@@ -24,7 +24,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { useCounselorFilters } from "../shell";
-import { ReviewLayoutSwitch, ReviewSession } from "./ReviewSession";
+import { ReviewSession } from "./ReviewSession";
 import { NudgeSession } from "./NudgeSession";
 import "./prepare.css";
 
@@ -88,7 +88,6 @@ export function ReviewDesk() {
             </IconTip>
           </span>
         )}
-        {tab === "awaiting" && <span className="ml-auto"><ReviewLayoutSwitch /></span>}
       </div>
       {tab === "awaiting" && <ReviewSession key={`${gradeFilter}|${chip ?? ""}`} only={only} milestone={fMilestone} />}
       {tab === "progress" && <NudgeSession key={`p|${gradeFilter}|${chip ?? ""}`} rows={progress} kind="progress" />}

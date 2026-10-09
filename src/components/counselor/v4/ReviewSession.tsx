@@ -27,9 +27,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Check, Pencil, ChevronLeft, ChevronRight, Columns3, Maximize2, MessageSquareText, PanelRight, RotateCcw, Sparkles, X } from "lucide-react";
+import { Check, Pencil, ChevronDown, ChevronLeft, ChevronRight, Maximize2, MessageSquareText, RotateCcw, Sparkles, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
-import { useAB } from "../abTests";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { LocalBurst } from "@/components/build/ui";
 import { playCorrect, playFanfare, playSelect } from "@/components/play/sound";
@@ -58,39 +57,12 @@ function draftsFor(first: string, milestone: MilestoneKey, asks: boolean): { lab
   return [...answer, { label: "Great work", text: `Great work on your ${thing}, ${first}. Approved!` }, { label: "One more detail", text: `Almost there. Add one more detail to your ${thing} and send it back.` }].slice(0, 3);
 }
 
-/** Desktop has two layouts to compare (10 Oct 2026, Chandu: "maybe we can
- *  have the doc in full view with a small column for up next and floating
- *  controls on the document view somehow? But the composer would need to
- *  be very accessible and prominent but also not in the way"): "panes"
- *  (page, composer, Up next) and "canvas" (the page at reading size, a
- *  rail of faces, the reply as a comment card in the page's margin).
- *  Remembered per browser. */
-export type ReviewLayout = "panes" | "canvas";
-// Canvas is the default (10 Oct 2026, Chandu: "do what you think is
-// best"): reviewing is reading, and in three panes the page is ~420px wide
-// at 1440 and smaller on the 1366px Windows laptops most counselors use, so
-// its text renders around 6px; Canvas shows it at 100%, with Approve and
-// Dreamy's drafts beside it in the margin card. Three panes stays behind
-// the switch until Maisha and Usman have compared; then the loser goes.
-export const useReviewLayout = () => useAB<ReviewLayout>("v4-review-layout", "canvas");
-
-/** The layout switch, for the Review tab row (desktop only). */
-export function ReviewLayoutSwitch() {
-  const [layout, setLayout] = useReviewLayout();
-  const wide = useWide();
-  if (!wide) return null;
-  const opts = [{ key: "panes" as const, label: "Three panes", Icon: Columns3 }, { key: "canvas" as const, label: "Canvas", Icon: PanelRight }];
-  return (
-    <span className="v4-rs-layout" role="group" aria-label="Review layout">
-      {opts.map(({ key, label, Icon }) => (
-        <IconTip key={key} label={label}>
-          <button type="button" onClick={() => setLayout(key)} aria-pressed={layout === key} aria-label={label} className="dm-quiet"><Icon className="h-4 w-4" aria-hidden /></button>
-        </IconTip>
-      ))}
-    </span>
-  );
-}
-
+/** One desktop layout (10 Oct 2026). Three panes and Canvas were compared
+ *  the same day; after Chandu's notes on Canvas ("these 2 should not be
+ *  inside a box", "the right pane should be sticky and no needing scroll",
+ *  "the documents cant be full size in the middle with scrolling") the two
+ *  had converged, so the switch went: a rail of faces, the page sized to
+ *  the screen, and the reply pane beside it with its buttons always in view. */
 // lg and up gets the desktop layouts; below that, the touch layout
 const WIDE = "(min-width: 1024px)";
 const subscribeWide = (cb: () => void) => { const q = window.matchMedia(WIDE); q.addEventListener("change", cb); return () => q.removeEventListener("change", cb); };
@@ -135,12 +107,19 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
   const setFeedback = useCallback((text: string) => setReplies((r) => ({ ...r, [replyKey]: text })), [replyKey]);
 
   const docRef = useRef<HTMLElement>(null);
-  const canvasRef = useRef<HTMLElement | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const stripRef = useRef<HTMLOListElement>(null);
   const wide = useWide();
-  const [layout] = useReviewLayout();
-  const canvas = wide && layout === "canvas";
+  const canvas = wide;
+  // the rail's scroll cues: fades at the ends and "N more below"
+  const [rail, setRail] = useState({ atTop: true, atBottom: true, below: 0 });
+  const measureRail = useCallback((el: HTMLElement) => {
+    const atTop = el.scrollTop < 4;
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+    const edge = el.scrollTop + el.clientHeight - 12;
+    const below = [...el.children].filter((c) => (c as HTMLElement).offsetTop - el.offsetTop > edge).length;
+    setRail((r) => (r.atTop === atTop && r.atBottom === atBottom && r.below === below ? r : { atTop, atBottom, below }));
+  }, []);
   const [sheet, setSheet] = useState(false);
   const replyRef = useRef<HTMLTextAreaElement>(null);
   // the touch layout's filmstrip keeps the current page in view, sideways only
@@ -173,12 +152,19 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
       if (!el || window.innerWidth < 1024) { setFitH(undefined); return; }
       const top = el.getBoundingClientRect().top + window.scrollY;
       // the three panes put a 44px document bar above the page
-      setFitH(Math.max(300, window.innerHeight - top - 24 - (canvasRef.current ? 0 : 44)));
+      setFitH(Math.max(280, window.innerHeight - top - 16));
     };
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, [item?.student.id, item?.milestone, layout, wide]);
+  }, [item?.student.id, item?.milestone, wide]);
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el || !canvas) return;
+    const ro = new ResizeObserver(() => measureRail(el));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [canvas, queue.length, measureRail]);
   const docW = fitH ? Math.round((fitH * 816) / 1056) : undefined;
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
@@ -328,28 +314,6 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
       <DocumentPage student={item.student} milestone={item.milestone} />
     </DocumentPreviewModal>
   );
-  const queueList = (compact: boolean) => (
-    <ul ref={listRef} className="dm-scroll flex min-h-0 flex-1 flex-col gap-[2px] overflow-y-auto">
-      {queue.map((q, i) => {
-        const on = !held && i === index;
-        const qs = submissionFor(q.student, q.milestone);
-        const late = qs.dueInDays < 0;
-        return (
-          <li key={`${q.student.id}-${q.milestone}`} data-on={on ? "true" : undefined}>
-            <button type="button" onClick={() => go(i)} aria-current={on ? "true" : undefined} className="v4-rs-next dm-quiet">
-              <span className="v4-rs-face"><StudentFace s={q.student} size={compact ? 36 : 44} /></span>
-              <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                <span className="truncate text-[14px] leading-[18px] font-semibold">{compact ? q.student.name.split(" ")[0] : q.student.name}</span>
-                <span className="truncate text-[12.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{q.milestone}</span>
-                {!compact && <span className={`text-[12px] font-semibold ${on ? "" : late ? "v5-risk" : ""}`} style={on || !late ? { color: on ? "var(--primary)" : "var(--muted-foreground)" } : undefined}>{on ? "Now reviewing" : late ? `${-qs.dueInDays}d late` : qs.asks ? "Has a question" : `Sent ${qs.sentDaysAgo}d ago`}</span>}
-              </span>
-            </button>
-          </li>
-        );
-      })}
-    </ul>
-  );
-
   const page = (
     <section ref={docRef} aria-label="Submission" className="flex min-w-0 flex-col" style={docW ? { width: docW } : undefined}>
       {wide && <div className="v4-rs-pagebar">{pager || <span />}{fullBtn}</div>}
@@ -466,27 +430,33 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
     );
   }
 
-  // Canvas, the default desktop layout, rebuilt like a document app (10 Oct
-  // 2026, Chandu: "the review on canvas UI needs work. Make it better"). The
-  // first canvas floated the reply over the page, covering what you came to
-  // read, left ~180px of empty desk either side, and boxed Up next as a
-  // second panel. Now:
-  // - a document toolbar: ‹ 3 of 13 ›, the session's progress, Full screen
-  //   and the two decisions, always in view (on a 1366x768 laptop the card
-  //   is taller than the canvas, which hid Approve below the fold);
-  // - the page at reading size, and the reply as a comment card in the
-  //   page's right margin (Google Docs' comments), sticky while you scroll,
-  //   so it is always there and never on top of the work: the student's
-  //   note as the thread's first message, Sent · Deadline · Status, Dreamy
-  //   across its top edge, his drafts, the box, Approve / Ask for changes;
-  // - Up next as a slim rail of faces down the left (name and milestone on
-  //   hover; a red dot is late, a blue dot asked a question).
-  if (canvas) {
-    return (
-      <div className="v4-rs-cv" style={fitH ? { height: fitH } : undefined}>
-        <nav className="v4-rs-rail" aria-label="Up next">
-          <span className="v4-rs-rail-head">Next</span>
-          <ul ref={listRef} className="v4-rs-rail-list">
+  // Desktop (10 Oct 2026, after Chandu's notes on the first canvas: "scroll
+  // section is too small, i should need to scroll to see the composer fully
+  // or the ctas", "these 2 should not be inside a box", "the right pane
+  // should be sticky and no needing scroll", "the documents cant be full
+  // size in the middle with scrolling", "the left student scroll thing
+  // needs work. The avatars are random, there needs to be a scroll
+  // indicator"):
+  // - a rail of faces, each with a first name, the session's progress as a
+  //   ring on top, fades where the list continues and "N more" to scroll;
+  // - the page, sized to the screen, with the pager and Full screen above it;
+  // - the reply pane, the same height: the student's note, Dreamy's drafts,
+  //   the box, and Approve / Ask for changes pinned to its foot. When the
+  //   screen is short the note scrolls inside the pane; the buttons never
+  //   leave view. No frame around the page or the pane.
+  const pageH = fitH ? fitH - 44 : undefined;
+  const pageW = pageH ? Math.round((pageH * 816) / 1056) : undefined;
+  const R = 17;
+  const C = 2 * Math.PI * R;
+  return (
+    <div className="v4-rs-cv" style={fitH ? { height: fitH } : undefined}>
+      <nav className="v4-rs-rail" aria-label="Up next">
+        <span className="v4-rs-rail-ring" role="img" aria-label={`${cleared} of ${total} cleared`}>
+          <svg viewBox="0 0 40 40" aria-hidden><circle cx="20" cy="20" r={R} className="is-track" /><circle cx="20" cy="20" r={R} className="is-fill" strokeDasharray={C} strokeDashoffset={C * (1 - pct / 100)} /></svg>
+          <b>{cleared}<small>/{total}</small></b>
+        </span>
+        <div className={`v4-rs-rail-scroll ${rail.atTop ? "" : "is-fade-top"} ${rail.atBottom ? "" : "is-fade-bottom"}`}>
+          <ul ref={listRef} className="v4-rs-rail-list" onScroll={(e) => measureRail(e.currentTarget)}>
             {queue.map((q, i) => {
               const on = !held && i === index;
               const qs = submissionFor(q.student, q.milestone);
@@ -495,77 +465,41 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
                 <li key={`${q.student.id}-${q.milestone}`} data-on={on ? "true" : undefined}>
                   <IconTip label={`${q.student.name} · ${q.milestone}${late ? " · late" : qs.asks ? " · has a question" : ""}`}>
                     <button type="button" onClick={() => go(i)} aria-current={on ? "true" : undefined} aria-label={`${q.student.name}, ${q.milestone}`} className="v4-rs-rail-btn">
-                      <StudentFace s={q.student} size={40} />
-                      {(late || qs.asks) && <span className={`v4-rs-rail-dot ${late ? "is-late" : "is-ask"}`} aria-hidden />}
+                      <span className="v4-rs-rail-face"><StudentFace s={q.student} size={40} />{(late || qs.asks) && <span className={`v4-rs-rail-dot ${late ? "is-late" : "is-ask"}`} aria-hidden />}</span>
+                      <span className="v4-rs-rail-name">{q.student.name.split(" ")[0]}</span>
                     </button>
                   </IconTip>
                 </li>
               );
             })}
           </ul>
-        </nav>
-        <section ref={(el) => { docRef.current = el; canvasRef.current = el; }} aria-label="Submission" className="v4-rs-canvas">
-          <div className="v4-rs-cv-bar">
-            {pager || <span />}
-            <div className="v4-rs-cv-progress" role="status" aria-live="polite">
-              <span><b>{cleared} of {total}</b> cleared</span>
-              <span className="v4-rs-cv-spark"><SparkBar percent={pct} min={2} height={6} fill="linear-gradient(90deg, color-mix(in srgb, var(--primary) 70%, #7fd1ff), var(--primary))" glow="var(--primary)" memoryKey="v4-review-session" /></span>
-            </div>
-            {/* the decisions live in the toolbar, always in view (GitHub's
-               review bar); the margin card is the conversation */}
-            <div className="v4-rs-cv-actions">
-              <IconTip label="Full screen"><button type="button" onClick={() => setFull(true)} aria-label="Full screen" className="v4-rs-cv-icon dm-quiet"><Maximize2 className="h-4 w-4" aria-hidden /></button></IconTip>
-              {held ? (
-                <IconTip label="Next (N)"><button type="button" onClick={next} className="v4-rs-approve dm-solid">{upNext ? <>Next: {upNext.student.name.split(" ")[0]}</> : "Finish"}<ChevronRight className="h-4 w-4" aria-hidden /></button></IconTip>
-              ) : (
-                <>
-                  <IconTip label={feedback.trim() ? "Ask for changes (C)" : "Write what to change first"}>
-                    <button type="button" disabled={!feedback.trim() || !!stamp} onClick={() => decide("Changes Requested")} className="v4-rs-changes dm-quiet">Ask for changes</button>
-                  </IconTip>
-                  <IconTip label="Approve (A)">
-                    <button type="button" onClick={() => decide("Approved")} disabled={!!stamp} className="v4-rs-approve dm-solid"><Check className="h-4 w-4" aria-hidden /> Approve</button>
-                  </IconTip>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="v4-rs-canvas-scroll dm-scroll">
-            <div className="v4-rs-cv-row">
-              <div key={itemKey} className="v4-rs-page v4-rs-canvas-page is-arriving">
-                <button type="button" onClick={() => setFull(true)} aria-label={`Open ${item.milestone} full screen`} className="block w-full cursor-zoom-in text-left">
-                  <FitPage shadow="0 1px 2px rgba(35,51,46,0.14), 0 22px 56px -22px rgba(35,51,46,0.42)"><DocumentPage student={item.student} milestone={item.milestone} /></FitPage>
-                </button>
-                {shownStamp && <span className={`v4-rs-stamp is-${shownStamp}`} aria-hidden>{shownStamp === "approved" ? "Approved" : "Changes asked"}</span>}
-                <LocalBurst nonce={burst} />
-              </div>
-              <aside className="v4-rs-cv-side" aria-label={`Reply to ${first}`}>
-                {composer}
-                {last && !held && <UndoLink last={last} onUndo={undo} />}
-              </aside>
-            </div>
-          </div>
-          {preview}
-        </section>
-      </div>
-    );
-  }
+        </div>
+        {rail.below > 0 && (
+          <button type="button" onClick={() => listRef.current?.scrollBy({ top: 240, behavior: "smooth" })} className="v4-rs-rail-more dm-quiet" aria-label={`${rail.below} more below`}>
+            <ChevronDown className="h-[14px] w-[14px]" aria-hidden />{rail.below}
+          </button>
+        )}
+      </nav>
 
-  return (
-    <div className="flex flex-col gap-[var(--space-6)]">
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_264px] gap-[var(--space-6)] xl:grid-cols-[auto_minmax(0,1fr)_320px] xl:gap-[var(--space-8)]">
-        {page}
+      <section ref={docRef} aria-label="Submission" className="v4-rs-cv-doc" style={pageW ? { width: pageW } : undefined}>
+        <div className="v4-rs-pagebar">
+          {pager || <span />}
+          <IconTip label="Full screen"><button type="button" onClick={() => setFull(true)} aria-label="Full screen" className="v4-rs-cv-icon dm-quiet"><Maximize2 className="h-4 w-4" aria-hidden /></button></IconTip>
+        </div>
+        <div key={itemKey} className="v4-rs-page is-arriving">
+          <button type="button" onClick={() => setFull(true)} aria-label={`Open ${item.milestone} full screen`} className="block w-full cursor-zoom-in text-left">
+            <FitPage fitHeight={pageH} shadow="0 1px 2px rgba(35,51,46,0.14), 0 22px 56px -22px rgba(35,51,46,0.42)"><DocumentPage student={item.student} milestone={item.milestone} /></FitPage>
+          </button>
+          {shownStamp && <span className={`v4-rs-stamp is-${shownStamp}`} aria-hidden>{shownStamp === "approved" ? "Approved" : "Changes asked"}</span>}
+          <LocalBurst nonce={burst} />
+        </div>
+        {preview}
+      </section>
 
-        <section aria-label="Your reply" className="flex min-w-0 flex-col gap-[var(--space-3)]" style={fitH ? { minHeight: fitH + 44 } : undefined}>
-          {composer}
-          {last && !held && <UndoLink last={last} onUndo={undo} />}
-        </section>
-
-        <aside aria-label="Up next" className="v4-rs-queue" style={fitH ? { height: fitH + 44 } : undefined}>
-          {bar}
-          <span className="v4-rs-next-head">Up next <span>J / K</span></span>
-          {queueList(false)}
-        </aside>
-      </div>
+      <section className="v4-rs-cv-reply" aria-label={`Reply to ${first}`}>
+        {composer}
+        {last && !held && <UndoLink last={last} onUndo={undo} />}
+      </section>
     </div>
   );
 }
