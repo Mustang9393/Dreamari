@@ -56,8 +56,30 @@
 // - The editable region itself now says so: a small pencil + "Click to
 //   edit" mark at rest, and a visible (if quiet) dashed rule around the
 //   text, gone once it has focus -- flat print has neither.
-import { useRef, useState, useSyncExternalStore } from "react";
-import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, CircleDashed, Printer, Send, X } from "lucide-react";
+//
+// 10 Oct 2026, Assist as a session (Chandu: "I think the assist one
+// shouldnt have a drop down for students, rather a search bar and maybe
+// requests should be populated? I'm not sure. I like assist right now how
+// do we gamify it and make it more engaging?"). Only v4's Assist page
+// changes (v5 Documents, which passes `mode`, and the student profile's
+// DraftTools, which pass `fixedStudent`, keep the layout below as it was):
+// - the Student dropdown is a search box (name or grade, recent students
+//   on focus), AssistStudentSearch.tsx;
+// - the page opens on what is waiting, "Dreamy prepared N drafts for you":
+//   letters asked for, briefs for the next meetings, summaries for
+//   meetings already over (assistModel.ts); one click loads the student
+//   and the format into the same generator;
+// - Generate, Write my own, Copy, Print and Save to notes move from the
+//   bottom of the settings column to a toolbar on top of the desk, so the
+//   next action is in view without scrolling on a 768-tall laptop;
+// - copy, print or save finishes a draft: it is stamped, with a burst and
+//   a chime, Dreamy hops, the "2 of 6 done" bar sparks forward and the
+//   week's "min saved" count grows; it stays on the desk with Edit and
+//   Undo until Next or Done ("nothing leaves on its own");
+// - a finish line when the queue is clear (AssistSession.tsx).
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
+import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, CircleDashed, Printer, Send, X, Maximize2, RefreshCw, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { draftKey, listDrafts, removeDraft, saveDraft, useDrafts, wordCount } from "@/lib/counselorDrafts";
 import { SurfaceState } from "@/components/app/SurfaceState";
@@ -81,9 +103,27 @@ import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCoun
 import { sendToStudent } from "@/lib/counselorMessages";
 import { askForInput, askMessage, letterInputs, useLetterInputAsks, useNoteCount, type LetterInput } from "./letterInputs";
 import "./prepare.css";
+import "./assist.css";
+import { LocalBurst } from "@/components/build/ui";
+import { playCorrect, playFanfare, playSelect } from "@/components/play/sound";
+import { readNotes } from "@/lib/counselorNotes";
+import { StudentFace } from "../v5/StudentFace";
+import { AssistStudentSearch } from "./AssistStudentSearch";
+import { DreamyInline, FinishLine, HeldBar, ModeSwitch, QueueList, SessionProgress, StartHero, STAMP, profileHref, type AssistMode } from "./AssistSession";
+import { Disclosure } from "./Disclosure";
+import { useAB } from "../abTests";
+import { addRecentStudent, isDone, markFinished, removeAssistNote, unmarkFinished, useAssistQueue, useFinished, useRecentStudents, weekMinutes, weekStart, type AssistItem, type FinishHow } from "./assistModel";
 
 
 type ToolId = DocKind | "attention" | "group-message";
+const NO_STUDENTS: CounselorStudent[] = [];
+// desktop (MobileStudio's breakpoint): the page in the window's scroll
+const WIDE = "(min-width: 1101px)";
+const subscribeWide = (cb: () => void) => { const q = window.matchMedia(WIDE); q.addEventListener("change", cb); return () => q.removeEventListener("change", cb); };
+const useWide = () => useSyncExternalStore(subscribeWide, () => window.matchMedia(WIDE).matches, () => true);
+const PAGE_SHADOW = "0 1px 2px rgba(40,54,110,0.16), 0 24px 60px -26px rgba(40,54,110,0.5)";
+/** read only from event handlers (when a session starts and ends) */
+const clockNow = () => Date.now();
 
 
 export const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
@@ -371,15 +411,124 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
   // excitement] ... without losing the clean, professional,
   // easy-to-process experience").
   const [landed, setLanded] = useState(0);
-  const generateFor = (k: DocKind, st: CounselorStudent | undefined) => {
+  const generateFor = (k: DocKind, st: CounselorStudent | undefined, type: string = letterType) => {
     setSavedTo(null);
     // v4's letter draws on the student's inputs (brag sheet, family form,
-    // interests, notes); v5's is built as before
-    const text = buildDraft(k, st, letterType, !legacy && st && k === "recommendation-letter" ? letterInputs(st, st.id === student?.id ? noteCount : 0, asked) : undefined);
-    if (st) saveDraft({ studentId: st.id, kind: k, letterType, text });
+    // interests, notes); v5's is built as before. A queue item opens a
+    // student who is not on screen yet, so their notes are read directly.
+    const notes = st && st.id === student?.id ? noteCount : st ? readNotes(st.id).length : 0;
+    const text = buildDraft(k, st, type, !legacy && st && k === "recommendation-letter" ? letterInputs(st, notes, asked) : undefined);
+    if (st) saveDraft({ studentId: st.id, kind: k, letterType: type, text });
     else setLoose(text);
     setLanded((n) => n + 1);
   };
+
+  // ---- the session (v4 Assist only, 10 Oct 2026) -----------------------------
+  const session = !legacy && !fixedStudent;
+  const queue = useAssistQueue(session ? roster : NO_STUDENTS);
+  const finished = useFinished();
+  const recentIds = useRecentStudents();
+  const [since] = useState(() => weekStart());
+  const doneKey = (k: string) => isDone(finished[k], since);
+  const curKey = student ? draftKey(student.id, kind) : null;
+  const activeItem = curKey ? queue.find((q) => q.key === curKey) : undefined;
+  const held = session && curKey && doneKey(curKey) ? finished[curKey] : undefined;
+  const queueDone = queue.filter((q) => doneKey(q.key)).length;
+  const nextItem = queue.find((q) => q.key !== curKey && !doneKey(q.key));
+  const [burst, setBurst] = useState(0);
+  const [fresh, setFresh] = useState<string | null>(null);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [finale, setFinale] = useState<{ count: number; minutes: number | null } | null>(null);
+  const [preparing, setPreparing] = useState<string | null>(null);
+  const prepTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(prepTimer.current), []);
+  // recent first; before there are any, the students on the queue
+  const recentStudents = (recentIds.length ? recentIds : queue.map((q) => q.student.id)).map((id) => roster.find((s) => s.id === id)).filter((s): s is CounselorStudent => !!s).filter((s, i, a) => a.indexOf(s) === i);
+
+  /** Put a student and a format on the desk. */
+  const show = (st: CounselorStudent, k: DocKind, type?: string) => {
+    window.clearTimeout(prepTimer.current);
+    setPreparing(null);
+    setStudentId(st.id);
+    setKind(k);
+    if (type !== undefined) setLetterType(type);
+    setLoose(null);
+    setSavedTo(null);
+    setFinale(null);
+    setFresh(null);
+    if (startedAt === null) setStartedAt(clockNow());
+    addRecentStudent(st.id);
+  };
+  /** Open a queue item: Dreamy "prepared" it, so a draft it does not have
+   *  yet is written as it opens, after a short beat of Dreamy drafting. */
+  const openItem = (it: AssistItem) => {
+    const type = it.letterType || letterType;
+    show(it.student, it.kind, type);
+    if (drafts[it.key]) return;
+    setPreparing(it.key);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    prepTimer.current = window.setTimeout(() => { generateFor(it.kind, it.student, type); setPreparing(null); }, reduce ? 0 : 700);
+  };
+  /** From the search: their waiting item if they have one, else the format on screen. */
+  const pickStudent = (st: CounselorStudent) => {
+    const waiting = queue.find((q) => q.student.id === st.id && !doneKey(q.key));
+    if (waiting) openItem(waiting);
+    else show(st, kind);
+  };
+  /** Copy, print or save: the three ways a draft leaves Assist, and in the
+   *  session, what makes it done. */
+  const finish = (how: FinishHow) => {
+    if (draft === null) return;
+    let noteId: string | undefined;
+    if (how === "saved") {
+      if (!student) return;
+      noteId = addNote(student.id, `${TITLES[kind]}:\n${plainText(draft)}`)[0]?.id;
+      setSavedTo(student.name);
+    } else if (how === "copied") {
+      void navigator.clipboard?.writeText(plainText(draft));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } else print();
+    if (!session || !student || !curKey) return;
+    markFinished(curKey, { studentId: student.id, kind, how, noteId });
+    setFresh(curKey);
+    setBurst((n) => n + 1);
+    playCorrect();
+  };
+  /** Open a finished draft again to change it (the note stays saved). */
+  const editHeld = () => {
+    if (!curKey) return;
+    unmarkFinished(curKey);
+    setFresh(null);
+    playSelect();
+  };
+  /** Take the finish back: a saved note comes out of the notes again. */
+  const undoHeld = () => {
+    if (!curKey || !held) return;
+    if (held.noteId) removeAssistNote(held.studentId, held.noteId);
+    unmarkFinished(curKey);
+    setSavedTo(null);
+    setFresh(null);
+    playSelect();
+  };
+  const allDone = queue.length > 0 && queueDone === queue.length;
+  const moveOn = () => {
+    setFresh(null);
+    if (nextItem) { openItem(nextItem); return; }
+    if (activeItem && allDone) {
+      playFanfare();
+      setBurst((n) => n + 1);
+      setFinale({ count: queue.length, minutes: startedAt ? Math.max(1, Math.round((clockNow() - startedAt) / 60000)) : null });
+    }
+    setStudentId("");
+    setLoose(null);
+  };
+  const [modePick, setModePick] = useAB<"auto" | AssistMode>("v4-assist-mode", "auto");
+  const [openInputs, setOpenInputs] = useState(false);
+  const [openSettings, setOpenSettings] = useState(false);
+  const [openSaved, setOpenSaved] = useState(false);
+  const wide = useWide();
+  const nextLabel = nextItem ? `Next: ${nextItem.student.name.split(" ")[0]}` : activeItem && allDone ? "Finish" : "Done";
   // A blank start with only the headings, for a counselor who would rather
   // write than edit a generated draft ("make sure a manual option exists
   // everywhere we have AI generated things").
@@ -426,16 +575,20 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
   // graphic editors or doc editors work on mobile").
   const sheetBtn = "dm-quiet flex min-h-[48px] w-full cursor-pointer items-center gap-[10px] rounded-[12px] border px-[14px] text-left text-[15px] font-semibold";
   const close = () => setSheet(null);
-  const matching = students.filter((x) => !studentQuery.trim() || x.name.toLowerCase().includes(studentQuery.trim().toLowerCase()));
+  // the session's sheet lists recent students first, and also finds by grade
+  const sheetOrder = session && !studentQuery.trim() ? [...recentStudents, ...students.filter((x) => !recentStudents.includes(x))] : students;
+  const matching = sheetOrder.filter((x) => { const q = studentQuery.trim().toLowerCase(); return !q || x.name.toLowerCase().includes(q) || (/^\d+$/.test(q) && String(x.grade) === q); });
   const mobileTools = (
     <>
-      <nav aria-label="Document tools" className="v4-studio-toolbar sticky z-[30] items-stretch gap-[2px] rounded-[18px] border p-[4px]" style={{ bottom: "calc(var(--doc-bar-bottom, 0px) + 10px + env(safe-area-inset-bottom))", background: "color-mix(in srgb, var(--card) 92%, transparent)", borderColor: "var(--glass-border)", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", boxShadow: "0 14px 36px -16px rgba(0,0,0,0.5)" }}>
+      <nav aria-label="Document tools" className="v4-studio-toolbar sticky z-[30] items-stretch gap-[2px] rounded-[18px] border p-[4px]" style={{ bottom: "calc(var(--doc-bar-bottom, 0px) + 10px + env(safe-area-inset-bottom))", background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 14px 36px -16px rgba(0,0,0,0.5)" }}>
+        {held ? <HeldBar compact how={held.how} first={student?.name.split(" ")[0] ?? ""} minutes={held.minutes} nextLabel={nextLabel} onEdit={editHeld} onUndo={undoHeld} onNext={moveOn} /> : <>
         {!fixedStudent && <ToolButton icon={Users} label={student ? student.name.split(" ")[0] : "Student"} onClick={() => setSheet("student")} />}
         <ToolButton icon={LayoutTemplate} label="Format" onClick={() => setSheet("format")} />
         <ToolButton icon={Sparkles} label={draft !== null ? "Redo" : "Draft"} primary={draft === null && !!student} onClick={() => setSheet("draft")} />
         <ToolButton icon={PenLine} label="Edit" disabled={draft === null} onClick={() => setSheet("edit")} />
         <ToolButton icon={Share2} label="Share" disabled={draft === null} onClick={() => setSheet("share")} />
         <ToolButton icon={SlidersHorizontal} label="More" onClick={() => setSheet("more")} />
+        </>}
       </nav>
 
       <ToolSheet title="Student" open={sheet === "student"} onClose={close} tall>
@@ -446,7 +599,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
         <ul className="flex flex-col">
           {matching.map((x) => (
             <li key={x.id}>
-              <button type="button" onClick={() => { setStudentId(x.id); setLoose(null); setSavedTo(null); close(); }} aria-pressed={x.id === studentId} className="dm-quiet flex min-h-[52px] w-full cursor-pointer items-center gap-[12px] rounded-[12px] px-[8px] text-left" style={x.id === studentId ? { background: "color-mix(in srgb, var(--primary) 14%, transparent)" } : undefined}>
+              <button type="button" onClick={() => { if (session) pickStudent(x); else { setStudentId(x.id); setLoose(null); setSavedTo(null); } close(); }} aria-pressed={x.id === studentId} className="dm-quiet flex min-h-[52px] w-full cursor-pointer items-center gap-[12px] rounded-[12px] px-[8px] text-left" style={x.id === studentId ? { background: "color-mix(in srgb, var(--primary) 14%, transparent)" } : undefined}>
                 <Avatar name={x.name} size={34} index={x.avatarIndex} />
                 <span className="flex min-w-0 flex-1 flex-col"><span className="truncate text-[15px] font-semibold">{x.name}</span><span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Grade {x.grade} · {x.status}</span></span>
                 {x.id === studentId && <Check className="h-4 w-4" aria-hidden />}
@@ -501,9 +654,9 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
       </ToolSheet>
 
       <ToolSheet title="Share" open={sheet === "share"} onClose={close}>
-        <button type="button" onClick={() => { print(); close(); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Printer className="h-4 w-4" aria-hidden /> Print or save as PDF</button>
-        <button type="button" onClick={() => { if (draft) void navigator.clipboard?.writeText(plainText(draft)); setCopied(true); window.setTimeout(() => setCopied(false), 1500); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}>{copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />} {copied ? "Copied" : "Copy text"}</button>
-        {student && draft !== null && <button type="button" onClick={() => { addNote(student.id, `${TITLES[kind]}:\n${plainText(draft)}`); setSavedTo(student.name); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Save className="h-4 w-4" aria-hidden /> {savedTo ? `Saved to ${student.name.split(" ")[0]}'s notes` : "Save to notes"}</button>}
+        <button type="button" onClick={() => { if (session) finish("printed"); else print(); close(); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Printer className="h-4 w-4" aria-hidden /> Print or save as PDF</button>
+        <button type="button" onClick={() => { if (session) { finish("copied"); close(); return; } if (draft) void navigator.clipboard?.writeText(plainText(draft)); setCopied(true); window.setTimeout(() => setCopied(false), 1500); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}>{copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />} {copied ? "Copied" : "Copy text"}</button>
+        {student && draft !== null && <button type="button" onClick={() => { if (session) { finish("saved"); close(); return; } addNote(student.id, `${TITLES[kind]}:\n${plainText(draft)}`); setSavedTo(student.name); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Save className="h-4 w-4" aria-hidden /> {savedTo ? `Saved to ${student.name.split(" ")[0]}'s notes` : "Save to notes"}</button>}
         {draft !== null && kind === "recommendation-letter" && student && letterTools?.status(student.id) === "open" && <button type="button" onClick={() => { letterTools.markSent(student, wordCount(draft)); close(); }} className="dm-solid flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-[8px] rounded-[12px] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Send className="h-4 w-4" aria-hidden /> Mark sent</button>}
       </ToolSheet>
 
@@ -534,10 +687,229 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
     </>
   );
 
+  // Setup blocks shared by both layouts (the session's and the original)
+  const formatList = (
+<fieldset className="v4-document-templates"><legend>Choose a Format</legend>{KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setLoose(null); setSavedTo(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{TITLES[k]}</strong><small>{DESCRIBE[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
+  );
+  const letterTypeField = kind === "recommendation-letter" && (
+<label className="flex min-w-0 flex-col gap-[4px]">
+                <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter type</span>
+                <Listbox ariaLabel="Letter type" value={letterType} onChange={setLetterType} placeholder="Choose a type" options={LETTER_TYPES.map((t) => ({ value: t, label: letterTypeLabel(t) }))} className={FIELD} style={fieldStyle} />
+              </label>
+  );
+  // The letter's inputs sit above Generate (9 Oct 2026): what the student,
+  // the family and my notes give the letter, and an ask for what is
+  // missing. They replace the generic facts.
+  const inputsBlock = student && showInputs && inputs && (
+<div className="flex flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
+                <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter Inputs</span>
+                <LetterInputList inputs={inputs} onAsk={ask} />
+              </div>
+  );
+  const savedDraftsBlock = (list: typeof savedList, /** inside its own fold, which already names it */ bare = false) => list.length > 0 && (
+<div className={bare ? "flex flex-col" : "flex flex-col gap-[6px] border-t pt-[var(--space-4)]"} style={{ borderColor: "var(--glass-border)" }}>
+                {!bare && <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Saved drafts</span>}
+                <ul className="flex flex-col gap-[2px]">
+                  {list.map((d) => {
+                    const who = roster.find((s) => s.id === d.studentId);
+                    const on = student?.id === d.studentId && kind === d.kind;
+                    return (
+                      <li key={`${d.studentId}:${d.kind}`} className="flex items-center gap-[4px]">
+                        <button type="button" onClick={() => reopen(d.studentId, d.kind, d.letterType)} aria-current={on ? "true" : undefined} className="dm-quiet flex min-w-0 flex-1 cursor-pointer flex-col rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left" style={on ? { background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : undefined}>
+                          <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{TITLES[d.kind as DocKind] ?? d.kind}{!fixedStudent && who ? `, ${who.name}` : ""}</span>
+                          <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Edited {new Date(d.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                        </button>
+                        <IconTip label="Remove draft"><button type="button" aria-label="Remove draft" onClick={() => removeDraft(d.studentId, d.kind)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button></IconTip>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+  );
+
+  // ---- the session's layout (v4 Assist) ----------------------------------------
+  // Left, sticky and sized to its content: one switch between Dreamy's
+  // drafts and a blank start, then only that mode's controls, with the
+  // context and the settings folded away. Right: the desk, in the page's
+  // own flow (the window scrolls it; nothing traps the wheel), its bar
+  // sticky so the next action (Start, Generate, Save to notes, Next) is
+  // always in view.
+  // 10 Oct 2026, after Chandu tried the first pass: "when the mouse is over
+  // the document the scroll is stuck in the document", "split the
+  // Dreamy-drafted list and the from-scratch one ... I need to scroll so
+  // much to get to the UI", "organized better so I don't have to scroll to
+  // get to the other controls".
+  const firstName = student?.name.split(" ")[0] ?? "";
+  const assistMode: AssistMode = modePick === "auto" ? (queue.length ? "drafts" : "scratch") : modePick;
+  const hero = session && assistMode === "drafts" && !finale && !student && startedAt === null && nextItem ? nextItem : null;
+  const exampleWarn = kind === "recommendation-letter" && draft?.includes(EXAMPLE_PLACEHOLDER) && !held && (
+    <p className="as-warn"><Sparkles className="mt-[2px] h-[12px] w-[12px] flex-none" aria-hidden /> Add one specific example where the letter asks for it.</p>
+  );
+  const queueKeys = new Set(queue.map((q) => q.key));
+  const iconBtn = "as-icon dm-quiet";
+  const generateBtn = <button type="button" onClick={() => generateFor(kind, student)} disabled={!student || !!preparing} className="as-primary dm-solid"><Sparkles className="h-[14px] w-[14px]" aria-hidden />{preparing ? "Drafting" : showInputs ? "Generate Letter" : "Generate"}</button>;
+  const writeBtn = <button type="button" onClick={writeOwn} disabled={!!preparing} className="as-quiet dm-quiet"><PenLine className="h-[14px] w-[14px]" aria-hidden />Write my own</button>;
+  const deskBar = hero ? (
+    <StartHero count={queue.length - queueDone} first={hero} onStart={() => openItem(hero)} />
+  ) : (
+    <div className="as-bar">
+      <div className="as-doc">
+        {student ? (
+          <>
+            <Link href={profileHref(student.id)} className="as-doc-face" aria-label={`Open ${student.name}'s profile`}><StudentFace s={student} size={34} /></Link>
+            <span className="as-doc-text">
+              <Link href={profileHref(student.id)} className="as-doc-name dm-link">{student.name}</Link>
+              <span className="as-doc-kind">{TITLES[kind]}{activeItem ? ` · ${activeItem.why}` : ""}</span>
+            </span>
+          </>
+        ) : (
+          <span className="as-doc-text">
+            <span className="as-doc-name">{TITLES[kind]}</span>
+            <span className="as-doc-kind">{assistMode === "drafts" && nextItem ? "Pick a draft on the left" : "Find a student, then Generate"}</span>
+          </span>
+        )}
+      </div>
+      {held ? (
+        <HeldBar how={held.how} first={firstName} minutes={held.minutes} nextLabel={nextLabel} onEdit={editHeld} onUndo={undoHeld} onNext={moveOn} hop={burst} />
+      ) : (
+        <div className="as-tools">
+          {!student && assistMode === "drafts" && nextItem ? (
+            <>
+              {writeBtn}
+              <button type="button" onClick={() => openItem(nextItem)} className="as-primary dm-solid">Next: {nextItem.student.name.split(" ")[0]}<ChevronRightIcon className="h-4 w-4" aria-hidden /></button>
+            </>
+          ) : draft === null || preparing ? (
+            <>{writeBtn}{generateBtn}</>
+          ) : (
+            <>
+              <IconTip label="Regenerate"><button type="button" aria-label="Regenerate" onClick={() => generateFor(kind, student)} className={iconBtn}><RefreshCw className="h-4 w-4" aria-hidden /></button></IconTip>
+              <IconTip label="Write my own"><button type="button" aria-label="Write my own" onClick={writeOwn} className={iconBtn}><PenLine className="h-4 w-4" aria-hidden /></button></IconTip>
+              <span className="as-sep" aria-hidden />
+              <IconTip label="Copy text"><button type="button" aria-label="Copy text" onClick={() => finish("copied")} className={iconBtn}><Copy className="h-4 w-4" aria-hidden /></button></IconTip>
+              <IconTip label="Print or PDF"><button type="button" aria-label="Print or PDF" onClick={() => finish("printed")} className={iconBtn}><Printer className="h-4 w-4" aria-hidden /></button></IconTip>
+              <button type="button" onClick={() => finish("saved")} className="as-primary dm-solid"><Save className="h-[14px] w-[14px]" aria-hidden />Save to notes</button>
+            </>
+          )}
+          <IconTip label="Full screen"><button type="button" aria-label="Full screen" onClick={() => setFull(true)} className={iconBtn}><Maximize2 className="h-4 w-4" aria-hidden /></button></IconTip>
+        </div>
+      )}
+    </div>
+  );
+  // the page under the bar: before the start, and while Dreamy drafts, its
+  // body is lines waiting to be written
+  const waitingPage = !!hero || !!preparing;
+  const sessionPage = (ref?: React.Ref<HTMLDivElement>) => (
+    <DocumentPage kind={kind} title={TITLES[kind]} student={student} letterType={letterType} signer={signer} draft={waitingPage ? "" : draft} onDraft={setDraft} pageRef={ref} />
+  );
+  // the five formats, one line each; the chosen one says what it is for
+  const formatPicker = (
+    <fieldset className="as-formats">
+      <legend className="as-label">Format</legend>
+      {KINDS.map((k) => (
+        <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setLoose(null); setSavedTo(null); }} className="as-format">
+          <span className="as-format-name">{TITLES[k]}</span>
+          {kind === k && <><span className="as-format-desc">{DESCRIBE[k]}</span><Check className="as-format-check h-[14px] w-[14px]" aria-hidden /></>}
+        </button>
+      ))}
+    </fieldset>
+  );
+  const savedShown = savedList.filter((d) => !queueKeys.has(draftKey(d.studentId, d.kind)));
+  const okInputs = inputs?.filter((i) => i.ok).length ?? 0;
+  const contextBlock = student && (showInputs && inputs ? (
+    <Disclosure id="as-inputs" title="Letter inputs" summary={`${okInputs} of ${inputs.length} in`} open={openInputs} onToggle={() => setOpenInputs((o) => !o)}>
+      <LetterInputList inputs={inputs} onAsk={ask} />
+    </Disclosure>
+  ) : (
+    <Disclosure id="as-built" title="Built from" summary={`${firstName}'s record`} open={openInputs} onToggle={() => setOpenInputs((o) => !o)}>
+      <ul className="as-facts">
+        <li><span>Status</span><StatusChip status={student.status} /></li>
+        <li><span>Milestones done</span><b className="tabular-nums">{approvedCount} of {student.milestoneCount}</b></li>
+        <li><span>Top match</span><b className="truncate">{student.topMatches[0]?.title ?? "Not yet"}</b></li>
+        <li><span>Plan</span><b className="truncate">{student.postsecondaryIntent}</b></li>
+      </ul>
+    </Disclosure>
+  ));
+  const settingsBlock = (
+    <Disclosure id="as-settings" title="Settings" summary={kind === "recommendation-letter" ? "Letter type, signature, style" : "Publication style"} open={openSettings} onToggle={() => setOpenSettings((o) => !o)}>
+      <div className="flex flex-col gap-[14px]">
+        {letterTypeField}
+        {kind === "recommendation-letter" && <SignatureSettings />}
+        <SchoolPublicationSettings />
+        <span className="as-foot">{student ? "Drafts save as you type." : "Drafts stay here until copied, saved or exported."}</span>
+      </div>
+    </Disclosure>
+  );
+  const sessionLayout = (
+    <>
+      {/* phones and tablets: the queue as a strip of faces above the page */}
+      <div className="as-mobile-session">
+        {queue.length > 0 && <SessionProgress total={queue.length} done={queueDone} weekMinutes={weekMinutes(finished, since)} />}
+        <QueueList variant="strip" items={queue} isDone={doneKey} activeKey={activeItem?.key ?? null} onOpen={openItem} />
+      </div>
+      <div className="as-layout">
+        <aside className="v4-studio-settings as-panel dm-scroll" aria-label="Drafts and setup">
+          <ModeSwitch mode={assistMode} count={queue.length - queueDone} onChange={setModePick} />
+          {assistMode === "drafts" ? (
+            <>
+              {queue.length > 0 && <SessionProgress total={queue.length} done={queueDone} weekMinutes={weekMinutes(finished, since)} />}
+              <QueueList items={queue} isDone={doneKey} activeKey={activeItem?.key ?? null} onOpen={openItem} />
+            </>
+          ) : (
+            <>
+              <AssistStudentSearch students={students} recent={recentStudents} onPick={pickStudent} />
+              {formatPicker}
+              {savedShown.length > 0 && (
+                <Disclosure id="as-saved" title="Saved drafts" summary={`${savedShown.length}`} open={openSaved} onToggle={() => setOpenSaved((o) => !o)}>
+                  {savedDraftsBlock(savedShown, true)}
+                </Disclosure>
+              )}
+            </>
+          )}
+          <div className="as-folds">
+            {contextBlock}
+            {settingsBlock}
+          </div>
+        </aside>
+
+        <section className={`as-desk v4-publication-desk ${finale ? "is-finale" : ""}`} aria-label="Draft">
+          {finale ? (
+            <FinishLine count={finale.count} minutes={finale.minutes} hop={burst} />
+          ) : (
+            <>
+              {deskBar}
+              {exampleWarn}
+              <div className="as-paper">
+                <div inert={!!held || waitingPage} className={waitingPage ? `as-paper-waiting ${preparing ? "is-drafting" : ""}` : undefined}>
+                  <SurfaceState id={60} what="document">
+                    <div className="v4-draft-shimmer">
+                      {/* the page sits in the window's own scroll on desktop;
+                         pinch zoom (a scroll box of its own) is for touch */}
+                      {wide
+                        ? <FitPage shadow={PAGE_SHADOW}>{sessionPage(pageRef)}</FitPage>
+                        : <PinchZoom><FitPage shadow={PAGE_SHADOW}>{sessionPage(pageRef)}</FitPage></PinchZoom>}
+                      <ConfirmShimmer key={landed} active={landed > 0} />
+                    </div>
+                  </SurfaceState>
+                </div>
+                {preparing && <span className="as-drafting" role="status"><DreamyInline size={30} pop={2} thinking />Dreamy is drafting</span>}
+                {held && <span key={`${curKey}-${burst}`} className={`as-stamp is-${held.how} ${fresh === curKey ? "is-fresh" : ""}`} aria-hidden>{STAMP[held.how]}</span>}
+                <LocalBurst nonce={burst} />
+              </div>
+            </>
+          )}
+        </section>
+        <FullScreenDocument open={full} onClose={() => setFull(false)} title={docTitle} onPrint={() => finish("printed")}>{sessionPage()}</FullScreenDocument>
+      </div>
+      {mobileTools}
+    </>
+  );
+
   return (
     <div className="v4-page v4-studio flex flex-col gap-[var(--space-4)]">
 
-      {mode === "documents" && (
+      {mode === "documents" && session && sessionLayout}
+
+      {mode === "documents" && !session && (
         <>
         <div className="v4-studio-layout grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[320px_minmax(0,1fr)]">
           {/* Setup: who, what, then generate. Sticky on a wide screen so
@@ -549,22 +921,12 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
                 <Listbox ariaLabel="Student" value={studentId} onChange={(v) => { setStudentId(v); setLoose(null); setSavedTo(null); }} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
               </label>
             )}
-            <fieldset className="v4-document-templates"><legend>Choose a Format</legend>{KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setLoose(null); setSavedTo(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{TITLES[k]}</strong><small>{DESCRIBE[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
-            {kind === "recommendation-letter" && (
-              <label className="flex min-w-0 flex-col gap-[4px]">
-                <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter type</span>
-                <Listbox ariaLabel="Letter type" value={letterType} onChange={setLetterType} placeholder="Choose a type" options={LETTER_TYPES.map((t) => ({ value: t, label: letterTypeLabel(t) }))} className={FIELD} style={fieldStyle} />
-              </label>
-            )}
+            {formatList}
+            {letterTypeField}
             {/* The letter's inputs sit above Generate (9 Oct 2026): what the
                student, the family and my notes give the letter, and an ask
                for what is missing. They replace the generic facts below. */}
-            {student && showInputs && inputs && (
-              <div className="flex flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
-                <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter Inputs</span>
-                <LetterInputList inputs={inputs} onAsk={ask} />
-              </div>
-            )}
+            {inputsBlock}
             <div className="grid grid-cols-2 gap-[8px]">
               <button type="button" onClick={() => generateFor(kind, student)} disabled={!student} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[10px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
                 <Sparkles className="h-[14px] w-[14px]" aria-hidden /> {draft !== null ? "Regenerate" : showInputs ? "Generate Letter" : "Generate"}
@@ -615,26 +977,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
                 ? <button type="button" onClick={() => letterTools.markSent(student, wordCount(draft))} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[10px] text-[13px] font-bold"><Send className="h-[14px] w-[14px]" aria-hidden /> Mark sent</button>
                 : <span className="flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--v4-ok)" }}><Check className="h-[13px] w-[13px]" aria-hidden /> Letter sent</span>
             )}
-            {savedList.length > 0 && (
-              <div className="flex flex-col gap-[6px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Saved drafts</span>
-                <ul className="flex flex-col gap-[2px]">
-                  {savedList.map((d) => {
-                    const who = roster.find((s) => s.id === d.studentId);
-                    const on = student?.id === d.studentId && kind === d.kind;
-                    return (
-                      <li key={`${d.studentId}:${d.kind}`} className="flex items-center gap-[4px]">
-                        <button type="button" onClick={() => reopen(d.studentId, d.kind, d.letterType)} aria-current={on ? "true" : undefined} className="dm-quiet flex min-w-0 flex-1 cursor-pointer flex-col rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left" style={on ? { background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : undefined}>
-                          <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{TITLES[d.kind as DocKind] ?? d.kind}{!fixedStudent && who ? `, ${who.name}` : ""}</span>
-                          <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Edited {new Date(d.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                        </button>
-                        <IconTip label="Remove draft"><button type="button" aria-label="Remove draft" onClick={() => removeDraft(d.studentId, d.kind)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button></IconTip>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
+            {savedDraftsBlock(savedList)}
             {kind === "recommendation-letter" && <SignatureSettings />}
             <SchoolPublicationSettings />
             {/* Drafts are local until explicitly exported. */}

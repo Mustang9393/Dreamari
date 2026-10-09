@@ -1,3 +1,15 @@
+## 2026-10-10: Assist as a session; Messages' Dreamy large
+
+**Why (Chandu):** "the assist one shouldnt have a drop down for students, rather a search bar and maybe requests should be populated? ... how do we gamify it and make it more engaging?"; then "I cant scroll properly in assist, when the mouse is over the document the scroll is stuck in the document"; "split the assisted dreamy list and the from scratch one, because now if i skip the list ... I need to scroll so much"; "organized better so i dont have to scroll to get to the other controls"; and the Dreamy notes ("place it large ... a layer over whatever").
+
+- **Assist** (`ProductivitySuite.tsx` v4 path, new `AssistSession.tsx`, `AssistStudentSearch.tsx`, `assistModel.ts`, `assist.css`; v5 Documents and the profile's DraftTools keep the old layout):
+  - Two modes behind one switch (`useAB` key `v4-assist-mode`): "Dreamy's drafts (N)", a queue built from real data (next-meeting briefs, letter requests in progress or pending, summaries for last week's meetings), and "Start from scratch" (student search by name or grade, format list).
+  - A session: "1 of 6 done", "N min saved this week" (DEMO-ONLY estimates), a stamp, burst and chime when a draft is copied, printed or saved to notes; a finished draft stays with Edit, Undo and Next; a finish line at the end.
+  - No scroll trap: the document is in the window's scroll (a wheel over it scrolls the page); the controls column and the desk toolbar are sticky; letter type, signature and publication style fold into Settings, letter inputs into "Built from". The page subtitle is hidden on desktop to give the layout height, as on Review.
+  - Dreamy large (about 90px) as a layer beside the line he says, with side room so he never covers words.
+- **Messages:** Dreamy about 97px over the top-left corner of the reply frame, the sent bar and the selection pane; 115px on inbox zero.
+- **Open:** time-saved minutes per format are DEMO-ONLY.
+
 ## 2026-10-10: Dreamy, large, as a layer over a fixed slot
 
 **Why (Chandu, in order):** "dreamy sits very awkwardly in every place ... it floats too much ... no proper composition to its placement. Please make it better or remove or lock its position properly"; "it helps to have it as a layer over wherever it sits so when it moves or floats it can do so without forcing the frames or layouts to change"; "Now dreamy is horribly tiny. Please visually verify ... just place it large anywhere and let it sit a layer over whatever, so even if it's too big it just naturally overlays whatever it is."

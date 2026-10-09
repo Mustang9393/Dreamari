@@ -103,7 +103,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { LocalBurst } from "@/components/build/ui";
 import { playCorrect, playFanfare, playSweep } from "@/components/play/sound";
 import { cv } from "@/lib/counselorBase";
-import { Dreamy } from "./InsightCharts";
+import { GlassesDreamy } from "./InsightCharts";
 import { Listbox } from "./Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "./chips";
@@ -528,10 +528,14 @@ const threadKey = (id: string) => `t-${id}`;
 export type InboxSession = { cleared: number; startedAt: number; finishedAt: number | null; /** the questions cleared, for inbox zero's faces */ keys: string[] };
 
 /** Dreamy in his glasses, the pose for every Dreamy on Messages (10 Oct
- *  2026, Chandu: "the glasses dreamy everywhere"). The shared art; the
- *  float and hop are this page's (messages.css). */
-function DreamyGlasses({ size }: { size: number }) {
-  return <Dreamy mood="glasses" size={size} className="msg-dreamy-img" />;
+ *  2026, Chandu: "the glasses dreamy everywhere"). Later the same day
+ *  ("Dreamy sits very awkwardly ... It floats too much"): always an inline
+ *  face locked into the row he speaks in, a 36px slot (88px only on inbox
+ *  zero, centered), one per view. GlassesDreamy (InsightCharts.tsx) draws
+ *  him as a layer over that slot, so his float, tilt and hop never move
+ *  the layout. */
+function DreamyGlasses({ size, hop = 0, thinking = false, pop }: { size: number; hop?: number; thinking?: boolean; pop?: number }) {
+  return <GlassesDreamy size={size} hop={hop} thinking={thinking} pop={pop} />;
 }
 
 type Draft = { label: string; text: string };
@@ -585,7 +589,7 @@ function InboxZero({ session, faces }: { session: InboxSession; faces: QuestionR
   return (
     <div className="msg-zero">
       <LocalBurst nonce={n > 0 ? 1 : 0} />
-      <span className="msg-zero-dreamy"><DreamyGlasses size={120} /></span>
+      <span className="msg-zero-avatar"><DreamyGlasses size={92} pop={1.25} hop={n > 0 ? 1 : 0} /></span>
       <p className="msg-zero-title">{n > 0 ? `All ${n} answered` : "All caught up"}</p>
       <p className="msg-zero-sub">{n > 0 ? `Done in ${minutes} ${minutes === 1 ? "minute" : "minutes"}. New messages land here first.` : "New messages from students land here first."}</p>
       {faces.length > 0 && (
@@ -1028,18 +1032,20 @@ function BulkPanel({ rows, done, onReply, onResolve, onClear, onUndo, onDone }: 
         ))}
         {n > shown.length && <li className="msg-bulkpane-more">and {n - shown.length} more</li>}
       </ul>
-      <div className="msg-composer is-done">
-        <span className={`msg-dreamy ${done ? "is-hop" : ""}`} aria-hidden><DreamyGlasses size={84} /></span>
+      <div className="msg-composer is-done has-mascot">
+        <span className="msg-mascot" aria-hidden><DreamyGlasses size={44} pop={2.2} hop={done ? 1 : 0} /></span>
         <div className="msg-done">
           {done ? (
             <>
+              <span className="msg-done-copy">Nice work.</span>
               <button type="button" onClick={onUndo} className="msg-undo-link dm-link"><RotateCcw className="h-[13px] w-[13px]" aria-hidden />Undo all</button>
               <IconTip label="Done (N or Enter)"><button type="button" onClick={onDone} className="msg-next dm-solid bg-[var(--primary)] text-[var(--primary-foreground)]">Done<ArrowRight className="h-[15px] w-[15px]" aria-hidden /></button></IconTip>
             </>
           ) : (
             <>
-              <button type="button" onClick={onClear} className="msg-undo-link dm-link">Clear</button>
+              <span className="msg-done-copy">One reply can go to all {n}.</span>
               <span className="msg-bulkpane-actions">
+                <button type="button" onClick={onClear} className="msg-undo-link dm-link">Clear</button>
                 <button type="button" onClick={onResolve} className="msg-btn dm-quiet"><Check className="h-4 w-4" aria-hidden />Mark resolved</button>
                 <button type="button" onClick={onReply} className="msg-next dm-solid bg-[var(--primary)] text-[var(--primary-foreground)]"><Send className="h-[15px] w-[15px]" aria-hidden />Reply to all</button>
               </span>
@@ -1058,10 +1064,10 @@ function BubbleFace({ id, name, index }: { id?: string; name: string; index?: nu
   return <IconTip label={`Open ${name}`}><Link href={`${cv("students")}&studentId=${encodeURIComponent(id)}`} className="msg-face" aria-label={`Open ${name}`}>{face}</Link></IconTip>;
 }
 
-/** The reply frame: Dreamy across its top edge with his drafts as chips
+/** The reply frame: Dreamy's face leads his drafts row (a 36px avatar, in line), his drafts as chips
  *  (hover or focus one to preview it in the box, tap to fill it), the box,
  *  then the actions. */
-function ReplyBox({ row, value, onChange, onSend, hop = false, drafts = true, children }: { row: InboxRow; value: string; onChange: (v: string) => void; onSend: () => void; /** Dreamy hops when the reply goes */ hop?: boolean; drafts?: boolean; children: React.ReactNode }) {
+function ReplyBox({ row, value, onChange, onSend, hop = 0, drafts = true, children }: { row: InboxRow; value: string; onChange: (v: string) => void; onSend: () => void; /** Dreamy hops when this changes (a message went) */ hop?: number; drafts?: boolean; children: React.ReactNode }) {
   const [preview, setPreview] = useState<string | null>(null);
   // Dreamy "types" his drafts for a beat as each thread opens (he read it
   // first), then they pop in
@@ -1071,9 +1077,12 @@ function ReplyBox({ row, value, onChange, onSend, hop = false, drafts = true, ch
   const first = row.name.split(" ")[0];
   const label = row.kind === "question" ? "My reply" : "Message";
   return (
-    <div className="msg-composer">
-      <span className={`msg-dreamy ${hop ? "is-hop" : ""}`} aria-hidden><DreamyGlasses size={84} /></span>
+    <div className="msg-composer has-mascot">
+      {/* Dreamy, large, as a layer over the frame's top-left corner (out of
+         the flow; the first row keeps room for him) */}
+      <span className="msg-mascot" aria-hidden><DreamyGlasses size={44} pop={2.2} hop={hop} thinking={drafts && typing} /></span>
       <div className="msg-drafts" role="group" aria-label="Dreamy's drafts" aria-busy={drafts && typing}>
+        {drafts && <span className="msg-drafts-says">Dreamy suggests</span>}
         {drafts && typing && <span className="msg-typing" aria-label="Dreamy is drafting"><i /><i /><i /></span>}
         {drafts && !typing && draftsFor(row).map((d) => (
           <button key={d.label} type="button" aria-pressed={value === d.text} className="msg-draft dm-quiet"
@@ -1082,7 +1091,7 @@ function ReplyBox({ row, value, onChange, onSend, hop = false, drafts = true, ch
             <Sparkles className="h-[13px] w-[13px]" aria-hidden />{d.label}
           </button>
         ))}
-        {!drafts && <span className="msg-drafts-note">Editing your reply</span>}
+        {!drafts && <span className="msg-drafts-says">Editing your reply</span>}
       </div>
       <textarea ref={boxRef} value={value} onChange={(e) => onChange(e.target.value)} aria-label={label} rows={3}
         onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); onSend(); } }}
@@ -1093,15 +1102,15 @@ function ReplyBox({ row, value, onChange, onSend, hop = false, drafts = true, ch
   );
 }
 
-/** After a reply or a resolve: Dreamy cheering on the frame, what happened,
+/** After a reply or a resolve: Dreamy's face beside what happened (a hop),
  *  Undo for a resolve, and Next (the only thing that moves on). */
 function DoneBar({ settled, first, onUndo, onNext, nextLabel }: { settled: NonNullable<Settled>; first: string; onUndo: () => void; onNext: () => void; nextLabel: string }) {
   const nextRef = useRef<HTMLButtonElement>(null);
   // focus lands on Next, so Enter moves on
   useEffect(() => { nextRef.current?.focus({ preventScroll: true }); }, []);
   return (
-    <div className="msg-composer is-done">
-      <span className="msg-dreamy is-hop" aria-hidden><DreamyGlasses size={84} /></span>
+    <div className="msg-composer is-done has-mascot">
+      <span className="msg-mascot" aria-hidden><DreamyGlasses size={44} pop={2.2} hop={1} /></span>
       <div className="msg-done">
         <span className="msg-done-copy" role="status">
           <CheckCheck className="h-[18px] w-[18px]" aria-hidden />
@@ -1197,7 +1206,7 @@ function ConversationThread({ row, response, setResponse, onSend, justSent, back
           );
         })}
       </div>
-      <ReplyBox row={row} value={response} onChange={setResponse} onSend={onSend} hop={justSent}>
+      <ReplyBox row={row} value={response} onChange={setResponse} onSend={onSend} hop={justSent ? row.messages.length : 0}>
         <div className="msg-actions is-one">
           <IconTip label="Send (Ctrl+Enter)">
             <button type="button" disabled={response.trim().length === 0} onClick={onSend} className="msg-send dm-solid bg-[var(--primary)] text-[var(--primary-foreground)]"><Send className="h-[15px] w-[15px]" aria-hidden />Send</button>

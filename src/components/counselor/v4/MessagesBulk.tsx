@@ -22,7 +22,6 @@ import { addSend, type BatchKind } from "@/lib/counselorCasefile";
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import { createLocalRecord } from "@/lib/localRecord";
 import { Avatar } from "./chips";
-import { Dreamy } from "./InsightCharts";
 import { useDialogFocus } from "./useDialogFocus";
 
 /** {first} becomes each student's first name. */
@@ -106,7 +105,6 @@ export function BulkReplyReview({ items, onCancel, onSend }: { items: ReplyItem[
     <>
       <div className="msg-scrim" onClick={onCancel} aria-hidden />
       <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="msg-review-title" className="msg-review dm-scroll">
-        <span className="msg-review-dreamy" aria-hidden><Dreamy mood="glasses" size={88} className="msg-dreamy-img" /></span>
         <IconTip label="Close" className="msg-review-close absolute"><button type="button" onClick={onCancel} aria-label="Close" className="dm-quiet"><X className="h-4 w-4" aria-hidden /></button></IconTip>
         <div className="msg-review-head">
           <h2 id="msg-review-title" className="msg-review-title">Reply to {n}</h2>
