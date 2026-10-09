@@ -437,3 +437,5 @@ html.dark [data-counselor-version="v4"] .v4-navigation {background:rgb(10,13,28)
 [data-counselor-version="v4"] .v4-rp-done .v4-rp-mascot {top:-24px;left:6px;right:auto}
 [data-counselor-version="v4"] .v4-rp-done {padding-left:86px}
 [data-counselor-version="v4"] .v4-rp-done-copy {white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* the layer floats; the image itself must not (insights.css gives .v4-dreamy its own float) */
+[data-counselor-version="v4"] .v4-gd-layer img {animation:none!important}

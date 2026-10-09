@@ -4,7 +4,11 @@
 // "Meetings and messages and their subtabs ... need super engaging and
 // exciting like we did for awaiting me just now"). Students Dreamari flags
 // with nothing booked, neediest first, with "3 of 11 reached" sparking
-// forward and Dreamy (in glasses) hopping on every invite.
+// forward and Dreamy (in glasses, about 100px, a layer over the header's
+// right end, out of the flow: 10 Oct 2026, "just place it large anywhere
+// and let it sit as a layer over whatever") hopping on every invite. One
+// Dreamy per view, so the Invite all dialog has none; the finish states
+// center a larger one above their line.
 //
 // Two rules from the same day, set elsewhere in the dashboard and carried
 // here:
@@ -110,7 +114,7 @@ export function MeetingsOutreach({ flagged, invitedIds, bookedIds, monday, now }
   if (!flagged.length) {
     return (
       <div className="mtg-finish">
-        <GlassesDreamy size={96} />
+        <span className="mtg-finish-mascot"><GlassesDreamy size={56} pop={2.1} /></span>
         <h2 className="mtg-finish-title">Everyone has a meeting</h2>
       </div>
     );
@@ -124,7 +128,7 @@ export function MeetingsOutreach({ flagged, invitedIds, bookedIds, monday, now }
     return (
       <div className="mtg-finish">
         <LocalBurst nonce={finish} />
-        <GlassesDreamy size={104} hop={finish} />
+        <span className="mtg-finish-mascot"><GlassesDreamy size={56} pop={2.1} hop={finish} /></span>
         <h2 className="mtg-finish-title">All {total} reached</h2>
         <span className="mtg-reached-faces">
           {reached.slice(0, 8).map((s) => (
@@ -141,7 +145,7 @@ export function MeetingsOutreach({ flagged, invitedIds, bookedIds, monday, now }
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <section aria-label="Outreach progress" className="mtg-session">
-        <span className="mtg-session-dreamy"><GlassesDreamy size={92} thinking={!!composing || reviewing} hop={hop} /></span>
+        <span className="mtg-mascot is-session"><GlassesDreamy size={44} pop={2.3} thinking={!!composing || reviewing} hop={hop} /></span>
         <div className="mtg-session-copy" role="status" aria-live="polite">
           <p className="mtg-session-count"><b>{reached.length} of {total}</b> reached</p>
           <SparkBar percent={pct} min={2} height={6} fill={BAR_FILL} glow="var(--primary)" memoryKey="v4-outreach-session" />
@@ -262,7 +266,6 @@ function InviteAll({ students, template, onCancel, onSend }: { students: Counsel
     <>
       <div className="mtg-scrim" onClick={onCancel} aria-hidden />
       <div ref={ref} role="dialog" aria-modal="true" aria-labelledby="mtg-all-title" tabIndex={-1} className="mtg-review dm-scroll">
-        <span className="mtg-review-dreamy"><GlassesDreamy size={84} thinking /></span>
         <IconTip label="Close" className="mtg-review-close"><button type="button" onClick={onCancel} aria-label="Close" className="dm-quiet"><X className="h-4 w-4" aria-hidden /></button></IconTip>
         <h2 id="mtg-all-title" className="mtg-review-title">Read before you send</h2>
 

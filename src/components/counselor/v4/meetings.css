@@ -38,9 +38,21 @@
 [data-counselor-version="v4"] .mtg-facts>*+*::before {content:"·";margin:0 8px;color:var(--muted-foreground);opacity:.6}
 [data-counselor-version="v4"] .mtg-facts-link {font-weight:600;color:var(--primary)}
 /* Dreamy sits across the hero's bottom edge, at the right; his line is a bubble to his left */
-[data-counselor-version="v4"] .mtg-dreamy {position:relative;display:flex;align-items:flex-end;padding-right:88px}
-[data-counselor-version="v4"] .mtg-dreamy-img {position:absolute;right:-8px;bottom:-46px;display:block;line-height:0}
-[data-counselor-version="v4"] .mtg-dreamy-say {flex:1;min-width:0;display:flex;align-items:flex-start;gap:8px;padding:11px 14px 12px;border-radius:16px 16px 4px 16px;border:1px solid var(--glass-border);background:var(--glass-surface-2);font-size:14px;line-height:20px;color:var(--foreground)}
+[data-counselor-version="v4"] .mtg-dreamy {display:flex;align-items:center;gap:14px}
+/* Dreamy's slot never shrinks in a flex row; he is drawn as a layer over it */
+/* Dreamy, large, as a layer: an absolute anchor out of the flow, over a
+   corner the row below keeps clear (10 Oct 2026: "just place it large
+   anywhere and let it sit as a layer over whatever") */
+[data-counselor-version="v4"] .mtg-mascot {position:absolute;z-index:4;display:block;line-height:0;pointer-events:none}
+[data-counselor-version="v4"] .mtg-mascot.is-hero {right:30px;bottom:6px}
+[data-counselor-version="v4"] .mtg-mascot.is-session {right:52px;top:50%;margin-top:-22px}
+[data-counselor-version="v4"] .mtg-hero .mtg-dreamy {padding-right:104px}
+[data-counselor-version="v4"] .mtg-hero.is-empty {padding-right:130px}
+[data-counselor-version="v4"] section.mtg-session {padding-right:140px}
+@media (max-width:640px){[data-counselor-version="v4"] section.mtg-session {padding-right:118px} [data-counselor-version="v4"] .mtg-mascot.is-session {right:40px} [data-counselor-version="v4"] section.mtg-session .mtg-session-copy {flex:1 1 100%}}
+[data-counselor-version="v4"] .mtg-finish-mascot {display:grid;place-items:center;width:124px;height:124px}
+[data-counselor-version="v4"] .mtg-done-badge {display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:color-mix(in srgb,var(--color-feedback-success) 16%,transparent);color:var(--color-feedback-success)}
+[data-counselor-version="v4"] .mtg-dreamy-say {flex:1;min-width:0;padding:8px 14px 9px;border-radius:4px 16px 16px 16px;border:1px solid var(--glass-border);background:var(--glass-surface-2);font-size:14px;line-height:20px;color:var(--foreground)}
 [data-counselor-version="v4"] .mtg-dreamy-say b {display:inline-flex;align-items:center;gap:6px;font-size:12px;line-height:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
 [data-counselor-version="v4"] .mtg-dreamy-say>svg {color:var(--primary)}
 
@@ -74,8 +86,7 @@
 [data-counselor-version="v4"] .mtg-stamp.is-invite {color:var(--primary)}
 
 /* ---- Needs Outreach: the session ---- */
-[data-counselor-version="v4"] .mtg-session {position:relative;display:flex;align-items:center;gap:16px 24px;margin-top:26px;padding:16px 22px 16px 128px;min-height:80px;border-radius:var(--radius-xl,20px);border:1px solid var(--glass-border);background:var(--glass-surface-1);box-shadow:0 18px 40px -28px rgba(0,0,0,.5)}
-[data-counselor-version="v4"] .mtg-session-dreamy {position:absolute;top:-28px;left:14px;display:block;line-height:0}
+[data-counselor-version="v4"] .mtg-session {position:relative;display:flex;align-items:center;gap:16px 18px;padding:16px 22px;border-radius:var(--radius-xl,20px);border:1px solid var(--glass-border);background:var(--glass-surface-1);box-shadow:0 18px 40px -28px rgba(0,0,0,.5)}
 [data-counselor-version="v4"] .mtg-session-copy {display:flex;flex:1;flex-direction:column;gap:9px;min-width:0;max-width:560px}
 [data-counselor-version="v4"] .mtg-session-count {font-size:14px;color:var(--muted-foreground)}
 [data-counselor-version="v4"] .mtg-session-count b {font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--foreground);margin-right:4px;font-variant-numeric:tabular-nums}
@@ -120,8 +131,7 @@
 /* Invite all: read first. A centred dialog, solid card surface (no backdrop-filter) */
 [data-counselor-version="v4"] .mtg-scrim {position:fixed;inset:0;z-index:110;background:color-mix(in srgb,var(--background) 70%,transparent)}
 [data-counselor-version="v4"] .mtg-review {position:fixed;left:50%;top:50%;z-index:111;display:flex;flex-direction:column;gap:14px;width:min(600px,calc(100vw - 32px));max-height:min(86vh,760px);overflow-y:auto;padding:26px 24px 22px;border-radius:22px;border:1px solid var(--glass-border);background:var(--card);box-shadow:0 30px 80px -30px rgba(0,0,0,.7);transform:translate(-50%,-50%);outline:none}
-[data-counselor-version="v4"] .mtg-review-dreamy {position:absolute;top:8px;left:16px;line-height:0}
-[data-counselor-version="v4"] .mtg-review-title {min-height:72px;display:flex;align-items:center;padding-left:104px;padding-right:36px;font-family:var(--font-display);font-size:22px;line-height:28px;font-weight:600;color:var(--foreground)}
+[data-counselor-version="v4"] .mtg-review-title {display:flex;align-items:center;padding-right:40px;font-family:var(--font-display);font-size:22px;line-height:28px;font-weight:600;color:var(--foreground)}
 [data-counselor-version="v4"] .mtg-review-close {position:absolute;top:14px;right:14px}
 [data-counselor-version="v4"] .mtg-review-close button {display:inline-flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:999px;color:var(--muted-foreground);cursor:pointer}
 [data-counselor-version="v4"] .mtg-label {font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
@@ -303,11 +313,7 @@
   [data-counselor-version="v4"] .mtg-count {flex-direction:row;align-items:baseline;gap:8px}
   [data-counselor-version="v4"] .mtg-hero-name {font-size:21px;line-height:26px}
   [data-counselor-version="v4"] .mtg-count strong {font-size:21px;line-height:26px;text-align:left}
-  [data-counselor-version="v4"] .mtg-dreamy {padding-right:70px}
-  [data-counselor-version="v4"] .mtg-dreamy-img {right:-10px;bottom:-40px}
-  [data-counselor-version="v4"] .mtg-dreamy-img img {width:64px !important;height:64px !important}
-  [data-counselor-version="v4"] .mtg-session {flex-direction:column;align-items:stretch;padding:72px 16px 16px}
-  [data-counselor-version="v4"] .mtg-session-dreamy {top:-26px;left:10px}
+  [data-counselor-version="v4"] .mtg-session {flex-wrap:wrap;padding:14px 16px}
   [data-counselor-version="v4"] .mtg-reached {position:absolute;top:14px;right:16px}
   [data-counselor-version="v4"] .mtg-out-row {grid-template-columns:minmax(0,1fr) auto;gap:6px 10px}
   /* the why spans the row under the name, and wraps rather than cut */

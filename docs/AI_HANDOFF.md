@@ -1,3 +1,8 @@
+## 2026-10-10: Meetings' Dreamy large; one float only
+
+- **Meetings:** Dreamy about 101px as a layer over the next-meeting card's bottom-right corner (and the "nothing booked" card), and at the right end of the Needs Outreach header; 118px centered on the finish screens; one per view (the Invite all dialog has none; Past meetings' "All done" uses a check badge). Text and buttons keep clear of him by padding, not by moving.
+- **One float:** inside `GlassesDreamy` the layer floats; the image's own `.v4-dreamy` float from insights.css is switched off there so he doesn't bob twice.
+
 ## 2026-10-10: Assist as a session; Messages' Dreamy large
 
 **Why (Chandu):** "the assist one shouldnt have a drop down for students, rather a search bar and maybe requests should be populated? ... how do we gamify it and make it more engaging?"; then "I cant scroll properly in assist, when the mouse is over the document the scroll is stuck in the document"; "split the assisted dreamy list and the from scratch one, because now if i skip the list ... I need to scroll so much"; "organized better so i dont have to scroll to get to the other controls"; and the Dreamy notes ("place it large ... a layer over whatever").

@@ -8,14 +8,17 @@
 // - Next up, the one hero (and the only glow on the page): who, when, a
 //   live countdown, then the prep a counselor hunts for before a meeting
 //   (their status and why, what they last sent, a link to review it if it
-//   is waiting) and Dreamy in glasses, sitting across the frame's edge,
-//   with one talking point. While a meeting is on, the countdown counts
+//   is waiting) and Dreamy in glasses with one talking point. He is large
+//   (about 100px) and drawn as a layer over the card's bottom-right corner,
+//   out of the flow, so he never pushes the layout (10 Oct 2026, Chandu:
+//   "What's the point of a tiny Dreamy nobody can see? ... just place it
+//   large anywhere and let it sit as a layer over whatever"). One per view. While a meeting is on, the countdown counts
 //   down what is left and offers Mark done.
 // - Past meetings: ones that are over and not yet marked done. One tap
 //   marks one done (the time goes to the time log, Dreamy's note to the
 //   meeting): a green "Done" stamp, a burst and a chime, then the row
 //   slides out, the same decision feel as the review session. The last one
-//   ends on Dreamy hopping and a fanfare. Undo is one link away.
+//   ends on a green check and a fanfare (Dreamy is already in the hero). Undo is one link away.
 // Copy pass the same day (Chandu: "What is ready to log?" and "So much text
 // right now on this page needs to reduce"): "Ready to log / Log it" became
 // "Past meetings / Done", the explainer lines and labels went, and the
@@ -81,7 +84,7 @@ export function MeetingsNext({ next, toLog, anyOver, byId, now, onOutreach }: {
 function NothingNext({ onOutreach }: { onOutreach: () => void }) {
   return (
     <section aria-label="Next meeting" className="mtg-hero is-empty">
-      <GlassesDreamy size={76} thinking />
+      <span className="mtg-mascot is-hero"><GlassesDreamy size={44} pop={2.3} thinking /></span>
       <div className="flex flex-col gap-[6px]">
         <h2 className="mtg-hero-name">Nothing booked</h2>
         <button type="button" className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--primary)" }} onClick={onOutreach}>Needs Outreach</button>
@@ -134,9 +137,12 @@ function NextUp({ m, s, now }: { m: Meeting; s: CounselorStudent; now: Date }) {
             ? <Link href={reviewHref} className="mtg-facts-link dm-link">{sent.milestone} waiting on you, sent {ago}</Link>
             : <span>Last sent {sent.milestone}, {sent.state === "changes" ? "changes asked" : "approved"}</span>)}
         </p>
+        {/* Dreamy says the talking point: he sits large, as a layer over the
+           card's bottom-right corner (10 Oct 2026, Chandu: "just place it
+           large anywhere and let it sit as a layer over whatever"); the row
+           keeps clear of him, so he covers no text or control */}
         <div className="mtg-dreamy">
-          <span className="mtg-dreamy-img"><GlassesDreamy size={84} hop={burst} /></span>
-          <p className="mtg-dreamy-say"><Sparkles className="mt-[3px] h-[14px] w-[14px] flex-none" aria-hidden /><span>{talkingPoint(s, m)}</span></p>
+          <p className="mtg-dreamy-say">{talkingPoint(s, m)}</p>
         </div>
         {(on || t >= end) && (
           <button type="button" onClick={() => log(m)} disabled={!!stamping} className="mtg-log is-solid self-start" aria-label={`Mark the meeting with ${first} done`}>
@@ -144,6 +150,7 @@ function NextUp({ m, s, now }: { m: Meeting; s: CounselorStudent; now: Date }) {
           </button>
         )}
       </div>
+      <span className="mtg-mascot is-hero"><GlassesDreamy size={44} pop={2.3} hop={burst} /></span>
       {stamping === m.id && <span className="mtg-stamp" aria-hidden>Done</span>}
       <LocalBurst nonce={burst} />
     </section>
@@ -175,7 +182,8 @@ function ToLog({ items, byId, now }: { items: Meeting[]; byId: Map<string, Couns
     return (
       <section aria-label="Past meetings" className="mtg-wrap is-done">
         <LocalBurst nonce={finish} />
-        <GlassesDreamy size={88} hop={finish} />
+        {/* the hero beside this card already has Dreamy: one per view */}
+        <span className="mtg-done-badge" aria-hidden><Check className="h-6 w-6" strokeWidth={3} /></span>
         <h3 className="mtg-wrap-title">All done</h3>
         {minutes > 0 && <p className="mtg-hero-sub"><b>{minutes} min</b> with students</p>}
         {last && lastName && <Undo word={`Done: ${lastName}`} onUndo={undo} />}
