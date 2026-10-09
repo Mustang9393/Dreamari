@@ -1,16 +1,119 @@
-/* The counselor profile sheet in v4 (9 Oct 2026): a v4 page heading over
-   v5's Profile view. Scoped to the sheet so v5's own page is untouched. */
-.v4-profile-sheet .v4-profile-sheet-head {margin:0;padding:22px var(--space-5) 18px;border-bottom:1px solid var(--glass-border);align-items:flex-end}
-@media (min-width:640px) {.v4-profile-sheet .v4-profile-sheet-head {padding-inline:var(--space-8)}}
-.v4-profile-sheet .v4-profile-sheet-head h1 {margin:6px 0 4px;font-size:clamp(28px,calc(3vw / var(--vz, 1)),40px)}
-.v4-profile-sheet .v4-profile-sheet-head .v4-page-purpose {margin:0}
-.v4-profile-sheet-tools {display:flex;flex:none;align-items:center;gap:8px}
-/* v5's own "PROFILE" h1, hidden here: the sheet has its own title. */
-.v4-profile-sheet .v4-profile-sheet-body > div > h1:first-child {display:none}
-.v4-profile-sheet .v4-profile-sheet-body > div {gap:40px;padding-top:var(--space-6)}
-/* phone: the office-hours rows wrap their times under the day */
+/* The counselor profile sheet in v4 (9 Oct 2026, Maisha: "closer to how the
+   Connect professional profiles do"): a cover with the portrait and name on
+   it, three numbers, then connected cards. v4 tokens only: the primary, the
+   glass surfaces, the hairline. Scoped to the sheet. */
+.v4-profile-sheet {font-family:var(--font-body);}
+.v4-profile-sheet .v4-cp-bar {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px var(--space-5);border-bottom:1px solid var(--glass-border);}
+@media (min-width:640px) {.v4-profile-sheet .v4-cp-bar {padding-inline:var(--space-8);}}
+.v4-profile-sheet-tools {display:flex;flex:none;align-items:center;gap:8px;}
+.v4-profile-sheet .v4-cp-body {display:flex;flex-direction:column;gap:28px;padding:var(--space-5) var(--space-5) var(--space-12);}
+@media (min-width:640px) {.v4-profile-sheet .v4-cp-body {padding-inline:var(--space-8);}}
+
+/* ---- the cover ---- */
+.v4-profile-sheet .v4-cp-cover {position:relative;overflow:hidden;border-radius:24px 24px 24px 6px;border:1px solid rgba(255,255,255,.16);background:#0e0c20;color:#fff;box-shadow:0 18px 40px -28px rgba(0,0,0,.6);}
+.v4-profile-sheet .v4-cp-cover-art {position:absolute;inset:0;}
+.v4-profile-sheet .v4-cp-scrim {position:absolute;inset:0;background:linear-gradient(to top,rgba(12,16,35,.96) 0%,rgba(12,16,35,.82) 42%,rgba(12,16,35,.3) 78%,rgba(12,16,35,.08) 100%);}
+.v4-profile-sheet .v4-cp-cover-tools {position:absolute;top:16px;right:16px;z-index:2;display:flex;border-radius:12px;padding:2px;background:rgba(9,10,20,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.v4-profile-sheet .v4-cp-cover-tools button {display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:10px;font-size:13.5px;font-weight:600;color:rgba(255,255,255,.9);cursor:pointer;}
+.v4-profile-sheet .v4-cp-cover-tools button[aria-pressed="true"] {color:#0e0c20!important;background:#fff!important;opacity:1!important;}
+.v4-profile-sheet .v4-cp-identity {position:relative;display:flex;align-items:flex-end;gap:22px;padding:88px 28px 26px;}
+.v4-profile-sheet .v4-cp-portrait {position:relative;display:grid;place-items:center;flex:none;width:104px;height:104px;border-radius:50%;overflow:hidden;background:color-mix(in srgb,var(--primary) 30%,#0e0c20);box-shadow:0 0 0 3px rgba(255,255,255,.9),0 14px 30px -14px rgba(0,0,0,.7);font-size:36px;font-weight:600;}
+.v4-profile-sheet .v4-cp-who {min-width:0;flex:1;}
+.v4-profile-sheet .v4-cp-who h2 {font-size:clamp(26px,3vw,34px);font-weight:500;letter-spacing:-1.2px;line-height:1.1;color:#fff;}
+.v4-profile-sheet .v4-cp-who p {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px;font-size:14.5px;font-weight:500;color:rgba(255,255,255,.8);}
+.v4-profile-sheet .v4-cp-who p span {color:rgba(255,255,255,.3);}
+.v4-profile-sheet .v4-cp-stats {display:flex;flex-wrap:wrap;margin:18px 0 0;}
+.v4-profile-sheet .v4-cp-stats>div {display:flex;}
+.v4-profile-sheet .v4-cp-stats>div+div {border-left:1px solid rgba(255,255,255,.18);}
+.v4-profile-sheet .v4-cp-stats>div+div>* {margin-left:16px;}
+.v4-profile-sheet .v4-cp-stats>div>* {display:flex;flex-direction:column;gap:2px;margin:-6px -10px;padding:6px 26px 6px 10px;border-radius:10px;text-align:left;color:#fff;cursor:pointer;}
+.v4-profile-sheet .v4-cp-stats>div+div>* {margin-left:6px;}
+.v4-profile-sheet .v4-cp-stats>div>*:hover {background:rgba(255,255,255,.12)!important;color:#fff!important;box-shadow:none!important;}
+.v4-profile-sheet .v4-cp-stats dd {margin:0;font-size:22px;line-height:26px;font-weight:600;font-variant-numeric:tabular-nums;}
+.v4-profile-sheet .v4-cp-stats dt {font-size:12.5px;line-height:16px;font-weight:600;color:rgba(255,255,255,.78);white-space:nowrap;}
+
+/* ---- the body: cards left, the preview right ---- */
+.v4-profile-sheet .v4-cp-grid {display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start;}
+.v4-profile-sheet .v4-cp-main {display:flex;flex-direction:column;gap:24px;min-width:0;}
+.v4-profile-sheet .v4-cp-card {display:flex;flex-direction:column;gap:20px;padding:24px 26px;border-radius:22px 22px 6px 22px;border:1px solid var(--v4-edge);background:var(--v4-glass);}
+.v4-profile-sheet .v4-cp-card-head {display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.v4-profile-sheet .v4-cp-card-head h3 {font-size:20px;font-weight:500;letter-spacing:-.5px;line-height:1.2;}
+.v4-profile-sheet .v4-cp-card-head p {flex-basis:100%;font-size:13px;color:var(--muted-foreground);}
+.v4-profile-sheet .v4-cp-saved {display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--v4-positive);transition:opacity .2s;}
+.v4-profile-sheet .v4-cp-field {display:flex;flex-direction:column;gap:8px;}
+.v4-profile-sheet .v4-cp-field>p {font-size:14.5px;line-height:1.5;}
+.v4-profile-sheet .v4-cp-label {font-size:11px;text-transform:uppercase;letter-spacing:1.4px;font-weight:600;color:var(--muted-foreground);}
+.v4-profile-sheet .v4-cp-muted {font-size:13px;color:var(--muted-foreground);}
+.v4-profile-sheet .v4-cp-chips {display:flex;flex-wrap:wrap;gap:8px;}
+.v4-profile-sheet .v4-cp-chip {display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--glass-border);font-size:13px;font-weight:600;color:var(--muted-foreground);}
+.v4-profile-sheet button.v4-cp-chip {cursor:pointer;}
+.v4-profile-sheet .v4-cp-chip.is-on {background:color-mix(in srgb,var(--primary) 14%,transparent);border-color:color-mix(in srgb,var(--primary) 50%,transparent);color:var(--foreground);}
+.v4-profile-sheet .v4-cp-chip.is-small {height:26px;padding:0 10px;font-size:12px;background:color-mix(in srgb,var(--primary) 12%,transparent);border-color:transparent;color:var(--foreground);}
+.v4-profile-sheet .v4-cp-input {height:42px;width:100%;max-width:420px;border-radius:11px;border:1px solid color-mix(in srgb,var(--foreground) 30%,transparent);background:var(--glass-surface-1);padding:0 14px;font-size:14.5px;color:var(--foreground);outline:none;}
+.v4-profile-sheet .v4-cp-input:focus-visible {border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 12%,transparent);}
+
+/* office hours: one row a day, a switch, from and to */
+.v4-profile-sheet .v4-cp-hours {display:flex;flex-direction:column;list-style:none;margin:0;padding:0;}
+.v4-profile-sheet .v4-cp-hours li {display:flex;align-items:center;gap:12px;min-height:52px;border-bottom:1px solid var(--v4-line);}
+.v4-profile-sheet .v4-cp-hours li:last-child {border-bottom:0;}
+.v4-profile-sheet .v4-cp-switch {position:relative;flex:none;width:42px;height:24px;border-radius:999px;background:color-mix(in srgb,var(--foreground) 18%,transparent);transition:background .18s;cursor:pointer;}
+.v4-profile-sheet .v4-cp-switch[data-on="true"] {background:var(--primary);}
+.v4-profile-sheet .v4-cp-switch>span {position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .18s;}
+.v4-profile-sheet .v4-cp-switch[data-on="true"]>span {left:21px;}
+.v4-profile-sheet .v4-cp-day {width:96px;flex:none;font-size:14.5px;font-weight:600;}
+.v4-profile-sheet .v4-cp-times {display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.v4-profile-sheet .v4-cp-time {min-width:118px;}
+
+/* the team */
+.v4-profile-sheet .v4-cp-team {display:flex;flex-direction:column;list-style:none;margin:0;padding:0;}
+.v4-profile-sheet .v4-cp-mate {display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--v4-line);}
+.v4-profile-sheet .v4-cp-mate:last-child {border-bottom:0;padding-bottom:4px;}
+.v4-profile-sheet .v4-cp-mate-photo {position:relative;display:grid;place-items:center;flex:none;width:48px;height:48px;border-radius:50%;overflow:hidden;background:color-mix(in srgb,var(--primary) 16%,transparent);color:var(--primary);font-size:15px;font-weight:600;}
+.v4-profile-sheet .v4-cp-mate-who {display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;}
+.v4-profile-sheet .v4-cp-mate-who strong {font-size:15px;font-weight:600;}
+.v4-profile-sheet .v4-cp-mate-who small {font-size:12.5px;color:var(--muted-foreground);}
+.v4-profile-sheet .v4-cp-mate-actions {display:flex;align-items:center;gap:8px;flex:none;}
+.v4-profile-sheet .v4-cp-mate-actions .v4-round {width:36px;height:36px;color:var(--foreground);}
+.v4-profile-sheet .v4-cp-cover-btn {display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--glass-border);font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;}
+.v4-profile-sheet .v4-cp-cover-btn.is-on {background:var(--primary);border-color:var(--primary);color:var(--primary-foreground);}
+
+/* the preview card students see: the portrait, the name, the hours, the
+   topics, the caseload; no strap */
+.v4-profile-sheet .v4-cp-preview {display:flex;flex-direction:column;gap:12px;position:sticky;top:16px;}
+.v4-profile-sheet .v4-cp-badge {display:flex;flex-direction:column;overflow:hidden;border-radius:22px;border:1px solid var(--v4-edge);background:var(--card);box-shadow:0 24px 50px -30px rgba(20,30,70,.45);}
+.v4-profile-sheet .v4-cp-badge-photo {position:relative;display:grid;place-items:center;height:210px;background:color-mix(in srgb,var(--primary) 14%,var(--card));color:var(--primary);font-size:56px;font-weight:600;}
+.v4-profile-sheet .v4-cp-badge-body {display:flex;flex-direction:column;gap:10px;padding:16px 20px 20px;}
+.v4-profile-sheet .v4-cp-badge-body strong {font-size:20px;font-weight:500;letter-spacing:-.4px;line-height:1.2;}
+.v4-profile-sheet .v4-cp-badge-body>small {margin-top:-6px;font-size:13px;color:var(--muted-foreground);}
+.v4-profile-sheet .v4-cp-badge-line {display:flex;flex-direction:column;gap:2px;font-size:13.5px;color:var(--muted-foreground);}
+.v4-profile-sheet .v4-cp-badge-line b {font-weight:600;color:var(--foreground);}
+.v4-profile-sheet .v4-cp-badge-foot {display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--v4-line);padding-top:12px;font-size:13px;font-weight:600;}
+.v4-profile-sheet .v4-cp-badge-foot span:last-child {font-variant-numeric:tabular-nums;color:var(--muted-foreground);}
+
+/* tablets: the two columns still fit; the preview narrows */
+@media (max-width:1023px) {
+  .v4-profile-sheet .v4-cp-grid {grid-template-columns:minmax(0,1fr) 260px;gap:18px;}
+  .v4-profile-sheet .v4-cp-card {padding:20px 22px;}
+  .v4-profile-sheet .v4-cp-identity {padding:76px 22px 22px;gap:18px;}
+}
+/* phones: the identity stacks under the portrait, the stats wrap, the
+   preview sits under About Me and the team */
 @media (max-width:639px) {
-  .v4-profile-sheet .v4-profile-sheet-head {flex-direction:column;align-items:flex-start;gap:12px}
-  .v4-profile-sheet .v4-profile-sheet-tools {width:100%;justify-content:space-between}
-  .v4-profile-sheet li:has(> [role="switch"]) {flex-wrap:wrap;padding:6px 0}
+  .v4-profile-sheet .v4-cp-bar {padding:14px 16px;}
+  .v4-profile-sheet .v4-cp-body {padding:16px 16px var(--space-12);gap:20px;}
+  .v4-profile-sheet .v4-cp-cover {border-radius:18px 18px 18px 6px;}
+  .v4-profile-sheet .v4-cp-identity {flex-direction:column;align-items:flex-start;padding:72px 18px 20px;gap:14px;}
+  .v4-profile-sheet .v4-cp-portrait {width:84px;height:84px;font-size:30px;}
+  .v4-profile-sheet .v4-cp-stats {display:grid;grid-template-columns:repeat(3,minmax(0,auto));justify-content:start;}
+  .v4-profile-sheet .v4-cp-stats>div>* {padding-right:12px;}
+  .v4-profile-sheet .v4-cp-stats>div+div>* {margin-left:4px;padding-left:8px;}
+  .v4-profile-sheet .v4-cp-stats dd {font-size:20px;}
+  .v4-profile-sheet .v4-cp-stats dt {font-size:11.5px;white-space:normal;}
+  .v4-profile-sheet .v4-cp-grid {grid-template-columns:minmax(0,1fr);gap:20px;}
+  .v4-profile-sheet .v4-cp-preview {position:static;}
+  .v4-profile-sheet .v4-cp-card {padding:18px;border-radius:18px 18px 6px 18px;}
+  .v4-profile-sheet .v4-cp-mate {flex-wrap:wrap;}
+  .v4-profile-sheet .v4-cp-mate-actions {width:100%;padding-left:62px;}
+  .v4-profile-sheet .v4-cp-hours li {flex-wrap:wrap;padding:6px 0;}
+  .v4-profile-sheet .v4-cp-times {flex-basis:100%;padding-left:54px;}
 }

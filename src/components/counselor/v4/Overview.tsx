@@ -1,11 +1,22 @@
 "use client";
 
+// Home (9 Oct 2026, Maisha: "Rename the 'Today' tab to Home"). Her notes
+// of the same day shape every block below: v5's cleaner hero with v4's four
+// metrics "grouped more closely together on the left" and "only two
+// buttons: Log Time and Start Reviewing" on the right; "a small, compact
+// indicator near the top showing the counselor's next scheduled meeting";
+// My Next Conversations and the saved-careers carousel kept as they were;
+// Pending Reviews in v5's compact form with v4's small arrows; Most Watched
+// replaced by "Most Played Career Simulations" in v5's card layout.
+
 import { useMemo, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowUpRight, CalendarPlus, Clock, FileCheck2, UserRound } from "lucide-react";
+import { ArrowUpRight, CalendarClock, CalendarPlus, ChevronRight, Clock, UserRound } from "lucide-react";
 import { useCounselorFilters, type GradeFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
+import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { attentionRank, attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { Avatar } from "./chips";
@@ -14,18 +25,45 @@ import { IconTip } from "@/components/app/IconTip";
 import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
 import { Coverflow } from "../v5/Coverflow";
-import { MostWatched } from "../v5/Videos";
+import { MostPlayedSimulations } from "../v5/HomeExtras";
+import { MILESTONE_ICON } from "../v5/milestoneIcons";
+import { useMeetings } from "../v5/Prepare";
 import { openCareer } from "../v5/ExploreSheets";
 import { schoolSnapshot, toV5 } from "@/lib/counselorV5";
 import { useTodayFilters } from "./Workspace";
+import "../v5/v5.css";
 import "./today.css";
 
 const subscribeDate = (notify: () => void) => { const timer = window.setInterval(notify, 60000); return () => window.clearInterval(timer); };
 const dateSnapshot = () => new Intl.DateTimeFormat("en", {weekday:"long",month:"long",day:"numeric"}).format(new Date());
 const serverDateSnapshot = () => "Today";
+const noop = () => () => {};
+const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const studentHref = (id: string) => `/counselor?view=students&studentId=${encodeURIComponent(id)}&v=4`;
 
 function Jump({children,onClick}:{children:React.ReactNode;onClick:()=>void}) {return <button className="v4-text-action" onClick={onClick}>{children}<ArrowUpRight size={16}/></button>;}
 
+/** The next meeting still to come, as one line (Maisha, 9 Oct 2026: "a
+ *  small, compact indicator near the top showing the counselor's next
+ *  scheduled meeting, its time, and a clickable link to open it ... keep it
+ *  minimal"). Client-only: the seeds are built from the clock, so the
+ *  server would print a different line. */
+function NextMeeting({ roster }: { roster: Parameters<typeof useMeetings>[0] }) {
+ const mounted = useSyncExternalStore(noop, () => true, () => false);
+ const meetings = useMeetings(roster);
+ const done = useMeetingsDone();
+ if (!mounted) return <span className="v4-home-next" aria-hidden />;
+ const now = new Date();
+ const next = meetings.find((m) => !isPast(m, now) && !done[m.id]);
+ if (!next) return <button type="button" className="v4-home-next dm-row dm-quiet" onClick={() => openLog({ mode: "book" })}><CalendarClock size={15} aria-hidden /><span>Nothing booked yet. <b>Book a meeting</b></span><ChevronRight size={14} aria-hidden /></button>;
+ const student = roster.find((s) => s.id === next.studentId);
+ const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+ const [y, mo, d] = next.day.split("-").map(Number);
+ const when = next.day === iso(now) ? "today" : next.day === iso(tomorrow) ? "tomorrow" : new Date(y, mo - 1, d).toLocaleDateString("en-US", { weekday: "short" });
+ return <Link href="/counselor?view=meetings&v=4" className="v4-home-next dm-row dm-quiet" aria-label={`Next meeting: ${timeLabel(next.time)} ${when}, ${student?.name ?? "a student"}, ${next.type}. Open Meetings`}>
+  <CalendarClock size={15} aria-hidden /><span>Next: <b>{timeLabel(next.time)} {when}</b>{student ? ` · ${student.name}` : ""} · {next.type}</span><ChevronRight size={14} aria-hidden />
+ </Link>;
+}
 
 export function Overview(){
  const router=useRouter();const reviewed=useReviewedRoster();
@@ -59,36 +97,44 @@ export function Overview(){
  const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank).slice(0,5);
  const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
  const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
- const openStudent=(id:string)=>router.push(`/counselor?view=students&studentId=${id}&v=4`);
+ const openStudent=(id:string)=>router.push(studentHref(id));
  const status=(value:"On Track"|"Needs Attention"|"At Risk")=>{setStatusFilter(value);go("students");};
- // Title Case labels; the numbers roll up on arrival like the student app's
- // XP count (Maisha, 7 Oct 2026: "the extra kick of excitement").
- const signals:{label:string;value:number;suffix?:string;small:string;action:()=>void}[]=[
-  {label:"Students in View",value:total,small:gradeFilter==="All Grades"?"Across all grades":`Grade ${gradeFilter}`,action:()=>go("students")},
-  {label:"On Track",value:pct(onTrack),suffix:"%",small:`${onTrack} students`,action:()=>go("milestones&mode=student")},
-  {label:"At Risk",value:atRisk,small:`${attention} more need attention`,action:()=>status("At Risk")},
-  {label:"Still Exploring",value:undecided,small:"No postsecondary plan yet",action:()=>go("insights")},
+ // v4's four metrics, Title Case, in v5's form: the number first, then the
+ // label, hairlines between, no third line (Maisha, 9 Oct 2026: "Keep the
+ // existing metrics from V4 ... Use V5's cleaner layout"). The numbers roll
+ // up on arrival like the student app's XP count (Maisha, 7 Oct 2026: "the
+ // extra kick of excitement").
+ const signals:{label:string;value:number;suffix?:string;action:()=>void}[]=[
+  {label:"Students in View",value:total,action:()=>go("students")},
+  {label:"On Track",value:pct(onTrack),suffix:"%",action:()=>go("milestones&mode=student")},
+  {label:"At Risk",value:atRisk,action:()=>status("At Risk")},
+  {label:"Still Exploring",value:undecided,action:()=>go("insights")},
  ];
  return <div className="v4-daily">
-  {/* v5's hero (8 Oct 2026: "how can we make v4's overview more like
-     v5's, without destroying it"): the greeting with the four numbers right
-     under it, and the day's two actions on the right, Log time beside the
-     review. The sentence that repeated the review and risk counts went:
-     the numbers below and the Pending Reviews island already say them. */}
-  <section className="v4-welcome">
-   <div><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1>
+  {/* v5's hero (Maisha, 9 Oct 2026: "Use V5's cleaner layout, with the
+     metrics grouped more closely together on the left. On the right, keep
+     only two buttons"): the greeting and Dreamy's briefing on the left, the
+     two actions and the next meeting on the right, then the four figures
+     in one group under both. The grade picker left the actions row for the
+     end of the figures it narrows, so the right side is the two buttons. */}
+  <section className="v4-welcome v4-home-hero">
+   <div className="v4-home-lead"><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1>
     <div className="v4-dreamy-brief"><DreamyMoment mood={missed?"problem-solving":"idea"} size={44}/><ul aria-label="Dreamy's briefing">{brief.map(b=><li key={b.text}><button type="button" className="dm-row" onClick={b.go}>{b.text}<ArrowUpRight size={14}/></button></li>)}</ul></div>
    </div>
-   <div className="v4-welcome-actions">
-    {filters}
-    <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log time</button>
-    <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start reviewing":"Open students"}<ArrowUpRight size={18}/></button>
+   <div className="v4-home-side">
+    <div className="v4-welcome-actions">
+     <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log Time</button>
+     <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start Reviewing":"Open Students"}<ArrowUpRight size={18}/></button>
+    </div>
+    <NextMeeting roster={reviewed} />
+   </div>
+   <div className="v4-home-signals">
+    <div className="v4-home-figures" role="group" aria-label="Caseload summary">
+     {signals.map(s=><button key={s.label} type="button" onClick={s.action} className="v4-home-figure dm-quiet"><strong><CountUp value={s.value} suffix={s.suffix}/></strong><span>{s.label}<ChevronRight size={14} aria-hidden/></span></button>)}
+    </div>
+    {filters&&<div className="v4-home-scope">{filters}</div>}
    </div>
   </section>
-
-  <div className="v4-signal-strip" aria-label="Caseload summary">
-   {signals.map((s,i)=><button key={s.label} onClick={s.action} className={`v4-signal v4-signal-${i}`}><span>{s.label}</span><strong><CountUp value={s.value} suffix={s.suffix}/></strong><small>{s.small}</small><ArrowUpRight size={16}/></button>)}
-  </div>
 
   {/* today's notice from v5, only when there is one: covering for a
      teammate. Check-ins are gone from the demo (9 Oct 2026, Maisha:
@@ -100,7 +146,8 @@ export function Overview(){
   <div className="v4-daily-grid">
    <section className="v4-focus-sheet">
     {/* First person (Maisha: "flip it so the counselor reads it as talking
-       about themselves ... 'My Next Conversations'"). */}
+       about themselves ... 'My Next Conversations'"). Kept as it was
+       (Maisha, 9 Oct 2026: "Keep the existing V4 layout and functionality"). */}
     <header className="v4-section-head"><div><h2>My Next Conversations</h2></div><span className="v4-pill">{attention+atRisk} need support</span></header>
     <div className="v4-priority-list">{priority.length?priority.map((s,i)=><div key={s.id} className="v4-priority-row"><button onClick={()=>openStudent(s.id)}><span className="v4-list-index">{String(i+1).padStart(2,"0")}</span><Avatar name={s.name} size={44} index={s.avatarIndex}/><span className="v4-person"><strong>{s.name}</strong><small>Grade {s.grade} · {attentionReason(s)}</small></span><span className={`v4-status-text ${s.status==="At Risk"?"is-risk":"is-attention"}`}><i aria-hidden/>{s.status}</span></button>
      {/* v5's booking on the row that calls for it */}
@@ -108,29 +155,40 @@ export function Overview(){
      <IconTip label="Book a meeting"><button className="v4-row-action is-primary" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}><CalendarPlus size={16}/></button></IconTip></div>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
     <div className="v4-sheet-foot"><span>Prioritized by current milestone status</span><Jump onClick={()=>go("students")}>View students</Jump></div>
    </section>
-   <section className="v4-review-island">
-    <header className="v4-section-head"><span className="v4-overline">Pending Reviews</span><FileCheck2 size={22}/></header>
-    <div className="v4-review-number"><strong><CountUp value={pendingCount}/></strong><span>submissions<br/>awaiting my review</span></div>
-    {/* The document icons wear the Pending Review status colour, one hue
-       for the whole stack (Maisha: "make all of these the same color ...
-       so there isn't too much competing for our attention"). */}
-    <div className="v4-review-stack">{pending.filter(r=>r.count>0).map(r=><button key={r.key} onClick={()=>go("review-queue")}><span className="v4-mini-document" style={{color:"var(--v4-review)"}}><FileCheck2 size={17}/></span><span>{r.key}</span><b>{r.count}</b><ArrowUpRight size={14}/></button>)}{!pendingCount&&<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}</div>
-    <button className="v4-island-action" onClick={()=>go("review-queue")}>Open review desk <ArrowRight size={18}/></button>
+   {/* v5's Pending Reviews, open on the page with a hairline to its left
+      (Maisha, 9 Oct 2026: "Replace the V4 layout with the cleaner, more
+      compact design from V5. Retain the small arrow next to each review
+      category/count"). The count opens the desk; each row opens it
+      narrowed to that milestone. The island's own "Open review desk"
+      went: Start Reviewing above already goes there. */}
+   <section className="v4-review-column" aria-label="Pending reviews">
+    <span className="v4-overline">Pending Reviews</span>
+    {pendingCount?<>
+     <Link href="/counselor?v=4&view=review-queue" className="v4-review-total dm-row dm-quiet"><strong><CountUp value={pendingCount}/></strong><span>submissions<br/>waiting for me</span></Link>
+     <ul className="v4-review-rows">{pending.filter(r=>r.count>0).map(r=>{const Icon=MILESTONE_ICON[r.key];return <li key={r.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><Icon size={17} aria-hidden/><span>{r.key}</span><b>{r.count}</b><ArrowUpRight size={14} aria-hidden/></Link></li>;})}</ul>
+    </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
    </section>
   </div>
 
   {/* Milestone Completion, Career Interests and Plans After Graduation
      moved to Insights whole (8 Oct 2026, Chandu: "the today tab seems
      really badly cluttered"; "milestone completion and plans after
-     graduation etc belong in insights"). Today answers what needs me
+     graduation etc belong in insights"). Home answers what needs me
      today; On Track and Still Exploring open the moved charts. */}
-  {/* What students are into, back on Today (8 Oct 2026, Chandu: "I want
-     to see top 10 carousel and videos on the today page too"): v5 Home's
-     ranked carousel of what they save and its Most Watched videos. */}
+  {/* What students are into (8 Oct 2026, Chandu: "I want to see top 10
+     carousel and videos on the today page too"); kept (Maisha, 9 Oct 2026:
+     "Keep the V4 carousel design displaying the top 10 most-saved careers"). */}
   <section className="v4-today-rail" aria-label="What my students are saving">
    <header className="v4-section-head"><div><h2>What My Students Are Saving</h2></div><Jump onClick={()=>go("explore")}>Explore</Jump></header>
    <Coverflow mode="cover" label="Most saved careers" items={saved.map(({career,students:n},k)=>({key:career.id,rank:k+1,title:career.title,world:career.world,photo:career.photo,focus:career.photoFocus,stat:{value:String(n),label:n===1?"Student":"Students"},onOpen:()=>openCareer({title:career.title,world:career.world,photo:career.photo},saved.map(x=>({title:x.career.title,world:x.career.world,photo:x.career.photo})))}))}/>
   </section>
-  <section className="v4-today-rail" aria-label="Most watched"><header className="v4-section-head"><div><h2>Most Watched by My Students</h2></div></header><MostWatched titled={false}/></section>
+  {/* v5's simulation cards in place of Most Watched (Maisha, 9 Oct 2026:
+     "Replace V4's 'Most Watched by My Students' section with V5's 'Most
+     Played Simulations.' Rename it 'Most Played Career Simulations'").
+     A card opens who played it. */}
+  <section className="v4-today-rail v4-home-sims" aria-label="Most played career simulations">
+   <header className="v4-section-head"><div><h2>Most Played Career Simulations</h2></div></header>
+   <MostPlayedSimulations students={total} titled={false}/>
+  </section>
  </div>;
 }

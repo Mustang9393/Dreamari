@@ -89,7 +89,7 @@ const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
 
 
 export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: string }> = {
-  overview: { title: "Overview", subtitle: "Welcome back. Here's your caseload at a glance." },
+  overview: { title: "Home", subtitle: "Welcome back. Here's your caseload at a glance." },
   students: { title: "Students", subtitle: "View and manage your student caseload" },
   milestones: { title: "Milestone Tracker", subtitle: "Track completion of required milestones by grade level" },
   "review-queue": { title: "Review Queue", subtitle: "Review and approve student submissions" },

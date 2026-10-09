@@ -66,11 +66,42 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 [data-counselor-version="v4"] .v4-settings>.v4-settings-profile .v4-surface {border-radius:24px 24px 6px 24px!important;padding:30px!important}
 @media (max-width:640px){[data-counselor-version="v4"] .v4-settings>.v4-settings-profile .v4-surface {padding:22px!important}}
 
-/* v5 additions to the Overview (8 Oct 2026): two hero actions, row actions,
-   and the check-in alert line. */
-[data-counselor-version="v4"] .v4-welcome-actions {display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-[data-counselor-version="v4"] .v4-secondary-action {display:inline-flex;align-items:center;gap:8px;border:1px solid var(--glass-border);border-radius:13px;padding:15px 20px;font-size:12px;font-weight:600;color:var(--foreground);background:var(--glass-surface-1);}
+/* ---- Home (9 Oct 2026, Maisha's notes): v5's hero on v4's tokens ---- */
+/* The hero is a grid: the greeting and Dreamy's briefing left, the two
+   actions and the next meeting right, the four figures in one group under
+   both. The grade picker sits at the end of the figures it narrows
+   ("only two buttons" on the right). */
+[data-counselor-version="v4"] .v4-home-hero {display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"lead side" "signals signals";align-items:start;column-gap:32px;row-gap:26px;padding:0 0 30px;}
+[data-counselor-version="v4"] .v4-home-lead {grid-area:lead;min-width:0;}
+[data-counselor-version="v4"] .v4-home-side {grid-area:side;display:flex;flex-direction:column;align-items:flex-end;gap:14px;padding-top:26px;}
+[data-counselor-version="v4"] .v4-home-signals {grid-area:signals;display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--v4-line);padding-top:20px;}
+[data-counselor-version="v4"] .v4-welcome-actions {display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+/* one row, one height: an older phone rule (v4.css) pushed the primary
+   button down 20px for when it sat alone under the greeting (8 Oct 2026:
+   "why is the start reviewing button sitting lower") */
+[data-counselor-version="v4"] .v4-welcome-actions>* {height:44px!important;margin:0!important;}
+[data-counselor-version="v4"] .v4-welcome-actions .v4-primary-action {box-shadow:0 4px 14px -8px var(--v4-action);}
+[data-counselor-version="v4"] .v4-secondary-action {display:inline-flex;align-items:center;border:1px solid var(--glass-border);font-weight:600;color:var(--foreground);background:var(--glass-surface-1);}
 [data-counselor-version="v4"] .v4-secondary-action:hover {background:var(--glass-surface-2);}
+[data-counselor-version="v4"] .v4-welcome-actions :is(.v4-secondary-action,.v4-primary-action) {height:44px;padding:0 18px;border-radius:12px;font-size:13px;gap:10px;}
+/* the next meeting: one line, a link to Meetings */
+[data-counselor-version="v4"] .v4-home-next {display:inline-flex;align-items:center;gap:8px;min-height:24px;font-size:13px;line-height:18px;color:var(--muted-foreground);text-align:left;cursor:pointer;}
+[data-counselor-version="v4"] .v4-home-next b {font-weight:600;color:var(--foreground);}
+[data-counselor-version="v4"] .v4-home-next svg:first-child {color:var(--primary);flex:none;}
+[data-counselor-version="v4"] .v4-home-next svg:last-child {flex:none;transition:transform .18s;}
+[data-counselor-version="v4"] .v4-home-next:hover svg:last-child {transform:translateX(2px);}
+/* the four figures: number first, then the label, hairlines between; the
+   hover surface takes the whole figure with air around it */
+[data-counselor-version="v4"] .v4-home-figures {display:flex;align-items:stretch;min-width:0;}
+[data-counselor-version="v4"] .v4-home-figure {display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:6px 28px 6px 20px;border-left:1px solid var(--v4-line);border-radius:10px;text-align:left;cursor:pointer;}
+[data-counselor-version="v4"] .v4-home-figure:first-child {border-left:0;padding-left:0;margin-left:-10px;padding-left:10px;}
+[data-counselor-version="v4"] .v4-home-figure strong {font-size:40px;line-height:1;font-weight:500;letter-spacing:-1.6px;font-variant-numeric:tabular-nums;}
+[data-counselor-version="v4"] .v4-home-figure>span {display:inline-flex;align-items:center;gap:2px;font-size:13px;font-weight:600;color:var(--muted-foreground);white-space:nowrap;}
+[data-counselor-version="v4"] .v4-home-figure>span svg {opacity:0;transition:opacity .18s,transform .18s;color:var(--primary);}
+[data-counselor-version="v4"] .v4-home-figure:hover>span svg,[data-counselor-version="v4"] .v4-home-figure:focus-visible>span svg {opacity:1;transform:translateX(2px);}
+[data-counselor-version="v4"] .v4-home-figure:hover>span,[data-counselor-version="v4"] .v4-home-figure:focus-visible>span {color:var(--foreground);}
+[data-counselor-version="v4"] .v4-home-scope {flex:none;}
+[data-counselor-version="v4"] .v4-home-scope .v4-grade-picker {min-height:38px;padding:8px 12px!important;}
 [data-counselor-version="v4"] .v4-priority-list>.v4-priority-row {display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--v4-line);}
 [data-counselor-version="v4"] .v4-priority-list>.v4-priority-row:last-child {border-bottom:0;}
 [data-counselor-version="v4"] .v4-priority-row>button:first-child {display:flex;align-items:center;gap:13px;text-align:left;flex:1;min-width:0;padding:15px 0;}
@@ -83,34 +114,67 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 [data-counselor-version="v4"] .v4-alert-line span {flex:1;min-width:0;}
 [data-counselor-version="v4"] .v4-alert-line:hover {background:var(--glass-surface-1);}
 
-/* Today, 8 Oct 2026 ("too cluttered in tablet mode"; "On Track, then a huge
-   space, then 104 students, then a huge space to the side and the number"):
-   the grade picker, Log time and Start reviewing share one row at one
-   height; each figure reads number first, then its label, then the note,
-   left aligned like v5's hero stats. */
-[data-counselor-version="v4"] .v4-welcome-actions {flex-wrap:wrap;justify-content:flex-end;}
-/* one row, one height: an older phone rule (v4.css) pushed the primary
-   button down 20px for when it sat alone under the greeting (8 Oct 2026:
-   "why is the start reviewing button sitting lower") */
-[data-counselor-version="v4"] .v4-welcome-actions>* {height:44px!important;margin:0!important;}
-[data-counselor-version="v4"] .v4-welcome-actions .v4-primary-action {box-shadow:0 4px 14px -8px var(--v4-action);}
-[data-counselor-version="v4"] .v4-welcome-actions :is(.v4-secondary-action,.v4-primary-action) {height:44px;padding:0 18px;border-radius:12px;font-size:13px;gap:10px;}
-[data-counselor-version="v4"] .v4-welcome-actions .v4-grade-picker button,[data-counselor-version="v4"] .v4-welcome-actions .v4-grade-picker {height:44px;}
-[data-counselor-version="v4"] .v4-signal {display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:0 24px;}
-[data-counselor-version="v4"] .v4-signal:first-child {padding-left:0;}
-[data-counselor-version="v4"] .v4-signal strong {order:-1;margin:0 0 4px;font-size:40px;line-height:1;}
-[data-counselor-version="v4"] .v4-signal>span {font-size:13px;font-weight:600;color:var(--foreground);}
-[data-counselor-version="v4"] .v4-signal small {margin:0;font-size:12px;}
-[data-counselor-version="v4"] .v4-signal svg {top:4px;right:16px;}
-@media (max-width:1023px){
- [data-counselor-version="v4"] .v4-welcome {flex-direction:column;align-items:flex-start;gap:18px;}
- [data-counselor-version="v4"] .v4-welcome-actions {justify-content:flex-start;}
- [data-counselor-version="v4"] .v4-signal-strip {grid-template-columns:repeat(2,minmax(0,1fr));row-gap:22px;}
- [data-counselor-version="v4"] .v4-signal:nth-child(3) {padding-left:0;border-left:0;}
+/* Pending Reviews in v5's open form: a hairline to its left on wide
+   screens, the count, then one row per milestone with its icon in the
+   Pending Review colour (Maisha, 7 Oct 2026: "make all of these the same
+   color"), its count and v4's small arrow. */
+[data-counselor-version="v4"] .v4-review-column {display:flex;flex-direction:column;gap:14px;min-width:0;border-left:1px solid var(--v4-line);padding:6px 0 0 28px;}
+[data-counselor-version="v4"] .v4-review-total {display:flex;align-items:flex-end;gap:14px;width:fit-content;text-align:left;color:var(--foreground);}
+[data-counselor-version="v4"] .v4-review-total strong {font-size:56px;line-height:.9;font-weight:350;letter-spacing:-3px;font-variant-numeric:tabular-nums;}
+[data-counselor-version="v4"] .v4-review-total .v4-count,[data-counselor-version="v4"] .v4-home-figure .v4-count {font-size:inherit;}
+[data-counselor-version="v4"] .v4-review-total span {font-size:12.5px;line-height:1.45;font-weight:500;color:var(--muted-foreground);padding-bottom:3px;}
+[data-counselor-version="v4"] .v4-review-rows {display:flex;flex-direction:column;list-style:none;margin:0;padding:0;}
+[data-counselor-version="v4"] .v4-review-rows li {border-bottom:1px solid var(--v4-line);}
+[data-counselor-version="v4"] .v4-review-rows li:last-child {border-bottom:0;}
+/* the hover surface takes the whole row: 10px of air at the sides, the
+   row's own 40px height, nothing clipped */
+[data-counselor-version="v4"] .v4-review-rows a {display:flex;align-items:center;gap:10px;min-height:40px;margin:0 -10px;padding:0 10px;border-radius:10px;font-size:13px;color:var(--foreground);}
+[data-counselor-version="v4"] .v4-review-rows a>svg:first-child {color:var(--v4-review);flex:none;}
+[data-counselor-version="v4"] .v4-review-rows a>span {flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+[data-counselor-version="v4"] .v4-review-rows a>b {font-weight:600;font-variant-numeric:tabular-nums;}
+[data-counselor-version="v4"] .v4-review-rows a>svg:last-child {color:var(--muted-foreground);flex:none;transition:color .18s,transform .18s;}
+[data-counselor-version="v4"] .v4-review-rows a:hover>svg:last-child {color:var(--primary);transform:translate(1px,-1px);}
+[data-counselor-version="v4"] .v4-review-column .v4-today-clear {align-items:flex-start;text-align:left;padding:10px 0;}
+[data-counselor-version="v4"] .v4-review-column .v4-today-clear p {max-width:24ch;}
+
+/* Most Played Career Simulations: v5's three cards, v4's section head */
+[data-counselor-version="v4"] .v4-home-sims {margin-top:40px;--rail-bleed:16px;}
+/* tablets: three across left each card ~250px wide (the title ran into the
+   rank badge at 820); two show and the third peeks, as a sideways rail */
+@media (min-width:640px) and (max-width:1023px){
+ [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm {display:flex!important;flex-wrap:nowrap!important;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:-26px;padding-inline:26px;padding-bottom:4px;}
+ [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm::-webkit-scrollbar {display:none;}
+ [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm>* {flex:none;width:46%;scroll-snap-align:start;scroll-margin-inline:26px;}
 }
-/* side by side on tablets (they fit); one column only on phones */
+
+/* tablets: the hero keeps its two sides; the figures and the picker share
+   one row; the two Home blocks sit side by side (they fit) */
+@media (max-width:1100px){
+ [data-counselor-version="v4"] .v4-home-figure {padding:6px 18px 6px 14px;}
+ [data-counselor-version="v4"] .v4-home-figure strong {font-size:34px;}
+ [data-counselor-version="v4"] .v4-home-figure>span {font-size:12.5px;}
+ [data-counselor-version="v4"] .v4-review-column {padding-left:18px;}
+ [data-counselor-version="v4"] .v4-review-total strong {font-size:48px;}
+}
 @media (min-width:768px) and (max-width:1023px){ [data-counselor-version="v4"] .v4-daily-grid {grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)!important;gap:16px!important;} }
-@media (max-width:767px){ [data-counselor-version="v4"] .v4-daily-grid {grid-template-columns:minmax(0,1fr)!important;} }
+/* phones: greeting, briefing, the two buttons at equal width, the next
+   meeting, then the figures two by two with the picker above them; Pending
+   Reviews loses its side hairline and sits under My Next Conversations */
+@media (max-width:767px){
+ [data-counselor-version="v4"] .v4-home-hero {grid-template-columns:minmax(0,1fr);grid-template-areas:"lead" "side" "signals";row-gap:20px;padding-bottom:22px;}
+ [data-counselor-version="v4"] .v4-home-side {align-items:stretch;padding-top:0;gap:12px;}
+ [data-counselor-version="v4"] .v4-welcome-actions {display:grid;grid-template-columns:1fr 1fr;}
+ [data-counselor-version="v4"] .v4-welcome-actions>* {justify-content:center;}
+ [data-counselor-version="v4"] .v4-home-next {align-self:flex-start;}
+ [data-counselor-version="v4"] .v4-home-signals {flex-direction:column-reverse;align-items:stretch;gap:14px;padding-top:16px;}
+ [data-counselor-version="v4"] .v4-home-figures {display:grid;grid-template-columns:1fr 1fr;row-gap:16px;}
+ [data-counselor-version="v4"] .v4-home-figure {padding:4px 12px;margin:0;}
+ [data-counselor-version="v4"] .v4-home-figure:first-child,[data-counselor-version="v4"] .v4-home-figure:nth-child(3) {border-left:0;padding-left:0;margin-left:0;}
+ [data-counselor-version="v4"] .v4-home-figure strong {font-size:32px;}
+ [data-counselor-version="v4"] .v4-home-scope {align-self:flex-start;}
+ [data-counselor-version="v4"] .v4-daily-grid {grid-template-columns:minmax(0,1fr)!important;}
+ [data-counselor-version="v4"] .v4-review-column {border-left:0;border-top:1px solid var(--v4-line);padding:22px 0 0;}
+}
 [data-counselor-version="v4"] .v4-today-rail {display:flex;flex-direction:column;gap:18px;margin-top:44px;}
 
 /* Dreamy's briefing under the greeting (9 Oct 2026): he reads first and
@@ -119,7 +183,10 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 [data-counselor-version="v4"] .v4-dreamy-brief {display:flex;align-items:flex-start;gap:12px;margin-top:2px;max-width:560px;}
 [data-counselor-version="v4"] .v4-dreamy-brief>img {flex:none;margin-top:2px;}
 [data-counselor-version="v4"] .v4-dreamy-brief ul {display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none;}
-[data-counselor-version="v4"] .v4-dreamy-brief button {display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:20px;font-weight:500;color:var(--foreground);cursor:pointer;text-align:left;}
-[data-counselor-version="v4"] .v4-dreamy-brief button svg {color:var(--muted-foreground);flex:none;}
+/* inline, so the arrow follows the last word when a line wraps (it floated
+   to the far edge on tablets and phones) */
+[data-counselor-version="v4"] .v4-dreamy-brief button {display:inline;font-size:14px;line-height:20px;font-weight:500;color:var(--foreground);cursor:pointer;text-align:left;-webkit-box-decoration-break:clone;box-decoration-break:clone;}
+[data-counselor-version="v4"] .v4-dreamy-brief ul {align-items:flex-start;}
+[data-counselor-version="v4"] .v4-dreamy-brief button svg {display:inline-block;vertical-align:-2px;margin-left:6px;color:var(--muted-foreground);}
 [data-counselor-version="v4"] .v4-dreamy-brief button:hover svg {color:var(--primary);}
 @media (max-width:640px){[data-counselor-version="v4"] .v4-dreamy-brief {margin-top:6px;}[data-counselor-version="v4"] .v4-dreamy-brief button {font-size:13.5px;}}
