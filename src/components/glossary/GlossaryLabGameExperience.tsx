@@ -1794,9 +1794,19 @@ function FitToScreen({ children, enabled, watch, compact = false }: { children: 
       }
       const need = i.offsetHeight;
       // a 2px margin keeps sub-pixel rounding from tipping the box into scroll
-      const scale = room > 0 && need > room ? Math.max(0.1, (room - 2) / need) : 1;
+      let scale = room > 0 && need > room ? Math.max(0.1, (room - 2) / need) : 1;
+      if (compact && need < room) {
+        // Grow into the room on tall screens (9 Oct 2026: the question block
+        // sat small under the HUD with a void beneath it). Capped at 1.15x,
+        // so the block keeps air around it and never reads as clutter, and by
+        // the frame's width against the activity's own width (the inner is
+        // always full width, so measure its child) so it never overflows.
+        const content = i.firstElementChild as HTMLElement | null;
+        const widthCap = content && content.offsetWidth > 0 ? b.clientWidth / content.offsetWidth : 1;
+        scale = Math.max(1, Math.min(1.15, widthCap, (room - 2) / need));
+      }
       const pull = scale < 1 ? Math.ceil(need * (1 - scale)) : 0;
-      const height = compact ? Math.min(need, room) : null;
+      const height = compact ? Math.min(Math.round(need * scale), room) : null;
       setFit((prev) => (Math.abs(prev.scale - scale) > 0.004 || prev.pull !== pull || prev.height !== height ? { scale, pull, height } : prev));
     };
     measure();
@@ -1817,7 +1827,7 @@ function FitToScreen({ children, enabled, watch, compact = false }: { children: 
   if (!enabled) return <>{children}</>;
   return (
     <div ref={box} className="glossary-fit-box" style={compact && fit.height !== null ? { flex: "none", height: fit.height } : undefined}>
-      <div ref={inner} className="glossary-fit-inner" style={fit.scale < 1 ? { transform: `scale(${fit.scale})`, marginBottom: compact ? 0 : -fit.pull } : undefined}>{children}</div>
+      <div ref={inner} className="glossary-fit-inner" style={fit.scale !== 1 ? { transform: `scale(${fit.scale})`, marginBottom: compact ? 0 : -fit.pull } : undefined}>{children}</div>
     </div>
   );
 }

@@ -1,3 +1,11 @@
+## 2026-10-09: Question screens, final: HUD pinned, activity under it, grown into the room
+
+**Why:** Chandu, after the previous entry's group-centring: "No, keep the HUD position consistent, don't keep switching. Just make sure the awkward spaces aren't there, maybe you can scale up the question part so it's not that big of a gap ... this should not cause unnecessary inconsistency with the other screens and also shouldn't cause clutter and overload. There should still be ample room to breathe."
+
+- The HUD is pinned at the top on every question type, like a status bar. The activity starts a fixed 16 to 28px under it (not centred in the leftover height, which is what pushed it low on tall screens).
+- FitToScreen now also grows the activity when there is room, capped at 1.15x and by the frame's width against the activity's own width, so it never crowds the frame and never overflows it. On short windows it still shrinks (match board on 1366x680: 0.87x, no overflow).
+- Verified on the Play-tab route at 2560x1440, 1440x900 and 1366x680: HUD at the same spot, gap 37 to 57px including the main's padding, block at 1.15x with room beneath, no document scroll.
+
 ## 2026-10-09: Question screens: HUD and activity centred as one group
 
 **Why:** Chandu, on the live 2560 build: "The gap here between the Dreamy + question-answers to the HUD is too much and it feels like there is some sort of awkwardness and the main content is not exactly centred."
