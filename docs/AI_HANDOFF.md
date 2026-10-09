@@ -1,3 +1,14 @@
+## 2026-10-10: Messages redesign with bulk actions and bulk sending
+
+**Why (Chandu):** "Messages inbox and sent are too basic. We need better design there all around. And do we have bulk action controls? Bulk email, bulk sending etc?"
+
+- **Inbox** (Superhuman, Front, Linear): unread rows bold, read rows quiet; a thread header with status, topic and milestone pills; keys J / K, X selects, E resolves, N or Enter next, Esc clears.
+- **Bulk actions:** in Needs Reply, a checkbox replaces the face on hover or focus, shift-click selects a range, select-all in the list head. The reading pane shows the selection with Mark resolved and Reply to all. Reply to all opens a review first (one note with {first}, a per-student preview, the recipient list with untick, then Send N). Nothing leaves until Done; Undo all is there.
+- **Bulk sending:** "New message" on both tabs (`MessagesBulk.tsx`): Message, Reminder, To-do or Announcement; audience by grade, status, pathway, milestone not done, or hand-picked; a "What Emma gets" preview per student; "Also send as email" (DEMO-ONLY, nothing is emailed). Writes through `addSend`, so Sent and profiles read it as before.
+- **Sent** (Intercom): an outbox strip (Sent, Reached, Read %, Replies), each batch with a read ring, Sent / Read / Replied, Nudge the N, See who, and the faces not read yet.
+- Light mode in the student glass material; panels size to content on tall screens.
+- **Open:** a bulk send stores its text with `{first}`; the student profile's send list shows it raw until it fills names in. Batch read and replied numbers are DEMO-ONLY.
+
 ## 2026-10-10: Review Canvas is the default again; a designed reply pane; light mode in the student app's material across the dashboard; Meetings calendar redesign
 
 **Why (Chandu, in order):** "why are you refusing to make the canvas the default surface on reviews again? The current size doesnt make it legible at all" (an earlier note, "the documents can be full size in the middle with scrolling", had been misread as "can't"); "the composer should be accessible and easy to use and DESIGNED properly"; "All of this needs to work on large screens and 4K ... no stupid awkward alignment and spacing on wide big tall screens"; "the light mode should follow material design etc and surface/card materials we made for the student app's light mode. It has that subtle glass tactility and light", then "surface parity for everywhere in the counselor dashboard not just that one tab"; "the shadows in the next conversations row's cards are being clipped by the row height"; "The calendar view needs better design in meetings too ... Make it POP."
