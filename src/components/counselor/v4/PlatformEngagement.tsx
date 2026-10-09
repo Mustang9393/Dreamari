@@ -9,6 +9,12 @@
 // own year picker), Dreamari Activity (four indicators, DEMO-ONLY pending
 // Usman), the ten most active students as real, openable students, and
 // Inactive 7+ Days opening its students with View, Message and Message All.
+// Her second pass, same day: the Logins chart loses its Site view ("remove
+// the tab called 'site' completely"; SiteBars and the by-site data stay
+// exported below only because v5's Analytics and the component lab draw
+// them), and Inactive 7+ Days is four tiles with the number large instead
+// of four bars ("the numbers are 2, 1, 1, 3. Does it make sense for this to
+// be a line chart? Maybe the numbers should be larger").
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useId, useLayoutEffect, useRef, useState } from "react";
@@ -188,11 +194,14 @@ export const ENGAGEMENT_YEARS: Record<"current" | "2024-2025" | "2023-2024", Yea
     bySite: [{ site: "Career Explorer", total: 591, unique: 94 }, { site: "Academic Planner", total: 364, unique: 78 }, { site: "College Finder", total: 218, unique: 57 }, { site: "Resume Builder", total: 167, unique: 44 }, { site: "Career Simulations", total: 112, unique: 38 }],
   },
 };
-type EngagementView = "day" | "month" | "student" | "site";
-const VIEWS: { key: EngagementView; label: string }[] = [{ key: "day", label: "Day" }, { key: "month", label: "Month" }, { key: "student", label: "Student" }, { key: "site", label: "Site" }];
+// No Site view in v4 (Maisha, 9 Oct 2026: "remove the tab called 'site'
+// completely"); v5's Analytics keeps its own.
+type EngagementView = "day" | "month" | "student";
+const VIEWS: { key: EngagementView; label: string }[] = [{ key: "day", label: "Day" }, { key: "month", label: "Month" }, { key: "student", label: "Student" }];
 
 /** Logins by site: total logins and unique students per part of the app,
- *  two bars a row, one scale. */
+ *  two bars a row, one scale. Drawn by v5's Analytics and the component
+ *  lab, not by this page any more (9 Oct 2026). */
 export function SiteBars({ sites }: { sites: YearData["bySite"] }) {
   const reduce = useReducedMotion();
   const max = Math.ceil(Math.max(...sites.map((s) => s.total)) / 100) * 100;
@@ -501,7 +510,6 @@ export function PlatformEngagement() {
           {view === "student" && (back === 0
             ? <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students, by logins · select one to open</span><ActiveStudents rows={active} /></>
             : <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students that year, by logins</span><RankedBars key={`student-${scope.filter.year}`} items={year.byStudent} unit="logins" /></>)}
-          {view === "site" && <SiteBars key={`site-${scope.filter.year}-${share}`} sites={year.bySite} />}
           {/* The month table closes the chart's own card (it is that chart's data). */}
           {view === "month" && (
           <div className="v4-engagement-table border-t pt-[var(--space-2)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -538,14 +546,27 @@ export function PlatformEngagement() {
          'Inactive 7+ Days' actionable: keep the V4 breakdown by grade;
          clicking Grade 12 with three inactive students immediately opens
          those three, with View Student, Message Student, Message All." It is
-         always today's roster, whatever school year is picked. */}
+         always today's roster, whatever school year is picked.
+         Four tiles, not four bars (Maisha, same day: "the numbers are 2, 1,
+         1, 3. Does it make sense for this to be a line chart? Maybe the
+         numbers should be larger"): counts this small compare as figures,
+         not as lengths. Each tile is the number, the grade, and Open. */}
       <HoverBeam strength={0.6} className="v4-engagement-checkins h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <header className="v4-card-head"><h2>Inactive 7+ Days</h2><span>Right now · {inactive.length} {inactive.length === 1 ? "student" : "students"} · select a grade</span></header>
           {inactive.length === 0 ? (
             <div className="v4-progress-empty"><Dreamy mood="celebrate" size={64}/><p><strong>Every student logged in this week.</strong><span>No one to reach out to right now.</span></p></div>
           ) : (
-          <div className="v4-checkin-grades">{checkins.map(g=><button key={g.grade} disabled={!g.students.length} onClick={()=>setDrill({title:`Grade ${g.grade}: Inactive 7+ Days`,subtitle:sub(`${g.students.length} ${g.students.length===1?"student":"students"} with no activity for 7+ days`),students:g.students.map(s=>({s,note:lastActiveLabel(s.lastActive)}))})}><span>Grade {g.grade}</span><span className="v4-checkin-track"><i style={{width:`${g.students.length/Math.max(1,...checkins.map(x=>x.students.length))*100}%`}}/></span><strong>{g.students.length}</strong><ArrowUpRight size={14}/></button>)}</div>
+          <div className="v4-inactive-tiles" role="group" aria-label="Inactive students by grade">
+            {checkins.map((g) => (
+              <button key={g.grade} type="button" disabled={!g.students.length} className="v4-inactive-tile dm-quiet group" aria-label={`Grade ${g.grade}: ${g.students.length} inactive 7+ days. Open them`}
+                onClick={() => setDrill({ title: `Grade ${g.grade}: Inactive 7+ Days`, subtitle: sub(`${g.students.length} ${g.students.length === 1 ? "student" : "students"} with no activity for 7+ days`), students: g.students.map((s) => ({ s, note: lastActiveLabel(s.lastActive) })) })}>
+                <strong><CountUp value={g.students.length} /></strong>
+                <span className="v4-inactive-grade">Grade {g.grade}</span>
+                <span className="v4-inactive-open">Open<Go kind="open" /></span>
+              </button>
+            ))}
+          </div>
           )}
         </div>
       </HoverBeam>

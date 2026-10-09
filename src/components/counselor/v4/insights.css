@@ -232,6 +232,25 @@ html.dark [data-counselor-version="v4"] .v4-opportunity-wash { opacity: .26; fil
   [data-counselor-version="v4"] .v4-active-track, [data-counselor-version="v4"] .v4-active-students button > svg { display: none; }
 }
 [data-counselor-version="v4"] .v4-checkin-grades > button:disabled { cursor: default; opacity: .55; }
+/* Inactive 7+ Days as tiles (Maisha, 9 Oct 2026: "the numbers are 2, 1, 1,
+   3 ... Maybe the numbers should be larger"): one row of four, the count
+   large, the grade under it, Open under that. Equal heights from the grid;
+   two across on a phone. A tile's hover fill is its own border, never a
+   fill hugging the number. */
+[data-counselor-version="v4"] .v4-inactive-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+[data-counselor-version="v4"] .v4-inactive-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 112px; padding: 16px 18px; border: 1px solid var(--glass-border); border-radius: var(--radius-md); text-align: left; cursor: pointer; }
+[data-counselor-version="v4"] .v4-inactive-tile:disabled { cursor: default; opacity: .55; }
+[data-counselor-version="v4"] .v4-inactive-tile strong { font-family: var(--font-display); font-size: 32px; line-height: 1; font-weight: 600; color: var(--foreground); font-variant-numeric: tabular-nums; }
+[data-counselor-version="v4"] .v4-inactive-grade { font-size: 13px; font-weight: 600; color: var(--foreground); }
+[data-counselor-version="v4"] .v4-inactive-open { display: inline-flex; align-items: center; gap: 2px; margin-top: auto; padding-top: 6px; font-size: 12px; font-weight: 600; color: var(--primary); }
+[data-counselor-version="v4"] .v4-inactive-open svg { color: var(--primary); }
+[data-counselor-version="v4"] .v4-inactive-tile:disabled .v4-inactive-open { color: var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-inactive-tile:disabled .v4-inactive-open svg { color: var(--muted-foreground); }
+@media (max-width: 640px) {
+  [data-counselor-version="v4"] .v4-inactive-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-counselor-version="v4"] .v4-inactive-tile { min-height: 100px; padding: 14px 16px; }
+  [data-counselor-version="v4"] .v4-inactive-tile strong { font-size: 28px; }
+}
 
 /* ---------- My Impact ---------- */
 

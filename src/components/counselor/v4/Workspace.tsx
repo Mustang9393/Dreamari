@@ -7,7 +7,8 @@ import { SlidersHorizontal, Sun, Moon } from "lucide-react";
 import type { CounselorView } from "../roles";
 
 const areas: WorkspaceArea[] = [
-  { label: "Today", views: ["overview"] },
+  // "Rename the 'Today' tab to Home" (Maisha, 9 Oct 2026).
+  { label: "Home", views: ["overview"] },
   // Maisha's consolidation (9 Oct 2026): Students is Directory and
   // Milestones; Review moved to Prepare; Check-ins left the demo.
   { label: "Students", views: ["students", "milestones", "progress", "academics", "applications", "financial-aid", "counselors", "team", "capacity"] },
@@ -17,8 +18,11 @@ const areas: WorkspaceArea[] = [
   // "In v4 change 'Workspace' to 'Prepare.' This should be the place where
   // counselors go to review, communicate, prepare for meetings, and
   // complete their work" (Maisha, 9 Oct 2026).
-  { label: "Prepare", views: ["review-queue", "meetings", "connect", "productivity", "time"] },
-  { label: "Insights", views: ["readiness", "insights", "engagement", "impact", "school-impact", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
+  // Tab order is Maisha's (9 Oct 2026): Prepare "Meetings → Review →
+  // Messages → Assist"; Insights "College & Career → Readiness →
+  // Engagement → My Impact". roles.ts sorts the menu the same way.
+  { label: "Prepare", views: ["meetings", "review-queue", "connect", "productivity", "time"] },
+  { label: "Insights", views: ["insights", "readiness", "engagement", "impact", "school-impact", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
 ];
 // The leaders' own areas (6 Oct 2026): the counselor's four groups put a
 // principal's Counseling Team under "Students" and every report under
@@ -33,13 +37,13 @@ const FiltersSlot = createContext<React.ReactNode>(null);
 export const useTodayFilters = () => useContext(FiltersSlot);
 export const LEADER_AREAS: Record<"School Leader" | "District Leader", WorkspaceArea[]> = {
   "School Leader": [
-    { label: "Today", views: ["overview"] },
+    { label: "Home", views: ["overview"] },
     { label: "Students", views: ["leader-progress", "postsecondary"] },
     { label: "Team", views: ["team"] },
     { label: "Reports", views: ["leader-reports"] },
   ],
   "District Leader": [
-    { label: "Today", views: ["overview"] },
+    { label: "Home", views: ["overview"] },
     { label: "Schools", views: ["school-performance", "capacity"] },
     { label: "Students", views: ["outcomes"] },
     { label: "Reports", views: ["district-reports"] },
@@ -53,9 +57,10 @@ export const LEADER_AREAS: Record<"School Leader" | "District Leader", Workspace
 // words, please capitalize the first letter of each main word".
 // 9 Oct 2026 (Maisha): "Directory", not "Student Directory" ("no need to
 // repeat the word 'student' since that's already the name of the tab");
-// Connect is Messages, the review desk is Reviews, Insights' first tab is
-// Readiness and the career page is College & Career.
-const names: Partial<Record<CounselorView,string>> = {overview:"Today",students:"Directory",milestones:"Milestones","review-queue":"Reviews",meetings:"Meetings",connect:"Messages",productivity:"Assist",progress:"Milestones",readiness:"Readiness",insights:"College & Career",explore:"Explore",engagement:"Engagement",impact:"My Impact","school-impact":"School Impact",counselors:"Counselors",settings:"Preferences","leader-progress":"Student Progress",postsecondary:"Career & Postsecondary",team:"Counseling Team","leader-reports":"Reports","school-performance":"School Performance",outcomes:"Student Outcomes",capacity:"Counseling Capacity","district-reports":"Reports"};
+// Connect is Messages, the review desk is Review (her word, 9 Oct 2026:
+// "Meetings → Review → Messages → Assist"), the first tab is Home and the
+// career page is College & Career.
+const names: Partial<Record<CounselorView,string>> = {overview:"Home",students:"Directory",milestones:"Milestones","review-queue":"Review",meetings:"Meetings",connect:"Messages",productivity:"Assist",progress:"Milestones",readiness:"Readiness",insights:"College & Career",explore:"Explore",engagement:"Engagement",impact:"My Impact","school-impact":"School Impact",counselors:"Counselors",settings:"Preferences","leader-progress":"Student Progress",postsecondary:"Career & Postsecondary",team:"Counseling Team","leader-reports":"Reports","school-performance":"School Performance",outcomes:"Student Outcomes",capacity:"Counseling Capacity","district-reports":"Reports"};
 
 // One line under each page title that says what the page is for, in the
 // counselor's own voice (Maisha: "When there is a new tab, there is usually
@@ -69,7 +74,9 @@ const purposes: Partial<Record<CounselorView,string>> = {
   progress:"Track every milestone. See who needs support. Take action.",
   "review-queue":"Student submissions waiting on me. Read, comment, and approve in one place.",
   meetings:"Who I am meeting this week, and who may need a meeting next.",
-  connect:"Student questions, messages, and announcements to my school, in one inbox.",
+  // Maisha's own line (9 Oct 2026): "Update the description to: 'Student
+  // questions and announcements in one space.'"
+  connect:"Student questions and announcements in one space.",
   readiness:"Are my students prepared for what comes next?",
   productivity:"Generate high-quality first drafts for routine counseling tasks. Review, edit, and approve before use.",
   insights:"Where my students are interested in going, so I can plan speakers, visits, and programs they will care about.",
@@ -91,6 +98,12 @@ const purposes: Partial<Record<CounselorView,string>> = {
 
 
 
+// Pages that drop the "Students / Lincoln High School" overline above
+// their title (Maisha, 9 Oct 2026: "Remove the 'Students / Lincoln High
+// School' breadcrumb above Milestones"). Milestones only, in both its
+// readings; every other page keeps it.
+const NO_OVERLINE = new Set<CounselorView>(["milestones", "progress"]);
+
 export function Workspace({active,items,children,search,filters,account,org,theme,onTheme,showTitle=true,areaSet=areas}: {
  active:CounselorView;items:{view:CounselorView;label:string}[];children:React.ReactNode;search:React.ReactNode;filters:React.ReactNode;account:React.ReactNode;org:string;theme:string;onTheme:()=>void;showTitle?:boolean;areaSet?:WorkspaceArea[];
 }) {
@@ -105,7 +118,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
            built exactly like the app's own Wordmark (chrome.tsx): the
            logo-mark SVG as a currentColor mask, DREAMARI in the display face.
            "Counselor" stays as the quiet caption, as v2's "Command Center". */}
-        <Link href="/counselor?view=overview&v=4" aria-label="Dreamari Counselor, Today" className="v4-brand dm-link" style={{ color: "var(--foreground)" }}>
+        <Link href="/counselor?view=overview&v=4" aria-label="Dreamari Counselor, Home" className="v4-brand dm-link" style={{ color: "var(--foreground)" }}>
           <span className="flex flex-col gap-[3px]">
             <span className="flex items-center gap-[var(--space-1)]">
               <span aria-hidden className="h-[13px] w-[23px] flex-none" style={{ background: "currentColor", maskImage: "url(/images/app/logo-mark.svg)", WebkitMaskImage: "url(/images/app/logo-mark.svg)", maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat" }} />
@@ -120,7 +133,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
    <div className="v4-nav-context"><nav className="v4-secondary-nav dm-scroll" aria-label="Tools in this area">{area && area.items.length>1?area.items.map(i=><Link key={i.view} href={`/counselor?view=${i.view}&v=4`} aria-current={active===i.view?"page":undefined}>{names[i.view]??i.label}</Link>):<span className="v4-org">{org}</span>}</nav><div className="v4-search">{search}</div></div>
   </header>
   <main id="main" className={`v4-main v4-view-${active}`}>
-   {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div><span className="v4-overline">{area?.label??"My Workspace"}<span aria-hidden> / </span>{org}</span><h1>{title}</h1>{purposes[active]&&<p className="v4-page-purpose">{purposes[active]}</p>}</div><div className="v4-page-controls">{filters}</div></div>}
+   {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div>{!NO_OVERLINE.has(active)&&<span className="v4-overline">{area?.label??"My Workspace"}<span aria-hidden> / </span>{org}</span>}<h1>{title}</h1>{purposes[active]&&<p className="v4-page-purpose">{purposes[active]}</p>}</div><div className="v4-page-controls">{filters}</div></div>}
    <div className="v4-content"><FiltersSlot.Provider value={active==="overview"?filters:null}>{children}</FiltersSlot.Provider></div>
    <footer className="v4-workspace-footer"><span>Dreamari</span></footer>
   </main>

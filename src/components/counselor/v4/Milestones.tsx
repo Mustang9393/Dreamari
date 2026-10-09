@@ -33,6 +33,19 @@
 // but it is now a short fixed-width meter beside the percentage, one
 // column that lines up down the card, and the rows are hairline rows in
 // one card per grade instead of a boxed card each.
+//
+// Maisha's second pass (9 Oct 2026):
+// - no "Students / Lincoln High School" breadcrumb over the title (the
+//   Workspace shell skips it for this page);
+// - on All Grades the four summary figures are larger, and the Cohort
+//   Pulse grade lines are gone ("Remove the grade-specific progress bar
+//   breakdown ... from the 'All Grades' view. This information should
+//   appear only when an individual grade is selected"); a picked grade
+//   shows its own full bar and counts in the summary card instead;
+// - Bars | Donuts, a switch at the top right of each grade's card ("a
+//   view toggle for the milestone breakdown ... between the current
+//   line/bar view and a donut chart view, as discussed during our call").
+//   One setting for the page, remembered in localStorage.
 
 import { createElement, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -41,10 +54,12 @@ import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { createLocalRecord } from "@/lib/localRecord";
 import { useCounselorFilters, type GradeFilter } from "../shell";
 import { Listbox } from "./Listbox";
 import { Go } from "./chips";
-import { SegBar } from "./milestoneViz";
+import { Segmented } from "./viz";
+import { MilestoneRing, SegBar, countsLine } from "./milestoneViz";
 import { MilestoneDrawer } from "./MilestoneDrawer";
 import { MilestonesByStudent, type StudentStatusFilter } from "./MilestonesByStudent";
 import { GRADES, buildModel, milestoneIcon, needsHelp, pctDone, reviewHref, reviewHrefIds, sumCounts, typeLabel, type Grade, type MilestoneRow } from "./milestonesModel";
@@ -52,7 +67,13 @@ import { SubTabs } from "./SubTabs";
 import "./milestones.css";
 
 type Mode = "milestone" | "student";
+type Viz = "bars" | "donuts";
 const GRADE_OPTIONS = ["All Grades", "9", "10", "11", "12"];
+// The Bars | Donuts choice is one setting for the page, kept across visits
+// (the app's localStorage record idiom: a stable snapshot, the server and
+// the first client paint both read the fallback).
+const VIZ_RECORD = createLocalRecord<Viz>("dreamari:milestones-viz", "bars");
+const VIZ_OPTIONS: { key: Viz; label: string }[] = [{ key: "bars", label: "Bars" }, { key: "donuts", label: "Donuts" }];
 
 export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   const router = useRouter();
@@ -76,6 +97,9 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   // page becomes too long and repetitive"; 35 rows stacked was that page).
   const [openGrades, setOpenGrades] = useState<Set<Grade>>(() => new Set<Grade>([9]));
   const toggleGrade = (g: Grade) => setOpenGrades((prev) => { const next = new Set(prev); if (next.has(g)) next.delete(g); else next.add(g); return next; });
+  const storedViz = VIZ_RECORD.useValue();
+  const viz: Viz = storedViz === "donuts" ? "donuts" : "bars";
+  const setViz = (v: Viz) => VIZ_RECORD.write(v);
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const showCounselor = account.role === "Lead Counselor";
   const roster = useReviewedRoster();
@@ -86,10 +110,8 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   const students = model.students.filter((r) => grades.includes(r.s.grade as Grade));
   const counts = sumCounts(rows);
   const needHelp = students.filter((r) => needsHelp(r.s)).length;
-  const pulse = GRADES.map((g) => {
-    const c = sumCounts(model.rows[g]);
-    return { g, counts: c, pct: pctDone(c), help: model.students.filter((r) => r.s.grade === g && needsHelp(r.s)).length, n: model.students.filter((r) => r.s.grade === g).length };
-  });
+  // each grade's percentage, for the section heads on All Grades
+  const pulse = GRADES.map((g) => ({ g, pct: pctDone(sumCounts(model.rows[g])) }));
   const opened = openRow ? model.rows[openRow.grade].find((r) => r.item.id === openRow.id) ?? null : null;
 
   const exportCsv = () => {
@@ -124,7 +146,9 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
       </div>
 
       <section aria-label="Summary" className="v4-ms-overview v4-surface">
-        <dl className="v4-ms-summary">
+        {/* the figures step up on All Grades ("slightly increase the size
+           of the summary metrics ... for better visibility", Maisha) */}
+        <dl className={`v4-ms-summary ${gradeFilter === "All Grades" ? "is-all" : ""}`}>
           <div><dt>Students</dt><dd>{students.length}</dd></div>
           <div><dt>Milestones</dt><dd>{rows.length}</dd></div>
           <div><dt>Complete</dt><dd>{pctDone(counts)}%</dd></div>
@@ -139,21 +163,17 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
             </dd>
           </div>
         </dl>
-        {/* Cohort Pulse (Maisha: "only when All Grades is selected ... a
-           thin segmented line or compact indicator, not anonymous dots").
-           One short line per grade over its bar, no heading: the four
-           lines read as a group on their own. Each grade opens itself. */}
-        {gradeFilter === "All Grades" && (
-          <ul className="v4-ms-pulse" aria-label="Cohort Pulse">
-            {pulse.map((p) => (
-              <li key={p.g}>
-                <button type="button" onClick={() => setGradeFilter(p.g)} aria-label={`Grade ${p.g}: ${p.pct}% complete, ${p.help} need attention. Show Grade ${p.g}`}>
-                  <span className="v4-ms-pulse-line"><b>Grade {p.g}</b><span>{p.pct}%</span>{p.help > 0 && <span className="is-help">{p.help} need attention</span>}</span>
-                  <SegBar counts={p.counts} label={`Grade ${p.g}`} />
-                </button>
-              </li>
-            ))}
-          </ul>
+        {/* One grade picked: that grade's bar with all four states and the
+           counts behind it, under a hairline. The grade lines left All
+           Grades (Maisha: "This information should appear only when an
+           individual grade is selected"); the grade sections below already
+           carry each grade's percentage. The line shows the breakdown, not
+           the percentage again (the Complete figure above says it once). */}
+        {gradeFilter !== "All Grades" && (
+          <div className="v4-ms-grade-line">
+            <SegBar full counts={counts} label={`Grade ${gradeFilter}`} className="is-tall" />
+            <span className="v4-ms-grade-line-counts">{countsLine(counts) || "No milestone activity yet"}</span>
+          </div>
         )}
       </section>
 
@@ -166,12 +186,24 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
               const p = pulse.find((x) => x.g === g)!;
               const waitingIds = model.rows[g].flatMap((r) => (r.key ? r.waiting.map((s) => s.id) : []));
               const open = grades.length === 1 || openGrades.has(g);
-              // one card per grade, its milestones as hairline rows
+              // one card per grade: the Bars | Donuts switch at its top
+              // right (a switch inside a card is the compact underline,
+              // never the page pill), then its milestones as hairline rows
+              // or a grid of rings
               const list = (
                 <div id={`v4-ms-grade-${g}`} className="v4-ms-card v4-surface">
-                  <ul className="v4-ms-rows">
-                    {model.rows[g].map((r) => <MilestoneModule key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
-                  </ul>
+                  <div className="v4-ms-card-head">
+                    <Segmented ariaLabel={`Grade ${g} milestone view`} value={viz} onChange={setViz} options={VIZ_OPTIONS} />
+                  </div>
+                  {viz === "donuts" ? (
+                    <ul className="v4-ms-donuts">
+                      {model.rows[g].map((r) => <MilestoneDonut key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
+                    </ul>
+                  ) : (
+                    <ul className="v4-ms-rows">
+                      {model.rows[g].map((r) => <MilestoneModule key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
+                    </ul>
+                  )}
                 </div>
               );
               if (grades.length === 1) return <section key={g} aria-label={`Grade ${g} milestones`}>{list}</section>;
@@ -219,6 +251,20 @@ function MilestoneModule({ row, onOpen, onWaiting }: { row: MilestoneRow; onOpen
         )}
       </span>
       <span className="v4-ms-row-go" aria-hidden><Go /></span>
+    </li>
+  );
+}
+
+/** One milestone as a ring (the Donuts view): the ring with the
+ *  percentage in it, the name under it, and "N waiting for you" under
+ *  that when it applies. Opens the same drawer as the row. */
+function MilestoneDonut({ row, onOpen, onWaiting }: { row: MilestoneRow; onOpen: () => void; onWaiting: () => void }) {
+  const waiting = row.key ? row.waiting.length : 0;
+  return (
+    <li onClick={onOpen} className="v4-ms-donut dm-quiet">
+      <MilestoneRing counts={row.counts} label={row.item.name} />
+      <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="v4-ms-donut-title v4-ms-name" aria-label={`${row.item.name}: ${row.pct}% complete. Open students`}>{row.item.name}</button>
+      {waiting > 0 && <button type="button" onClick={(e) => { e.stopPropagation(); onWaiting(); }} className="v4-ms-wait">{waiting} waiting for you</button>}
     </li>
   );
 }

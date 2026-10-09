@@ -31,14 +31,18 @@
 // Design budget (v2): blue plus status colors, no card tints, gradient bars.
 
 // 9 Oct 2026, Maisha's Prepare consolidation: this page is Messages, not
-// Connect. Three tabs: Inbox (student questions and conversations in one
-// list), Broadcasts (announcements to a grade, a group or the whole school,
-// plus private messages to picked students) and Sent. The Groups boards are
-// removed for now (moderation and safety); see CounselorConnect below.
+// Connect. Two tabs (her second pass, same day: "Keep only two tabs: Inbox
+// and Sent. Rename the existing 'Broadcasts' tab to 'Sent,' retaining its
+// current layout and content. Remove the existing separate 'Sent' tab."):
+// Inbox (student questions and conversations in one list) and Sent (the
+// announcements workspace and the composer, as Broadcasts was, with the old
+// Sent log's messages, reminders, to-dos and Explore shares reachable from
+// one dropdown at its top left instead of a third tab). The Groups boards
+// are removed for now (moderation and safety); see CounselorConnect below.
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Send, Check, Bell, Briefcase, ClipboardList, Landmark, Megaphone, MessageSquare } from "lucide-react";
+import { Plus, Send, Check, Bell, Briefcase, ClipboardList, Landmark, MessageSquare } from "lucide-react";
 import { Listbox } from "./Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "./chips";
@@ -553,44 +557,58 @@ function ThreadReading({ row, response, setResponse, onSend }: { row: Extract<In
 }
 
 // ---- Sent ---------------------------------------------------------------------
+// Sent is Broadcasts' layout and content (Maisha, 9 Oct 2026: "Rename the
+// existing 'Broadcasts' tab to 'Sent,' retaining its current layout and
+// content. Remove the existing separate 'Sent' tab."). The old Sent log's
+// rows (messages, reminders, to-dos, Explore shares; 8 Oct 2026 audit:
+// recorded and never shown) stay reachable from one dropdown at the top
+// left of the tab, in the same spot in both layouts: Announcements shows
+// the announcement list beside the open one; any other kind shows that
+// kind's rows in one card.
 
-type SentKind = "message" | "reminder" | "todo" | "announcement" | "share";
-type SentRow = { id: string; at: string; kind: SentKind; label: string; icon: typeof Bell; text: string; audience: string; studentIds: string[]; open?: () => void; openLabel?: string };
-const SENT_FILTERS: { value: "all" | SentKind; label: string }[] = [
-  { value: "all", label: "Everything sent" },
+type SentKind = "announcement" | "message" | "reminder" | "todo" | "share";
+type SentRow = { id: string; at: string; kind: Exclude<SentKind, "announcement">; label: string; icon: typeof Bell; text: string; audience: string; studentIds: string[]; open?: () => void; openLabel?: string };
+const SENT_KINDS: { value: SentKind; label: string }[] = [
+  { value: "announcement", label: "Announcements" },
   { value: "message", label: "Messages" },
   { value: "reminder", label: "Reminders" },
   { value: "todo", label: "To-dos" },
-  { value: "announcement", label: "Announcements" },
   { value: "share", label: "Shared from Explore" },
 ];
 const SEND_LABEL: Record<"message" | "reminder" | "todo", { label: string; icon: typeof Bell }> = { message: { label: "Message", icon: MessageSquare }, reminder: { label: "Reminder", icon: Bell }, todo: { label: "To-do", icon: ClipboardList } };
 const shortDay = (iso: string) => new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
-/** Everything that went out from the dashboard in one list, newest first
- *  (8 Oct 2026 audit: messages, reminders, to-dos and Explore shares were
- *  recorded and never shown). A row opens who it went to. */
-function SentPanel({ announcements, onOpenAnnouncement, onMessage }: { announcements: Announcement[]; onOpenAnnouncement: (id: string) => void; onMessage: (ids: string[]) => void }) {
+/** Everything but announcements that went out from the dashboard, newest
+ *  first: messages, reminders and to-dos (counselorCasefile), one-to-one
+ *  messages (counselorMessages) and Explore shares (counselorShares). */
+function useSentRows(): SentRow[] {
   const sends = useSends();
   const shares = useShares();
   const threads = useMessages().threads;
-  const roster = useReviewedRoster();
-  const [filter, setFilter] = useState<"all" | SentKind>("all");
-  const [drill, setDrill] = useState<Drill | null>(null);
-  const rows = useMemo<SentRow[]>(() => [
+  return useMemo<SentRow[]>(() => [
     ...sends.map((s) => ({ id: s.id, at: s.at, kind: s.kind, ...SEND_LABEL[s.kind], text: s.due ? `${s.text} Due ${shortDay(s.due)}.` : s.text, audience: s.audience, studentIds: s.studentIds })),
     // one-to-one messages from a student page or brief (v5's thread store)
     ...threads.flatMap((t) => t.messages.map((m, i) => ({ id: `${t.studentId}-${i}`, at: m.at, kind: "message" as const, ...SEND_LABEL.message, text: m.text, audience: t.name, studentIds: [t.studentId] }))),
-    ...announcements.map((a) => { const [to, sent] = a.to.split(" · Sent: "); return { id: a.id, at: `${sent}T12:00:00`, kind: "announcement" as const, label: "Announcement", icon: Megaphone, text: a.title, audience: to, studentIds: [], open: () => onOpenAnnouncement(a.id) }; }),
     ...shares.map((sh) => {
       const career = sh.kind === "career" ? ALL_CATALOG_CAREERS.find((c) => c.title === sh.title) : undefined;
       const school = sh.kind === "school" ? COLLEGES.find((c) => c.slug === sh.ref) : undefined;
       return { id: sh.id, at: sh.at, kind: "share" as const, label: sh.kind === "career" ? "Career shared" : sh.kind === "school" ? "School shared" : "Shared", icon: sh.kind === "school" ? Landmark : Briefcase, text: sh.title, audience: `${sh.studentIds.length} student${sh.studentIds.length === 1 ? "" : "s"}`, studentIds: sh.studentIds, open: career ? () => openCareer(career) : school ? () => openSchool(school) : undefined, openLabel: `Open ${sh.title}` };
     }),
-  ].sort((a, b) => b.at.localeCompare(a.at)), [sends, shares, threads, announcements, onOpenAnnouncement]);
-  const shown = filter === "all" ? rows : rows.filter((r) => r.kind === filter);
+  ].sort((a, b) => b.at.localeCompare(a.at)), [sends, shares, threads]);
+}
+
+/** The one dropdown that picks what Sent shows, with each kind's count. */
+function SentKindPicker({ kind, onKind, counts }: { kind: SentKind; onKind: (k: SentKind) => void; counts: Record<SentKind, number> }) {
+  return <Listbox ariaLabel="What was sent" value={kind} onChange={(v) => onKind(v as SentKind)} options={SENT_KINDS.map((k) => ({ value: k.value, label: `${k.label} · ${counts[k.value]}` }))} className={LIST_FIELD} style={FIELD_STYLE} />;
+}
+
+/** One kind of sent item (not announcements) as rows in a card. A row
+ *  opens who it went to. */
+function SentPanel({ kind, onKind, counts, rows, onMessage }: { kind: Exclude<SentKind, "announcement">; onKind: (k: SentKind) => void; counts: Record<SentKind, number>; rows: SentRow[]; onMessage: (ids: string[]) => void }) {
+  const roster = useReviewedRoster();
+  const [drill, setDrill] = useState<Drill | null>(null);
+  const shown = rows.filter((r) => r.kind === kind);
   const openRow = (r: SentRow) => {
-    if (r.kind === "announcement") { r.open?.(); return; }
     const to = r.studentIds.map((id) => roster.find((s) => s.id === id)).filter((s): s is CounselorStudent => !!s);
     setDrill({
       title: r.label, subtitle: `${shortDay(r.at)} · ${r.audience}`, lead: r.text,
@@ -601,8 +619,7 @@ function SentPanel({ announcements, onOpenAnnouncement, onMessage }: { announcem
   return (
     <div className="v4-surface flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={TINTED_CARD}>
       <div className="flex flex-wrap items-center justify-between gap-[8px] border-b p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-        <div className="w-[220px]"><Listbox ariaLabel="What was sent" value={filter} onChange={(v) => setFilter(v as "all" | SentKind)} options={SENT_FILTERS} className={LIST_FIELD} style={FIELD_STYLE} /></div>
-        <span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{shown.length} sent</span>
+        <div className="w-[240px] max-w-full"><SentKindPicker kind={kind} onKind={onKind} counts={counts} /></div>
       </div>
       <ul className="flex flex-col">
         {shown.length === 0 && <li className="px-[var(--space-5)] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing of this kind sent yet.</li>}
@@ -628,15 +645,14 @@ function SentPanel({ announcements, onOpenAnnouncement, onMessage }: { announcem
 }
 
 // Messages (9 Oct 2026, Maisha: "Replace the current Connect section with
-// 'Messages' inside Prepare. Inside Messages, keep: Inbox ..., Broadcasts
-// (announcements sent to grades, groups, or the full school), Sent
-// (previous communication)"). Three tabs, one row. Groups are gone ("Remove
-// 'Groups' as student-to-student discussion boards for now ... creates
-// moderation/safety complexity"); Questions folded into Inbox. Old links
-// still land: &tab=questions and &tab=discussions open Inbox,
-// &tab=announcements opens Broadcasts.
-type MessagesTab = "inbox" | "broadcasts" | "sent";
-const OLD_TAB: Record<string, MessagesTab> = { inbox: "inbox", questions: "inbox", discussions: "inbox", broadcasts: "broadcasts", announcements: "broadcasts", sent: "sent" };
+// 'Messages' inside Prepare"), then cut to two tabs the same day ("Keep only
+// two tabs: Inbox and Sent"). Groups are gone ("Remove 'Groups' as
+// student-to-student discussion boards for now ... creates moderation/
+// safety complexity"); Questions folded into Inbox. Old links still land:
+// &tab=questions and &tab=discussions open Inbox; &tab=broadcasts,
+// &tab=announcements and &tab=sent open Sent.
+type MessagesTab = "inbox" | "sent";
+const OLD_TAB: Record<string, MessagesTab> = { inbox: "inbox", questions: "inbox", discussions: "inbox", broadcasts: "sent", announcements: "sent", sent: "sent" };
 
 export function CounselorConnect() {
   // Opens on the Inbox (standing rule: what needs attention comes first).
@@ -644,7 +660,7 @@ export function CounselorConnect() {
   // "Message all", Engagement's inactive drill, a profile's Message,
   // Milestones' "Message this group") opens straight into a private message
   // addressed to that pathway (`&pathway=`) or those students (`&ids=`), on
-  // Broadcasts, where everything sent to more than one student starts.
+  // Sent, where everything sent to more than one student starts.
   const params = useSearchParams();
   const composeParam = params.get("compose") === "1";
   const initialPathway = params.get("pathway");
@@ -653,16 +669,21 @@ export function CounselorConnect() {
   const studentParam = params.get("studentId");
   const draftParam = params.get("draft");
   const tabParam = OLD_TAB[params.get("tab") ?? ""];
-  const [tab, setTab] = useState<MessagesTab>(composeParam ? "broadcasts" : (questionParam || studentParam) ? "inbox" : tabParam ?? "inbox");
+  const [tab, setTab] = useState<MessagesTab>(composeParam ? "sent" : (questionParam || studentParam) ? "inbox" : tabParam ?? "inbox");
   const live = useConnectLive();
   const announcements = live.announcements;
   // `n` remounts the composer when a drill asks to message a new set
   const [compose, setCompose] = useState<{ kind: "announcement" | "private"; ids: string[]; n: number } | null>(composeParam ? { kind: "private", ids: initialIds, n: 0 } : null);
   const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(null);
   const [drill, setDrill] = useState<Drill | null>(null);
+  // what Sent shows: announcements (its layout from Broadcasts) or one
+  // kind of the old Sent log
+  const [sentKind, setSentKind] = useState<SentKind>("announcement");
+  const sentRows = useSentRows();
+  const sentCounts: Record<SentKind, number> = { announcement: announcements.length, message: 0, reminder: 0, todo: 0, share: 0 };
+  for (const r of sentRows) sentCounts[r.kind]++;
   const current = announcements.find((a) => a.id === openAnnouncement) ?? announcements[0];
-  const message = (ids: string[]) => { setDrill(null); setTab("broadcasts"); setCompose({ kind: "private", ids, n: Date.now() }); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  const openAnn = (id: string) => { setTab("broadcasts"); setCompose(null); setOpenAnnouncement(id); };
+  const message = (ids: string[]) => { setDrill(null); setTab("sent"); setCompose({ kind: "private", ids, n: Date.now() }); window.scrollTo({ top: 0, behavior: "smooth" }); };
   return (
     <div className="v4-page v4-connect flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -674,25 +695,31 @@ export function CounselorConnect() {
           onChange={setTab}
           options={[
             { key: "inbox", label: "Inbox" },
-            { key: "broadcasts", label: "Broadcasts" },
             { key: "sent", label: "Sent" },
           ]}
         />
-        {tab === "broadcasts" && !compose && (
+        {tab === "sent" && !compose && (
           <button type="button" onClick={() => setCompose({ kind: "announcement", ids: [], n: Date.now() })} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
-            <Plus className="h-[14px] w-[14px]" aria-hidden /> New broadcast
+            <Plus className="h-[14px] w-[14px]" aria-hidden /> New message
           </button>
         )}
       </div>
 
       {tab === "inbox" && <InboxPanel initialQuestion={questionParam} initialStudent={studentParam} initialDraft={draftParam} />}
-      {tab === "broadcasts" && (
+      {tab === "sent" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          {compose && <MessageComposer key={compose.n} initialKind={compose.kind} initialPathway={compose.n === 0 ? initialPathway : null} initialIds={compose.ids} onCancel={() => setCompose(null)} onSendAnnouncement={(a) => { addAnnouncement(a); setCompose(null); setOpenAnnouncement(a.id); }} />}
-          {!compose && <div className="v4-broadcast-workspace"><ul className="v4-broadcast-list dm-scroll">{announcements.map(a=><AnnouncementCard key={a.id} a={a} open={current?.id===a.id} onToggle={()=>setOpenAnnouncement(a.id)}/>)}</ul>{current && <AnnouncementReading a={current} onDrill={setDrill} onMessage={message}/>}</div>}
+          {compose && <MessageComposer key={compose.n} initialKind={compose.kind} initialPathway={compose.n === 0 ? initialPathway : null} initialIds={compose.ids} onCancel={() => setCompose(null)} onSendAnnouncement={(a) => { addAnnouncement(a); setCompose(null); setSentKind("announcement"); setOpenAnnouncement(a.id); }} />}
+          {!compose && (sentKind === "announcement"
+            ? <div className="v4-broadcast-workspace">
+                <div className="flex min-w-0 flex-col gap-[10px]">
+                  <SentKindPicker kind={sentKind} onKind={setSentKind} counts={sentCounts} />
+                  <ul className="v4-broadcast-list dm-scroll">{announcements.map(a=><AnnouncementCard key={a.id} a={a} open={current?.id===a.id} onToggle={()=>setOpenAnnouncement(a.id)}/>)}</ul>
+                </div>
+                {current && <AnnouncementReading a={current} onDrill={setDrill} onMessage={message}/>}
+              </div>
+            : <SentPanel kind={sentKind} onKind={setSentKind} counts={sentCounts} rows={sentRows} onMessage={message} />)}
         </div>
       )}
-      {tab === "sent" && <SentPanel announcements={announcements} onOpenAnnouncement={openAnn} onMessage={message} />}
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );

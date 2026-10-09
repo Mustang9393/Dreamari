@@ -70,17 +70,22 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
   // Reviews, Meetings, Messages (was Connect) and Assist. Insights is
   // Readiness, College & Career, Engagement and My Impact. "Fewer tabs.
   // Less repeated information. Every function has one clear home."
+  //
+  // Tab order within Prepare and Insights (Maisha, 9 Oct 2026): "Reorder
+  // tabs to: Meetings → Review → Messages → Assist" and "Reorder tabs to:
+  // College & Career → Readiness → Engagement → My Impact". V4_VIEW_ORDER
+  // below sorts v4's menu the same way.
   "School Counselor": [
     { view: "overview" },
     { view: "students" },
     { view: "milestones" },
     { view: "explore" },
-    { view: "review-queue" },
     { view: "meetings" },
+    { view: "review-queue" },
     { view: "connect" },
     { view: "productivity" },
-    { view: "readiness" },
     { view: "insights" },
+    { view: "readiness" },
     { view: "engagement" },
     { view: "impact" },
     { view: "settings" },
@@ -91,12 +96,12 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "students" },
     { view: "milestones" },
     { view: "explore" },
-    { view: "review-queue" },
     { view: "meetings" },
+    { view: "review-queue" },
     { view: "connect" },
     { view: "productivity" },
-    { view: "readiness" },
     { view: "insights" },
+    { view: "readiness" },
     { view: "engagement" },
     { view: "school-impact" },
     { view: "settings" },
@@ -178,9 +183,15 @@ export const VIEW_GROUP: Record<CounselorView, NavGroup> = {
 };
 const VIEW_ORDER: CounselorView[] = ["overview", "school-performance", "leader-progress", "outcomes", "postsecondary", "team", "capacity", "leader-reports", "district-reports", "schools", "students", "academics", "counselors", "milestones", "review-queue", "checkins", "applications", "financial-aid", "insights", "explore", "meetings", "time", "connect", "productivity", "readiness", "progress", "engagement", "reports", "impact", "school-impact", "settings"];
 
+// v4's own order (9 Oct 2026). VIEW_ORDER above keeps v3's grouped menu
+// contiguous (Review sits in its Students group there); v4 follows Maisha's
+// tab order instead: Prepare is Meetings, Review, Messages, Assist and
+// Insights is College & Career, Readiness, Engagement, My Impact.
+const V4_VIEW_ORDER: CounselorView[] = ["overview", "school-performance", "leader-progress", "outcomes", "postsecondary", "team", "capacity", "leader-reports", "district-reports", "schools", "students", "academics", "counselors", "milestones", "progress", "checkins", "applications", "financial-aid", "explore", "meetings", "review-queue", "connect", "productivity", "time", "insights", "readiness", "engagement", "reports", "impact", "school-impact", "settings"];
+
 export function menuForRole(role: CounselorRole | "", version?: string, extras = false): RoleMenuItem[] {
   const base = ROLE_MENUS[roleOrDefault(role)];
-  if (version === "v4") return [...base].sort((a, b) => VIEW_ORDER.indexOf(a.view) - VIEW_ORDER.indexOf(b.view));
+  if (version === "v4") return [...base].sort((a, b) => V4_VIEW_ORDER.indexOf(a.view) - V4_VIEW_ORDER.indexOf(b.view));
   if (version !== "v3") return base;
   const extra = extras ? V3_EXTRA[roleOrDefault(role)] ?? [] : [];
   const all = [...base, ...extra.filter((e) => !base.some((b) => b.view === e.view))];

@@ -78,7 +78,7 @@ export const SCREEN_EMPTY: Record<CounselorView, { title: string; body: string; 
   meetings: { title: "No Meetings Booked", body: "Book one, or check Needs Outreach for who may need you.", cta: { label: "Students", view: "students" } },
   "financial-aid": { title: "No Seniors Yet", body: "Each senior's FAFSA status appears here once Grade 12 students are enrolled.", cta: { label: "Students", view: "students" } },
   academics: { title: "No School Records Yet", body: "Grades, attendance and transcripts appear once the school's SIS is connected in Settings.", cta: { label: "Settings", view: "settings" } },
-  time: { title: "Nothing Logged Yet", body: "My reviews, letters, reminders and meetings log themselves here. Add anything else from Log time at the top.", cta: { label: "Today", view: "overview" } },
+  time: { title: "Nothing Logged Yet", body: "My reviews, letters, reminders and meetings log themselves here. Add anything else from Log time at the top.", cta: { label: "Home", view: "overview" } },
   applications: { title: "No Applications Yet", body: "Seniors' colleges and school documents appear here once they add colleges to their list.", cta: { label: "Students", view: "students" } },
 };
 
