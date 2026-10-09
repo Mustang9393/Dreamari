@@ -172,7 +172,9 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
         {gradeFilter !== "All Grades" && (
           <div className="v4-ms-grade-line">
             <SegBar full counts={counts} label={`Grade ${gradeFilter}`} className="is-tall" />
-            <span className="v4-ms-grade-line-counts">{countsLine(counts) || "No milestone activity yet"}</span>
+            {/* "Checkpoints" names the unit: the strip above counts students, this
+               line counts milestone checkpoints, so 3 and 7 are both right */}
+            <span className="v4-ms-grade-line-counts">{countsLine(counts) ? `Checkpoints · ${countsLine(counts)}` : "No milestone activity yet"}</span>
           </div>
         )}
       </section>
