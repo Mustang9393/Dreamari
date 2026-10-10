@@ -1,3 +1,9 @@
+## 2026-10-10: Readiness top row restored; light-mode orbs solid
+
+**Why (Chandu):** "why did you remove the whole row that was there above the gaps row in readiness?" His earlier "I dont want those cards with numbers for readiness" meant the numbered grid cards being tried for Readiness by Grade; I misread it as the top indicator row and removed that in f02214d7.
+- **Readiness:** the four indicator tiles (tick dial, name, count, See N missing, the tile picks the list below) are back exactly as in 9d152836 (`charts/ivGauge.tsx`, `ivGauge.css`, scoped `.is-gauge`). The list header is back to its title.
+- **Glow kit:** the Orb's centre was white in light mode, so on pale cards it read as a hollow ring; light mode now uses a saturated core (`--gl-orb-core`). GlowStroke also draws a solid base under its gradient, because an objectBoundingBox gradient paints nothing on a perfectly straight path.
+
 ## 2026-10-10: Charts made of light (part 2): Engagement and My Impact
 
 **Why (Chandu):** the same rules as part 1, plus "the new weekly active daily active stuff are thin and faint to read in light mode i love them in dark mode"; "the curved sparkline is sitting too far from the stuff"; "the glows are getting clipped causing them to read like rectangular places"; "A DOT KEEPS FLYING ACROSS THE SCREEN" (Logins by Month); "IM NOT REALLY SURE WHAT THE ON TRACK REPRESENTS? ... Why are some squares dark and others light?"; "My impact was better before, the hero graph used to be a dotted rose kinda thing".

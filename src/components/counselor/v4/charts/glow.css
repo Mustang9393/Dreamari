@@ -13,6 +13,7 @@
   --gl-b1: .16; --gl-b2: .06; --gl-b3: 0;
   --gl-core: .28;
   --gl-orb-halo: .5;
+  --gl-orb-core: 55%;
   --gl-aurora: .4;
   --gl-aurora-base: .1;
   --gl-grid: color-mix(in srgb, var(--gl-blue) 16%, transparent);
@@ -24,6 +25,7 @@ html.dark [data-counselor-version="v4"] {
   --gl-b1: .5; --gl-b2: .22; --gl-b3: .09;
   --gl-core: .85;
   --gl-orb-halo: 1;
+  --gl-orb-core: 0%;
   --gl-aurora: 1;
   --gl-aurora-base: .2;
   --gl-grid: color-mix(in srgb, #8fb3ff 14%, transparent);

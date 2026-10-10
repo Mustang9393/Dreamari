@@ -1,0 +1,32 @@
+/* The Readiness indicator dials and their tile row, restored from 9d152836
+   (see ivGauge.tsx for why). Scoped to .is-gauge so the plain tile styles
+   in insightViz.css stay untouched. */
+[data-counselor-version="v4"] {
+  --v4-ig-off: color-mix(in srgb, var(--foreground) 13%, transparent);
+  --v4-ig-tint: color-mix(in srgb, var(--primary) 40%, white);
+}
+html:not(.dark) [data-counselor-version="v4"] {
+  --v4-ig-off: color-mix(in srgb, var(--foreground) 11%, transparent);
+  --v4-ig-tint: color-mix(in srgb, var(--primary) 45%, white);
+}
+[data-counselor-version="v4"] .v4-iv-gauge { position: relative; display: inline-grid; place-items: center; flex: none; }
+[data-counselor-version="v4"] .v4-iv-gauge svg { position: absolute; inset: 0; overflow: visible; }
+[data-counselor-version="v4"] .v4-iv-gauge line { transition: stroke .35s ease; }
+/* the page's one glow: a static light pool behind the selected dial */
+[data-counselor-version="v4"] .v4-iv-gauge::before { content: ""; position: absolute; inset: -14%; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 30%, transparent), transparent); opacity: 0; transition: opacity .4s ease; pointer-events: none; }
+[data-counselor-version="v4"] .v4-iv-gauge.is-active::before { opacity: 1; }
+[data-counselor-version="v4"] .v4-iv-gauge-center { position: relative; display: inline-flex; align-items: baseline; font-family: var(--font-display); font-size: 24px; line-height: 1; font-weight: 500; letter-spacing: -.02em; color: var(--foreground); }
+[data-counselor-version="v4"] .v4-iv-gauge-center small { font-size: 12px; margin-left: 1px; color: var(--muted-foreground); font-weight: 500; }
+
+[data-counselor-version="v4"] .v4-iv-tiles.is-gauge .v4-iv-tile { flex-direction: row; align-items: center; gap: 16px; padding: 16px 34px 16px 14px; }
+[data-counselor-version="v4"] .v4-iv-tiles.is-gauge .v4-iv-tile-copy { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+[data-counselor-version="v4"] .v4-iv-tiles.is-gauge .v4-iv-tile .v4-iv-see-wrap { margin-top: 0; }
+@media (max-width: 1279px) {
+  [data-counselor-version="v4"] .v4-iv-tiles.is-gauge .v4-iv-tile { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+@media (max-width: 767px) {
+  [data-counselor-version="v4"] .v4-iv-tiles.is-gauge .v4-iv-tile { padding: 14px 30px 14px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-counselor-version="v4"] .v4-iv-gauge line { transition: none !important; }
+}

@@ -51,6 +51,9 @@ export function GlowStroke({ d, color = GLOW.blue, width = 2.5, from = 0.45, qui
       <path {...common} className="gl-bloom gl-b3" strokeWidth={width * 8} />
       <path {...common} className="gl-bloom gl-b2" strokeWidth={width * 4} />
       <path {...common} className="gl-bloom gl-b1" strokeWidth={width * 2} />
+      {/* a solid base under the gradient: an objectBoundingBox gradient
+         paints nothing on a perfectly straight horizontal or vertical path */}
+      <path {...common} stroke={color} strokeOpacity={from} strokeWidth={width} />
       <path {...common} stroke={`url(#gl-s-${id})`} strokeWidth={width} />
       <path {...common} className="gl-core" strokeWidth={Math.max(0.8, width * 0.36)} />
     </g>
@@ -72,8 +75,9 @@ export function Orb({ cx, cy, r = 6, color = GLOW.blue, pulse, className }: { cx
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </radialGradient>
         <radialGradient id={`gl-ob-${id}`}>
-          <stop offset="0%" stopColor="var(--gl-hot)" />
-          <stop offset="45%" stopColor={`color-mix(in srgb, ${color} 40%, var(--gl-hot))`} />
+          {/* white-hot in dark; in light a saturated core, or it reads hollow */}
+          <stop offset="0%" stopColor={`color-mix(in srgb, ${color} var(--gl-orb-core), white)`} />
+          <stop offset="45%" stopColor={`color-mix(in srgb, ${color} calc(var(--gl-orb-core) + 40%), white)`} />
           <stop offset="100%" stopColor={color} />
         </radialGradient>
       </defs>

@@ -61,15 +61,15 @@
 // All, and a grade row opens that grade's students, needs support first.
 
 import { useMemo, useState } from "react";
-import { Info, Users } from "lucide-react";
+import { ChevronRight, Info, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { sisFor } from "@/lib/counselorSis";
 import { IconTip } from "@/components/app/IconTip";
 import { CountUp } from "./InsightCharts";
 import { DotDonut, GradeTrail, useWidth } from "./charts/insightViz";
+import { SegmentGauge } from "./charts/ivGauge";
 import { Segmented } from "./viz";
-import { Listbox } from "./Listbox";
 import { InsightStudentsPanel, StudentRows, messageHref, type StudentsDrill } from "./InsightStudents";
 import { GRADES, doneBy, pct, sisConnected, useInsightsScope } from "./insightsScope";
 import "./insights.css";
@@ -230,6 +230,38 @@ export function Readiness() {
 
   return (
     <div className="v4-page v4-readiness flex flex-col gap-[var(--space-5)]">
+      {/* Top indicators: a 40-tick dial lit to the share, the share inside
+         it, the name and the count beside it, and an (i) that says what
+         counts. A tile picks the list at the foot of the page; the picked
+         dial is the page's one glow. */}
+      <div role="group" aria-label="Readiness indicators" className={`v4-iv-tiles is-gauge ${rows.length === 3 ? "is-three" : ""}`}>
+        {rows.map((r, i) => {
+          const on = r === cur;
+          return (
+            <div key={r.m.key} className="v4-iv-cellwrap">
+              <div className={`v4-iv-tile ${on ? "is-on" : ""}`}>
+                {/* the tile picks the list at the foot of the page */}
+                <button type="button" aria-pressed={on} onClick={() => { setPick(i); setShow("support"); }} className="v4-iv-tile-hit" aria-label={`${r.m.label}: ${r.value}%, ${r.met.length} of ${r.eligible.length}${r.m.covers ? ` in ${r.m.covers}` : ""}. Show this list below`} />
+                <SegmentGauge value={r.value} active={on}><CountUp value={r.value} /><small>%</small></SegmentGauge>
+                <span className="v4-iv-tile-copy">
+                  <span className="v4-iv-tile-label">{r.m.label}</span>
+                  <span className="v4-iv-tile-note">{r.met.length} of {r.eligible.length}{r.m.covers && <><span aria-hidden> · </span><span className="whitespace-nowrap">{r.m.covers}</span></>}</span>
+                  {/* and a direct path to the students it counts */}
+                  <IconTip label={r.support.length ? `See the ${n(r.support.length)} ${MISSING[r.m.key]}` : `See the ${n(r.met.length)} ${MET[r.m.key]}`} className="v4-iv-see-wrap">
+                    <button type="button" onClick={() => openGap(r)} className="v4-iv-see" aria-label={r.support.length ? `See the ${n(r.support.length)} ${MISSING[r.m.key]}` : `See the ${n(r.met.length)} ${MET[r.m.key]}`}>
+                      See {r.support.length || r.met.length} {r.support.length ? "missing" : "students"}<ChevronRight size={13} aria-hidden />
+                    </button>
+                  </IconTip>
+                </span>
+              </div>
+              <IconTip label={r.m.info} className="v4-iv-info">
+                <button type="button" aria-label={`About ${r.m.label}`} className="v4-r2-info dm-quiet"><Info size={14} aria-hidden /></button>
+              </IconTip>
+            </div>
+          );
+        })}
+      </div>
+
       {/* Gaps: one dot per student the indicator covers, the students still
          missing it lit, in a ring (the one view since 10 Oct 2026: "I dont
          like bar graphs"). Each opens those students with Message All. */}
@@ -294,14 +326,7 @@ export function Readiness() {
       {/* The students the picked indicator counts, the part a counselor acts on. */}
       <section className="v4-surface flex flex-col gap-[var(--space-4)] border p-[var(--space-5)]">
         <header className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-          {/* the milestone picker that the top tiles used to be (10 Oct 2026,
-             Chandu: "I dont want those cards with numbers for readiness");
-             each milestone's share still shows in Gaps and Readiness by Grade */}
-          <span className="flex flex-wrap items-center gap-[var(--space-3)]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{show === "support" ? "Needs Support" : cur.m.doneWord}</h2>
-            <Listbox ariaLabel="Milestone" value={String(rows.indexOf(cur))} onChange={(v) => { setPick(Number(v)); setShow("support"); }} className="v4-grade-picker" panelStyle={{ background: "var(--card)", color: "var(--foreground)" }}
-              options={rows.map((r, i) => ({ value: String(i), label: r.m.label }))} />
-          </span>
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{show === "support" ? "Needs Support" : cur.m.doneWord}: {cur.m.label}</h2>
           <span className="flex flex-wrap items-center gap-[var(--space-3)]">
             <Segmented ariaLabel="Which students" value={show} onChange={setShow} options={[{ key: "support", label: "Needs Support", count: cur.support.length }, { key: "done", label: cur.m.doneWord, count: cur.met.length }]} />
             {listed.length > 0 && (
