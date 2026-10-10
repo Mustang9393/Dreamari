@@ -79,7 +79,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { useInsightsScope } from "./insightsScope";
 import { InsightStudentsPanel, type StudentsDrill } from "./InsightStudents";
 import { AscaAlignment, SectionTitle, UseOfTime, timeGroups, TIME_CATEGORIES, TIME_SHADE } from "./ImpactSections";
-import { DotConstellation, GoalRose, MarginMarker, TimeWaffle, WinClock, WinDots, WinGauge, WinLift, WinPath, WinStep } from "./charts/impactViz";
+import { DotConstellation, GoalRose, MarginMarker, TimeFlow, WinClock, WinFlow, WinGauge, WinLiftTrack, WinPath, WinStep } from "./charts/impactViz";
 import { ASCA_TARGET_PCT } from "@/lib/counselorTimeLog";
 import "./insights2.css";
 
@@ -360,11 +360,19 @@ function goalMargin(g: ImpactView["goals"][number]) {
 function winCard(key: WinKey, v: ImpactView): { kicker: string; hero: string; caption: string; viz: React.ReactNode } {
   const t = v.turnaround.toFixed(1);
   switch (key) {
-    case "moved": return { kicker: "Postsecondary direction", hero: String(v.moved), caption: "undecided students chose a direction this semester.", viz: <WinDots n={v.moved} /> };
+    case "moved": return { kicker: "Postsecondary direction", hero: String(v.moved), caption: "undecided students chose a direction this semester.", viz: <WinFlow moved={v.moved} still={v.exploring} /> };
     case "academic": return { kicker: "Academic plans", hero: `+${ASCA_DELTAS.academicPlan}`, caption: "points after counselor reviews.", viz: <WinStep from={v.academicPct - ASCA_DELTAS.academicPlan} to={v.academicPct} /> };
     case "senior": return { kicker: "Senior plans", hero: `${v.seniorPct}%`, caption: `${v.seniorPct >= GOAL_PCT ? "Meets" : "Nearing"} the district’s ${GOAL_PCT}% spring benchmark.`, viz: <WinGauge value={v.seniorPct} bench={GOAL_PCT} /> };
     case "turnaround": return { kicker: "Review speed", hero: `${t} days`, caption: `average review. District standard: ${REVIEW_DAYS} days.`, viz: <WinClock days={v.turnaround} standard={REVIEW_DAYS} /> };
-    case "onTrack": return { kicker: "On track", hero: `${v.onTrackPct}%`, caption: `of ${v.caseload} students. School: ${SCHOOL_AVG_ON_TRACK}%.`, viz: <WinLift ours={v.onTrackPct} school={SCHOOL_AVG_ON_TRACK} /> };
+    // 10 Oct 2026, Chandu on the old 100-cell lift waffle: "IM NOT REALLY
+    // SURE WHAT THE ON TRACK REPRESENTS? ... Why are some squares dark and
+    // others light?" The kicker now says what on track means, the caption
+    // says the lift in words, and the chart labels its own marks.
+    case "onTrack": {
+      const lift = v.onTrackPct - SCHOOL_AVG_ON_TRACK;
+      const pts = `${Math.abs(lift)} ${Math.abs(lift) === 1 ? "point" : "points"}`;
+      return { kicker: "On track to graduate", hero: `${v.onTrackPct}%`, caption: `of your ${v.caseload} students. ${lift === 0 ? "Same as the school." : `${pts} ${lift > 0 ? "above" : "below"} the school.`}`, viz: <WinLiftTrack ours={v.onTrackPct} school={SCHOOL_AVG_ON_TRACK} /> };
+    }
     case "pathway": return v.upperPct >= GOAL_PCT
       ? { kicker: "Career pathways", hero: "11–12", caption: "Grades 11–12 are above the school target.", viz: <WinPath pct={v.upperPct} target={GOAL_PCT} /> }
       : { kicker: "Career pathways", hero: `${v.upperPct}%`, caption: `of grades 11–12 have one. Target: ${GOAL_PCT}%.`, viz: <WinPath pct={v.upperPct} target={GOAL_PCT} /> };
@@ -460,7 +468,7 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
           <em className="iv-orbit-caption">on track · {v.onTrack} students</em>
         </button>
         </IconTip>
-        <div className="v4-impact-priority"><span className="v4-overline">Next step</span><strong><CountUp value={v.exploring}/></strong><span className="iv-share" aria-hidden><i className="iv-grow" style={{ width: `${pct(v.exploring, v.caseload)}%` }} /></span><p className="v4-impact-priority-label">students still exploring<br/>their next step</p><button className="v4-text-action" onClick={() => open(drills.exploring())}>View student list <Go/></button></div>
+        <div className="v4-impact-priority"><span className="v4-overline">Next step</span><strong><CountUp value={v.exploring}/></strong><p className="v4-impact-priority-label">students still exploring<br/>their next step</p><button className="v4-text-action" onClick={() => open(drills.exploring())}>View student list <Go/></button></div>
       </section>
 
       {/* 3. ASCA Alignment */}
@@ -523,7 +531,7 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
       {!live && (
         <section className={`${FLAT_CARD_CLASS} flex flex-col gap-[var(--space-3)]`} style={FLAT_CARD} aria-label="Use of Time">
           <SectionTitle title="Use of Time" info="Where the period's logged time went. ASCA asks for 80% in direct and indirect student services." unit={`${v.time.studentPct}% direct and indirect student services · ASCA target: ${ASCA_TARGET_PCT}%`} />
-          <TimeWaffle groups={v.time.groups.map((g) => ({ c: g.c, pct: g.minutes, color: TIME_SHADE[g.c] }))} target={ASCA_TARGET_PCT} label={v.time.groups.map((g) => `${g.c} ${g.pct}%`).join(", ")} />
+          <TimeFlow groups={v.time.groups.map((g) => ({ c: g.c, pct: g.minutes, color: TIME_SHADE[g.c], quiet: g.c === "Administrative Work" }))} target={ASCA_TARGET_PCT} label={v.time.groups.map((g) => `${g.c} ${g.pct}%`).join(", ")} />
           <ul className="v4-r2-legend" style={{ color: INK }}>
             {v.time.groups.map((g) => <li key={g.c}><i aria-hidden className="mr-[6px] inline-block size-[9px] rounded-[2px] align-middle" style={{ background: TIME_SHADE[g.c] }} /><span>{g.c}: {g.pct}%</span></li>)}
           </ul>

@@ -34,7 +34,7 @@ import { ChevronRight, Clock, Info } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { ASCA_TARGET_PCT, hoursLabel, type TimeEntry, type TimeSummary } from "@/lib/counselorTimeLog";
 import { openLog } from "../v5/LogSheet";
-import { SlopeGraph, TimeWaffle } from "./charts/impactViz";
+import { SlopeGraph, TimeFlow } from "./charts/impactViz";
 import { Go } from "./chips";
 import type { StudentsDrill } from "./InsightStudents";
 import "./insights2.css";
@@ -109,7 +109,7 @@ export function UseOfTime({ week, onDrill }: { week: TimeSummary; onDrill: (d: S
           <em className={`v4-time-target ${met ? "is-met" : ""}`}>ASCA target: {ASCA_TARGET_PCT}%{met ? " · met" : ""}</em>
         </div>
         <div className="flex min-w-0 flex-col gap-[var(--space-4)]">
-          <TimeWaffle groups={groups.map((g) => ({ c: g.c, pct: g.minutes, color: TIME_SHADE[g.c] }))} target={ASCA_TARGET_PCT} active={lit} onActive={setLit}
+          <TimeFlow groups={groups.map((g) => ({ c: g.c, pct: g.minutes, color: TIME_SHADE[g.c], quiet: g.c === "Administrative Work" }))} target={ASCA_TARGET_PCT} active={lit} onActive={setLit}
             onPick={(c) => { const g = groups.find((x) => x.c === c); if (g && g.minutes) open(g); }}
             label={`${groups.map((g) => `${g.c} ${hoursLabel(g.minutes)}`).join(", ")}. ASCA target ${ASCA_TARGET_PCT}%`} />
           <ul className="v4-time-legend" onPointerLeave={() => setLit(null)}>

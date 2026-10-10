@@ -12,23 +12,37 @@
 //     who was active then: "everything needs drilldowns that are logical"). Layered gradient areas on one
 //     zero-based scale, a scrubber that snaps to the nearest period, a light
 //     beam on the selected period, the latest point lit. The page's only glow.
-//   - KpiSpark: the stat tiles' trend, a shape-only sparkline with the
-//     latest month lit and the month before it marked.
-//   - DotWaffle: weekly and daily active as one dot per student, so "42 of
-//     121" reads as people, not as a bar length.
-//   - TickRing: Dreamari Activity as a dial of 40 ticks (2.5% each).
-//   - Lollipops: the top ten students on one shared, zero-based scale.
-//   - GradeDots: Inactive 7+ Days, each grade's students as dots, the
-//     inactive ones in the warning colour (the number stays large, Maisha's
-//     9 Oct ask).
+//   - KpiSpark: the stat tiles' trend, a neon curve rising to a lit orb
+//     (the glow pass's "Conversion" reference), the month before marked.
+//   - ShareLight: weekly and daily active (and each Dreamari Activity
+//     measure) as one point of light on a faint 0 to 100% hairline. They
+//     were dot grids, then cell hives; Chandu, same day: "all the grids ...
+//     are too much and too dense. Lets not do those." Weekly and
+//     daily have no history, so a trail would invent one; one point is
+//     honest.
+//   - Dreamari Activity: the four measures are independent (each is its
+//     own roll per student, a student can do any mix), so a funnel or
+//     Sankey would invent a nesting; each is a ShareLight under its figure.
+//     It was four tick dials, then cell hives; rings, bars and any layout of many
+//     small repeated marks are all out ("why is everything a ring to you?",
+//     "I dont like bar graphs", "that whole grid idea is bad").
+//   - The top ten is a clean ranked list with plain numbers: no per-row
+//     chart ("Too many things"). It was lollipops, then dot strips.
+//   - WarnLight: Inactive 7+ Days stays plain numbers (Maisha's 9 Oct ask)
+//     with one amber light per grade that has students to reach.
+//   All marks are light, not solid ("please dont give all the graphs that
+//   3d look ... i want them to be made of LIGHT"): points of light with a
+//   bright core fading to colour, no highlights or rims, and only a handful
+//   of marks per chart.
 // Blue family plus status colours only; text never wears the data colour.
 // No blur on animated layers (CROSS_BROWSER_GUARDRAILS.md): the glow is
 // stacked strokes, not a filter.
 
-import { useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { Tip } from "@/components/app/IconTip";
+import { Aurora, GLOW, GlowStroke, LightGrid, Orb } from "./glow";
 import "./engageViz.css";
 
 type Point = { label: string; total: number; unique: number; avg: number };
@@ -57,8 +71,8 @@ function niceScale(peak: number) {
   return { max, ticks: Array.from({ length: Math.round(max / step) + 1 }, (_, i) => i * step) };
 }
 
-const TOTAL = "var(--v4-chart-1)";
-const ACTIVE = "var(--v4-chart-2)";
+const TOTAL = GLOW.blue;
+const ACTIVE = GLOW.sky;
 
 /** The hero: total logins and active students over the period. */
 export function LoginsArea({ data, path, unit, onSee }: { data: Point[]; path: (p: XY[]) => string; unit: "day" | "month"; /** opens the selected period's active students */ onSee?: (p: Point) => void }) {
@@ -120,10 +134,7 @@ export function LoginsArea({ data, path, unit, onSee }: { data: Point[]; path: (
             onPointerUp={() => { if (hover !== null) setPinned(hover); }}
             onPointerLeave={() => setHover(null)}>
             <defs>
-              <linearGradient id={`ev-ta-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={TOTAL} stopOpacity=".34" /><stop offset="70%" stopColor={TOTAL} stopOpacity=".06" /><stop offset="100%" stopColor={TOTAL} stopOpacity="0" /></linearGradient>
-              <linearGradient id={`ev-aa-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={ACTIVE} stopOpacity=".26" /><stop offset="100%" stopColor={ACTIVE} stopOpacity="0" /></linearGradient>
-              <linearGradient id={`ev-tl-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor={TOTAL} stopOpacity=".55" /><stop offset="100%" stopColor={TOTAL} /></linearGradient>
-              <linearGradient id={`ev-beam-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={TOTAL} stopOpacity="0" /><stop offset="100%" stopColor={TOTAL} stopOpacity=".13" /></linearGradient>
+              <linearGradient id={`ev-beam-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={GLOW.sky} stopOpacity="0" /><stop offset="100%" stopColor={GLOW.blue} stopOpacity=".22" /></linearGradient>
             </defs>
             {ticks.map((t) => (
               <g key={t}>
@@ -131,30 +142,26 @@ export function LoginsArea({ data, path, unit, onSee }: { data: Point[]; path: (
                 <text x={left - 10} y={y(t) + 4} textAnchor="end" className="ev-tick">{t}</text>
               </g>
             ))}
+            <LightGrid xs={data.map((_, i) => x(i))} top={top - 6} bottom={base} />
             {/* the light beam on the selected period */}
             <rect x={x(index) - band * 0.26} y={top - 6} width={band * 0.52} height={base - top + 6} rx={Math.min(14, band * 0.2)} fill={`url(#ev-beam-${id})`} className="ev-beam" />
             {data.length > 1 && (
               <g className={reduce ? undefined : "ev-reveal"}>
-                <path d={area(totalD)} fill={`url(#ev-ta-${id})`} />
-                <path d={area(activeD)} fill={`url(#ev-aa-${id})`} />
-                {/* the hero glow: stacked strokes, no filter */}
-                <path d={totalD} fill="none" stroke={TOTAL} strokeOpacity=".08" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
-                <path d={totalD} fill="none" stroke={TOTAL} strokeOpacity=".16" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-                <path d={totalD} fill="none" stroke={`url(#ev-tl-${id})`} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d={activeD} fill="none" stroke={ACTIVE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <Aurora d={area(totalD)} box={{ x: left, y: top, w: plotW, h: base - top }} />
+                <Aurora d={area(activeD)} box={{ x: left, y: top, w: plotW, h: base - top }} colors={[GLOW.sky, GLOW.indigo]} strength={0.55} />
+                <GlowStroke d={activeD} color={GLOW.sky} width={2.25} />
+                <GlowStroke d={totalD} color={GLOW.blue} width={3} />
               </g>
             )}
             <line x1={x(index)} x2={x(index)} y1={top - 6} y2={base} className="ev-scrub" />
             {data.map((p, i) => i !== index && (
               <g key={p.label} className="ev-rest">
-                <circle cx={x(i)} cy={y(p.total)} r="3" fill={TOTAL} />
-                <circle cx={x(i)} cy={y(p.unique)} r="2.5" fill={ACTIVE} />
+                <circle cx={x(i)} cy={y(p.total)} r="3" style={{ stroke: GLOW.blue }} />
+                <circle cx={x(i)} cy={y(p.unique)} r="2.5" style={{ stroke: GLOW.sky }} />
               </g>
             ))}
-            {index === last && !reduce && <circle cx={x(index)} cy={ty} r="6" fill={TOTAL} className="ev-pulse" style={{ transformOrigin: `${x(index)}px ${ty}px` }} />}
-            <circle cx={x(index)} cy={ty} r="13" fill={TOTAL} opacity=".14" />
-            <circle cx={x(index)} cy={ty} r="5.5" fill={TOTAL} stroke="var(--background)" strokeWidth="2" />
-            <circle cx={x(index)} cy={y(cur.unique)} r="4.5" fill={ACTIVE} stroke="var(--background)" strokeWidth="2" />
+            <Orb cx={x(index)} cy={y(cur.unique)} r={4.5} color={GLOW.sky} />
+            <Orb cx={x(index)} cy={ty} r={7} color={GLOW.blue} pulse={index === last && !reduce} />
             <ValuePill x={x(index)} y={ty} value={cur.total} flip={flip} strong />
             <ValuePill x={x(index)} y={uy} value={cur.unique} flip={flip} />
           </svg>
@@ -206,94 +213,88 @@ function monotone(pts: XY[]) {
   return d;
 }
 
-/** A stat tile's trend: shape only, the latest month lit. */
+/** A flat series has a zero-height box, and an objectBoundingBox gradient
+ *  on a zero-height box paints nothing; a hair of slope keeps it drawn. */
+function keepDrawn(pts: XY[]) {
+  if (pts.length > 1 && pts.every((p) => Math.abs(p.y - pts[0].y) < 0.01)) pts[pts.length - 1] = { ...pts[pts.length - 1], y: pts[0].y - 0.02 };
+  return pts;
+}
+
+/** Room around a small chart for its glow: the SVG is drawn this much
+ *  larger on every side and placed back over its box (absolute, -P), so
+ *  halos and bloom never meet an edge. */
+const GLOW_PAD = 30;
+
+/** A stat tile's trend as a neon curve rising to a lit orb (the
+ *  "Conversion" reference): aurora under the line, the month before marked.
+ *  Same box as ShareLight, so the four tiles line up. */
 export function KpiSpark({ values, label }: { values: number[]; label: string }) {
-  const id = useId().replace(/:/g, "");
   const reduce = useReducedMotion();
-  const W = 132, H = 40, pad = 5;
+  const [wrap, width] = useWidth<HTMLSpanElement>();
+  const W = Math.max(40, width), H = 40, P = GLOW_PAD;
   const lo = Math.min(...values), hi = Math.max(...values);
-  const pts = values.map((v, i) => ({ x: pad + (i / Math.max(1, values.length - 1)) * (W - pad * 2), y: pad + (1 - (v - lo) / Math.max(1e-9, hi - lo)) * (H - pad * 2) }));
+  const x0 = 4, x1 = W - 8, y0 = 8, y1 = H - 6;
+  const pts = keepDrawn(values.map((v, i) => ({ x: x0 + (i / Math.max(1, values.length - 1)) * (x1 - x0), y: y0 + (1 - (v - lo) / Math.max(1e-9, hi - lo)) * (y1 - y0) })));
   // Curved, not sharp ("I liked when the engagement graphs were more
   // curved than sharp"): monotone, so the line never overshoots a month.
   const d = monotone(pts);
   const end = pts[pts.length - 1];
   const prev = pts[pts.length - 2];
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="ev-spark" role="img" aria-label={label}>
-      <defs>
-        <linearGradient id={`ev-sa-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={TOTAL} stopOpacity=".28" /><stop offset="100%" stopColor={TOTAL} stopOpacity="0" /></linearGradient>
-        <linearGradient id={`ev-sl-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor={TOTAL} stopOpacity=".25" /><stop offset="100%" stopColor={TOTAL} /></linearGradient>
-      </defs>
-      <g className={reduce ? undefined : "ev-reveal"}>
-        <path d={`${d} L${end.x} ${H} L${pts[0].x} ${H} Z`} fill={`url(#ev-sa-${id})`} />
-        <path d={d} fill="none" stroke={`url(#ev-sl-${id})`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </g>
-      {prev && <circle cx={prev.x} cy={prev.y} r="2.5" fill="var(--background)" stroke={TOTAL} strokeWidth="1.5" />}
-      <circle cx={end.x} cy={end.y} r="4" fill={TOTAL} stroke="var(--background)" strokeWidth="2" />
-    </svg>
-  );
-}
-
-/** One dot per student, the active ones filled first, column by column,
- *  so the filled share reads left to right like a bar. */
-export function DotWaffle({ n, of, label }: { n: number; of: number; label: string }) {
-  const reduce = useReducedMotion();
-  const total = Math.max(1, of);
-  const rows = total > 90 ? 4 : total > 40 ? 3 : 2;
-  const cols = Math.ceil(total / rows);
-  const S = 8;
-  return (
-    <svg viewBox={`0 0 ${cols * S} ${rows * S}`} className="ev-waffle" role="img" aria-label={label} preserveAspectRatio="xMinYMid meet">
-      {Array.from({ length: total }, (_, i) => {
-        const c = Math.floor(i / rows), r = i % rows;
-        const on = i < n;
-        return <circle key={i} cx={c * S + S / 2} cy={r * S + S / 2} r={S * 0.32} className={on ? "ev-dot is-on" : "ev-dot"} style={on && !reduce ? { animationDelay: `${c * 14}ms` } : undefined} />;
-      })}
-    </svg>
-  );
-}
-
-/** A dial of 40 ticks, 2.5% each; the filled ticks step from light to full blue. */
-export function TickRing({ pct, children, size = 92 }: { pct: number; children?: ReactNode; size?: number }) {
-  const reduce = useReducedMotion();
-  const N = 40;
-  const on = Math.round((Math.max(0, Math.min(100, pct)) / 100) * N);
-  const C = 50, R1 = 37, R2 = 47;
-  return (
-    <span className="ev-ring" style={{ width: size, height: size }}>
-      <svg viewBox="0 0 100 100" aria-hidden="true">
-        {Array.from({ length: N }, (_, i) => {
-          const a = (i / N) * Math.PI * 2 - Math.PI / 2;
-          const lit = i < on;
-          const mix = on > 1 ? Math.round(40 + (i / (on - 1)) * 60) : 100;
-          return (
-            <line key={i} x1={C + Math.cos(a) * R1} y1={C + Math.sin(a) * R1} x2={C + Math.cos(a) * R2} y2={C + Math.sin(a) * R2}
-              className={lit ? "ev-tick-mark is-on" : "ev-tick-mark"}
-              style={lit ? { stroke: `color-mix(in srgb, var(--v4-chart-1) ${mix}%, var(--v4-chart-2))`, animationDelay: reduce ? undefined : `${i * 12}ms` } : undefined} />
-          );
-        })}
-      </svg>
-      <span className="ev-ring-center">{children}</span>
+    <span ref={wrap} className="ev-chartbox" role="img" aria-label={label}>
+      {width > 0 && (
+        <svg width={W + P * 2} height={H + P * 2} style={{ left: -P, top: -P }} aria-hidden="true">
+          <g transform={`translate(${P} ${P})`}>
+            <g className={reduce ? undefined : "ev-reveal"}>
+              <Aurora d={`${d} L${end.x} ${H} L${pts[0].x} ${H} Z`} box={{ x: 0, y: 0, w: W, h: H }} strength={0.8} />
+              <GlowStroke d={d} color={TOTAL} width={2} from={0.3} />
+            </g>
+            {prev && <circle cx={prev.x} cy={prev.y} r="2" className="ev-spark-prev" />}
+            <g className="ev-orb"><Orb cx={end.x} cy={end.y} r={3.5} color={GLOW.blue} /></g>
+          </g>
+        </svg>
+      )}
     </span>
   );
 }
 
-/** Ranked counts on one zero-based scale: a stem and a dot head per row. */
-export function Lollipop({ value, max, delay = 0 }: { value: number; max: number; delay?: number }) {
+/** A share of the caseload as one point of light on a faint 0 to 100%
+ *  line: few marks, low density ("all the grids ... are too much and too
+ *  dense"). Dark: a short trail leads into the orb, fading from nothing.
+ *  Light: a solid blue trail from 0 to the value, brighter at the orb, on
+ *  a 2px base, so it reads on a pale surface. */
+export function ShareLight({ n, of, label }: { n: number; of: number; label?: string }) {
   const reduce = useReducedMotion();
-  const pct = (value / Math.max(1, max)) * 100;
+  const id = useId().replace(/:/g, "");
+  const [wrap, width] = useWidth<HTMLSpanElement>();
+  const W = Math.max(40, width), H = 40, P = GLOW_PAD, cy = 24;
+  const x0 = 4, x1 = W - 4;
+  const p = Math.max(0, Math.min(1, n / Math.max(1, of)));
+  const x = x0 + (x1 - x0) * p;
+  const lead = Math.min(x - x0, 56);
   return (
-    <span className="ev-lolly" aria-hidden>
-      <i className={reduce ? undefined : "ev-grow"} style={{ width: `${pct}%`, animationDelay: reduce ? undefined : `${delay}ms` }}><b /></i>
+    <span ref={wrap} className="ev-chartbox" role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true}>
+      {width > 0 && (
+        <svg width={W + P * 2} height={H + P * 2} style={{ left: -P, top: -P }} aria-hidden="true">
+          <defs>
+            <linearGradient id={`ev-sl-${id}`} x1={x - lead} x2={x} y1="0" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor={GLOW.sky} stopOpacity="0" /><stop offset="100%" stopColor={GLOW.sky} stopOpacity=".9" /></linearGradient>
+            <linearGradient id={`ev-st-${id}`} x1={x0} x2={Math.max(x, x0 + 1)} y1="0" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor={GLOW.blue} stopOpacity=".55" /><stop offset="100%" stopColor={GLOW.blue} /></linearGradient>
+          </defs>
+          <g transform={`translate(${P} ${P})`}>
+            <line x1={x0} x2={x1} y1={cy} y2={cy} className="ev-share-line" />
+            <line x1={x0} x2={x0} y1={cy - 4} y2={cy + 4} className="ev-share-end" />
+            <line x1={x1} x2={x1} y1={cy - 4} y2={cy + 4} className="ev-share-end" />
+            {x - x0 > 2 && <line x1={x0} x2={x} y1={cy} y2={cy} stroke={`url(#ev-st-${id})`} className={reduce ? "ev-share-trail" : "ev-share-trail ev-lead-in"} />}
+            {lead > 2 && <line x1={x - lead} x2={x} y1={cy} y2={cy} stroke={`url(#ev-sl-${id})`} strokeWidth="1.5" strokeLinecap="round" className={reduce ? "ev-share-lead" : "ev-share-lead ev-lead-in"} />}
+            <g className={reduce ? "ev-orb" : "ev-orb ev-lead-in"}><Orb cx={x} cy={cy} r={4} color={GLOW.sky} /></g>
+          </g>
+        </svg>
+      )}
     </span>
   );
 }
 
-/** A grade's students as dots, the inactive ones in the warning colour. */
-export function GradeDots({ inactive, of }: { inactive: number; of: number }) {
-  return (
-    <span className="ev-grade-dots" aria-hidden style={{ gridTemplateColumns: `repeat(${Math.ceil(Math.max(of, inactive) / 2)}, 6px)` }}>
-      {Array.from({ length: Math.max(of, inactive) }, (_, i) => <i key={i} className={i < inactive ? "is-off" : undefined} />)}
-    </span>
-  );
+/** A single amber point of light: this grade has students to reach. */
+export function WarnLight() {
+  return <span className="ev-warn-light" aria-hidden />;
 }

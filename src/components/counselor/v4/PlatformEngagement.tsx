@@ -5,13 +5,16 @@
 // now. I want you to take it to the next level ... be creative with the
 // graphs, don't be traditional, as long as they convey the information
 // sensibly." Same sections, same order, same data and controls; only the
-// visuals change (charts/engageViz.tsx): the stat tiles get a lit sparkline
-// or a dot per student, Dreamari Activity becomes four tick dials, Logins is
-// a layered glowing area with a scrubber (the page's one glow), the top ten
-// are lollipops on one scale, and Inactive 7+ Days shows each grade's
-// students as dots. Same day ("everything needs drilldowns that are
-// logical. I see graphs ... that don't do anything when I click"): the
-// weekly and daily dot grids open who was active, the Active tile's trend
+// visuals change (charts/engageViz.tsx). After the glow pass and the
+// user's same-day rules ("i want them to be made of LIGHT", "I dont like
+// bar graphs", "Please dont use the [cell shapes] anymore i hate it. Too
+// many things", "that whole grid idea is bad"), the page carries few marks: the
+// monthly tiles a neon trail to an orb, weekly, daily and each Dreamari
+// Activity measure one point of light on a faint 0 to 100% line, Logins a
+// layered glowing area with a scrubber, the top ten a plain ranked list,
+// and Inactive 7+ Days big numbers with one amber light per grade. Same
+// day ("everything needs drilldowns that are logical. I see graphs ... that don't do anything when I click"): the
+// weekly and daily lights open who was active, the Active tile's trend
 // and each logins period open that period's active students, and every
 // students mark carries a tooltip saying what it opens. The exported Sparkline, LoginsChart and SiteBars below
 // stay as they were: v5's Analytics and the component lab draw them.
@@ -35,7 +38,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { DotWaffle, GradeDots, KpiSpark, Lollipop, LoginsArea, TickRing } from "./charts/engageViz";
+import { KpiSpark, LoginsArea, ShareLight, WarnLight } from "./charts/engageViz";
 import { Segmented } from "./viz";
 import { Disclosure } from "./Disclosure";
 import { useSyncExternalStore } from "react";
@@ -122,19 +125,16 @@ function EngagementStat({ value, decimals = 0, label, series, delta, prevLabel, 
             </span>
           )}
         </span>
-        <span className="mt-auto flex items-end justify-between gap-[10px]">
-          {series ? (
-            <>
-              <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>vs {prevLabel}</span>
-              {hit(<KpiSpark values={series} label={`${label}, month by month`} />, "w-[132px] min-w-0 shrink")}
-            </>
-          ) : share ? (
-            <span className="flex w-full flex-col gap-[8px]">
-              <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{sharePct}% of {share.of} students</span>
-              {hit(<DotWaffle n={share.n} of={share.of} label={`${share.n} of ${share.of} students, one dot each`} />)}
-            </span>
-          ) : null}
-        </span>
+        {/* One structure for all four tiles (label, figure, sub-line, chart
+           directly under it, left-aligned, one width), so the row lines up. */}
+        {(series || share) && (
+          <span className="mt-auto flex w-full flex-col gap-[8px]">
+            <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{series ? `vs ${prevLabel}` : `${sharePct}% of ${share!.of} students`}</span>
+            {series
+              ? hit(<KpiSpark values={series} label={`${label}, month by month`} />)
+              : hit(<ShareLight n={share!.n} of={share!.of} label={`${share!.n} of ${share!.of} students`} />)}
+          </span>
+        )}
     </div>
   );
 }
@@ -388,7 +388,6 @@ const INDICATORS: Indicator[] = [
  *  their own lists (many of those students have graduated). */
 function ActiveStudents({ rows }: { rows: { s: CounselorStudent; count: number }[] }) {
   const router = useRouter();
-  const max = Math.max(1, ...rows.map((r) => r.count));
   return (
     <ol className="ev-leaders">
       {rows.map((r, i) => (
@@ -397,7 +396,6 @@ function ActiveStudents({ rows }: { rows: { s: CounselorStudent; count: number }
             <span className="ev-leader-rank">{String(i + 1).padStart(2, "0")}</span>
             <Avatar name={r.s.name} size={28} index={r.s.avatarIndex} />
             <span className="ev-leader-name">{r.s.name}<small>Grade {r.s.grade}</small></span>
-            <Lollipop value={r.count} max={max} delay={i * 30} />
             <strong>{r.count}</strong>
             <Go kind="open" className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100" />
           </button>
@@ -407,17 +405,15 @@ function ActiveStudents({ rows }: { rows: { s: CounselorStudent; count: number }
   );
 }
 
-/** An earlier year's top ten: the same lollipops, names only (many of
+/** An earlier year's top ten: the same plain list, names only (many of
  *  those students have graduated, so nothing opens). */
 function PastLeaders({ items }: { items: { name: string; count: number }[] }) {
-  const max = Math.max(1, ...items.map((r) => r.count));
   return (
     <ol className="ev-leaders">
       {items.map((r, i) => (
         <li key={r.name} className="ev-leader is-plain" aria-label={`${r.name}: ${r.count} logins`}>
           <span className="ev-leader-rank">{String(i + 1).padStart(2, "0")}</span>
           <span className="ev-leader-name">{r.name}</span>
-          <Lollipop value={r.count} max={max} delay={i * 30} />
           <strong>{r.count}</strong>
         </li>
       ))}
@@ -522,13 +518,12 @@ export function PlatformEngagement() {
         <header className="v4-card-head"><h2>Dreamari Activity</h2><span>Students participating</span></header>
         <div className="ev-activity">
           {indicators.map((x) => (
-            <IconTip key={x.ind.key} label={`See the ${x.did.length} students`} className="min-w-0">
+            <IconTip key={x.ind.key} label={`See the ${x.did.length} students`} className="flex min-w-0 w-full">
             <button type="button" onClick={() => openIndicator(x)} className="ev-activity-item dm-quiet group" aria-label={`${x.ind.label}: ${x.value}%, ${x.did.length} students. Show them`}>
-              <TickRing pct={x.value}><CountUp value={x.value} /><small>%</small></TickRing>
-              <span>
-                <span className="ev-activity-label">{x.ind.label}</span>
-                <span className="ev-activity-note">{x.did.length} of {roster.length}</span>
-              </span>
+              <span className="ev-activity-label">{x.ind.label}</span>
+              <strong className="ev-activity-figure"><CountUp value={x.value} /><small>%</small></strong>
+              <span className="ev-activity-note">{x.did.length} of {roster.length}</span>
+              <ShareLight n={x.did.length} of={roster.length} />
             </button>
             </IconTip>
           ))}
@@ -600,10 +595,9 @@ export function PlatformEngagement() {
             {checkins.map((g) => (
               <button key={g.grade} type="button" disabled={!g.students.length} className="v4-inactive-tile dm-quiet group" aria-label={`Grade ${g.grade}: ${g.students.length} inactive 7+ days. Open them`}
                 onClick={() => setDrill({ title: `Grade ${g.grade}: Inactive 7+ Days`, subtitle: sub(`${g.students.length} ${g.students.length === 1 ? "student" : "students"} with no activity for 7+ days`), students: g.students.map((s) => ({ s, note: lastActiveLabel(s.lastActive) })) })}>
-                <strong><CountUp value={g.students.length} /></strong>
+                <strong><CountUp value={g.students.length} />{g.students.length > 0 && <WarnLight />}</strong>
                 <span className="v4-inactive-grade">Grade {g.grade}</span>
                 <span className="ev-grade-share">of {g.size} students</span>
-                <GradeDots inactive={g.students.length} of={g.size} />
                 <span className="v4-inactive-open">Open<Go kind="open" /></span>
               </button>
             ))}
