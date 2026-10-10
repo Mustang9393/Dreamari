@@ -1,5 +1,23 @@
 "use client";
 
+// 10 Oct 2026, new chart forms (Chandu: "work on different styles for the
+// graphs etc and everything inside milestones and insights. Don't change
+// structure of the page or organisation of the pages, but please try better
+// types of graphs, more beautiful ones ... be creative with the graphs, don't
+// be traditional, as long as they convey the information sensibly"). Same
+// rows, same order, same switch, same drills; only the marks changed
+// (charts/insightViz.tsx):
+//   - Career posters gain a slim meter: the share of the students in view
+//     who saved each career (the poster chip already says how many).
+//   - Schools: the count became a strip of the students' own faces, one
+//     face per student, so the row says who as well as how many.
+//   - Majors: word chips became a treemap, each tile sized by its count;
+//     switching Saved | At their schools glides every tile to its new place.
+//   - Postsecondary Direction (forked here from SchoolPulse.tsx, which no
+//     other page used): a stacked bar became one dot per student, grouped by
+//     plan; hovering a group or its key dims the rest.
+// RankedBars and TopTen below are shared with other screens and unchanged.
+
 // DEMO-ONLY v2 fork of ../CareerCollegeInsights.tsx (24 Sept 2026). v1 stays untouched so the
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
@@ -52,11 +70,12 @@ import { openCareer, openSchool } from "../v5/ExploreSheets";
 import { schoolStudents } from "../v5/exploreData";
 import { COLLEGES, collegeImage, type College } from "@/components/colleges/data";
 import { careerById, toV5 } from "@/lib/counselorV5";
-import type { CounselorStudent } from "@/lib/counselorRoster";
+import type { CounselorStudent, PostsecondaryIntent } from "@/lib/counselorRoster";
 import type { ProfileCareer } from "@/components/profile/data";
 import type { CatalogCareer } from "@/components/app/catalog";
 import { majorPoster, programmeMajor, savedMajorsFor } from "./majors";
-import { PostsecondaryDirection } from "./SchoolPulse";
+import { useChartColors } from "./ChartColors";
+import { DotRibbon, FaceStrip, InterestMeter, Treemap, useWidth } from "./charts/insightViz";
 import "./insights.css";
 import "./insights2.css";
 import { useMemo, useState } from "react";
@@ -162,6 +181,7 @@ type Ranked<T> = { item: T; students: CounselorStudent[] };
 const EXPLORE = "/counselor?view=explore&v=4";
 const LEVEL: Record<College["level"], string> = { "Certificates": "Trade school", "Associate degrees": "2-year", "Bachelor's degrees": "4-year" };
 const n = (k: number) => `${k} ${k === 1 ? "student" : "students"}`;
+const FACE = 26;
 
 /** One row: title, one line, a switch and an "Explore all ..." link at the
  *  right, and one line of posters that scrolls sideways. No card around it
@@ -204,6 +224,7 @@ function InterestRows() {
   const { roster, all, back, scopeLabel, year } = scope;
   const [majorMode, setMajorMode] = useState<"saved" | "schools">("saved");
   const [allSchools, setAllSchools] = useState(false);
+  const [whoRef, whoW] = useWidth<HTMLSpanElement>();
   const router = useRouter();
   const [drill, setDrill] = useState<StudentsDrill | null>(null);
   const when = back === 0 ? "" : ` · end of ${year.label}`;
@@ -266,30 +287,40 @@ function InterestRows() {
       .map((x) => ({ ...x, item: { ...x.item, salary: `${x.students.length} saved` } }));
   }, [roster, back]);
 
+  // One face per student: the longest strip (the top school) sets the
+  // pitch, so every strip uses the same spacing and length means count.
+  const maxSchool = schools[0]?.students.length ?? 1;
+  const facePitch = Math.max(6, Math.min(FACE - 4, ((whoW || 240) - 44 - FACE) / Math.max(1, maxSchool - 1)));
+
+  // One treemap for both lists, keyed by major, so switching glides tiles.
+  const majorItems = majorMode === "saved"
+    ? savedMajors.map((x) => ({ key: x.item.title, label: x.item.title, value: x.students.length, aria: `${x.item.title}: ${n(x.students.length)} saved it`, tip: `See the ${n(x.students.length)} who saved it`, data: () => openSavedMajor(x) }))
+    : exploredMajors.map((x) => ({ key: x.item.title, label: x.item.title, value: x.students.length, aria: `${x.item.title}: ${n(x.students.length)} exploring a school that offers it`, tip: `See the ${n(x.students.length)} at schools offering it`, data: () => openExploredMajor(x) }));
+
   const careerRow = careers.map((c) => c.item);
   const schoolRow: College[] = schools.map((c) => c.item);
   const openCareerStudents = ({ item, students }: Ranked<ProfileCareer>) => setDrill({
-    title: item.title,
-    subtitle: sub(`${n(students.length)} saved it`),
+    title: `${n(students.length)} saved ${item.title}`,
+    subtitle: sub(`${Math.round((students.length / Math.max(1, roster.length)) * 100)}% of students in view`),
     students: students.map((s) => ({ s, note: s.careerTrack })),
     extra: { label: "Career details", onClick: () => openCareer(item, careerRow) },
   });
   const openSchoolStudents = ({ item, students }: Ranked<College>) => setDrill({
-    title: item.name,
-    subtitle: sub(`${n(students.length)} exploring it`),
+    title: `${n(students.length)} exploring ${item.name}`,
+    subtitle: sub(`${item.city}, ${item.state} · ${LEVEL[item.level]}`),
     students: students.map((s) => ({ s, note: s.postsecondaryIntent === "Undecided" ? "No plan yet" : s.postsecondaryIntent })),
     extra: { label: "School details", onClick: () => openSchool(item, schoolRow) },
   });
   const openExploredMajor = (x: (typeof exploredMajors)[number]) => setDrill({
-    title: x.item.title,
-    subtitle: sub(`${n(x.students.length)} exploring a school that offers it`),
+    title: `${n(x.students.length)} at schools offering ${x.item.title}`,
+    subtitle: sub("Exploring a school that offers it"),
     items: x.schools.slice(0, 6),
     itemsLabel: "Offered at",
     students: x.students.map((s) => ({ s, note: s.postsecondaryIntent === "Undecided" ? "No plan yet" : s.postsecondaryIntent })),
   });
   const openSavedMajor = (x: Ranked<CatalogCareer>) => setDrill({
-    title: x.item.title,
-    subtitle: sub(`${n(x.students.length)} saved it`),
+    title: `${n(x.students.length)} saved ${x.item.title}`,
+    subtitle: sub("Saved as a major"),
     students: x.students.map((s) => ({ s, note: s.careerTrack })),
   });
 
@@ -297,7 +328,13 @@ function InterestRows() {
     <>
       <PosterRow title="Most Saved Careers" sub="See who saved each career." explore="Explore all careers"
         empty={careers.length === 0 ? `No saved careers for ${scope.who} yet.` : undefined}>
-        {careers.map((c, i) => <RankedPosterCard key={c.item.id} career={c.item} rank={i + 1} chip={`${c.students.length} saved`} onClick={() => openCareerStudents(c)} />)}
+        {careers.map((c, i) => (
+          <div key={c.item.id} className={`v4-iv-poster ${i + 1 >= 10 ? "is-two" : ""}`}>
+            <RankedPosterCard career={c.item} rank={i + 1} chip={`${c.students.length} saved`} onClick={() => openCareerStudents(c)} />
+            <InterestMeter share={Math.round((c.students.length / Math.max(1, roster.length)) * 100)} onOpen={() => openCareerStudents(c)}
+              tip={`See the ${n(c.students.length)} who saved it`} aria={`${c.item.title}: ${n(c.students.length)} saved it, ${Math.round((c.students.length / Math.max(1, roster.length)) * 100)}% of students. Show them`} />
+          </div>
+        ))}
       </PosterRow>
       {/* Schools and majors in their own forms, side by side (10 Oct 2026,
          Chandu: "College and career insights is too dense. We don't need to
@@ -315,14 +352,14 @@ function InterestRows() {
             <span className="v4-r2-tools"><button type="button" onClick={() => router.push(EXPLORE)} className="v4-r2-link">Explore all schools<ArrowUpRight size={14} aria-hidden /></button></span>
           </header>
           {schools.length === 0 ? <p className="v4-cc-empty">No one in {scope.who} is looking at schools yet. Juniors and seniors start this step.</p> : <>
-            <ol className="v4-cc-schools">
-              {schools.slice(0, allSchools ? schools.length : 5).map((c) => {
+            <ol className="v4-iv-schools">
+              {schools.slice(0, allSchools ? schools.length : 5).map((c, i) => {
                 const img = collegeImage(c.item);
-                return <li key={c.item.slug}><button type="button" onClick={() => openSchoolStudents(c)} className="v4-cc-school dm-quiet" aria-label={`${c.item.name}: ${n(c.students.length)} exploring it`}>
-                  <span className="v4-cc-school-photo" style={img ? { backgroundImage: `url(${img})` } : undefined} aria-hidden />
-                  <span className="v4-cc-school-copy"><strong>{c.item.name}</strong><small>{c.item.city}, {c.item.state} · {LEVEL[c.item.level]}</small></span>
-                  <span className="v4-cc-count"><b>{c.students.length}</b> {c.students.length === 1 ? "student" : "students"}</span>
-                </button></li>;
+                return <li key={c.item.slug}><IconTip label={`See the ${n(c.students.length)} exploring it`} className="w-full"><button type="button" onClick={() => openSchoolStudents(c)} className="v4-iv-school" aria-label={`${c.item.name}: ${n(c.students.length)} exploring it. Show them`}>
+                  <span className="v4-iv-school-photo" style={img ? { backgroundImage: `url(${img})` } : undefined} aria-hidden />
+                  <span className="v4-iv-school-copy"><strong>{c.item.name}</strong><small>{c.item.city}, {c.item.state} · {LEVEL[c.item.level]}</small></span>
+                  <span className="v4-iv-school-who" ref={i === 0 ? whoRef : undefined}><FaceStrip students={c.students} pitch={facePitch} size={FACE} /><b aria-hidden>{c.students.length}</b></span>
+                </button></IconTip></li>;
               })}
             </ol>
             <ShowAll total={schools.length} shown={5} open={allSchools} onToggle={() => setAllSchools((v) => !v)} />
@@ -335,9 +372,52 @@ function InterestRows() {
           </header>
           {(majorMode === "saved" ? savedMajors : exploredMajors).length === 0
             ? <p className="v4-cc-empty">{majorMode === "saved" ? `No saved majors for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet.`}</p>
-            : <ul className="v4-cc-chips">{majorMode === "saved"
-              ? savedMajors.map((x) => <li key={x.item.title}><button type="button" onClick={() => openSavedMajor(x)} className="v4-cc-chip dm-quiet" aria-label={`${x.item.title}: ${n(x.students.length)} saved it`}><span>{x.item.title}</span><b>{x.students.length}</b></button></li>)
-              : exploredMajors.map((x) => <li key={x.item.title}><button type="button" onClick={() => openExploredMajor(x)} className="v4-cc-chip dm-quiet" aria-label={`${x.item.title}: ${n(x.students.length)} exploring a school that offers it`}><span>{x.item.title}</span><b>{x.students.length}</b></button></li>)}</ul>}
+            : <Treemap items={majorItems} onOpen={(open) => open()} />}
+        </div>
+      </section>
+      <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
+    </>
+  );
+}
+
+const INTENTS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
+const PLAN_PHRASE: Record<PostsecondaryIntent, string> = { "4-Year College": "headed to a 4-year college", "2-Year College": "headed to a 2-year college", "Trade/Technical School": "headed to a trade or technical school", Workforce: "going straight to work", Military: "joining the military", Undecided: "still deciding" };
+const INTENT_SHORT: Record<PostsecondaryIntent, string> = { "4-Year College": "4-year", "2-Year College": "2-year", "Trade/Technical School": "Trade", Workforce: "Work", Military: "Military", Undecided: "Deciding" };
+
+/** Postsecondary Direction, forked from SchoolPulse.tsx (10 Oct 2026) so
+ *  its chart could change without touching another file: the same plans,
+ *  key, Multicolor switch and drills, drawn as one dot per student grouped
+ *  by plan instead of a stacked bar. Same key as Readiness's Postsecondary
+ *  Plan Defined, so the two pages agree. */
+function PostsecondaryRibbon() {
+  const scope = useInsightsScope();
+  const { roster, back, scopeLabel, year } = scope;
+  const planColors = useChartColors();
+  const [drill, setDrill] = useState<StudentsDrill | null>(null);
+  const [hot, setHot] = useState<string | null>(null);
+  const when = back === 0 ? "" : ` · end of ${year.label}`;
+  const sub = (s: string) => [s, scopeLabel].filter(Boolean).join(" · ") + when;
+  const intentOf = (s: CounselorStudent): PostsecondaryIntent => s.postsecondaryIntent !== "Undecided" && doneBy(s, "postsecondary", back) ? s.postsecondaryIntent : "Undecided";
+  const plans = INTENTS.map((k) => ({ k, list: roster.filter((s) => intentOf(s) === k) }));
+  const decided = roster.length - (plans.find((p) => p.k === "Undecided")?.list.length ?? 0);
+  const openPlan = (k: PostsecondaryIntent, list: CounselorStudent[]) => setDrill({ title: `${n(list.length)} ${PLAN_PHRASE[k]}`, subtitle: sub(`${Math.round((list.length / Math.max(1, roster.length)) * 100)}% of students in view`), students: list.map((s) => ({ s, note: s.careerTrack })) });
+  if (roster.length === 0) return null;
+  return (
+    <>
+      <section className="v4-iv-direction" aria-label="Postsecondary Direction" {...planColors.attrs}>
+        <header className="v4-r2-head">
+          <div className="v4-r2-lead"><h2 className="v4-r2-title">Postsecondary Direction</h2><span className="v4-r2-sub">{decided} of {roster.length} have chosen a direction · one dot per student</span></div>
+          <span className="v4-r2-tools">{planColors.toggle}</span>
+        </header>
+        <DotRibbon hot={hot} onHot={setHot} groups={plans.map((p, i) => ({ key: p.k, short: INTENT_SHORT[p.k], count: p.list.length, color: `var(--v4-step-${i + 1})`, aria: `${p.k}: ${n(p.list.length)}. Show them`, tip: `See the ${n(p.list.length)} ${PLAN_PHRASE[p.k]}`, onOpen: () => openPlan(p.k, p.list) }))} />
+        <div className="v4-iv-key" onMouseLeave={() => setHot(null)}>
+          {plans.map((p, i) => (
+            <IconTip key={p.k} label={p.list.length ? `See the ${n(p.list.length)} ${PLAN_PHRASE[p.k]}` : `No one ${PLAN_PHRASE[p.k]} yet`} className="w-full">
+              <button type="button" onClick={() => openPlan(p.k, p.list)} disabled={!p.list.length} aria-label={`${p.k}: ${n(p.list.length)}${p.list.length ? ". Show them" : ""}`} onMouseEnter={() => p.list.length && setHot(p.k)} onFocus={() => p.list.length && setHot(p.k)} onBlur={() => setHot(null)} className={`w-full ${hot && hot !== p.k ? "is-dim" : ""}`}>
+                <i style={{ background: `var(--v4-step-${i + 1})` }} /><span>{p.k === "Undecided" ? "Still deciding" : p.k}</span><b>{p.list.length}</b>
+              </button>
+            </IconTip>
+          ))}
         </div>
       </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
@@ -376,7 +456,7 @@ export function CareerCollegeInsights() {
       {/* more air between the sections (10 Oct 2026, Chandu: "make sure
          there's more breathing space and air, avoid clutter") */}
       {roster.length === 0 ? <p className="v4-filter-empty">No students match {scope.who}. Try a different grade or group.</p> : <InterestRows />}
-      <PostsecondaryDirection />
+      <PostsecondaryRibbon />
       <HoverBeam strength={0.7} className="h-full">
         <div className="v4-recommendations v4-surface relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />

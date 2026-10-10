@@ -33,23 +33,21 @@
 .v4-ms-grade-line {display:flex;flex-direction:column;gap:8px;padding:14px 0 2px;border-top:1px solid var(--v4-line)}
 .v4-ms-grade-line-counts {font-size:12.5px;font-weight:500;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
 
-/* The bar. Rows and the pulse: green done, a thin amber mark for who
-   needs attention, the rest is the track. The drawer's full bar shows all
-   four states beside their labels. */
-.v4-ms-bar {display:flex;gap:2px;height:6px;border-radius:99px;overflow:hidden;background:color-mix(in srgb,var(--foreground) 10%,transparent)}
-.v4-ms-bar>span {height:100%;min-width:3px}
-.v4-ms-bar>.is-done {background:var(--v4-ok);border-radius:99px 0 0 99px}
-.v4-ms-bar>.is-attention {background:var(--v4-warn)}
-.v4-ms-bar.is-tall {height:10px}
-
 /* Collapsible grade sections on All Grades: "Grade 10 · 74%" and the
    waiting link, nothing else. */
 .v4-ms-grade {display:flex;flex-direction:column;gap:8px}
 .v4-ms-grade-head {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.v4-ms-grade-title {display:flex;align-items:center;gap:2px}
 .v4-ms-grade-toggle {display:flex;align-items:center;gap:10px;padding:12px 12px;margin-left:-12px;border-radius:12px;cursor:pointer;text-align:left}
+.v4-ms-grade-chev {display:grid;place-items:center;width:32px;height:32px;border-radius:50%;cursor:pointer}
+/* figures that open a drill: a tint inside the figure's own rounded box */
+.v4-ms-fig {display:inline-flex;align-items:center;gap:6px;padding:2px 8px;margin:-2px -8px;border-radius:10px;font:inherit;color:inherit;cursor:pointer;transition:background .15s}
+.v4-ms-fig:hover,.v4-ms-fig:focus-visible {background:color-mix(in srgb,var(--foreground) 7%,transparent)}
+.v4-ms-fig.is-hero-fig {gap:12px}
+.v4-ms-grade-pct.v4-ms-fig {margin:0;padding:6px 8px}
+.v4-ms-face {display:flex;flex:none;border-radius:13px}
 .v4-content .v4-ms .v4-ms-grade-toggle h2 {font-family:var(--font-display);font-size:16px!important;font-weight:600!important;letter-spacing:0;color:var(--foreground);margin:0}
-.v4-ms-grade-pct {font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--muted-foreground)}
-.v4-ms-grade-pct::before {content:"·";margin-right:10px}
+.v4-ms-grade-pct {display:inline-flex;align-items:center;gap:8px;margin-left:4px;font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--muted-foreground)}
 .v4-ms-grade:has(.v4-ms-grade-toggle[aria-expanded="false"]) .v4-ms-grade-head {border-bottom:1px solid var(--v4-line)}
 
 /* Milestone rows: one card per grade, hairline rows inside (Chandu, 9 Oct
@@ -61,33 +59,17 @@
    underline, level 4 of the tab hierarchy), right-aligned */
 .v4-ms-card-head {display:flex;justify-content:flex-end;padding:4px 12px 0}
 .v4-ms-rows {display:flex;flex-direction:column;list-style:none;margin:0;padding:0}
-.v4-ms-row {display:grid;grid-template-columns:18px minmax(0,1fr) 120px 48px 150px 22px;grid-template-areas:"icon name bar pct wait go";align-items:center;gap:0 16px;min-height:48px;padding:10px 12px;border-radius:10px;cursor:pointer}
+.v4-ms-row {display:grid;grid-template-columns:18px minmax(0,1fr) 168px 48px 150px 22px;grid-template-areas:"icon name bar pct wait go";align-items:center;gap:0 16px;min-height:48px;padding:10px 12px;border-radius:10px;cursor:pointer}
 .v4-ms-row+.v4-ms-row {border-top:1px solid var(--v4-line)}
 .v4-ms-row-icon {grid-area:icon;display:grid;place-items:center;color:var(--muted-foreground)}
 .v4-ms-row-title {grid-area:name;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;cursor:pointer}
 .v4-ms-row-pct {grid-area:pct;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground);text-align:right}
-.v4-ms-row-bar {grid-area:bar;width:120px;justify-self:end}
+.v4-ms-row-bar {grid-area:bar;width:168px;justify-self:end}
 .v4-ms-row-wait {grid-area:wait;justify-self:end;text-align:right}
 .v4-ms-wait {font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer;white-space:nowrap;border-radius:8px;padding:8px 12px;margin:-8px -12px}
 .v4-ms-wait:hover,.v4-ms-wait:focus-visible {background:color-mix(in srgb,var(--primary) 12%,transparent)}
 .v4-ms-row-go {grid-area:go;opacity:0;transition:opacity .15s}
 .v4-ms-row:hover .v4-ms-row-go,.v4-ms-row:focus-within .v4-ms-row-go {opacity:1}
-
-/* Donuts (Maisha, 9 Oct 2026): the same rows as a grid of rings, five
-   across on desktop, three on a tablet, two on a phone, every tile the
-   same height. A tile is the ring, the name, and the waiting link; the
-   whole tile opens the drawer, with the same hover air as a row. */
-.v4-ms-donuts {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;list-style:none;margin:0;padding:6px 4px 4px}
-.v4-ms-donut {display:flex;flex-direction:column;align-items:center;gap:10px;min-height:150px;padding:16px 10px 14px;border-radius:12px;text-align:center;cursor:pointer}
-.v4-ms-donut-title {display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-width:100%;line-height:1.3;text-align:center;cursor:pointer}
-.v4-ms-donut .v4-ms-wait {margin-top:auto;margin-bottom:-8px}
-.v4-ms-ring {position:relative;display:inline-grid;place-items:center;flex:none}
-.v4-ms-ring svg {grid-area:1/1;display:block}
-.v4-ms-ring b {grid-area:1/1;font-family:var(--font-display);font-size:16px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
-.v4-ms-ring b small {font-size:10px;font-weight:600;margin-left:1px}
-@keyframes v4-ms-ring-draw {from {stroke-dasharray:0 100}}
-.v4-ms-ring-arc {animation:v4-ms-ring-draw .9s cubic-bezier(.22,1,.36,1) both}
-@media (prefers-reduced-motion:reduce) {.v4-ms-ring-arc {animation:none}}
 
 /* Drawer. The SidePanel portals out of the v4 tree, so the status fills
    it draws with are restated here (same values as v4.css). */
@@ -98,6 +80,8 @@ html.dark .v4-ms-drawer {--v4-step-2:#6f9bff}
 .v4-ms-chip[aria-pressed="true"] {border-color:var(--primary);color:var(--foreground)}
 .v4-ms-person {display:flex;align-items:center;gap:10px;padding:10px 10px;margin:0 -10px;border-bottom:1px solid var(--v4-line);border-radius:10px;cursor:pointer}
 .v4-ms-person:last-child {border-bottom:0}
+/* the student a dot pointed at */
+.v4-ms-person.is-focus {background:color-mix(in srgb,var(--primary) 14%,transparent);box-shadow:inset 3px 0 0 var(--primary)}
 
 /* By Student: name and grade, percentage, dots, status with its reason. */
 .v4-content .v4-ms .v4-ms-students.v4-surface {padding:0!important;overflow:hidden}
@@ -114,19 +98,12 @@ html.dark .v4-ms-drawer {--v4-step-2:#6f9bff}
 .v4-ms-student-reason {grid-area:reason;font-size:12.5px;font-weight:500;line-height:1.4;color:var(--muted-foreground)}
 .v4-ms-student-go {grid-area:go;opacity:0;transition:opacity .15s}
 .v4-ms-student:hover .v4-ms-student-go,.v4-ms-student:focus-within .v4-ms-student-go {opacity:1}
-.v4-ms-dots {display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 0}
-.v4-ms-dot {display:block;width:10px;height:10px;border-radius:50%;box-sizing:border-box;flex:none}
-.v4-ms-dot.is-done {background:var(--v4-ok)}
-.v4-ms-dot.is-attention {background:var(--v4-warn)}
-.v4-ms-dot.is-in-progress {border:1.5px solid var(--v4-step-2);background:linear-gradient(90deg,var(--v4-step-2) 50%,transparent 50%)}
-.v4-ms-dot.is-not-started {border:1.5px solid color-mix(in srgb,var(--foreground) 40%,transparent)}
 
 @media (max-width:1023px) {
-  .v4-ms-donuts {grid-template-columns:repeat(3,minmax(0,1fr))}
   /* the waiting column keeps its width even when empty, so the meters
      stay in one column down the card */
-  .v4-ms-row {grid-template-columns:18px minmax(0,1fr) 96px 44px 124px;grid-template-areas:"icon name bar pct wait";gap:0 14px}
-  .v4-ms-row-bar {width:96px}
+  .v4-ms-row {grid-template-columns:18px minmax(0,1fr) 120px 44px 124px;grid-template-areas:"icon name bar pct wait";gap:0 14px}
+  .v4-ms-row-bar {width:120px}
   .v4-ms-row-go {display:none}
   .v4-ms-student {grid-template-columns:24px minmax(0,1.2fr) 48px minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:"pick who pct dots status";gap:6px 14px}
   .v4-ms-student-go {display:none}
@@ -134,13 +111,11 @@ html.dark .v4-ms-drawer {--v4-step-2:#6f9bff}
 @media (max-width:639px) {
   .v4-ms-toolbar .is-bordered {display:none}
   .v4-content .v4-ms .v4-ms-card.v4-surface {padding:4px 4px!important}
-  .v4-ms-row {grid-template-columns:minmax(0,1fr) 80px 40px;grid-template-areas:"name bar pct" "wait wait wait";gap:0 10px;padding:10px 10px}
-  .v4-ms-row-bar {width:80px}
+  .v4-ms-row {grid-template-columns:minmax(0,1fr) 92px 40px;grid-template-areas:"name bar pct" "wait wait wait";gap:0 10px;padding:10px 10px}
+  .v4-ms-row-bar {width:92px}
   .v4-ms-row-wait:not(:empty) {margin-top:4px}
   .v4-ms-row-icon {display:none}
   .v4-ms-wait {font-size:12px}
-  .v4-ms-donuts {grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;padding:4px 0 2px}
-  .v4-ms-donut {padding:14px 8px 12px;min-height:140px}
   .v4-ms-card-head {padding:4px 8px 0}
   .v4-ms-summary {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   .v4-ms-summary.is-all dd {font-size:28px}
@@ -168,14 +143,12 @@ html.dark .v4-ms-drawer {--v4-step-2:#6f9bff}
   --msc-edge:rgba(255,255,255,.9); --msc-outline:color-mix(in srgb,var(--foreground) 8%,transparent);
   --msc-shadow:0 22px 44px -30px rgba(29,37,57,.42),0 2px 6px -2px rgba(29,37,57,.08);
   --msc-disc-a:rgba(255,255,255,.95); --msc-disc-b:rgba(255,255,255,.35);
-  --msc-track:color-mix(in srgb,var(--foreground) 8%,transparent);
 }
 html.dark .v4-ms {
   --msc-glass-a:rgba(255,255,255,.085); --msc-glass-b:rgba(255,255,255,.025);
   --msc-edge:rgba(255,255,255,.14); --msc-outline:rgba(255,255,255,.07);
   --msc-shadow:0 22px 44px -28px rgba(0,0,0,.7);
-  --msc-disc-a:rgba(255,255,255,.12); --msc-disc-b:rgba(255,255,255,.01);
-  --msc-track:rgba(255,255,255,.08);
+  --msc-disc-a:rgba(255,255,255,.10); --msc-disc-b:rgba(255,255,255,.0);
 }
 .v4-msc-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;list-style:none;margin:0;padding:0}
 .v4-msc-cell {min-width:0}
@@ -196,46 +169,184 @@ html.dark .v4-ms {
 .v4-msc-title {display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-align:left;font-size:15px;line-height:1.35;font-weight:600;letter-spacing:-.01em;color:var(--foreground);cursor:pointer}
 .v4-msc-wait {flex:none;margin-top:-1px;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;color:var(--primary);cursor:pointer;background:color-mix(in srgb,var(--primary) 10%,transparent);transition:background .15s}
 .v4-msc-wait:hover,.v4-msc-wait:focus-visible {background:color-mix(in srgb,var(--primary) 18%,transparent)}
-.v4-msc-body {position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:22px;min-height:120px}
+.v4-msc-body {position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:20px;min-height:116px}
 /* the counts: Done leads at body size in full ink; the rest are quiet.
    Label left, number right, every number in one column. */
-.v4-msc-counts {display:flex;flex-direction:column;gap:9px;margin:0;min-width:0}
-.v4-msc-counts>div {display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--muted-foreground)}
-.v4-msc-counts dt {display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.v4-msc-counts dd {margin:0;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
-.v4-msc-counts>.is-lead {padding-bottom:9px;border-bottom:1px solid var(--v4-line);font-size:14px;font-weight:600;color:var(--foreground)}
-.v4-msc-counts>.is-lead dd {font-size:15px}
-
-/* the gauge. The arcs run from a lit tone of each hue to its status
-   token, so the ring reads as light on glass in both themes (the light
-   theme's status tokens alone are deep and read flat). Amber stays a true
-   amber end to end: the light theme's warning token is a text-safe brown
-   that read as mud on a ring. */
-.v4-msc-gauge {position:relative;display:inline-grid;place-items:center;width:108px;height:108px;flex:none}
-.v4-msc-gauge>* {grid-area:1/1}
-.v4-msc-gauge svg {width:100%;height:100%;display:block;overflow:visible}
-.v4-msc-pool {width:150%;height:150%;border-radius:50%;pointer-events:none;
-  background:radial-gradient(closest-side,color-mix(in srgb,#4ade80 22%,transparent),transparent)}
-.v4-msc-track {stroke:var(--msc-track)}
-.v4-msc-disc-a {stop-color:var(--msc-disc-a)}
-.v4-msc-disc-b {stop-color:var(--msc-disc-b)}
-.v4-msc-stop-a.is-done {stop-color:#4ade80}
-.v4-msc-stop-b.is-done {stop-color:var(--v4-ok)}
-.v4-msc-stop-a.is-progress {stop-color:#93c5fd}
-.v4-msc-stop-b.is-progress {stop-color:var(--v4-step-2)}
-.v4-msc-stop-a.is-attention {stop-color:#fcd34d}
-.v4-msc-stop-b.is-attention {stop-color:#f59e0b}
-.v4-msc-pct {position:relative;font-family:var(--font-display);font-size:26px;line-height:1;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--foreground)}
-.v4-msc-pct small {font-size:13px;font-weight:600;margin-left:1px;color:var(--muted-foreground)}
-
-.v4-msc-swatch {flex:none;width:8px;height:8px;border-radius:50%}
-.v4-msc-swatch.is-done {background:linear-gradient(135deg,#4ade80,var(--v4-ok))}
-.v4-msc-swatch.is-in-progress {background:linear-gradient(135deg,#93c5fd,var(--v4-step-2))}
-.v4-msc-swatch.is-attention {background:linear-gradient(135deg,#fcd34d,#f59e0b)}
-.v4-msc-swatch.is-not-started {background:var(--msc-track);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--foreground) 14%,transparent)}
+/* each row is a button (opens the drawer on that state); its hover is a
+   tint inside the row's own rounded shape, padded out so the text keeps
+   its place */
+.v4-msc-counts {display:flex;flex-direction:column;gap:3px;margin:0;padding:0;list-style:none;min-width:0}
+.v4-msc-counts button {display:flex;width:100%;align-items:baseline;justify-content:space-between;gap:10px;padding:4px 8px;margin:0 -8px;width:calc(100% + 16px);border-radius:8px;font-size:12.5px;color:var(--muted-foreground);cursor:pointer;text-align:left;transition:background .15s}
+.v4-msc-counts button:hover,.v4-msc-counts button:focus-visible {background:color-mix(in srgb,var(--foreground) 7%,transparent)}
+.v4-msc-count-label {display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.v4-msc-counts b {font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
+.v4-msc-counts>.is-lead {padding-bottom:6px;margin-bottom:3px;border-bottom:1px solid var(--v4-line)}
+.v4-msc-counts>.is-lead button {font-size:14px;font-weight:600;color:var(--foreground)}
+.v4-msc-counts>.is-lead b {font-size:15px}
 
 @media (max-width:1279px) {.v4-msc-grid {grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:1023px) {.v4-msc-grid {grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:639px) {
   .v4-msc-grid {grid-template-columns:minmax(0,1fr);gap:12px}
+}
+
+/* ---- The marks, redrawn (10 Oct 2026) ----
+   Chandu: "try better types of graphs, more beautiful ones ... be creative
+   with the graphs, don't be traditional, as long as they convey the
+   information sensibly we can use them." Components in milestoneViz.tsx.
+   Colour: the three status hues only (green done, blue in progress, amber
+   needs attention), each a base step plus a lit step for the gradient's
+   bright end; Not Started is the neutral track. The bases were run through
+   the dataviz palette validator against each theme's surface (CVD and
+   normal-vision separation pass in both). Light needs deeper bases: the
+   light theme's glass is bright, and lit tints alone read washed out.
+   One encoding everywhere so a counselor learns it once: full = Done,
+   half = In Progress, amber = Needs Attention, outline = Not Started.
+   Light comes from gradients, never a blur filter (Chromebooks). The one
+   glow is the Complete ring in the summary. */
+.v4-ms,.v4-ms-drawer {
+  --msv-done:#21915c; --msv-done-lit:#56cf92;
+  --msv-progress:#4b7cf0; --msv-progress-lit:#8fb0ff;
+  --msv-attention:#cf8a00; --msv-attention-lit:#f5c04a;
+  --msv-idle:color-mix(in srgb,var(--foreground) 11%,transparent);
+  --msv-idle-line:color-mix(in srgb,var(--foreground) 30%,transparent);
+  --msv-quarter:color-mix(in srgb,var(--foreground) 16%,transparent);
+}
+html.dark .v4-ms,html.dark .v4-ms-drawer {
+  --msv-done:#27a872; --msv-done-lit:#7deab4;
+  --msv-progress:#5f8ff8; --msv-progress-lit:#a9c4ff;
+  --msv-attention:#d18a12; --msv-attention-lit:#ffd27a;
+  --msv-idle:rgba(255,255,255,.09);
+  --msv-idle-line:rgba(255,255,255,.34);
+  --msv-quarter:rgba(255,255,255,.16);
+}
+@keyframes msv-fade {from {opacity:0}}
+@keyframes msv-ring-draw {from {stroke-dasharray:0 100}}
+@keyframes msv-grow {from {transform:scaleX(0)}}
+
+/* Tick gauge (Charts cards): one tick per student over 270 degrees. A
+   glass disc and a hairline guide ring sit inside; the number is centred
+   in the disc. Ticks light up in order on arrival. */
+.msv-gauge {position:relative;display:inline-grid;place-items:center;width:112px;height:112px;flex:none}
+.msv-gauge>* {grid-area:1/1}
+.msv-gauge::before {content:"";grid-area:1/1;width:62%;height:62%;border-radius:50%;
+  background:radial-gradient(circle at 35% 28%,var(--msc-disc-a),var(--msc-disc-b) 72%);
+  box-shadow:inset 0 1px 0 var(--msc-edge),0 0 0 1px var(--msc-outline)}
+.msv-gauge svg {width:100%;height:100%;display:block;overflow:visible}
+.msv-gauge-center {position:relative;display:grid;place-items:center}
+.msv-tick {stroke-linecap:round}
+.msv-tick.is-done {stroke:var(--msv-done)}
+.msv-tick.is-in-progress {stroke:var(--msv-progress)}
+.msv-tick.is-attention {stroke:var(--msv-attention)}
+.msv-tick.is-not-started {stroke:var(--msv-idle)}
+.msv-tick:not(.is-not-started) {animation:msv-fade .4s ease-out both;animation-delay:calc(var(--i) * 16ms)}
+.msv-gauge svg.is-live .msv-tick {cursor:pointer;transition:filter .15s}
+.msv-gauge svg.is-live .msv-tick:hover {filter:brightness(1.35)}
+.v4-msc-pct {position:relative;font-family:var(--font-display);font-size:24px;line-height:1;font-weight:600;letter-spacing:-.03em;color:var(--foreground)}
+.v4-msc-pct small {font-size:12px;font-weight:600;margin-left:1px;color:var(--muted-foreground)}
+/* the key beside the gauge: a tick, the same shape as the mark it names */
+.msv-key {flex:none;width:4px;height:12px;border-radius:2px}
+.msv-key.is-done {background:linear-gradient(180deg,var(--msv-done-lit),var(--msv-done))}
+.msv-key.is-in-progress {background:var(--msv-progress)}
+.msv-key.is-attention {background:var(--msv-attention)}
+.msv-key.is-not-started {background:var(--msv-idle);box-shadow:inset 0 0 0 1px var(--msv-idle-line)}
+
+/* Pill track (List rows): lit leading edge, 2px gap, quarter ticks. */
+.msv-track {display:flex;gap:2px;height:8px;border-radius:99px;overflow:hidden;
+  background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),var(--msv-quarter) calc(25% - 1px) 25%),var(--msv-idle)}
+.msv-slot {position:relative;height:100%;min-width:4px;transform-origin:left center;animation:msv-grow .8s cubic-bezier(.22,1,.36,1) both}
+.msv-slot.is-rest {flex:1 1 auto;animation:none}
+/* each part is a button; the hit area reaches 10px above and below the
+   8px pill, the hover is an inset ring inside the part's own shape */
+.msv-seg {position:relative;display:block;width:100%;height:100%;border-radius:99px;cursor:pointer;transition:box-shadow .15s}
+.msv-seg::before {content:"";position:absolute;inset:-10px 0}
+.msv-seg:hover,.msv-seg:focus-visible {box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--foreground) 60%,transparent)}
+.msv-seg.is-rest:hover,.msv-seg.is-rest:focus-visible {background:color-mix(in srgb,var(--foreground) 8%,transparent)}
+.msv-seg:focus-visible {outline:2px solid var(--primary);outline-offset:3px}
+.msv-seg.is-done {background:linear-gradient(90deg,var(--msv-done),var(--msv-done-lit))}
+.msv-seg.is-attention {background:var(--msv-attention)}
+.msv-track {overflow:visible}
+
+/* Checkpoint waffle (summary, one grade): one dot per checkpoint, column
+   by column, Done first. The dots are fluid squares, capped at a 20px
+   pitch so a small grade does not balloon; the legend sits to the right on
+   desktop and under the dots below 1024px. Hovering a state, on a dot or
+   in the legend, dims the other states. */
+.msv-waffle-wrap {--rows:4;display:flex;align-items:center;gap:32px}
+.msv-waffle {flex:1 1 auto;min-width:0;max-width:calc(var(--n) / var(--rows) * 20px);display:grid;grid-auto-flow:column;grid-template-rows:repeat(var(--rows),auto);grid-auto-columns:minmax(0,1fr);gap:4px}
+.msv-cell {aspect-ratio:1;border-radius:50%;box-sizing:border-box;transition:opacity .2s;animation:msv-fade .5s ease-out both;animation-delay:calc(var(--i, 0) * 2ms)}
+.msv-cell.is-done,.msv-person.is-done,.msv-swatch.is-done {background:radial-gradient(circle at 34% 30%,var(--msv-done-lit),var(--msv-done) 72%)}
+.msv-cell.is-in-progress,.msv-person.is-in-progress,.msv-swatch.is-in-progress {background:linear-gradient(90deg,var(--msv-progress) 50%,transparent 50%);box-shadow:inset 0 0 0 1.5px var(--msv-progress)}
+.msv-cell.is-attention,.msv-person.is-attention,.msv-swatch.is-attention {background:radial-gradient(circle at 34% 30%,var(--msv-attention-lit),var(--msv-attention) 72%)}
+.msv-cell.is-not-started,.msv-person.is-not-started,.msv-swatch.is-not-started {box-shadow:inset 0 0 0 1.5px var(--msv-idle-line)}
+.msv-waffle-wrap:has(.is-done:hover) .msv-cell:not(.is-done),
+.msv-waffle-wrap:has(.is-in-progress:hover) .msv-cell:not(.is-in-progress),
+.msv-waffle-wrap:has(.is-attention:hover) .msv-cell:not(.is-attention),
+.msv-waffle-wrap:has(.is-not-started:hover) .msv-cell:not(.is-not-started) {opacity:.22}
+.msv-legend {display:flex;flex-direction:column;gap:7px;flex:none;min-width:170px;margin:0}
+.msv-legend-title {font-size:12px;font-weight:500;color:var(--muted-foreground);margin-bottom:2px}
+.msv-legend-item {display:flex;align-items:center;gap:9px;margin:0 -8px;padding:4px 8px;border-radius:8px;font-size:12.5px;font-weight:500;color:var(--muted-foreground);cursor:pointer;text-align:left;transition:background .15s}
+.msv-legend-item:hover,.msv-legend-item:focus-visible {background:color-mix(in srgb,var(--foreground) 7%,transparent)}
+.msv-cell {cursor:pointer}
+.msv-legend-item b {min-width:28px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
+.msv-swatch {display:block;flex:none;width:10px;height:10px;border-radius:50%;box-sizing:border-box}
+.msv-waffle-empty {font-size:12.5px;font-weight:500;color:var(--muted-foreground)}
+
+/* Drawer people: one dot per student; the chips' filter dims the rest. */
+.msv-people {display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:6px 4px;padding:2px 0;justify-items:center}
+.msv-people>span {width:100%;justify-content:center}
+.msv-person {display:block;width:100%;max-width:16px;aspect-ratio:1;border-radius:50%;box-sizing:border-box;transition:opacity .2s}
+.msv-person.is-dim {opacity:.2}
+.msv-person {cursor:pointer}
+.msv-person:hover,.msv-person:focus-visible {opacity:1;outline:2px solid color-mix(in srgb,var(--foreground) 70%,transparent);outline-offset:-2px}
+.msv-person:focus-visible {outline-color:var(--primary)}
+
+/* Rings: the Complete figure (the page's one glow, a plain radial
+   gradient behind the ring) and the quiet ring by each grade's head. */
+.msv-ring {position:relative;display:inline-grid;place-items:center;flex:none}
+.msv-ring svg {position:relative;display:block}
+.msv-ring-track {stroke:var(--msv-idle)}
+.msv-ring-a {stop-color:var(--msv-done)}
+.msv-ring-b {stop-color:var(--msv-done-lit)}
+.msv-ring-arc {animation:msv-ring-draw 1s cubic-bezier(.22,1,.36,1) both}
+.msv-ring.is-hero::before {content:"";position:absolute;inset:-55%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--msv-done-lit) 26%,transparent) 30%,transparent)}
+.v4-ms-summary>.is-hero {align-items:center}
+.v4-ms-summary>.is-hero dd {display:inline-flex;align-items:center;gap:12px}
+
+/* Stepped track (By Student): one pill per milestone, curriculum order. */
+.msv-steps {display:flex;align-items:center;gap:2px;padding:6px 0}
+.msv-step {display:block;width:16px;height:8px;border-radius:2px;flex:none;box-sizing:border-box}
+.msv-steps>:first-child .msv-step {border-radius:99px 2px 2px 99px}
+.msv-steps>:last-child .msv-step {border-radius:2px 99px 99px 2px}
+.msv-step {position:relative;cursor:pointer;transition:filter .15s}
+.msv-step::before {content:"";position:absolute;inset:-8px -1px}
+.msv-step:hover,.msv-step:focus-visible {filter:brightness(1.25);outline:1.5px solid color-mix(in srgb,var(--foreground) 60%,transparent);outline-offset:-1.5px}
+.msv-step:focus-visible {outline:2px solid var(--primary);outline-offset:2px}
+.msv-step.is-done {background:linear-gradient(90deg,var(--msv-done),var(--msv-done-lit))}
+.msv-step.is-in-progress {background:linear-gradient(90deg,var(--msv-progress) 50%,transparent 50%);box-shadow:inset 0 0 0 1.5px var(--msv-progress)}
+.msv-step.is-attention {background:var(--msv-attention)}
+.msv-step.is-not-started {box-shadow:inset 0 0 0 1.5px var(--msv-idle-line)}
+
+@media (max-width:1023px) {
+  .msv-waffle-wrap {--rows:6;flex-direction:column;align-items:stretch;gap:14px}
+  .msv-waffle {max-width:none}
+  .msv-legend {flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 18px}
+  .msv-legend-title {margin:0}
+  .msv-legend-item b {min-width:0}
+}
+@media (max-width:639px) {
+  /* phone: each figure stacks over its label, so the ringed Complete
+     figure fits its half of the grid like the other three */
+  .v4-ms-summary>div,.v4-ms-summary>.is-hero {flex-direction:column-reverse;align-items:flex-start;gap:6px}
+  .v4-ms-summary>.is-hero dd {gap:8px}
+  .v4-ms-summary>.is-hero .msv-ring {width:26px!important;height:26px!important}
+  .v4-ms-summary>.is-hero .msv-ring svg {width:100%;height:100%}
+  .msv-waffle-wrap {--rows:10}
+  .msv-waffle {gap:3px}
+  .msv-gauge {width:100px;height:100px}
+  .msv-step {width:13px}
+}
+@media (prefers-reduced-motion:reduce) {
+  .msv-tick,.msv-slot,.msv-cell,.msv-ring-arc {animation:none!important}
 }

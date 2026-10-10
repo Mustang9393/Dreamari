@@ -1,5 +1,27 @@
 "use client";
 
+// 10 Oct 2026, Chandu: "try better types of graphs, more beautiful ones ...
+// Get inspiration from Pinterest, Dribbble etc and be creative with the
+// graphs, don't be traditional, as long as they convey the information
+// sensibly." Visuals only; the six sections, their order, data, drills and
+// reports are unchanged (charts/impactViz.tsx). The cover's ring is now a
+// constellation, one dot per student lit clockwise, with the page's one
+// glow behind it; the next step gets its share of the caseload as a thin
+// bar; each Key Win wears its check; each district goal gets a bullet bar
+// against its target tick and the header a pip per goal met; an earlier
+// period's Use of Time is the same waffle as the live week's.
+// The user's follow-up the same day: "ASCA Alignment and District goals need
+// better graphs. Think beyond bars and donuts please." and "The Key Wins can
+// also be better." District Goals now leads with a goal rose (one petal per
+// goal, length = result as a share of target, a ring at 100%; turnaround is
+// inverted since fewer days is better) linked to the table by hover, and
+// each row shows its margin ("7 over", "15 under") instead of a bar. Key
+// Wins is a bento of six cards: a hero figure, a micro-chart matched to the
+// win's story, and the sentence cut short. The cover's caption moved under
+// the constellation so no dot touches the number ("The on track 104
+// students and the 86% are ... intersecting the graph"), and light mode
+// drops the blue glow ("sort of bad on light mode").
+
 // My Impact. Rebuilt 27 Sept 2026 on Maisha's review ("Am I able to see the
 // principal report? ... Please utilize the same numbers as the replit"),
 // re-laid 2 Oct 2026 to her Replit section for section ("ours is so dense
@@ -41,6 +63,7 @@ import { CountUp } from "./InsightCharts";
 import { ImpactPublication } from "./ImpactPublication";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { CheckCircle2, ChevronRight, FileBarChart, Mail, Copy } from "lucide-react";
+import type React from "react";
 import { DEMO_SCHOOL, MILESTONE_KEYS, milestonesForGrade, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useCounselorPreferences } from "@/lib/counselorPreferences";
@@ -52,9 +75,11 @@ import { useConnectLive } from "./CounselorConnect";
 import { useRouter } from "next/navigation";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { Listbox } from "./Listbox";
+import { IconTip } from "@/components/app/IconTip";
 import { useInsightsScope } from "./insightsScope";
 import { InsightStudentsPanel, type StudentsDrill } from "./InsightStudents";
-import { AscaAlignment, SectionTitle, UseOfTime, timeGroups, TIME_CATEGORIES } from "./ImpactSections";
+import { AscaAlignment, SectionTitle, UseOfTime, timeGroups, TIME_CATEGORIES, TIME_SHADE } from "./ImpactSections";
+import { DotConstellation, GoalRose, MarginMarker, TimeWaffle, WinClock, WinDots, WinGauge, WinLift, WinPath, WinStep } from "./charts/impactViz";
 import { ASCA_TARGET_PCT } from "@/lib/counselorTimeLog";
 import "./insights2.css";
 
@@ -207,12 +232,12 @@ function buildView(p: PeriodData, school: string, week?: TimeSummary) {
     // 3. ASCA Alignment: her four measures
     asca: {
       academic: [
-        { key: "academicPlan" as const, label: "Students with academic plans on file", pct: academicPct, delta: ASCA_DELTAS.academicPlan },
-        { key: "onTrack" as const, label: "Students meeting on-track criteria", pct: onTrackPct, delta: ASCA_DELTAS.onTrack },
+        { key: "academicPlan" as const, short: "Academic plans on file", label: "Students with academic plans on file", pct: academicPct, delta: ASCA_DELTAS.academicPlan },
+        { key: "onTrack" as const, short: "Meeting on-track criteria", label: "Students meeting on-track criteria", pct: onTrackPct, delta: ASCA_DELTAS.onTrack },
       ],
       career: [
-        { key: "direction" as const, label: "Students with a defined postsecondary direction", pct: withPlanPct, delta: ASCA_DELTAS.direction },
-        { key: "careerReport" as const, label: "Students completing career exploration activities", pct: careerPct, delta: ASCA_DELTAS.careerReport },
+        { key: "direction" as const, short: "Postsecondary direction set", label: "Students with a defined postsecondary direction", pct: withPlanPct, delta: ASCA_DELTAS.direction },
+        { key: "careerReport" as const, short: "Career exploration done", label: "Students completing career exploration activities", pct: careerPct, delta: ASCA_DELTAS.careerReport },
       ],
     },
     // 4. Key Wins: her six sentences, this period's figures, no em dashes
@@ -226,12 +251,12 @@ function buildView(p: PeriodData, school: string, week?: TimeSummary) {
     ],
     // 5. District Goals & Reporting: result against target, status computed
     goals: [
-      { key: "plans" as GoalKey, metric: "Postsecondary plans on file", result: `${withPlanPct}%`, note: `${withPlan} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: withPlanPct >= GOAL_PCT },
-      { key: "senior" as GoalKey, metric: "Senior postsecondary plans completed", result: `${seniorPct}%`, note: `${p.seniorsWithPlan} of ${sr}`, target: `${GOAL_PCT}% or more`, met: seniorPct >= GOAL_PCT },
-      { key: "onTrack" as GoalKey, metric: "On-track rate", result: `${onTrackPct}%`, note: `${p.onTrack} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: onTrackPct >= GOAL_PCT },
-      { key: "careerReport" as GoalKey, metric: "Career report completion", result: `${careerPct}%`, note: `${p.careerReports} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: careerPct >= GOAL_PCT },
-      { key: "academicPlan" as GoalKey, metric: "Academic plan completion", result: `${academicPct}%`, note: `${p.academicPlans} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: academicPct >= GOAL_PCT },
-      { key: "turnaround" as GoalKey, metric: "Plan review turnaround", result: `${t} days`, note: "average", target: `${REVIEW_DAYS} days or less`, met: p.turnaround <= REVIEW_DAYS },
+      { key: "plans" as GoalKey, value: withPlanPct, goal: GOAL_PCT, max: 100, metric: "Postsecondary plans on file", result: `${withPlanPct}%`, note: `${withPlan} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: withPlanPct >= GOAL_PCT },
+      { key: "senior" as GoalKey, value: seniorPct, goal: GOAL_PCT, max: 100, metric: "Senior postsecondary plans completed", result: `${seniorPct}%`, note: `${p.seniorsWithPlan} of ${sr}`, target: `${GOAL_PCT}% or more`, met: seniorPct >= GOAL_PCT },
+      { key: "onTrack" as GoalKey, value: onTrackPct, goal: GOAL_PCT, max: 100, metric: "On-track rate", result: `${onTrackPct}%`, note: `${p.onTrack} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: onTrackPct >= GOAL_PCT },
+      { key: "careerReport" as GoalKey, value: careerPct, goal: GOAL_PCT, max: 100, metric: "Career report completion", result: `${careerPct}%`, note: `${p.careerReports} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: careerPct >= GOAL_PCT },
+      { key: "academicPlan" as GoalKey, value: academicPct, goal: GOAL_PCT, max: 100, metric: "Academic plan completion", result: `${academicPct}%`, note: `${p.academicPlans} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: academicPct >= GOAL_PCT },
+      { key: "turnaround" as GoalKey, value: p.turnaround, goal: REVIEW_DAYS, max: REVIEW_DAYS * 2, metric: "Plan review turnaround", result: `${t} days`, note: "average", target: `${REVIEW_DAYS} days or less`, met: p.turnaround <= REVIEW_DAYS },
     ],
     // 6. Use of Time: the ASCA share and the four categories
     time: { studentPct, total: timeTotal, groups: TIME_CATEGORIES.map((c, i) => ({ c, minutes: minutes[i], pct: Math.round((minutes[i] / timeTotal) * 100) })) },
@@ -319,6 +344,33 @@ export function ImpactReportThumb({ kind, width = 120 }: { kind: "impact" | "pri
   );
 }
 
+/** A goal's margin to its target: points over or under, or days faster or
+ *  slower for the turnaround (fewer days is better). */
+function goalMargin(g: ImpactView["goals"][number]) {
+  if (g.key === "turnaround") {
+    const d = Math.round((g.goal - g.value) * 10) / 10;
+    return { good: d >= 0, text: `${Math.abs(d)} ${d >= 0 ? "days faster" : "days slower"}` };
+  }
+  const d = g.value - g.goal;
+  return { good: d >= 0, text: `${Math.abs(d)} ${d >= 0 ? "over" : "under"}` };
+}
+
+/** Each Key Win as a bento card: a kicker, a hero figure, a micro-chart
+ *  matched to its story, and the sentence cut short. */
+function winCard(key: WinKey, v: ImpactView): { kicker: string; hero: string; caption: string; viz: React.ReactNode } {
+  const t = v.turnaround.toFixed(1);
+  switch (key) {
+    case "moved": return { kicker: "Postsecondary direction", hero: String(v.moved), caption: "undecided students chose a direction this semester.", viz: <WinDots n={v.moved} /> };
+    case "academic": return { kicker: "Academic plans", hero: `+${ASCA_DELTAS.academicPlan}`, caption: "points after counselor reviews.", viz: <WinStep from={v.academicPct - ASCA_DELTAS.academicPlan} to={v.academicPct} /> };
+    case "senior": return { kicker: "Senior plans", hero: `${v.seniorPct}%`, caption: `${v.seniorPct >= GOAL_PCT ? "Meets" : "Nearing"} the district’s ${GOAL_PCT}% spring benchmark.`, viz: <WinGauge value={v.seniorPct} bench={GOAL_PCT} /> };
+    case "turnaround": return { kicker: "Review speed", hero: `${t} days`, caption: `average review. District standard: ${REVIEW_DAYS} days.`, viz: <WinClock days={v.turnaround} standard={REVIEW_DAYS} /> };
+    case "onTrack": return { kicker: "On track", hero: `${v.onTrackPct}%`, caption: `of ${v.caseload} students. School: ${SCHOOL_AVG_ON_TRACK}%.`, viz: <WinLift ours={v.onTrackPct} school={SCHOOL_AVG_ON_TRACK} /> };
+    case "pathway": return v.upperPct >= GOAL_PCT
+      ? { kicker: "Career pathways", hero: "11–12", caption: "Grades 11–12 are above the school target.", viz: <WinPath pct={v.upperPct} target={GOAL_PCT} /> }
+      : { kicker: "Career pathways", hero: `${v.upperPct}%`, caption: `of grades 11–12 have one. Target: ${GOAL_PCT}%.`, viz: <WinPath pct={v.upperPct} target={GOAL_PCT} /> };
+  }
+}
+
 const needsLabel = (s: CounselorStudent) => (s.postsecondaryIntent === "Undecided" ? "No plan yet" : s.postsecondaryIntent);
 
 /** `scope="school"` is the Lead Counselor's School Impact: the same six
@@ -333,6 +385,7 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
   const router = useRouter();
   const [report, setReport] = useState<false | "impact" | "principal">(false);
   const [drill, setDrill] = useState<StudentsDrill | null>(null);
+  const [goalLit, setGoalLit] = useState<string | null>(null);
   // The Insights grade and group filters scope the live period (9 Oct 2026);
   // the fixed history periods are whole-caseload figures.
   const scope = useInsightsScope();
@@ -378,6 +431,9 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
   const forGoal: Record<GoalKey, () => StudentsDrill> = { plans: drills.direction, senior: drills.senior, onTrack: drills.onTrack, careerReport: drills.careerReport, academicPlan: drills.academic, turnaround: drills.reviews };
   const forAsca = { academicPlan: drills.academic, onTrack: drills.onTrack, direction: drills.direction, careerReport: drills.careerReport } as const;
   const our = who_ === "school" ? "our" : "my";
+  // What a mark's tooltip says it opens: the students behind it, or the
+  // breakdown for a past period with no student list.
+  const ascaTip = (d: StudentsDrill) => (d.students.length ? `See the ${d.students.length} ${d.listLabel ? d.listLabel.split(" · ")[0].toLowerCase() : "students"}` : "See the breakdown");
 
   return (
     // COMPONENT_INVENTORY row 62: this screen's own data is always seeded
@@ -394,32 +450,42 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
       {/* 2. Student Progress: the hero, unchanged (it matches her image). */}
       <section className="v4-impact-cover" aria-label="Student Progress">
         <div className="v4-impact-story"><span className="v4-overline">Student Progress</span><h2>Moving Toward<br/><em>What’s Next</em></h2><p>{v.onTrack} of {live && scope.scopeLabel ? `these ${v.caseload}` : `${our} ${v.caseload}`} students are on track.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
-        <button className="v4-momentum-orbit" onClick={() => open(drills.onTrack())} aria-label={`On-track rate ${v.onTrackPct} percent, ${v.onTrack} students. Open details`}>
-          <svg viewBox="0 0 320 240" aria-hidden="true"><defs><linearGradient id="momentum-ink" x1="0" y1="1" x2="1" y2="0"><stop stopColor="var(--v4-chart-1)"/><stop offset="1" stopColor="var(--v4-chart-2)"/></linearGradient></defs><ellipse cx="160" cy="120" rx="147" ry="99" fill="none" stroke="var(--glass-border)" transform="rotate(-18 160 120)"/><ellipse cx="160" cy="120" rx="132" ry="114" fill="none" stroke="var(--glass-border)" transform="rotate(23 160 120)"/><circle cx="160" cy="120" r="92" fill="none" stroke="var(--glass-border)" strokeWidth="14"/><circle className="v4-ring-draw" cx="160" cy="120" r="92" pathLength="100" fill="none" stroke="url(#momentum-ink)" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${v.onTrackPct} 100`} transform="rotate(-90 160 120)"/></svg>
-          <span><strong><CountUp value={v.onTrackPct}/><small>%</small></strong><em>on track · {v.onTrack} students</em></span>
+        {/* One dot per student, the on-track ones lit clockwise (the page's one glow). */}
+        <IconTip label={live ? `See the ${notOnTrack.length} students not on track` : "See the breakdown"} className="justify-self-center w-full max-w-[300px] justify-center">
+        <button className="iv-orbit dm-quiet" onClick={() => open(drills.onTrack())} aria-label={`On-track rate ${v.onTrackPct} percent, ${v.onTrack} of ${v.caseload} students. Open details`}>
+          <span className="iv-orbit-disc">
+            <DotConstellation lit={v.onTrack} total={v.caseload} />
+            <span className="iv-orbit-center"><strong><CountUp value={v.onTrackPct}/><small>%</small></strong></span>
+          </span>
+          <em className="iv-orbit-caption">on track · {v.onTrack} students</em>
         </button>
-        <div className="v4-impact-priority"><span className="v4-overline">Next step</span><strong><CountUp value={v.exploring}/></strong><p className="v4-impact-priority-label">students still exploring<br/>their next step</p><button className="v4-text-action" onClick={() => open(drills.exploring())}>View student list <Go/></button></div>
+        </IconTip>
+        <div className="v4-impact-priority"><span className="v4-overline">Next step</span><strong><CountUp value={v.exploring}/></strong><span className="iv-share" aria-hidden><i className="iv-grow" style={{ width: `${pct(v.exploring, v.caseload)}%` }} /></span><p className="v4-impact-priority-label">students still exploring<br/>their next step</p><button className="v4-text-action" onClick={() => open(drills.exploring())}>View student list <Go/></button></div>
       </section>
 
       {/* 3. ASCA Alignment */}
       <AscaAlignment
-        academic={v.asca.academic.map((a) => ({ ...a, onOpen: () => open(forAsca[a.key]()) }))}
-        career={v.asca.career.map((a) => ({ ...a, onOpen: () => open(forAsca[a.key]()) }))}
+        academic={v.asca.academic.map((a) => ({ ...a, tip: ascaTip(forAsca[a.key]()), onOpen: () => open(forAsca[a.key]()) }))}
+        career={v.asca.career.map((a) => ({ ...a, tip: ascaTip(forAsca[a.key]()), onOpen: () => open(forAsca[a.key]()) }))}
         onAbout={() => open(drills.asca())} />
 
-      {/* 4. Key Wins: six sentences, a green check each, every tile opens
-         the students or the detail behind it. */}
+      {/* 4. Key Wins: a bento of six cards, each a hero figure, a
+         micro-chart matched to the win and its sentence cut short. Every
+         card opens the students or the detail behind it. */}
       <section className={`${FLAT_CARD_CLASS} flex flex-col gap-[var(--space-4)]`} style={FLAT_CARD} aria-label="Key Wins">
-        <SectionTitle title="Key Wins" info="What moved this period, in one line each. Select a win to see the students behind it." />
-        <div className="v4-wins2 cv-rail-sm">
-          {v.wins.map((w) => (
-            <div key={w.key} className="h-full">
-              <button type="button" onClick={() => open(forWin[w.key]())} className="v4-win2 dm-quiet group">
-                <span>{w.text}</span>
-                <ChevronRight size={14} aria-hidden className="transition-transform group-hover:translate-x-[3px]" />
+        <SectionTitle title="Key Wins" info="What moved this period. Select a win to see the students behind it." />
+        <div className="iv-wins">
+          {v.wins.map((w) => {
+            const card = winCard(w.key, v);
+            return (
+              <button key={w.key} type="button" onClick={() => open(forWin[w.key]())} className={`iv-win iv-win-${w.key} dm-quiet group`} aria-label={`${w.text} Show details`}>
+                <span className="iv-win-top"><span className="iv-win-kicker">{card.kicker}</span><ChevronRight size={14} aria-hidden className="transition-transform group-hover:translate-x-[3px]" /></span>
+                <span className="iv-win-viz">{card.viz}</span>
+                <strong className="iv-win-hero">{card.hero}</strong>
+                <span className="iv-win-caption">{card.caption}</span>
               </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -427,20 +493,28 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
          its students. Compact cards on phones (insights2.css). */}
       <section className={`${FLAT_CARD_CLASS} flex flex-col gap-[var(--space-4)]`} style={FLAT_CARD} aria-label="District Goals and Reporting">
         <div className="flex flex-wrap items-center justify-between gap-[10px]">
-          <SectionTitle title="District Goals & Reporting" info="Each district measure against its target. Met is a threshold check for this period, not a change over time." unit={`${v.goals.filter((g) => g.met).length} of ${v.goals.length} met`} />
+          <SectionTitle title="District Goals & Reporting" info="Each district measure against its target. Met is a threshold check for this period, not a change over time. In the rose, each petal is a result as a share of its target; the ring is 100%." unit={`${v.goals.filter((g) => g.met).length} of ${v.goals.length} met`} />
           <button type="button" onClick={() => setReport("principal")} className="v4-r2-link">View full report<ChevronRight size={14} aria-hidden /></button>
         </div>
+        <div className="iv-goals-layout">
+        <figure className="iv-rose-wrap">
+          <GoalRose lit={goalLit} onLit={setGoalLit} onOpen={(k) => open(forGoal[k as GoalKey]())}
+            goals={v.goals.map((g) => ({ key: g.key, short: g.metric, met: g.met, value: g.key === "turnaround" ? `${g.value.toFixed(1)}d` : g.result, ratio: g.key === "turnaround" ? g.goal / Math.max(0.1, g.value) : g.value / Math.max(1, g.goal) }))} />
+          <figcaption><i className="is-met" aria-hidden />Met<i className="is-open" aria-hidden />In progress<i className="is-ring" aria-hidden />Target</figcaption>
+        </figure>
         <div className="v4-goals">
           <div className="v4-goals-head" aria-hidden><span>Goal / Metric</span><span>Current Result</span><span>Target</span><span>Status</span><span /></div>
           {v.goals.map((g) => (
-            <button key={g.key} type="button" onClick={() => open(forGoal[g.key]())} className="v4-goal dm-quiet group" aria-label={`${g.metric}: ${g.result}, target ${g.target}, ${g.met ? "met" : "in progress"}. Show students`}>
+            <button key={g.key} type="button" onClick={() => open(forGoal[g.key]())} className={`v4-goal dm-quiet group${goalLit === g.key ? " is-lit" : ""}`}
+              onPointerEnter={() => setGoalLit(g.key)} onPointerLeave={() => setGoalLit(null)} onFocus={() => setGoalLit(g.key)} onBlur={() => setGoalLit(null)} aria-label={`${g.metric}: ${g.result}, target ${g.target}, ${g.met ? "met" : "in progress"}. Show students`}>
               <span className="v4-goal-metric">{g.metric}</span>
-              <span className="v4-goal-result"><strong>{g.result}</strong><small>{g.note}</small></span>
+              <span className="v4-goal-result iv-goal-result"><strong>{g.result}</strong><small>{g.note}</small><MarginMarker {...goalMargin(g)} /></span>
               <span className="v4-goal-target">{g.target}</span>
               <MetChip met={g.met} />
               <ChevronRight size={14} aria-hidden className="transition-transform group-hover:translate-x-[3px]" />
             </button>
           ))}
+        </div>
         </div>
       </section>
 
@@ -449,8 +523,9 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
       {!live && (
         <section className={`${FLAT_CARD_CLASS} flex flex-col gap-[var(--space-3)]`} style={FLAT_CARD} aria-label="Use of Time">
           <SectionTitle title="Use of Time" info="Where the period's logged time went. ASCA asks for 80% in direct and indirect student services." unit={`${v.time.studentPct}% direct and indirect student services · ASCA target: ${ASCA_TARGET_PCT}%`} />
+          <TimeWaffle groups={v.time.groups.map((g) => ({ c: g.c, pct: g.minutes, color: TIME_SHADE[g.c] }))} target={ASCA_TARGET_PCT} label={v.time.groups.map((g) => `${g.c} ${g.pct}%`).join(", ")} />
           <ul className="v4-r2-legend" style={{ color: INK }}>
-            {v.time.groups.map((g) => <li key={g.c}><span>{g.c}: {g.pct}%</span></li>)}
+            {v.time.groups.map((g) => <li key={g.c}><i aria-hidden className="mr-[6px] inline-block size-[9px] rounded-[2px] align-middle" style={{ background: TIME_SHADE[g.c] }} /><span>{g.c}: {g.pct}%</span></li>)}
           </ul>
         </section>
       )}

@@ -1,5 +1,16 @@
 "use client";
 
+// 10 Oct 2026, Chandu: "try better types of graphs, more beautiful ones ...
+// be creative with the graphs, don't be traditional, as long as they convey
+// the information sensibly." Visuals only, same sections and data: Use of
+// Time's single bar is now a waffle of 100 cells with the ASCA 80% line
+// drawn across it (the gap to target is visible, not just stated), and each
+// ASCA measure's ring is now a dumbbell from last semester to now, so the
+// change reads as a distance (charts/impactViz.tsx). Same day, the user's
+// follow-up: "ASCA Alignment and District goals need better graphs. Think
+// beyond bars and donuts please." The dumbbells became two slopegraphs (one
+// per domain): each measure is a line from last semester to now, labelled
+// at its right end, on one shared scale that says where it starts.
 // My Impact's shared sections (9 Oct 2026, Maisha's Insights notes, then her
 // My Impact image the same day: "I want to change some of the info here
 // because it's repetitive and present in other sections since our last
@@ -18,12 +29,12 @@
 // with the change since last semester under it. The deltas are DEMO-ONLY
 // seeded until semester snapshots are stored.
 
+import { useState } from "react";
 import { ChevronRight, Clock, Info } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
 import { IconTip } from "@/components/app/IconTip";
 import { ASCA_TARGET_PCT, hoursLabel, type TimeEntry, type TimeSummary } from "@/lib/counselorTimeLog";
 import { openLog } from "../v5/LogSheet";
-import { DrawRing } from "../v5/charts";
+import { SlopeGraph, TimeWaffle } from "./charts/impactViz";
 import { Go } from "./chips";
 import type { StudentsDrill } from "./InsightStudents";
 import "./insights2.css";
@@ -46,7 +57,7 @@ export function timeCategory(e: TimeEntry): TimeCategory {
 
 // One blue stepping lighter by category, Administrative Work the neutral
 // (the time that is not with or for students).
-const SHADE: Record<TimeCategory, string> = {
+export const TIME_SHADE: Record<TimeCategory, string> = {
   "Student Meetings": "var(--v4-step-1)",
   "Career & Postsecondary Support": "var(--v4-step-2)",
   Reviews: "var(--v4-step-3)",
@@ -74,7 +85,7 @@ export function timeGroups(week: TimeSummary) {
 }
 
 export function UseOfTime({ week, onDrill }: { week: TimeSummary; onDrill: (d: StudentsDrill) => void }) {
-  const reduce = useReducedMotion();
+  const [lit, setLit] = useState<string | null>(null);
   const { total, groups } = timeGroups(week);
   const met = week.studentPct >= ASCA_TARGET_PCT;
   const open = (g: (typeof groups)[number]) => onDrill({
@@ -98,16 +109,14 @@ export function UseOfTime({ week, onDrill }: { week: TimeSummary; onDrill: (d: S
           <em className={`v4-time-target ${met ? "is-met" : ""}`}>ASCA target: {ASCA_TARGET_PCT}%{met ? " · met" : ""}</em>
         </div>
         <div className="flex min-w-0 flex-col gap-[var(--space-4)]">
-          <span className="v4-time-bar" role="img" aria-label={groups.map((g) => `${g.c} ${hoursLabel(g.minutes)}`).join(", ")}>
-            {groups.filter((g) => g.minutes > 0).map((g, i) => (
-              <motion.span key={g.c} initial={reduce ? false : { scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.6, delay: reduce ? 0 : i * 0.06, ease: [0.22, 1, 0.36, 1] }} style={{ flex: g.minutes, background: SHADE[g.c] }} />
-            ))}
-          </span>
-          <ul className="v4-time-legend">
+          <TimeWaffle groups={groups.map((g) => ({ c: g.c, pct: g.minutes, color: TIME_SHADE[g.c] }))} target={ASCA_TARGET_PCT} active={lit} onActive={setLit}
+            onPick={(c) => { const g = groups.find((x) => x.c === c); if (g && g.minutes) open(g); }}
+            label={`${groups.map((g) => `${g.c} ${hoursLabel(g.minutes)}`).join(", ")}. ASCA target ${ASCA_TARGET_PCT}%`} />
+          <ul className="v4-time-legend" onPointerLeave={() => setLit(null)}>
             {groups.map((g) => (
               <li key={g.c}>
-                <button type="button" onClick={() => open(g)} disabled={!g.minutes} className="dm-quiet group">
-                  <i style={{ background: SHADE[g.c] }} aria-hidden />
+                <button type="button" onClick={() => open(g)} disabled={!g.minutes} className="dm-quiet group" onPointerEnter={() => setLit(g.c)} onFocus={() => setLit(g.c)} onBlur={() => setLit(null)}>
+                  <i style={{ background: TIME_SHADE[g.c] }} aria-hidden />
                   <span>{g.c}</span>
                   <b>{hoursLabel(g.minutes)}</b>
                   <small>{g.pct}%</small>
@@ -122,11 +131,15 @@ export function UseOfTime({ week, onDrill }: { week: TimeSummary; onDrill: (d: S
   );
 }
 
-export type AscaItem = { pct: number; label: string; /** points since last semester (DEMO-ONLY seeded) */ delta: number; onOpen: () => void };
+export type AscaItem = { key: string; short: string; tip: string; pct: number; label: string; /** points since last semester (DEMO-ONLY seeded) */ delta: number; onOpen: () => void };
 
 /** ASCA Alignment: Academic and Career, two rings each, the change since
  *  last semester under each. */
 export function AscaAlignment({ academic, career, onAbout }: { academic: AscaItem[]; career: AscaItem[]; onAbout: () => void }) {
+  // One shared scale for both groups, cropped to the decade below the
+  // lowest value (and said so under the charts).
+  const all = [...academic, ...career].flatMap((it) => [it.pct, it.pct - it.delta]);
+  const lo = Math.max(0, Math.min(80, Math.floor((Math.min(...all) - 4) / 10) * 10));
   const domains = [
     { title: "Academic Development", items: academic },
     { title: "Career Development", items: career },
@@ -137,24 +150,18 @@ export function AscaAlignment({ academic, career, onAbout }: { academic: AscaIte
         <SectionTitle title="ASCA Alignment" info="How the caseload lines up with the ASCA National Model's academic and career domains. The change is since last semester." />
         <button type="button" onClick={onAbout} className="v4-r2-link">About these metrics<ChevronRight size={14} aria-hidden /></button>
       </div>
-      <div className="v4-asca2">
+      {/* Two slopegraphs on one shared scale: last semester on the left
+         axis, now on the right, each line labelled at its end. A label
+         opens the students behind it. */}
+      <div className="iv-asca">
         {domains.map((d) => (
-          <div key={d.title}>
-            <span className="v4-asca2-domain">{d.title}</span>
-            {d.items.map((it) => (
-              <button key={it.label} type="button" onClick={it.onOpen} className="v4-asca2-item dm-quiet group" aria-label={`${it.label}: ${it.pct}%, ${it.delta >= 0 ? "up" : "down"} ${Math.abs(it.delta)} points from last semester. Show students`}>
-                <DrawRing pct={it.pct} size={48} stroke={4} />
-                <span>
-                  <strong>{it.pct}%</strong>
-                  <em>{it.label}</em>
-                  <small>{it.delta >= 0 ? "+" : ""}{it.delta}% from last semester</small>
-                </span>
-                <ChevronRight size={14} aria-hidden className="transition-transform group-hover:translate-x-[3px]" />
-              </button>
-            ))}
+          <div key={d.title} className="iv-asca-group">
+            <span className="iv-asca-domain">{d.title}</span>
+            <SlopeGraph lo={lo} items={d.items.map((it) => ({ key: it.key, pct: it.pct, delta: it.delta, short: it.short, label: it.label, tip: it.tip, onOpen: it.onOpen }))} />
           </div>
         ))}
       </div>
+      <p className="iv-asca-note">Change in points since last semester. Scale starts at {lo}%.</p>
     </section>
   );
 }

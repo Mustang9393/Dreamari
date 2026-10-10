@@ -55,6 +55,33 @@
 //   toolbar, beside By Milestone | By Student: it is one setting for the
 //   page, so it is shown once and never moves when the view changes. A new
 //   storage key, so everyone starts on Charts.
+//
+// The charts redrawn (Chandu, 10 Oct 2026: "try better types of graphs,
+// more beautiful ones ... be creative with the graphs, don't be
+// traditional, as long as they convey the information sensibly we can use
+// them", and "Don't change structure of the page or organisation"). The
+// page order, filters and links are untouched; only the marks changed
+// (all of them in milestoneViz.tsx):
+// - the summary figures roll up on arrival, and Complete wears a gradient
+//   ring with the page's one glow (one hero per page);
+// - one grade picked: the four-colour bar became a waffle, one dot per
+//   checkpoint, so "174 Done" is a block you can see, not a sliver;
+// - each grade's head gets a quiet ring beside its percentage;
+// - List rows: the meter became a lit pill track with quarter ticks.
+//
+// Every mark drills (Chandu, 10 Oct 2026: "everything needs drilldowns
+// that are logical. I see graphs ... that don't do anything when I
+// click"). What each opens, and why it is the logical next screen:
+// - Students: the By Student list (every student, the figure's own rows);
+// - Milestones: a drill ranking every milestone, lowest first, with the
+//   lowest one a click away;
+// - Complete: a drill of the students who are not complete, lowest first;
+// - Need Attention: By Student filtered to them (unchanged);
+// - a waffle state (dot or legend): that state across the grade's
+//   milestones, which milestones hold it and who;
+// - a grade head's ring: that grade's students who are not complete;
+// - cards, list bars, By Student pills: the milestone drawer, filtered to
+//   the state clicked or focused on the student clicked.
 
 import { createElement, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -68,11 +95,14 @@ import { useCounselorFilters, type GradeFilter } from "../shell";
 import { Listbox } from "./Listbox";
 import { Go } from "./chips";
 import { Segmented } from "./viz";
-import { SegBar, countsLine } from "./milestoneViz";
+import { CheckpointWaffle, HeroRing, PillTrack, seeLine } from "./milestoneViz";
+import { DrillPanel, type Drill } from "./Drill";
+import { Tip } from "@/components/app/IconTip";
+import { CountUp } from "./overviewShared";
 import { MilestoneCard } from "./MilestoneCards";
-import { MilestoneDrawer } from "./MilestoneDrawer";
+import { MilestoneDrawer, type MilestoneFilter } from "./MilestoneDrawer";
 import { MilestonesByStudent, type StudentStatusFilter } from "./MilestonesByStudent";
-import { GRADES, buildModel, milestoneIcon, needsHelp, pctDone, reviewHref, reviewHrefIds, sumCounts, typeLabel, type Grade, type MilestoneRow } from "./milestonesModel";
+import { GRADES, M_LABEL, buildModel, milestoneIcon, needsHelp, pctDone, reviewHref, reviewHrefIds, sumCounts, typeLabel, type Grade, type MState, type MilestoneRow, type StudentRow } from "./milestonesModel";
 import { SubTabs } from "./SubTabs";
 import "./milestones.css";
 
@@ -101,7 +131,8 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   };
   const { gradeFilter, setGradeFilter, counselorFilter, setCounselorFilter } = useCounselorFilters();
   const [status, setStatus] = useState<StudentStatusFilter>("All");
-  const [openRow, setOpenRow] = useState<{ grade: Grade; id: string } | null>(null);
+  const [openRow, setOpenRow] = useState<{ grade: Grade; id: string; filter?: MilestoneFilter; focus?: string } | null>(null);
+  const [drill, setDrill] = useState<Drill | null>(null);
   // All Grades: one collapsible section per grade, Grade 9 open, the rest
   // closed, each independent (Maisha: "once there are 7-12 milestones, the
   // page becomes too long and repetitive"; 35 rows stacked was that page).
@@ -123,6 +154,57 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   // each grade's percentage, for the section heads on All Grades
   const pulse = GRADES.map((g) => ({ g, pct: pctDone(sumCounts(model.rows[g])) }));
   const opened = openRow ? model.rows[openRow.grade].find((r) => r.item.id === openRow.id) ?? null : null;
+
+  // ---- drills (see the header: what each figure opens and why) ----
+  const scopeLabel = gradeFilter === "All Grades" ? "All Grades" : `Grade ${gradeFilter}`;
+  const openStudents = () => { setDrill(null); setStatus("All"); setMode("student"); };
+  const asDrillStudent = (r: StudentRow) => ({ id: r.s.id, name: r.s.name, grade: r.s.grade, avatarIndex: r.s.avatarIndex, note: `${r.pct}% · ${r.counts.done} of ${r.total} done` });
+  const notCompleteDrill = (list: StudentRow[], scope: string, pct: number) => {
+    const open = list.filter((r) => r.total > 0 && r.pct < 100).sort((a, b) => a.pct - b.pct || a.s.name.localeCompare(b.s.name));
+    setDrill({
+      title: `${open.length} not complete`,
+      subtitle: `${scope} · ${pct}% of checkpoints done`,
+      students: open.map(asDrillStudent),
+      studentsLabel: `${open.length} students, furthest behind first`,
+      action: { label: "Open By Student", onClick: openStudents },
+    });
+  };
+  const milestonesDrill = () => {
+    const ranked = [...rows].sort((a, b) => a.pct - b.pct || a.item.name.localeCompare(b.item.name));
+    const low = ranked[0];
+    setDrill({
+      title: `${rows.length} milestones`,
+      subtitle: `${scopeLabel} · lowest first`,
+      rows: ranked.map((r) => ({ label: gradeFilter === "All Grades" ? `Grade ${r.grade} · ${r.item.name}` : r.item.name, value: `${r.pct}%`, pct: r.pct })),
+      rowsLabel: "Complete",
+      action: low ? { label: `Open ${low.item.name}`, onClick: () => { setDrill(null); setOpenRow({ grade: low.grade, id: low.item.id }); } } : undefined,
+    });
+  };
+  const stateDrill = (g: Grade, st: MState) => {
+    const holding = model.rows[g].filter((r) => r.counts[st] > 0).sort((a, b) => b.counts[st] - a.counts[st]);
+    const who = new Map<string, { r: StudentRow; items: string[] }>();
+    for (const r of holding) for (const e of r.entries) if (e.state === st) {
+      const sr = model.students.find((x) => x.s.id === e.s.id);
+      if (!sr) continue;
+      const cur = who.get(e.s.id) ?? { r: sr, items: [] };
+      cur.items.push(r.item.name);
+      who.set(e.s.id, cur);
+    }
+    const people = [...who.values()].sort((a, b) => b.items.length - a.items.length || a.r.s.name.localeCompare(b.r.s.name));
+    const n = holding.reduce((t, r) => t + r.counts[st], 0);
+    const top = holding[0];
+    setDrill({
+      title: `${n} ${M_LABEL[st]}`,
+      subtitle: `Grade ${g} · checkpoints across ${holding.length} ${holding.length === 1 ? "milestone" : "milestones"}`,
+      rows: holding.map((r) => ({ label: r.item.name, value: `${r.counts[st]} of ${r.total}`, pct: (r.counts[st] / Math.max(1, r.total)) * 100 })),
+      rowsLabel: "Where they are",
+      students: people.map(({ r, items }) => ({ id: r.s.id, name: r.s.name, grade: r.s.grade, avatarIndex: r.s.avatarIndex, note: items.length > 2 ? `${items.slice(0, 2).join(", ")} +${items.length - 2}` : items.join(", ") })),
+      studentsLabel: `${people.length} ${people.length === 1 ? "student" : "students"}`,
+      action: top ? { label: `Open ${top.item.name}`, onClick: () => { setDrill(null); setOpenRow({ grade: g, id: top.item.id, filter: st }); } } : undefined,
+    });
+  };
+  const gradeStudents = (g: Grade) => model.students.filter((r) => r.s.grade === g);
+  const openNeedHelp = () => { setStatus("Need Help"); setMode("student"); };
 
   const exportCsv = () => {
     const lines = mode === "milestone"
@@ -160,16 +242,18 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
         {/* the figures step up on All Grades ("slightly increase the size
            of the summary metrics ... for better visibility", Maisha) */}
         <dl className={`v4-ms-summary ${gradeFilter === "All Grades" ? "is-all" : ""}`}>
-          <div><dt>Students</dt><dd>{students.length}</dd></div>
-          <div><dt>Milestones</dt><dd>{rows.length}</dd></div>
-          <div><dt>Complete</dt><dd>{pctDone(counts)}%</dd></div>
+          <div><dt>Students</dt><dd><Tip label={seeLine(students.length)}><button type="button" onClick={openStudents} className="v4-ms-fig" aria-label={`${students.length} students: open the student list`}><CountUp value={students.length} /></button></Tip></dd></div>
+          <div><dt>Milestones</dt><dd><Tip label="See every milestone, lowest first"><button type="button" onClick={milestonesDrill} className="v4-ms-fig" aria-label={`${rows.length} milestones: rank them, lowest first`}><CountUp value={rows.length} /></button></Tip></dd></div>
+          <div className="is-hero"><dt>Complete</dt><dd><Tip label={seeLine(students.filter((r) => r.total > 0 && r.pct < 100).length, "not complete")}><button type="button" onClick={() => notCompleteDrill(students, scopeLabel, pctDone(counts))} className="v4-ms-fig is-hero-fig" aria-label={`${pctDone(counts)}% complete: see the students who are not complete`}><HeroRing hero pct={pctDone(counts)} size={gradeFilter === "All Grades" ? 40 : 32} stroke={gradeFilter === "All Grades" ? 5 : 4} /><CountUp value={pctDone(counts)} suffix="%" /></button></Tip></dd></div>
           <div>
             <dt>Need Attention</dt>
             <dd>
               {needHelp > 0 ? (
-                <button type="button" onClick={() => { setStatus("Need Help"); setMode("student"); }} className="v4-ms-summary-link" aria-label={`${needHelp} students need attention: show them`}>
-                  <span style={{ color: "var(--v4-caution)" }}>{needHelp}</span><Go />
-                </button>
+                <Tip label={seeLine(needHelp)}>
+                  <button type="button" onClick={openNeedHelp} className="v4-ms-summary-link v4-ms-fig" aria-label={`${needHelp} students need attention: show them`}>
+                    <span style={{ color: "var(--v4-caution)" }}><CountUp value={needHelp} /></span><Go />
+                  </button>
+                </Tip>
               ) : 0}
             </dd>
           </div>
@@ -182,10 +266,10 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
            the percentage again (the Complete figure above says it once). */}
         {gradeFilter !== "All Grades" && (
           <div className="v4-ms-grade-line">
-            <SegBar full counts={counts} label={`Grade ${gradeFilter}`} className="is-tall" />
-            {/* "Checkpoints" names the unit: the strip above counts students, this
-               line counts milestone checkpoints, so 3 and 7 are both right */}
-            <span className="v4-ms-grade-line-counts">{countsLine(counts) ? `Checkpoints · ${countsLine(counts)}` : "No milestone activity yet"}</span>
+            {/* "Checkpoints" names the unit: the strip above counts students,
+               the waffle counts milestone checkpoints, so 3 and 7 are both
+               right. One dot per checkpoint, Done first. */}
+            <CheckpointWaffle counts={counts} label={`Grade ${gradeFilter}`} onPick={(st) => stateDrill(gradeFilter as Grade, st)} />
           </div>
         )}
       </section>
@@ -204,12 +288,12 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
               // in one surface per grade.
               const list = viz === "charts" ? (
                 <ul id={`v4-ms-grade-${g}`} className="v4-msc-grid">
-                  {model.rows[g].map((r) => <MilestoneCard key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
+                  {model.rows[g].map((r) => <MilestoneCard key={r.item.id} row={r} onOpen={(st) => setOpenRow({ grade: g, id: r.item.id, filter: st })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
                 </ul>
               ) : (
                 <div id={`v4-ms-grade-${g}`} className="v4-ms-card v4-surface">
                   <ul className="v4-ms-rows">
-                    {model.rows[g].map((r) => <MilestoneModule key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
+                    {model.rows[g].map((r) => <MilestoneModule key={r.item.id} row={r} onOpen={(f) => setOpenRow({ grade: g, id: r.item.id, filter: f })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
                   </ul>
                 </div>
               );
@@ -218,11 +302,15 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
                 <section key={g} aria-label={`Grade ${g} milestones`} className="v4-ms-grade">
                   {/* "Grade 10 · 74%" and the waiting link, nothing else */}
                   <div className="v4-ms-grade-head">
-                    <button type="button" aria-expanded={open} aria-controls={`v4-ms-grade-${g}`} onClick={() => toggleGrade(g)} className="v4-ms-grade-toggle dm-quiet">
-                      <h2>Grade {g}</h2>
-                      <span className="v4-ms-grade-pct">{p.pct}%</span>
-                      <ChevronDown className="h-[16px] w-[16px] flex-none transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
-                    </button>
+                    {/* the name and chevron fold the section; the ring and its
+                       percentage drill into the grade's students not complete */}
+                    <span className="v4-ms-grade-title">
+                      <button type="button" aria-expanded={open} aria-controls={`v4-ms-grade-${g}`} onClick={() => toggleGrade(g)} className="v4-ms-grade-toggle dm-quiet"><h2>Grade {g}</h2></button>
+                      <Tip label={seeLine(gradeStudents(g).filter((r) => r.total > 0 && r.pct < 100).length, "not complete")}>
+                        <button type="button" onClick={() => notCompleteDrill(gradeStudents(g), `Grade ${g}`, p.pct)} className="v4-ms-grade-pct v4-ms-fig" aria-label={`Grade ${g}, ${p.pct}% complete: see the students not complete`}><HeroRing pct={p.pct} size={18} stroke={3} />{p.pct}%</button>
+                      </Tip>
+                      <button type="button" tabIndex={-1} aria-hidden onClick={() => toggleGrade(g)} className="v4-ms-grade-chev dm-quiet"><ChevronDown className="h-[16px] w-[16px] flex-none transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden /></button>
+                    </span>
                     {waitingIds.length > 0 && <button type="button" onClick={() => router.push(reviewHrefIds(waitingIds))} className="v4-ms-wait">{waitingIds.length} waiting for you</button>}
                   </div>
                   {open && list}
@@ -232,10 +320,11 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
           </div>
         )
       ) : (
-        <MilestonesByStudent key={`${gradeFilter}-${counselorFilter}`} rows={students} status={status} setStatus={setStatus} />
+        <MilestonesByStudent key={`${gradeFilter}-${counselorFilter}`} rows={students} status={status} setStatus={setStatus} onOpenMilestone={(r, m) => setOpenRow({ grade: r.s.grade as Grade, id: m.item.id, filter: m.state, focus: r.s.id })} />
       )}
 
-      <MilestoneDrawer row={opened} onClose={() => setOpenRow(null)} />
+      <MilestoneDrawer row={opened} onClose={() => setOpenRow(null)} initialFilter={openRow?.filter} focusId={openRow?.focus} />
+      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }
@@ -244,13 +333,13 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
  *  meter beside its percentage, and "N waiting for you" only when
  *  submissions are in the counselor's queue. The whole row opens the
  *  drawer; the arrow shows on hover. */
-function MilestoneModule({ row, onOpen, onWaiting }: { row: MilestoneRow; onOpen: () => void; onWaiting: () => void }) {
+function MilestoneModule({ row, onOpen, onWaiting }: { row: MilestoneRow; onOpen: (f?: MilestoneFilter) => void; onWaiting: () => void }) {
   const waiting = row.key ? row.waiting.length : 0;
   return (
-    <li onClick={onOpen} className="v4-ms-row dm-quiet">
+    <li onClick={() => onOpen()} className="v4-ms-row dm-quiet">
       <span className="v4-ms-row-icon" aria-hidden>{createElement(milestoneIcon(row), { className: "h-[15px] w-[15px]" })}</span>
       <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="v4-ms-row-title v4-ms-name" aria-label={`${row.item.name}: ${row.pct}% complete. Open students`}>{row.item.name}</button>
-      <SegBar counts={row.counts} label={row.item.name} className="v4-ms-row-bar" />
+      <PillTrack counts={row.counts} label={row.item.name} onPick={(f) => onOpen(f)} className="v4-ms-row-bar" />
       <span className="v4-ms-row-pct">{row.pct}%</span>
       <span className="v4-ms-row-wait">
         {waiting > 0 && (

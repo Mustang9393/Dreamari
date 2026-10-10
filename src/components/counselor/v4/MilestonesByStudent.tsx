@@ -12,6 +12,16 @@
 // counts column too (Chandu, 9 Oct 2026: "super dense and wordy ... not
 // overwhelming like it is now"): the dots carry the counts as their
 // tooltip and label. Students who need help sort first.
+//
+// The dots became a stepped track (Chandu, 10 Oct 2026: "try better types
+// of graphs, more beautiful ones ... don't be traditional"): one pill per
+// milestone in curriculum order (MilestoneDots in milestoneViz.tsx), so a
+// row reads as how far along the year's path a student is. Same data, same
+// tooltip; full, half, amber and outline pills keep the four states
+// readable without colour.
+// Drilldowns (Chandu, 10 Oct 2026: "everything needs drilldowns that are
+// logical"): each pill opens that milestone's drawer focused on this
+// student; the face and the name open the student's profile.
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -26,7 +36,7 @@ import { Avatar, Go, SelectBox, StatusChip } from "./chips";
 import { attentionRank, attentionReason } from "./studentAttention";
 import { notify } from "../v5/LogSheet";
 import { MilestoneDots } from "./milestoneViz";
-import { STATUS_RANK, studentHref, type StudentRow } from "./milestonesModel";
+import { STATUS_RANK, studentHref, type Mark, type StudentRow } from "./milestonesModel";
 
 const PAGE = 25;
 export type StudentStatusFilter = "All" | "Need Help" | "At Risk" | "Needs Attention" | "On Track";
@@ -38,7 +48,7 @@ const STATUS_OPTIONS: { value: StudentStatusFilter; label: string }[] = [
   { value: "On Track", label: "On Track" },
 ];
 
-export function MilestonesByStudent({ rows, status, setStatus }: { rows: StudentRow[]; status: StudentStatusFilter; setStatus: (s: StudentStatusFilter) => void }) {
+export function MilestonesByStudent({ rows, status, setStatus, onOpenMilestone }: { rows: StudentRow[]; status: StudentStatusFilter; setStatus: (s: StudentStatusFilter) => void; onOpenMilestone: (r: StudentRow, m: Mark) => void }) {
   const router = useRouter();
   const [pathway, setPathway] = useState("All");
   const [shown, setShown] = useState(PAGE);
@@ -99,14 +109,14 @@ export function MilestonesByStudent({ rows, status, setStatus }: { rows: Student
                   <SelectBox checked={picked.has(r.s.id)} label={`Select ${r.s.name}`} onChange={(on) => toggle(r.s.id, on)} />
                 </span>
                 <span className="v4-ms-student-who">
-                  <Avatar name={r.s.name} index={r.s.avatarIndex} size={36} />
+                  <Link href={studentHref(r.s.id)} onClick={(e) => e.stopPropagation()} aria-label={`Open ${r.s.name}'s profile`} tabIndex={-1} className="v4-ms-face"><Avatar name={r.s.name} index={r.s.avatarIndex} size={36} /></Link>
                   <span className="flex min-w-0 flex-col leading-tight">
                     <Link href={studentHref(r.s.id)} onClick={(e) => e.stopPropagation()} className="v4-ms-name truncate">{r.s.name}</Link>
                     <span className="v4-ms-sub">Grade {r.s.grade}</span>
                   </span>
                 </span>
                 <span className="v4-ms-student-pct">{r.pct}%</span>
-                <span className="v4-ms-student-dots"><MilestoneDots marks={r.marks} counts={r.counts} /></span>
+                <span className="v4-ms-student-dots"><MilestoneDots marks={r.marks} counts={r.counts} who={r.s.name} onPick={(m) => onOpenMilestone(r, m)} /></span>
                 <span className="v4-ms-student-status">
                   <StatusChip status={r.s.status} />
                   {help && <span className="v4-ms-student-reason">{attentionReason(r.s)}</span>}

@@ -12,8 +12,21 @@
 // states with their names and colours all sit here, not on the row.
 // The panel is the v4 SidePanel (role=dialog aria-modal), so Back and
 // Escape close it.
+//
+// The four-colour bar became one dot per student (Chandu, 10 Oct 2026:
+// "try better types of graphs, more beautiful ones ... as long as they
+// convey the information sensibly"). The dots sit in Done, In Progress,
+// Needs Attention, Not Started order, each names its student on hover, and
+// the dots outside the active chip step back, so the chart and the filter
+// below it are one control: pick "Needs Attention" and those people light
+// up above the list of them.
+// Drilldowns (Chandu, 10 Oct 2026: "everything needs drilldowns that are
+// logical"): the drawer can open pre-filtered (a legend row, a tick or a
+// bar segment picks the state) or focused on one student (a By Student
+// segment), and a dot click brings that student's row into view and
+// marks it, switching to All when the filter was hiding them.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FileCheck2, MessageSquare, Users } from "lucide-react";
@@ -23,22 +36,32 @@ import { BatchComposer } from "./Batch";
 import { Avatar, SelectBox } from "./chips";
 import { DreamyMoment } from "./overviewShared";
 import { notify } from "../v5/LogSheet";
-import { SegBar } from "./milestoneViz";
+import { StudentDots } from "./milestoneViz";
 import { M_LABEL, M_STATES, STATE_RANK, entryNote, messageHref, reviewHref, studentHref, typeLabel, type MState, type MilestoneRow } from "./milestonesModel";
 
-export function MilestoneDrawer({ row, onClose }: { row: MilestoneRow | null; onClose: () => void }) {
+export type MilestoneFilter = MState | "open" | "all";
+
+export function MilestoneDrawer({ row, onClose, initialFilter, focusId }: { row: MilestoneRow | null; onClose: () => void; initialFilter?: MilestoneFilter; focusId?: string }) {
   return (
     <SidePanel open={!!row} onClose={onClose} title={row?.item.name ?? ""} subtitle={row ? `Grade ${row.grade} · ${typeLabel(row.item.classification)}` : undefined}>
-      {row && <DrawerBody key={`${row.grade}-${row.item.id}`} row={row} onClose={onClose} />}
+      {row && <DrawerBody key={`${row.grade}-${row.item.id}-${initialFilter ?? ""}-${focusId ?? ""}`} row={row} onClose={onClose} initialFilter={initialFilter} focusId={focusId} />}
     </SidePanel>
   );
 }
 
-type Filter = MState | "open" | "all";
+type Filter = MilestoneFilter;
 
-function DrawerBody({ row, onClose }: { row: MilestoneRow; onClose: () => void }) {
+function DrawerBody({ row, onClose, initialFilter, focusId }: { row: MilestoneRow; onClose: () => void; initialFilter?: Filter; focusId?: string }) {
   const router = useRouter();
-  const [filter, setFilterState] = useState<Filter>("open");
+  const [filter, setFilterState] = useState<Filter>(initialFilter ?? (focusId ? "all" : "open"));
+  // the student a dot (or a By Student segment) pointed at: scrolled into
+  // view and marked; `n` re-runs the scroll when the same dot is clicked again
+  const [focus, setFocus] = useState<{ id: string; n: number } | null>(focusId ? { id: focusId, n: 0 } : null);
+  useEffect(() => {
+    if (!focus) return;
+    const t = window.setTimeout(() => document.getElementById(`v4-ms-person-${focus.id}`)?.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }), 60);
+    return () => window.clearTimeout(t);
+  }, [focus]);
   const [picked, setPicked] = useState<Set<string>>(() => new Set());
   const [composing, setComposing] = useState(false);
   const setFilter = (f: Filter) => { setFilterState(f); setPicked(new Set()); setComposing(false); };
@@ -46,6 +69,8 @@ function DrawerBody({ row, onClose }: { row: MilestoneRow; onClose: () => void }
   // step comes off before the page goes on (backStep.ts)
   const go = (href: string) => { onClose(); router.push(href); };
 
+  const active = (st: MState) => filter === "all" || (filter === "open" ? st !== "done" : st === filter);
+  const byState = [...row.entries].sort((a, b) => M_STATES.findIndex((st) => st.key === a.state) - M_STATES.findIndex((st) => st.key === b.state) || a.s.name.localeCompare(b.s.name));
   const sorted = [...row.entries].sort((a, b) => STATE_RANK[a.state] - STATE_RANK[b.state] || a.s.name.localeCompare(b.s.name));
   const shown = filter === "all" ? sorted : filter === "open" ? sorted.filter((e) => e.state !== "done") : sorted.filter((e) => e.state === filter);
   const targets = (picked.size ? shown.filter((e) => picked.has(e.s.id)) : shown).map((e) => e.s);
@@ -60,12 +85,16 @@ function DrawerBody({ row, onClose }: { row: MilestoneRow; onClose: () => void }
           <strong className="text-[30px] leading-none font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{row.pct}%</strong>
           <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>complete · {row.counts.done} of {row.total}</span>
         </span>
-        <SegBar full counts={row.counts} label={row.item.name} className="is-tall" />
+        <StudentDots entries={byState} label={row.item.name} active={active} onPick={(id) => {
+          const e = row.entries.find((x) => x.s.id === id);
+          if (e && !active(e.state)) setFilter("all");
+          setFocus((f) => ({ id, n: (f?.n ?? 0) + 1 }));
+        }} />
         {/* the four counts, each a filter for the list below */}
         <div role="group" aria-label="Show students by status" className="grid grid-cols-2 gap-[6px]">
           {M_STATES.map((st) => (
             <button key={st.key} type="button" aria-pressed={filter === st.key} onClick={() => setFilter(filter === st.key ? "open" : st.key)} className="v4-ms-chip">
-              <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: st.color }} />
+              <span aria-hidden className={`msv-swatch is-${st.key}`} />
               <span className="flex-1 truncate text-left">{st.label}</span>
               <b className="tabular-nums">{row.counts[st.key]}</b>
             </button>
@@ -97,7 +126,7 @@ function DrawerBody({ row, onClose }: { row: MilestoneRow; onClose: () => void }
           filter === "open" ? (
             <p className="flex items-center gap-[10px] py-[var(--space-2)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}><DreamyMoment mood="celebrate" size={48} />Every student has completed this.</p>
           ) : (
-            <p className="py-[var(--space-3)] text-[13px]" style={{ color: "var(--muted-foreground)" }}>No students are {M_LABEL[filter as MState]?.toLowerCase() ?? "here"}.</p>
+            <p className="py-[var(--space-3)] text-[13px]" style={{ color: "var(--muted-foreground)" }}>{M_LABEL[filter as MState] ? `No students in ${M_LABEL[filter as MState]} right now.` : "No students here."}</p>
           )
         ) : (
           <ul className="flex flex-col">
@@ -105,7 +134,7 @@ function DrawerBody({ row, onClose }: { row: MilestoneRow; onClose: () => void }
               const note = entryNote(e, row.item);
               const first = e.s.name.split(" ")[0];
               return (
-                <li key={e.s.id} onClick={() => go(studentHref(e.s.id))} className="v4-ms-person dm-quiet">
+                <li key={e.s.id} id={`v4-ms-person-${e.s.id}`} onClick={() => go(studentHref(e.s.id))} className={`v4-ms-person dm-quiet ${focus?.id === e.s.id ? "is-focus" : ""}`}>
                   <span onClick={(ev) => ev.stopPropagation()} className="flex">
                     <SelectBox checked={picked.has(e.s.id)} label={`Select ${e.s.name}`} onChange={(on) => toggle(e.s.id, on)} />
                   </span>

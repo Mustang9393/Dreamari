@@ -1,5 +1,21 @@
 "use client";
 
+// 10 Oct 2026, Chandu: "try better types of graphs, more beautiful ones. The
+// graphs in the engagement tab are slightly better than the rest live right
+// now. I want you to take it to the next level ... be creative with the
+// graphs, don't be traditional, as long as they convey the information
+// sensibly." Same sections, same order, same data and controls; only the
+// visuals change (charts/engageViz.tsx): the stat tiles get a lit sparkline
+// or a dot per student, Dreamari Activity becomes four tick dials, Logins is
+// a layered glowing area with a scrubber (the page's one glow), the top ten
+// are lollipops on one scale, and Inactive 7+ Days shows each grade's
+// students as dots. Same day ("everything needs drilldowns that are
+// logical. I see graphs ... that don't do anything when I click"): the
+// weekly and daily dot grids open who was active, the Active tile's trend
+// and each logins period open that period's active students, and every
+// students mark carries a tooltip saying what it opens. The exported Sparkline, LoginsChart and SiteBars below
+// stay as they were: v5's Analytics and the component lab draw them.
+
 // DEMO-ONLY v2 fork of ../PlatformEngagement.tsx (24 Sept 2026). v1 stays untouched so the
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
@@ -19,10 +35,9 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { EngagementTrend } from "./EngagementTrend";
+import { DotWaffle, GradeDots, KpiSpark, Lollipop, LoginsArea, TickRing } from "./charts/engageViz";
 import { Segmented } from "./viz";
 import { Disclosure } from "./Disclosure";
-import { RankedBars } from "./CareerCollegeInsights";
 import { useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { DEMO_SCHOOL, lastActiveLabel } from "@/lib/counselorRoster";
@@ -38,6 +53,8 @@ import { seedHash } from "@/lib/localRecord";
 import { signalsFor } from "@/lib/studentSignals";
 
 import { Avatar, Go } from "./chips";
+import { IconTip } from "@/components/app/IconTip";
+import type React from "react";
 import { InsightStudentsPanel, messageHref, studentHref, type StudentsDrill } from "./InsightStudents";
 import { doneBy, pct, useInsightsScope, type SchoolYearKey } from "./insightsScope";
 import "./insights.css";
@@ -86,7 +103,8 @@ export function Sparkline({ values }: { values: number[] }) {
   );
 }
 
-function EngagementStat({ value, decimals = 0, label, series, delta, prevLabel, share }: { value: number; decimals?: number; label: string; series?: number[]; delta?: number; prevLabel?: string; share?: { n: number; of: number } }) {
+function EngagementStat({ value, decimals = 0, label, series, delta, prevLabel, share, open }: { value: number; decimals?: number; label: string; series?: number[]; delta?: number; prevLabel?: string; share?: { n: number; of: number }; /** the chart opens the students it counts */ open?: { tip: string; onClick: () => void } }) {
+  const hit = (node: React.ReactNode, cls = "w-full max-w-[260px]") => open ? <IconTip label={open.tip} className={cls}><button type="button" className="ev-hit dm-quiet" onClick={open.onClick} aria-label={`${label}: ${open.tip}`}>{node}</button></IconTip> : node;
   const up = (delta ?? 0) >= 0;
   const sharePct = share ? Math.round((share.n / Math.max(1, share.of)) * 100) : 0;
   return (
@@ -108,14 +126,12 @@ function EngagementStat({ value, decimals = 0, label, series, delta, prevLabel, 
           {series ? (
             <>
               <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>vs {prevLabel}</span>
-              <Sparkline values={series} />
+              {hit(<KpiSpark values={series} label={`${label}, month by month`} />, "w-[132px] min-w-0 shrink")}
             </>
           ) : share ? (
-            <span className="flex w-full flex-col gap-[6px]">
+            <span className="flex w-full flex-col gap-[8px]">
               <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{sharePct}% of {share.of} students</span>
-              <span className="relative block h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }} aria-hidden>
-                <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={{ width: "0%" }} animate={{ width: `${sharePct}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${TOTAL_COLOR} 40%, transparent), ${TOTAL_COLOR})` }} />
-              </span>
+              {hit(<DotWaffle n={share.n} of={share.of} label={`${share.n} of ${share.of} students, one dot each`} />)}
             </span>
           ) : null}
         </span>
@@ -372,20 +388,37 @@ const INDICATORS: Indicator[] = [
  *  their own lists (many of those students have graduated). */
 function ActiveStudents({ rows }: { rows: { s: CounselorStudent; count: number }[] }) {
   const router = useRouter();
-  const reduce = useReducedMotion();
   const max = Math.max(1, ...rows.map((r) => r.count));
   return (
-    <ol className="v4-active-students">
+    <ol className="ev-leaders">
       {rows.map((r, i) => (
         <li key={r.s.id}>
-          <button type="button" onClick={() => router.push(studentHref(r.s.id))} className="dm-quiet group">
-            <span className="v4-rank-index">{String(i + 1).padStart(2, "0")}</span>
+          <button type="button" onClick={() => router.push(studentHref(r.s.id))} className="ev-leader dm-quiet group" aria-label={`${r.s.name}, Grade ${r.s.grade}: ${r.count} logins. Open student`}>
+            <span className="ev-leader-rank">{String(i + 1).padStart(2, "0")}</span>
             <Avatar name={r.s.name} size={28} index={r.s.avatarIndex} />
-            <span className="v4-active-name">{r.s.name}<small>Grade {r.s.grade}</small></span>
-            <span className="v4-active-track" aria-hidden><motion.i initial={reduce ? false : { width: "0%" }} animate={{ width: `${(r.count / max) * 100}%` }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: reduce ? 0 : i * 0.03 }} /></span>
+            <span className="ev-leader-name">{r.s.name}<small>Grade {r.s.grade}</small></span>
+            <Lollipop value={r.count} max={max} delay={i * 30} />
             <strong>{r.count}</strong>
             <Go kind="open" className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100" />
           </button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** An earlier year's top ten: the same lollipops, names only (many of
+ *  those students have graduated, so nothing opens). */
+function PastLeaders({ items }: { items: { name: string; count: number }[] }) {
+  const max = Math.max(1, ...items.map((r) => r.count));
+  return (
+    <ol className="ev-leaders">
+      {items.map((r, i) => (
+        <li key={r.name} className="ev-leader is-plain" aria-label={`${r.name}: ${r.count} logins`}>
+          <span className="ev-leader-rank">{String(i + 1).padStart(2, "0")}</span>
+          <span className="ev-leader-name">{r.name}</span>
+          <Lollipop value={r.count} max={max} delay={i * 30} />
+          <strong>{r.count}</strong>
         </li>
       ))}
     </ol>
@@ -407,7 +440,7 @@ export function PlatformEngagement() {
   const { roster, back, scopeLabel } = scope;
   const sub = (s: string) => [s, scopeLabel].filter(Boolean).join(" · ");
   const inactive = roster.filter((s) => daysInactive(s) >= 7);
-  const checkins = [9, 10, 11, 12].map((grade) => ({ grade, students: inactive.filter((s) => s.grade === grade) })).filter((g) => scope.filter.grade === "all" || g.grade === Number(scope.filter.grade));
+  const checkins = [9, 10, 11, 12].map((grade) => ({ grade, size: roster.filter((s) => s.grade === grade).length, students: inactive.filter((s) => s.grade === grade) })).filter((g) => scope.filter.grade === "all" || g.grade === Number(scope.filter.grade));
   const schools = district ? districtSchools(everyone).slice().sort((a, b) => a.activePct - b.activePct) : [];
   const reach = schools.filter((s) => s.activePct >= SCHOOL_TARGETS.activeStudents).length;
   const [view, setView] = useState<EngagementView>("month");
@@ -424,6 +457,27 @@ export function PlatformEngagement() {
   // DEMO-ONLY: per-student logins for the current year, seeded from each
   // student's Dreamari activity until logins are logged per student.
   const active = roster.map((s) => ({ s, count: 8 + Math.round(s.engagement.dailyDropsCompleted / 4) + (seedHash(`${s.id}:logins`) % 9) })).sort((a, b) => b.count - a.count).slice(0, 10);
+
+  // DEMO-ONLY: who was active in a period needs per-student login logs
+  // (pending Usman). Until then the students most recently active fill the
+  // period's count (weekly, daily), or a steady seeded pick fills a past
+  // month or day's count, so every figure opens a list of the right size.
+  const byRecent = [...roster].sort((a, b) => daysInactive(a) - daysInactive(b));
+  const openActive = (title: string, n: number, pool: CounselorStudent[], when: string) => {
+    const count = Math.min(n, pool.length);
+    const act = pool.slice(0, count);
+    const rest = roster.filter((s) => !act.includes(s));
+    setDrill({
+      title,
+      subtitle: sub(`${count} of ${roster.length} students · ${when}`),
+      stats: [{ value: `${pct(count, roster.length)}%`, label: "of students" }, { value: String(rest.length), label: "not active" }],
+      students: act.map((s) => ({ s, note: lastActiveLabel(s.lastActive) })),
+      listLabel: `Active · ${count}`,
+      extra: rest.length ? { label: `Message the ${rest.length} not active`, onClick: () => router.push(messageHref(rest.map((s) => s.id))) } : undefined,
+    });
+  };
+  const seeded = (key: string) => [...roster].sort((a, b) => seedHash(`${a.id}:${key}`) - seedHash(`${b.id}:${key}`));
+  const openPeriod = (p: Point) => openActive(`Active in ${p.label}`, p.unique, back === 0 && p === latest ? byRecent : seeded(p.label), `${p.total} logins`);
 
   const indicators = INDICATORS.map((ind) => {
     const did = roster.filter((s) => ind.did(s) && doneBy(s, `eng:${ind.key}`, back));
@@ -456,9 +510,9 @@ export function PlatformEngagement() {
          last month; weekly and daily have no history here, so they show
          their share of the caseload instead of an invented trend. */}
       <div className="v4-engagement-stats grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
-        <EngagementStat value={latest.unique} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
-        <EngagementStat value={weekly} label="Weekly active" share={{ n: weekly, of: roster.length }} />
-        <EngagementStat value={daily} label="Daily active" share={{ n: daily, of: roster.length }} />
+        <EngagementStat value={latest.unique} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} open={{ tip: `See the ${Math.min(latest.unique, roster.length)} students`, onClick: () => openPeriod(latest) }} />
+        <EngagementStat value={weekly} label="Weekly active" share={{ n: weekly, of: roster.length }} open={{ tip: `See the ${weekly} students`, onClick: () => openActive("Weekly active", weekly, byRecent, "last 7 days") }} />
+        <EngagementStat value={daily} label="Daily active" share={{ n: daily, of: roster.length }} open={{ tip: `See the ${daily} students`, onClick: () => openActive("Daily active", daily, byRecent, "today") }} />
         <EngagementStat value={latest.avg} decimals={2} label="Logins per active student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
       </div>
 
@@ -466,16 +520,17 @@ export function PlatformEngagement() {
          students it counts, with a message to the ones not there yet. */}
       <section className="v4-surface flex flex-col gap-[var(--space-4)] border p-[var(--space-5)]">
         <header className="v4-card-head"><h2>Dreamari Activity</h2><span>Students participating</span></header>
-        <div className="v4-indicator-row">
+        <div className="ev-activity">
           {indicators.map((x) => (
-            <button key={x.ind.key} type="button" onClick={() => openIndicator(x)} className="v4-indicator dm-quiet group" aria-label={`${x.ind.label}: ${x.value}%, ${x.did.length} students. Show them`}>
-              <span className="flex min-w-0 flex-col gap-[2px]">
-                <strong><CountUp value={x.value} /><small>%</small></strong>
-                <span className="v4-indicator-label">{x.ind.label}</span>
-                <span className="v4-indicator-note">{x.did.length} of {roster.length}</span>
+            <IconTip key={x.ind.key} label={`See the ${x.did.length} students`} className="min-w-0">
+            <button type="button" onClick={() => openIndicator(x)} className="ev-activity-item dm-quiet group" aria-label={`${x.ind.label}: ${x.value}%, ${x.did.length} students. Show them`}>
+              <TickRing pct={x.value}><CountUp value={x.value} /><small>%</small></TickRing>
+              <span>
+                <span className="ev-activity-label">{x.ind.label}</span>
+                <span className="ev-activity-note">{x.did.length} of {roster.length}</span>
               </span>
-              <span className="v4-activity-track" aria-hidden><i style={{width:`${x.value}%`}} /></span>
             </button>
+            </IconTip>
           ))}
         </div>
       </section>
@@ -489,11 +544,11 @@ export function PlatformEngagement() {
             </span>
             <Segmented ariaLabel="Logins by" value={view} onChange={(k) => setView(k as EngagementView)} options={VIEWS.map((v) => ({ key: v.key, label: v.label }))} />
           </div>
-          {view === "day" && <EngagementTrend key={`day-${scope.filter.year}-${share}`} data={year.daily} path={smoothPath} />}
-          {view === "month" && <EngagementTrend key={`month-${scope.filter.year}-${share}`} data={year.monthly} path={smoothPath} />}
+          {view === "day" && <LoginsArea key={`day-${scope.filter.year}-${share}`} data={year.daily} path={smoothPath} unit="day" onSee={openPeriod} />}
+          {view === "month" && <LoginsArea key={`month-${scope.filter.year}-${share}`} data={year.monthly} path={smoothPath} unit="month" onSee={openPeriod} />}
           {view === "student" && (back === 0
             ? <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Top 10 students by logins</span><ActiveStudents rows={active} /></>
-            : <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Top 10 students that year</span><RankedBars key={`student-${scope.filter.year}`} items={year.byStudent} unit="logins" /></>)}
+            : <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Top 10 students that year</span><PastLeaders key={`student-${scope.filter.year}`} items={year.byStudent} /></>)}
           {/* The month table closes the chart's own card (it is that chart's data). */}
           {view === "month" && (
           <div className="v4-engagement-table border-t pt-[var(--space-2)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -547,6 +602,8 @@ export function PlatformEngagement() {
                 onClick={() => setDrill({ title: `Grade ${g.grade}: Inactive 7+ Days`, subtitle: sub(`${g.students.length} ${g.students.length === 1 ? "student" : "students"} with no activity for 7+ days`), students: g.students.map((s) => ({ s, note: lastActiveLabel(s.lastActive) })) })}>
                 <strong><CountUp value={g.students.length} /></strong>
                 <span className="v4-inactive-grade">Grade {g.grade}</span>
+                <span className="ev-grade-share">of {g.size} students</span>
+                <GradeDots inactive={g.students.length} of={g.size} />
                 <span className="v4-inactive-open">Open<Go kind="open" /></span>
               </button>
             ))}
