@@ -107,3 +107,8 @@ html.dark [data-counselor-version="v4"] { --ev-warn-hot: color-mix(in srgb, var(
   [data-counselor-version="v4"] :is(.ev-reveal, .ev-lead-in) { animation: none !important; }
   [data-counselor-version="v4"] .ev-beam { transition: none; }
 }
+
+[data-counselor-version="v4"] { --ev-active: #1a2d8c; }
+html.dark [data-counselor-version="v4"] { --ev-active: #cdeeff; }
+/* the active-students line's casing: the page colour, so it reads over the aurora */
+[data-counselor-version="v4"] .ev-casing { stroke: var(--background); stroke-opacity: .75; }

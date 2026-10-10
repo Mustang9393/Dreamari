@@ -72,7 +72,8 @@ function niceScale(peak: number) {
 }
 
 const TOTAL = GLOW.blue;
-const ACTIVE = GLOW.sky;
+/** its own colour, outside the aurora's blues: near-white in dark, deep navy in light */
+const ACTIVE = "var(--ev-active)";
 
 /** The hero: total logins and active students over the period. */
 export function LoginsArea({ data, path, unit, onSee }: { data: Point[]; path: (p: XY[]) => string; unit: "day" | "month"; /** opens the selected period's active students */ onSee?: (p: Point) => void }) {
@@ -148,8 +149,11 @@ export function LoginsArea({ data, path, unit, onSee }: { data: Point[]; path: (
             {data.length > 1 && (
               <g className={reduce ? undefined : "ev-reveal"}>
                 <Aurora d={area(totalD)} box={{ x: left, y: top, w: plotW, h: base - top }} span={[x(0), x(last)]} />
-                <Aurora d={area(activeD)} box={{ x: left, y: top, w: plotW, h: base - top }} span={[x(0), x(last)]} colors={[GLOW.sky, GLOW.sky]} strength={0.3} />
-                <GlowStroke d={activeD} color={GLOW.sky} width={2.25} />
+                {/* a casing in the page colour so the active line cuts through the
+                   aurora instead of melting into it (Chandu: "the second line
+                   is hard to distinguish against the aurora stuff") */}
+                <path d={activeD} fill="none" className="ev-casing" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+                <GlowStroke d={activeD} color={ACTIVE} width={2.5} from={1} />
                 <GlowStroke d={totalD} color={GLOW.blue} width={3} />
               </g>
             )}
@@ -157,10 +161,10 @@ export function LoginsArea({ data, path, unit, onSee }: { data: Point[]; path: (
             {data.map((p, i) => i !== index && (
               <g key={p.label} className="ev-rest">
                 <circle cx={x(i)} cy={y(p.total)} r="3" style={{ stroke: GLOW.blue }} />
-                <circle cx={x(i)} cy={y(p.unique)} r="2.5" style={{ stroke: GLOW.sky }} />
+                <circle cx={x(i)} cy={y(p.unique)} r="2.5" style={{ stroke: ACTIVE }} />
               </g>
             ))}
-            <Orb cx={x(index)} cy={y(cur.unique)} r={4.5} color={GLOW.sky} />
+            <Orb cx={x(index)} cy={y(cur.unique)} r={4.5} color={ACTIVE} />
             <Orb cx={x(index)} cy={ty} r={7} color={GLOW.blue} pulse={index === last && !reduce} />
             <ValuePill x={x(index)} y={ty} value={cur.total} flip={flip} strong />
             <ValuePill x={x(index)} y={uy} value={cur.unique} flip={flip} />
