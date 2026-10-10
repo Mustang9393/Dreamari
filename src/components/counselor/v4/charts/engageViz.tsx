@@ -147,8 +147,8 @@ export function LoginsArea({ data, path, unit, onSee }: { data: Point[]; path: (
             <rect x={x(index) - band * 0.26} y={top - 6} width={band * 0.52} height={base - top + 6} rx={Math.min(14, band * 0.2)} fill={`url(#ev-beam-${id})`} className="ev-beam" />
             {data.length > 1 && (
               <g className={reduce ? undefined : "ev-reveal"}>
-                <Aurora d={area(totalD)} box={{ x: left, y: top, w: plotW, h: base - top }} />
-                <Aurora d={area(activeD)} box={{ x: left, y: top, w: plotW, h: base - top }} colors={[GLOW.sky, GLOW.indigo]} strength={0.55} />
+                <Aurora d={area(totalD)} box={{ x: left, y: top, w: plotW, h: base - top }} span={[x(0), x(last)]} />
+                <Aurora d={area(activeD)} box={{ x: left, y: top, w: plotW, h: base - top }} span={[x(0), x(last)]} colors={[GLOW.sky, GLOW.sky]} strength={0.3} />
                 <GlowStroke d={activeD} color={GLOW.sky} width={2.25} />
                 <GlowStroke d={totalD} color={GLOW.blue} width={3} />
               </g>

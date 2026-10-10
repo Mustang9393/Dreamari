@@ -1,3 +1,10 @@
+## 2026-10-10: Aurora fills under the curves; light mode brighter
+
+**Why (Chandu):** "the readiness by grade graph can have the area under it have a gradient sort of colored fill ... See where all we can have these ... more atmospheric"; then "i love the readiness by grade graph. Lets see if we can give that treatment to as many graphs as possible. The colorful aurora stuff"; "the graphs still dont feel right on light mode, dark mode is great"; "make sure the colors in light mode are brighter rather than muddy."
+- **Atmosphere** (`charts/glow.tsx`): colour drifts across the chart's width, densest at the floor and thinning toward the line, a soft haze above the line from stacked raised copies (no blur filter), the ends fading instead of stopping in a wall, and a lit floor line. Neighbouring colours blend in oklab (sRGB went grey, oklch swung amber into green or pink).
+- **Aurora** is now a thin wrapper over Atmosphere, so every chart that used it (Logins by Month, Engagement sparklines, Key Wins, leader Impact Over Time) picked up the look. Readiness by Grade uses it directly: indigo to blue to sky across the grades, warm under a grade below 50%.
+- **Light mode:** brighter hues (blue #3b7bff, sky #22b2ff, indigo #7a68ff) and a clean orange used only inside fills, because the warning token is a dark gold in light and turned blends brown. Status text and orbs keep the warning token. Bloom and white cores are off in light, and orb halos are tight, because a halo on a pale card read as a smudge or an out-of-focus dot.
+
 ## 2026-10-10: Charts made of light (part 3): leader dashboards and the other counselor tabs
 
 **Why (Chandu):** "i want all graphs to get these material updates and more creative visions, not just the ones in engagement", under the same rules as parts 1 and 2 (no bars, rings, grids or fields of small marks; made of light, never 3D; few words; glows never clipped; light mode legible).

@@ -28,6 +28,8 @@ export const GLOW = {
   sky: "var(--gl-sky)",
   indigo: "var(--gl-indigo)",
   hot: "var(--gl-hot)",
+  /** warm light for fills under a low value; status text keeps the warning token */
+  warm: "var(--gl-warm)",
 } as const;
 
 /** useId without the colons SVG ids dislike. */
@@ -88,38 +90,70 @@ export function Orb({ cx, cy, r = 6, color = GLOW.blue, pulse, className }: { cx
   );
 }
 
-/** Soft overlapping light, clipped to `d`, fading toward the floor.
- *  `box` is the plot area the light spreads across. */
-export function Aurora({ d, box, colors = [GLOW.blue, GLOW.sky, GLOW.indigo], strength = 1, className }: { d: string; box: { x: number; y: number; w: number; h: number }; colors?: string[]; strength?: number; className?: string }) {
+/** Soft colourful light under a curve, the Readiness by Grade look (Chandu,
+ *  10 Oct 2026: "i love the readiness by grade graph. Lets see if we can
+ *  give that treatment to as many graphs as possible. The colorful aurora
+ *  stuff."). A thin wrapper over Atmosphere so every chart that used the
+ *  older clipped blobs now drifts through `colors` across its width.
+ *  `strength` scales it; `span` fades the shape's own ends. */
+export function Aurora({ d, box, colors = [GLOW.indigo, GLOW.blue, GLOW.sky], strength = 1, span, className }: { d: string; box: { x: number; y: number; w: number; h: number }; colors?: string[]; strength?: number; span?: [number, number]; className?: string }) {
+  const stops = colors.map((c, i) => ({ at: colors.length === 1 ? 0.5 : i / (colors.length - 1), color: c }));
+  return (
+    <g style={{ opacity: Math.max(0, Math.min(1, strength)) }} className={className}>
+      <Atmosphere d={d} box={box} stops={stops} span={span} floor={box.h > 80} haze={box.h > 80 ? 6 : 3} />
+    </g>
+  );
+}
+
+/** Atmospheric light under a curve (Chandu, 10 Oct 2026: "the area under it
+ *  have a gradient sort of colored fill ... more atmospheric"): colour drifts
+ *  along the width (`stops`, 0 to 1 across `box`), the light is densest at
+ *  the floor and thins toward the line, and a soft haze rises just above the
+ *  line, built from stacked, slightly raised copies of the shape rather
+ *  than a blur filter. A lit floor line grounds it. `d` is the closed area. */
+export function Atmosphere({ d, box, stops, span, haze = 6, floor = true, className }: { d: string; box: { x: number; y: number; w: number; h: number }; stops: { at: number; color: string }[]; /** the x range the shape covers; its ends fade out instead of stopping in a wall */ span?: [number, number]; haze?: number; /** the lit floor line */ floor?: boolean; className?: string }) {
   const id = useUid();
   const { x, y, w, h } = box;
-  // Blobs sit along the width, heaviest toward the latest values (right).
-  const blobs = colors.map((c, i) => ({ c, cx: x + w * (0.18 + (i / Math.max(1, colors.length - 1)) * 0.7), r: w * (0.32 + i * 0.04) }));
+  const fill = `url(#gl-ah-${id})`;
+  // blend neighbouring colours through oklab so amber into blue stays
+  // vivid instead of passing through grey (sRGB gradients go muddy)
+  const sorted = [...stops].sort((a, b) => a.at - b.at);
+  const blended = sorted.flatMap((s, i) => i === 0 ? [s] : [{ at: (sorted[i - 1].at + s.at) / 2, color: `color-mix(in oklab, ${sorted[i - 1].color}, ${s.color})` }, s]);
+  const [sx0, sx1] = span ?? [x, x + w];
+  const fadeW = Math.min(64, (sx1 - sx0) * 0.12);
   return (
-    <g className={["gl-aurora", className ?? ""].join(" ")} style={{ ["--gl-k" as string]: String(strength) }}>
+    <g className={["gl-atmo", className ?? ""].join(" ")}>
       <defs>
-        <clipPath id={`gl-ac-${id}`}><path d={d} /></clipPath>
-        <linearGradient id={`gl-af-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#000" stopOpacity="0" />
-          <stop offset="100%" stopColor="#000" stopOpacity="1" />
+        <linearGradient id={`gl-ah-${id}`} gradientUnits="userSpaceOnUse" x1={x} y1="0" x2={x + w} y2="0">
+          {blended.map((s, i) => <stop key={i} offset={`${(Math.max(0, Math.min(1, s.at)) * 100).toFixed(1)}%`} stopColor={s.color} />)}
         </linearGradient>
-        <mask id={`gl-am-${id}`} maskContentUnits="userSpaceOnUse">
-          <rect x={x} y={y} width={w} height={h} fill="#fff" />
-          <rect x={x} y={y} width={w} height={h} fill={`url(#gl-af-${id})`} />
+        <linearGradient id={`gl-av-${id}`} gradientUnits="userSpaceOnUse" x1="0" y1={y - 30} x2="0" y2={y + h}>
+          <stop offset="0%" stopColor="#fff" stopOpacity=".18" />
+          <stop offset="60%" stopColor="#fff" stopOpacity=".55" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="1" />
+        </linearGradient>
+        <mask id={`gl-am-${id}`} maskUnits="userSpaceOnUse" x={x - 2} y={y - 40} width={w + 4} height={h + 42}>
+          <rect x={x - 2} y={y - 40} width={w + 4} height={h + 42} fill={`url(#gl-av-${id})`} />
         </mask>
-        {blobs.map((b, i) => (
-          <radialGradient key={i} id={`gl-ab-${id}-${i}`}>
-            <stop offset="0%" stopColor={b.c} stopOpacity=".9" />
-            <stop offset="100%" stopColor={b.c} stopOpacity="0" />
-          </radialGradient>
-        ))}
+        <linearGradient id={`gl-ax-${id}`} gradientUnits="userSpaceOnUse" x1={sx0} y1="0" x2={sx1} y2="0">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0" />
+          <stop offset={`${((fadeW / Math.max(1, sx1 - sx0)) * 100).toFixed(1)}%`} stopColor="#fff" stopOpacity="1" />
+          <stop offset={`${(100 - (fadeW / Math.max(1, sx1 - sx0)) * 100).toFixed(1)}%`} stopColor="#fff" stopOpacity="1" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <mask id={`gl-amx-${id}`} maskUnits="userSpaceOnUse" x={x - 2} y={y - 40} width={w + 4} height={h + 42}>
+          <rect x={x - 2} y={y - 40} width={w + 4} height={h + 42} fill={`url(#gl-ax-${id})`} />
+        </mask>
       </defs>
-      <g clipPath={`url(#gl-ac-${id})`} mask={`url(#gl-am-${id})`}>
-        <rect x={x} y={y} width={w} height={h} className="gl-aurora-base" />
-        {blobs.map((b, i) => (
-          <ellipse key={i} cx={b.cx} cy={y + h * 0.15} rx={b.r} ry={h * 0.9} fill={`url(#gl-ab-${id}-${i})`} className="gl-aurora-blob" />
-        ))}
+      <g mask={`url(#gl-amx-${id})`}>
+        <g mask={`url(#gl-am-${id})`} className="gl-atmo-light">
+          {Array.from({ length: haze }, (_, i) => (
+            <path key={i} d={d} fill={fill} transform={`translate(0 ${-(i + 1) * 3})`} opacity={0.16 * (1 - i / haze)} />
+          ))}
+          <path d={d} fill={fill} />
+        </g>
       </g>
+      {floor && <line x1={sx0} x2={sx1} y1={y + h} y2={y + h} stroke={fill} className="gl-atmo-floor" />}
     </g>
   );
 }

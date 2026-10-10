@@ -6,28 +6,30 @@
    Blue family only: blue, sky and indigo; status colours stay with status. */
 
 [data-counselor-version="v4"] {
-  --gl-blue: #2f6bf2;
-  --gl-sky: #3aa0f5;
-  --gl-indigo: #5a5ff0;
+  --gl-blue: #3b7bff;
+  --gl-sky: #22b2ff;
+  --gl-indigo: #7a68ff;
+  /* the warm used inside fills only: a clean orange, because the warning
+     token is a dark gold in light mode and turns blends brown */
+  --gl-warm: #ff9a3c;
   --gl-hot: #ffffff;
-  --gl-b1: .16; --gl-b2: .06; --gl-b3: 0;
-  --gl-core: .28;
+  --gl-b1: .07; --gl-b2: 0; --gl-b3: 0;
+  --gl-core: 0;
   --gl-orb-halo: .5;
   --gl-orb-core: 55%;
-  --gl-aurora: .4;
-  --gl-aurora-base: .1;
+  --gl-atmo: .66;
   --gl-grid: color-mix(in srgb, var(--gl-blue) 16%, transparent);
 }
 html.dark [data-counselor-version="v4"] {
   --gl-blue: #4a86ff;
   --gl-sky: #48c2ff;
   --gl-indigo: #7a6cff;
+  --gl-warm: var(--color-feedback-warning);
   --gl-b1: .5; --gl-b2: .22; --gl-b3: .09;
   --gl-core: .85;
   --gl-orb-halo: 1;
   --gl-orb-core: 0%;
-  --gl-aurora: 1;
-  --gl-aurora-base: .2;
+  --gl-atmo: .78;
   --gl-grid: color-mix(in srgb, #8fb3ff 14%, transparent);
 }
 
@@ -48,8 +50,6 @@ html.dark [data-counselor-version="v4"] {
 @keyframes gl-pulse { 0% { transform: scale(1); opacity: .5; } 100% { transform: scale(3.4); opacity: 0; } }
 [data-counselor-version="v4"] .gl-orb-pulse { transform-box: fill-box; transform-origin: center; animation: gl-pulse 2.6s cubic-bezier(.22,1,.36,1) infinite; pointer-events: none; }
 
-[data-counselor-version="v4"] .gl-aurora-base { fill: var(--gl-blue); opacity: var(--gl-aurora-base); }
-[data-counselor-version="v4"] .gl-aurora-blob { opacity: calc(var(--gl-aurora) * var(--gl-k, 1)); }
 
 [data-counselor-version="v4"] .gl-grid { color: var(--gl-grid); }
 [data-counselor-version="v4"] .gl-grid line { stroke-width: 1; }
@@ -57,3 +57,15 @@ html.dark [data-counselor-version="v4"] {
 @media (prefers-reduced-motion: reduce) {
   [data-counselor-version="v4"] .gl-orb-pulse { animation: none; opacity: 0; }
 }
+
+/* ---------- atmosphere ---------- */
+[data-counselor-version="v4"] .gl-atmo-light { opacity: var(--gl-atmo); }
+[data-counselor-version="v4"] .gl-atmo-floor { stroke-width: 1.5; opacity: calc(var(--gl-atmo) * .9); }
+
+/* ---------- light mode: light on paper, not glow on paper ----------
+   (Chandu, 10 Oct 2026: "the graphs still dont feel right on light mode,
+   dark mode is great"). A halo on a pale card reads as a smudge or an
+   out-of-focus dot, so in light the bloom and white cores go, an orb keeps
+   only a tight tinted aura, and the colour lives in the atmosphere fills,
+   which read as a soft wash on white. */
+html:not(.dark) [data-counselor-version="v4"] .gl-orb-halo { transform-box: fill-box; transform-origin: center; transform: scale(.42); opacity: .45; }

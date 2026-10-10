@@ -37,7 +37,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useReducedMotion } from "framer-motion";
 import { IconTip } from "@/components/app/IconTip";
-import { GLOW, GlowStroke, Orb } from "./glow";
+import { Atmosphere, GLOW, GlowStroke, Orb } from "./glow";
 import "./insightViz.css";
 
 /** Width of an element, measured (0 before the first layout). */
@@ -273,7 +273,13 @@ export function GradeTrail({ points, measureKey, height = 240 }: { points: Trail
   const padX = W && W < 480 ? 12 : 40;
   const xs = points.map((_, i) => padX + ((W - padX * 2) * (i + 0.5)) / Math.max(1, points.length));
   const y = (v: number) => bottom - (Math.max(0, Math.min(100, v)) / 100) * (bottom - top);
-  const pts = points.map((p, i) => (p.value === null ? null : { x: xs[i], y: y(p.value) })).filter((p): p is { x: number; y: number } => !!p);
+  const pts = points.map((p, i) => (p.value === null ? null : { x: xs[i], y: y(p.value), warn: p.value < 50 })).filter((p): p is { x: number; y: number; warn: boolean } => !!p);
+  // the atmosphere under the trail: colour drifts across the grades
+  // (indigo, blue, sky) and warms to amber under a grade below 50%
+  const HUES = [GLOW.indigo, GLOW.blue, GLOW.sky];
+  const box = { x: padX / 2, y: top, w: Math.max(1, W - padX), h: bottom - top };
+  const stops = pts.map((p, i) => ({ at: (p.x - box.x) / box.w, color: p.warn ? GLOW.warm : HUES[i % HUES.length] }));
+  const area = pts.length > 1 ? `${monotone(pts)} L${pts[pts.length - 1].x.toFixed(1)} ${bottom} L${pts[0].x.toFixed(1)} ${bottom} Z` : "";
   return (
     <div ref={ref} className="v4-iv-gt" style={{ height: H }}>
       {W > 0 && (
@@ -283,6 +289,7 @@ export function GradeTrail({ points, measureKey, height = 240 }: { points: Trail
             {[0, 100].map((v) => <line key={v} x1={padX / 2} x2={W - padX / 2} y1={y(v)} y2={y(v)} className="v4-iv-gt-hair" />)}
             {pts.length > 1 && (
               <g key={measureKey} className={`v4-iv-gt-trail ${on ? "is-on" : ""}`}>
+                <Atmosphere d={area} box={box} stops={stops} span={[pts[0].x, pts[pts.length - 1].x]} />
                 <GlowStroke d={monotone(pts)} width={3} from={0.55} />
               </g>
             )}
