@@ -37,12 +37,10 @@
 
 /* Analytics use one open canvas. Only meaningful objects and dialogs
    retain surfaces; reset explicit page sections, never all descendants. */
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-engagement,.v4-readiness,.v4-impact-report) { gap:36px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-readiness,.v4-engagement,.v4-impact-report) > .v4-surface,
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-engagement-chart,.v4-engagement-checkins) > .v4-surface,
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-cc-direction .v4-destination-sheet { background:transparent!important; border:0!important; border-radius:0!important; box-shadow:none!important; backdrop-filter:none; padding:0!important; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-readiness,.v4-engagement,.v4-impact-report) > section,
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-engagement-chart,.v4-engagement-checkins) { border-top:1px solid var(--v4-line)!important; padding-top:28px!important; }
+/* section gaps and dividers: see "Section rhythm" below (.v4-sections) */
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-r2-title,.v4-card-head h2,.v4-engagement-chart h2,.v4-readiness h2) { font-size:21px!important; font-weight:500!important; letter-spacing:-.02em; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-r2-sub,.v4-card-head>span) { font-size:12px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-engagement-stats { gap:28px; }
@@ -699,21 +697,71 @@ html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-r
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card {background:linear-gradient(180deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.58) 100%)!important;border-color:rgba(255,255,255,.85)!important;box-shadow:0 14px 34px -22px rgba(40,60,140,.4),inset 0 1px 0 rgba(255,255,255,.95)}
 html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card {background:linear-gradient(180deg,rgba(52,60,94,.9) 0%,rgba(30,36,62,.78) 100%)!important;border-color:rgba(255,255,255,.12)!important;box-shadow:0 18px 40px -24px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.09)}
 
-/* Section separation, every v4 page (10 Oct 2026, Chandu: "vertically
-   sections seem to be spilling into each other, lets handle the
-   separation better? either more space or some kind of a line separator?
-   Everywhere."). One rule: sections that stack on the page (Home and its
-   leader variants, College & Career) get a hairline with the same air
-   above and below it; pages already built from bordered panels
-   (Engagement, Readiness, My Impact, Meetings) get more room between
-   panels instead of a line, so nothing reads as boxed twice. */
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-daily {row-gap:44px!important}
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-daily > :is(.v4-home-work, .v4-today-rail) {padding-top:44px;border-top:1px solid var(--v4-line)}
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-daily > .v4-home-work {margin-top:28px}
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-cc-page {gap:44px!important}
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-cc-page > * + * {padding-top:44px;border-top:1px solid var(--v4-line)}
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-engagement, .v4-readiness, .v4-impact-report) {gap:36px!important}
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-mtg {gap:28px!important}
+/* Section rhythm, every v4 page in every role (10 Oct 2026, Chandu, asked
+   three times: "vertically sections seem to be spilling into each other
+   ... either more space or some kind of a line separator? Everywhere";
+   "the different sections especially in the impact tab seem to spill into
+   the other sections"; "the readiness and engagement and my impact
+   sections need more separation between them vertically, maybe even using
+   lines?"). The first pass gave a few pages their own margins and lines;
+   the others kept spilling. Now one mechanism: a page root carries
+   .v4-sections and its direct children are its sections.
+   - One knob: --v4-section-gap (64px desktop, 72px on very wide screens,
+     40px on phones). Between two open sections a full-width hairline sits
+     centred in that gap (half above, half below), so a heading never sits
+     tight under the previous section's content.
+   - A section that is already a panel (.v4-section-panel or one of the
+     known glass panels) keeps its own box and gets the same outer gap with
+     no line, so nothing is boxed twice. Same for the section after a panel.
+   - Controls that belong to the next section (toolbars, sub-tabs, a
+     standalone section heading: .v4-section-lead or the known classes) sit
+     a tight gap above it with no line; a trailing data note does too.
+   No overflow is set anywhere here, so chart glows still spill freely. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] {
+  --v4-section-gap: 64px;
+  --v4-section-tight: 28px;
+  --v4-section-rule: color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+html:not(.dark) [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-rule: color-mix(in srgb, var(--foreground) 18%, transparent); }
+@media (min-width: 1800px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-gap: 72px; } }
+@media (max-width: 767px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-gap: 40px; --v4-section-tight: 20px; } }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections { gap: 0 !important; row-gap: 0 !important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > * { margin-top: 0 !important; margin-bottom: 0 !important; }
+/* the rhythm owns the space between sections, so the open sections that
+   carried their own bottom padding as a spacer drop it */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > :is(.v4-home-hero, .v4-impact-cover) { padding-bottom: 0 !important; }
+/* The four cases below are mutually exclusive by their selectors. */
+/* open section after open section: hairline centred in the gap */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > :not(.v4-section-panel, .v4-report-canvas, .v4-leader-sheet, .v4-progress-landscape, .v4-interest-explorer, .v4-roster-table, .v4-ms-overview, .msg-shell, .mtg-top):not(.v4-section-lead, .v4-impact-toolbar, .v4-ms-toolbar, .v4-district-toolbar, .v4-subtabs, .v4-section-heading, .prep-toolbar, .msg-toolbar, .v4-roster-toolbar) + :not(.v4-section-panel, .v4-report-canvas, .v4-leader-sheet, .v4-progress-landscape, .v4-interest-explorer, .v4-roster-table, .v4-ms-overview, .msg-shell, .mtg-top):not(.v4-data-note) {
+  margin-top: calc(var(--v4-section-gap) / 2) !important;
+  padding-top: calc(var(--v4-section-gap) / 2) !important;
+  border-top: 1px solid var(--v4-section-rule) !important;
+}
+/* a panel keeps its own box: outer gap only, no line */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > :not(.v4-section-lead, .v4-impact-toolbar, .v4-ms-toolbar, .v4-district-toolbar, .v4-subtabs, .v4-section-heading, .prep-toolbar, .msg-toolbar, .v4-roster-toolbar) + :is(.v4-section-panel, .v4-report-canvas, .v4-leader-sheet, .v4-progress-landscape, .v4-interest-explorer, .v4-roster-table, .v4-ms-overview, .msg-shell, .mtg-top) { margin-top: var(--v4-section-gap) !important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > :is(.v4-section-panel, .v4-report-canvas, .v4-leader-sheet, .v4-progress-landscape, .v4-interest-explorer, .v4-roster-table, .v4-ms-overview, .msg-shell, .mtg-top) + :not(.v4-section-panel, .v4-report-canvas, .v4-leader-sheet, .v4-progress-landscape, .v4-interest-explorer, .v4-roster-table, .v4-ms-overview, .msg-shell, .mtg-top):not(.v4-data-note) { margin-top: var(--v4-section-gap) !important; padding-top: 0 !important; border-top: 0 !important; }
+/* controls that open the next section: tight, no line */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > :is(.v4-section-lead, .v4-impact-toolbar, .v4-ms-toolbar, .v4-district-toolbar, .v4-subtabs, .v4-section-heading, .prep-toolbar, .msg-toolbar, .v4-roster-toolbar) + :is(.v4-section-panel, .v4-report-canvas, .v4-leader-sheet, .v4-progress-landscape, .v4-interest-explorer, .v4-roster-table, .v4-ms-overview, .msg-shell, .mtg-top) { margin-top: var(--v4-section-tight) !important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > :is(.v4-section-lead, .v4-impact-toolbar, .v4-ms-toolbar, .v4-district-toolbar, .v4-subtabs, .v4-section-heading, .prep-toolbar, .msg-toolbar, .v4-roster-toolbar) + :not(.v4-section-panel, .v4-report-canvas, .v4-leader-sheet, .v4-progress-landscape, .v4-interest-explorer, .v4-roster-table, .v4-ms-overview, .msg-shell, .mtg-top) { margin-top: var(--v4-section-tight) !important; padding-top: 0 !important; border-top: 0 !important; }
+/* a trailing data note, and a second grid continuing the same section */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > * + .v4-data-note { margin-top: var(--v4-section-tight) !important; padding-top: 0 !important; border-top: 0 !important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > .v4-leader-grid.v4-leader-grid.v4-leader-grid + .v4-leader-grid.v4-leader-grid { margin-top: 24px !important; padding-top: 0 !important; border-top: 0 !important; }
+
+/* Milestones' grade groups fold, so they are not page sections: folded
+   heads stay a tight list of hairline rows. An open grade's card grid is a
+   section's worth of content, so the grade after it starts below the same
+   centred hairline and gap as any section. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-ms-grade:has(> .v4-ms-grade-head .v4-ms-grade-toggle[aria-expanded="true"]) + .v4-ms-grade {
+  margin-top: calc(var(--v4-section-gap) / 2 - 12px);
+  padding-top: calc(var(--v4-section-gap) / 2);
+  border-top: 1px solid var(--v4-section-rule);
+}
+/* The student profile is a bento of cards: the card edges already part
+   them, so they keep a card gutter (24px, both ways) instead of the page
+   gap, which would leave a 64px canyon between neighbouring cards. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile { row-gap: 24px !important; column-gap: 24px !important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile-stack,
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile-stack > .grid { gap: 24px !important; }
 
 /* the row's horizontal scroll clips anything outside it, shadows included
    (10 Oct 2026: "the shadows in the next conversations row's cards are

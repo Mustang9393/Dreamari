@@ -229,7 +229,7 @@ export function Readiness() {
   const verdict = !lowest ? "Share of each grade meeting each indicator." : lowest.value >= 90 ? "Every grade is at 90% or more on every indicator." : `Biggest gap: ${GAP_NOUN[lowest.key]} in Grade ${lowest.g}.`;
 
   return (
-    <div className="v4-page v4-readiness flex flex-col gap-[var(--space-5)]">
+    <div className="v4-page v4-readiness v4-sections flex flex-col">
       {/* Top indicators: a 40-tick dial lit to the share, the share inside
          it, the name and the count beside it, and an (i) that says what
          counts. A tile picks the list at the foot of the page; the picked

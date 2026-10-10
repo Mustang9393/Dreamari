@@ -157,7 +157,7 @@ export function SchoolPerformance() {
   );
 
   return (
-    <div className="v4-page v4-leader-page">
+    <div className="v4-page v4-leader-page v4-sections">
       <SubTabs<Tab> ariaLabel="School performance view" options={TAB_OPTIONS} value={tab} onChange={setTab} />
 
       <div className="v4-district-toolbar" aria-label="Filter view">

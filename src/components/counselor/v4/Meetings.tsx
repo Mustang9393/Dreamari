@@ -110,7 +110,7 @@ export function Meetings() {
   };
 
   return (
-    <div className="v4-mtg flex flex-col gap-[var(--space-5)]">
+    <div className="v4-mtg v4-sections flex flex-col">
       <div className="prep-toolbar">
         <SubTabs ariaLabel="Meetings view" value={view} onChange={setView} options={[{ key: "upcoming", label: "Upcoming", count: upcoming.length }, { key: "outreach", label: "Needs Outreach", count: toReach.length }]} />
         <div className="prep-toolbar-actions">
@@ -131,7 +131,7 @@ export function Meetings() {
         mode === "calendar" ? (
           <MeetingsWeek meetings={meetings} roster={ordered} now={now} done={done} />
         ) : (
-          <div className="mtg-agenda">
+          <div className="mtg-agenda v4-sections">
             <MeetingsNext next={next} toLog={toLog} anyOver={over.length > 0} byId={byId} now={now} onOutreach={() => setView("outreach")} />
             <ComingUp meetings={upcoming.slice(1).filter((m) => m.day <= weekOut)} byId={byId} now={now} />
           </div>

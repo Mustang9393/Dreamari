@@ -163,7 +163,7 @@ export function SchoolProgress() {
   const shown = showAll ? rows : rows.slice(0, 8);
 
   return (
-    <div className="v4-progress">
+    <div className="v4-progress v4-sections">
       <SubTabs
         ariaLabel="Student progress sections"
         value={tab}

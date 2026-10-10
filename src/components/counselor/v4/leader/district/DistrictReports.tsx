@@ -243,7 +243,7 @@ export function DistrictReports() {
   const [csvLabel, pdfLabel] = DISTRICT_REPORTS_COPY.headerExports;
 
   return (
-    <div className="v4-page v4-leader-page">
+    <div className="v4-page v4-leader-page v4-sections">
       <div className="v4-district-toolbar">
         <span className="v4-district-meta"><strong>{titleCase(DISTRICT_REPORTS_COPY.sectionTitle)}</strong> · {DISTRICT_REPORTS_COPY.sectionSubtitle}</span>
         <div>

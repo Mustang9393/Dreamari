@@ -172,7 +172,7 @@ export function CounselingCapacity() {
   const coveragePct = Number(coverageStat.value.replace("%", ""));
 
   return (
-    <div className="v4-page v4-leader-page">
+    <div className="v4-page v4-leader-page v4-sections">
       {/* Your impact's cover, with the story's two numbers each opening its drill. */}
       <section className="v4-impact-cover v4-leader-cover">
         <div className="v4-impact-story">

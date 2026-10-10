@@ -128,7 +128,7 @@ export function SchoolOverview() {
   };
 
   return (
-    <div className="v4-daily v4-leader-page">
+    <div className="v4-daily v4-leader-page v4-sections">
       <LeaderWelcome
         overline={date || "Today"}
         title={`Welcome back${first ? `, ${first}` : ""}`}

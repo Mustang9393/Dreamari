@@ -221,7 +221,7 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   const setGrade = (v: string) => setGradeFilter(v === "All Grades" ? "All Grades" : (Number(v) as GradeFilter));
 
   return (
-    <div className="v4-page v4-ms flex flex-col gap-[var(--space-4)]">
+    <div className="v4-page v4-ms v4-sections flex flex-col">
       <div className="v4-ms-toolbar">
         <span className="flex flex-wrap items-center gap-[8px]">
           {/* a row of pills, not a dropdown: Maisha wrote the selector as

@@ -142,9 +142,14 @@ function Careers({ path, onOpen, after }: { path: Pathway; onOpen: OpenCareer; /
   const subject = SUBJECTS[query.trim().toLowerCase()];
   const browsing = !query.trim();
   return (
-    <section aria-label="Careers" className="flex flex-col gap-[var(--space-6)]">
-      <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A career, a world, or a subject like Math" />
-      <WorldPills value={world} trades={path === "trades"} onChange={(w) => { setWorld(w); setShown(PAGE); }} />
+    // v4-sections and v4-section-lead only take effect inside v4's
+    // workspace (visual-refresh.css, "Section rhythm"): v4 puts a hairline
+    // and a wide gap between the shelves; v5 renders exactly as before.
+    <section aria-label="Careers" className="v4-sections flex flex-col gap-[var(--space-6)]">
+      <div className="v4-section-lead flex flex-col gap-[var(--space-6)]">
+        <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A career, a world, or a subject like Math" />
+        <WorldPills value={world} trades={path === "trades"} onChange={(w) => { setWorld(w); setShown(PAGE); }} />
+      </div>
 
       {browsing && world === "All" && <ShortlistCareers onOpen={onOpen} />}
       {browsing && <CuratedCareerRows key={world} world={world} onOpen={onOpen} trades={path === "trades"} />}
@@ -249,7 +254,7 @@ export function CuratedCareerRows({ onOpen, trades = false, world = "All" }: { o
     ];
   }, [savers, trades, world]);
   return (
-    <div className="flex flex-col gap-[var(--space-8)]">
+    <div className="v4-sections flex flex-col gap-[var(--space-8)]">
       {rows.filter((r) => r.list.length >= 3).map((r) => (
         <Row key={r.title} title={r.title}>
           {r.list.map((c, i) => r.ranked

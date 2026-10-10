@@ -449,7 +449,7 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
     // school genuinely has no caseload; `?state=loading|error&surface=62`
     // previews the states this always-populated demo data never reaches.
     <SurfaceState id={62} isEmpty={v.caseload === 0} onEmptyAction={() => router.push("/counselor?view=schools")}>
-    <div className="v4-page v4-impact-report flex flex-col gap-[var(--space-6)]">
+    <div className="v4-page v4-impact-report v4-sections flex flex-col">
       <div className="v4-impact-toolbar">
         <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={periods.map((p) => ({ value: p.key, label: p.current ? `This semester (${p.label})` : p.label }))} className="v4-period-select" />
         <span className="v4-source-note">{v.range} · {who_ === "school" ? `Prepared by ${name}` : who}</span>

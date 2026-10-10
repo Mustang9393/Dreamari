@@ -491,7 +491,7 @@ export function PlatformEngagement() {
   if (roster.length === 0) return <p className="v4-filter-empty">No students match {scope.who}. Try a different grade or group.</p>;
 
   return (
-    <div className="v4-page v4-engagement flex flex-col gap-[var(--space-5)]">
+    <div className="v4-page v4-engagement v4-sections flex flex-col">
       {district && (
         <OverviewCard title="Schools" unit="% of students active this month" hero>
           <Verdict band={reach === schools.length ? "met" : reach >= schools.length - 1 ? "near" : "missed"}>{reach} of {schools.length} schools reach {SCHOOL_TARGETS.activeStudents}% · {schools[0]?.short} has the most room to grow</Verdict>

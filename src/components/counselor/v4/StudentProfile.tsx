@@ -309,7 +309,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       />
 
       {tab === "overview" && (
-        <div className="flex flex-col gap-[var(--space-4)]">
+        <div className="v4-profile-stack flex flex-col gap-[var(--space-4)]">
           <HoverBeam strength={0.6} className="h-full">
             <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
               <span className="flex flex-wrap items-baseline gap-x-[8px]">
@@ -395,7 +395,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       )}
 
       {tab === "activity" && (
-        <div className="flex flex-col gap-[var(--space-4)]">
+        <div className="v4-profile-stack flex flex-col gap-[var(--space-4)]">
         <HoverBeam strength={0.6} className="h-full">
           <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
             <CardHead icon={Sparkles} title="On Dreamari" />
@@ -414,7 +414,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       )}
 
       {tab === "notes" && (
-        <div className="flex flex-col gap-[var(--space-4)]">
+        <div className="v4-profile-stack flex flex-col gap-[var(--space-4)]">
           <div className="v4-surface flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
             <CardHead icon={StickyNote} title="Notes" />
             <div className="flex flex-col gap-[8px]">

@@ -73,7 +73,7 @@ export function SchoolReports() {
   };
 
   return (
-    <div className="v4-leader-page">
+    <div className="v4-leader-page v4-sections">
       <div className="v4-school-shelf">
         {reports.map((r, i) => (
           <Beam key={r.id} corner={i % 2 ? "bl" : "br"}>

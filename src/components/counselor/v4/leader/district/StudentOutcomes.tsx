@@ -112,7 +112,7 @@ export function StudentOutcomes() {
   const intentions = useMemo(() => [...O.intentions.rows].sort((a, b) => b.value - a.value), [O.intentions.rows]);
 
   return (
-    <div className="v4-page v4-leader-page">
+    <div className="v4-page v4-leader-page v4-sections">
       <SubTabs ariaLabel="Compare by" value={by} onChange={setBy} options={O.comparison.toggles.map((t) => ({ key: t.id, label: titleCase(t.label) }))} />
 
       <div className="v4-district-toolbar">

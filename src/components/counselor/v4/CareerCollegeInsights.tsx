@@ -471,12 +471,12 @@ export function CareerCollegeInsights() {
     };
   };
   return (
-    <div className="v4-page v4-insights v4-cc-page flex flex-col">
+    <div className="v4-page v4-insights v4-cc-page v4-sections flex flex-col">
       {/* more air between the sections (10 Oct 2026, Chandu: "make sure
          there's more breathing space and air, avoid clutter") */}
       {roster.length === 0 ? <p className="v4-filter-empty">No students match {scope.who}. Try a different grade or group.</p> : <InterestRows />}
       <PostsecondaryRibbon />
-      <HoverBeam strength={0.7} className="h-full">
+      <HoverBeam strength={0.7} className="v4-section-panel h-full">
         <div className="v4-recommendations v4-surface relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
           <div className="relative flex flex-col gap-[var(--space-4)]">

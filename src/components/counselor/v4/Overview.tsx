@@ -131,7 +131,7 @@ export function Overview(){
   {label:`${pct(onTrack)}% on track`,value:`${pct(onTrack)}%`,words:"on track",action:()=>go("milestones&mode=student")},
   {label:`${undecided} still exploring`,value:`${undecided}`,words:"still exploring",action:()=>go("insights")},
  ];
- return <div className="v4-daily">
+ return <div className="v4-daily v4-sections">
   {/* 9 Oct: Apple's event widget + notification stack hierarchy, adapted to
       Dreamari. Two useful groups; quieter copy without losing an update. */}
   <section className="v4-welcome v4-home-hero v4-home-lockscreen">

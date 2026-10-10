@@ -107,7 +107,7 @@ export function SchoolPostsecondary() {
   ];
 
   return (
-    <div className="v4-leader-page">
+    <div className="v4-leader-page v4-sections">
       <section className="v4-interest-explorer v4-school-explorer">
         <header>
           <Segmented ariaLabel="What students lean toward" value={mode} onChange={(m) => { setMode(m); setSelected(0); setAll(false); }} options={[{ key: "interests", label: "Interest Areas" }, { key: "choices", label: "Institutions" }]} />
