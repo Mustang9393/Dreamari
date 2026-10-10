@@ -186,6 +186,21 @@ export const UW_THREADS: Thread[] = [
     ],
   },
   {
+    // WHY (10 Oct 2026): the forwarded note lists FAFSA help among CapCAN's
+    // services, and this board had nowhere a student asking about aid
+    // would find it. So one answer points to CapCAN, the way a Detroit
+    // answer points to Grow Detroit's Young Talent. Routed to "CapCAN" so
+    // it also lists on CapCAN's Questions tab. DEMO-ONLY: the question,
+    // answer and counts, like the rest of this section.
+    id: "sc-t-fafsa", boardId: SC, type: "question",
+    title: "Who can help me with the FAFSA in Lansing?",
+    handle: "Sam", grade: "Senior", postedAgo: "3d ago", state: "answered",
+    routedScope: "CapCAN", expectedWindow: "within 1 day", helpful: 29, followers: 7, comments: 2,
+    responses: [
+      { kind: "answer", proId: "pro-wong", primary: true, postedAgo: "3d ago", body: "Try CapCAN. They help with the FAFSA and scholarships. Find it in Programs." },
+    ],
+  },
+  {
     id: "sc-t-planner", boardId: SC, type: "question",
     title: "Do I need a master's degree to be a city planner?",
     handle: "Leo", grade: "Sophomore", postedAgo: "2h ago", state: "routed",

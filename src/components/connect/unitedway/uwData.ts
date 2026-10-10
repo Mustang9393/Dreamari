@@ -115,7 +115,9 @@ export type Program = {
   about?: string;
   gets: string[]; // three short facts, shown with icons
   who: string;
-  when: string;
+  /** left out when the source gives no season (CapCAN, 10 Oct 2026): the
+   *  facts strip drops the cell rather than guess */
+  when?: string;
   where: string;
   by: string;
   status: "open" | "soon" | "returning";
@@ -250,6 +252,13 @@ export type UwBoard = {
   roster: { pro: string; checks: "done" | "training" | "pending"; hours: number }[];
   /** network board only: national partnerships */
   network?: { title: string; items: { name: string; line: string; stat: string }[] };
+  /** United Way Worldwide's leading corporate partners: plain names, no
+   *  logos, no amounts, with a link to the live list */
+  partners?: { title: string; names: string[]; url: string; more: string };
+  /** a local United Way's work that isn't for students (South Central
+   *  Michigan's small business programs), on the United Way view only,
+   *  each with its real status and a link to its own page */
+  community?: { title: string; items: { name: string; line: string; status: string; url: string }[] };
 };
 
 // ——— shared UI strings ———
@@ -630,6 +639,21 @@ export const NETWORK: UwBoard = {
       { name: "MENTOR", line: "Standards for mentor programs", stat: "5,000 programs" },
       { name: "Character Playbook", line: "With the NFL, for middle schools", stat: "1M students" },
     ],
+  },
+  // WHY (10 Oct 2026): a teammate forwarded "United Way leading corporate
+  // partners (global sponsors)" with "See if we can use these anywhere and
+  // if yes, please do." They are national, so they sit on the network
+  // board's United Way view, next to National partners, as one line of
+  // plain names (this board's rule: United Way's own logo and photos only,
+  // so no company logos, and no amounts). Names are the forwarded list,
+  // checked against unitedway.org/leading-corporate-partners on 10 Oct
+  // 2026; Mars was on the forwarded list but not on that page, so it is
+  // left out until confirmed. The page lists 43; the link shows them all.
+  partners: {
+    title: "Leading corporate partners",
+    names: ["3M", "Air Products", "Bank of America", "BMO", "Caterpillar", "Comcast", "Costco", "Cummins", "Deloitte", "Delta Air Lines", "Dow", "Eaton", "Eli Lilly", "EY", "Ford", "GM", "H-E-B", "John Deere", "Kimberly-Clark", "Nationwide", "Paychex", "Principal Financial", "Publix", "Stellantis", "Target", "Truist", "USAA", "Verizon", "Wegmans"],
+    url: "https://www.unitedway.org/leading-corporate-partners",
+    more: "See all on unitedway.org",
   },
 };
 

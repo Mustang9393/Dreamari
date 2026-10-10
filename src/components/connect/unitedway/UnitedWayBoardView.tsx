@@ -23,10 +23,10 @@
 // copy cut to a title, one line and icon facts. Strings live in uwData.ts.
 
 import Image from "next/image";
-import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
+import { Fragment, createContext, useContext, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Backpack, Briefcase, Calendar, CalendarPlus, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, GraduationCap, HandHeart, Handshake, Heart, MapPin, MessageSquareOff, MessagesSquare, Phone, Plus, ShieldCheck, Sparkles, Sun, Timer, Users, X, Crown } from "lucide-react";
+import { ArrowUpRight, Backpack, Briefcase, Calendar, CalendarPlus, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, GraduationCap, HandHeart, Handshake, Heart, MapPin, MessageSquareOff, MessagesSquare, Phone, Plus, ShieldCheck, Sparkles, Sun, Timer, Users, X, Crown } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
@@ -281,7 +281,7 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
   // its own United Way's events first, then the online ones open to everyone
   const related = (p.chapter ? [...events.filter((e) => e.chapter === p.chapter), ...events.filter((e) => e.chapter === null)] : events).slice(0, 4);
   const about = threads.filter((t) => t.routedScope === p.title);
-  const facts = [{ k: "Who", v: p.who }, { k: "When", v: p.when }, { k: "Where", v: p.where }, ...(p.deadline ? [{ k: "Apply", v: p.deadline.replace(/^Apply /, "") }] : [])];
+  const facts = [{ k: "Who", v: p.who }, ...(p.when ? [{ k: "When", v: p.when }] : []), { k: "Where", v: p.where }, ...(p.deadline ? [{ k: "Apply", v: p.deadline.replace(/^Apply /, "") }] : [])];
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /> {P.back}</button>
@@ -311,7 +311,7 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
       {p.mentorship && mentorshipJoined && <Done text={U.nextStep} />}
 
       {/* the facts strip, divided, the way the detail pages show them */}
-      <section aria-label="Program facts" className={`grid grid-cols-2 overflow-hidden rounded-[var(--radius-lg)] border ${facts.length === 4 ? "sm:grid-cols-4" : "sm:grid-cols-3"}`} style={{ ...ITEM, boxShadow: "none" }}>
+      <section aria-label="Program facts" className={`grid grid-cols-2 overflow-hidden rounded-[var(--radius-lg)] border ${facts.length === 4 ? "sm:grid-cols-4" : facts.length === 3 ? "sm:grid-cols-3" : ""}`} style={{ ...ITEM, boxShadow: "none" }}>
         {facts.map((f, i) => (
           <div key={f.k} className={`flex flex-col gap-[4px] p-[var(--space-4)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t sm:border-t-0" : ""} sm:[&:nth-child(n+2)]:border-l`} style={{ borderColor: RULE }}>
             <Eyebrow tone="var(--muted-foreground)">{f.k}</Eyebrow>
@@ -1079,6 +1079,32 @@ function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPo
             </Panel>
           )}
         </div>
+      )}
+      {board.partners && (
+        <Panel id="uw-partners-title" title={board.partners.title}>
+          <div className="flex flex-col gap-[var(--space-3)]">
+            <p className="text-[14px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{board.partners.names.map((n, i) => <Fragment key={n}>{i > 0 && " · "}<span className="whitespace-nowrap">{n}</span></Fragment>)}</p>
+            <a href={board.partners.url} target="_blank" rel="noopener noreferrer" className="dm-link flex w-fit items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: BLUE_TEXT }}>{board.partners.more} <ArrowUpRight className="h-3.5 w-3.5" aria-hidden /></a>
+          </div>
+        </Panel>
+      )}
+      {board.community && (
+        <Panel id="uw-community-title" title={board.community.title} className="lg:col-span-3">
+          <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
+            {board.community.items.map((c) => (
+              <li key={c.name} className="flex">
+                <a href={c.url} target="_blank" rel="noopener noreferrer" className="dm-tap flex w-full flex-col gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                  <span className="flex items-start justify-between gap-[10px]">
+                    <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
+                    <ArrowUpRight className="mt-[2px] h-4 w-4 flex-none" aria-hidden style={{ color: BLUE_TEXT }} />
+                  </span>
+                  <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{c.line}</span>
+                  <span className="mt-auto flex items-center gap-[6px] pt-[2px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}><span aria-hidden className="size-[6px] rounded-full" style={{ background: D.BRAND.yellow }} />{c.status}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Panel>
       )}
       </div>
     </div>

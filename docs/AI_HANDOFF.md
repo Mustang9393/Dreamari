@@ -1,3 +1,11 @@
+## 2026-10-10: United Way boards: CapCAN, Kalamazoo small business help, leading corporate partners
+
+**Why:** a teammate forwarded Michigan programs and the United Way leading corporate partners list. Chandu: "See if we can use these anywhere and if yes, please do. We don't have to do all of them", then "fix and push. everything".
+- **CapCAN** (Capital Area College Access Network) is a College program on both Michigan boards' student Programs tab: FAFSA and scholarship help, college tours, application help, job boards and apprenticeships; College Couch Corner as its about line; run by CapCAN "a United Way partner" (capcan.org says it works through its United Way partnership). No "When" because nothing published says when, so `when` is now optional and the facts strip drops to two cells. South Central's Q&A has a FAFSA question that points to it (DEMO-ONLY). The Michigan "programs" count is now derived from the list.
+- **Small business help** is a panel on South Central's United Way view: Kalamazoo Micro-Enterprise Grants ("Closed for now") and the Kalamazoo Small Business Loan Fund ("Inactive"), each linking to its real page. They are for business owners, so they stay off student surfaces; neither is ever shown as open.
+- **Leading corporate partners** are plain names on the network board's United Way view, linking to unitedway.org/leading-corporate-partners. No logos (official United Way imagery only), no amounts. Mars is left out: it is not on the live unitedway.org list the panel links to.
+- **Open:** partners on the Michigan boards too? Keep the small business panel while both programs are closed? The CapCAN card uses the standard "Apply" button like every program; it may read better as a link out.
+
 ## 2026-10-10: Aurora fills under the curves; light mode brighter
 
 **Why (Chandu):** "the readiness by grade graph can have the area under it have a gradient sort of colored fill ... See where all we can have these ... more atmospheric"; then "i love the readiness by grade graph. Lets see if we can give that treatment to as many graphs as possible. The colorful aurora stuff"; "the graphs still dont feel right on light mode, dark mode is great"; "make sure the colors in light mode are brighter rather than muddy."

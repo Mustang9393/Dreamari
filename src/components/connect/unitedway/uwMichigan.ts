@@ -119,6 +119,21 @@ const PROGRAMS: Program[] = [
     url: "https://unitedwaymidland.org/what-we-do/youth-success/",
   },
   {
+    // WHY (10 Oct 2026): a teammate forwarded CapCAN as a Michigan program
+    // to add ("See if we can use these anywhere and if yes, please do").
+    // Lansing is in South Central's area, and CapCAN works "through our
+    // partnership with United Way" (capcan.org). Same facts as on the
+    // South Central board (uwSouthCentral.ts): the four forwarded services,
+    // no season, count or price, because none is published.
+    id: "mi-capcan", title: "CapCAN", kind: "college", photo: PHOTOS.advocate, focus: "50% 30%",
+    about: "They also post College Couch Corner videos.",
+    line: "Help to get into college and pay for it.",
+    gets: ["FAFSA and scholarship help", "College tours, in person or online", "Help with college applications", "Job boards and apprenticeships"],
+    who: "Students and adults", where: "Lansing area", by: "Capital Area College Access Network · a United Way partner", status: "open",
+    chapter: "scmi",
+    url: "https://capcan.org/",
+  },
+  {
     // the published page shows the 2019-20 round; the grant ranges are its
     id: "mi-ygs", title: "Youth Genesee Serves", kind: "lead", photo: MI.team, focus: "50% 40%",
     line: "Get up to $1,500 for your service idea.",
@@ -163,7 +178,7 @@ export const MICHIGAN: UwBoard = {
   id: UW_MI_ID,
   name: "Michigan",
   line: "Lead, serve and find real work.",
-  stats: [{ value: "35", label: "United Ways" }, { value: "8", label: "programs" }],
+  stats: [{ value: "35", label: "United Ways" }, { value: String(PROGRAMS.length), label: "programs" }],
   photos: { hero: MI.hero, heroFocus: "50% 40%", volunteers: MI.volunteers, volunteersFocus: "50% 35%" },
   map: "michigan",
   chapters: CHAPTERS,
@@ -273,6 +288,8 @@ export const MICHIGAN: UwBoard = {
     { program: "Bigs in Schools", by: "South Central", students: 172, volunteers: 33, hours: 130 },
     { program: "Youth Genesee Serves", by: "Genesee", students: 96, volunteers: 15, hours: 80 },
     { program: "College Opportunity Program", by: "Midland", students: 41, volunteers: 6, hours: 40 },
+    // DEMO-ONLY: CapCAN's counts on this board, like every row here
+    { program: "CapCAN", by: "South Central", students: 84, volunteers: 6, hours: 50 },
   ],
   roster: [
     { pro: "pro-whitfield", checks: "done", hours: 19 },

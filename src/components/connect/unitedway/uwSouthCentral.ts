@@ -93,6 +93,23 @@ const PROGRAMS: Program[] = [
     chapter: null,
   },
   {
+    // WHY (10 Oct 2026): a teammate forwarded CapCAN as a Michigan program
+    // to add ("See if we can use these anywhere and if yes, please do").
+    // It is a Lansing college access network that works "through our
+    // partnership with United Way" (capcan.org), so it sits with the
+    // college programs, in the Lansing community. The four gets are the
+    // services the forwarded note lists; the video series is the about
+    // line. No season, count or price is published, so there is no "when",
+    // no proof stat and nothing says free.
+    id: "sc-capcan", title: "CapCAN", kind: "college", photo: PHOTOS.advocate, focus: "50% 30%",
+    about: "They also post College Couch Corner videos.",
+    line: "Help to get into college and pay for it.",
+    gets: ["FAFSA and scholarship help", "College tours, in person or online", "Help with college applications", "Job boards and apprenticeships"],
+    who: "Students and adults", where: "Lansing area", by: "Capital Area College Access Network · a United Way partner", status: "open",
+    chapter: "lan",
+    url: "https://capcan.org/",
+  },
+  {
     // DEMO-ONLY: research could not confirm Youth United Way still meets
     // (see uwMichigan.ts)
     id: "sc-yuw", title: "Youth United Way", kind: "lead", photo: PHOTOS.volunteers, focus: "50% 40%",
@@ -248,9 +265,26 @@ export const SOUTH_CENTRAL: UwBoard = {
     { program: "Public service internships", by: "Whole region", students: 48, volunteers: 12, hours: 160 },
     { program: "College to career", by: "Lansing and Kalamazoo", students: 140, volunteers: 10, hours: 70 },
     { program: "Start at community college", by: "Whole region", students: 90, volunteers: 6, hours: 40 },
+    // DEMO-ONLY: CapCAN's counts on this board, like every row here
+    { program: "CapCAN", by: "Lansing", students: 84, volunteers: 6, hours: 50 },
     { program: "Youth United Way", by: "Kalamazoo", students: 96, volunteers: 8, hours: 90 },
     { program: "Bigs in Schools", by: "Jackson", students: 112, volunteers: 19, hours: 130 },
   ],
+  // WHY (10 Oct 2026): the same forwarded note listed UWSCMI's Kalamazoo
+  // small business programs. They are for business owners, not students,
+  // so they stay off the student and volunteer views and sit on the United
+  // Way view only, as one small panel that links to each program's page.
+  // Status is the pages' own, never shown as open: the loan fund's page
+  // says it is currently inactive and points to the grants; the grants'
+  // portal is closed and the page says to follow their social media for
+  // updates. $5,000 and "City of Kalamazoo" are from the grants' page.
+  community: {
+    title: "Small business help",
+    items: [
+      { name: "Kalamazoo Micro-Enterprise Grants", line: "$5,000 grants for very small businesses in the City of Kalamazoo.", status: "Closed for now", url: "https://unitedforscmi.org/battle-creek-kalamazoo/kalamazoo-micro-enterprise-grants/" },
+      { name: "Kalamazoo Small Business Loan Fund", line: "Its page points to the grants instead.", status: "Inactive", url: "https://unitedforscmi.org/battle-creek-kalamazoo/kalamazoo-small-business-loan-fund/" },
+    ],
+  },
   roster: [
     { pro: "pro-doyle", checks: "done", hours: 18 },
     { pro: "pro-wong", checks: "done", hours: 15 },
