@@ -29,6 +29,7 @@ import { useRouter } from "next/navigation";
 import { ChevronRight, TrendingDown, TrendingUp } from "lucide-react";
 import { SegmentedRing } from "./viz";
 import { OverviewCard } from "./overviewShared";
+import { SplitFlow } from "./charts/lit";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Avatar, CardLink, Go, StatRow } from "./chips";
 import { DrillPanel, type Drill } from "./Drill";
@@ -132,12 +133,9 @@ export function DeltaChip({ pts }: { pts: number }) {
 // there's exactly one thing the eye lands on first.
 export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, rows, hero, heroTint, aside }: { title: string; /** one muted line under the title, for a reading that has no trend delta */ caption?: string; centerPct: number; centerLabel: string; deltaPts?: number; rows: { label: string; value: number; color: string; onClick?: () => void }[]; hero?: boolean; heroTint?: string; /** the card's way in, a CardLink, visible at rest */ aside?: React.ReactNode }) {
   const surface = hero ? { ...GLASS_CARD_HERO, borderColor: heroTint ? `color-mix(in srgb, ${heroTint} 38%, var(--glass-border))` : GLASS_CARD_HERO.borderColor } : GLASS_CARD;
-  // Student Status and Postsecondary Plans sit in an equal-width 2-column
-  // row now (both cards the same width), so their rings should read the
-  // same size too (direct instruction, 26 Sept 2026) -- `hero` still
-  // controls the glow/tint surface treatment, just not ring geometry.
-  const ringSize = 132;
-  const ringStroke = 15;
+  // Student Status and Postsecondary Plans read the same size (direct
+  // instruction, 26 Sept 2026): their cell fields share one geometry, and
+  // `hero` controls only the glow/tint surface treatment.
   // A quiet version of the same glow, not just a flat plain box -- "no
   // upgrade at all" was a fair read of a sidekick card that got resized but
   // kept every pixel of its old self. Low enough opacity it never competes
@@ -169,19 +167,18 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
            of sitting glued to the title with dead air below (direct
            report: "badly aligned"). */}
         <div className="relative flex flex-1 flex-col items-center justify-center gap-[var(--space-5)]">
-          {/* Every category in the legend below gets its own drawn arc here
-             -- not a single accent-colored ring next to an unrelated
-             multi-color legend (direct feedback: "only one color is being
-             represented when there's more colors in the legend"). */}
-          <SegmentedRing segments={rows.map((r) => ({ value: r.value, color: r.color }))} size={ringSize} stroke={ringStroke}>
-            <span className="flex flex-col items-center">
-              <span className={`${hero ? "text-[32px]" : "text-[24px]"} leading-[1] font-extrabold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{Math.round(centerPct)}%</span>
-              <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{centerLabel}</span>
-            </span>
-          </SegmentedRing>
-          <div className="flex w-full flex-col gap-[4px]">
+          {/* 10 Oct 2026 glow pass: the segmented ring became a small flow of
+             light. The headline share sits on top; one source splits into a
+             ribbon per group, each as thick as its share and ending at that
+             group's own clickable row (Chandu: "why is everything a ring to
+             you?", "i want them to be made of LIGHT", and no grids). */}
+          <span className="flex w-full items-baseline gap-[8px]">
+            <span className={`${hero ? "text-[32px]" : "text-[28px]"} leading-[1] font-extrabold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{Math.round(centerPct)}%</span>
+            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{centerLabel}</span>
+          </span>
+          <SplitFlow segments={rows.map((r) => ({ value: r.value, color: r.color }))} label={rows.map((r) => `${r.label} ${r.value}`).join(", ")}>
             {rows.map((r) => <StatRow key={r.label} {...r} />)}
-          </div>
+          </SplitFlow>
         </div>
       </div>
     </HoverBeam>

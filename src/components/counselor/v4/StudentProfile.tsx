@@ -30,6 +30,7 @@ import { QUESTIONS, useConnectLive } from "./CounselorConnect";
 import { SidePanel } from "./SidePanel";
 import { Go } from "./chips";
 import { MetricTile } from "./viz";
+import { LightStrip } from "./charts/lit";
 import { SubTabs } from "./SubTabs";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { lastActiveLabel, milestonesForGrade, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
@@ -369,9 +370,8 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                             <span style={{ color: "var(--foreground)" }}>{m.title}</span>
                             <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>{m.pct}%</span>
                           </span>
-                          <span className="relative block h-[6px] overflow-hidden rounded-[3px]" style={{ background: "var(--inset-border)" }}>
-                            <span className="absolute inset-y-0 left-0 rounded-[3px]" style={{ width: `${m.pct}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 35%, transparent), var(--primary))" }} />
-                          </span>
+                          {/* one point of light, not a bar (10 Oct 2026: "I dont like bar graphs") */}
+                          <LightStrip pct={m.pct} />
                         </span>
                       </>
                     );

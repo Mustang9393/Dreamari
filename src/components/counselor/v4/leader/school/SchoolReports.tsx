@@ -37,6 +37,15 @@
 // shelf takes the app's HoverBeam hover, the student app's card treatment,
 // so the shelf invites a click during a demo. Headers in Title Case.
 
+//
+// Glow pass (10 Oct 2026). WHY: Chandu asked for every graph to get the
+// light material ("i want all graphs to get these material updates and
+// more creative visions, not just the ones in engagement"), then ruled out
+// bars ("I dont like bar graphs"), rings, grids and dense marks ("that
+// whole grid idea is bad") and asked for charts "made of LIGHT". So on
+// this screen: Impact Since Launch lanes are points of light
+// with a trail from launch; the key shows the hollow launch mark and the
+// lit point for now.
 import { useEffect, useRef, useState } from "react";
 import { Download } from "lucide-react";
 import { FullScreenDocument, printDocumentPage } from "../../DocumentDesk";

@@ -1,0 +1,97 @@
+/* The leader chart forms (ldViz.tsx), 10 Oct 2026 glow pass. Dark: lit
+   centres, halos, hot edges. Light: glossy colour and white rims, no halos,
+   because a halo on a pale surface reads as a smudge ("the blue glow ... is
+   sort of bad on light mode"). Motion is opacity only and stops under
+   reduced motion. No blur filters. */
+
+/* --ld-core: the hot centre of a point of light. Dark: near white. Light:
+   the colour itself, a touch brighter, so nothing reads as a hollow bead. */
+[data-counselor-version="v4"] { --ld-core: color-mix(in srgb, var(--gl-blue) 70%, white); --ld-rib-a: .14; --ld-rib-b: .42; --ld-rib-on: .58; --ld-off: color-mix(in srgb, var(--foreground) 20%, transparent); --ld-glow: .26; --ld-trail-glow: .14; --ld-axis: color-mix(in srgb, var(--foreground) 20%, transparent); --ld-axis-w: 2px; --ld-trail-w: 3px; }
+html.dark [data-counselor-version="v4"] { --ld-core: #fff; --ld-rib-a: .1; --ld-rib-b: .48; --ld-rib-on: .66; --ld-off: color-mix(in srgb, #8fb3ff 22%, transparent); --ld-glow: .3; --ld-trail-glow: .28; --ld-axis: color-mix(in srgb, var(--foreground) 16%, transparent); --ld-axis-w: 1px; --ld-trail-w: 2px; }
+
+@keyframes ld-fade { from { opacity: 0; } }
+html.dark [data-counselor-version="v4"] .ld-core-stop { stop-color: var(--ld-core); }
+
+/* ---------- LightGauge ---------- */
+[data-counselor-version="v4"] .ld-gauge { display: flex; flex-direction: column; align-items: stretch; gap: 14px; width: 100%; max-width: 300px; margin: 0; text-align: left; }
+[data-counselor-version="v4"] .ld-gauge-figure { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+[data-counselor-version="v4"] .ld-gauge-figure strong { font-size: 60px; font-weight: 350; letter-spacing: -.07em; line-height: 1; font-variant-numeric: tabular-nums; color: var(--foreground); }
+[data-counselor-version="v4"] .ld-gauge-figure strong small { font-size: 24px; letter-spacing: -.02em; margin-left: 2px; }
+[data-counselor-version="v4"] .ld-gauge-figure em { font-style: normal; font-size: 12px; color: var(--muted-foreground); }
+[data-counselor-version="v4"] .ld-gauge-plot { display: block; width: 100%; }
+[data-counselor-version="v4"] .ld-gauge-plot svg { display: block; overflow: visible; }
+[data-counselor-version="v4"] .ld-gauge-axis { stroke: var(--ld-axis); stroke-width: var(--ld-axis-w); stroke-linecap: round; }
+[data-counselor-version="v4"] .ld-gauge-tick { font-size: 11px; fill: var(--muted-foreground); font-variant-numeric: tabular-nums; font-family: var(--font-body); }
+@keyframes ld-gauge-trail { from { transform: scaleX(0); } }
+[data-counselor-version="v4"] .ld-gauge-trail { transform-box: fill-box; transform-origin: left center; animation: ld-gauge-trail .9s cubic-bezier(.22,1,.36,1) both; }
+[data-counselor-version="v4"] .ld-gauge-orb { animation: ld-fade .4s ease-out .7s both; }
+/* the gauge as a button (the coverage cover opens every school) */
+[data-counselor-version="v4"] .ld-gauge-btn { display: block; width: 100%; max-width: 324px; justify-self: start; padding: 12px; margin-left: -12px; border-radius: 22px; text-align: left; cursor: pointer; transition: background .2s; }
+[data-counselor-version="v4"] .ld-gauge-btn:hover { background: color-mix(in srgb, var(--glass-surface-2) 60%, transparent); }
+[data-counselor-version="v4"] .ld-gauge-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ---------- PlanFlow ---------- */
+[data-counselor-version="v4"] .ld-flow { display: block; width: 100%; min-width: 0; margin: 0; padding: 0; text-align: left; }
+[data-counselor-version="v4"] .ld-flow.is-button { cursor: pointer; border-radius: 16px; }
+[data-counselor-version="v4"] .ld-flow.is-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+[data-counselor-version="v4"] .ld-flow-plot { position: relative; width: 100%; }
+[data-counselor-version="v4"] .ld-flow-plot svg { display: block; overflow: visible; font-family: var(--font-body); }
+[data-counselor-version="v4"] .ld-flow-source { font-size: 11px; fill: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+[data-counselor-version="v4"] .ld-flow-stop-a { stop-opacity: var(--ld-rib-a); }
+[data-counselor-version="v4"] .ld-flow-stop-b { stop-opacity: var(--ld-rib-b); }
+[data-counselor-version="v4"] .ld-flow-ribbon { transition: opacity .2s; }
+[data-counselor-version="v4"] .ld-flow-ribbon.is-dim, [data-counselor-version="v4"] .ld-flow-part.is-dim { opacity: .38; }
+[data-counselor-version="v4"] .ld-flow-ribbon.is-on .ld-flow-stop-b { stop-opacity: var(--ld-rib-on); }
+[data-counselor-version="v4"] .ld-flow-part { transition: opacity .2s; }
+[data-counselor-version="v4"] .ld-flow-edge { stroke-width: 1; stroke-opacity: .55; }
+html.dark [data-counselor-version="v4"] .ld-flow-ribbon path { mix-blend-mode: screen; }
+[data-counselor-version="v4"] .ld-flow-lead { fill: none; stroke: var(--v4-line); stroke-width: 1; }
+[data-counselor-version="v4"] .ld-flow-label { font-size: 12px; font-weight: 500; fill: var(--foreground); }
+[data-counselor-version="v4"] .ld-flow-value { font-size: 13px; font-weight: 550; fill: var(--foreground); font-variant-numeric: tabular-nums; }
+[data-counselor-version="v4"] .ld-flow-note { font-size: 11px; fill: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+[data-counselor-version="v4"] .ld-flow svg.is-anim .ld-flow-ribbon { animation: ld-fade .7s ease-out both; }
+
+/* ---------- DotTrack: a point of light on a hairline scale ---------- */
+[data-counselor-version="v4"] .ld-dots { position: relative; display: block; height: 22px; min-width: 0; }
+[data-counselor-version="v4"] .ld-dots.is-thin { height: 14px; }
+[data-counselor-version="v4"] .ld-dots-axis { position: absolute; left: 0; right: 0; top: 50%; height: var(--ld-axis-w); margin-top: calc(var(--ld-axis-w) / -2); border-radius: 2px; background: var(--ld-axis); opacity: .85; transition: opacity .2s; }
+[data-counselor-version="v4"] .ld-dots-district { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed color-mix(in srgb, var(--foreground) 50%, transparent); }
+/* the trail: a thin core with a faint wide glow layered under it */
+[data-counselor-version="v4"] .ld-dots-trail { position: absolute; top: 50%; height: var(--ld-trail-w); margin-top: calc(var(--ld-trail-w) / -2); border-radius: 2px; background: linear-gradient(90deg, color-mix(in srgb, var(--lc) 45%, transparent), var(--lc)); transform-origin: left center; }
+[data-counselor-version="v4"] .ld-dots-trail::before { content: ""; position: absolute; left: 0; right: 0; top: -3px; bottom: -3px; border-radius: 4px; background: linear-gradient(90deg, transparent, var(--lc)); opacity: var(--ld-trail-glow); }
+/* the launch mark: a lit outline */
+[data-counselor-version="v4"] .ld-dots-base { position: absolute; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--lc) 70%, var(--foreground)); background: var(--card); }
+/* today: hot centre, the colour, a soft halo, nothing solid */
+[data-counselor-version="v4"] .ld-dots-now { position: absolute; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, var(--ld-core) 0 12%, var(--lc) 26%, color-mix(in srgb, var(--lc) 35%, transparent) 38%, transparent 70%); }
+[data-counselor-version="v4"] .ld-dots-now::before { content: ""; position: absolute; inset: -10px; border-radius: 50%; background: radial-gradient(circle, var(--lc), transparent 62%); opacity: var(--ld-glow); }
+[data-counselor-version="v4"] .ld-dots.is-thin .ld-dots-now { width: 22px; height: 22px; margin: -11px 0 0 -11px; }
+[data-counselor-version="v4"] .ld-dots.is-thin .ld-dots-now::before { inset: -6px; }
+@keyframes ld-trail { from { transform: scaleX(0); } }
+[data-counselor-version="v4"] .ld-dots.is-anim .ld-dots-trail { animation: ld-trail .8s cubic-bezier(.22,1,.36,1) both; }
+[data-counselor-version="v4"] .ld-dots.is-anim .ld-dots-now { animation: ld-fade .6s ease-out .25s both; }
+
+/* ---------- StripPlot: one point of light per school ---------- */
+[data-counselor-version="v4"] .ld-strip { width: 100%; min-width: 0; }
+[data-counselor-version="v4"] .ld-strip-plot { position: relative; width: 100%; }
+[data-counselor-version="v4"] .ld-strip-axis { position: absolute; left: 0; right: 0; height: var(--ld-axis-w); border-radius: 2px; background: var(--ld-axis); }
+[data-counselor-version="v4"] .ld-strip-at { position: absolute; width: 24px; height: 24px; margin-left: -12px; }
+[data-counselor-version="v4"] .ld-strip-point { position: relative; display: block; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; background: radial-gradient(circle, var(--ld-core) 0 12%, var(--lc) 28%, color-mix(in srgb, var(--lc) 32%, transparent) 44%, transparent 70%); transition: transform .15s; }
+[data-counselor-version="v4"] .ld-strip-point:hover, [data-counselor-version="v4"] .ld-strip-point:focus-visible { transform: scale(1.35); }
+[data-counselor-version="v4"] .ld-strip-point:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+[data-counselor-version="v4"] .ld-strip.is-anim .ld-strip-at { animation: ld-fade .5s ease-out both; }
+[data-counselor-version="v4"] .ld-strip-scale { display: flex; justify-content: space-between; padding: 4px 4px 0; font-size: 11px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-counselor-version="v4"] :is(.ld-dots-trail, .ld-dots-now, .ld-strip-at, .ld-gauge-trail, .ld-gauge-orb) { animation: none !important; }
+  [data-counselor-version="v4"] :is(.ld-flow-ribbon) { animation: none !important; }
+}
+
+/* Light mode: the point of light keeps a saturated core in its own colour
+   (a pale centre read as a hollow bullseye on a light page), then a soft
+   tinted halo. */
+html:not(.dark) [data-counselor-version="v4"] .ld-dots-now,
+html:not(.dark) [data-counselor-version="v4"] .ld-strip-point { background: radial-gradient(circle, var(--lc) 0 22%, color-mix(in srgb, var(--lc) 42%, transparent) 34%, color-mix(in srgb, var(--lc) 14%, transparent) 52%, transparent 70%); }
+/* Light mode: the flow's columns get a solid 3px line under the light so
+   they stay legible on a pale page (UPDATE 2); dark keeps the light alone. */
+[data-counselor-version="v4"] .ld-flow-solid { fill: none; stroke-width: 3; stroke-linecap: round; opacity: 0; }
+html:not(.dark) [data-counselor-version="v4"] .ld-flow-solid { opacity: 1; }

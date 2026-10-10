@@ -41,6 +41,7 @@ import { submissionFor } from "../v5/submission";
 import { DocumentPage, DocumentPreviewModal } from "./DocumentPreview";
 import { FitPage } from "./DocumentDesk";
 import { GlassesDreamy } from "./InsightCharts";
+import { LightPool } from "./charts/lit";
 
 type Item = { student: CounselorStudent; milestone: MilestoneKey };
 type Stamp = { kind: "approved" | "changes"; key: string } | null;
@@ -514,14 +515,13 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
     </section>
   );
 
-  const R = 17;
-  const C = 2 * Math.PI * R;
   return (
     <div className="v4-rs-cv">
       <nav className="v4-rs-rail" aria-label="Up next">
+        {/* a pool of light that grows as the queue clears (10 Oct 2026 glow
+           pass; was a ring: "why is everything a ring to you?") */}
         <span className="v4-rs-rail-ring" role="img" aria-label={`${cleared} of ${total} cleared`}>
-          <svg viewBox="0 0 40 40" aria-hidden><circle cx="20" cy="20" r={R} className="is-track" /><circle cx="20" cy="20" r={R} className="is-fill" strokeDasharray={C} strokeDashoffset={C * (1 - pct / 100)} /></svg>
-          <b>{cleared}<small>/{total}</small></b>
+          <LightPool pct={pct} size={52}><b>{cleared}<small>/{total}</small></b></LightPool>
         </span>
         <div className={`v4-rs-rail-scroll ${rail.atTop ? "" : "is-fade-top"} ${rail.atBottom ? "" : "is-fade-bottom"}`}>
           <ul ref={listRef} className="v4-rs-rail-list" onScroll={(e) => measureRail(e.currentTarget)}>

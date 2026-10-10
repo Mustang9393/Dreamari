@@ -15,6 +15,11 @@
 //     25/50/75 ticks, the launch-baseline tick, and (new here) a dashed
 //     district line, the value in a light weight. One component for every
 //     ranked school list on every District screen.
+//   - Glow pass (10 Oct 2026, Chandu: "i want all graphs to get these
+//     material updates", then "I dont like bar graphs" and "i want them to
+//     be made of LIGHT"): school lanes are points of light on a hairline
+//     scale (DistrictTrack), the scatter's dots are points of light sized
+//     by enrollment, the attention quadrant is lit from its far corner.
 //   - The quadrant scatter keeps every behaviour (thresholds, attention
 //     wash, labels, hover/focus/tap card, keyboard open) and takes v4's
 //     drawing: hairline axes and grid, light 10px labels, blue for within
@@ -28,9 +33,10 @@
 // load reads the same way (within range green, higher load amber, and the
 // attention wash amber); a school's measure lane is the one series colour.
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
+import { DotTrack } from "../../charts/ldViz";
 import { ArrowUpRight } from "lucide-react";
 import type { Drill } from "../../Drill";
 import { openSchoolFromDistrict } from "../context";
@@ -84,19 +90,13 @@ export function SchoolName({ school, students, status }: { school: LeaderSchool;
   );
 }
 
-/** Today's lane track, with the launch-baseline tick and an optional dashed
- *  district line. 0 to 100 so every list compares honestly. */
+/** A school's value on the 0 to 100 scale as a point of light (charts/
+ *  ldViz DotTrack): a lit outline at its launch baseline, a light trail to
+ *  today, an optional dashed district line. It was a filled track; the 10
+ *  Oct glow pass retired every bar ("I dont like bar graphs"). 0 to 100 so
+ *  every list compares honestly. */
 export function DistrictTrack({ value, baseline, district, color = "var(--v4-cat-1)", thin = false }: { value: number; baseline?: number; district?: number; color?: string; thin?: boolean }) {
-  const reduce = useReducedMotion();
-  const pct = (n: number) => `${Math.max(0, Math.min(100, n))}%`;
-  return (
-    <span className={`v4-district-track ${thin ? "is-thin" : ""}`} aria-hidden>
-      <motion.span className="v4-district-fill" initial={reduce ? false : { width: "0%" }} animate={{ width: pct(value) }} transition={{ duration: reduce ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: color }} />
-      {!thin && [25, 50, 75].map((t) => <i key={t} style={{ left: `${t}%` }} />)}
-      {baseline !== undefined && <b className="v4-district-base" style={{ left: pct(baseline) }} />}
-      {district !== undefined && <em className="v4-district-line" style={{ left: pct(district) }} />}
-    </span>
-  );
+  return <DotTrack value={value} baseline={baseline} district={district} color={color} thin={thin} />;
 }
 
 /** One school as a lane: name, track, value, change, arrow. The whole row
@@ -120,6 +120,7 @@ export function LaneLegend({ district, baseline = "Launch baseline" }: { distric
   return (
     <span className="v4-district-legend">
       {baseline && <span><b aria-hidden />{baseline}</span>}
+      <span><i aria-hidden />Now</span>
       {district && <span><em aria-hidden />{district}</span>}
     </span>
   );
@@ -269,6 +270,7 @@ export function QuadrantScatter({
 }) {
   const [boxRef, w] = useElementWidth();
   const reduce = useReducedMotion();
+  const uid = useId().replace(/:/g, "");
   const [hover, setHover] = useState<string | null>(null);
   const [focus, setFocus] = useState<string | null>(null);
   const [armed, setArmed] = useState<string | null>(null); // touch: first tap
@@ -277,7 +279,7 @@ export function QuadrantScatter({
 
   const compact = w < 520;
   const h = compact ? Math.max(330, Math.round(w * 1.1)) : Math.min(440, Math.max(350, Math.round(w * 0.42)));
-  const m = { l: compact ? 42 : 52, r: compact ? 12 : 20, t: 18, b: compact ? 48 : 50 };
+  const m = { l: compact ? 52 : 56, r: compact ? 12 : 20, t: 18, b: compact ? 48 : 50 };
   const pw = w - m.l - m.r;
   const ph = h - m.t - m.b;
 
@@ -338,12 +340,27 @@ export function QuadrantScatter({
   return (
     <div ref={boxRef} className="w-full">
       <svg width="100%" viewBox={`0 0 ${w} ${h}`} role="group" aria-label={ariaLabel} className="block overflow-visible" style={{ height: "auto", maxWidth: "100%" }} onMouseLeave={() => setHover(null)} onClick={() => setArmed(null)}>
-        {/* the attention quadrant: past the load line and under the coverage line */}
-        <rect x={qx} y={qy} width={Math.max(0, m.l + pw - qx)} height={Math.max(0, m.t + ph - qy)} rx={6} fill="var(--v4-warn)" fillOpacity={0.1} />
+        <defs>
+          {/* points of light (10 Oct glow pass: "made of LIGHT"): a hot
+             centre, the tone, then a halo that fades to nothing */}
+          {(["positive", "negative"] as const).map((t) => (
+            <radialGradient key={t} id={`qs-${t}-${uid}`}>
+              <stop offset="0%" stopColor={QUADRANT_TONE[t]} className="ld-core-stop" />
+              <stop offset="22%" stopColor={QUADRANT_TONE[t]} />
+              <stop offset="58%" stopColor={QUADRANT_TONE[t]} stopOpacity=".38" />
+              <stop offset="100%" stopColor={QUADRANT_TONE[t]} stopOpacity="0" />
+            </radialGradient>
+          ))}
+          <radialGradient id={`qs-wash-${uid}`} cx="100%" cy="100%" r="100%">
+            <stop offset="0%" stopColor="var(--v4-warn)" className="v4-district-wash" />
+            <stop offset="100%" stopColor="var(--v4-warn)" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        {/* the attention quadrant: past the load line and under the coverage line, lit from its far corner */}
+        <rect x={qx} y={qy} width={Math.max(0, m.l + pw - qx)} height={Math.max(0, m.t + ph - qy)} rx={6} fill={`url(#qs-wash-${uid})`} />
         {/* hairline grid, light labels */}
         {yTicks.map((v) => (
           <g key={`y${v}`}>
-            <line x1={m.l} x2={m.l + pw} y1={py(v)} y2={py(v)} stroke="var(--v4-line)" strokeDasharray="2 5" />
             <text x={m.l - 10} y={py(v) + 3.5} textAnchor="end" {...label} className="tabular-nums">{v}{yUnit}</text>
           </g>
         ))}
@@ -395,8 +412,8 @@ export function QuadrantScatter({
             >
               {/* a generous invisible hit area for small dots */}
               <circle cx={cx} cy={cy} r={Math.max(r, 14)} fill="transparent" />
-              <circle cx={cx} cy={cy} r={r} fill={color} fillOpacity={on ? 0.9 : 0.62} stroke="var(--card)" strokeOpacity={0.9} strokeWidth={1.5} />
-              {on && <circle cx={cx} cy={cy} r={r + 4} fill="none" stroke="var(--foreground)" strokeOpacity={0.7} strokeWidth={1.25} />}
+              <circle cx={cx} cy={cy} r={r * 1.7} fill={`url(#qs-${p.tone}-${uid})`} className={on ? "v4-district-qdot is-on" : "v4-district-qdot"} />
+              {on && <circle cx={cx} cy={cy} r={r + 5} fill="none" stroke={color} strokeOpacity={0.85} strokeWidth={1.25} />}
               {showName && (
                 <text x={lx} y={below ? cy + r + 13 : cy - r - 6} textAnchor="middle" fontSize={11} fontWeight={500} fill="var(--foreground)" stroke="var(--card)" strokeWidth={3} strokeOpacity={0.85} paintOrder="stroke" pointerEvents="none">{name}</text>
               )}

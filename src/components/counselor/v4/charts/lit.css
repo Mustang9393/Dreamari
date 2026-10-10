@@ -1,0 +1,80 @@
+/* WHY (10 Oct 2026, Chandu): "i want all graphs to get these material
+   updates and more creative visions", then "I dont want 3d solid look ...
+   i want them to be made of LIGHT". The light for lit.tsx: every mark is
+   emissive (a bright core, the series colour, a soft fade), flat and
+   translucent. No gloss, no rims, no shadows, no solid gradient bodies.
+   Dark mode: a near-white core and a halo. Light mode: the same light,
+   softer; the core is the colour itself so nothing turns into a pale
+   smudge on a white card. Colours fall back to the app's primary because
+   drill panels portal outside the v4 root where the --gl-* tokens live.
+   Only opacity and transform animate. No blur filters. */
+
+.lit-strip,.lit-pool,.lit-funnel,.lit-split {
+  --lit-core-mix: 100%;
+  --lit-halo: .45;
+  --lit-on: .9;
+}
+html.dark :is(.lit-strip,.lit-pool,.lit-funnel,.lit-split) {
+  --lit-core-mix: 22%;
+  --lit-halo: 1;
+  --lit-on: 1;
+}
+
+/* ---------- LightStrip: a hairline scale, a trail, one point ---------- */
+.lit-strip {position:relative;display:block;width:100%;height:12px}
+.lit-strip i {position:absolute;display:block}
+/* light mode (UPDATE 2): a 2px track at about 20% ink, a 3px solid trail,
+   a saturated point with a tinted halo; dark mode is thinner and brighter */
+.lit-strip-scale {left:0;right:0;top:50%;height:2px;border-radius:1px;transform:translateY(-50%);background:color-mix(in srgb,var(--foreground) 20%,transparent)}
+.lit-strip-trail {left:0;top:50%;height:3px;border-radius:2px;background:linear-gradient(90deg,color-mix(in srgb,var(--lit-c) 30%,transparent),var(--lit-c) 45%);transform:translateY(-50%);transform-origin:left center;animation:lit-trail .8s cubic-bezier(.22,1,.36,1) both}
+.lit-strip-target {top:1px;bottom:1px;width:2px;margin-left:-1px;border-radius:1px;background:color-mix(in srgb,var(--foreground) 50%,transparent)}
+/* the point: core, colour, fade; the halo is a wider disc of the same light */
+.lit-strip-point {top:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;transform:translateY(-50%);background:radial-gradient(circle,color-mix(in srgb,var(--lit-c) var(--lit-core-mix),white) 0%,var(--lit-c) 55%,color-mix(in srgb,var(--lit-c) 40%,transparent) 100%);animation:lit-fade .6s .25s ease-out both}
+.lit-strip-point::before {content:"";position:absolute;inset:-8px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--lit-c) 55%,transparent),transparent 68%);opacity:calc(var(--lit-halo) * .85)}
+.lit-strip-point[data-zero] {width:6px;height:6px;margin-left:0;background:color-mix(in srgb,var(--foreground) 22%,transparent)}
+.lit-strip-point[data-zero]::before {display:none}
+html.dark .lit-strip-scale {height:1px;background:color-mix(in srgb,var(--foreground) 12%,transparent)}
+html.dark .lit-strip-trail {height:2px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--lit-c) 40%,transparent) 55%,var(--lit-c))}
+@keyframes lit-trail {from {transform:translateY(-50%) scaleX(0);opacity:0}}
+
+/* ---------- LightPool: a pool of light behind a number ---------- */
+.lit-pool {position:relative;display:inline-grid;flex:none;place-items:center}
+.lit-pool > svg {position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.lit-pool > :not(svg) {position:relative}
+.lit-pool-room {fill:color-mix(in srgb,var(--gl-blue,var(--primary)) 7%,transparent)}
+html.dark .lit-pool-room {fill:color-mix(in srgb,var(--gl-sky,var(--primary)) 7%,transparent)}
+.lit-pool-light {opacity:.4}
+html.dark .lit-pool-light {opacity:.55}
+.lit-pool-halo {opacity:calc(var(--lit-halo) * .7);pointer-events:none}
+.lit-pool-on {transform-box:fill-box;transform-origin:center;animation:lit-bloom .9s cubic-bezier(.22,1,.36,1) both}
+@keyframes lit-bloom {from {transform:scale(.2);opacity:0}}
+
+/* ---------- ReachFunnel: a ribbon of light ---------- */
+.lit-funnel {display:flex;flex-direction:column;gap:8px;max-width:520px}
+.lit-funnel-plot {height:58px}
+.lit-funnel-plot svg {display:block;overflow:visible}
+.lit-funnel-light {opacity:.3}
+html.dark .lit-funnel-light {opacity:.24}
+.lit-funnel-stop {stroke:var(--gl-sky,var(--primary));stroke-opacity:.35;stroke-width:1;stroke-dasharray:1 3}
+.lit-funnel-plot svg > * {animation:lit-fade .7s ease-out both}
+.lit-funnel-keys {display:grid;margin:0;padding:0;list-style:none}
+.lit-funnel-keys li {display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center}
+.lit-funnel-keys span {font-size:13px;font-weight:600;color:var(--muted-foreground)}
+.lit-funnel-keys strong {font-size:15px;font-weight:650;font-variant-numeric:tabular-nums;color:var(--foreground)}
+
+/* ---------- SplitFlow: a small Sankey of light ---------- */
+.lit-split {display:flex;align-items:stretch;gap:6px;width:100%}
+.lit-split-plot {flex:none;overflow:visible}
+.lit-split-rows {display:flex;min-width:0;flex:1;flex-direction:column;justify-content:center;gap:4px}
+.lit-split-light {opacity:.26}
+html.dark .lit-split-light {opacity:.3}
+.lit-split-src {stroke:var(--gl-blue,var(--primary))}
+.lit-split-src.is-0 {stroke-opacity:calc(var(--lit-halo) * .12)}
+.lit-split-src.is-1 {stroke-opacity:calc(.15 + var(--lit-halo) * .2)}
+.lit-split-src.is-2 {stroke-opacity:.95}
+html.dark .lit-split-src.is-2 {stroke:color-mix(in srgb,var(--gl-sky,var(--primary)) 40%,white)}
+.lit-split-ribbon {animation:lit-fade .7s ease-out both}
+
+@media (prefers-reduced-motion: reduce) {
+  .lit-strip-trail,.lit-strip-point,.lit-pool-on,.lit-split-ribbon,.lit-funnel-plot svg > * {animation:none}
+}

@@ -32,23 +32,37 @@
 //   - titleCase(): one rule for every header the data stores in sentence
 //     case or capitals ("Career exploration", "DISTRICT ROLLUP").
 //   - CountUp: hero and signal numbers count up once, when first seen.
-//   - Lane `spark`: the student app's SparkBar fill (the charge that sweeps
-//     a growing bar), used once per page, on the lanes that matter most.
+//   - Lane `spark`: the student app's SparkBar fill, retired in the 10 Oct
+//     glow pass with every bar ("I dont like bar graphs"); see Lane.
 //   - (Wins This Term was here; removed 7 Oct 2026, not asked for.)
 //     Dreamy celebrating only when a real milestone was crossed.
 //   - INTEREST_ART: the student app's career posters for each interest area.
 //   - Sheet: HoverBeam (the app's card hover) around every sheet.
+//
+// Glow pass (10 Oct 2026). Chandu: "i want all graphs to get these material
+// updates and more creative visions", then "I dont like bar graphs", "why
+// is everything a ring to you?", "that whole grid idea is bad" and "i want
+// them to be made of LIGHT". So the kit's charts are light, with a handful
+// of marks each (shared kit: ../charts/glow.tsx; leader forms:
+// ../charts/ldViz.tsx):
+//   - Lane: a point of light on a hairline scale; with a baseline, a lit
+//     outline at launch and a light trail to today. No filled track.
+//   - Orbit: a light trail ending in an orb under the figure (no ring).
+//   - TrendLine: a light trail over an aurora, the shown month an orb.
+//   - SignalStrip: a short line of light wakes over a number on hover.
+//   - ShareBar is gone; parts of a whole are the PlanFlow Sankey.
 
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import { SparkBar } from "@/components/flow/SparkBar";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { heroFocus } from "@/components/career/heroFocus";
 import { Go } from "../chips";
 import type { Drill } from "../Drill";
 import "./leader.css";
 import { useChartColors } from "../ChartColors";
+import { Aurora, GLOW, GlowStroke, Orb } from "../charts/glow";
+import { DotTrack, LightGauge, useLdWidth } from "../charts/ldViz";
 
 export const pctText = (n: number, digits = 0) => `${n.toFixed(digits)}%`;
 
@@ -204,26 +218,16 @@ export function SignalStrip({ items, label }: { items: Signal[]; label: string }
   );
 }
 
-/** The ring from Your impact: a gradient arc over a hairline track, two
- *  hairline ellipses around it, the figure in the middle. */
+/** One share of 100 as a light trail ending in a lit orb, under the figure
+ *  (charts/ldViz LightGauge). It was Your impact's ring; the 10 Oct glow
+ *  pass dropped it ("why is everything a ring to you?", "i want them to be
+ *  made of LIGHT"). Same props, same drill. */
 export function Orbit({ value, max = 100, figure, unit, caption, onOpen, label }: { value: number; max?: number; figure: React.ReactNode; unit?: string; caption: string; onOpen?: () => void; label: string }) {
-  const id = useId().replace(/:/g, "");
   const share = Math.max(0, Math.min(100, (value / max) * 100));
-  const art = (
-    <>
-      <svg viewBox="0 0 320 240" aria-hidden="true">
-        <defs><linearGradient id={`orbit-${id}`} x1="0" y1="1" x2="1" y2="0"><stop stopColor="var(--v4-chart-1)" /><stop offset="1" stopColor="var(--v4-chart-2)" /></linearGradient></defs>
-        <ellipse cx="160" cy="120" rx="147" ry="99" fill="none" stroke="var(--glass-border)" transform="rotate(-18 160 120)" />
-        <ellipse cx="160" cy="120" rx="132" ry="114" fill="none" stroke="var(--glass-border)" transform="rotate(23 160 120)" />
-        <circle cx="160" cy="120" r="92" fill="none" stroke="var(--glass-border)" strokeWidth="14" />
-        <circle cx="160" cy="120" r="92" pathLength="100" fill="none" stroke={`url(#orbit-${id})`} strokeWidth="14" strokeLinecap="round" strokeDasharray={`${share} 100`} transform="rotate(-90 160 120)" />
-      </svg>
-      <span><strong><CountUp value={figure} />{unit && <small>{unit}</small>}</strong><em>{caption}</em></span>
-    </>
-  );
+  const art = <LightGauge value={share} figure={<strong><CountUp value={figure} />{unit && <small>{unit}</small>}</strong>} caption={caption} />;
   return onOpen
-    ? <button type="button" className="v4-momentum-orbit" onClick={onOpen} aria-label={label}>{art}</button>
-    : <div className="v4-momentum-orbit" role="img" aria-label={label}>{art}</div>;
+    ? <button type="button" className="ld-gauge-btn" onClick={onOpen} aria-label={label}>{art}</button>
+    : <div className="ld-gauge-btn" role="img" aria-label={label}>{art}</div>;
 }
 
 /** Your impact's cover: the story (serif, one blue italic phrase), the
@@ -300,35 +304,18 @@ export function Pill({ children }: { children: React.ReactNode }) {
   return <span className="v4-pill">{children}</span>;
 }
 
-/** The student app's SparkBar as a lane fill: it opens at zero and grows to
- *  the value, and the charge sweeps the span it grew (then, rarely, an idle
- *  flicker; SparkBar keeps one shared cooldown and honours reduced motion). */
-function SparkFill({ value, color }: { value: number; color: string }) {
-  const [shown, setShown] = useState(0);
-  useEffect(() => {
-    const t = window.setTimeout(() => setShown(value), 140);
-    return () => window.clearTimeout(t);
-  }, [value]);
-  return <SparkBar percent={shown} fill={color} glow={color} height={22} track="transparent" className="v4-leader-spark" />;
-}
-
-/** Today's lane: label, a track with 25/50/75 ticks, the value, a small
- *  caption. `baseline` adds the launch tick; `scale` is the track's top.
- *  The default fill is the series colour (--v4-cat-1: one calm blue, or the
- *  first Bright hue); `spark` swaps the plain fill for SparkBar. */
-export function Lane({ label, value, display, sub, color = "var(--v4-cat-1)", baseline, scale = 100, onClick, aria, spark = false }: { label: React.ReactNode; value: number; display: React.ReactNode; sub?: React.ReactNode; color?: string; baseline?: number; scale?: number; onClick?: () => void; aria?: string; spark?: boolean }) {
-  const reduce = useReducedMotion();
-  const w = Math.max(0, Math.min(100, (value / scale) * 100));
+/** Today's lane as a dot plot (10 Oct 2026 glow pass). WHY: Chandu, "I
+ *  dont like bar graphs", after "why is everything a ring to you?". The
+ *  filled track became a hairline scale with the value as a lit dot; with a
+ *  `baseline` a hollow dot marks launch and a thin light line joins it to
+ *  today, so each row reads cold as "from here to here". Label, value and
+ *  caption keep their columns; `scale` is the scale's top. `spark` is kept
+ *  for callers and ignored: the SparkBar charge was a bar fill. */
+export function Lane({ label, value, display, sub, color = "var(--v4-cat-1)", baseline, scale = 100, onClick, aria }: { label: React.ReactNode; value: number; display: React.ReactNode; sub?: React.ReactNode; color?: string; baseline?: number; scale?: number; onClick?: () => void; aria?: string; spark?: boolean }) {
   const inner = (
     <>
       <span className="v4-leader-lane-label">{label}</span>
-      <div className={`v4-lane-track ${spark ? "is-spark" : ""}`}>
-        {spark
-          ? <SparkFill value={w} color={color} />
-          : <motion.span initial={reduce ? false : { width: "0%" }} animate={{ width: `${w}%` }} transition={{ duration: reduce ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: color }} />}
-        {[25, 50, 75].map((t) => <i key={t} style={{ left: `${t}%` }} />)}
-        {baseline !== undefined && <b className="v4-leader-baseline" style={{ left: `${Math.min(100, (baseline / scale) * 100)}%` }} title={`Launch baseline ${baseline}`} />}
-      </div>
+      <DotTrack value={value} baseline={baseline} scale={scale} color={color} />
       <b>{display}</b>
       <small>{sub}</small>
     </>
@@ -397,13 +384,18 @@ function smoothPath(pts: { x: number; y: number }[]) {
   return d;
 }
 
-/** The Engagement page's line: a soft area, dots on every month, light
- *  gridlines, every month labelled, hover or focus shows the value. */
+/** The Engagement page's line, in the 10 Oct glow material (Logins by
+ *  Month is the reference): a light trail over an aurora fill, the shown
+ *  month as a lit orb, every month labelled, hover shows the value. No
+ *  gridlines or per-month dots: a handful of marks ("that whole grid idea
+ *  is bad"). Drawn at its real pixel width, so the tube and
+ *  the orb never stretch. */
 export function TrendLine({ points, format = (v) => `${Math.round(v)}%`, min, max, label, baseline }: { points: { label: string; value: number }[]; format?: (v: number) => string; min?: number; max?: number; label: string; baseline?: { value: number; label: string } }) {
   const reduce = useReducedMotion();
-  const id = useId().replace(/:/g, "");
+  const [wrap, W] = useLdWidth<HTMLDivElement>();
   const [hover, setHover] = useState<number | null>(null);
-  const W = 720, H = 220, PX = 18, PT = 22, PB = 30;
+  const H = W > 0 && W < 520 ? 170 : 220;
+  const PX = 18, PT = 24, PB = 8;
   const vals = points.map((p) => p.value).concat(baseline ? [baseline.value] : []);
   const lo = min ?? Math.max(0, Math.floor((Math.min(...vals) - 8) / 10) * 10);
   const hi = max ?? Math.min(100, Math.ceil((Math.max(...vals) + 6) / 10) * 10);
@@ -411,27 +403,30 @@ export function TrendLine({ points, format = (v) => `${Math.round(v)}%`, min, ma
   const y = (v: number) => PT + (1 - (v - lo) / Math.max(1e-9, hi - lo)) * (H - PT - PB);
   const pts = points.map((p, i) => ({ x: x(i), y: y(p.value) }));
   const d = smoothPath(pts);
-  const grid = [0, 0.5, 1].map((f) => lo + f * (hi - lo));
   const last = points.length - 1;
   const shown = hover ?? last;
+  const floor = H - PB;
+  const band = W / Math.max(1, points.length);
   return (
     <figure className="v4-leader-trend" aria-label={label}>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${label}: ${points.map((p) => `${p.label} ${format(p.value)}`).join(", ")}`} preserveAspectRatio="none" onMouseLeave={() => setHover(null)}>
-        <defs><linearGradient id={`trend-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--v4-chart-1)" stopOpacity=".32" /><stop offset="100%" stopColor="var(--v4-chart-1)" stopOpacity="0" /></linearGradient></defs>
-        {grid.map((g) => <line key={g} x1={PX} x2={W - PX} y1={y(g)} y2={y(g)} stroke="var(--glass-border)" strokeDasharray="2 5" vectorEffect="non-scaling-stroke" />)}
-        {baseline && <line x1={PX} x2={W - PX} y1={y(baseline.value)} y2={y(baseline.value)} stroke="var(--muted-foreground)" strokeOpacity=".5" strokeDasharray="6 4" vectorEffect="non-scaling-stroke" />}
-        <motion.path d={`${d} L${pts[last].x} ${H - PB} L${pts[0].x} ${H - PB} Z`} fill={`url(#trend-${id})`} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }} />
-        <motion.path key={d} d={d} fill="none" stroke="var(--v4-chart-1)" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} />
-        {pts.map((p, i) => <rect key={i} x={p.x - (W / points.length) / 2} y={0} width={W / points.length} height={H} fill="transparent" onMouseEnter={() => setHover(i)} />)}
-      </svg>
-      {/* Dots and labels are HTML over the SVG so they stay round and crisp
-         however the chart is stretched. */}
-      <div className="v4-leader-trend-layer" aria-hidden>
-        {pts.map((p, i) => <i key={i} className={i === shown ? "is-on" : ""} style={{ left: `${(p.x / W) * 100}%`, top: `${(p.y / H) * 100}%` }} />)}
-        <span className="v4-leader-trend-tip" style={{ left: `${(pts[shown].x / W) * 100}%`, top: `${(pts[shown].y / H) * 100}%` }}>{format(points[shown].value)}</span>
-        {baseline && <em className="v4-leader-trend-base" style={{ top: `${(y(baseline.value) / H) * 100}%` }}>{baseline.label}</em>}
+      <div ref={wrap} className="v4-leader-trend-plot" style={{ height: H }}>
+        {W > 0 && (
+          <svg width={W} height={H} role="img" aria-label={`${label}: ${points.map((p) => `${p.label} ${format(p.value)}`).join(", ")}`} onMouseLeave={() => setHover(null)}>
+            {baseline && <line x1={PX} x2={W - PX} y1={y(baseline.value)} y2={y(baseline.value)} className="v4-leader-trend-baseline" />}
+            {pts.length > 1 && (
+              <g key={d} className={reduce ? undefined : "ld-reveal"}>
+                <Aurora d={`${d} L${pts[last].x} ${floor} L${pts[0].x} ${floor} Z`} box={{ x: PX, y: PT, w: W - PX * 2, h: floor - PT }} />
+                <GlowStroke d={d} color={GLOW.blue} width={3} from={0.6} />
+              </g>
+            )}
+            {pts[shown] && <Orb cx={pts[shown].x} cy={pts[shown].y} r={6.5} color={GLOW.blue} pulse={shown === last && !reduce} />}
+            {pts.map((p, i) => <rect key={i} x={p.x - band / 2} y={0} width={band} height={H} fill="transparent" onMouseEnter={() => setHover(i)} />)}
+          </svg>
+        )}
+        {W > 0 && pts[shown] && <span className="v4-leader-trend-tip" aria-hidden style={{ left: Math.max(30, Math.min(W - 30, pts[shown].x)), top: pts[shown].y }}>{format(points[shown].value)}</span>}
+        {W > 0 && baseline && <em className="v4-leader-trend-base" aria-hidden style={{ top: y(baseline.value) }}>{baseline.label}</em>}
       </div>
-      <div className="v4-leader-trend-axis" aria-hidden>{points.map((p, i) => <span key={`${p.label}-${i}`} style={{ left: `${(x(i) / W) * 100}%` }}>{p.label}</span>)}</div>
+      <div className="v4-leader-trend-axis" aria-hidden>{points.map((p, i) => <span key={`${p.label}-${i}`} style={{ left: W > 0 ? x(i) : `${(i / Math.max(1, last)) * 100}%` }}>{p.label}</span>)}</div>
     </figure>
   );
 }
@@ -439,16 +434,6 @@ export function TrendLine({ points, format = (v) => `${Math.round(v)}%`, min, ma
 /** A colour key: dot plus label (Today's map key). */
 export function Key({ items }: { items: { label: string; color: string }[] }) {
   return <div className="v4-map-key v4-leader-key">{items.map((k) => <span key={k.label}><i style={{ background: k.color }} />{k.label}</span>)}</div>;
-}
-
-/** A stacked share bar (Today's "Plans after graduation"). */
-export function ShareBar({ parts, label }: { parts: { label: string; value: number; color: string }[]; label: string }) {
-  const total = parts.reduce((n, p) => n + p.value, 0) || 1;
-  return (
-    <div className="v4-leader-share" role="img" aria-label={`${label}: ${parts.map((p) => `${p.label} ${p.value}`).join(", ")}`}>
-      {parts.filter((p) => p.value > 0).map((p) => <span key={p.label} style={{ flex: p.value / total, background: p.color }} />)}
-    </div>
-  );
 }
 
 /** Status FILLS (dots, bars, squares). Maisha, 7 Oct 2026: "Maybe On Track

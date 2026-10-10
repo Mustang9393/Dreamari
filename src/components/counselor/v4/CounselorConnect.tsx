@@ -108,6 +108,7 @@ import { Listbox } from "./Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "./chips";
 import { Segmented } from "./viz";
+import { LightPool, ReachFunnel } from "./charts/lit";
 import { SubTabs } from "./SubTabs";
 import { Avatar, SelectBox, STATUS_COLORS, STATUS_FILLS, StatusChip, StudentLink } from "./chips";
 import { BulkComposer, BulkReplyReview, EmailToggle, fillFirst, markEmailed, reachFor, useEmailed } from "./MessagesBulk";
@@ -269,12 +270,15 @@ const ds = (s: CounselorStudent, note: string): DrillStudent => ({ id: s.id, nam
 // 10 Oct 2026: one flat row per announcement (title and date, then the
 // audience), its read rate as a small ring at the left, the way a chat list
 // leads with a face.
+// 10 Oct 2026, glow pass: the ring became a pool of light whose area is the
+// read rate (Chandu: "why is everything a ring to you?" and "i want them to
+// be made of LIGHT"), same size, so the row still leads with a face-sized
+// mark and the number stays on top.
 function ReadRing({ pct, size = 34 }: { pct: number; size?: number }) {
   return (
-    <span className="msg-ring" style={{ width: size, height: size }}>
-      <svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--glass-border)" strokeWidth="3" /><circle className="msg-ring-arc" cx="18" cy="18" r="15" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeDasharray={`${pct} 100`} transform="rotate(-90 18 18)" /></svg>
+    <LightPool pct={pct} size={size} className="msg-ring">
       <b>{pct}<small>%</small></b>
-    </span>
+    </LightPool>
   );
 }
 
@@ -1305,7 +1309,8 @@ function SentStats({ announcements, rows }: { announcements: Announcement[]; row
   const cells = [
     { k: "Sent", v: String(announcements.length + rows.filter((r) => r.kind !== "share").length), sub: "announcements and notes" },
     { k: "Reached", v: String(reached.size), sub: "students" },
-    { k: "Read", v: `${pct}%`, sub: `${read} of ${sent} deliveries`, bar: pct },
+    // plain text, no mini chart (10 Oct 2026: "I dont like bar graphs")
+    { k: "Read", v: `${pct}%`, sub: `${read} of ${sent} deliveries` },
     { k: "Replies", v: String(replies), sub: "from students" },
   ];
   return (
@@ -1314,7 +1319,7 @@ function SentStats({ announcements, rows }: { announcements: Announcement[]; row
         <div key={c.k} className="msg-stat">
           <span className="msg-stat-k">{c.k}</span>
           <strong className="msg-stat-v">{c.v}</strong>
-          {c.bar !== undefined ? <span className="msg-stat-bar" aria-hidden><i style={{ width: `${c.bar}%` }} /></span> : <span className="msg-stat-sub">{c.sub}</span>}
+          <span className="msg-stat-sub">{c.sub}</span>
         </div>
       ))}
     </div>
@@ -1410,15 +1415,9 @@ function BatchReading({ r, onMessage, onBack }: { r: SentRow; onMessage: (ids: s
       </header>
       <div className="msg-line is-me msg-read-bubble"><p className="msg-bubble is-me"><WithTokens text={r.text} /></p></div>
       {r.kind !== "share" && (
-        <div className="msg-reach" role="group" aria-label="Reach">
-          {bars.map((b) => (
-            <div key={b.k} className="msg-reach-row">
-              <span className="msg-reach-k">{b.k}</span>
-              <span className="msg-reach-bar" aria-hidden><i style={{ width: `${b.pct}%` }} /></span>
-              <strong className="msg-reach-v">{b.v}</strong>
-            </div>
-          ))}
-        </div>
+        // Sent, Read, Replied as one ribbon that narrows as students drop
+        // off (10 Oct 2026 glow pass; was three bars, "I dont like bar graphs")
+        <ReachFunnel stages={bars} label={`Reach: ${bars.map((b) => `${b.k} ${b.v}`).join(", ")}`} />
       )}
       <footer className="msg-read-foot">
         <span className="msg-stack">{to.slice(0, 6).map((s) => <span key={s.id}><Avatar name={s.name} index={s.avatarIndex} size={28} /></span>)}</span>

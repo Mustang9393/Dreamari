@@ -46,6 +46,16 @@
 // version of the counselor's focus art). The rollup counts up; headers,
 // tabs and section labels are Title Case.
 
+//
+// Glow pass (10 Oct 2026). WHY: Chandu asked for every graph to get the
+// light material ("i want all graphs to get these material updates and
+// more creative visions, not just the ones in engagement"), then ruled out
+// bars ("I dont like bar graphs"), rings, grids and dense marks ("that
+// whole grid idea is bad") and asked for charts "made of LIGHT". So on
+// this screen: every lane is a point of light on a hairline
+// scale (kit Lane, DistrictTrack), and Postsecondary Intentions is a Sankey of
+// light (charts/ldViz PlanFlow): every district student flows to a plan,
+// ribbon width = share. The flow labels each part, so its key list went.
 import { useMemo, useState } from "react";
 import { SubTabs } from "../../SubTabs";
 import { Listbox } from "../../Listbox";
@@ -59,7 +69,8 @@ import {
   type OutcomeMetricId,
   type ShareRow,
 } from "@/lib/leaderData";
-import { ArtThumb, CountUp, Lane, Pill, Row, Rows, SectionHeading, ShareBar, Sheet, series, step, titleCase } from "../kit";
+import { ArtThumb, CountUp, Lane, Pill, Row, Rows, SectionHeading, Sheet, series, step, titleCase } from "../kit";
+import { PlanFlow } from "../../charts/ldViz";
 import { DistrictAxis, DistrictTrack, LaneLegend, SchoolLane, int, pts, useOpenSchool } from "./districtKit";
 
 const GRADES = [9, 10, 11, 12] as const;
@@ -173,21 +184,16 @@ export function StudentOutcomes() {
       <div className="v4-leader-grid cols-2">
         <Sheet corner="br" title={O.interests.title} colors>
           <ShareLanes rows={O.interests.rows} art />
-          <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.interests.subtitle} Bars compare to the largest share.</span></div>
+          <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.interests.subtitle} The scale runs to the largest share.</span></div>
         </Sheet>
         <Sheet corner="bl" title={O.choices.title} colors>
           <ShareLanes rows={O.choices.rows} />
-          <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.choices.subtitle} Bars compare to the largest share.</span></div>
+          <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.choices.subtitle} The scale runs to the largest share.</span></div>
         </Sheet>
       </div>
       <div className="v4-leader-grid cols-2">
         <Sheet corner="tr" title={O.intentions.title} colors>
-          <ShareBar label={O.intentions.title} parts={intentions.map((r, i) => ({ label: r.label, value: r.value, color: partTone(r.label, i) }))} />
-          <div className="v4-destination-key" style={{ marginBottom: 0 }}>
-            {intentions.map((r, i) => (
-              <div key={r.label}><i style={{ background: partTone(r.label, i) }} /><span>{r.label}</span><b className="font-[550] tabular-nums">{r.value}%</b></div>
-            ))}
-          </div>
+          <PlanFlow label={O.intentions.title} source={`${int(DISTRICT_TOTALS.enrollment)} students`} parts={intentions.map((r, i) => ({ label: r.label, value: r.value, color: partTone(r.label, i) }))} />
           <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.intentions.subtitle}</span></div>
         </Sheet>
         <Sheet corner="tl" title={O.emerging.title}>

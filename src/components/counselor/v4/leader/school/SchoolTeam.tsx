@@ -37,6 +37,14 @@
 // attention"): one calm blue in Calm, two hues in Bright, never a colour per
 // person. Headers and column heads in Title Case; the hero number counts up.
 
+//
+// Glow pass (10 Oct 2026). WHY: Chandu asked for every graph to get the
+// light material ("i want all graphs to get these material updates and
+// more creative visions, not just the ones in engagement"), then ruled out
+// bars ("I dont like bar graphs"), rings, grids and dense marks ("that
+// whole grid idea is bad") and asked for charts "made of LIGHT". So on
+// this screen: each counselor's two meters are points of light
+// on a hairline scale (charts/ldViz DotTrack).
 import { useState } from "react";
 import { Clock3, FileCheck2, Gauge, ShieldCheck } from "lucide-react";
 import { Go } from "../../chips";
@@ -44,12 +52,13 @@ import { DrillPanel, type Drill } from "../../Drill";
 import { num, schoolLine, useSchoolDetail } from "./schoolKit";
 import { CountUp, SignalStrip, series, titleCase, titled } from "../kit";
 import type { CounselorRow } from "@/lib/leaderData";
+import { DotTrack } from "../../charts/ldViz";
 
 function Meter({ value, label, color }: { value: number; label: string; color: string }) {
   return (
     <span className="v4-school-meter" aria-hidden>
       <small>{label}</small>
-      <span className="v4-school-meter-track"><span style={{ width: `${Math.max(0, Math.min(100, value))}%`, background: color }} />{[25, 50, 75].map((t) => <i key={t} style={{ left: `${t}%` }} />)}</span>
+      <DotTrack value={value} color={color} />
       <b>{value}%</b>
     </span>
   );

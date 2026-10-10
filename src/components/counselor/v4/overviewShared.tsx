@@ -21,6 +21,7 @@ import { CardLink, Go } from "./chips";
 import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 import { targetBand, type TargetBand } from "@/lib/counselorOrg";
 import { HERO_FOCUS_BY_PHOTO } from "@/components/career/heroFocus";
+import { LightStrip } from "./charts/lit";
 
 // Status FILLS (dots, bars, tints) and status INKS (text) are separate
 // tokens since Maisha's v4 review, 7 Oct 2026 ("Maybe On Track is green,
@@ -184,19 +185,14 @@ export function Verdict({ band, children }: { band: TargetBand; children: React.
 
 export { CardLink as SeeLink };
 
-/** A thin track, a fill, a target tick. Quiet blue unless the value is
- *  below its target. */
-export function RankBar({ value, target, height = 6 }: { value: number; target?: number; height?: number }) {
-  const v = Math.max(0, Math.min(100, value));
+/** A light strip: one point of light at the value on a hairline scale,
+ *  with a target mark. Quiet blue unless the value is below its target.
+ *  Was a thin bar until 10 Oct 2026 (Chandu: "I dont like bar graphs", "i
+ *  want them to be made of LIGHT"); same data, same colour rule. `height`
+ *  is kept for callers and no longer used. */
+export function RankBar({ value, target }: { value: number; target?: number; height?: number }) {
   const color = (typeof target === "number" && alertFill(value, target)) || "var(--primary)";
-  return (
-    <span className="relative block w-full rounded-full" style={{ height, background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
-      {/* Same family as the column charts: strongest at the value end,
-         fading toward the start (direct question, 25 Sept 2026). */}
-      <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${v}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${color} 35%, transparent), ${color})` }} />
-      {typeof target === "number" && <span className="absolute top-[-3px] bottom-[-3px] w-[2px] rounded-[1px]" style={{ left: `calc(${target}% - 1px)`, background: "color-mix(in srgb, var(--foreground) 55%, transparent)" }} />}
-    </span>
-  );
+  return <LightStrip pct={value} target={target} color={color} />;
 }
 
 /** One row: label (and an optional muted note) left, value right, bar under.

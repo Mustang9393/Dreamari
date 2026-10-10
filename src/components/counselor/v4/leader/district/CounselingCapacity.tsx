@@ -40,6 +40,15 @@
 // under the threshold. The cover's numbers count up; headers, tabs and
 // column heads are Title Case.
 
+//
+// Glow pass (10 Oct 2026). WHY: Chandu asked for every graph to get the
+// light material ("i want all graphs to get these material updates and
+// more creative visions, not just the ones in engagement"), then ruled out
+// bars ("I dont like bar graphs"), rings, grids and dense marks ("that
+// whole grid idea is bad") and asked for charts "made of LIGHT". So on
+// this screen: the coverage orbit is a light trail ending in
+// an orb (kit Orbit, now LightGauge), the scatter's dots are points of light
+// sized by enrollment, and the table's coverage tracks are points of light.
 import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { Segmented } from "../../viz";

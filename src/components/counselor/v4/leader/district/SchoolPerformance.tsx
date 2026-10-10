@@ -48,6 +48,15 @@
 // blue, support amber), the district value counts up, headers and tabs are
 // Title Case.
 
+//
+// Glow pass (10 Oct 2026). WHY: Chandu asked for every graph to get the
+// light material ("i want all graphs to get these material updates and
+// more creative visions, not just the ones in engagement"), then ruled out
+// bars ("I dont like bar graphs"), rings, grids and dense marks ("that
+// whole grid idea is bad") and asked for charts "made of LIGHT". So on
+// this screen: each school lane is a point of light with a
+// light trail from its launch baseline and the dashed district line
+// (DistrictTrack). The All Measures table stays plain numbers.
 import { useMemo, useState } from "react";
 import { ArrowUpRight, Search } from "lucide-react";
 import { SubTabs } from "../../SubTabs";

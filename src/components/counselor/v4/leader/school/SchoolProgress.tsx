@@ -46,6 +46,14 @@
 // report blue, No Recent Activity red). The hero number counts to each bar
 // a leader selects. Headers are Title Case.
 
+//
+// Glow pass (10 Oct 2026). WHY: Chandu asked for every graph to get the
+// light material ("i want all graphs to get these material updates and
+// more creative visions, not just the ones in engagement"), then ruled out
+// bars ("I dont like bar graphs"), rings, grids and dense marks ("that
+// whole grid idea is bad") and asked for charts "made of LIGHT". So on
+// this screen: the report bars are points of light on a
+// hairline scale, with a light trail from each launch baseline (ReportBars).
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
@@ -150,8 +158,8 @@ export function SchoolProgress() {
     items: [sp.experiences.subtitle, sp.experiences.tooltipText],
   });
 
-  const expScale = niceScale(Math.max(...sp.experiences.tiles.map((x) => x.value)));
   const sampleScale = niceScale(Math.max(...statusCounts.map((c) => c.count)));
+  const expScale = niceScale(Math.max(...sp.experiences.tiles.map((x) => x.value)));
   const shown = showAll ? rows : rows.slice(0, 8);
 
   return (
@@ -176,13 +184,13 @@ export function SchoolProgress() {
               <div className="v4-report-hero-number"><CountUp value={`${k.value}%`} /></div>
               <p>Up {k.delta} points since launch, from {k.baseline}%. {k.id === "follow-up" ? "Share of flagged students with a follow-up action recorded." : "Share of every enrolled student."}</p>
               <div className="v4-school-explainer-actions"><TextAction onClick={() => setDrill(kpiDrill(k))}>How it is counted</TextAction></div>
-              <span className="v4-chart-instruction">Select a bar to read its measure <ArrowUpRight size={14} aria-hidden /></span>
+              <span className="v4-chart-instruction">Select a row to read its measure <ArrowUpRight size={14} aria-hidden /></span>
             </div>
             <ReportBars
               label="Planning milestones"
               selected={milestone}
               onSelect={setMilestone}
-              unit="% of students · the tick marks the launch baseline"
+              unit="% of students · the hollow dot marks the launch baseline"
               ticks={["0", "25", "50", "75", "100%"]}
               items={sp.kpis.map((x) => ({
                 key: x.id,
@@ -205,7 +213,7 @@ export function SchoolProgress() {
               <p>{t.helper}</p>
               <small>A count for {ACADEMIC_YEAR_LABEL}, not a percentage.</small>
               <div className="v4-school-explainer-actions"><TextAction onClick={() => setDrill(experienceDrill(t))}>About these counts</TextAction></div>
-              <span className="v4-chart-instruction">Select a bar to read its count <ArrowUpRight size={14} aria-hidden /></span>
+              <span className="v4-chart-instruction">Select a row to read its count <ArrowUpRight size={14} aria-hidden /></span>
             </div>
             <ReportBars
               label={sp.experiences.title}
@@ -226,7 +234,7 @@ export function SchoolProgress() {
               <div className="v4-report-hero-number"><CountUp value={statusCount} /></div>
               <p>{status === "all" ? `${sample.length} synthetic students. ${notOnTrack} need support.` : `${statusCount} of ${sample.length} synthetic students.`}</p>
               <small>{STUDENT_SAMPLE_COPY.subtitle}</small>
-              <span className="v4-chart-instruction">Select a bar to filter the students below <ArrowUpRight size={14} aria-hidden /></span>
+              <span className="v4-chart-instruction">Select a row to filter the students below <ArrowUpRight size={14} aria-hidden /></span>
             </div>
             <ReportBars
               label="Sample support status"

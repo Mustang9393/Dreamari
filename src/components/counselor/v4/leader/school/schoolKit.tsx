@@ -11,10 +11,11 @@
 // structure everything... EVERYTHING needs to be like this version." Those
 // v2 pieces are gone; what is left is either data plumbing or the counselor's
 // own v4 patterns, wrapped once so the four School screens share them:
-//   - ReportBars: Student progress's report canvas bars (v4-report-bar),
-//     plus the leader's launch-baseline tick.
-//   - PortionRing: Your impact's "Life after graduation" ring
-//     (v4-destination-chart), for parts of one whole.
+//   - ReportBars: Student progress's report canvas rows (v4-report-bar),
+//     plus the leader's launch baseline. Points of light since the 10 Oct
+//     glow pass (no bars).
+//   - PortionRing (Your impact's ring) was retired the same day: parts of
+//     one whole are charts/ldViz PlanFlow now, a Sankey of light.
 //
 // Maisha's v4 review (7 Oct 2026): measures side by side share ONE colour
 // (the series token: one calm blue, or a hue each in Bright), "so there
@@ -38,7 +39,8 @@ import { usePublicationStyle } from "../../SchoolPublication";
 import type { Drill } from "../../Drill";
 import { schoolDetail, type SchoolDetail, type SchoolKpi, type SchoolReport } from "@/lib/leaderData";
 import { useLeaderSchoolId } from "../context";
-import { CountUp, series, step } from "../kit";
+import { series } from "../kit";
+import { DotTrack } from "../../charts/ldViz";
 import "./school.css";
 
 /** The school being shown, with every screen's data bundle. */
@@ -64,10 +66,12 @@ export function niceScale(max: number): number {
 
 export type BarItem = { key: string; label: string; value: number; display: React.ReactNode; color?: string; baseline?: number; aria?: string };
 
-/** Student progress's report bars (counselor v4, StudentProgress.tsx): a
- *  label, a wide track with quarter ticks, the value. Selecting one marks it
- *  (aria-pressed) the way the counselor's chart picks the students below.
- *  `baseline` adds the leader's launch tick inside the track. */
+/** Student progress's report rows (counselor v4, StudentProgress.tsx): a
+ *  label, a wide scale, the value. Selecting one marks it (aria-pressed)
+ *  the way the counselor's chart picks the students below. 10 Oct 2026
+ *  glow pass ("I dont like bar graphs"; "i want them to be made of
+ *  LIGHT"): the filled bars became points of light on a hairline scale,
+ *  with a lit outline at `baseline` and a light trail to today. */
 export function ReportBars({ items, scale = 100, selected, onSelect, unit, label, ticks }: { items: BarItem[]; scale?: number; selected?: string; onSelect: (key: string) => void; unit: string; label: string; ticks?: string[] }) {
   const marks = ticks ?? [0, 0.25, 0.5, 0.75, 1].map((n) => String(Math.round(n * scale)));
   return (
@@ -75,42 +79,13 @@ export function ReportBars({ items, scale = 100, selected, onSelect, unit, label
       {items.map((b, i) => (
         <button key={b.key} type="button" className="v4-report-bar" aria-pressed={selected === b.key} onClick={() => onSelect(b.key)} aria-label={b.aria}>
           <span className="v4-report-bar-label">{b.label}</span>
-          <span className="v4-report-bar-track">
-            <span style={{ width: `${Math.max(1.2, Math.min(100, (b.value / scale) * 100))}%`, background: b.color ?? series(i) }} />
-            {[0.25, 0.5, 0.75].map((n) => <i key={n} style={{ left: `${n * 100}%` }} />)}
-            {b.baseline !== undefined && <b className="v4-school-base" style={{ left: `${Math.min(100, (b.baseline / scale) * 100)}%` }} />}
-          </span>
+          <DotTrack value={b.value} baseline={b.baseline} scale={scale} color={b.color ?? series(i)} />
           <strong>{b.display}</strong>
           <ArrowUpRight size={14} aria-hidden />
         </button>
       ))}
       <div className="v4-report-scale" aria-hidden>{marks.map((m, i) => <span key={`${m}-${i}`}>{m}</span>)}</div>
       <small className="v4-report-unit">{unit}</small>
-    </div>
-  );
-}
-
-/** Parts of one whole as Your impact's ring (v4-destination-chart): the
- *  arcs in the v4 chart ramp, "Undecided" in the neutral slice, the lead
- *  share in the middle, the key beside it. The ring opens the drill. */
-export function PortionRing({ rows, centerLabel, onOpen, label, note }: { rows: readonly { label: string; value: number }[]; centerLabel: string; onOpen: () => void; label: string; /** a quiet second line per key row, e.g. the head-count */ note?: (value: number) => string }) {
-  const ranked = rows.filter((r) => r.label !== "Undecided");
-  const parts = [...ranked.map((r, i) => ({ ...r, color: step(i) })), ...rows.filter((r) => r.label === "Undecided").map((r) => ({ ...r, color: "var(--v4-step-6)" }))];
-  const total = parts.reduce((n, p) => n + p.value, 0) || 1;
-  const lead = ranked.reduce((a, b) => (b.value > a.value ? b : a), ranked[0] ?? parts[0]);
-  let start = 0;
-  const arcs = parts.map((p) => { const a = { ...p, start, share: (p.value / total) * 100 }; start += a.share; return a; });
-  return (
-    <div className="v4-destination-chart v4-school-ring">
-      <button type="button" className="v4-ring-figure" onClick={onOpen} aria-label={`${label}: ${parts.map((p) => `${p.label} ${p.value}%`).join(", ")}. Open details`}>
-        <svg viewBox="0 0 240 240" aria-hidden="true">
-          <circle cx="120" cy="120" r="91" fill="none" stroke="var(--glass-border)" strokeWidth="25" />
-          {arcs.filter((a) => a.value > 0).map((a) => <circle key={a.label} cx="120" cy="120" r="91" pathLength="100" fill="none" stroke={a.color} strokeWidth="25" strokeDasharray={`${Math.max(0, a.share - 0.6)} ${100 - Math.max(0, a.share - 0.6)}`} strokeDashoffset={-a.start} transform="rotate(-90 120 120)" />)}
-          <circle cx="120" cy="120" r="69" fill="none" stroke="var(--glass-border)" strokeDasharray="1 5" />
-        </svg>
-        <span><strong><CountUp value={lead?.value} /><small>%</small></strong><em>{centerLabel}</em></span>
-      </button>
-      <ul>{parts.map((p) => <li key={p.label}><i style={{ background: p.color }} /><span>{p.label}{note && <small>{note(p.value)}</small>}</span><strong>{p.value}%</strong></li>)}</ul>
     </div>
   );
 }

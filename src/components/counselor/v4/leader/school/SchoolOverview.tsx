@@ -37,6 +37,15 @@
 //   as a section or CONTENT/DATA wise that Maisha didn't ask for.")
 //   - Headers in Title Case ("Impact Over Time", "Support Status").
 
+//
+// Glow pass (10 Oct 2026). WHY: Chandu asked for every graph to get the
+// light material ("i want all graphs to get these material updates and
+// more creative visions, not just the ones in engagement"), then ruled out
+// bars ("I dont like bar graphs"), rings, grids and dense marks ("that
+// whole grid idea is bad") and asked for charts "made of LIGHT". So on
+// this screen: the impact line is a light trail over an aurora
+// with the latest month as an orb (kit TrendLine), and every lane is a point
+// of light (the SparkBar fills went with the bars).
 import { useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, FileCheck2, Users } from "lucide-react";
@@ -160,7 +169,7 @@ export function SchoolOverview() {
                 <Lane label="Today" value={kpi.value} display={`${dec(kpi.value)}%`} baseline={kpi.baseline} />
               </div>
             )}
-            <small>{rel ? "A relative gain, not percentage points" : "The tick marks the launch baseline"}</small>
+            <small>{rel ? "A relative gain, not percentage points" : "The hollow dot marks the launch baseline"}</small>
           </div>
           <div key={`${metric}-${period}`}>
             <TrendLine
@@ -185,7 +194,6 @@ export function SchoolOverview() {
                 display={num(r.count)}
                 sub={`${dec(r.widthPct)}%`}
                 color={SUPPORT_TONE[r.status]}
-                spark
                 onClick={() => openStatus(r.status)}
                 aria={`${r.status}: ${num(r.count)} students, ${dec(r.widthPct)} percent. Open these students`}
               />

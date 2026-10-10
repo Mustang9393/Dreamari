@@ -46,9 +46,19 @@
 //   - School status in the colours she asked for (above green, meeting
 //     blue, support amber). Headers in Title Case.
 
+//
+// Glow pass (10 Oct 2026). WHY: Chandu asked for every graph to get the
+// light material ("i want all graphs to get these material updates and
+// more creative visions, not just the ones in engagement"), then ruled out
+// bars ("I dont like bar graphs"), rings, grids and dense marks ("that
+// whole grid idea is bad") and asked for charts "made of LIGHT". So on
+// this screen: the measure lanes are points of light with a
+// trail from launch, and the status island's eleven squares became a light
+// strip plot (charts/ldViz StripPlot): one point per school on the planning
+// scale, in its status colour, each still opening the school.
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowRight, ArrowUpRight, School } from "lucide-react";
-import { Tip } from "@/components/app/IconTip";
+import { StripPlot } from "../../charts/ldViz";
 import { DrillPanel, type Drill } from "../../Drill";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import {
@@ -163,7 +173,6 @@ export function DistrictOverview() {
                   key={k.id}
                   label={k.label}
                   color={series(i)}
-                  spark
                   value={k.value}
                   display={`${k.value}%`}
                   sub={`from ${k.baseline}%`}
@@ -199,18 +208,20 @@ export function DistrictOverview() {
               </button>
             ))}
           </div>
-          <div className="v4-sheet-foot mt-auto"><span>Ranked by career exploration · the tick is each school&apos;s launch baseline · trend is the planning change since launch</span><TextAction onClick={() => go("school-performance")}>All schools</TextAction></div>
+          <div className="v4-sheet-foot mt-auto"><span>Ranked by career exploration · the hollow dot is each school&apos;s launch baseline · trend is the planning change since launch</span><TextAction onClick={() => go("school-performance")}>All schools</TextAction></div>
         </section>
 
         <section className="v4-review-island">
           <header className="v4-section-head"><span className="v4-overline">{titleCase(DISTRICT_STATUS_CARD.title)}</span><School size={22} aria-hidden /></header>
           <div className="v4-review-number"><strong><CountUp value={behind} /></strong><span>{behind === 1 ? "school needs" : "schools need"} support<br />{counts.above} above target · {counts.meeting} meeting</span></div>
-          <div className="v4-district-dots" aria-label="Every school by status, lowest planning first">
-            {byPlanning.map((s) => (
-              <Tip key={s.id} label={`${s.name} · ${SCHOOL_STATUS_LABELS[s.status].filter} · planning ${s.planning.value}%`}>
-                <button type="button" onClick={() => open(s.id)} aria-label={`Open ${s.name}. ${SCHOOL_STATUS_LABELS[s.status].filter}, planning ${s.planning.value}%`} style={{ background: STATUS_COLOR[s.status] }} />
-              </Tip>
-            ))}
+          <div className="v4-district-strip">
+            <StripPlot
+              label="Every school by planning milestones, coloured by status. Select a school to open it"
+              unit="%"
+              min={Math.max(0, Math.floor((byPlanning[0]?.planning.value ?? 0) / 10) * 10 - 10)}
+              max={Math.min(100, Math.ceil((byPlanning[byPlanning.length - 1]?.planning.value ?? 100) / 10) * 10 + 10)}
+              points={byPlanning.map((s) => ({ id: s.id, value: s.planning.value, color: STATUS_COLOR[s.status], label: `${s.name} · ${SCHOOL_STATUS_LABELS[s.status].filter} · planning ${s.planning.value}%`, aria: `Open ${s.name}. ${SCHOOL_STATUS_LABELS[s.status].filter}, planning ${s.planning.value}%`, onClick: () => open(s.id) }))}
+            />
           </div>
           <div className="v4-review-stack">
             {DISTRICT_STATUS_CARD.pills.map((p) => (

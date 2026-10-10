@@ -198,9 +198,7 @@
 [data-counselor-version="v4"] .mtg-cal-sum {display:inline-flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-left:auto}
 [data-counselor-version="v4"] .mtg-ring-wrap {display:inline-flex;align-items:center;gap:8px}
 [data-counselor-version="v4"] .mtg-ring-wrap .cal-count b {font-weight:600;color:var(--foreground);font-variant-numeric:tabular-nums}
-[data-counselor-version="v4"] .mtg-ring {flex:none}
-[data-counselor-version="v4"] .mtg-ring-track {fill:none;stroke:var(--glass-surface-2);stroke-width:3.5}
-[data-counselor-version="v4"] .mtg-ring-fill {fill:none;stroke:var(--primary);stroke-width:3.5;stroke-linecap:round}
+[data-counselor-version="v4"] .mtg-week-strip {flex:none;width:72px}
 [data-counselor-version="v4"] .mtg-kinds {display:inline-flex;flex-wrap:wrap;gap:4px}
 [data-counselor-version="v4"] .mtg-kind {display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:999px;background:var(--glass-surface-1);border:1px solid var(--glass-border);font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground);cursor:default}
 [data-counselor-version="v4"] .mtg-kind i {width:8px;height:8px;border-radius:50%;background:var(--tc)}
@@ -366,7 +364,6 @@ html:not(.dark) [data-counselor-version="v4"] .mtg-block-topic {color:var(--mute
   @keyframes mtg-pulse {from {opacity:.6;transform:scale(1)} to {opacity:0;transform:scale(2.6)}}
   .mtg-pop-layer .mtg-pop {animation:mtg-pop-card .16s cubic-bezier(.2,.8,.2,1) both}
   @keyframes mtg-pop-card {from {opacity:0;transform:translateY(4px)}}
-  [data-counselor-version="v4"] .mtg-ring-fill {transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)}
   [data-counselor-version="v4"] .mtg-stamp {animation:mtg-stamp .32s cubic-bezier(.2,1.6,.4,1) both}
   /* on a row that stays, the stamp lands, holds, then lifts off */
   [data-counselor-version="v4"] .mtg-stamp.is-fading {animation:mtg-stamp .32s cubic-bezier(.2,1.6,.4,1) both,mtg-lift .5s 1.4s ease-in forwards}

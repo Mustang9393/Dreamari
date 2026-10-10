@@ -10,7 +10,7 @@
 // same everywhere.
 
 import { useRouter } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
+import { LightStrip } from "./charts/lit";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { Avatar, Go } from "./chips";
 import { GLASS_INSET } from "../surfaces";
@@ -45,13 +45,10 @@ export function DrillTile({ onOpen, label, className = "", style, children }: { 
   );
 }
 
+// A drill row's share as one point of light on a hairline scale (10 Oct
+// 2026, Chandu: "I dont like bar graphs", "made of LIGHT").
 export function DrillBar({ pct }: { pct: number }) {
-  const reduce = useReducedMotion();
-  return (
-    <span className="relative block h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>
-      <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${Math.max(0, Math.min(100, pct))}%` }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} style={{ background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 45%, transparent), var(--primary))" }} />
-    </span>
-  );
+  return <LightStrip pct={pct} />;
 }
 
 const label = "text-[11px] font-bold tracking-[0.06em] uppercase";

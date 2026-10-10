@@ -48,6 +48,7 @@ import { openLog } from "../v5/LogSheet";
 import { StudentFace } from "../v5/StudentFace";
 import { STATUS_COLORS } from "./chips";
 import { logNote } from "./meetingsModel";
+import { LightStrip } from "./charts/lit";
 
 const DAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -176,7 +177,9 @@ export function MeetingsWeek({ meetings, roster, now, done }: { meetings: Meetin
         <span className="mtg-cal-sum">
           {week.length > 0 ? (
             <span className="mtg-ring-wrap" role="status" aria-label={`${weekDone} of ${week.length} meetings done`}>
-              <Ring value={weekDone} total={week.length} />
+              {/* a short light trail to one point (10 Oct 2026 glow pass; was a
+                 ring: "why is everything a ring to you?", "made of LIGHT") */}
+              <LightStrip pct={(weekDone / week.length) * 100} className="mtg-week-strip" />
               <span className="cal-count"><b>{weekDone}/{week.length}</b> done</span>
             </span>
           ) : <span className="cal-count">0 meetings</span>}
@@ -291,19 +294,6 @@ export function MeetingsWeek({ meetings, roster, now, done }: { meetings: Meetin
 
       {hover && <HoverCard h={hover} now={now} done={!!done[hover.m.id]} onEnter={keep} onLeave={hide} onClose={() => setHover(null)} />}
     </section>
-  );
-}
-
-/** The week's progress as a small ring. */
-function Ring({ value, total }: { value: number; total: number }) {
-  const r = 11;
-  const c = 2 * Math.PI * r;
-  const pct = total ? value / total : 0;
-  return (
-    <svg className="mtg-ring" width="30" height="30" viewBox="0 0 30 30" aria-hidden>
-      <circle cx="15" cy="15" r={r} className="mtg-ring-track" />
-      <circle cx="15" cy="15" r={r} className="mtg-ring-fill" strokeDasharray={c} strokeDashoffset={c * (1 - pct)} transform="rotate(-90 15 15)" />
-    </svg>
   );
 }
 

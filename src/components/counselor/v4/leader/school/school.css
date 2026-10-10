@@ -9,11 +9,12 @@
 .v4-school-bars .v4-report-scale{margin:0 109px 0 193px}
 .v4-school-bars .v4-report-bar strong{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1}
 .v4-school-bars .v4-report-bar strong small{font-size:11px;font-weight:400;letter-spacing:0;color:var(--muted-foreground);margin-top:3px}
-.v4-school-base{position:absolute;top:4px;bottom:4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--foreground);opacity:.55}
+.v4-school-bars .v4-report-bar[aria-pressed="true"] .ld-dots-now{transform:scale(1.3)}
+.v4-school-bars .ld-dots-now{transition:transform .2s}
 .v4-school-key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11px;color:var(--muted-foreground);margin-top:14px}
 .v4-school-key span{display:inline-flex;align-items:center;gap:7px}
-.v4-school-key i{display:inline-block;width:2px;height:12px;border-radius:2px;background:var(--foreground);opacity:.55}
-.v4-school-key i.is-fill{width:14px;height:8px;opacity:1;background:var(--v4-cat-1);border-radius:3px}
+.v4-school-key i{display:inline-block;width:9px;height:9px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--v4-cat-1) 70%,var(--foreground))}
+.v4-school-key i.is-fill{width:16px;height:16px;margin:-3px;border:0;background:radial-gradient(circle,var(--ld-core) 0 12%,var(--v4-cat-1) 28%,color-mix(in srgb,var(--v4-cat-1) 30%,transparent) 42%,transparent 70%)}
 
 /* The explainer's quiet actions stack under the sentence. */
 .v4-school-explainer-actions{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-top:16px}
@@ -38,12 +39,19 @@
 .v4-school-panel-close{margin-top:auto;display:flex;align-items:center;justify-content:center;height:42px;border:1px solid var(--glass-border);border-radius:11px 11px 5px 11px;font-size:12px;font-weight:550;background:var(--glass-surface-1)}
 .v4-school-panel-close:hover{background:var(--glass-surface-2)}
 
-/* Ring (Career & postsecondary): Your impact's ring, sized for a sheet. */
-.v4-school-ring{margin-top:6px}
-.v4-school-ring .v4-ring-figure em{max-width:120px;text-align:center;line-height:1.35}
 
 /* Explorer (Career & postsecondary): the focus number is a share. */
-.v4-school-explorer .v4-focus-orb strong small{font-size:22px;letter-spacing:0;margin:0 0 0 2px;color:var(--foreground)}
+/* The focus share as a light trail (glow pass, 10 Oct 2026). */
+.v4-school-focus-field{width:100%;max-width:280px;align-self:flex-start;margin:18px 0 0}
+.v4-school-explorer .v4-interest-focus>p{align-self:flex-start;margin-top:10px}
+.v4-school-focus-field .ld-gauge-figure strong{font-size:56px}
+/* The ranking stems as light: a thin trail to a point of light, on a
+   plain hairline (no repeated ticks). */
+.v4-school-explorer .v4-interest-stem{background:linear-gradient(var(--ld-axis),var(--ld-axis)) 0 50%/100% var(--ld-axis-w) no-repeat}
+.v4-school-explorer .v4-interest-stem>i{height:2px;top:3.5px;border-radius:2px;background:linear-gradient(90deg,color-mix(in srgb,var(--gl-sky) 20%,transparent),var(--gl-sky))}
+.v4-school-explorer .v4-interest-stem>b{top:-4px;width:16px;height:16px;box-shadow:none;background:radial-gradient(circle,color-mix(in srgb,var(--gl-sky) 60%,var(--ld-core)) 0 10%,color-mix(in srgb,var(--gl-sky) 70%,transparent) 30%,transparent 68%)}
+.v4-school-explorer .v4-interest-ranking li button[aria-pressed=true] .v4-interest-stem>b{width:26px;height:26px;top:-9px;background:radial-gradient(circle,var(--ld-core) 0 12%,var(--gl-blue) 28%,color-mix(in srgb,var(--gl-blue) 30%,transparent) 44%,transparent 70%)}
+.v4-school-explorer .v4-interest-ranking li button[aria-pressed=true] .v4-interest-stem>i{background:linear-gradient(90deg,color-mix(in srgb,var(--gl-blue) 25%,transparent),var(--gl-blue))}
 .v4-school-explorer .v4-interest-focus h2{min-height:0!important}
 .v4-school-explorer .v4-interest-focus>p b{font-weight:600;color:var(--foreground)}
 
@@ -63,15 +71,12 @@
 .v4-school-team-head>span:nth-child(1){grid-column:1/3}
 .v4-school-team-row{width:100%;text-align:left;padding:16px 0;border-bottom:1px solid var(--v4-line);transition:background .18s}
 .v4-school-team-row:last-child{border-bottom:0}
-.v4-school-team-row:hover .v4-school-meter-track{box-shadow:0 0 0 1px var(--glass-border)}
+.v4-school-team-row:hover .ld-dots-axis{opacity:1}
 .v4-school-who{display:flex;align-items:center;gap:12px;min-width:0}
 .v4-school-who strong{display:block;font-size:13px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .v4-school-who small{display:block;font-size:11px;margin-top:5px;color:var(--muted-foreground)}
 .v4-school-monogram{display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;border-radius:13px 13px 18px 6px;background:linear-gradient(145deg,var(--glass-surface-2),var(--inset-bg));border:1px solid var(--v4-edge);font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--primary)}
 .v4-school-meter{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:12px;align-items:center}
-.v4-school-meter-track{position:relative;height:10px;border-radius:5px;background:var(--inset-bg);overflow:hidden}
-.v4-school-meter-track>span{position:absolute;inset:0 auto 0 0;border-radius:5px;background:var(--v4-chart-1);box-shadow:inset 0 1px #ffffff66}
-.v4-school-meter-track>i{position:absolute;top:0;bottom:0;width:1px;background:var(--v4-paper)}
 .v4-school-meter b{font-size:15px;font-weight:450;letter-spacing:-.3px;text-align:right;font-variant-numeric:tabular-nums}
 .v4-school-meter small{display:none}
 
@@ -118,15 +123,13 @@
  .v4-school-doc-foot{margin:16px 19px 0}
 }
 @media(max-width:700px){
+ .v4-school-focus-field{grid-column:2;grid-row:1/3;width:150px;max-width:100%;margin:0}
+ .v4-school-focus-field .ld-gauge{gap:6px}
+ .v4-school-focus-field .ld-gauge-figure strong{font-size:38px}
  .v4-school-bars .v4-report-bar{grid-template-columns:96px minmax(0,1fr) 46px 12px;gap:8px;padding:8px 0}
  .v4-school-bars .v4-report-scale{margin:0 67px 0 104px}
  .v4-school-filters .v4-select,.v4-school-year{flex:1 1 calc(50% - 5px);min-width:0}
 }
-.v4-school-ring .v4-ring-figure svg{max-height:320px}
-.v4-school-ring ul{gap:0!important}
-.v4-school-ring li{padding:13px 0;border-bottom:1px solid var(--v4-line)}
-.v4-school-ring li:last-child{border-bottom:0}
-.v4-school-ring li small{display:block;font-size:11px;color:var(--muted-foreground);margin-top:4px}
 
 /* Impact since launch (Reports): Today's lanes with a fixed label column so
    the 0 to 100 axis sits exactly under the tracks. */
@@ -137,3 +140,4 @@
  .v4-school-impact .v4-lane small{display:none}
  .v4-school-impact .v4-leader-lane-axis{margin-left:114px;margin-right:50px}
 }
+html:not(.dark) .v4-school-key i.is-fill{background:radial-gradient(circle,var(--v4-cat-1) 0 22%,color-mix(in srgb,var(--v4-cat-1) 40%,transparent) 36%,transparent 70%)}

@@ -41,15 +41,28 @@
 // engineer; Healthcare, a nurse...; "Other" has no picture). The intentions
 // ring steps through one hue (her Plans After Graduation note), with
 // Undecided neutral. The discovery number counts up. Headers in Title Case.
+//
+// Glow pass (10 Oct 2026). WHY: Chandu, "i want all graphs to get these
+// material updates and more creative visions", "why is everything a ring
+// to you?", "I dont like bar graphs" and "i want them to be made of
+// LIGHT". The two rings on this screen became the form their data has:
+//   - The focus share is a light trail on a 0 to 100 scale ending in a lit
+//     orb (charts/ldViz LightGauge), under the big number.
+//   - Postsecondary intentions are a Sankey of light (PlanFlow): every
+//     enrolled student flows from one column to their plan, ribbon width =
+//     share, each part labelled with its share and head-count, so the key
+//     list beside the ring is no longer needed. It still opens the drill.
+//   - The ranking stems glow; the selected one is the lit point.
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { DrillPanel, type Drill } from "../../Drill";
-import { PortionRing, num, schoolLine, useSchoolDetail } from "./schoolKit";
+import { num, schoolLine, useSchoolDetail } from "./schoolKit";
+import { LightGauge, PlanFlow } from "../../charts/ldViz";
 import { useChartColors } from "../../ChartColors";
 import { Segmented } from "../../viz";
-import { CountUp, INTEREST_ART, SectionHeading, TextAction, artPosition, titleCase, titled } from "../kit";
+import { CountUp, INTEREST_ART, SectionHeading, TextAction, artPosition, step, titleCase, titled } from "../kit";
 
 // The data stores this label in capitals ("NEW CAREERS DISCOVERED").
 const sentence = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
@@ -87,7 +100,11 @@ export function SchoolPostsecondary() {
   const listDrill = () => mode === "interests"
     ? distDrill(cp.interests.title, cp.tooltips.interests, cp.interests.rows, cp.interests.subtitle)
     : distDrill(cp.choices.title, cp.tooltips.choices, cp.choices.rows, `${cp.choices.subtitle} A student can explore several, so the shares do not total 100%.`);
-  const lead4 = cp.intentions.rows.find((r) => r.label.startsWith("4-Year")) ?? cp.intentions.rows[0];
+  // Parts of one whole step through one hue by rank; Undecided is neutral.
+  const intentionParts = [
+    ...cp.intentions.rows.filter((r) => r.label !== "Undecided").sort((a, b) => b.value - a.value).map((r, i) => ({ label: r.label, value: r.value, color: step(i) })),
+    ...cp.intentions.rows.filter((r) => r.label === "Undecided").map((r) => ({ label: r.label, value: r.value, color: "var(--v4-step-6)" })),
+  ];
 
   return (
     <div className="v4-leader-page">
@@ -101,15 +118,8 @@ export function SchoolPostsecondary() {
             {mode === "interests" && INTEREST_ART[focus.label] && <span key={focus.label} className="v4-focus-art" aria-hidden style={{ backgroundImage: `url(${INTEREST_ART[focus.label]})`, backgroundPosition: artPosition(INTEREST_ART[focus.label]) }} />}
             <span className="v4-overline">{selected === 0 ? "Most Chosen" : `Rank ${selected + 1}`} / {mode === "interests" ? "Interest Area" : "Institution"}</span>
             <h2>{focus.label}</h2>
-            <div className="v4-focus-orb">
-              <svg viewBox="0 0 260 190" aria-hidden="true">
-                <defs><linearGradient id="school-interest-ink"><stop stopColor="var(--v4-chart-1)" /><stop offset="1" stopColor="var(--v4-chart-2)" /></linearGradient></defs>
-                <ellipse cx="130" cy="95" rx="116" ry="68" fill="none" stroke="var(--glass-border)" transform="rotate(-24 130 95)" />
-                <circle cx="130" cy="95" r="74" fill="none" stroke="var(--glass-border)" strokeWidth="2" />
-                <circle cx="130" cy="95" r="74" fill="none" stroke="url(#school-interest-ink)" strokeWidth="11" pathLength="100" strokeDasharray={`${focus.value} 100`} strokeLinecap="round" transform="rotate(-90 130 95)" />
-                <circle cx="130" cy="95" r="62" fill="none" stroke="var(--glass-border)" strokeDasharray="1 4" />
-              </svg>
-              <span><strong><CountUp value={focus.value} /><small>%</small></strong><small>of enrolled students</small></span>
+            <div className="v4-school-focus-field">
+              <LightGauge value={focus.value} figure={<strong><CountUp value={focus.value} /><small>%</small></strong>} caption="of enrolled students" />
             </div>
             <p>About <b>{students(focus.value)}</b> of {num(school.enrollment)}</p>
           </div>
@@ -138,12 +148,12 @@ export function SchoolPostsecondary() {
             <div><h2>{titleCase(cp.intentions.title)}</h2></div>
             <span className="v4-section-tools">{intentionColors.toggle}<TextAction onClick={() => setDrill(distDrill(cp.intentions.title, cp.tooltips.intentions, cp.intentions.rows, cp.intentions.subtitle))}>Details</TextAction></span>
           </header>
-          <div className="my-auto pt-[10px]">
-            <PortionRing
+          <div className="pt-[14px]">
+            <PlanFlow
               label={cp.intentions.title}
-              rows={cp.intentions.rows}
+              source={`${num(school.enrollment)} students`}
+              parts={intentionParts}
               note={(v) => `about ${students(v)}`}
-              centerLabel={`plan a ${lead4.label.startsWith("4-Year") ? "4-year college" : lead4.label.toLowerCase()}`}
               onOpen={() => setDrill(distDrill(cp.intentions.title, cp.tooltips.intentions, cp.intentions.rows, cp.intentions.subtitle))}
             />
           </div>

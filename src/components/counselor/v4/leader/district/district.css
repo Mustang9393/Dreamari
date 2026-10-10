@@ -9,16 +9,6 @@
 .v4-district-name .v4-person strong{font-weight:550;line-height:1.35}
 .v4-district-name .v4-person small{margin-top:3px}
 
-/* Today's lane track plus the launch tick and the dashed district line. */
-.v4-district-track{position:relative;display:block;height:22px;border-radius:5px;background:var(--inset-bg)}
-.v4-district-track.is-thin{height:6px;border-radius:3px}
-.v4-district-fill{position:absolute;inset:0 auto 0 0;border-radius:5px;box-shadow:inset 0 1px #ffffff70}
-.v4-district-track.is-thin .v4-district-fill{border-radius:3px;box-shadow:none}
-.v4-district-track>i{position:absolute;top:0;bottom:0;width:1px;background:var(--v4-paper)}
-.v4-district-base{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;border-radius:2px;background:var(--foreground);opacity:.55}
-.v4-district-track.is-thin .v4-district-base{top:-4px;bottom:-4px}
-.v4-district-line{position:absolute;top:-6px;bottom:-6px;width:0;border-left:1.5px dashed var(--foreground);opacity:.5}
-
 /* A column of school lanes; the axis shares the lanes' grid so the scale
    sits under the tracks exactly. */
 .v4-district-lanes{--dl-cols:minmax(230px,1.25fr) minmax(0,2.6fr) 44px 74px 14px;display:flex;flex-direction:column}
@@ -29,13 +19,14 @@
 .v4-district-lane>small{font-size:11px;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
 .v4-district-go{opacity:.35;transition:opacity .18s,transform .18s}
 button.v4-district-lane:hover .v4-district-go,button.v4-district-row:hover .v4-district-go{opacity:1;transform:translate(2px,-2px)}
-button.v4-district-lane:hover .v4-district-track{box-shadow:0 0 0 1px var(--glass-border)}
+button.v4-district-lane:hover .ld-dots-axis{opacity:1}
 button.v4-district-lane:hover .v4-person strong,button.v4-district-row:hover .v4-person strong{color:var(--primary)}
 .v4-district-axis{display:grid;grid-template-columns:var(--dl-cols);gap:16px;padding-top:8px;font-size:11px;color:var(--muted-foreground)}
 .v4-district-axis>div{display:flex;justify-content:space-between}
 .v4-district-legend{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 16px;font-size:11px;color:var(--muted-foreground)}
 .v4-district-legend>span{display:inline-flex;align-items:center;gap:7px}
-.v4-district-legend b{display:block;width:2px;height:13px;border-radius:2px;background:var(--foreground);opacity:.55}
+.v4-district-legend b{display:block;width:9px;height:9px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--v4-cat-1) 70%,var(--foreground))}
+.v4-district-legend i{display:block;width:16px;height:16px;margin:-3px;border-radius:50%;background:radial-gradient(circle,var(--ld-core) 0 12%,var(--v4-cat-1) 28%,color-mix(in srgb,var(--v4-cat-1) 30%,transparent) 42%,transparent 70%)}
 .v4-district-legend em{display:block;height:15px;border-left:1.5px dashed var(--foreground);opacity:.6}
 
 /* Tables as hairline rows (the roster's quiet table, rows are buttons). */
@@ -55,10 +46,9 @@ button.v4-district-row:hover+.v4-district-row{box-shadow:none}
 .v4-district-r{text-align:right}
 .v4-district-phone{display:none}
 
-/* Today: the status island's eleven schools, one square each. */
-.v4-district-dots{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 20px}
-.v4-district-dots>span>button{display:block;width:24px;height:24px;border-radius:40%;transition:transform .15s;box-shadow:inset 0 1px #ffffff60}
-.v4-district-dots>span>button:hover{transform:scale(1.25)}
+/* Today: the status island's eleven schools are a light strip plot
+   (charts/ldViz StripPlot), one point of light per school. */
+.v4-district-strip{margin:4px 0 20px}
 
 /* A filter toolbar: Listboxes, the search field, the sort on the right. */
 .v4-district-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 18px}
@@ -127,6 +117,8 @@ button.v4-district-row:hover+.v4-district-row{box-shadow:none}
 .v4-district-measures .v4-district-measure-axis{display:grid;grid-template-columns:180px minmax(0,1fr) 44px 64px;gap:14px;padding-top:6px;font-size:11px;color:var(--muted-foreground)}
 .v4-district-measures .v4-district-measure-axis>div{display:flex;justify-content:space-between}
 .v4-district-fill-col{flex:1;justify-content:space-around}
+.v4-district-qdot{opacity:.82;transition:opacity .2s}
+.v4-district-qdot.is-on{opacity:1}
 .v4-district-toolbar .v4-tool-button{display:inline-flex;align-items:center;gap:8px}
 @media(max-width:767px){
  .v4-district-measures .v4-lane,.v4-district-measures .v4-district-measure-axis{grid-template-columns:100px minmax(0,1fr) 34px}
@@ -139,3 +131,6 @@ button.v4-district-row:hover+.v4-district-row{box-shadow:none}
 .publication-report-page.v4-district-doc .publication-key-figures{padding:11px 18px}
 .publication-report-page.v4-district-doc .publication-method{margin-top:14px}
 .publication-report-page.v4-district-doc .publication-method p{margin-top:4px}
+html:not(.dark) .v4-district-legend i{background:radial-gradient(circle,var(--v4-cat-1) 0 22%,color-mix(in srgb,var(--v4-cat-1) 40%,transparent) 36%,transparent 70%)}
+.v4-district-wash{stop-opacity:.2}
+html:not(.dark) .v4-district-wash{stop-opacity:0}
