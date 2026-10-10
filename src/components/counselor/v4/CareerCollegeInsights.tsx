@@ -9,13 +9,24 @@
 // (charts/insightViz.tsx):
 //   - Career posters gain a slim meter: the share of the students in view
 //     who saved each career (the poster chip already says how many).
-//   - Schools: the count became a strip of the students' own faces, one
-//     face per student, so the row says who as well as how many.
+//   - Schools: the count was briefly a strip of faces; it is a plain
+//     number again (see the glow pass below).
 //   - Majors: word chips became a treemap, each tile sized by its count;
 //     switching Saved | At their schools glides every tile to its new place.
 //   - Postsecondary Direction (forked here from SchoolPulse.tsx, which no
 //     other page used): a stacked bar became one dot per student, grouped by
 //     plan; hovering a group or its key dims the rest.
+//   - Glow pass, later on 10 Oct 2026 (Chandu: "think more light, glow?"
+//     with a glowing Sankey among the references, then "GIVE ALL GRAPHS
+//     THIS SORT OF VISUAL UPGRADE ... AND TRY DIFFERENT KINDS OF GRAPHS"):
+//     then "I dont like bar graphs" and "i want them to be made of LIGHT":
+//     then "that whole grid idea is bad" (no rows of small repeated marks):
+//     poster meters and the schools' face strips became plain numbers;
+//     major tiles are soft fills of light with no outlines; and
+//     Postsecondary Direction became a glowing flow from grade to plan
+//     (charts/ivFlow.tsx). Every student has a grade and a plan, so the
+//     flow says which grades are still deciding, which the dot groups
+//     could not.
 // RankedBars and TopTen below are shared with other screens and unchanged.
 
 // DEMO-ONLY v2 fork of ../CareerCollegeInsights.tsx (24 Sept 2026). v1 stays untouched so the
@@ -75,7 +86,8 @@ import type { ProfileCareer } from "@/components/profile/data";
 import type { CatalogCareer } from "@/components/app/catalog";
 import { majorPoster, programmeMajor, savedMajorsFor } from "./majors";
 import { useChartColors } from "./ChartColors";
-import { DotRibbon, FaceStrip, InterestMeter, Treemap, useWidth } from "./charts/insightViz";
+import { InterestMeter, Treemap } from "./charts/insightViz";
+import { FlowSankey } from "./charts/ivFlow";
 import "./insights.css";
 import "./insights2.css";
 import { useMemo, useState } from "react";
@@ -87,7 +99,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { DrillTile } from "./Drill";
 import { ShowAll } from "./Disclosure";
 import { InsightStudentsPanel, type StudentsDrill } from "./InsightStudents";
-import { doneBy, useInsightsScope } from "./insightsScope";
+import { GRADES, doneBy, useInsightsScope } from "./insightsScope";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
 // Each recommendation as a number, a subject and its actions -- the
@@ -181,7 +193,6 @@ type Ranked<T> = { item: T; students: CounselorStudent[] };
 const EXPLORE = "/counselor?view=explore&v=4";
 const LEVEL: Record<College["level"], string> = { "Certificates": "Trade school", "Associate degrees": "2-year", "Bachelor's degrees": "4-year" };
 const n = (k: number) => `${k} ${k === 1 ? "student" : "students"}`;
-const FACE = 26;
 
 /** One row: title, one line, a switch and an "Explore all ..." link at the
  *  right, and one line of posters that scrolls sideways. No card around it
@@ -224,7 +235,6 @@ function InterestRows() {
   const { roster, all, back, scopeLabel, year } = scope;
   const [majorMode, setMajorMode] = useState<"saved" | "schools">("saved");
   const [allSchools, setAllSchools] = useState(false);
-  const [whoRef, whoW] = useWidth<HTMLSpanElement>();
   const router = useRouter();
   const [drill, setDrill] = useState<StudentsDrill | null>(null);
   const when = back === 0 ? "" : ` · end of ${year.label}`;
@@ -287,11 +297,6 @@ function InterestRows() {
       .map((x) => ({ ...x, item: { ...x.item, salary: `${x.students.length} saved` } }));
   }, [roster, back]);
 
-  // One face per student: the longest strip (the top school) sets the
-  // pitch, so every strip uses the same spacing and length means count.
-  const maxSchool = schools[0]?.students.length ?? 1;
-  const facePitch = Math.max(6, Math.min(FACE - 4, ((whoW || 240) - 44 - FACE) / Math.max(1, maxSchool - 1)));
-
   // One treemap for both lists, keyed by major, so switching glides tiles.
   const majorItems = majorMode === "saved"
     ? savedMajors.map((x) => ({ key: x.item.title, label: x.item.title, value: x.students.length, aria: `${x.item.title}: ${n(x.students.length)} saved it`, tip: `See the ${n(x.students.length)} who saved it`, data: () => openSavedMajor(x) }))
@@ -353,12 +358,12 @@ function InterestRows() {
           </header>
           {schools.length === 0 ? <p className="v4-cc-empty">No one in {scope.who} is looking at schools yet. Juniors and seniors start this step.</p> : <>
             <ol className="v4-iv-schools">
-              {schools.slice(0, allSchools ? schools.length : 5).map((c, i) => {
+              {schools.slice(0, allSchools ? schools.length : 5).map((c) => {
                 const img = collegeImage(c.item);
                 return <li key={c.item.slug}><IconTip label={`See the ${n(c.students.length)} exploring it`} className="w-full"><button type="button" onClick={() => openSchoolStudents(c)} className="v4-iv-school" aria-label={`${c.item.name}: ${n(c.students.length)} exploring it. Show them`}>
                   <span className="v4-iv-school-photo" style={img ? { backgroundImage: `url(${img})` } : undefined} aria-hidden />
                   <span className="v4-iv-school-copy"><strong>{c.item.name}</strong><small>{c.item.city}, {c.item.state} · {LEVEL[c.item.level]}</small></span>
-                  <span className="v4-iv-school-who" ref={i === 0 ? whoRef : undefined}><FaceStrip students={c.students} pitch={facePitch} size={FACE} /><b aria-hidden>{c.students.length}</b></span>
+                  <span className="v4-iv-school-who" aria-hidden><b>{c.students.length}</b><small>exploring</small></span>
                 </button></IconTip></li>;
               })}
             </ol>
@@ -386,9 +391,12 @@ const INTENT_SHORT: Record<PostsecondaryIntent, string> = { "4-Year College": "4
 
 /** Postsecondary Direction, forked from SchoolPulse.tsx (10 Oct 2026) so
  *  its chart could change without touching another file: the same plans,
- *  key, Multicolor switch and drills, drawn as one dot per student grouped
- *  by plan instead of a stacked bar. Same key as Readiness's Postsecondary
- *  Plan Defined, so the two pages agree. */
+ *  key, Multicolor switch and drills. Same key as Readiness's Postsecondary
+ *  Plan Defined, so the two pages agree. Drawn as a glowing flow from grade
+ *  to plan (glow pass, 10 Oct 2026): a grade, a plan and every ribbon
+ *  between them open exactly the students they count. The flow's right
+ *  labels ("4-year · 66") are the key; the separate key list was a
+ *  duplicate, so it is gone, and plans no one chose are left out. */
 function PostsecondaryRibbon() {
   const scope = useInsightsScope();
   const { roster, back, scopeLabel, year } = scope;
@@ -400,25 +408,36 @@ function PostsecondaryRibbon() {
   const intentOf = (s: CounselorStudent): PostsecondaryIntent => s.postsecondaryIntent !== "Undecided" && doneBy(s, "postsecondary", back) ? s.postsecondaryIntent : "Undecided";
   const plans = INTENTS.map((k) => ({ k, list: roster.filter((s) => intentOf(s) === k) }));
   const decided = roster.length - (plans.find((p) => p.k === "Undecided")?.list.length ?? 0);
+  const grades = GRADES.map((g) => ({ g, list: roster.filter((s) => s.grade === g) })).filter((x) => x.list.length > 0);
   const openPlan = (k: PostsecondaryIntent, list: CounselorStudent[]) => setDrill({ title: `${n(list.length)} ${PLAN_PHRASE[k]}`, subtitle: sub(`${Math.round((list.length / Math.max(1, roster.length)) * 100)}% of students in view`), students: list.map((s) => ({ s, note: s.careerTrack })) });
+  // a grade: still deciding first, since those are the students to reach
+  const openGrade = (g: number, list: CounselorStudent[]) => {
+    const deciding = list.filter((s) => intentOf(s) === "Undecided");
+    const ranked = [...deciding, ...list.filter((s) => intentOf(s) !== "Undecided")];
+    setDrill({
+      title: `Grade ${g}`,
+      subtitle: sub(`${list.length - deciding.length} of ${n(list.length)} have chosen a direction`),
+      students: ranked.map((s) => ({ s, note: intentOf(s) === "Undecided" ? "No plan yet" : intentOf(s) })),
+      listLabel: deciding.length ? `Still deciding first · ${list.length} students` : undefined,
+    });
+  };
+  const openLink = (g: number, k: PostsecondaryIntent, list: CounselorStudent[], of: number) => setDrill({ title: `${n(list.length)} in Grade ${g} ${PLAN_PHRASE[k]}`, subtitle: sub(`${list.length} of ${of} in Grade ${g}`), students: list.map((s) => ({ s, note: s.careerTrack })) });
   if (roster.length === 0) return null;
   return (
     <>
       <section className="v4-iv-direction" aria-label="Postsecondary Direction" {...planColors.attrs}>
         <header className="v4-r2-head">
-          <div className="v4-r2-lead"><h2 className="v4-r2-title">Postsecondary Direction</h2><span className="v4-r2-sub">{decided} of {roster.length} have chosen a direction · one dot per student</span></div>
+          <div className="v4-r2-lead"><h2 className="v4-r2-title">Postsecondary Direction</h2><span className="v4-r2-sub">{decided} of {roster.length} have chosen a direction · by grade</span></div>
           <span className="v4-r2-tools">{planColors.toggle}</span>
         </header>
-        <DotRibbon hot={hot} onHot={setHot} groups={plans.map((p, i) => ({ key: p.k, short: INTENT_SHORT[p.k], count: p.list.length, color: `var(--v4-step-${i + 1})`, aria: `${p.k}: ${n(p.list.length)}. Show them`, tip: `See the ${n(p.list.length)} ${PLAN_PHRASE[p.k]}`, onOpen: () => openPlan(p.k, p.list) }))} />
-        <div className="v4-iv-key" onMouseLeave={() => setHot(null)}>
-          {plans.map((p, i) => (
-            <IconTip key={p.k} label={p.list.length ? `See the ${n(p.list.length)} ${PLAN_PHRASE[p.k]}` : `No one ${PLAN_PHRASE[p.k]} yet`} className="w-full">
-              <button type="button" onClick={() => openPlan(p.k, p.list)} disabled={!p.list.length} aria-label={`${p.k}: ${n(p.list.length)}${p.list.length ? ". Show them" : ""}`} onMouseEnter={() => p.list.length && setHot(p.k)} onFocus={() => p.list.length && setHot(p.k)} onBlur={() => setHot(null)} className={`w-full ${hot && hot !== p.k ? "is-dim" : ""}`}>
-                <i style={{ background: `var(--v4-step-${i + 1})` }} /><span>{p.k === "Undecided" ? "Still deciding" : p.k}</span><b>{p.list.length}</b>
-              </button>
-            </IconTip>
-          ))}
-        </div>
+        <FlowSankey hot={hot} onHot={setHot}
+          left={grades.map((x) => ({ key: String(x.g), label: `Grade ${x.g}`, sub: n(x.list.length), color: "var(--gl-sky)", tip: `See Grade ${x.g}'s ${n(x.list.length)}, still deciding first`, aria: `Grade ${x.g}: ${n(x.list.length)}. Show them`, onOpen: () => openGrade(x.g, x.list) }))}
+          right={plans.map((p, i) => ({ key: p.k, label: `${INTENT_SHORT[p.k]} · ${p.list.length}`, color: `var(--v4-step-${i + 1})`, quiet: p.k === "Undecided", tip: `See the ${n(p.list.length)} ${PLAN_PHRASE[p.k]}`, aria: `${p.k}: ${n(p.list.length)}. Show them`, onOpen: () => openPlan(p.k, p.list) }))}
+          links={grades.flatMap((x) => plans.map((p) => {
+            const list = x.list.filter((s) => intentOf(s) === p.k);
+            return { from: String(x.g), to: p.k, value: list.length, tip: `Grade ${x.g} · ${INTENT_SHORT[p.k]}: ${n(list.length)}`, aria: `Grade ${x.g}, ${p.k}: ${n(list.length)}. Show them`, onOpen: () => openLink(x.g, p.k, list, x.list.length) };
+          }))}
+        />
       </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </>

@@ -1,0 +1,57 @@
+/* WHY (10 Oct 2026, Chandu): "think more light, glow ... GIVE ALL GRAPHS
+   THIS SORT OF VISUAL UPGRADE". The shared light for every chart (glow.tsx).
+   Dark mode: neon tubes, lit orbs, aurora fills. Light mode: the same light,
+   softer, with almost no bloom, because a halo on a pale surface
+   reads as a smudge ("the blue glow ... is sort of bad on light mode").
+   Blue family only: blue, sky and indigo; status colours stay with status. */
+
+[data-counselor-version="v4"] {
+  --gl-blue: #2f6bf2;
+  --gl-sky: #3aa0f5;
+  --gl-indigo: #5a5ff0;
+  --gl-hot: #ffffff;
+  --gl-b1: .16; --gl-b2: .06; --gl-b3: 0;
+  --gl-core: .28;
+  --gl-orb-halo: .5;
+  --gl-aurora: .4;
+  --gl-aurora-base: .1;
+  --gl-grid: color-mix(in srgb, var(--gl-blue) 16%, transparent);
+}
+html.dark [data-counselor-version="v4"] {
+  --gl-blue: #4a86ff;
+  --gl-sky: #48c2ff;
+  --gl-indigo: #7a6cff;
+  --gl-b1: .5; --gl-b2: .22; --gl-b3: .09;
+  --gl-core: .85;
+  --gl-orb-halo: 1;
+  --gl-aurora: 1;
+  --gl-aurora-base: .2;
+  --gl-grid: color-mix(in srgb, #8fb3ff 14%, transparent);
+}
+
+[data-counselor-version="v4"] .gl-bloom { stroke: var(--gl-c); }
+[data-counselor-version="v4"] .gl-b1 { stroke-opacity: var(--gl-b1); }
+[data-counselor-version="v4"] .gl-b2 { stroke-opacity: var(--gl-b2); }
+[data-counselor-version="v4"] .gl-b3 { stroke-opacity: var(--gl-b3); }
+[data-counselor-version="v4"] .gl-core { stroke: var(--gl-hot); stroke-opacity: var(--gl-core); }
+[data-counselor-version="v4"] .gl-stroke.is-quiet .gl-bloom { stroke-opacity: calc(var(--gl-b1) * .35); }
+[data-counselor-version="v4"] .gl-stroke.is-quiet .gl-b3 { stroke-opacity: 0; }
+[data-counselor-version="v4"] .gl-stroke.is-quiet .gl-core { stroke-opacity: calc(var(--gl-core) * .4); }
+
+[data-counselor-version="v4"] .gl-orb-halo { opacity: var(--gl-orb-halo); }
+/* light, not material: no rims, bevels, highlights or drop shadows */
+[data-counselor-version="v4"] .gl-orb-body { stroke: none; }
+/* transform-box keeps the scale centred on the bead itself; never set a
+   pixel transform-origin inline with fill-box, or it flies across the chart */
+@keyframes gl-pulse { 0% { transform: scale(1); opacity: .5; } 100% { transform: scale(3.4); opacity: 0; } }
+[data-counselor-version="v4"] .gl-orb-pulse { transform-box: fill-box; transform-origin: center; animation: gl-pulse 2.6s cubic-bezier(.22,1,.36,1) infinite; pointer-events: none; }
+
+[data-counselor-version="v4"] .gl-aurora-base { fill: var(--gl-blue); opacity: var(--gl-aurora-base); }
+[data-counselor-version="v4"] .gl-aurora-blob { opacity: calc(var(--gl-aurora) * var(--gl-k, 1)); }
+
+[data-counselor-version="v4"] .gl-grid { color: var(--gl-grid); }
+[data-counselor-version="v4"] .gl-grid line { stroke-width: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-counselor-version="v4"] .gl-orb-pulse { animation: none; opacity: 0; }
+}

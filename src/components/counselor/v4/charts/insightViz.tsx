@@ -8,34 +8,36 @@
 // creative with the graphs, don't be traditional, as long as they convey the
 // information sensibly we can use them."
 //
-// One idea runs through both pages: a student is a dot (or a face). The
-// counselor's question is always "which students", so the marks count
-// people, not abstract lengths:
-//   - SegmentGauge: a 270 degree dial of 40 ticks, lit to the share (the
-//     Readiness indicators). The selected tile carries the page's one glow.
-//   - DotBar / DotDonut: one dot per eligible student, the ones still
-//     missing an indicator lit (Readiness > Gaps, bar and donut views).
-//   - FaceStrip: one face per student exploring a school, a unit chart that
-//     says who as well as how many (College & Career > schools).
-//   - Treemap: majors as tiles sized by their count, gliding to the new
-//     layout when Saved | At their schools switches.
-//   - DotRibbon: postsecondary plans as one dot per student, grouped.
-//   - InterestMeter: a slim share-of-caseload meter under each career poster.
-//   - JourneyChart: Readiness by Grade as a "readiness journey": four grade
-//     lanes, one smooth ribbon per indicator crossing them at its share.
-//     The user, on the heat grid: "I don't like the readiness grade bar
-//     graphs... are there really no other creative graph styles?", and on
-//     rings: "why is everything a ring to you?" A ribbon shows the one thing
-//     a grid of cells hides: how each indicator moves from grade to grade.
-// Colour: --primary, the --v4-step blue ramp and neutrals only. Every mark
-// is SVG or CSS, never blurred while animating, and still under reduced
-// motion. Forked, not shared: the other Insights tabs keep their own marks.
+// The counselor's question is always "which students", so every mark opens
+// exactly the students it counts.
+//
+// Glow pass (10 Oct 2026). Chandu: "think more light, glow?" with neon
+// tube, aurora and glowing Sankey references, then "GIVE ALL GRAPHS THIS
+// SORT OF VISUAL UPGRADE IF POSSIBLE. AND TRY DIFFERENT KINDS OF GRAPHS".
+// Every mark here now wears the shared light kit (glow.tsx) or the same
+// principles in CSS: stacked shapes and radial gradients, never a blur.
+//   - Readiness tiles: the tick dials are gone (Chandu: "why is everything
+//     a ring to you?", "I dont like bar graphs", "all the grids and
+//     hexagons are too much", "i dont want so many things to read for
+//     readiness"); a tile is its name, share, count and path to students.
+//   - Poster meters and the schools' face strips became plain numbers;
+//     Gaps' bar view is gone.
+//   - DotDonut: exactly as it was (loved: "The gaps donuts were better
+//     before"), the one chart here still made of one mark per student.
+//   - Treemap: majors as tiles sized by their count, each a soft fill of
+//     light (no outlines, which made it read as a grid of boxes).
+//   - GradeTrail: Readiness by Grade, one measure at a time: a trail of
+//     light across the grades with an Orb per grade (see its note for why).
+//   - The postsecondary flow (grade to plan) lives in ivFlow.tsx.
+// Colour: the GLOW blues, the --v4-step ramp and status amber only. Light
+// mode keeps the gloss and drops the bloom, so nothing goes muddy on a
+// pale surface. Every animation is opacity or transform, and still under
+// reduced motion.
 
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useReducedMotion } from "framer-motion";
-import { Avatar } from "../chips";
 import { IconTip } from "@/components/app/IconTip";
-import type { CounselorStudent } from "@/lib/counselorRoster";
+import { GLOW, GlowStroke, Orb } from "./glow";
 import "./insightViz.css";
 
 /** Width of an element, measured (0 before the first layout). */
@@ -54,7 +56,7 @@ export function useWidth<T extends HTMLElement>() {
 }
 
 /** False on the first paint, true right after, so marks can draw in once. */
-function useArrived() {
+export function useArrived() {
   const reduce = useReducedMotion();
   const [on, setOn] = useState(false);
   useEffect(() => {
@@ -66,63 +68,8 @@ function useArrived() {
 }
 
 /* ------------------------------------------------------------------ */
-/* SegmentGauge                                                        */
+/* DotDonut                                                            */
 /* ------------------------------------------------------------------ */
-
-const TICKS = 40;
-const SWEEP = 270;
-
-/** A 270 degree dial of 40 ticks lit to `value` (0-100), the share in the
- *  middle. Each tick is 2.5 points, so the lit count is honest. */
-export function SegmentGauge({ value, size = 92, active = false, children }: { value: number; size?: number; active?: boolean; children?: ReactNode }) {
-  const { on, reduce } = useArrived();
-  const lit = Math.round((Math.max(0, Math.min(100, value)) / 100) * TICKS);
-  const c = size / 2;
-  const r1 = size / 2 - 3;
-  const r0 = r1 - size * 0.11;
-  return (
-    <span className={`v4-iv-gauge ${active ? "is-active" : ""}`} style={{ width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-        {Array.from({ length: TICKS }, (_, i) => {
-          const a = ((135 + (i * SWEEP) / (TICKS - 1)) * Math.PI) / 180;
-          const isLit = on && i < lit;
-          // the lit run deepens toward its end: pale at the start, full blue at the share
-          const mix = lit > 1 ? Math.round(42 + (58 * i) / (lit - 1)) : 100;
-          return (
-            <line key={i} x1={c + r0 * Math.cos(a)} y1={c + r0 * Math.sin(a)} x2={c + r1 * Math.cos(a)} y2={c + r1 * Math.sin(a)}
-              strokeWidth={size > 80 ? 3 : 2.5} strokeLinecap="round"
-              style={{ stroke: isLit ? `color-mix(in srgb, var(--primary) ${mix}%, var(--v4-iv-tint))` : "var(--v4-iv-off)", transitionDelay: reduce ? "0ms" : `${i * 14}ms` }} />
-          );
-        })}
-      </svg>
-      <span className="v4-iv-gauge-center">{children}</span>
-    </span>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* DotBar + DotDonut                                                   */
-/* ------------------------------------------------------------------ */
-
-/** One dot per eligible student, column by column, the `lit` ones first so
- *  the lit run reads like a bar. Every row of a chart shares `rows` and the
- *  same dot pitch, so a longer bar always means more students. */
-export function DotBar({ total, lit, rows, label }: { total: number; lit: number; rows: number; label?: string }) {
-  const { on, reduce } = useArrived();
-  return (
-    <span className="v4-iv-dotbar" style={{ ["--rows" as string]: rows } as CSSProperties} role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true}>
-      {Array.from({ length: total }, (_, i) => (
-        <i key={i} className={on && i < lit ? "is-lit" : ""} style={reduce ? undefined : { transitionDelay: `${Math.min(i, 120) * 6}ms` }} />
-      ))}
-    </span>
-  );
-}
-
-/** Rows a DotBar needs so the longest one fits `width` at `pitch` px. */
-export function dotRows(maxTotal: number, width: number, pitch: number, min = 2) {
-  if (!width) return min;
-  return Math.max(min, Math.ceil((maxTotal * pitch) / Math.max(1, width)));
-}
 
 const GOLDEN = Math.PI * (3 - Math.sqrt(5));
 
@@ -156,26 +103,6 @@ export function DotDonut({ total, lit, size = 132, children }: { total: number; 
         ))}
       </svg>
       <span className="v4-iv-dotdonut-center">{children}</span>
-    </span>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* FaceStrip                                                           */
-/* ------------------------------------------------------------------ */
-
-/** One face per student, in a row whose length is the count (a unit
- *  chart). Faces overlap evenly when the longest strip would not fit, so
- *  the lengths stay comparable across rows. */
-export function FaceStrip({ students, pitch, size = 26 }: { students: CounselorStudent[]; pitch: number; size?: number }) {
-  const { on, reduce } = useArrived();
-  return (
-    <span className="v4-iv-faces" style={{ width: size + Math.max(0, students.length - 1) * pitch, height: size }} aria-hidden>
-      {students.map((s, i) => (
-        <span key={s.id} className={`v4-iv-face ${on ? "is-on" : ""}`} style={{ left: i * pitch, width: size, height: size, zIndex: students.length - i, transitionDelay: reduce ? "0ms" : `${i * 40}ms` }}>
-          <Avatar name={s.name} index={s.avatarIndex} size={size} />
-        </span>
-      ))}
     </span>
   );
 }
@@ -221,8 +148,9 @@ export function squarify(values: number[], W: number, H: number): Box[] {
   return out;
 }
 
-/** Majors as tiles: area is the count, blue deepens with it, name and
- *  count printed. Tiles are keyed by name, so switching lists glides each
+/** Majors as tiles: area is the count, name and count printed. Each tile
+ *  is made of light: a soft translucent fill that deepens with the count
+ *  (`--k`); no outline at rest, no gloss or shading. Tiles are keyed by name, so switching lists glides each
  *  tile to its new place. */
 export function Treemap<T>({ items, height: fixed, onOpen }: { items: { key: string; label: string; value: number; aria: string; /** hover text, e.g. "See the 9 students" */ tip?: string; data: T }[]; /** default: 384px, taller when narrow so names still fit */ height?: number; onOpen: (data: T) => void }) {
   const [ref, W] = useWidth<HTMLDivElement>();
@@ -239,7 +167,7 @@ export function Treemap<T>({ items, height: fixed, onOpen }: { items: { key: str
           <div key={it.key} className="v4-iv-tmslot" style={{ left: b.x, top: b.y, width: b.w, height: b.h }}>
             <IconTip label={it.tip ?? it.aria} className="h-full w-full">
               <button type="button" onClick={() => onOpen(it.data)} aria-label={it.aria} className={`v4-iv-tm ${roomy ? "" : "is-tight"}`}
-                style={{ ["--t" as string]: `color-mix(in srgb, var(--primary) ${Math.round(10 + share * 24)}%, transparent)`, ["--b" as string]: `color-mix(in srgb, var(--primary) ${Math.round(3 + share * 14)}%, transparent)` } as CSSProperties}>
+                style={{ ["--k" as string]: share.toFixed(2) } as CSSProperties}>
                 <span className="v4-iv-tm-face">
                   <span className="v4-iv-tm-name">{it.label}</span>
                   <b>{it.value}</b>
@@ -254,58 +182,18 @@ export function Treemap<T>({ items, height: fixed, onOpen }: { items: { key: str
 }
 
 /* ------------------------------------------------------------------ */
-/* DotRibbon                                                           */
-/* ------------------------------------------------------------------ */
-
-/** Groups of students as one ribbon of dots, column by column, a gap
- *  between groups and a short name under each group wide enough to hold
- *  it. Each group is a button; hovering one dims the rest. */
-export function DotRibbon({ groups, rows = 4, hot, onHot }: {
-  groups: { key: string; short: string; count: number; color: string; aria: string; /** hover text */ tip?: string; onOpen: () => void }[];
-  rows?: number; hot: string | null; onHot: (k: string | null) => void;
-}) {
-  const [ref, W] = useWidth<HTMLDivElement>();
-  const { on, reduce } = useArrived();
-  const shown = groups.filter((g) => g.count > 0);
-  const cols = shown.reduce((a, g) => a + Math.ceil(g.count / rows), 0);
-  const gap = 12;
-  const pitch = W ? Math.max(8, Math.min(19, (W - gap * Math.max(0, shown.length - 1)) / Math.max(1, cols))) : 0;
-  let seen = 0;
-  return (
-    <div ref={ref} className="v4-iv-ribbon" style={{ ["--p" as string]: `${pitch}px`, ["--rows" as string]: rows, gap } as CSSProperties} onMouseLeave={() => onHot(null)}>
-      {pitch > 0 && shown.map((g) => {
-        const width = Math.ceil(g.count / rows) * pitch;
-        const start = seen;
-        seen += g.count;
-        return (
-          <IconTip key={g.key} label={g.tip ?? g.aria}>
-          <button type="button" onClick={g.onOpen} aria-label={g.aria} onMouseEnter={() => onHot(g.key)} onFocus={() => onHot(g.key)} onBlur={() => onHot(null)}
-            className={`v4-iv-ribbon-group ${hot && hot !== g.key ? "is-dim" : ""}`} style={{ ["--c" as string]: g.color } as CSSProperties}>
-            <span className="v4-iv-ribbon-dots" aria-hidden>
-              {Array.from({ length: g.count }, (_, i) => <i key={i} className={on ? "is-on" : ""} style={reduce ? undefined : { transitionDelay: `${Math.min(start + i, 140) * 5}ms` }} />)}
-            </span>
-            <span className="v4-iv-ribbon-name" style={{ maxWidth: Math.max(width, 0) }}>{width >= 40 ? g.short : ""}</span>
-          </button>
-          </IconTip>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* InterestMeter                                                       */
 /* ------------------------------------------------------------------ */
 
-/** A slim meter under a poster: the share of the students in view who
- *  saved it, on a 0-100% track (honest, so small shares look small). */
+/** Under a poster: the share of the students in view who saved it, as a
+ *  plain line that opens the savers. It was a slim meter, then a few faces;
+ *  Chandu (10 Oct 2026): "I dont like bar graphs" and "that whole grid idea
+ *  is bad" (no rows of small repeated marks), so it is words only. */
 export function InterestMeter({ share, onOpen, tip, aria }: { share: number; onOpen: () => void; tip: string; aria: string }) {
-  const { on } = useArrived();
   return (
     <span className="v4-iv-meter">
       <IconTip label={tip} className="w-full">
         <button type="button" onClick={onOpen} aria-label={aria} className="v4-iv-meterbtn">
-          <span className="v4-iv-meter-track" aria-hidden><i style={{ width: on ? `${Math.max(2, share)}%` : "0%" }} /></span>
           <small>{share}% of students</small>
         </button>
       </IconTip>
@@ -314,21 +202,30 @@ export function InterestMeter({ share, onOpen, tip, aria }: { share: number; onO
 }
 
 /* ------------------------------------------------------------------ */
-/* JourneyChart                                                        */
+/* spread (label nudging, used by the postsecondary flow)              */
 /* ------------------------------------------------------------------ */
 
-export type JourneyPoint = { value: number; tip: string; aria: string; onOpen: () => void } | null;
-export type JourneySeries = { key: string; label: string; points: JourneyPoint[]; tip: string; aria: string; onOpen: () => void };
-export type JourneyLane = { key: string; title: string; sub: string; tip: string; aria: string; onOpen: () => void };
-
-/** End marker per ribbon, so colour is never the only cue. */
-const MARKS = ["circle", "square", "diamond", "triangle"] as const;
-function Mark({ kind, x, y, r, className }: { kind: (typeof MARKS)[number]; x: number; y: number; r: number; className?: string }) {
-  if (kind === "circle") return <circle cx={x} cy={y} r={r} className={className} />;
-  if (kind === "square") return <rect x={x - r * 0.9} y={y - r * 0.9} width={r * 1.8} height={r * 1.8} rx={r * 0.3} className={className} />;
-  if (kind === "diamond") return <path d={`M${x} ${y - r * 1.2}L${x + r * 1.2} ${y}L${x} ${y + r * 1.2}L${x - r * 1.2} ${y}Z`} className={className} />;
-  return <path d={`M${x} ${y - r * 1.15}L${x + r * 1.1} ${y + r * 0.8}L${x - r * 1.1} ${y + r * 0.8}Z`} className={className} />;
+/** Push labels apart (top to bottom) so none sit closer than `gap`, kept
+ *  inside [lo, hi]. Returns the new y for each input, in input order. */
+export function spread(ys: number[], gap: number, lo: number, hi: number) {
+  const order = ys.map((y, i) => ({ y, i })).sort((a, b) => a.y - b.y);
+  for (let k = 1; k < order.length; k++) order[k].y = Math.max(order[k].y, order[k - 1].y + gap);
+  if (order.length && order[order.length - 1].y > hi) {
+    order[order.length - 1].y = hi;
+    for (let k = order.length - 2; k >= 0; k--) order[k].y = Math.min(order[k].y, order[k + 1].y - gap);
+  }
+  if (order.length && order[0].y < lo) {
+    order[0].y = lo;
+    for (let k = 1; k < order.length; k++) order[k].y = Math.max(order[k].y, order[k - 1].y + gap);
+  }
+  const out: number[] = new Array(ys.length);
+  for (const o of order) out[o.i] = o.y;
+  return out;
 }
+
+/* ------------------------------------------------------------------ */
+/* GradeTrail                                                          */
+/* ------------------------------------------------------------------ */
 
 /** Monotone cubic through the points (Fritsch-Carlson, as d3's
  *  curveMonotoneX): smooth, and never overshoots past a data value. */
@@ -352,153 +249,70 @@ function monotone(pts: { x: number; y: number }[]) {
   return d;
 }
 
-/** Push labels apart (top to bottom) so none sit closer than `gap`, kept
- *  inside [lo, hi]. Returns the new y for each input, in input order. */
-function spread(ys: number[], gap: number, lo: number, hi: number) {
-  const order = ys.map((y, i) => ({ y, i })).sort((a, b) => a.y - b.y);
-  for (let k = 1; k < order.length; k++) order[k].y = Math.max(order[k].y, order[k - 1].y + gap);
-  if (order.length && order[order.length - 1].y > hi) {
-    order[order.length - 1].y = hi;
-    for (let k = order.length - 2; k >= 0; k--) order[k].y = Math.min(order[k].y, order[k + 1].y - gap);
-  }
-  if (order.length && order[0].y < lo) {
-    order[0].y = lo;
-    for (let k = 1; k < order.length; k++) order[k].y = Math.max(order[k].y, order[k - 1].y + gap);
-  }
-  const out: number[] = new Array(ys.length);
-  for (const o of order) out[o.i] = o.y;
-  return out;
-}
+export type TrailPoint = { key: string; label: string; value: number | null; tip: string; aria: string; onOpen: () => void; /** the grade label opens the whole grade */ grade: { tip: string; aria: string; onOpen: () => void } };
 
-/** The readiness journey: grade lanes left to right, each indicator one
- *  ribbon crossing them at its share on one 0-100% scale. A chip on the
- *  ribbon at every lane prints the share (amber under 50%) and opens that
- *  grade's students missing it; the lane header opens the grade; the name
- *  at a ribbon's end opens everyone missing that indicator. Hovering a lane
- *  or a ribbon lights it and dims the rest. */
-export function JourneyChart({ lanes, series, height = 500, minWidth = 600 }: { lanes: JourneyLane[]; series: JourneySeries[]; height?: number; /** below this the chart scrolls sideways */ minWidth?: number }) {
-  const [ref, measured] = useWidth<HTMLDivElement>();
+/** Readiness by Grade, as simple as it can be (10 Oct 2026). WHY: Chandu
+ *  turned down the ribbon chart (unsure it read), then a dot grid and a
+ *  strip plot ("all the grids and hexagons are too much and too dense"),
+ *  and asked: "I dont want cards for readiness by grade, i dont want so
+ *  many things to read for readiness. Make it simple. But no bar graphs."
+ *  So: one measure at a time (the switch lives in the section header), one
+ *  trail of light across the grades, an Orb per grade at its share on an
+ *  honest 0 to 100 scale, the share above it and the grade below. Those
+ *  are the only words. Under 50% the Orb and its share turn the status
+ *  amber. A grade the measure does not cover has no point, and the trail
+ *  starts at the next one. Switching measures glides each Orb to its new
+ *  height (transform only) and fades the trail in at its new shape. Every
+ *  Orb is a button that opens that grade's students missing the measure;
+ *  a grade's name opens the whole grade, needs support first. */
+export function GradeTrail({ points, measureKey, height = 240 }: { points: TrailPoint[]; /** changes when the measure switches, to fade the trail in anew */ measureKey: string; height?: number }) {
+  const [ref, W] = useWidth<HTMLDivElement>();
   const { on, reduce } = useArrived();
-  const [lane, setLane] = useState<string | null>(null);
-  const [hot, setHot] = useState<string | null>(null);
-  const [atEnd, setAtEnd] = useState(false);
-  const W = Math.max(minWidth, measured);
   const H = height;
-  const head = 56, top = head + 22, bottom = H - 22;
-  const padL = 44, padR = 150;
-  const area = Math.max(1, W - padL - padR);
-  const laneX = lanes.map((_, i) => padL + (area * (i + 0.5)) / lanes.length);
-  const colW = Math.min(150, (area / lanes.length) * 0.72);
-  const y = (v: number) => bottom - (v / 100) * (bottom - top);
-  const endX = laneX[laneX.length - 1] + colW / 2 + 8;
-  const id = useId().replace(/:/g, "");
-
-  const paths = series.map((s) => {
-    const pts = s.points.map((p, i) => (p ? { x: laneX[i], y: y(p.value) } : null)).filter((p): p is { x: number; y: number } => !!p);
-    const last = pts[pts.length - 1];
-    return { pts, d: pts.length ? `${monotone(pts)}L${endX} ${last.y}` : "", start: pts[0], startsLate: !s.points[0] && pts.length > 0, last };
-  });
-  // chips per lane, nudged apart; names at the right end, nudged apart
-  const chipY = lanes.map((_, li) => spread(series.map((s) => (s.points[li] ? y(s.points[li]!.value) : -999)), 24, top, bottom));
-  const nameY = spread(paths.map((p) => (p.last ? p.last.y : bottom)), 22, top, bottom);
-  const dimSeries = (k: string) => (hot && hot !== k ? "is-dim" : "");
-  const dimLane = (k: string) => (lane && lane !== k ? "is-dim" : "");
-
+  const top = 44, bottom = H - 40;
+  const padX = W && W < 480 ? 12 : 40;
+  const xs = points.map((_, i) => padX + ((W - padX * 2) * (i + 0.5)) / Math.max(1, points.length));
+  const y = (v: number) => bottom - (Math.max(0, Math.min(100, v)) / 100) * (bottom - top);
+  const pts = points.map((p, i) => (p.value === null ? null : { x: xs[i], y: y(p.value) })).filter((p): p is { x: number; y: number } => !!p);
   return (
-    <div className={`v4-iv-journey-scroll dm-scroll ${W > measured + 1 && measured > 0 && !atEnd ? "has-more" : ""}`} ref={ref}
-      onScroll={(e) => { const el = e.currentTarget; setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4); }}>
-      <div className="v4-iv-journey" style={{ width: W, height: H }} onMouseLeave={() => { setLane(null); setHot(null); }}>
-        {measured > 0 && (
-          <>
-            <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden>
-              <defs>
-                {series.map((s, k) => (
-                  <linearGradient key={s.key} id={`${id}-g${k}`} gradientUnits="userSpaceOnUse" x1={laneX[0]} x2={endX} y1={0} y2={0}>
-                    <stop offset="0%" className={`v4-iv-stop-a s-${k}`} />
-                    <stop offset="100%" className={`v4-iv-stop-b s-${k}`} />
-                  </linearGradient>
-                ))}
-              </defs>
-              {/* lanes: soft glass columns; hovering one lights that grade */}
-              {lanes.map((l, i) => (
-                <rect key={l.key} x={laneX[i] - colW / 2} y={4} width={colW} height={H - 8} rx={18}
-                  className={`v4-iv-lane ${lane === l.key ? "is-hot" : ""} ${dimLane(l.key)}`} onMouseEnter={() => setLane(l.key)} />
-              ))}
-              {/* the shared scale: solid hairlines at 0, 50 and 100% */}
-              {[0, 50, 100].map((v) => (
-                <g key={v} className="v4-iv-scale">
-                  <line x1={padL - 8} x2={endX} y1={y(v)} y2={y(v)} />
-                  <text x={padL - 14} y={y(v) + 4} textAnchor="end">{v === 0 ? "0" : `${v}%`}</text>
-                </g>
-              ))}
-              {series.map((s, k) => {
-                const p = paths[k];
-                if (!p.d) return null;
-                return (
-                  <g key={s.key} className={`v4-iv-ribbon-g ${dimSeries(s.key)}`}>
-                    <path d={p.d} className="v4-iv-ribbon" stroke={`url(#${id}-g${k})`} pathLength={1}
-                      style={{ strokeDashoffset: on ? 0 : 1, transitionDelay: reduce ? "0ms" : `${k * 120}ms` }} />
-                    {/* a ribbon that starts late (career pathway, Grade 10) gets a
-                       small tick where it begins; the empty Grade 9 lane says the rest */}
-                    {p.startsLate && (
-                      <g className="v4-iv-starts">
-                        <line x1={p.start.x} x2={p.start.x} y1={p.start.y - 11} y2={p.start.y + 11} />
-                      </g>
-                    )}
-                    {/* a wide invisible stroke so the ribbon is easy to hover */}
-                    <path d={p.d} className="v4-iv-ribbon-hit" onMouseEnter={() => setHot(s.key)} onMouseLeave={() => setHot(null)} />
-                  </g>
-                );
-              })}
-              {/* where a nudged chip really sits on its ribbon: a dot at the true share */}
-              {lanes.map((l, li) => series.map((s, k) => {
-                const pt = s.points[li];
-                if (!pt) return null;
-                const ty = y(pt.value);
-                const cy = chipY[li][k];
-                return (
-                  <g key={`${l.key}-${s.key}`} className={`v4-iv-truept ${dimSeries(s.key)} ${on ? "is-on" : ""}`}>
-                    {Math.abs(cy - ty) > 6 && <circle cx={laneX[li]} cy={ty} r={4} className={`s-${k}`} />}
-                  </g>
-                );
-              }))}
-            </svg>
-            {/* lane headers: the grade and its size; opens the grade's students */}
-            {lanes.map((l, i) => (
-              <span key={l.key} className={`v4-iv-lanehead ${dimLane(l.key)}`} style={{ left: laneX[i], width: colW }}>
-                <IconTip label={l.tip} className="w-full">
-                  <button type="button" onClick={l.onOpen} aria-label={l.aria} onMouseEnter={() => setLane(l.key)} onFocus={() => setLane(l.key)} onBlur={() => setLane(null)}>
-                    <strong>{l.title}</strong><small>{l.sub}</small>
-                  </button>
-                </IconTip>
+    <div ref={ref} className="v4-iv-gt" style={{ height: H }}>
+      {W > 0 && (
+        <>
+          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden>
+            {/* the only scale: faint hairlines at 0 and 100% */}
+            {[0, 100].map((v) => <line key={v} x1={padX / 2} x2={W - padX / 2} y1={y(v)} y2={y(v)} className="v4-iv-gt-hair" />)}
+            {pts.length > 1 && (
+              <g key={measureKey} className={`v4-iv-gt-trail ${on ? "is-on" : ""}`}>
+                <GlowStroke d={monotone(pts)} width={3} from={0.55} />
+              </g>
+            )}
+          </svg>
+          {points.map((p, i) => {
+            const warn = p.value !== null && p.value < 50;
+            const py = p.value === null ? bottom : on ? y(p.value) : bottom;
+            return (
+              <span key={p.key} className={`v4-iv-gt-pt ${p.value === null ? "is-none" : ""} ${warn ? "is-warn" : ""}`}
+                style={{ transform: `translate(${xs[i]}px, ${py}px)`, transitionDuration: reduce ? "0ms" : undefined }}>
+                {p.value !== null && (
+                  <>
+                    <b className="v4-iv-gt-pct">{p.value}%</b>
+                    <IconTip label={p.tip} className="v4-iv-gt-hit">
+                      <button type="button" onClick={p.onOpen} aria-label={p.aria}>
+                        <svg width={28} height={28} viewBox="0 0 28 28" aria-hidden><Orb cx={14} cy={14} r={6.5} color={warn ? "var(--color-feedback-warning)" : GLOW.blue} /></svg>
+                      </button>
+                    </IconTip>
+                  </>
+                )}
               </span>
-            ))}
-            {/* value chips: one per ribbon per lane, nudged so none collide */}
-            {lanes.map((l, li) => series.map((s, k) => {
-              const pt = s.points[li];
-              if (!pt) return null;
-              return (
-                <span key={`${l.key}-${s.key}`} className={`v4-iv-chip-slot ${on ? "is-on" : ""} ${dimLane(l.key)} ${dimSeries(s.key)}`} style={{ left: laneX[li], top: chipY[li][k], transitionDelay: reduce ? "0ms" : `${300 + li * 120}ms` }}>
-                  <IconTip label={pt.tip}>
-                    <button type="button" onClick={pt.onOpen} aria-label={pt.aria} className={`v4-iv-chip s-${k} ${pt.value < 50 ? "is-warn" : ""}`}
-                      onMouseEnter={() => { setHot(s.key); setLane(l.key); }} onFocus={() => { setHot(s.key); setLane(l.key); }} onBlur={() => { setHot(null); setLane(null); }}>
-                      <svg width={10} height={10} viewBox="0 0 10 10" aria-hidden><Mark kind={MARKS[k % 4]} x={5} y={5} r={3.6} className={`v4-iv-chipmark s-${k}`} /></svg>{pt.value}%
-                    </button>
-                  </IconTip>
-                </span>
-              );
-            }))}
-            {/* direct labels at each ribbon's end; opens everyone missing it */}
-            {series.map((s, k) => paths[k].last && (
-              <span key={s.key} className={`v4-iv-endname ${dimSeries(s.key)}`} style={{ left: endX + 12, top: nameY[k] }}>
-                <IconTip label={s.tip}>
-                  <button type="button" onClick={s.onOpen} aria-label={s.aria} onMouseEnter={() => setHot(s.key)} onFocus={() => setHot(s.key)} onBlur={() => setHot(null)}><svg width={12} height={12} viewBox="0 0 12 12" aria-hidden><Mark kind={MARKS[k % 4]} x={6} y={6} r={4.2} className={`v4-iv-chipmark s-${k}`} /></svg>{s.label}</button>
-                </IconTip>
-              </span>
-            ))}
-          </>
-        )}
-      </div>
+            );
+          })}
+          {points.map((p, i) => (
+            <span key={p.key} className="v4-iv-gt-grade" style={{ left: xs[i], top: bottom + 20 }}>
+              <IconTip label={p.grade.tip}><button type="button" onClick={p.grade.onOpen} aria-label={p.grade.aria}>{p.label}</button></IconTip>
+            </span>
+          ))}
+        </>
+      )}
     </div>
   );
 }
