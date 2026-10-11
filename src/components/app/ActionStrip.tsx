@@ -41,7 +41,7 @@ export function StripButton({ icon, label, onClick, ariaLabel, on = false, busy 
       onBlur={() => setPeek(false)}
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); armed.current = false; setPeek(false); onClick(); }}
       className={toolbar ? "dm-quiet cpk-toolbar-button" : boxed ? BOXED + (tight ? TIGHT : "") : BASE}
-      style={{ ...(boxed ? boxStyle(ink, on) : {}), color: showOff ? "var(--color-feedback-error)" : toolbar && on ? "var(--cpk-world)" : ink ?? (on ? "#fff" : "rgba(255,255,255,0.86)"), animation: pulse && !on ? `${toolbar ? "cpk-action-ring" : "dm-tray-ring"} 1.6s ease-out 3` : undefined }}>
+      style={{ ...(boxed ? boxStyle(ink, on) : {}), color: showOff ? "var(--color-feedback-error)" : ink ?? (on || toolbar ? "#fff" : "rgba(255,255,255,0.86)"), animation: pulse && !on ? `${toolbar ? "cpk-action-ring" : "dm-tray-ring"} 1.6s ease-out 3` : undefined }}>
       {busy ? <Loader2 className="h-[22px] w-[22px] animate-spin" aria-hidden /> : showOff ? offIcon ?? <X className="h-[22px] w-[22px]" aria-hidden /> : icon}
       <span>{showOff ? offLabel : label}</span>
     </button>

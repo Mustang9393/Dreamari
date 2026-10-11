@@ -36,7 +36,7 @@ const TONES: Record<"photo" | "card", Tone> = {
   card: { fg: "var(--foreground)", border: "var(--glass-border)", quiet: "var(--glass-surface-1)", primary: "color-mix(in srgb, var(--primary) 26%, var(--glass-surface-1))", skeleton: "var(--glass-surface-2)", rule: "var(--glass-border)", ink: "var(--foreground)", nudge: "var(--muted-foreground)" },
 };
 
-export function CareerHeaderActions({ career, onConnect, surface = "photo", stack = true }: { career: { slug: string; title: string; world: string }; onConnect: () => void; surface?: "photo" | "card"; stack?: boolean }) {
+export function CareerHeaderActions({ career, onConnect, surface = "photo", stack = true, split = false }: { career: { slug: string; title: string; world: string }; onConnect: () => void; surface?: "photo" | "card"; stack?: boolean; /** a sheet footer: games at the left edge, the icons at the right */ split?: boolean }) {
   const router = useRouter();
   const lab = useLab();
   const T = TONES[surface];
@@ -67,11 +67,20 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
          keep it and talk to a pro, the shape the For You rail already
          uses. Desktop: the games left, the strip right, one line.
          Phones: the games fill the width, the strip sits under them,
-         evenly spaced on one line at any width. */}
+         evenly spaced on one line at any width.
+         11 Oct 2026: the page is back on that one row (an 8 Oct pass had
+         put it on the sheet's stacked layout, stretching every button across
+         the card). The row is built left to right with fixed gaps, never
+         pinned to both edges, so a career with no games, one game, or no
+         pros (Ask a pro hidden) still reads as one tidy line. In a sheet
+         (`split`) the row is a footer bar, so the games take the left edge
+         and the icons the right, the usual dialog footer (Chandu: "in the
+         pop modals, the games can be left and the action icons can be
+         aligned right"). */}
       {!ready ? (
         <div className="mt-[var(--space-1)] flex gap-[var(--space-3)]">{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: T.skeleton }} />)}</div>
       ) : (
-        <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "cpk-career-actions" : "md:flex-row md:items-center md:justify-between"} ${surface === "photo" ? "on-dark-media" : ""}`} style={{ textShadow: "none", "--cpk-world": accent } as CSSProperties}>
+        <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "cpk-career-actions" : `cpk-row md:flex-row md:flex-wrap md:items-center md:gap-x-[var(--space-5)] ${split ? "md:justify-between" : ""}`} ${surface === "photo" ? "on-dark-media" : ""}`} style={{ textShadow: "none", "--cpk-world": accent } as CSSProperties}>
           {/* Play and Glossary Game on every career (8 Oct 2026, Chandu: "make
              sure we have a colourful play button and play and glossary
              buttons for every career even if we don't have the actual games
@@ -81,7 +90,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
              with that colour's glow under it, Glossary Game is outlined in
              it. Without the game, both open Play. The two always share one width:
              Play is never the smaller one (Chandu, 8 Oct 2026). */}
-          <div role="group" aria-label="Try it" className={`grid grid-cols-2 gap-[var(--space-2)] ${stack ? "cpk-game-actions" : ""}`}>
+          <div role="group" aria-label="Try it" className={`grid grid-cols-2 gap-[var(--space-2)] ${stack ? "cpk-game-actions" : "md:w-max md:[grid-template-columns:repeat(2,1fr)]"}`}>
             <button
               type="button"
               onClick={() => router.push(hasSimulation ? `/play/${career.slug}` : "/play")}
@@ -107,7 +116,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               <BookOpen className="h-4 w-4" aria-hidden style={{ color: accent }} /> Glossary Game
             </button>
           </div>
-          <div role="group" aria-label="Keep it, or ask a pro" className={`grid gap-[var(--space-2)] ${stack ? "cpk-action-toolbar" : "md:flex"} ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`}>
+          <div role="group" aria-label="Keep it, or ask a pro" className={`grid gap-[var(--space-2)] ${stack ? "cpk-action-toolbar" : "cpk-action-toolbar md:flex md:!w-auto md:gap-[var(--space-1)]"} ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`}>
             <StripButton
               on={saved}
               busy={lab.pending === `save:${career.slug}`}
@@ -120,9 +129,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               label={saved ? "Saved" : "Save"}
               offLabel="Remove"
               ink={T.ink}
-              boxed={!stack}
-              tight={!stack}
-              toolbar={stack}
+              toolbar
             />
             <StripButton
               on={rank >= 0}
@@ -135,14 +142,12 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               label={rank >= 0 ? `#${rank + 1} in Top 3` : "Top 3"}
               offLabel="Take out"
               ink={T.ink}
-              boxed={!stack}
-              tight={!stack}
-              toolbar={stack}
+              toolbar
             />
             {/* Connect with [World] Professionals, ported from the Replit
                reference; hidden when the world has no real pros. */}
             {hasWorldProfessionals && (
-              <StripButton onClick={onConnect} ariaLabel="Ask a professional" icon={<AskProAction size={24} className="cpk-action-icon" />} label="Ask a pro" ink={T.ink} boxed={!stack} tight={!stack} toolbar={stack} />
+              <StripButton onClick={onConnect} ariaLabel="Ask a professional" icon={<AskProAction size={24} className="cpk-action-icon" />} label="Ask a pro" ink={T.ink} toolbar />
             )}
           </div>
         </div>
@@ -154,7 +159,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
       {ready && !saved && rank < 0 && (stack
         // in a sheet: centred under the spread strip, with room above it (Chandu, 8 Oct 2026)
         ? <div className="mt-[var(--space-2)]"><NextStep persist center ink={T.nudge} text="Save it to keep it. Your Top 3 comes from what you save." /></div>
-        : <NextStep persist ink={T.nudge} text="Save it to keep it. Your Top 3 comes from what you save." />)}
+        : <div className="mt-[var(--space-3)]"><NextStep persist ink={T.nudge} text="Save it to keep it. Your Top 3 comes from what you save." /></div>)}
     </>
   );
 }

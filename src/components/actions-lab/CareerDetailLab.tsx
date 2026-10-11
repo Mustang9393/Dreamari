@@ -570,7 +570,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
               {vm.summary && <p className={`${LABEL} max-w-[40ch] pt-[2px]`}>{vm.summary}</p>}
             </div>
             {/* the actions, shared with the career sheet (CareerHeaderActions) */}
-            <CareerHeaderActions career={career} onConnect={() => setConnectOpen(true)} />
+            <CareerHeaderActions career={career} onConnect={() => setConnectOpen(true)} stack={false} />
           </div>
         </section>
 

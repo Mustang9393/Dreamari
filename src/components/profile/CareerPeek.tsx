@@ -353,7 +353,7 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport, variant = "
                 <FileText className="h-5 w-5 shrink-0" aria-hidden /><span>Get Career Report</span>
               </button>
             </div>
-          ) : <div className="min-w-0 w-full"><CareerHeaderActions career={{ slug: career.id, title: career.title, world: career.world }} onConnect={() => setConnectOpen(true)} surface="card" stack /></div>}
+          ) : <div className="min-w-0 w-full"><CareerHeaderActions career={{ slug: career.id, title: career.title, world: career.world }} onConnect={() => setConnectOpen(true)} surface="card" stack={false} split /></div>}
           <ModalActionFeedback />
         </div>
       </motion.div>

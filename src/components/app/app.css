@@ -969,15 +969,38 @@ html.light .xsheet .cpk-cta, .xsheet[data-ink="light"] .cpk-cta { color: #fff; }
 .cpk-refined .cpk-tabs [role="tab"][aria-selected="true"] > [aria-hidden] { background: color-mix(in srgb, var(--cpk-world) 16%, var(--glass-surface-2)) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cpk-world) 38%, transparent); }
 .cpk-career-actions { margin-top: 0; gap: 10px; }
 .cpk-game-actions > button { min-height: 46px; }
-.cpk-action-toolbar { width: 100%; gap: 8px; }
-.cpk-toolbar-button { display: flex; min-height: 44px; min-width: 0; cursor: pointer; align-items: center; justify-content: center; gap: 7px; padding: 6px 10px; border: 1px solid transparent; border-radius: var(--radius-sm); font-size: 13px; line-height: 18px; font-weight: 600; transition: background-color 160ms, border-color 160ms; }
-.cpk-toolbar-button > svg { flex-shrink: 0; width: 20px; height: 20px; }
+/* Save / Top 3 / Ask a pro (11 Oct 2026, Chandu: "when they are selected or
+   active the entire width of the space is highlighted and gold which should
+   not happen, they can be spaced apart but their padding should be more like
+   a circle or square around them and when selected only the color of the
+   icons need to change not their padding or area around them"). Each button
+   hugs its icon and label (justify-self: center inside a spread grid), so
+   hover, focus and the next-step pulse sit in a compact rounded square; the
+   space between buttons stays empty. Selected never paints a box: only the
+   icon takes the world colour. */
+.cpk-action-toolbar { width: 100%; gap: 8px; justify-items: center; }
+.cpk-toolbar-button { display: flex; min-height: 44px; min-width: 0; cursor: pointer; align-items: center; justify-content: center; gap: 7px; padding: 8px 12px; border: 0; border-radius: var(--radius-md); font-size: 13px; line-height: 18px; font-weight: 600; transition: background-color 160ms; }
+.cpk-toolbar-button > svg { flex-shrink: 0; width: 20px; height: 20px; transition: color 160ms; }
 .cpk-toolbar-button > .cpk-action-icon { width: 24px; height: 24px; }
-.cpk-toolbar-button[aria-pressed="true"] { background: color-mix(in srgb, var(--cpk-world) 13%, transparent); border-color: color-mix(in srgb, var(--cpk-world) 35%, transparent); }
+.cpk-toolbar-button[aria-pressed="true"] > svg:first-child { color: var(--cpk-world); }
 .cpk-toolbar-button:disabled { cursor: wait; }
-.cpk-school-actions { align-items: center; }
+/* The one-row header (career page and sheet) measures its own width. When
+   the games and three labelled buttons cannot share one line (a sheet's
+   content side, a phone), the buttons turn icon-over-label instead of
+   wrapping to a second row (11 Oct 2026, Chandu on the sheet: "Why is this
+   stacked?"), so the row stays one line and nothing breaks "Top 3" or
+   "Ask a pro" across two lines. */
+.cpk-row { container-type: inline-size; }
+@container (max-width: 680px) {
+  .cpk-row .cpk-toolbar-button { flex-direction: column; gap: 3px; padding: 6px 8px; font-size: 12px; line-height: 14px; white-space: nowrap; }
+  .cpk-row .cpk-toolbar-button > svg { width: 20px; height: 20px; }
+}
+/* the school row hugs the same way (11 Oct 2026): Save and each link sit
+   centred in their quarter at their own size, so hover stays a compact
+   rounded square; the hairline dividers between links went with the wide
+   cells they used to separate */
+.cpk-school-actions { align-items: center; justify-items: center; }
 .cpk-school-actions > a { background: transparent !important; border-color: transparent !important; white-space: normal; text-align: center; }
-.cpk-school-actions > a + a { border-left-color: var(--glass-border) !important; border-radius: 0; }
 @media (hover: hover) {
   .cpk-toolbar-button:hover, .cpk-school-actions > a:hover { background: var(--glass-surface-2) !important; }
 }
