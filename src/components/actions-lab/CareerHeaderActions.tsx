@@ -36,7 +36,7 @@ const TONES: Record<"photo" | "card", Tone> = {
   card: { fg: "var(--foreground)", border: "var(--glass-border)", quiet: "var(--glass-surface-1)", primary: "color-mix(in srgb, var(--primary) 26%, var(--glass-surface-1))", skeleton: "var(--glass-surface-2)", rule: "var(--glass-border)", ink: "var(--foreground)", nudge: "var(--muted-foreground)" },
 };
 
-export function CareerHeaderActions({ career, onConnect, surface = "photo", stack = true, split = false }: { career: { slug: string; title: string; world: string }; onConnect: () => void; surface?: "photo" | "card"; stack?: boolean; /** a sheet footer: games at the left edge, the icons at the right */ split?: boolean }) {
+export function CareerHeaderActions({ career, onConnect, surface = "photo", stack = true, split = false, games = { play: true, glossary: true } }: { career: { slug: string; title: string; world: string }; onConnect: () => void; surface?: "photo" | "card"; stack?: boolean; /** a sheet footer: games at the left edge, the icons at the right */ split?: boolean; /** which game buttons show. Every career offers both today (8 Oct 2026: without a game they open the Play tab); a backend that hides missing games passes its own, and the row adapts. */ games?: { play: boolean; glossary: boolean } }) {
   const router = useRouter();
   const lab = useLab();
   const T = TONES[surface];
@@ -56,6 +56,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
   const ink = careerButtonInk(career.world);
   const saved = lab.saved.includes(career.slug);
   const rank = lab.top3.indexOf(career.slug);
+  const gameCount = (games.play ? 1 : 0) + (games.glossary ? 1 : 0);
   return (
     <>
       {/* The header's actions in two tiers, the way Netflix lays out a
@@ -80,7 +81,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
       {!ready ? (
         <div className="mt-[var(--space-1)] flex gap-[var(--space-3)]">{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: T.skeleton }} />)}</div>
       ) : (
-        <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "cpk-career-actions" : `cpk-row md:flex-row md:flex-wrap md:items-center md:gap-x-[var(--space-5)] ${split ? "md:justify-between" : ""}`} ${surface === "photo" ? "on-dark-media" : ""}`} style={{ textShadow: "none", "--cpk-world": accent } as CSSProperties}>
+        <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "cpk-career-actions" : `cpk-row md:flex-row md:flex-wrap md:items-center md:gap-x-[var(--space-5)] ${split ? "is-split" : ""}`} ${surface === "photo" ? "on-dark-media" : ""}`} style={{ textShadow: "none", "--cpk-world": accent } as CSSProperties}>
           {/* Play and Glossary Game on every career (8 Oct 2026, Chandu: "make
              sure we have a colourful play button and play and glossary
              buttons for every career even if we don't have the actual games
@@ -90,7 +91,9 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
              with that colour's glow under it, Glossary Game is outlined in
              it. Without the game, both open Play. The two always share one width:
              Play is never the smaller one (Chandu, 8 Oct 2026). */}
-          <div role="group" aria-label="Try it" className={`grid grid-cols-2 gap-[var(--space-2)] ${stack ? "cpk-game-actions" : "md:w-max md:[grid-template-columns:repeat(2,1fr)]"}`}>
+          {gameCount > 0 && (
+          <div role="group" aria-label="Try it" className={`cpk-games grid gap-[var(--space-2)] ${gameCount === 2 ? "grid-cols-2" : "grid-cols-1"} ${stack ? "cpk-game-actions" : `md:w-max ${gameCount === 2 ? "md:[grid-template-columns:repeat(2,1fr)]" : "md:min-w-[160px]"}`}`}>
+            {games.play && (
             <button
               type="button"
               onClick={() => router.push(hasSimulation ? `/play/${career.slug}` : "/play")}
@@ -107,6 +110,8 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
               <Play className="h-[14px] w-[14px]" fill="currentColor" aria-hidden /> Play
             </button>
+            )}
+            {games.glossary && (
             <button
               type="button"
               onClick={() => router.push(hasGlossaryGame ? `/play/glossary/${career.slug}` : "/play")}
@@ -115,8 +120,10 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
             >
               <BookOpen className="h-4 w-4" aria-hidden style={{ color: accent }} /> Glossary Game
             </button>
+            )}
           </div>
-          <div role="group" aria-label="Keep it, or ask a pro" className={`grid gap-[var(--space-2)] ${stack ? "cpk-action-toolbar" : "cpk-action-toolbar md:flex md:!w-auto md:gap-[var(--space-1)]"} ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`}>
+          )}
+          <div role="group" aria-label="Keep it, or ask a pro" className={`cpk-icons grid gap-[var(--space-2)] ${stack ? "cpk-action-toolbar" : "cpk-action-toolbar md:flex md:!w-auto md:gap-[var(--space-1)]"} ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`}>
             <StripButton
               on={saved}
               busy={lab.pending === `save:${career.slug}`}

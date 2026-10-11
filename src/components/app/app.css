@@ -991,6 +991,18 @@ html.light .xsheet .cpk-cta, .xsheet[data-ink="light"] .cpk-cta { color: #fff; }
    stacked?"), so the row stays one line and nothing breaks "Top 3" or
    "Ask a pro" across two lines. */
 .cpk-row { container-type: inline-size; }
+/* A sheet footer (split): the icons take the right edge only when the games
+   sit right before them, so a career without games keeps its icons at the
+   left (11 Oct 2026, Chandu: "make sure the edge cases dont have the action
+   buttons sitting awkwardly on the right"). Above 520px the row always fits
+   on one line (the buttons turn icon-over-label first), so the icons never
+   land alone on a wrapped line at the right; under that width the row is
+   allowed to wrap and the push is dropped. Phones stack, untouched. */
+@media (min-width: 768px) {
+  @container (min-width: 520px) {
+    .cpk-row.is-split > .cpk-games + .cpk-icons { margin-left: auto; }
+  }
+}
 @container (max-width: 680px) {
   .cpk-row .cpk-toolbar-button { flex-direction: column; gap: 3px; padding: 6px 8px; font-size: 12px; line-height: 14px; white-space: nowrap; }
   .cpk-row .cpk-toolbar-button > svg { width: 20px; height: 20px; }

@@ -1,3 +1,10 @@
+## 2026-10-11: Career actions: edge cases (no games, one game, no pros)
+
+**Why (Chandu):** "make sure the edge cases dont have the action buttons sitting awkwardly on the right"; "when there is no play button etc. Refine those cases. Optimise so nothing looks broken."
+- `CareerHeaderActions` takes `games` ({ play, glossary }), default both (every career offers both today; without a game they open the Play tab). A backend that hides missing games passes its own and the row adapts: only the existing game buttons render; one game is full width on phones and at least 160px on desktop so it still reads as the main action; no games drops the group, so the icons sit at the left.
+- In a sheet footer the icons take the right edge only when the games sit right before them on the same line (a sibling rule inside a container query, desktop only); otherwise they stay left. No pros leaves two icons.
+- Checked each case (no games, Play only, no pros) on the page at 1440, the sheet at 1440 and a phone at 390.
+
 ## 2026-10-11: Career and school actions: compact buttons, icon-only selected state, one row again
 
 **Why (Chandu):** "in the career detail page in explore, were the CTAs not meant to be arranged in a row? games left the other reactions to the right? What happened?"; "the action buttons dont need to be spread so wide"; "when they are selected or active the entire width of the space is highlighted and gold which should not happen, they can be spaced apart but their padding should be more like a circle or square around them and when selected only the color of the icons need to change"; on the sheet "Why is this stacked?" and "in the pop modals, the games can be left and the action icons can be aligned right." What happened: a26b9763 (8 Oct) made the sheet's stacked layout the default for the full page too, stretching every button across the card.
