@@ -1,0 +1,504 @@
+/* Question layout prototypes (12 Oct 2026). DEMO-ONLY: prototype layout
+   switch (?qlayout=current|asks|stage, GlossaryLabGameExperience.tsx).
+
+   Team feedback on Business Basics: "What is a company?" sat clear of the
+   clouds, but longer questions ran down into the cloud illustrations; "we
+   should establish a universal approach to text placement, spacing and
+   visual hierarchy ... the decorative elements should complement the content
+   rather than compete with it", and not by shrinking the type. Chandu: Dreamy
+   keeps his size, the question keeps its size, every theme.
+
+   Both layouts keep the question's existing type rules (the same
+   .glossary-question-choice .glossary-speech-bubble p chain) and Dreamy's
+   existing size rules, and keep FitToScreen's 1.15x growth on desktop by
+   sizing the column at frame / 1.15, so on a laptop both render exactly as
+   large as today. The scenery sinks (a translate) when the question would
+   reach it, and rises a little to meet the answers when there is room:
+   --qa-scenery-shift, written by useQuestionSceneryFit.
+
+   Loaded last, after glossary-signal.css. Selectors are long on purpose:
+   they must outrank the legacy two-column rules in glossary-lab.css,
+   glossary-refined.css and glossary-fit.css without touching them. */
+
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"]:is([data-qlayout="asks"], [data-qlayout="stage"]):has(.glossary-qa) {
+  --glossary-frame-width: 1180px;
+  --qa-gap: clamp(14px, calc(2.2dvh / var(--vz, 1)), 24px);
+}
+
+/* The column: one centred stack. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] > .glossary-game-frame:not([hidden]) .glossary-question-screen.glossary-qa {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  margin-inline: auto;
+  gap: var(--qa-gap) !important;
+  grid-template-columns: none !important;
+  container-type: inline-size;
+}
+@media (min-width: 968px) {
+  /* FitToScreen grows the activity up to 1.15x when the frame is that much
+     wider than it; this keeps that growth, so type and Dreamy match today. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] > .glossary-game-frame:not([hidden]) .glossary-question-screen.glossary-qa {
+    width: calc(100% / 1.15) !important;
+  }
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa > * { grid-column: auto !important; grid-row: auto !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-question-profit-scene { width: 100%; margin: 0; }
+
+/* ---------------------------------------------------------------- asks */
+/* Dreamy, then his question in a bubble whose tail points at him. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-asks > .glossary-question-guide {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: clamp(22px, calc(2.2vw / var(--vz, 1)), 34px) !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-question-dreamy { flex: none !important; min-height: 0 !important; }
+
+/* The bubble wears the theme's own surface tokens (the HUD's and the answer
+   tiles'), so it is native in every world. Signal keeps its white pixel
+   plate and pixel tail from glossary-lab.css. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"]:not(.glossary-lab-atmosphere-v2) .glossary-qa-asks > .glossary-question-guide > .glossary-speech-bubble {
+  --qa-bubble-edge: color-mix(in srgb, var(--card) 94%, var(--refine-accent));
+  --qa-bubble-line: var(--glass-border);
+  position: relative;
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0;
+  max-width: none !important;
+  padding: clamp(18px, calc(2.4dvh / var(--vz, 1)), 26px) clamp(22px, calc(2.4vw / var(--vz, 1)), 34px) !important;
+  border: 1px solid var(--qa-bubble-line) !important;
+  border-radius: var(--qa-bubble-radius, 28px) !important;
+  background: var(--refine-surface) !important;
+  box-shadow: var(--refine-depth) !important;
+  clip-path: none !important;
+  overflow: visible;
+  text-align: left !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"]:not(.glossary-lab-atmosphere-v2) .glossary-qa-asks > .glossary-question-guide > .glossary-speech-bubble::before {
+  content: "";
+  display: block !important;
+  position: absolute;
+  top: 50%;
+  left: -11px;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-left: 1px solid var(--qa-bubble-line);
+  border-bottom: 1px solid var(--qa-bubble-line);
+  border-radius: 0 0 0 4px;
+  background: var(--qa-bubble-edge);
+  transform: translateY(-50%) rotate(45deg);
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"]:not(.glossary-lab-atmosphere-v2) .glossary-qa-asks > .glossary-question-guide > .glossary-speech-bubble::after { display: none !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-speech-bubble p { margin: 0; text-align: left !important; }
+/* Orbit: the paper cut-corner radius, ink tail. Horizon: the neon edge its
+   answer tiles carry. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v3[data-screen="question"] .glossary-qa-asks > .glossary-question-guide > .glossary-speech-bubble {
+  --qa-bubble-radius: 7px 28px 28px 7px;
+  --qa-bubble-edge: var(--orbit-paper);
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v4[data-screen="question"] .glossary-qa-asks > .glossary-question-guide > .glossary-speech-bubble {
+  --qa-bubble-radius: 6px 22px 6px 22px;
+  --qa-bubble-line: color-mix(in srgb, var(--world-personal-care-community-services) 50%, transparent);
+  --qa-bubble-edge: color-mix(in srgb, var(--card) 80%, var(--hero-accent-purple));
+}
+/* Signal: the plate stretches across the row instead of hugging its text. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-qa-asks > .glossary-question-guide > .glossary-signal-bubble {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+/* Answers: picture-and-word tiles in one row of four when they fit,
+   otherwise a 2x2; sentences always a 2x2 (one column on phones). */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa :is(.glossary-option-list, .glossary-document-list) {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: none !important;
+  grid-auto-rows: 1fr;
+  width: 100%;
+  height: auto !important;
+  min-height: 0 !important;
+  align-self: stretch !important;
+  gap: clamp(10px, calc(1.6dvh / var(--vz, 1)), 16px) !important;
+}
+@container (min-width: 760px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-asks[data-answer-shape="words"] .glossary-option-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa :is(.glossary-option, .glossary-document-option) { height: 100% !important; min-width: 0; }
+/* Portrait tablets have height to spare and too little width for four
+   picture tiles: a 2x2 of taller tiles. */
+@media (orientation: portrait) and (min-width: 641px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-asks[data-answer-shape="words"] .glossary-option-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-option { min-height: clamp(110px, calc(12svh / var(--vz, 1)), 160px) !important; }
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-option-grid .glossary-option:last-child:nth-child(odd) { grid-column: auto; }
+/* The misuse sheet stays one sheet, divided into a 2x2. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-document-list { gap: 0 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-document-option:nth-child(odd) { border-right-width: 1px; border-right-style: solid; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-document-option:nth-last-child(-n + 2) { border-bottom-width: 0; }
+
+/* ------------------------------------------------- every activity (asks)
+   12 Oct 2026, Chandu: "the other pages, for example Sort each one, etc.
+   still look broken". One frame for every activity: the HUD at one width,
+   Dreamy saying the instruction, the board under him in the same column. */
+
+/* The HUD keeps the column's width on every question screen instead of
+   following each activity's rendered width, so nothing jumps between
+   screens (the same 1180px frame, gutters on smaller windows). */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"]:is([data-qlayout="asks"], [data-qlayout="stage"]):has(.glossary-qa) > .glossary-game-frame:not([hidden]) .glossary-mastery-hud {
+  width: 100% !important;
+}
+
+/* The live hint inside the bubble: small, one line, under Dreamy's words. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-asks > .glossary-question-guide > .glossary-speech-bubble { flex-direction: column !important; align-items: stretch !important; justify-content: center !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-hint:empty { display: none; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-hint { margin-top: 8px; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-hint-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin: 0;
+  font: 600 15px/1.4 var(--font-body) !important;
+  letter-spacing: 0 !important;
+  color: var(--muted-foreground) !important;
+  -webkit-text-fill-color: currentColor;
+  text-align: left;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-hint-line > b { font-weight: 700; color: var(--foreground); white-space: nowrap; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-hint-line > b small { font-size: inherit; font-weight: 600; color: var(--muted-foreground); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-hint-line[data-tone="wrong"] > span { color: var(--danger, #e0483e); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-hint-line[data-tone="done"] > span { color: var(--world-food-farming-nature); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-qa-hint-line { font: 500 15px/1.4 var(--sig-mono) !important; color: #3b4a6b !important; }
+@media (max-width: 640px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-hint-line { font-size: 13px !important; }
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-qa-hint-line > b { color: var(--sig-ink); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v3[data-screen="question"] .glossary-qa-hint-line { color: color-mix(in srgb, var(--refine-ink) 72%, transparent) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v3[data-screen="question"] .glossary-qa-hint-line > b { color: var(--refine-ink); }
+
+/* Boards take the column. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa :is(.glossary-match-up, .glossary-sort-buckets, .glossary-profit-builder) { width: 100% !important; max-width: none !important; margin: 0 !important; }
+
+/* "Which one is wrong?": the sheet sat 18px lower than everything else. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-document-list { margin-top: 0 !important; }
+
+/* Match keeps its two columns at every width (12 Oct 2026, Chandu: "the
+   match layout should be like before, 2 columns"): concepts left, visuals
+   right, the links in the lane between. The board stays at its own bounded
+   width, centred in the column, so short words never stretch across it.
+   The Concept/Visual headers stay hidden: Dreamy's line ("Match each term
+   to its picture.") and the live hint in the bubble already say it. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-match-headers { display: none !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-match-up { max-width: 760px !important; margin-inline: auto !important; }
+/* Sort: the tray centred, the four buckets in one row on a wide column. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-sort-tray { justify-content: center !important; margin-bottom: clamp(18px, 3.2dvh, 32px) !important; }
+@media (orientation: landscape) and (min-width: 820px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-sort-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+
+/* Profit builder: the rig and the costs side by side, the two steps side
+   by side, Check underneath; the rig's label on its own line, readable. */
+@media (orientation: landscape) and (min-width: 820px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-profit-builder {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 14px !important;
+  }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-profit-builder > * { grid-column: auto; grid-row: auto; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-profit-cost { flex-direction: column !important; justify-content: center !important; align-items: flex-start !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-profit-builder > .dm-solid { grid-column: 1 / -1; }
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-profit-machine { position: relative; padding-top: 38px !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-profit-machine-label {
+  top: 12px !important;
+  left: 16px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: .12em !important;
+  color: var(--foreground) !important;
+  opacity: .8;
+  line-height: 1 !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-qa .glossary-profit-machine-label { font-size: 20px !important; color: var(--sig-gold) !important; opacity: 1; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v3[data-screen="question"] .glossary-qa .glossary-profit-machine-label { color: var(--refine-ink) !important; }
+/* Check My Math while waiting for both answers: a neutral slab with
+   readable ink, not the accent at 40% opacity. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-profit-builder > .dm-solid { min-height: 52px; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-profit-builder > .dm-solid:disabled {
+  opacity: 1 !important;
+  background: var(--glass-surface-2) !important;
+  color: var(--foreground) !important;
+  -webkit-text-fill-color: var(--foreground);
+  box-shadow: inset 0 0 0 1px var(--glass-border) !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v3[data-screen="question"] .glossary-qa .glossary-profit-builder > .dm-solid:disabled { color: var(--refine-ink) !important; -webkit-text-fill-color: var(--refine-ink); background: color-mix(in srgb, var(--refine-ink) 8%, var(--orbit-paper)) !important; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--refine-ink) 30%, transparent) !important; }
+
+/* --------------------------------------------------------------- stage */
+/* The question is the headline, full width, same type, no bubble. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-stage > .glossary-qa-prompt {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-stage > .glossary-qa-prompt > .glossary-speech-bubble {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+/* Signal's sentence needs its plate over the pixel city; it loses the tail,
+   since Dreamy is no longer beside it. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-stage .glossary-signal-tail { display: none; }
+
+/* Dreamy on the left, standing on the scenery; the answers a 2x2 beside him. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-stage-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(20px, calc(2.4vw / var(--vz, 1)), 36px);
+}
+/* Legacy rules place the list in grid row 2 when a scene card is present. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-stage-row > * { grid-row: 1 !important; grid-column: 2 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-stage-row > .glossary-question-dreamy {
+  grid-column: 1 !important;
+  position: relative;
+  z-index: 1;
+  align-self: end;
+  translate: 0 var(--qa-dreamy-drop, 0px);
+  transition: translate .45s cubic-bezier(.2, .7, .3, 1);
+}
+
+/* The row steps down onto the ground (useQuestionSceneryFit); main must
+   not clip it or Dreamy's feet. The shell still clips at the window. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout="stage"]:has(.glossary-qa) .glossary-engine-main { overflow: visible !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-stage-row {
+  translate: 0 var(--qa-row-drop, 0px);
+  transition: translate .45s cubic-bezier(.2, .7, .3, 1);
+}
+
+/* ------------------------------------------------------------- scenery */
+/* The floor under the answers: it rises a little to meet them, or sinks out
+   of the question's way, rather than sitting behind the text. The fixed
+   world layer clips it at the window, so the container need not. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell:is([data-qlayout="asks"], [data-qlayout="stage"]) .glossary-material-scenery {
+  overflow: visible;
+  translate: 0 var(--qa-scenery-shift, 0px);
+  transition: translate .5s cubic-bezier(.2, .7, .3, 1);
+}
+
+/* --------------------------------------------------------------- phone */
+@media (max-width: 640px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-asks > .glossary-question-guide { gap: 14px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"]:not(.glossary-lab-atmosphere-v2) .glossary-qa-asks > .glossary-question-guide > .glossary-speech-bubble { padding: 12px 14px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"]:not(.glossary-lab-atmosphere-v2) .glossary-qa-asks > .glossary-question-guide > .glossary-speech-bubble::before { left: -8px; width: 14px; height: 14px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa[data-answer-shape="sentences"] :is(.glossary-option-list, .glossary-document-list) { grid-template-columns: minmax(0, 1fr) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa[data-answer-shape="sentences"] .glossary-document-option { border-right-width: 0 !important; border-bottom-width: 1px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa[data-answer-shape="sentences"] .glossary-document-option:last-child { border-bottom-width: 0; }
+  /* Picture tiles: key and art on top, the word on its own line, so a
+     word never breaks letter by letter in a half-width tile. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-option-grid .glossary-option:has(.glossary-choice-art) {
+    display: grid !important; grid-template-columns: 28px minmax(0, 1fr) 20px; gap: 4px 8px !important; justify-items: center; padding: 8px 10px !important;
+  }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-option-grid .glossary-option:has(.glossary-choice-art) > .glossary-option-key { grid-column: 1; grid-row: 1; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-option-grid .glossary-option:has(.glossary-choice-art) > .glossary-choice-art { grid-column: 2; grid-row: 1; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-option-grid .glossary-option:has(.glossary-choice-art) > span.flex-1 { grid-column: 1 / -1; grid-row: 2; width: 100%; min-width: 0; text-align: center; overflow-wrap: normal !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-option-grid .glossary-option:has(.glossary-choice-art) > svg { grid-column: 3; grid-row: 1; }
+  /* Stage on a phone: the answers take the width; Dreamy stands under
+     them on the scenery. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-stage-row { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-stage-row > * { grid-column: 1 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-stage-row > .glossary-question-dreamy { grid-row: 2 !important; justify-self: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-material-scenery,
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-qa-stage-row,
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-qa-stage-row > .glossary-question-dreamy { transition: none !important; }
+}
+
+/* ------------------------------------------------------ prototype toggle */
+.glossary-qlayout-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--card);
+  font: 600 12px/1 var(--font-body);
+}
+.glossary-qlayout-toggle button {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+.glossary-qlayout-toggle button[aria-pressed="true"] { background: var(--foreground); color: var(--background); }
+.glossary-qlayout-toggle button:focus-visible { outline: 2px solid var(--glossary-accent); outline-offset: 2px; }
+
+/* =====================================================================
+   One type ramp for every activity (12 Oct 2026, Chandu: "some things
+   look too big, some things look too small ... Maybe the questions are a
+   little too big too?"). Strict hierarchy, top down: the question is the
+   largest text, then the answer and board content (one size), then labels
+   and hints. Nothing on a board is bigger than the question.
+
+   Targets are RENDERED sizes at 1440x900. FitToScreen grows the activity
+   by 1.15 on desktop (the column is sized for it), so sizes inside the
+   activity are divided by --qa-k; the inline feedback card is not scaled,
+   so it uses the rendered values directly. The body and frame zooms on big
+   screens scale everything together, as before. Dreamy is not touched.
+   ===================================================================== */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-qlayout] {
+  --qa-k: 1;
+  --qa-q: 22px; --qa-hint: 13px; --qa-a: 16px; --qa-a-display: 19px;
+  --qa-icon: 36px; --qa-pic: 44px; --qa-scene-art: 64px;
+  --qa-fig: 28px; --qa-label: 11px;
+  --qa-btn: 16px; --qa-btn-h: 48px;
+  --qa-row: 64px; --qa-tile: 104px; --qa-match-row: 52px; --qa-bucket: 96px;
+}
+@media (min-width: 641px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-qlayout] {
+    --qa-q: 28px; --qa-hint: 14px; --qa-a: 18px; --qa-a-display: 22px;
+    --qa-icon: 40px; --qa-pic: 52px; --qa-scene-art: 76px;
+    --qa-fig: 32px; --qa-label: 12px;
+    --qa-btn: 16px; --qa-btn-h: 50px;
+    --qa-row: 68px; --qa-tile: 120px; --qa-match-row: 56px; --qa-bucket: 112px;
+  }
+}
+@media (min-width: 968px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-qlayout] {
+    --qa-k: 1.15;
+    --qa-q: 32px; --qa-hint: 15px; --qa-a: 20px; --qa-a-display: 24px;
+    --qa-icon: 44px; --qa-pic: 56px; --qa-scene-art: 84px;
+    --qa-fig: 36px; --qa-label: 12.5px;
+    --qa-btn: 17px; --qa-btn-h: 52px;
+    --qa-row: 72px; --qa-tile: 128px; --qa-match-row: 60px; --qa-bucket: 120px;
+  }
+}
+
+/* The question (Dreamy's line). */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-question-guide .glossary-speech-bubble > p {
+  font-size: calc(var(--qa-q) / var(--qa-k)) !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+  letter-spacing: -.01em !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-question-guide .glossary-speech-bubble > p { letter-spacing: 0 !important; }
+/* The bubble sits centred against Dreamy. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa > .glossary-question-guide { align-items: center !important; }
+
+/* Hints and counters. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-qa-hint-line { font-size: calc(var(--qa-hint) / var(--qa-k)) !important; }
+
+/* Answer and board content: one size. Signal's pixel face (Jersey 20, used
+   for term names) draws small for its pixel size, so its display items
+   take --qa-a-display to read at the same size as Roboto at --qa-a. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa :is(.glossary-option span.flex-1, .glossary-document-option span.flex-1, .glossary-match-tile, .glossary-match-tile span, .glossary-match-label, .glossary-sort-token, .glossary-sort-target > span:not(.glossary-sort-count), .glossary-placed-token, .glossary-profit-step > span:first-child, .glossary-profit-input, .glossary-profit-input input) {
+  font-size: calc(var(--qa-a) / var(--qa-k)) !important;
+  line-height: 1.3 !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa :is(.glossary-match-left, .glossary-match-left span, .glossary-sort-target > span:not(.glossary-sort-count), .glossary-profit-input input) {
+  font-size: calc(var(--qa-a-display) / var(--qa-k)) !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa :is(.glossary-option-key, .glossary-sort-count) { font-size: calc(var(--qa-hint) / var(--qa-k)) !important; }
+
+/* Icons: one family. List rows, match tiles, sort chips and bucket heads
+   take --qa-icon; picture tiles --qa-pic. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa :is(.glossary-option-list:not(.glossary-option-grid) .glossary-choice-art, .glossary-document-art, .glossary-match-tile img, .glossary-match-art, .glossary-sort-art, .glossary-sort-bucket-art, .glossary-profit-art) {
+  width: calc(var(--qa-icon) / var(--qa-k)) !important;
+  height: calc(var(--qa-icon) / var(--qa-k)) !important;
+  object-fit: contain;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-option-grid .glossary-choice-art {
+  width: calc(var(--qa-pic) / var(--qa-k)) !important;
+  height: calc(var(--qa-pic) / var(--qa-k)) !important;
+}
+
+/* Figures and their labels (the scene card and the profit builder). */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa :is(.glossary-question-profit-scene b, .glossary-profit-factor b, .glossary-profit-cost b) {
+  font-size: calc(var(--qa-fig) / var(--qa-k)) !important;
+  line-height: 1.05 !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa :is(.glossary-question-profit-scene small, .glossary-question-profit-scene span, .glossary-profit-factor small, .glossary-profit-machine-label, .glossary-profit-cost span) {
+  font-size: calc(var(--qa-label) / var(--qa-k)) !important;
+  line-height: 1.3 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase;
+  font-weight: 800 !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-question-profit-scene > img { width: calc(var(--qa-scene-art) / var(--qa-k)) !important; height: calc(var(--qa-scene-art) / var(--qa-k)) !important; object-fit: contain; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-question-profit-scene { padding-block: calc(16px / var(--qa-k)) !important; min-height: 0 !important; }
+
+/* Buttons: one size and one height (Check sits in the scaled activity,
+   Continue in the unscaled feedback card). */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-profit-builder > .dm-solid {
+  font-size: calc(var(--qa-btn) / var(--qa-k)) !important;
+  min-height: calc(var(--qa-btn-h) / var(--qa-k)) !important;
+  height: calc(var(--qa-btn-h) / var(--qa-k)) !important;
+  padding-block: 0 !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-feedback-overlay.is-inline .glossary-feedback-cta {
+  font-size: var(--qa-btn) !important;
+  min-height: var(--qa-btn-h) !important;
+  height: var(--qa-btn-h) !important;
+  padding-block: 0 !important;
+}
+/* The feedback card: heading, then its sentence. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-feedback-overlay.is-inline .glossary-feedback-title { font-size: calc(var(--qa-a) * .95) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-feedback-overlay.is-inline .glossary-feedback-text { font-size: var(--qa-hint) !important; line-height: 1.4 !important; }
+
+/* Proportions. Choice rows share one height; picture tiles share one. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa :is(.glossary-option-list:not(.glossary-option-grid) .glossary-option, .glossary-document-option) {
+  min-height: calc(var(--qa-row) / var(--qa-k)) !important;
+  padding-block: calc(10px / var(--qa-k)) !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-option-grid .glossary-option {
+  min-height: calc(var(--qa-tile) / var(--qa-k)) !important;
+}
+/* Match rows. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-match-column { grid-auto-rows: calc(var(--qa-match-row) / var(--qa-k)) !important; gap: calc(8px / var(--qa-k)) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-match-tile { min-height: 0 !important; height: 100% !important; padding-block: 0 !important; }
+/* Sort: buckets start compact and grow as items land. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-sort-bucket { min-height: calc(var(--qa-bucket) / var(--qa-k)) !important; height: auto !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-sort-contents { min-height: 0 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-placed-token { padding: calc(4px / var(--qa-k)) calc(10px / var(--qa-k)) !important; }
+/* Orbit's paper scene card drew its figures in white on ivory (unreadable
+   since before this pass); they take the theme's ink like every other
+   Orbit figure. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v3[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-question-profit-scene :is(b, span) { color: var(--refine-ink) !important; -webkit-text-fill-color: var(--refine-ink); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v3[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-question-profit-scene small { color: color-mix(in srgb, var(--refine-ink) 70%, var(--glossary-accent)) !important; }
+/* Short laptop windows (1366x768) once the feedback card joins: the
+   finished board compacts so Dreamy and the question keep their size. */
+@media (min-width: 641px) and (max-height: 800px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout]:not([data-answer-state="idle"]) { --qa-match-row: 43px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout]:not([data-answer-state="idle"]) .glossary-question-screen.glossary-qa :is(.glossary-match-tile img, .glossary-match-art) { width: calc(34px / var(--qa-k)) !important; height: calc(34px / var(--qa-k)) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout]:not([data-answer-state="idle"]) .glossary-question-screen.glossary-qa .glossary-match-column { gap: calc(5px / var(--qa-k)) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout]:not([data-answer-state="idle"]) .glossary-question-screen.glossary-qa .glossary-profit-builder { gap: 8px !important; padding-block: 8px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout]:not([data-answer-state="idle"]) .glossary-question-screen.glossary-qa .glossary-profit-machine { padding-top: 30px !important; padding-bottom: 8px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout]:not([data-answer-state="idle"]) .glossary-question-screen.glossary-qa .glossary-profit-machine-label { top: 9px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout]:not([data-answer-state="idle"]) .glossary-question-screen.glossary-qa .glossary-profit-step { min-height: 0 !important; padding-block: 6px !important; }
+}
+/* Signal's buttons are set in its pixel face, which draws about a fifth
+   smaller than Roboto at the same px: the same 1.2 compensation as its
+   other display items, at the same button height. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen="question"][data-qlayout] .glossary-question-screen.glossary-qa .glossary-profit-builder > .dm-solid { font-size: calc(var(--qa-btn) * 1.2 / var(--qa-k)) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen="question"][data-qlayout] .glossary-feedback-overlay.is-inline .glossary-feedback-cta { font-size: calc(var(--qa-btn) * 1.2) !important; }

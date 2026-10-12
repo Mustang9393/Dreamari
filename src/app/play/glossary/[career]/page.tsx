@@ -17,6 +17,8 @@ import "@/components/glossary/glossary-worlds.css";
 // Chandu: "I don't see the font fixes and sizing updates"). Same bug as the
 // 8 Oct one above, one file further down the list.
 import "@/components/glossary/glossary-signal.css";
+// DEMO-ONLY: prototype question layouts (?qlayout=), loaded last (12 Oct 2026).
+import "@/components/glossary/glossary-qlayout.css";
 
 export const metadata: Metadata = {
   title: "Glossary Game · Dreamari",

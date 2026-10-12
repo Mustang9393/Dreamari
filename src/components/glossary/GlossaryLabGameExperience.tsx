@@ -109,6 +109,22 @@ function useAtmosphere(): LabAtmosphere {
   return useContext(AtmosphereContext);
 }
 
+/** How a Dreamy-led question (choice, type the term) is composed (12 Oct
+ *  2026, team feedback on Business Basics: long questions ran down into the
+ *  cloud scenery; "establish a universal approach to text placement ... the
+ *  decorative elements should complement the content rather than compete
+ *  with it", without shrinking the type). "current" is the two-column
+ *  layout as it shipped; "asks" is one centred column where Dreamy speaks
+ *  the question in a bubble (Duolingo's pattern) and the scenery is the floor
+ *  under the answers; "stage" puts the question full width on top and Dreamy
+ *  standing on the scenery beside a 2x2 of answers.
+ *  DEMO-ONLY: prototype layout switch. Pick one, delete the other two and
+ *  the ?qlayout= param + toggle once the team decides. */
+type QuestionLayout = "current" | "asks" | "stage";
+const QUESTION_LAYOUTS: QuestionLayout[] = ["current", "asks", "stage"];
+const DEFAULT_QUESTION_LAYOUT: QuestionLayout = "asks";
+const QuestionLayoutContext = createContext<QuestionLayout>("current");
+
 function useMaterialSounds() {
   const theme = useAtmosphere();
   const cue = useCallback((kind: "correct" | "repair" | "select" | "reward") => {
@@ -287,7 +303,7 @@ function dreamyAssetFor(atmosphere: LabAtmosphere, pose: string, small = false) 
   return `/images/dreamy/v2/dreamy-${pose}.webp`;
 }
 
-function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong" }) {
+function SpeechBubble({ children, tone = "neutral", aside }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong"; /** a small line under Dreamy's words, inside the bubble (the activity's live hint) */ aside?: React.ReactNode }) {
   const atmosphere = useAtmosphere();
   const bg = tone === "correct" ? "color-mix(in srgb, var(--success, #1f9d55) 14%, var(--card))" : tone === "wrong" ? "color-mix(in srgb, var(--danger, #e0483e) 12%, var(--card))" : "var(--glass-surface-1)";
   if (atmosphere === "v2") {
@@ -296,6 +312,7 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
     return (
       <div className="glossary-speech-bubble glossary-signal-bubble">
         <p>{children}</p>
+        {aside}
         <svg className="glossary-signal-tail" width="28" height="12" viewBox="0 0 7 3" shapeRendering="crispEdges" aria-hidden>
           <rect x="1" y="0" width="1" height="1" fill="#0a1230" /><rect x="2" y="0" width="3" height="1" fill="#fff" /><rect x="5" y="0" width="1" height="1" fill="#0a1230" />
           <rect x="2" y="1" width="1" height="1" fill="#0a1230" /><rect x="3" y="1" width="1" height="1" fill="#fff" /><rect x="4" y="1" width="1" height="1" fill="#0a1230" />
@@ -309,6 +326,7 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
       <p className="text-[clamp(18px,calc(2.6dvh/var(--vz,1)),21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
         {children}
       </p>
+      {aside}
     </div>
   );
 }
@@ -995,7 +1013,7 @@ function TypeTermCard({ question, onAnswer, onReset }: { question: Extract<Gloss
   );
 }
 
-function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "matchUp" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
+function MatchUpCard({ question, onAnswer, onReset, hintSlot }: { question: Extract<GlossaryQuestion, { kind: "matchUp" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void; /** in the framed layouts the live hint and the count sit in Dreamy's bubble */ hintSlot?: HTMLElement | null }) {
   const { playCorrect, playWrong, playSelect } = useMaterialSounds();
   const assets = useTermAssets("small");
   const atmosphere = useAtmosphere();
@@ -1152,25 +1170,33 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
     }
   }
 
+  const hintTone = matched.size === question.pairs.length ? "done" : wrongFlash ? "wrong" : "go";
+  const hintText = matched.size === question.pairs.length
+    ? "Every pair is connected!"
+    : wrongFlash
+      ? "Not a match. Try another one."
+      : dropTarget
+        ? "Let go to connect them"
+        : pickedLeft
+          ? `Now tap or drag to its ${(question.headers?.[1] ?? "example").toLowerCase()}`
+          : `Press a ${(question.headers?.[0] ?? "term").toLowerCase()}, then drag or tap its ${(question.headers?.[1] ?? "example").toLowerCase()}`;
   return (
     <div className={`glossary-match-up ${matched.size === question.pairs.length ? "is-complete" : ""} relative flex w-full flex-col gap-[var(--space-3)]`}>
       {matched.size === question.pairs.length ? <LocalBurst nonce={1} /> : null}
       {/* One live line that says the next move (Mika's match reference, 9 Oct
-         2026), instead of a static "Drag or tap" in the corner. */}
-      <p className="glossary-match-hint" aria-live="polite" data-tone={matched.size === question.pairs.length ? "done" : wrongFlash ? "wrong" : "go"}>
-        <i aria-hidden />
-        <span>
-          {matched.size === question.pairs.length
-            ? "Every pair is connected!"
-            : wrongFlash
-              ? "Not a match. Try another one."
-              : dropTarget
-                ? "Let go to connect them"
-                : pickedLeft
-                  ? `Now tap or drag to its ${(question.headers?.[1] ?? "example").toLowerCase()}`
-                  : `Press a ${(question.headers?.[0] ?? "term").toLowerCase()}, then drag or tap its ${(question.headers?.[1] ?? "example").toLowerCase()}`}
-        </span>
-      </p>
+         2026), instead of a static "Drag or tap" in the corner. In the framed
+         layouts it moves into Dreamy's bubble with the count, so nothing
+         sits loose on the scenery. */}
+      {hintSlot ? createPortal(
+        <div className="glossary-qa-hint-line" aria-live="polite" data-tone={hintTone}>
+          <span>{hintText}</span>
+          <b>{matched.size}/{question.pairs.length} matched{matched.size && matched.size < question.pairs.length ? <small> · Tap a matched pair to undo</small> : null}</b>
+        </div>, hintSlot) : (
+        <p className="glossary-match-hint" aria-live="polite" data-tone={hintTone}>
+          <i aria-hidden />
+          <span>{hintText}</span>
+        </p>
+      )}
       <div className="glossary-match-headers grid grid-cols-2 gap-[var(--space-3)]">
         <span className="text-center text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
           {question.headers?.[0] ?? "Term"}
@@ -1306,15 +1332,15 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
           })}
         </div>
       </div>
-      <div className="glossary-match-status" aria-live="polite">
+      {hintSlot ? null : <div className="glossary-match-status" aria-live="polite">
         <span>{matched.size}/{question.pairs.length} matched</span>
         <span>{matched.size ? "Tap a matched pair to undo" : ""}</span>
-      </div>
+      </div>}
     </div>
   );
 }
 
-function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "sortBuckets" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
+function SortBucketsCard({ question, onAnswer, onReset, hintSlot }: { question: Extract<GlossaryQuestion, { kind: "sortBuckets" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void; hintSlot?: HTMLElement | null }) {
   const { playCorrect, playWrong, playSelect } = useMaterialSounds();
   const assets = useTermAssets("small");
   const [placed, setPlaced] = useState<Record<string, string>>({});
@@ -1419,7 +1445,7 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
         <span>{dragging}</span>
       </div>, document.body) : null}
       {!allPlaced && (
-        <div className="flex flex-wrap gap-[var(--space-2)]">
+        <div className="glossary-sort-tray flex flex-wrap gap-[var(--space-2)]">
           {items
             .filter((item) => !placed[item.text])
             .map((item) => (
@@ -1442,8 +1468,12 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
             ))}
         </div>
       )}
-      {!allPlaced && <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{picked ? "Now tap or drop it on a bucket" : "Drag an item to its bucket, or tap it, then tap the bucket"}</p>}
-      {allPlaced && <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap any item to move it</p>}
+      {hintSlot
+        ? createPortal(<div className="glossary-qa-hint-line" aria-live="polite"><span>{allPlaced ? "Tap any item to move it" : picked ? "Now tap or drop it on a bucket" : "Drag an item to its bucket, or tap it, then tap the bucket"}</span></div>, hintSlot)
+        : <>
+          {!allPlaced && <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{picked ? "Now tap or drop it on a bucket" : "Drag an item to its bucket, or tap it, then tap the bucket"}</p>}
+          {allPlaced && <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap any item to move it</p>}
+        </>}
 
       <div className="glossary-sort-grid grid grid-cols-2 gap-[var(--space-3)]">
         {question.buckets.map((bucket) => (
@@ -1493,7 +1523,7 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
   );
 }
 
-function ProfitBuilderCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "profitBuilder" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
+function ProfitBuilderCard({ question, onAnswer, onReset, framed = false }: { question: Extract<GlossaryQuestion, { kind: "profitBuilder" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void; /** Dreamy's bubble carries the instruction, so the mission strip goes */ framed?: boolean }) {
   const { playCorrect, playWrong } = useMaterialSounds();
   const assets = useTermAssets();
   const [values, setValues] = useState<string[]>(() => question.steps.map(() => ""));
@@ -1520,7 +1550,7 @@ function ProfitBuilderCard({ question, onAnswer, onReset }: { question: Extract<
         <Image src={assets.Profit} alt="" width={88} height={88} className="glossary-profit-art" aria-hidden unoptimized />
       </div>
       <div className="glossary-profit-cost"><span>Operating costs</span><b>{scenarioValues[2] ?? "$60,000"}</b></div>
-      <p className="glossary-profit-mission">Find the revenue. Then calculate what remains.</p>
+      {framed ? null : <p className="glossary-profit-mission">Find the revenue. Then calculate what remains.</p>}
       {question.steps.map((step, i) => {
         const correct = checked && Number(values[i].replace(/[,$]/g, "")) === step.answer;
         const wrong = checked && !correct;
@@ -1593,6 +1623,7 @@ function QuestionScreen({
 }) {
   const [picked, setPicked] = useState<number | null>(null);
   const { playCorrect, playWrong } = useMaterialSounds();
+  const layout = useContext(QuestionLayoutContext);
   const [misses, setMisses] = useState<number[]>([]);
   const [missCount, setMissCount] = useState(0);
   const assets = useTermAssets();
@@ -1613,25 +1644,101 @@ function QuestionScreen({
   // sheet, bordered tiles), so this screen can sit directly on the page's
   // own background like the intro/unlock screens already do, and use the
   // taller mobile viewport instead of being squeezed into a fixed card.
+  const guided = question.kind !== "matchUp" && question.kind !== "sortBuckets" && question.kind !== "profitBuilder";
+  // Every activity shares the asks frame (12 Oct 2026, Chandu: "That solves
+  // the questions I think but the other pages, for example Sort each one,
+  // etc. still look broken"): Dreamy says the instruction, the board sits
+  // under him in the same column. "stage" only recomposes Dreamy-led
+  // questions; its boards use the asks frame too.
+  const composed = layout === "current" ? null : guided ? layout : "asks";
+  // The live hint of a board (drag or tap, the match count) renders into
+  // Dreamy's bubble through this slot instead of its own strip.
+  const [hintSlot, setHintSlot] = useState<HTMLDivElement | null>(null);
+  const line = question.kind === "matchUp" || question.kind === "sortBuckets"
+    // Q2 has no authored prompt; its title ("Match the terms") and hint
+    // merge into one plain line.
+    ? question.prompt || (question.kind === "matchUp" ? "Match each term to its picture." : question.label || question.type)
+    : question.prompt;
+  const board = question.kind === "matchUp" ? <MatchUpCard question={question} onAnswer={onAnswer} onReset={onReset} hintSlot={hintSlot} />
+    : question.kind === "sortBuckets" ? <SortBucketsCard question={question} onAnswer={onAnswer} onReset={onReset} hintSlot={hintSlot} />
+      : question.kind === "profitBuilder" ? <ProfitBuilderCard question={question} onAnswer={onAnswer} onReset={onReset} framed />
+        : null;
+  // One-word answers that all carry art read as picture tiles (one row of
+  // four when the column fits them); sentences read as a 2x2.
+  const wordTiles = question.kind === "choice" && question.type !== "Catch the Misuse" && choiceAssets.length > 0 && choiceAssets.every(Boolean) && shuffledOptions.every(({ o }) => !/\s/.test(o.trim()));
+  const scene = question.kind === "choice" && question.visual?.kind === "profit" ? (
+    <div className="glossary-question-profit-scene" aria-label={`${question.visual.title} sells for $${question.visual.sells}, costs $${question.visual.costs} to make, $${question.visual.sells - question.visual.costs} left`}>
+      <Image src={assets.Product} alt="" width={92} height={92} unoptimized />
+      <div><small>{question.visual.title}</small><b>${question.visual.sells}</b><span>Sells for</span></div>
+      <strong>−</strong>
+      <div><small>To make</small><b>${question.visual.costs}</b><span>Costs</span></div>
+      <strong>=</strong>
+      <div className="glossary-question-profit-result"><small>Left</small><b>${question.visual.sells - question.visual.costs}</b><span>What is it?</span></div>
+    </div>
+  ) : null;
+  const dreamy = <span className="glossary-question-dreamy"><DreamyFace pose="curious" size={84} /></span>;
+  const answers = question.kind === "choice" ? (() => {
+    const ListComponent = question.type === "Catch the Misuse" ? DocumentOptionList : OptionList;
+    return (
+      <ListComponent
+        options={shuffledOptions.map((s) => s.o)}
+        assets={choiceAssets}
+        grid={question.layout === "grid" || (composed !== null && wordTiles)}
+        correctIndex={shuffledOptions.findIndex((s) => s.i === question.correctIndex)}
+        picked={picked}
+        missed={misses}
+        revealed={picked !== null && (shuffledOptions[picked].i === question.correctIndex || missCount >= 2)}
+        onPick={(i) => {
+          setPicked(i);
+          const correct = shuffledOptions[i].i === question.correctIndex;
+          if (!correct) setMissCount((previous) => previous + 1);
+          if (!correct && !misses.includes(i)) setMisses((previous) => [...previous, i]);
+          window.setTimeout(correct ? playCorrect : playWrong, 0);
+          onAnswer({ correct, creditedTermIds: correct && question.termId ? [question.termId] : [] });
+        }}
+      />
+    );
+  })() : question.kind === "typeTerm" ? <TypeTermCard question={question} onAnswer={onAnswer} onReset={onReset} /> : null;
+
+  if (composed === "asks") return (
+    // Dreamy asks: he speaks the question (the bubble grows downward with a
+    // long one), then the scene, then the answers on the scenery floor.
+    // Boards also carry glossary-question-choice: Dreamy's size and the
+    // question's type are owned by that class's rules, so every activity
+    // gets exactly the same Dreamy and the same big line.
+    <div className={`glossary-screen glossary-question-screen glossary-question-${question.kind} ${guided ? "" : "glossary-question-choice"} glossary-qa glossary-qa-asks relative flex w-full flex-col`} data-answer-shape={wordTiles ? "words" : "sentences"}>
+      <div className="glossary-question-guide">
+        {dreamy}
+        <SpeechBubble aside={guided ? undefined : <div ref={setHintSlot} className="glossary-qa-hint" />}>{line}</SpeechBubble>
+      </div>
+      {scene}
+      {guided ? answers : board}
+    </div>
+  );
+  if (composed === "stage") return (
+    // Stage: the question is the headline; Dreamy stands on the scenery
+    // beside the answers (his feet are lined up with it at runtime).
+    <div className={`glossary-screen glossary-question-screen glossary-question-${question.kind} glossary-qa glossary-qa-stage relative flex w-full flex-col`} data-answer-shape={wordTiles ? "words" : "sentences"}>
+      <div className="glossary-question-guide glossary-qa-prompt">
+        <SpeechBubble>{question.prompt}</SpeechBubble>
+      </div>
+      {scene}
+      <div className="glossary-qa-stage-row">
+        {dreamy}
+        {answers}
+      </div>
+    </div>
+  );
   return (
     <div className={`glossary-screen glossary-question-screen glossary-question-${question.kind} relative flex w-full flex-col gap-[var(--space-6)]`}>
-      {question.kind === "choice" && question.visual?.kind === "profit" && (
-        <div className="glossary-question-profit-scene" aria-label={`${question.visual.title} sells for $${question.visual.sells}, costs $${question.visual.costs} to make, $${question.visual.sells - question.visual.costs} left`}>
-          <Image src={assets.Product} alt="" width={92} height={92} unoptimized />
-          <div><small>{question.visual.title}</small><b>${question.visual.sells}</b><span>Sells for</span></div>
-          <strong>−</strong>
-          <div><small>To make</small><b>${question.visual.costs}</b><span>Costs</span></div>
-          <strong>=</strong>
-          <div className="glossary-question-profit-result"><small>Left</small><b>${question.visual.sells - question.visual.costs}</b><span>What is it?</span></div>
-        </div>
-      )}
-      {question.kind !== "matchUp" && question.kind !== "sortBuckets" && question.kind !== "profitBuilder" && (
+      {scene}
+      {guided && (
         // No side padding here -- it was only ever there to "make room" for
         // Dreamy, but since he's absolutely positioned he doesn't need it,
         // and it was shifting the bubble (and the question text) off-center
         // on mobile, where this row is close to the full card width.
         <div className="glossary-question-guide">
-          <span className="glossary-question-dreamy"><DreamyFace pose="curious" size={84} /></span>
+          {dreamy}
           <SpeechBubble>{question.prompt}</SpeechBubble>
         </div>
       )}
@@ -1641,30 +1748,7 @@ function QuestionScreen({
         </p>
       )}
 
-      {question.kind === "choice" &&
-        (() => {
-          const ListComponent = question.type === "Catch the Misuse" ? DocumentOptionList : OptionList;
-          return (
-            <ListComponent
-              options={shuffledOptions.map((s) => s.o)}
-              assets={choiceAssets}
-              grid={question.layout === "grid"}
-              correctIndex={shuffledOptions.findIndex((s) => s.i === question.correctIndex)}
-              picked={picked}
-              missed={misses}
-              revealed={picked !== null && (shuffledOptions[picked].i === question.correctIndex || missCount >= 2)}
-              onPick={(i) => {
-                setPicked(i);
-                const correct = shuffledOptions[i].i === question.correctIndex;
-                if (!correct) setMissCount((previous) => previous + 1);
-                if (!correct && !misses.includes(i)) setMisses((previous) => [...previous, i]);
-                window.setTimeout(correct ? playCorrect : playWrong, 0);
-                onAnswer({ correct, creditedTermIds: correct && question.termId ? [question.termId] : [] });
-              }}
-            />
-          );
-        })()}
-      {question.kind === "typeTerm" && <TypeTermCard question={question} onAnswer={onAnswer} onReset={onReset} />}
+      {answers}
       {question.kind === "matchUp" && <MatchUpCard question={question} onAnswer={onAnswer} onReset={onReset} />}
       {question.kind === "sortBuckets" && <SortBucketsCard question={question} onAnswer={onAnswer} onReset={onReset} />}
       {question.kind === "profitBuilder" && <ProfitBuilderCard question={question} onAnswer={onAnswer} onReset={onReset} />}
@@ -2494,6 +2578,140 @@ function LabAtmosphereSwitcher({ value, onChange }: { value: LabAtmosphere; onCh
   );
 }
 
+/** Where each theme's scenery sits, as a share of the window's height, read
+ *  off its CSS (glossary-worlds.css): `top` is the highest point any layer
+ *  reaches while it drifts (question text must stay above it); `ground` is
+ *  the line things stand on (the typical cloud crest, the paper ridge, the
+ *  neon floor). `lift` is how far the layer can rise before its own bottom
+ *  edge would show. Phones use the shorter banks of the max-width: 640px
+ *  rules. Signal's scenery is the whole pixel city, so it never moves (its
+ *  question sits on a solid plate); its ground is the far bridge deck. */
+const SCENERY_LINES: Record<LabAtmosphere, { top: number; ground: number; topPhone: number; groundPhone: number; lift: number; moves: boolean }> = {
+  v1: { top: 0.7, ground: 0.79, topPhone: 0.8, groundPhone: 0.86, lift: 0.12, moves: true },
+  v2: { top: 1, ground: 0.69, topPhone: 1, groundPhone: 0.69, lift: 0, moves: false },
+  v3: { top: 0.64, ground: 0.75, topPhone: 0.74, groundPhone: 0.8, lift: 0.12, moves: true },
+  v4: { top: 0.56, ground: 0.84, topPhone: 0.6, groundPhone: 0.86, lift: 0.1, moves: true },
+};
+
+/** Product of every `zoom` from the element up: the body zooms above
+ *  1440px (globals.css) and the game frame on very large screens. */
+function effectiveZoom(element: Element): number {
+  let zoom = 1;
+  for (let node: Element | null = element; node; node = node.parentElement) zoom *= parseFloat(getComputedStyle(node).zoom) || 1;
+  return zoom;
+}
+
+/** Composes the prototype layouts against the scenery (all translates, so
+ *  nothing re-lays out and FitToScreen's measurement is untouched):
+ *  - the scenery is the floor under the answers: it rises (a little, within
+ *    `lift`) to meet them when there is spare room and sinks when there is
+ *    not, but never so high that it reaches the question text;
+ *  - "stage" stands Dreamy and the answers on its ground: the row steps
+ *    down (up to 12% of the window) before the floor rises, and Dreamy
+ *    makes up any last difference on his own.
+ *  Nothing is pushed into the inline feedback card. Writes
+ *  --qa-scenery-shift, --qa-row-drop and --qa-dreamy-drop on the shell;
+ *  glossary-qlayout.css applies them. DEMO-ONLY with the layout switch. */
+function useQuestionSceneryFit(shell: React.RefObject<HTMLDivElement | null>, layout: QuestionLayout, atmosphere: LabAtmosphere, active: boolean, watch: string) {
+  useLayoutEffect(() => {
+    const root = shell.current;
+    if (!root) return;
+    const vars = ["--qa-scenery-shift", "--qa-row-drop", "--qa-dreamy-drop"];
+    const clear = () => vars.forEach((name) => root.style.removeProperty(name));
+    if (!active || layout === "current") { clear(); return; }
+    let applied = { row: 0, dreamy: 0 };
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const screen = root.querySelector<HTMLElement>(".glossary-question-screen.glossary-qa");
+      const world = root.querySelector<HTMLElement>(".glossary-world");
+      const prompt = screen?.querySelector<HTMLElement>(".glossary-question-guide");
+      if (!screen || !world || !prompt) { clear(); applied = { row: 0, dreamy: 0 }; return; }
+      const line = SCENERY_LINES[atmosphere];
+      const phone = window.innerWidth <= 640;
+      const worldBox = world.getBoundingClientRect();
+      const topY = worldBox.top + worldBox.height * (phone ? line.topPhone : line.top);
+      const groundY = worldBox.top + worldBox.height * (phone ? line.groundPhone : line.ground);
+      const inner = screen.closest<HTMLElement>(".glossary-fit-inner");
+      const transform = inner ? getComputedStyle(inner).transform : "none";
+      const scale = effectiveZoom(screen) * (transform === "none" ? 1 : new DOMMatrixReadOnly(transform).a);
+      const feedback = root.querySelector<HTMLElement>(".glossary-feedback-overlay.is-inline");
+      const floorLimit = feedback ? feedback.getBoundingClientRect().top - 10 : worldBox.bottom - 12;
+      // Text never meets the scenery: the shift may not leave the top line
+      // above the question's bottom edge.
+      const clearance = phone ? 12 : 20;
+      const minShift = prompt.getBoundingClientRect().bottom + clearance - topY;
+      let shift = 0;
+      let rowDrop = 0;
+      let dreamyDrop = 0;
+      if (layout === "asks") {
+        const answers = screen.querySelector<HTMLElement>(":scope > :is(.glossary-option-list, .glossary-document-list, .glossary-type-term)") ?? screen.lastElementChild as HTMLElement | null;
+        if (answers) {
+          const box = answers.getBoundingClientRect();
+          const list = answers.matches(".glossary-option-list, .glossary-document-list");
+          const tile = list ? answers.lastElementChild?.getBoundingClientRect().height ?? 0 : Math.min(box.height * 0.25, 90);
+          // The floor's crest runs behind the lower third of the last row.
+          shift = box.bottom - tile * 0.3 - groundY;
+        }
+      } else {
+        const row = screen.querySelector<HTMLElement>(".glossary-qa-stage-row");
+        const dreamy = row?.querySelector<HTMLElement>(":scope > .glossary-question-dreamy");
+        if (row && dreamy) {
+          const rowBottom = row.getBoundingClientRect().bottom - applied.row * scale;
+          const dreamyBox = dreamy.getBoundingClientRect();
+          // His sprite's base sits a little above its box; he settles a few
+          // pixels into the bank so he reads as standing in it.
+          const dreamyBase = dreamyBox.bottom - (applied.row + applied.dreamy) * scale - dreamyBox.height * 0.08;
+          const base = Math.max(rowBottom, dreamyBase);
+          let gap = groundY - base;
+          if (gap > 0) {
+            // Portrait screens have height to spare: the stage may sit lower.
+            const stepCap = worldBox.height * (worldBox.height > worldBox.width ? 0.25 : 0.12);
+            rowDrop = Math.max(0, Math.min(gap, stepCap, floorLimit - rowBottom));
+            gap -= rowDrop;
+          }
+          shift = -gap;
+          if (line.moves) shift = Math.max(shift, -worldBox.height * line.lift, minShift);
+          else shift = 0;
+          // Whatever the floor could not make up, Dreamy steps down himself.
+          dreamyDrop = Math.max(0, Math.min(groundY + shift - (dreamyBase + rowDrop), floorLimit - (dreamyBox.bottom - (applied.row + applied.dreamy) * scale + rowDrop)));
+        }
+      }
+      if (layout === "asks") shift = line.moves ? Math.max(shift, -worldBox.height * line.lift, minShift) : 0;
+      const sceneryScale = effectiveZoom(world);
+      root.style.setProperty("--qa-scenery-shift", `${Math.round(shift / sceneryScale)}px`);
+      applied = { row: Math.round(rowDrop / scale), dreamy: Math.round(dreamyDrop / scale) };
+      root.style.setProperty("--qa-row-drop", `${applied.row}px`);
+      root.style.setProperty("--qa-dreamy-drop", `${applied.dreamy}px`);
+    };
+    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
+    measure();
+    // FitToScreen settles its scale a frame later; its box changes height
+    // with the scale, so observing it catches every re-fit.
+    const observer = new ResizeObserver(schedule);
+    const box = root.querySelector(".glossary-fit-box");
+    const main = root.querySelector(".glossary-engine-main");
+    if (box) observer.observe(box);
+    if (main) observer.observe(main);
+    observer.observe(root);
+    const settle = window.setTimeout(schedule, 450);
+    return () => { observer.disconnect(); window.cancelAnimationFrame(frame); window.clearTimeout(settle); };
+  }, [shell, layout, atmosphere, active, watch]);
+}
+
+/** DEMO-ONLY: prototype layout switch. A small pill on question screens,
+ *  shown in development or when the URL already carries ?qlayout=, so the
+ *  three compositions can be compared in place. */
+function QuestionLayoutToggle({ value, onChange }: { value: QuestionLayout; onChange: (next: QuestionLayout) => void }) {
+  return (
+    <div className="glossary-qlayout-toggle" role="group" aria-label="Question layout (prototype)">
+      {QUESTION_LAYOUTS.map((option) => (
+        <button key={option} type="button" aria-pressed={value === option} onClick={() => onChange(option)}>{option}</button>
+      ))}
+    </div>
+  );
+}
+
 export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: { career: GlossaryCareer; lesson: GlossaryLesson; variant?: ExperienceVariant }) {
   const router = useRouter();
   const [screen, setScreen] = useState<Screen>("intro");
@@ -2510,16 +2728,39 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const q = Number(params.get("q"));
-    const jump = Number.isFinite(q) && q >= 1 && q <= queue.length ? { index: q - 1, screen: "question" as const } : params.get("pp") === "1" ? { index: 0, screen: "powerPlay" as const } : null;
+    // Past the main loop, ?q= reaches the held-back review questions too (the
+    // longest prompt lives there), queued the way remediation would add them.
+    const review = Number.isFinite(q) && q > queue.length && q <= queue.length + lesson.reviewQuestions.length;
+    const jump = Number.isFinite(q) && q >= 1 && q <= queue.length + (review ? lesson.reviewQuestions.length : 0) ? { index: q - 1, screen: "question" as const } : params.get("pp") === "1" ? { index: 0, screen: "powerPlay" as const } : null;
     if (!jump) return;
     // The URL is an external system; the jump is applied once after mount.
     const t = window.setTimeout(() => {
+      if (review) setQueue((previous) => [...previous, ...lesson.reviewQuestions]);
       setQueueIndex(jump.index);
       setScreen(jump.screen);
     }, 0);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- a one-time read of the URL on mount
   }, []);
+  // DEMO-ONLY: prototype layout switch. ?qlayout=current|asks|stage picks
+  // the question composition (default asks); the toggle keeps it in the URL.
+  const [questionLayout, setQuestionLayout] = useState<QuestionLayout>(DEFAULT_QUESTION_LAYOUT);
+  const [showLayoutToggle, setShowLayoutToggle] = useState(false);
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("qlayout");
+    const t = window.setTimeout(() => {
+      if (QUESTION_LAYOUTS.includes(requested as QuestionLayout)) setQuestionLayout(requested as QuestionLayout);
+      setShowLayoutToggle(process.env.NODE_ENV !== "production" || requested !== null);
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
+  const changeQuestionLayout = (next: QuestionLayout) => {
+    setQuestionLayout(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("qlayout", next);
+    window.history.replaceState(window.history.state, "", url);
+  };
+  const shellRef = useRef<HTMLDivElement>(null);
   const [mastery, setMastery] = useState<Record<string, number>>({});
   const [pendingResult, setPendingResult] = useState<AnswerResult | null>(null);
   const [attempts, setAttempts] = useState<Record<string, number>>({});
@@ -2695,11 +2936,16 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         </div>
   ) : null;
   const sceneScreen = screen === "unlock" && unlockIndex >= lesson.terms.length ? "unlockComplete" : screen;
+  const activeLayout: QuestionLayout = variant === "lab" ? questionLayout : "current";
+  useQuestionSceneryFit(shellRef, activeLayout, atmosphere, variant === "lab" && screen === "question", `${current?.id ?? ""}-${pendingResult ? (pendingResult.correct ? 1 : 2) : 0}`);
   return (
     <AtmosphereContext.Provider value={variant === "lab" ? atmosphere : "v1"}>
+    <QuestionLayoutContext.Provider value={activeLayout}>
     <div
+      ref={shellRef}
       className={`glossary-game-shell glossary-game-${variant} glossary-lab-atmosphere-${atmosphere} ${variant === "lab" ? "glossary-fit-shell" : ""} marketing-v2 themeable relative flex min-h-dvh w-full flex-col`}
       data-screen={sceneScreen}
+      data-qlayout={variant === "lab" ? activeLayout : undefined}
       data-question-kind={screen === "question" ? current?.kind : undefined}
       data-answer-state={pendingResult ? (pendingResult.correct ? "correct" : "wrong") : "idle"}
       data-keyboard-open={visibleHeight !== null && visibleHeight < window.innerHeight * .75 ? "true" : undefined}
@@ -2769,7 +3015,9 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
       {variant === "lab" && showLevels ? <LabLevelMap career={career} lesson={lesson} atmosphere={atmosphere} onClose={() => setShowLevels(false)} /> : null}
       {variant === "lab" && screen === "intro" ? <LabAtmosphereSwitcher value={atmosphere} onChange={setAtmosphere} /> : null}
       {variant === "lab" ? <LabThemeMusic atmosphere={atmosphere} enabled={musicStarted} /> : null}
+      {variant === "lab" && showLayoutToggle && screen === "question" ? <QuestionLayoutToggle value={questionLayout} onChange={changeQuestionLayout} /> : null}
     </div>
+    </QuestionLayoutContext.Provider>
     </AtmosphereContext.Provider>
   );
 }
