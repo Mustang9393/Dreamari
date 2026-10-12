@@ -1,3 +1,8 @@
+## 2026-10-12: Connect feed: graphic posts at their own size
+
+**Why (Chandu):** "make sure the feed doesn't look awkward where the graphic posts come in." A pro's portrait graphic (about 430px wide) sat in a 580px-tall blurred frame across the whole column, so one post took most of a screen, mostly filler, between compact text posts.
+- `ConnectExperience.tsx` feed card: on sm and up the graphic shows at its own portrait size (300px, 340px from lg, rounded, a soft shadow) with the caption beside it; phones keep it full width with the caption under it. The board's graphic row (`AlignedInsightRow`) still uses `FramedGraphic`.
+
 ## 2026-10-12: Glossary Game: "Dreamy asks" on every activity, one size scale
 
 **Why:** team feedback on Business Basics: "the question sits comfortably above the clouds [on 'What is a company?'] ... in the other screens the questions overlap with the cloud illustrations"; "establish a universal approach to text placement, spacing, and visual hierarchy ... regardless of its length"; "I don't think reducing the font size is the solution". Chandu: "no making Dreamy smaller", then (after references: Duolingo has a character speak the prompt in a bubble, one centred column, answers below) "lets try it ... it should work for every theme", "the other pages, for example Sort each one, still look broken", "the match layout should be like before, 2 columns", and "some things look too big, some things look too small ... maybe the questions are a little too big".

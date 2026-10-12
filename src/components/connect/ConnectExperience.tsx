@@ -2903,12 +2903,19 @@ function FeedPostRow({
            see the image without scrolling, even smaller actually"), with the
            caption beside it on wide screens and under it on phones, and the
            counts under both. */}
+        {/* 12 Oct 2026 (Chandu: "make sure the feed doesn't look awkward
+           where the graphic posts come in"): the 580px blurred frame around a
+           430px portrait made one post take most of a screen, mostly filler,
+           in a run of compact text posts. On wide screens the graphic now sits
+           at its own portrait size with the caption beside it, so the post is
+           about as tall as its neighbours; phones keep it full width with the
+           caption under it. */}
         {item.kind === "insight" && item.insight.graphic
           ? (
-            <>
-              <span className="mt-[12px] block w-full"><FramedGraphic insight={item.insight} height={580} /></span>
-              {caption && <div className="mt-[14px] max-w-[60ch]"><ClampedExcerpt text={caption} onMore={openDiscussion} /></div>}
-            </>
+            <div className="mt-[12px] flex flex-col gap-[14px] sm:flex-row sm:items-start sm:gap-[20px]">
+              <span className="block w-full sm:w-[300px] sm:flex-none lg:w-[340px]"><span className="block overflow-hidden rounded-[14px]" style={{ boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.07)" }}><InsightGraphicView insight={item.insight} /></span></span>
+              {caption && <div className="min-w-0 max-w-[60ch] sm:pt-[2px]"><ClampedExcerpt text={caption} onMore={openDiscussion} /></div>}
+            </div>
           )
           : body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} onMore={openDiscussion} />}
 
