@@ -4319,7 +4319,7 @@ function BoardView({
              surface is -- loading/slow/error/offline are now real, reviewable
              states (?state=loading&surface=40 etc.), not just a possibility. */}
           <SurfaceState id={40} isEmpty={threads.length === 0 && postedQs.length === 0}>
-            {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} graphics={insights.some((i) => !!i.graphic)} />}
+            {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
             {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
             {/* One visual language with the Feed (Chandu, 6 Oct 2026: "let's
                have the other tabs, questions, posts etc look like the feed
@@ -4329,10 +4329,7 @@ function BoardView({
                between panel segments. */}
             <div className="w-full">
             <BoardFeedList
-              items={weaveGraphicPosts(
-                threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> })),
-                insights.filter((i) => !!i.graphic).map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId), reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> })),
-              )}
+              items={threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> }))}
               wrap={boardItem}
               breatherAt={feedV2 ? (i, isLast) => (i >= 3 && (i - 3) % 5 === 0 && !isLast ? breather((["career", "opportunity", "moment"] as const)[Math.floor((i - 3) / 5) % 3], Math.floor((i - 3) / 5)) : null) : undefined}
             />
@@ -4468,21 +4465,6 @@ function GraphicPostBody({ insight, caption, onMore }: { insight: Insight; capti
       </span>
     </>
   );
-}
-
-/** A board opens on Questions, so the pros' graphic posts land there too,
- *  not only on the Posts tab (12 Oct 2026, Chandu: "They should be
- *  everywhere since the pros are posting them, they need to land somewhere
- *  right?"): one after the second question, then one after every third. */
-function weaveGraphicPosts<T>(questions: T[], graphics: T[]): T[] {
-  if (!graphics.length) return questions;
-  const out: T[] = [];
-  let g = 0;
-  questions.forEach((q, i) => {
-    out.push(q);
-    if (g < graphics.length && (i === 1 || (i > 1 && (i - 1) % 3 === 0))) out.push(graphics[g++]);
-  });
-  return out;
 }
 
 /** One verified firm post (Industry Updates): the firm and the kind of thing

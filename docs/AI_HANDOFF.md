@@ -1,3 +1,10 @@
+## 2026-10-12: Graphic posts on every community board; none in Questions
+
+**Why (Chandu):** "I don't see all the boards with graphic posts ... Make it everywhere. But remember questions don't get graphic posts."
+- Only Finance and Tech had graphic posts. Three existing posts each on Professional Development, Health and Creative now carry a graphic (`data.ts`, `DEMO-ONLY` comments): the words are trimmed from each post's own body, nothing new is claimed, with photo backgrounds and the existing fonts. Every community board's Posts tab now has graphic posts, shown in the switch's layout.
+- Graphic posts are no longer woven into a board's Questions tab (the weave from the previous commit is removed), and the Graphics switch shows only on the Posts tab and the main Feed.
+- Not covered: the EY event board and the United Way boards, which use their own layouts.
+
 ## 2026-10-12: Connect graphic posts: three layouts behind a quiet switch; graphics on board Questions
 
 **Why (Chandu):** "show community board and the feeds with graphic posts as well. They should be everywhere since the pros are posting them, they need to land somewhere right?"; "I don't like the caption sitting on the right"; "what about just leaving the right side blank? ... or doing the same post within a blurred background?"; then "let's put all three in there with a switch that's subtle and doesn't fight with the UI."

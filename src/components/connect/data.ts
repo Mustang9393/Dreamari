@@ -1494,6 +1494,8 @@ export const INSIGHTS: Insight[] = [
     proId: "pro-martinez",
     title: "The 30-second answer to 'tell me about yourself'",
     body: "One line on who you are, one on what you've done that you're proud of, one on why you're here. Practice it out loud twice. Interviewers aren't grading your biography, they're checking whether you can organize a thought.",
+    // DEMO-ONLY: graphic for a board that had none (12 Oct 2026, Chandu: "make it everywhere"); the words are this post's own
+    graphic: { text: "Interviewers aren't grading your biography. One line on who you are, one on why you're here.", bg: "p-peak-dawn", font: "classic" },
     postedAgo: "2d ago",
     helpful: 116,
     replies: [
@@ -1512,6 +1514,8 @@ export const INSIGHTS: Insight[] = [
     proId: "pro-reyes",
     title: "Three things nobody tells you about your first year as a nurse",
     body: "You will ask hundreds of questions and that's the job, not a weakness. Most of us work three shifts a week, so the schedule has real room in it for school, family or a second interest. And the nurses who thrive are the ones who say something the moment a patient looks different.",
+    // DEMO-ONLY: graphic for a board that had none (12 Oct 2026, Chandu: "make it everywhere"); the words are this post's own
+    graphic: { text: "You will ask hundreds of questions in your first year. That's the job, not a weakness.", bg: "p-above-clouds", font: "classic" },
     postedAgo: "4d ago",
     helpful: 213,
     replies: [
@@ -1531,6 +1535,8 @@ export const INSIGHTS: Insight[] = [
     proId: "pro-cole",
     title: "What a brand actually pays a designer for",
     body: "Not prettiness, decisions. Why this color, why this type, why this layout for this audience. The day you can defend your choices out loud is the day you stop being a student and start being a designer.",
+    // DEMO-ONLY: graphic for a board that had none (12 Oct 2026, Chandu: "make it everywhere"); the words are this post's own
+    graphic: { text: "A brand doesn't pay a designer for prettiness. It pays for decisions you can defend out loud.", bg: "s-studio", font: "display" },
     postedAgo: "1d ago",
     helpful: 79,
     replies: [
@@ -1611,6 +1617,8 @@ export const INSIGHTS: Insight[] = [
     proId: "pro-whitfield",
     title: "Networking when you don't know anybody",
     body: "Networking isn't collecting contacts, it's being genuinely curious one person at a time. Ask someone how they got their job and what surprised them about it. People remember the student who asked a real question.",
+    // DEMO-ONLY: graphic for a board that had none (12 Oct 2026, Chandu: "make it everywhere"); the words are this post's own
+    graphic: { text: "Networking isn't collecting contacts. It's being genuinely curious, one person at a time.", bg: "p-teal-cloud", font: "display" },
     postedAgo: "3d ago",
     helpful: 102,
     replies: [
@@ -1627,6 +1635,8 @@ export const INSIGHTS: Insight[] = [
     proId: "pro-tanaka",
     title: "What to say when you don't know the answer in an interview",
     body: "Say 'I don't know, but here's how I'd find out', and then actually walk through it. Interviewers aren't testing your memory, they're testing what you do at the edge of what you know.",
+    // DEMO-ONLY: graphic for a board that had none (12 Oct 2026, Chandu: "make it everywhere"); the words are this post's own
+    graphic: { text: "Say 'I don't know, but here's how I'd find out.' Then actually walk through it.", bg: "p-pastel", font: "classic" },
     postedAgo: "5d ago",
     helpful: 199,
     replies: [
@@ -1642,6 +1652,8 @@ export const INSIGHTS: Insight[] = [
     proId: "pro-brooks",
     title: "Day shift vs night shift, honestly",
     body: "Days are busier and you learn faster; nights are calmer and you get more time with each patient. Most new nurses do some of both in year one. Both have a rhythm you grow into, and most people find the one that fits them.",
+    // DEMO-ONLY: graphic for a board that had none (12 Oct 2026, Chandu: "make it everywhere"); the words are this post's own
+    graphic: { text: "Days teach you fast. Nights give you time with each patient. Both have a rhythm you grow into.", bg: "p-night-sky", font: "display" },
     postedAgo: "2d ago",
     helpful: 296,
     replies: [
@@ -1657,6 +1669,8 @@ export const INSIGHTS: Insight[] = [
     proId: "pro-reyes",
     title: "The question I ask every student who shadows me",
     body: "Could you do this at 3 AM, tired, for someone who isn't grateful? If the answer is still yes, nursing will give you more back than almost any job I know. If it's no, that's a useful thing to learn at seventeen.",
+    // DEMO-ONLY: graphic for a board that had none (12 Oct 2026, Chandu: "make it everywhere"); the words are this post's own
+    graphic: { text: "Could you do this at 3 AM, tired, for someone who isn't grateful? If yes, nursing gives back more than almost any job.", bg: "p-sunset-sea", font: "classic" },
     postedAgo: "6d ago",
     helpful: 162,
     replies: [
@@ -1671,6 +1685,8 @@ export const INSIGHTS: Insight[] = [
     proId: "pro-fontaine",
     title: "Your sketchbook is already a portfolio",
     body: "Students wait for permission to have 'real work'. The messy process pages, the versions you rejected and why, are often more impressive to me than the polished final. Show your thinking, not just your taste.",
+    // DEMO-ONLY: graphic for a board that had none (12 Oct 2026, Chandu: "make it everywhere"); the words are this post's own
+    graphic: { text: "Your messy process pages are already a portfolio. Show your thinking.", bg: "p-snow-peak", font: "classic" },
     postedAgo: "3d ago",
     helpful: 259,
     replies: [
@@ -1687,6 +1703,8 @@ export const INSIGHTS: Insight[] = [
     proId: "pro-cole",
     title: "What an art director actually does all day",
     body: "Less drawing than you'd think, more deciding. I spend my day reviewing work, giving direction that keeps ten people rowing the same way, and defending good ideas in rooms where they could die. The craft got me here; the communication keeps me here.",
+    // DEMO-ONLY: graphic for a board that had none (12 Oct 2026, Chandu: "make it everywhere"); the words are this post's own
+    graphic: { text: "Less drawing than you'd think, more deciding. That's the art director's day.", bg: "p-city-dusk", font: "display" },
     postedAgo: "1w ago",
     helpful: 125,
     replies: [
