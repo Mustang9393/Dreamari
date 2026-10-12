@@ -22,7 +22,7 @@ import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks"
 import { careerProfile } from "@/components/career/profiles";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
 import { CareerBehindCard, FeedVersionChip, FlatBreathers, FramedGraphic, captionFor, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
-import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark, FEED_COL } from "./primitives";
+import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
@@ -4234,8 +4234,16 @@ function BoardView({
          firms) and, on the right, the pros answering here, what is open now
          for this field from Opportunities, and the next event. Below xl the
          rails fold away and the About tab carries the board's facts. */}
-      <div className="grid grid-cols-1 items-start gap-x-[var(--space-10)] xl:grid-cols-[minmax(0,1fr)_696px_minmax(0,1fr)]">
-      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="About this board"><BoardPulseRail community={community} /></aside>
+      {/* One column, the conversations only (12 Oct 2026, team feedback via
+         Chandu: "remove the This Board section ... those numbers are already
+         shown in the header, so this is redundant", "remove the Answering
+         Here professional list ... a distraction from the goal of the
+         community board", and "let the main content take more space and make
+         the focus student questions + professional answers"). The side rails
+         are gone; the middle track widens from 696px to 860px, still a
+         readable measure. The response time stays on the About tab and in the
+         ask confirmation; the pros stay on the Pros tab and in their answers. */}
+      <div className="mx-auto w-full max-w-[860px]">
       <div className="flex min-w-0 flex-col gap-[var(--space-5)]">
       <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Posts" }, { key: "updates", label: "Updates" }, { key: "pros", label: "Pros" }, { key: "about", label: "About" }]} />
 
@@ -4313,7 +4321,7 @@ function BoardView({
                posts"): the same row, the same counts, the same words, in
                the same hairline-divided panel. Breathers keep their slots
                between panel segments. */}
-            <div className={FEED_COL}>
+            <div className="w-full">
             <BoardFeedList
               items={threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> }))}
               wrap={boardItem}
@@ -4335,7 +4343,7 @@ function BoardView({
             {/* Posts carry their own variety through the pros' graphics, so
                no breathers here (Chandu, 2 Oct 2026). The rows are the
                Feed's rows (6 Oct 2026: one visual language). */}
-            <div className={FEED_COL}>
+            <div className="w-full">
             <BoardFeedList
               items={insights.map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId), reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> }))}
               wrap={boardItem}
@@ -4379,7 +4387,6 @@ function BoardView({
         </div>
       )}
       </div>
-      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="Around this board"><BoardSideRail pros={boardPros} /></aside>
       </div>
       </SectionSurface>
     </>
@@ -4431,60 +4438,6 @@ function OpportunityUpdateCard({ item }: { item: RelevantItem }) {
       </span>
       <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
     </Link>
-  );
-}
-
-/** Left rail at xl: the board's pulse. Its numbers, how fast it answers,
- *  what it is about and who is here, in one glance, so the About tab is
- *  for the long version. */
-function BoardPulseRail({ community }: { community: Community }) {
-  const accent = communityAccent(community);
-  const stat = (n: number, label: string) => (
-    <span className="flex flex-col"><span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{n.toLocaleString("en-US")}</span><span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span></span>
-  );
-  // Four lines and nothing more (Chandu: "TOO MUCH CLUTTER"). Topics and
-  // firms stay on the About tab.
-  return (
-    <div className="flex flex-col gap-[24px] pt-[var(--space-3)]">
-      <RailHeading>This board</RailHeading>
-      <div className="flex flex-col gap-[18px]">{stat(community.students, "students")}{stat(community.activePros, "pros answering")}{stat(community.posts, "posts")}</div>
-      <p className="flex items-start gap-[6px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        <ShieldCheck className="mt-[2px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: accent }} />{community.responseWindow}.
-      </p>
-    </div>
-  );
-}
-
-/** Right rail at xl: the people answering on this board, what is open now
- *  for its field, and the next event on its calendar. Different from the
- *  Feed's rail on purpose: this is the board's own orbit, not suggestions. */
-function BoardSideRail({ pros }: { pros: Pro[] }) {
-  const nav = useContext(ConnectNav);
-  // Only the people (Chandu: "just have answering here and the stats, that's
-  // enough. Space things out to be airy and breathable and clean").
-  return (
-    <div className="flex flex-col gap-[24px] pt-[var(--space-3)]">
-      {pros.length > 0 && (
-        <div className="flex flex-col gap-[16px]">
-          <RailHeading>Answering here</RailHeading>
-          <ul className="flex flex-col gap-[16px]">
-            {pros.slice(0, 3).map((pro) => (
-              <li key={pro.id} className="flex items-center gap-[8px]">
-                <ProAvatar proId={pro.id} name={pro.name} size={36} />
-                <span className="min-w-0 flex-1">
-                  <span className="flex min-w-0 items-center gap-[4px]">
-                    <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
-                    <VerifiedBadge size={12} />
-                  </span>
-                  <span className="block truncate text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role} · {pro.org}</span>
-                </span>
-                {!nav?.isFollowing(pro.id) && <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
   );
 }
 
