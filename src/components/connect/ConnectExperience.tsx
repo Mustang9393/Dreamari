@@ -38,6 +38,10 @@ import { NETWORK, UW_ID } from "./unitedway/uwData";
 import { MICHIGAN, UW_MI_ID } from "./unitedway/uwMichigan";
 import { SOUTH_CENTRAL, UW_SC_ID } from "./unitedway/uwSouthCentral";
 import { UnitedWayBoardView } from "./unitedway/UnitedWayBoardView";
+import { UW_EVENT_BOARDS, uwEventById } from "./unitedway/uwEvents";
+import { toggleEventReminder, useEventReminders } from "@/lib/eventReminders";
+import { downloadCalendarFile, parseEventDate } from "@/lib/calendarFile";
+import { replyAs, setReplyAs } from "@/lib/replyAs";
 import { MentorshipTab } from "./mentorship/MentorshipTab";
 import { EmptyView, Shimmer } from "@/components/app/states";
 import { SurfaceState } from "@/components/app/SurfaceState";
@@ -156,7 +160,7 @@ function backLabelFor(prev: View | undefined): string {
     case "board": return `Back to ${prev.id === ATT_ID ? "the AT&T community" : prev.id === UW_ID || prev.id === UW_MI_ID || prev.id === UW_SC_ID ? "United Way" : COMMUNITIES.find((c) => c.id === prev.id)?.name ?? "the community"}`;
     case "pro": return `Back to ${PROS.find((p) => p.id === prev.id)?.name ?? "the profile"}`;
     case "proDashboard": return "Back to my dashboard";
-    case "event": return `Back to ${EVENTS.find((e) => e.id === prev.id)?.name ?? "the event"}`;
+    case "event": return `Back to ${eventById(prev.id)?.name ?? "the event"}`;
     case "thread": return "Back to the question";
     case "insight": return "Back to the post";
     case "saved": return "Back to Saved";
@@ -239,7 +243,8 @@ function questionSnippet(thread: Thread): { by?: string; text: string } | undefi
 }
 
 function eventById(id: string) {
-  return EVENTS.find((e) => e.id === id);
+  // a United Way board's events open on this same event board (12 Oct 2026)
+  return EVENTS.find((e) => e.id === id) ?? uwEventById(id);
 }
 
 /** Every distinct person who's replied, in the order they first appear --
@@ -461,13 +466,24 @@ export function StatusChip({ state }: { state: Thread["state"] }) {
 // Student identity: handle + avatar + class year — Twitter-shaped, like the
 // marketing site's own Connect chapter — a first-name-only handle, never a
 // full/last name or a real photo.
-function IdentityBadge({ handle, grade, postedAgo }: { handle: string; grade: string; postedAgo: string }) {
+/** Where a poster lives, on a board shared by several communities (United
+ *  Way, 12 Oct 2026): a small pin and the town, in the meta line's own
+ *  quiet colour, never a coloured chip. */
+export function PlaceTag({ place, size = 12 }: { place: string; size?: number }) {
+  return (
+    <span className="flex min-w-0 flex-none items-center gap-[3px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)", fontSize: size, lineHeight: "16px" }}>
+      <MapPin className="h-3 w-3 flex-none" aria-hidden /> {place}
+    </span>
+  );
+}
+
+function IdentityBadge({ handle, grade, postedAgo, place }: { handle: string; grade: string; postedAgo: string; place?: string }) {
   return (
     <div className="flex items-center gap-[10px]">
       <Avatar name={handle} size={34} />
       <div className="flex min-w-0 flex-col">
         <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{handle}</span>
-        <span className="text-[11px] leading-[14px]" style={{ color: "var(--muted-foreground)" }}>{grade} · {postedAgo}</span>
+        <span className="flex flex-wrap items-center gap-x-[6px] text-[11px] leading-[14px]" style={{ color: "var(--muted-foreground)" }}>{grade} · {postedAgo}{place && <PlaceTag place={place} size={11} />}</span>
       </div>
     </div>
   );
@@ -730,7 +746,9 @@ export function EventMarks({ lead, partner, size = "md", ink: inkColor }: { lead
   const markOf = (name: string) => (NO_MARK.has(name) ? undefined : COMPANY_MARKS[name]);
   // a symbol with no letters (the JA triangles) reads at nearly the full box
   // height; a two-line wordmark (Goldman Sachs) at 1.4 letter heights
-  const SYMBOL = new Set(["Junior Achievement"]);
+  // United Way's lockup is its hand-and-rainbow symbol with the name
+  // stacked beside it, so it reads at the symbol's height too
+  const SYMBOL = new Set(["Junior Achievement", "United Way"]);
   const fit = (name: string, tall: boolean, max: number) => {
     const m = markOf(name);
     let L = SYMBOL.has(name) ? Math.round(box.h * 0.82) : tall ? Math.round(box.L * 1.4) : box.L;
@@ -879,7 +897,10 @@ export function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful
         <span className="flex min-w-0 items-center gap-[8px]">
           <Avatar name={thread.handle} size={26} />
           <span className="flex-none text-[12px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
-          <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}</span>
+          {/* on a phone a regional board's row keeps the town, not the
+             grade (the grade is still on the thread page) */}
+          <span className={`min-w-0 truncate text-[12px] leading-[16px] font-semibold ${thread.place ? "hidden sm:inline" : ""}`} style={{ color: "var(--muted-foreground)" }}>· {thread.grade}</span>
+          {thread.place && <PlaceTag place={thread.place} />}
         </span>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
       </div>
@@ -948,6 +969,7 @@ export function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful
           <div className="flex flex-wrap items-center gap-[6px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex cursor-pointer items-center gap-[4px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={13} /></button>
             <span className="flex min-w-0 items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span className="truncate">{pro.role}</span> <CompanyChip name={pro.org} tone="surface" size="sm" /></span>
+            {insight.place && <PlaceTag place={insight.place} />}
           </div>
           <h3 className="mt-[8px] text-[15.5px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
           <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
@@ -1396,7 +1418,7 @@ export function ConnectExperience() {
   /** Community awaiting join confirmation in the JoinSheet. */
   const [joinFor, setJoinFor] = useState<string | null>(null);
   const [joined, setJoined] = useState<Record<string, boolean>>(() => Object.fromEntries(COMMUNITIES.map((c) => [c.id, c.joined])));
-  const [eventJoined, setEventJoined] = useState<Record<string, boolean>>(() => Object.fromEntries(EVENTS.map((e) => [e.id, e.entitled])));
+  const [eventJoined, setEventJoined] = useState<Record<string, boolean>>(() => Object.fromEntries([...EVENTS, ...UW_EVENT_BOARDS].map((e) => [e.id, e.entitled])));
   const [saves, setSaves] = useState<Record<string, boolean>>({ "t-ib-hours": true, "i-day-in-life": true });
   const [helpfuls, setHelpfuls] = useState<Record<string, boolean>>({});
   const [announce, setAnnounce] = useState("");
@@ -1551,6 +1573,11 @@ export function ConnectExperience() {
     window.history.back();
   }, []);
   const backLabel = backLabelFor(viewStack[viewStack.length - 1]);
+  // leaving a partner board for the landing or another board: replies post
+  // as the student again (replyAs, 12 Oct 2026)
+  useEffect(() => {
+    if (view.kind === "home" || (view.kind === "board" && view.id !== UW_ID && view.id !== UW_MI_ID && view.id !== UW_SC_ID)) setReplyAs(null);
+  }, [view]);
 
   const say = useCallback((message: string) => {
     setAnnounce(message);
@@ -1567,6 +1594,7 @@ export function ConnectExperience() {
       openThread: (id: string) => setView({ kind: "thread", id }),
       openInsight: (id: string) => setView({ kind: "insight", id }),
       openBoard: (id: string) => setView({ kind: "board", id, filter: "questions" }),
+      openEvent: (id: string, filter = "questions") => setView({ kind: "event", id, filter }),
       // a partner board hands a student to its mentorship program; the
       // Mentorship tab reads the open program from the URL
       openMentorship: (program?: string) => {
@@ -1796,9 +1824,9 @@ export function ConnectExperience() {
             // Its mentoring program also lives in the Mentorship tab; the
             // board hands off there with the program open.
             // two United Way boards, one engine: the network, and Michigan
-            if (view.id === UW_ID) return <UnitedWayBoardView key={UW_ID} board={NETWORK} onBack={goBack} backLabel={backLabel} />;
-            if (view.id === UW_MI_ID) return <UnitedWayBoardView key={UW_MI_ID} board={MICHIGAN} onBack={goBack} backLabel={backLabel} />;
-            if (view.id === UW_SC_ID) return <UnitedWayBoardView key={UW_SC_ID} board={SOUTH_CENTRAL} onBack={goBack} backLabel={backLabel} />;
+            if (view.id === UW_ID) return <UnitedWayBoardView key={UW_ID} board={NETWORK} onBack={goBack} backLabel={backLabel} initialTab={view.filter} />;
+            if (view.id === UW_MI_ID) return <UnitedWayBoardView key={UW_MI_ID} board={MICHIGAN} onBack={goBack} backLabel={backLabel} initialTab={view.filter} />;
+            if (view.id === UW_SC_ID) return <UnitedWayBoardView key={UW_SC_ID} board={SOUTH_CENTRAL} onBack={goBack} backLabel={backLabel} initialTab={view.filter} />;
             const community = COMMUNITIES.find((c) => c.id === view.id);
             if (!community) return <ConnectNotFound onBack={goBack} backLabel={backLabel} />;
             return (
@@ -1845,7 +1873,10 @@ export function ConnectExperience() {
           (() => {
             const event = eventById(view.id);
             if (!event) return <ConnectNotFound onBack={goBack} backLabel={backLabel} />;
-            if (eventJoined[event.id]) {
+            // a partner board's upcoming event has its own page before the
+            // day (details, going, Remind me); Connect's own upcoming events
+            // carry no `going` and keep the line below (12 Oct 2026)
+            if (eventJoined[event.id] || (event.lifecycle === "Upcoming" && event.going !== undefined)) {
               return (
                 <EventView
                   event={event}
@@ -1853,7 +1884,7 @@ export function ConnectExperience() {
                   onFilter={(filter) => setView({ kind: "event", id: event.id, filter })}
                   onBack={goBack}
                   backLabel={backLabel}
-                  onOpenCommunity={(id) => setView({ kind: "board", id, filter: "questions" })}
+                  onOpenCommunity={(id, filter) => setView({ kind: "board", id, filter: filter ?? "questions" })}
                   onOpenThread={(id) => setView({ kind: "thread", id })}
                   onSaveTakeaway={() => toggleSave("recap-" + event.id, "takeaway")}
                   onAddToPlan={() => say("Added to your Plan as a next action.")}
@@ -3849,9 +3880,24 @@ function HomeView({
 /** One event, as the Events tab's ticket: extracted unchanged so the Feed
  *  can carry the real card (Chandu, 2 Oct 2026: "the real event cards we
  *  have in our Events tab"). */
-function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr }: { event: EventBoard; joined: boolean; onOpenEvent: (id: string) => void; onEnterCode: (id: string) => void; onQr: (event: EventBoard) => void }) {
+export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, reminded, onRemind, openLabel, remindLabels = ["Remind me", "Reminder set"], hostLine }: {
+  event: EventBoard; joined: boolean; onOpenEvent: (id: string) => void; onEnterCode: (id: string) => void; onQr: (event: EventBoard) => void;
+  /** A partner board's upcoming event (United Way, 12 Oct 2026): the
+   *  ticket opens the event's own page and offers Remind me in the action
+   *  row, the same toggle the Feed's event card uses. */
+  reminded?: boolean;
+  onRemind?: () => void;
+  /** a past event whose board is still open says so beside its button */
+  openLabel?: string;
+  /** the Remind me toggle's words, when a role does something else there
+   *  (United Way staff: "Co-host" / "Co-hosting") */
+  remindLabels?: [string, string];
+  /** who hosts it, beside the action (United Way staff view) */
+  hostLine?: string;
+}) {
   const eventInk = "#f6f5fb";
   const upcoming = event.lifecycle === "Upcoming";
+  const preview = upcoming && !!onRemind;
   const pAccent = partnerAccent(event.host);
   const lit = `color-mix(in srgb, ${pAccent} 62%, #ffffff)`;
   
@@ -3883,9 +3929,9 @@ function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr }: { event:
       <div
         role="button"
         tabIndex={0}
-        aria-label={`${joined ? "Open" : "Join"} ${event.name}`}
-        onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; if (joined) onOpenEvent(event.id); else onEnterCode(event.id); }}
-        onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (joined) onOpenEvent(event.id); else onEnterCode(event.id); } }}
+        aria-label={`${joined || preview ? "Open" : "Join"} ${event.name}`}
+        onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; if (joined || preview) onOpenEvent(event.id); else onEnterCode(event.id); }}
+        onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (joined || preview) onOpenEvent(event.id); else onEnterCode(event.id); } }}
         className="connect-ticket dm-tap relative flex h-[316px] cursor-pointer overflow-hidden rounded-[var(--radius-lg)]"
         style={{ background: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.12))`, fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}
       >
@@ -3906,12 +3952,36 @@ function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr }: { event:
             {typeof event.students === "number" && (
               <RingStats items={[[event.students, "Students"], [event.pros ?? 0, "Pros"], [event.postCount ?? 0, "Posts"]]} />
             )}
+            {preview && typeof event.going === "number" && <RingStats items={[[event.going + (reminded ? 1 : 0), "Going"]]} />}
           </div>
           {/* the action row: a button, or for an unopened event the one
              line that says why there is none, in the same place */}
           <div className="mt-[var(--space-4)] flex min-h-[38px] items-center">
             {joined ? (
-              <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open board <ChevronRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
+              <span className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px]">
+                <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open board <ChevronRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
+                {openLabel && (
+                  <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
+                    <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: "var(--world-food-farming-nature)", boxShadow: "0 0 0 3px color-mix(in srgb, var(--world-food-farming-nature) 28%, transparent)" }} />
+                    {openLabel}
+                  </span>
+                )}
+              </span>
+            ) : preview ? (
+              <span className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px]">
+              {/* the Feed event card's own Remind me toggle, unchanged */}
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onRemind!(); }}
+                aria-pressed={!!reminded}
+                className="dm-quiet relative z-20 flex min-h-[38px] flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[13px] leading-[16px] font-bold"
+                style={{ fontFamily: "var(--font-body)", ...(reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, rgba(255,255,255,0.2))", color: "#fff", background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, rgba(255,255,255,0.06))" } : { borderColor: "rgba(255,255,255,0.22)", color: "#fff", background: "rgba(255,255,255,0.08)" }) }}
+              >
+                {reminded ? <Check className="h-[14px] w-[14px]" aria-hidden /> : remindLabels[0] === "Remind me" ? <Bell className="h-[14px] w-[14px]" aria-hidden /> : <Users className="h-[14px] w-[14px]" aria-hidden />}
+                {reminded ? remindLabels[1] : remindLabels[0]}
+              </button>
+              {hostLine && <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}><Building2 className="h-[14px] w-[14px] flex-none" aria-hidden />{hostLine}</span>}
+              </span>
             ) : upcoming ? (
               <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
             ) : (
@@ -4511,7 +4581,7 @@ function EventView({
   onFilter: (f: string) => void;
   onBack: () => void;
   backLabel?: string;
-  onOpenCommunity?: (id: string) => void;
+  onOpenCommunity?: (id: string, filter?: string) => void;
   onOpenThread: (id: string) => void;
   onSaveTakeaway: () => void;
   takeawaySaved: boolean;
@@ -4526,7 +4596,21 @@ function EventView({
   // ("Ernst & Young") while every Pro record uses the short form its own
   // partner-program name goes by ("EY").
   const eventOrgNames = [...event.orgs, event.host, event.partner].filter((v): v is string => !!v);
-  const eventPros = PROS.filter((p) => eventOrgNames.includes(p.org));
+  // a partner board names who was in the room (United Way's volunteers
+  // aren't employees of the host), so the People tab lists them instead
+  const eventPros = event.proIds ? event.proIds.map(proById).filter(Boolean) : PROS.filter((p) => eventOrgNames.includes(p.org));
+  // what professionals posted after the event (a United Way volunteer's
+  // follow-up, 12 Oct 2026); none on Connect's own boards yet
+  const proPosts = INSIGHTS.filter((i) => i.boardId === event.id);
+  const nav = useContext(ConnectNav);
+  // Before the day (12 Oct 2026, United Way boards): the same header, then
+  // what it is, who it's for, Remind me, My Plan and a calendar file. The
+  // conversation opens here once the event has happened.
+  const preview = event.lifecycle === "Upcoming";
+  const reminders = useEventReminders();
+  const reminded = !!reminders[event.id];
+  const calDate = parseEventDate(event.date, event.time);
+  const [remindNote, setRemindNote] = useState(false);
   const [postedQs, setPostedQs] = useState<{ id: string; title: string }[]>([]);
   const [planAdded, setPlanAdded] = useState(false);
   const eventInk = "#f6f5fb";
@@ -4586,13 +4670,60 @@ function EventView({
             <RingStats items={[[event.students, "Students"], [event.pros ?? 0, "Pros"], [event.postCount ?? 0, "Posts"]]} />
           </div>
         )}
+        {preview && typeof event.going === "number" && (
+          <div className="relative z-10 mt-[var(--space-4)]">
+            <RingStats items={[[event.going + (reminded ? 1 : 0), "Going"]]} />
+          </div>
+        )}
         <div className="relative z-10 mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
           <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
             <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 70%, ${eventInk})` }} />
-            Attendees + event pros only
+            {event.access ?? "Attendees + event pros only"}
           </span>
         </div>
       </section>
+
+      {preview ? (
+        <>
+          <div className="flex flex-wrap items-center gap-[var(--space-3)]">
+            {reminded
+              ? <QuietCta done onClick={() => { toggleEventReminder(event.id); setRemindNote(false); }}><Check className="h-4 w-4" aria-hidden /> Reminder set</QuietCta>
+              : <PrimaryCta onClick={() => { setRemindNote(toggleEventReminder(event.id)); dispatchAuroraPulse("select"); }}><Bell className="h-4 w-4" aria-hidden /> Remind me</PrimaryCta>}
+            <QuietCta onClick={() => { setPlanAdded(true); onAddToPlan(); }} done={planAdded}>{planAdded ? "In My Plan" : "Add to My Plan"}</QuietCta>
+            {calDate && (
+              <IconTip label="Add to calendar">
+                <button type="button" aria-label="Add to calendar" onClick={() => downloadCalendarFile(event.name, calDate, event.location)} className="dm-quiet flex size-[44px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
+                  <Calendar className="h-4 w-4" aria-hidden />
+                </button>
+              </IconTip>
+            )}
+          </div>
+          {remindNote && reminded && <p role="status" className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-food-farming-nature)" }}>We&apos;ll remind you before it starts.</p>}
+          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+            {event.about && <p className="text-[16px] leading-[24px] font-semibold" style={{ color: "var(--foreground)" }}>{event.about}</p>}
+            {event.who && (
+              <div className="flex flex-col gap-[6px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+                <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Who it&apos;s for</span>
+                <span className="flex items-center gap-[8px] text-[14px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}><Users className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {event.who}</span>
+              </div>
+            )}
+            <div className="flex flex-col gap-[6px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+              <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Hosted by</span>
+              <div className="flex flex-wrap gap-[6px]">
+                {event.orgs.map((name) => <CompanyChip key={name} name={name} tone="surface" />)}
+              </div>
+            </div>
+            {/* what happens to this page after the day: the reason it exists */}
+            <div className="flex items-start gap-[12px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+              <span className="flex size-[36px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${pAccent} 24%, transparent)`, color: "var(--foreground)" }}><MessagesSquare className="h-4 w-4" aria-hidden /></span>
+              <span className="flex flex-col gap-[2px]">
+                <span className="text-[14.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>After the event, keep talking here</span>
+                <span className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Ask questions, share notes and follow up with the people you met.</span>
+              </span>
+            </div>
+          </div>
+        </>
+      ) : (<>
 
       {/* Six clearly separated rooms instead of one long stacked scroll
          (direct feedback, 5 Sept 2026): Questions is the tab a reader lands
@@ -4633,16 +4764,68 @@ function EventView({
 
       {tab === "posts" && (
         <div className="flex flex-col gap-[var(--space-4)]">
+          {/* The host team's debrief leads (United Way staff, 12 Oct 2026:
+             staff across four offices are the board's first audience): what
+             worked, the numbers, next steps by office, and a way back to the
+             staff Team space to talk it over. */}
+          {event.debrief && (
+            <Card accent={pAccent}>
+              <div className="flex flex-wrap items-center justify-between gap-[10px]">
+                <span className="flex min-w-0 items-center gap-[10px]">
+                  <Avatar name={event.debrief.by} size={36} />
+                  <span className="flex min-w-0 flex-col">
+                    <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{event.debrief.by}</span>
+                    <span className="flex flex-wrap items-center gap-x-[6px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{event.debrief.role} · {event.debrief.postedAgo}<PlaceTag place={event.debrief.office} /></span>
+                  </span>
+                </span>
+                <span className="rounded-full px-[10px] py-[3px] text-[11px] leading-[15px] font-extrabold tracking-[0.06em] uppercase" style={{ background: `color-mix(in srgb, ${pAccent} 24%, transparent)`, color: "var(--foreground)" }}>Team debrief</span>
+              </div>
+              <p className="mt-[12px] text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.debrief.title}</p>
+              <p className="mt-[4px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{event.debrief.body}</p>
+              {event.debrief.numbers.length > 0 && (
+                <div className="mt-[14px] flex flex-wrap gap-x-[var(--space-6)] gap-y-[8px]">
+                  {event.debrief.numbers.map((n) => (
+                    <span key={n.label} className="flex flex-col">
+                      <span className="text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{n.value}</span>
+                      <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{n.label}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="mt-[14px] grid grid-cols-1 gap-[var(--space-5)] md:grid-cols-2">
+                <div>
+                  <p className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>What worked</p>
+                  <ul className="mt-[6px] flex flex-col gap-[6px]">
+                    {event.debrief.worked.map((w) => <li key={w} className="flex items-start gap-[8px] text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}><CheckCircle2 className="mt-[2px] h-4 w-4 flex-none" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} />{w}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Next steps</p>
+                  <ul className="mt-[6px] flex flex-col gap-[6px]">
+                    {event.debrief.next.map((n) => <li key={n.office + n.task} className="flex flex-wrap items-center gap-x-[8px] text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}><PlaceTag place={n.office} />{n.task}</li>)}
+                  </ul>
+                </div>
+              </div>
+              {event.boardId && (
+                <div className="mt-[14px] flex flex-wrap gap-[8px]">
+                  <QuietCta onClick={() => onOpenCommunity?.(event.boardId!, "team")}><MessagesSquare className="h-4 w-4" aria-hidden /> Talk it over in Team · {event.debrief.replies} replies</QuietCta>
+                </div>
+              )}
+            </Card>
+          )}
+
           {/* The official Dream Opportunity post (CEO, 4 Sept): the event keeps
              going after the day ends. Rows and short lists, no essay. */}
           {event.official && (
             <Card accent={pAccent}>
               <div className="flex items-center gap-[10px]">
-                <span className="flex h-[36px] w-[36px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 55%, transparent)" }}>
-                  <LetterMark name="Dream Opportunity" ink="#FFFFFF" letterHeight={14} />
+                {/* a brand's reversed mark on its own colour (United Way's
+                   white lockup on United Way blue), so it reads in light mode */}
+                <span className="flex h-[36px] w-[36px] flex-none items-center justify-center rounded-full" style={COMPANY_BRAND[event.official.mark ?? ""] ? { background: COMPANY_BRAND[event.official.mark!].bg } : { background: "color-mix(in srgb, var(--primary) 22%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 55%, transparent)" }}>
+                  <LetterMark name={event.official.mark ?? event.official.by ?? "Dream Opportunity"} ink="#FFFFFF" letterHeight={14} />
                 </span>
                 <span className="flex min-w-0 flex-col">
-                  <span className="flex items-center gap-[5px] text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Dream Opportunity <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} /></span>
+                  <span className="flex items-center gap-[5px] text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{event.official.by ?? "Dream Opportunity"} <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} /></span>
                   <span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Official event account · {event.official.postedAgo}</span>
                 </span>
               </div>
@@ -4658,7 +4841,7 @@ function EventView({
                 ))}
               </ul>
               <div className="mt-[14px] flex flex-wrap gap-[8px]">
-                <QuietCta onClick={() => onOpenCommunity?.(event.official!.communityId)}>Keep talking in {event.official.communityName} <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></QuietCta>
+                <QuietCta onClick={() => onOpenCommunity?.(event.official!.communityId, event.boardId ? "talk" : undefined)}>Keep talking in {event.official.communityName} <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></QuietCta>
               </div>
             </Card>
           )}
@@ -4689,9 +4872,13 @@ function EventView({
         </div>
       )}
 
-      {tab === "insights" && (
+      {tab === "insights" && (proPosts.length > 0 ? (
+        <div className="flex flex-col gap-[var(--space-3)]">
+          {proPosts.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => nav?.openInsight(i.id)} {...cardProps(i.id)} />)}
+        </div>
+      ) : (
         <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Posts from professionals at this event will appear here after the answer round.</p>
-      )}
+      ))}
 
       {tab === "resources" && (
         <div className="flex flex-col gap-[var(--space-6)]">
@@ -4877,9 +5064,12 @@ function EventView({
           </div>
         </div>
       )}
+      </>)}
     </>
   );
-}// ——— thread (handoff 12) ———
+}
+
+// ——— thread (handoff 12) ———
 
 function ThreadView({
   thread,
@@ -4909,6 +5099,8 @@ function ThreadView({
   const p = cardProps(thread.id, "question");
   const nav = useContext(ConnectNav);
   const [posted, setPosted] = useState<LocalReply[]>([]);
+  // a volunteer or staff member from a partner board replies as themselves
+  const [as] = useState(replyAs);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const toggleCollapsed = (id: string) => setCollapsed((c) => ({ ...c, [id]: !c[id] }));
 
@@ -4927,7 +5119,7 @@ function ThreadView({
         <div>
           <h1 className="text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{thread.title}</h1>
           {thread.context && <p className="mt-[6px] text-[13.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>{thread.context}</p>}
-          <div className="mt-[10px]"><IdentityBadge handle={thread.handle} grade={thread.grade} postedAgo={thread.postedAgo} /></div>
+          <div className="mt-[10px]"><IdentityBadge handle={thread.handle} grade={thread.grade} postedAgo={thread.postedAgo} place={thread.place} /></div>
         </div>
 
         <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
@@ -5005,7 +5197,7 @@ function ThreadView({
                           return <CommentRow key={fid} id={fid} name={pro.name} chip="Pro" chipTone="pro" body={r.body} postedAgo={r.postedAgo} likes={0} liked={!!helpfuls[fid]} onLike={toggleHelpful} collapsed={!!collapsed[fid]} onToggleCollapse={() => toggleCollapsed(fid)} />;
                         }
                         const pid = thread.id + "-p" + index;
-                        return <CommentRow key={pid} id={pid} name={r.handle} chip="Student" meta={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} image={r.image} imageAlt={r.imageAlt} collapsed={!!collapsed[pid]} onToggleCollapse={() => toggleCollapsed(pid)} />;
+                        return <CommentRow key={pid} id={pid} name={r.handle} chip="Student" meta={r.place ? `${r.grade} · ${r.place}` : r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} image={r.image} imageAlt={r.imageAlt} collapsed={!!collapsed[pid]} onToggleCollapse={() => toggleCollapsed(pid)} />;
                       })}
                     </CommentStream>
                   </FollowupBranch>
@@ -5025,11 +5217,11 @@ function ThreadView({
         {posted.length > 0 && (
           <CommentStream>
             {posted.map((reply) => (
-              <CommentRow key={reply.id} id={reply.id} name="Jordan" chip="Student" meta="Junior" chipTone="student" body={reply.body} postedAgo="Just now" likes={0} liked={!!helpfuls[reply.id]} onLike={toggleHelpful} collapsed={!!collapsed[reply.id]} onToggleCollapse={() => toggleCollapsed(reply.id)} />
+              <CommentRow key={reply.id} id={reply.id} name={as?.name ?? "Jordan"} chip={as?.chip ?? "Student"} meta={as ? as.meta : "Junior"} chipTone={as?.tone ?? "student"} body={reply.body} postedAgo="Just now" likes={0} liked={!!helpfuls[reply.id]} onLike={toggleHelpful} collapsed={!!collapsed[reply.id]} onToggleCollapse={() => toggleCollapsed(reply.id)} />
             ))}
           </CommentStream>
         )}
-        <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${thread.id}-local-${current.length}`, body: text }])} />
+        <ReplyComposer as={as} onPost={(text) => setPosted((current) => [...current, { id: `${thread.id}-local-${current.length}`, body: text }])} />
 
         <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           <button type="button" onClick={p.onSave} aria-pressed={p.saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.saved ? "var(--accent-subtle)" : undefined }}>
@@ -5356,7 +5548,7 @@ function focusReplyComposer() {
   window.setTimeout(() => box?.querySelector("textarea")?.focus(), 350);
 }
 
-export function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
+export function ReplyComposer({ onPost, as }: { onPost: (text: string) => void; /** a partner board's volunteer or staff member (replyAs) */ as?: { name: string; meta?: string } | null }) {
   const [text, setText] = useState("");
   const blocked = CONTACT_INFO.test(text);
   // Unlike InlineAsk (only mounted once a reader taps "Ask" -- the tap
@@ -5373,7 +5565,7 @@ export function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
   };
   return (
     <div id="dm-reply-composer" className="flex items-start gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
-      <Avatar name="Jordan Rivera" size={32} />
+      <Avatar name={as?.name ?? "Jordan Rivera"} size={32} />
       <div className="min-w-0 flex-1">
         <HoverBeam strength={0.85} active={focused}>
         <label className="block">
@@ -5394,7 +5586,7 @@ export function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
         </HoverBeam>
         {blocked && <p role="alert" className="mt-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
         <div className="mt-[8px] flex items-center justify-between gap-[var(--space-3)]">
-          <span className="text-[11px] leading-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>Posts as Jordan · Junior{text.length > 200 ? ` · ${280 - text.length} left` : ""}</span>
+          <span className="text-[11px] leading-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>Posts as {as ? [as.name, as.meta].filter(Boolean).join(" · ") : "Jordan · Junior"}{text.length > 200 ? ` · ${280 - text.length} left` : ""}</span>
           <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
             Post <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
           </button>
@@ -5432,9 +5624,10 @@ function InsightThreadView({
 }) {
   const pro = proById(insight.proId);
   const boardCommunity = COMMUNITIES.find((c) => c.id === insight.boardId);
-  const boardName = boardCommunity?.name ?? "Community";
+  const boardName = boardCommunity?.name ?? eventById(insight.boardId)?.name ?? "Community";
   const nav = useContext(ConnectNav);
   const [posted, setPosted] = useState<LocalReply[]>([]);
+  const [as] = useState(replyAs);
 
   return (
     <>
@@ -5457,7 +5650,7 @@ function InsightThreadView({
           <InsightMark color={boardCommunity ? communityAccent(boardCommunity) : "var(--primary)"} size={48} />
           <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>Post</span>
           <h1 className="mt-[6px] text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h1>
-          <div className="mt-[12px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} size={38} /></div>
+          <div className="mt-[12px] flex flex-wrap items-center gap-x-[12px] gap-y-[6px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} size={38} />{insight.place && <PlaceTag place={insight.place} />}</div>
           <p className="mt-[14px] text-[13.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{insight.body}</p>
           <p className="mt-[10px] text-[11px] leading-[15px] italic" style={{ color: "var(--muted-foreground)" }}>{pro.verifiedBy}</p>
         </div>
@@ -5503,7 +5696,7 @@ function InsightThreadView({
                     id={rid}
                     name={isPro ? proById(reply.proId!).name : reply.handle!}
                     chip={isPro ? "Professional" : "Student"}
-                    meta={isPro ? undefined : reply.grade}
+                    meta={isPro ? undefined : reply.place ? `${reply.grade} · ${reply.place}` : reply.grade}
                     chipTone={isPro ? "pro" : "student"}
                     body={reply.body}
                     postedAgo={reply.postedAgo}
@@ -5519,9 +5712,10 @@ function InsightThreadView({
                 <CommentRow
                   key={reply.id}
                   id={reply.id}
-                  name="Jordan"
-                  chip="Junior"
-                  chipTone="student"
+                  name={as?.name ?? "Jordan"}
+                  chip={as?.chip ?? "Junior"}
+                  meta={as?.meta}
+                  chipTone={as?.tone ?? "student"}
                   body={reply.body}
                   postedAgo="Just now"
                   likes={0}
@@ -5541,7 +5735,7 @@ function InsightThreadView({
                 <p className="mt-[4px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Be the first to weigh in.</p>
               </Card>
             )}
-            <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${insight.id}-local-${current.length}`, body: text }])} />
+            <ReplyComposer as={as} onPost={(text) => setPosted((current) => [...current, { id: `${insight.id}-local-${current.length}`, body: text }])} />
           </div>
         </div>
       </article>

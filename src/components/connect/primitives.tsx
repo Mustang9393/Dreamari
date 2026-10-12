@@ -21,6 +21,9 @@ export const ConnectNav = createContext<{
   openThread: (id: string) => void;
   openInsight: (id: string) => void;
   openBoard: (id: string) => void;
+  /** an event page or its follow-up board (a United Way board's events
+   *  open on Connect's own event board, 12 Oct 2026) */
+  openEvent?: (id: string, filter?: string) => void;
   /** the Mentorship tab, optionally with one program open (a partner board hands off here) */
   openMentorship?: (program?: string) => void;
   openSaved: () => void;
@@ -519,6 +522,9 @@ export function SectionSurface({ children, className = "" }: { children: React.R
  *  height and one baseline; marks without `letters` are all letters. */
 export type MarkMeta = {
   file: string;
+  /** a full path when the mark lives outside /images/logos/companies (the
+   *  United Way mark is the board's own file, so it is never duplicated) */
+  src?: string;
   aspect: number;
   height?: number;
   ext?: "svg" | "png";
@@ -534,7 +540,13 @@ export type MarkMeta = {
    *  colour over the one-colour letters. */
   accent?: { file: string; color: string; ext?: "svg" | "png" };
 };
+/** Where a mark's file is served from. */
+export const markUrl = (m: { file: string; ext?: "svg" | "png"; src?: string }) => m.src ?? `/images/logos/companies/${m.file}.${m.ext ?? "svg"}`;
 export const COMPANY_MARKS: Record<string, MarkMeta> = {
+  // United Way's reversed (one-colour white) lockup, the version the brand
+  // publishes for dark grounds; the same file the United Way boards' banner
+  // uses (12 Oct 2026, for its events on Connect's event board)
+  "United Way": { file: "united-way-white", src: "/images/connect/partners/united-way-white.svg", aspect: 2.155 },
   // Dream Opportunity's own mark (the CEO's vectorised logo, letters only;
   // the full lockup with the wordmark is dream-opportunity-full.svg)
   "Dream Opportunity": { file: "dream-opportunity", aspect: 1.79, height: 16 },
@@ -689,8 +701,8 @@ export function CompanyChip({ name, tone = "photo", size = "md" }: { name: strin
               className="absolute inset-0 block"
               style={{
                 background: ink,
-                maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
-                WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+                maskImage: `url(${markUrl(mark)})`,
+                WebkitMaskImage: `url(${markUrl(mark)})`,
                 maskSize: "contain",
                 WebkitMaskSize: "contain",
                 maskRepeat: "no-repeat",
@@ -738,6 +750,8 @@ export function CompanyChip({ name, tone = "photo", size = "md" }: { name: strin
  *  volunteer's "Your company" card. Primary brand colour and the ink that
  *  reads on it (dark ink on the light brands: EY yellow, Amazon orange). */
 export const COMPANY_BRAND: Record<string, { bg: string; ink: string }> = {
+  // United Way brand standards blue (uwData.BRAND.blue)
+  "United Way": { bg: "#0044B5", ink: "#FFFFFF" },
   "JPMorgan Chase": { bg: "#5B3A29", ink: "#FFFFFF" },
   Coach: { bg: "#1A1613", ink: "#FFFFFF" },
   Amazon: { bg: "#FF9900", ink: "#131921" },
@@ -794,7 +808,7 @@ export function LetterMark({ name, ink = "#FFFFFF", letterHeight, markClassName 
     return (
       <span className={`relative flex flex-none items-center rounded-[6px] ${className}`} style={{ height: Math.round(boxH) + pad * 2, padding: pad, background: "#FFFFFF" }} title={name}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img alt="" src={`/images/logos/companies/${mark.file}.${mark.ext ?? "svg"}`} style={{ width: Math.round(boxW), height: Math.round(boxH), display: "block" }} />
+        <img alt="" src={markUrl(mark)} style={{ width: Math.round(boxW), height: Math.round(boxH), display: "block" }} />
         <span className="sr-only">{name}</span>
       </span>
     );
@@ -809,8 +823,8 @@ export function LetterMark({ name, ink = "#FFFFFF", letterHeight, markClassName 
           width: Math.round(boxW),
           height: Math.round(boxH),
           background: ink,
-          maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
-          WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+          maskImage: `url(${markUrl(mark)})`,
+          WebkitMaskImage: `url(${markUrl(mark)})`,
           maskSize: "100% 100%",
           WebkitMaskSize: "100% 100%",
           maskRepeat: "no-repeat",
@@ -857,8 +871,8 @@ export function CompanyMark({ name, ink = "currentColor", className = "", height
           className="absolute inset-0 block"
           style={{
             background: ink,
-            maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
-            WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+            maskImage: `url(${markUrl(mark)})`,
+            WebkitMaskImage: `url(${markUrl(mark)})`,
             maskSize: "contain",
             WebkitMaskSize: "contain",
             maskRepeat: "no-repeat",

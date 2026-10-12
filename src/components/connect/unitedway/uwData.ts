@@ -35,7 +35,7 @@
 // Brand colours (United Way brand standards): Blue #0044B5, Red #FD372C,
 // Yellow #FFBA00, Green #009464.
 
-import { PROS, type Pro } from "../data";
+import { PROS, type EventResource, type Pro } from "../data";
 
 export const UW_ID = "united-way-student-success";
 
@@ -68,10 +68,16 @@ export const PHOTOS = {
 
 // ——— the shared model ———
 
+// United Way's own staff first (12 Oct 2026, Chandu: "the ask was mainly
+// about the employees having a platform to communicate from these 4
+// different locations. The student part wasn't even mentioned, but we'll
+// have that as a nice to have. Focus on United Way chapters or the 4 groups
+// connecting and collaborating, and the events. Make that the first POV,
+// then students"). The board opens on the staff view.
 export const VIEWS = [
-  { key: "student", label: "Student" },
-  { key: "volunteer", label: "Volunteer" },
   { key: "partner", label: "United Way" },
+  { key: "student", label: "Students" },
+  { key: "volunteer", label: "Volunteers" },
 ] as const;
 export type UwView = typeof VIEWS[number]["key"];
 
@@ -80,16 +86,24 @@ export const STUDENT_TABS = [
   { key: "programs", label: "Programs" },
   { key: "events", label: "Events" },
   { key: "serve", label: "Serve" },
-  { key: "ask", label: "Q&A" },
+  // Q&A grew into Talk (12 Oct 2026): the client "needed a means of
+  // communication between the 4 regions on one board". The key stays "ask"
+  // so links and the Back memo keep working.
+  { key: "ask", label: "Talk" },
 ] as const;
 export type StudentTab = typeof STUDENT_TABS[number]["key"];
 export const VOLUNTEER_TABS = [
   { key: "today", label: "Today" },
   { key: "shifts", label: "Shifts" },
+  // volunteers post across communities and follow up after events
+  { key: "talk", label: "Talk" },
   { key: "impact", label: "My Impact" },
 ] as const;
 export type VolunteerTab = typeof VOLUNTEER_TABS[number]["key"];
 export const PARTNER_TABS = [
+  // where the offices talk and plan together, then their shared calendar
+  { key: "team", label: "Team" },
+  { key: "events", label: "Events" },
   { key: "impact", label: "Impact" },
   { key: "chapters", label: "By United Way" },
   { key: "programs", label: "Programs" },
@@ -155,6 +169,26 @@ export type UwEvent = {
   /** the local United Way that runs it; null = online, open to everyone */
   chapter: string | null;
   url?: string;
+  /** set once the event has happened: its board stays open so the people
+   *  who were there keep talking (12 Oct 2026). Rendered by Connect's own
+   *  event board (uwEvents.ts turns it into an EventBoard). */
+  followUp?: UwFollowUp;
+};
+
+/** What an event's board holds after the day, in the shape Connect's
+ *  event board already shows: counts, the host's official post, a pinned
+ *  recap, files and who was in the room. */
+export type UwFollowUp = {
+  /** the board goes read-only after this date */
+  closesOn: string;
+  students: number;
+  pros: number;
+  posts: number;
+  official?: { postedAgo: string; summary: string; about: string; next: string[] };
+  recap?: { proId: string; takeaways: string[]; postedAgo: string };
+  resources?: EventResource[];
+  /** volunteers who were there (People tab) */
+  proIds?: string[];
 };
 
 /** A volunteer shift: for teens (Serve) or adult volunteers (Shifts). */
@@ -176,12 +210,46 @@ export type Shift = {
 };
 
 
+/** A United Way staff member, by first name, role and office (a chapter's
+ *  short name). Never a real named person. */
+export type StaffMember = { name: string; role: string; office: string };
+export type StaffPostKind = "update" | "ask" | "idea" | "resource";
+export const STAFF_KIND_LABEL: Record<StaffPostKind, string> = { update: "Update", ask: "Ask the team", idea: "Idea", resource: "Shared resource" };
+/** One post in the staff Team space: an update, a question to the other
+ *  offices, an idea or a shared file, with replies from any office. */
+export type StaffPost = {
+  id: string;
+  kind: StaffPostKind;
+  author: StaffMember;
+  title: string;
+  body: string;
+  postedAgo: string;
+  pinned?: boolean;
+  resource?: { label: string; meta: string };
+  /** who does what, one owner per office */
+  tasks?: { office: string; owner: string; task: string; done: boolean }[];
+  /** a past event this debriefs: its event board shows it first on Posts */
+  eventId?: string;
+  worked?: string[];
+  numbers?: { value: string; label: string }[];
+  next?: { office: string; task: string }[];
+  replies: { author: StaffMember; body: string; postedAgo: string }[];
+};
+
 /** An opportunity a professional shares on the board: a job, an
  *  internship, a shadow day, a volunteer role at their organization. */
 export type SharedOpportunity = { id: string; title: string; org: string; kind: string; line: string; proId: string; chapter: string | null; when: string };
 
 export type UwBoard = {
   id: string;
+  /** the account that hosts this board's events and posts their follow-up */
+  org: string;
+  /** Talk (12 Oct 2026): the student-facing space where every community on
+   *  the board talks to the others */
+  talk: { title: string; line: string };
+  /** Team (12 Oct 2026): where United Way staff in every office talk, ask
+   *  each other and plan together; the board's first view */
+  staff: { title: string; line: string; /** what one place is to staff: "office", "United Way" */ unit: string; all: string; me: StaffMember; posts: StaffPost[] };
   /** What one place on the board is, when it isn't a whole United Way
    *  (South Central Michigan, 10 Oct 2026: four communities inside one
    *  United Way, with a regional layer over them). Absent: United Way. */
@@ -315,13 +383,60 @@ export const PROGRAM_PAGE = {
 export type ProgramTab = typeof PROGRAM_PAGE.tabs[number]["key"];
 
 export const EVENTS_UI = {
-  filters: [{ key: "all", label: "All" }, { key: "online", label: "Online" }, { key: "inperson", label: "In person" }] as const,
+  filters: [{ key: "all", label: "All events" }, { key: "online", label: "Online" }, { key: "inperson", label: "In person" }] as const,
+  // Upcoming and Past (12 Oct 2026): a past event's board stays open, so
+  // the conversation after the day is one tap away
+  when: [{ key: "upcoming", label: "Upcoming" }, { key: "past", label: "Past" }] as const,
+  open: "Conversation open",
+  noPast: "No past events yet. After an event, its board opens here.",
   going: "going",
-  save: "Save", saved: "Saved",
-  addPlan: "Add to My Plan", inPlan: "In My Plan",
-  calendar: "Add to calendar",
+  remind: "Remind me", reminded: "Reminder set", remindToast: "We'll remind you before it starts.",
+  keepTalking: "Keep talking after",
 };
 export type EventFilter = typeof EVENTS_UI.filters[number]["key"];
+export type EventWhen = typeof EVENTS_UI.when[number]["key"];
+
+/** Team: the staff space (12 Oct 2026). */
+export const STAFF_UI = {
+  placeholder: "Share an update, ask the other offices, or post an idea",
+  kinds: ["update", "ask", "idea", "resource"] as const,
+  posted: "Posted. Every office can see it.",
+  pinned: "Pinned",
+  list: "Latest from the team",
+  back: "Back to Team",
+  replies: "Replies",
+  reply: "Reply to the team",
+  tasks: "Who does what",
+  worked: "What worked",
+  next: "Next steps",
+  openEvent: "Open the event board",
+  open: "Open",
+  cohost: "Co-host", cohosting: "Co-hosting", cohostToast: "You're co-hosting. Plan it in Team.",
+  hostedBy: (office: string) => `Hosted by ${office}`,
+  allHost: "All offices",
+  studentSide: "Students see this board too. Their side is under Students.",
+};
+
+/** Talk: one space for every community on the board (12 Oct 2026). */
+export const TALK_UI = {
+  placeholder: "Ask or share something with every community",
+  from: "Posting from",
+  posted: "Posted. Every community can see it.",
+  again: "Post another",
+  all: "All",
+  list: "Latest from every community",
+  show: [{ value: "all", label: "Everything" }, { value: "answered", label: "Answered" }, { value: "waiting", label: "Waiting" }] as const,
+  // where a post goes, in three steps
+  how: [
+    { title: "You ask or share", line: "First name and your town only." },
+    { title: "Every community sees it", line: "Volunteers answer. Students reply." },
+    { title: "It helps the next person", line: "Most answers come in a day." },
+  ],
+  fromEvents: "From events",
+  volunteer: { placeholder: "Share a tip or a follow-up with every community", post: "Post", posted: "Posted. Students in every community can see it." },
+  partner: "Talk between communities",
+  partnerLine: "Posts on the board and its events, by where the poster lives",
+};
 
 export const HELP_UI = {
   line: "A real person helps you find help nearby.",
@@ -511,6 +626,22 @@ export const PROGRAMS: Program[] = [
 ];
 
 const NET_EVENTS: UwEvent[] = [
+  // DEMO-ONLY: a past event, so the network board shows its board staying
+  // open after the day (12 Oct 2026)
+  {
+    id: "uw-e-mentor-night", kind: "Online meetup", title: "Meet a mentor night", where: "Online", virtual: true, about: "Seniors met mentors from three cities. Then they asked anything.", who: "Seniors", date: { month: "Sep", day: 17, time: "6:00 PM", year: 2026 }, going: 212, chapter: null,
+    followUp: {
+      closesOn: "October 30, 2026", students: 212, pros: 9, posts: 11,
+      official: {
+        postedAgo: "3w ago",
+        summary: "212 seniors from six cities met mentors online. They asked about college, money and first jobs.",
+        about: "United Way runs mentor programs in many cities. This night let students meet mentors from more than one.",
+        next: ["Post the one question you still have.", "Raise your hand for e-Mentorship in Programs.", "Save the Oct 23 first-job panel."],
+      },
+      recap: { proId: "pro-okafor", postedAgo: "3w ago", takeaways: ["A mentor is someone you can ask the small questions too.", "Pick one goal for the year. Your mentor helps you keep it.", "Students from other cities had the same worries. You are not alone."] },
+      proIds: ["pro-okafor", "pro-reyes", "pro-whitfield", "pro-tanaka"],
+    },
+  },
   { id: "uw-e-panel", kind: "Online panel", title: "What a first job is really like", where: "Online", virtual: true, about: "Four volunteers share their first jobs. Then you ask.", who: "Any student", date: { month: "Oct", day: 23, time: "6:00 PM", year: 2026 }, going: 318, world: "Business & Finance", chapter: null },
   { id: "uw-e-fafsa", kind: "Workshop", title: "Financial aid night", where: "Online", virtual: true, about: "Fill out the FAFSA step by step, with help.", who: "Seniors and families", date: { month: "Oct", day: 29, time: "6:30 PM", year: 2026 }, going: 133, chapter: null },
   { id: "uw-e-careerday", kind: "Career day", title: "Career Day with local employers", where: "Albuquerque, NM", virtual: false, about: "Visit employer stations. Try a few jobs in one day.", who: "Grades 8 to 12", date: { month: "Nov", day: 6, time: "8:30 AM", year: 2026 }, going: 148, chapter: "nm" },
@@ -531,8 +662,41 @@ const NET_SERVE: Shift[] = [
 ];
 
 
+// ——— Team: staff across the network's United Ways (12 Oct 2026).
+// DEMO-ONLY: every staff member (first names and roles), post and reply ———
+const NET_STAFF: StaffPost[] = [
+  {
+    id: "uw-s-match-list", kind: "resource", author: { name: "Lin", role: "Mentor programs", office: "Palm Beach" }, pinned: true, postedAgo: "2d ago",
+    title: "Mentor match checklist",
+    body: "The checklist our Mentor Center uses before a first meeting. Copy it for your own program.",
+    resource: { label: "Mentor match checklist", meta: "PDF · 2 pages" },
+    replies: [{ author: { name: "Ben", role: "Youth programs", office: "Salt Lake" }, body: "Using it for our student advocates. Thank you!", postedAgo: "1d ago" }],
+  },
+  {
+    id: "uw-s-workshops", kind: "ask", author: { name: "Ben", role: "Youth programs", office: "Salt Lake" }, postedAgo: "6h ago",
+    title: "Orange County: which e-Mentorship workshop do seniors like most?",
+    body: "We want to add one workshop for our seniors. Which one gets the most out of them?",
+    replies: [
+      { author: { name: "Ana", role: "Student success", office: "Orange County" }, body: "Financial aid night, every year. Bring a parent and the laptop.", postedAgo: "5h ago" },
+      { author: { name: "Ben", role: "Youth programs", office: "Salt Lake" }, body: "Great. We'll start there in November.", postedAgo: "3h ago" },
+    ],
+  },
+  {
+    id: "uw-s-mentor-debrief", kind: "update", author: { name: "Ana", role: "Student success", office: "Orange County" }, postedAgo: "3w ago", eventId: "uw-e-mentor-night",
+    title: "Meet a mentor night: our debrief",
+    body: "Thanks to the six cities that joined. What worked and what's next.",
+    worked: ["Small breakout rooms of five students.", "Mentors from three cities in one night.", "A question list sent the day before."],
+    numbers: [{ value: "212", label: "seniors" }, { value: "9", label: "mentors" }, { value: "6", label: "cities" }],
+    next: [{ office: "Orange County", task: "Open e-Mentorship sign-ups" }, { office: "Salt Lake", task: "Host the spring night" }],
+    replies: [{ author: { name: "Lin", role: "Mentor programs", office: "Palm Beach" }, body: "Palm Beach will bring more mentors in spring.", postedAgo: "3w ago" }],
+  },
+];
+
 export const NETWORK: UwBoard = {
   id: UW_ID,
+  org: "United Way",
+  talk: { title: "Across United Way", line: "Ask and share with students and volunteers in every city on this board." },
+  staff: { title: "Across United Ways", line: "Staff from every United Way on this board, in one place.", unit: "United Way", all: "All United Ways", me: { name: "Alex", role: "Youth programs", office: "Orange County" }, posts: NET_STAFF },
   name: "Student Success",
   line: "Mentors, programs and real jobs from United Way.",
   stats: [{ value: "1,100", label: "United Ways" }, { value: "8", label: "programs open" }],

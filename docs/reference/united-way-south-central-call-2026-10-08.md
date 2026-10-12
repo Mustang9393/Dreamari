@@ -24,3 +24,6 @@ Call on 8 Oct 2026: Maisha Kabir (Dream) with Stephanie Slingerland (United Way 
 - Nonprofit and public sector professionals lead the volunteer list (Nathan Doyle, CDC Foundation; Naomi Wong, Khan Academy); corporate partners follow.
 - Real: the four communities, Youth United Way Kalamazoo, Bigs in Schools Jackson, Battle Creek's Youth Day of Caring, the colleges. Everything else is DEMO-ONLY and marked in code. Shared openings name generic employers ("A Lansing city office"), never a real organization's invented posting.
 - Hero photo is the United Way volunteers photo, not the Student United Way class photo, which carries West Michigan's banner.
+
+## Reframe (12 Oct 2026)
+Chandu, after the client's follow-up: "the ask was mainly about the employees having a platform to communicate from these 4 different locations. The student part wasn't even mentioned, but we'll have that as a nice to have." So the board's first user is United Way staff in the four offices (Kalamazoo, Battle Creek, Lansing, Jackson): it opens on a staff Team space (updates, asks, ideas, shared files, replies across offices, pinned plans, an office filter) and a shared Events calendar whose past events keep their conversation open, with the staff debrief leading. The student side (Programs, Events, Serve, Talk) stays as a nice-to-have, second in the view switch. Still LOCAL ONLY.

@@ -29,7 +29,7 @@
 // Southeastern Michigan's volunteers, a WCC graduate and Detroit), plus
 // unitedway.org's where Michigan had none.
 
-import { PHOTOS, VOLUNTEER_IDS, type Chapter, type Program, type Shift, type UwBoard, type UwEvent } from "./uwData";
+import { PHOTOS, VOLUNTEER_IDS, type Chapter, type Program, type Shift, type StaffMember, type StaffPost, type UwBoard, type UwEvent } from "./uwData";
 
 export const UW_MI_ID = "united-way-michigan";
 
@@ -150,6 +150,22 @@ const PROGRAMS: Program[] = [
 // Lakeshore pathway uses. DEMO-ONLY: dates and "going" counts below are
 // demo except Teen and Tween Night (20 May 2027, uwmqt.org).
 const EVENTS: UwEvent[] = [
+  // DEMO-ONLY: a past statewide meetup whose board stays open (12 Oct
+  // 2026), so Michigan's Events show the conversation after the day
+  {
+    id: "mi-e-suw-meetup", kind: "Online meetup", title: "Student United Way meetup", where: "Online", virtual: true, about: "Student United Way groups from across Michigan met online.", who: "High school students", date: { month: "Sep", day: 30, time: "6:00 PM", year: 2026 }, going: 96, chapter: null,
+    followUp: {
+      closesOn: "November 11, 2026", students: 96, pros: 5, posts: 9,
+      official: {
+        postedAgo: "1w ago",
+        summary: "96 students from Grand Rapids, Detroit, Flint, Muskegon and Marquette met online. Each group shared one project that worked.",
+        about: "Each Michigan United Way runs its own teen groups. This meetup let them learn from each other.",
+        next: ["Post the project idea you want to try.", "Ask a group in another city how they did theirs.", "Find a Day of Caring near you in Serve."],
+      },
+      recap: { proId: "pro-brooks", postedAgo: "1w ago", takeaways: ["Every group started small. One drive, one day, one cause.", "Groups in other cities want to help you. Just ask here.", "Write down what worked so the next class can use it."] },
+      proIds: ["pro-brooks", "pro-okafor", "pro-tanaka"],
+    },
+  },
   { id: "mi-e-fafsa", kind: "Workshop", title: "FAFSA night", where: "Online", virtual: true, about: "Fill out the FAFSA with help. Michigan grants need it.", who: "Seniors and families", date: { month: "Oct", day: 27, time: "6:30 PM", year: 2026 }, going: 164, chapter: null },
   { id: "mi-e-trades", kind: "Online panel", title: "Skilled trades in Michigan", where: "Online", virtual: true, about: "An electrician, a welder and a lineworker. Paid training, no debt.", who: "Any student", date: { month: "Nov", day: 5, time: "6:00 PM", year: 2026 }, going: 231, world: "Tech & Engineering", chapter: null },
   { id: "mi-e-mcq", kind: "Career day", title: "MiCareerQuest", where: "West Michigan", virtual: false, about: "Try real tools from real jobs. Health, trades, tech and more.", who: "9th and 10th grade", date: { month: "Nov", day: 18, time: "8:30 AM", year: 2026 }, going: 412, chapter: "lake" },
@@ -174,7 +190,56 @@ const SERVE: Shift[] = [
   { id: "mi-s-backpacks", kind: "Backpacks", title: "Pack backpacks for Bright Futures", where: "Metro Detroit", date: { month: "Aug", day: 7, time: "9:00 AM", year: 2027 }, hours: 3, spots: 60, who: "Ages 14 and up", chapter: "semi" },
 ];
 
+// ——— Team: staff across Michigan's United Ways (12 Oct 2026) ———
+// The same staff space as South Central's, between separate United Ways.
+// DEMO-ONLY: every staff member (first names and roles), post and reply.
+const MQT: StaffMember = { name: "Jo", role: "Community impact", office: "Marquette" };
+const HWM: StaffMember = { name: "Pat", role: "Youth programs", office: "West Michigan" };
+const GEN: StaffMember = { name: "Kim", role: "Volunteer center", office: "Genesee" };
+const LAKE: StaffMember = { name: "Rae", role: "Volunteer center", office: "Lakeshore" };
+const SEMI: StaffMember = { name: "Lee", role: "Youth programs", office: "Southeast Michigan" };
+const MI_STAFF: StaffPost[] = [
+  {
+    id: "mi-s-caring-calendar", kind: "resource", author: LAKE, pinned: true, postedAgo: "2d ago",
+    title: "Day of Caring dates, every United Way",
+    body: "One calendar with every Michigan Day of Caring. Add yours so we don't pick the same weekend.",
+    resource: { label: "Day of Caring calendar", meta: "Sheet · 1 page" },
+    replies: [{ author: GEN, body: "Added Flint's MLK Day of Service.", postedAgo: "1d ago" }],
+  },
+  {
+    id: "mi-s-suw-committees", kind: "ask", author: MQT, postedAgo: "4h ago",
+    title: "West Michigan: how do your Student United Way committees work?",
+    body: "Marquette is starting a Student United Way. How many committees do you run, and who leads each one?",
+    replies: [
+      { author: HWM, body: "Three committees: giving, service and speaking up. A student leads each one, with one adult.", postedAgo: "3h ago" },
+      { author: HWM, body: "I'll share our first-meeting agenda here this week.", postedAgo: "3h ago" },
+      { author: MQT, body: "Thank you! Three is a good size for us too.", postedAgo: "1h ago" },
+    ],
+  },
+  {
+    id: "mi-s-mlk-plan", kind: "idea", author: GEN, postedAgo: "3d ago",
+    title: "Share one MLK Day plan across the state?",
+    body: "Flint's MLK Day of Service ran well with one check-in table and one lead per group. Want one shared plan every United Way can use?",
+    replies: [
+      { author: LAKE, body: "Yes. Muskegon can use it for our Day of Caring too.", postedAgo: "3d ago" },
+      { author: SEMI, body: "Detroit is in. We'll add our backpack day notes.", postedAgo: "2d ago" },
+    ],
+  },
+  {
+    id: "mi-s-meetup-debrief", kind: "update", author: HWM, postedAgo: "1w ago", eventId: "mi-e-suw-meetup",
+    title: "Student United Way meetup: our debrief",
+    body: "Thanks to every United Way that brought a group. Here is what worked and what comes next.",
+    worked: ["Each group shared one project in two minutes.", "Students asked other cities how they started.", "Online made it easy for the U.P. to join."],
+    numbers: [{ value: "96", label: "students" }, { value: "5", label: "United Ways" }, { value: "9", label: "posts after" }],
+    next: [{ office: "Marquette", task: "Start a Student United Way" }, { office: "Genesee", task: "Share the coat drive plan" }, { office: "West Michigan", task: "Host the spring meetup" }],
+    replies: [{ author: MQT, body: "Marquette is starting ours in January.", postedAgo: "6d ago" }],
+  },
+];
+
 export const MICHIGAN: UwBoard = {
+  org: "United Way",
+  talk: { title: "Across Michigan", line: "Ask and share with students and volunteers in every United Way on this board." },
+  staff: { title: "Across Michigan", line: "Staff from every United Way on this board, in one place.", unit: "United Way", all: "All United Ways", me: { name: "Alex", role: "Youth programs", office: "South Central" }, posts: MI_STAFF },
   id: UW_MI_ID,
   name: "Michigan",
   line: "Lead, serve and find real work.",

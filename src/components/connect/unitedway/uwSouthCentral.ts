@@ -26,7 +26,7 @@
 // marked where it sits; the professionals' shared openings name generic
 // local employers, never a real organization's made-up posting.
 
-import { PHOTOS, type Chapter, type Program, type SharedOpportunity, type Shift, type UwBoard, type UwEvent } from "./uwData";
+import { PHOTOS, type Chapter, type Program, type SharedOpportunity, type Shift, type StaffMember, type StaffPost, type UwBoard, type UwEvent } from "./uwData";
 
 export const UW_SC_ID = "united-way-south-central";
 
@@ -133,6 +133,32 @@ const PROGRAMS: Program[] = [
 // in-person moment the call described; chapter null puts it in every
 // community's view.
 const EVENTS: UwEvent[] = [
+  // WHY (12 Oct 2026): the client asked for "a space like our events tab
+  // where participants could keep the conversation going after events were
+  // done". A regional convening is where all four communities meet, so the
+  // past one is the board that stays open: the cross-community talk and the
+  // event follow-up meet here. DEMO-ONLY: the date, counts, posts and
+  // files; the groups at the tables are generic, the colleges are the
+  // ones the call named.
+  {
+    id: "sc-e-fall-convening", kind: "Regional convening", title: "Fall regional convening", where: "Kalamazoo", virtual: false, about: "All four towns met. Students, nonprofits and colleges.", who: "Students and young pros", date: { month: "Sep", day: 26, time: "10:00 AM", year: 2026 }, going: 164, chapter: null,
+    followUp: {
+      closesOn: "November 7, 2026", students: 164, pros: 12, posts: 23,
+      official: {
+        postedAgo: "2w ago",
+        summary: "164 students from Kalamazoo, Battle Creek, Lansing and Jackson met in Kalamazoo. They talked with nonprofits, city staff and colleges. Then they planned one service day for all four towns.",
+        about: "United Way of South Central Michigan links four communities. The convening is where all four meet in person.",
+        next: ["Post one thing you learned in Questions.", "Follow a volunteer you met at a table.", "Save the next convening, Nov 14 in Battle Creek."],
+      },
+      recap: { proId: "pro-doyle", postedAgo: "2w ago", takeaways: ["Nonprofit and city jobs need all kinds of skills: writing, numbers, people and tech.", "Four towns can plan one project. Start with one shared day.", "Ask the people you met one question this month. Post it here so everyone learns."] },
+      resources: [
+        { kind: "slides", title: "Opening talk slides", description: "The welcome and the plan for the year.", sourceLabel: "United Way of South Central Michigan", meta: "12 slides" },
+        { kind: "pdf", title: "Notes from each table", description: "What each table talked about, one page each.", sourceLabel: "Student United", meta: "PDF · 4 pages" },
+        { kind: "folder", title: "Who hosted a table", description: "The groups students met.", sourceLabel: "United Way of South Central Michigan", meta: "6 groups", items: ["A Kalamazoo food bank", "A Lansing city office", "A Battle Creek clinic", "A Jackson youth program", "Michigan State", "Western Michigan"] },
+      ],
+      proIds: ["pro-doyle", "pro-wong", "pro-reyes", "pro-brooks"],
+    },
+  },
   { id: "sc-e-panel", kind: "Online panel", title: "Jobs that help your town", where: "Online", virtual: true, about: "A city planner, a social worker and a nonprofit director. Then you ask.", who: "Any student", date: { month: "Oct", day: 28, time: "6:00 PM", year: 2026 }, going: 142, chapter: null },
   { id: "sc-e-kickoff", kind: "Info night", title: "Student United kickoff", where: "Kalamazoo", virtual: false, about: "Meet your chapter. Pick your first project.", who: "High school and college", date: { month: "Nov", day: 5, time: "5:30 PM", year: 2026 }, going: 58, chapter: "kzoo" },
   { id: "sc-e-convening", kind: "Regional convening", title: "South Central convening", where: "Battle Creek", virtual: false, about: "All four towns meet. Students, nonprofits and colleges.", who: "Students and young pros", date: { month: "Nov", day: 14, time: "10:00 AM", year: 2026 }, going: 186, chapter: null },
@@ -161,8 +187,100 @@ const SHARED: SharedOpportunity[] = [
   { id: "sc-o-policy", title: "Policy research assistant", org: "A state office in Lansing", kind: "Internship", line: "For college students, 10 hours a week", proId: "pro-whitfield", chapter: "lan", when: "Spring 2027" },
 ];
 
+// ——— Team: staff in the four offices (12 Oct 2026) ———
+// WHY: the client's main ask was for "the employees having a platform to
+// communicate from these 4 different locations" (Chandu, 12 Oct 2026), so
+// the board opens on a space where the four offices talk, ask each other,
+// share what works and plan together. DEMO-ONLY: every staff member (first
+// names and roles, no real people), post, reply and task below.
+const KZ_YOUTH: StaffMember = { name: "Chris", role: "Youth programs", office: "Kalamazoo" };
+const LAN_YOUTH: StaffMember = { name: "Maya", role: "Youth programs", office: "Lansing" };
+const JX_VOL: StaffMember = { name: "Tess", role: "Volunteer center", office: "Jackson" };
+const BC_IMPACT: StaffMember = { name: "Dana", role: "Community impact", office: "Battle Creek" };
+const LAN_EVENTS: StaffMember = { name: "Rob", role: "Events", office: "Lansing" };
+const STAFF_POSTS: StaffPost[] = [
+  {
+    id: "sc-s-spring-plan", kind: "resource", author: BC_IMPACT, pinned: true, postedAgo: "1d ago",
+    title: "Spring service day plan",
+    body: "The plan from our thread: one morning in May, one project per town, then lunch together in Battle Creek. Add your project by Feb 1.",
+    resource: { label: "Spring service day plan", meta: "Doc · 3 pages" },
+    tasks: [
+      { office: "Battle Creek", owner: "Dana", task: "Host the lunch and the wrap-up", done: true },
+      { office: "Kalamazoo", owner: "Chris", task: "Youth United Way teens run one project", done: true },
+      { office: "Lansing", owner: "Maya", task: "Food box packing crew", done: false },
+      { office: "Jackson", owner: "Tess", task: "Mentors and their students join", done: false },
+    ],
+    replies: [{ author: LAN_YOUTH, body: "Added ours: packing food boxes at the Lansing food bank.", postedAgo: "20h ago" }],
+  },
+  {
+    id: "sc-s-yuw-voting", kind: "ask", author: LAN_YOUTH, postedAgo: "3h ago",
+    title: "How does Kalamazoo run Youth United Way grant voting?",
+    body: "Lansing wants to try teen grant voting next year. How do you set up the vote, and how do teens pick the nonprofits?",
+    replies: [
+      { author: KZ_YOUTH, body: "Teens visit each nonprofit first. Then they score each one on the same sheet. We vote in one meeting, with snacks.", postedAgo: "2h ago" },
+      { author: KZ_YOUTH, body: "I put our score sheet in Shared resources. Copy it for Lansing.", postedAgo: "2h ago" },
+      { author: LAN_YOUTH, body: "This is perfect. Can two of us sit in on your next vote?", postedAgo: "1h ago" },
+      { author: KZ_YOUTH, body: "Yes! It's in March. I'll post the date here.", postedAgo: "40m ago" },
+    ],
+  },
+  {
+    id: "sc-s-bigs-sheet", kind: "resource", author: JX_VOL, postedAgo: "5h ago",
+    title: "Our Bigs in Schools mentor sign-up sheet",
+    body: "This is the sheet Jackson uses to sign up mentors. It asks for free times, the school, and background check status. Copy it for your own office.",
+    resource: { label: "Mentor sign-up sheet", meta: "Sheet · 1 page" },
+    replies: [
+      { author: BC_IMPACT, body: "Using this for our reading buddies. Thank you!", postedAgo: "4h ago" },
+      { author: LAN_EVENTS, body: "Same for Lansing. The check status column saves us a lot of email.", postedAgo: "2h ago" },
+    ],
+  },
+  {
+    id: "sc-s-spring-idea", kind: "idea", author: BC_IMPACT, postedAgo: "4d ago",
+    title: "One spring service day for all four towns?",
+    body: "What if all four offices hold one service day in May? Each town runs one project the same morning. Battle Creek can host lunch for everyone after.",
+    replies: [
+      { author: KZ_YOUTH, body: "Yes from Kalamazoo. Youth United Way teens can run our project.", postedAgo: "4d ago" },
+      { author: LAN_YOUTH, body: "Lansing is in. We can bring the food box crew.", postedAgo: "4d ago" },
+      { author: JX_VOL, body: "Jackson too. Our mentors want to bring their students.", postedAgo: "3d ago" },
+      { author: BC_IMPACT, body: "Love it. I wrote up the plan and pinned it at the top.", postedAgo: "1d ago" },
+    ],
+  },
+  {
+    id: "sc-s-convening-plan", kind: "update", author: LAN_EVENTS, postedAgo: "2d ago",
+    title: "Nov 14 convening in Battle Creek: who does what",
+    body: "Here is the plan for the next convening. One owner per office. Check yours off when it's done.",
+    tasks: [
+      { office: "Battle Creek", owner: "Dana", task: "Room, tables and lunch", done: true },
+      { office: "Lansing", owner: "Rob", task: "Vans for students", done: true },
+      { office: "Kalamazoo", owner: "Chris", task: "College table", done: false },
+      { office: "Jackson", owner: "Tess", task: "Volunteer sign-in", done: false },
+    ],
+    replies: [
+      { author: KZ_YOUTH, body: "Two colleges said yes for the table. Confirming the rest this week.", postedAgo: "1d ago" },
+      { author: JX_VOL, body: "Volunteer sign-in sheet is ready. Twelve volunteers so far.", postedAgo: "20h ago" },
+    ],
+  },
+  {
+    // the debrief also leads the event's own board (uwEvents.ts)
+    id: "sc-s-fall-debrief", kind: "update", author: KZ_YOUTH, postedAgo: "2w ago", eventId: "sc-e-fall-convening",
+    title: "Fall regional convening: our debrief",
+    body: "Thanks, all four offices. Here is what worked and what we do next.",
+    worked: ["Mixing towns at every table got students talking.", "The college table was busy all day.", "Vans from Lansing and Jackson brought more students."],
+    numbers: [{ value: "164", label: "students" }, { value: "12", label: "volunteers" }, { value: "4", label: "towns" }],
+    next: [{ office: "Battle Creek", task: "Host the Nov 14 convening" }, { office: "Lansing", task: "Plan the vans again" }, { office: "Jackson", task: "Run volunteer sign-in" }, { office: "Kalamazoo", task: "Bring the college table back" }],
+    replies: [
+      { author: JX_VOL, body: "Jackson will bring two more volunteer tables next time.", postedAgo: "2w ago" },
+      { author: BC_IMPACT, body: "Battle Creek is ready to host. Room is booked.", postedAgo: "12d ago" },
+    ],
+  },
+];
+
 export const SOUTH_CENTRAL: UwBoard = {
   id: UW_SC_ID,
+  org: "United Way of South Central Michigan",
+  // the client's ask (12 Oct 2026): "a means of communication between the
+  // 4 regions on one board"
+  talk: { title: "Across the region", line: "Ask and share with students and volunteers in Kalamazoo, Battle Creek, Lansing and Jackson." },
+  staff: { title: "Across offices", line: "United Way staff in Kalamazoo, Battle Creek, Lansing and Jackson, in one place.", unit: "office", all: "All offices", me: { name: "Alex", role: "Volunteer engagement", office: "Battle Creek" }, posts: STAFF_POSTS },
   name: "South Central Michigan",
   line: "Find work that helps your town.",
   places: { all: "Whole region", tab: "By community", panel: "Students and volunteer hours by community" },

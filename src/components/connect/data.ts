@@ -12,7 +12,7 @@
 // verified scope ("what was verified and by whom"). No follower counts, no
 // DMs, no popularity ranking anywhere.
 
-import { UW_THREADS } from "./unitedway/uwThreads";
+import { UW_EVENT_THREADS, UW_INSIGHTS, UW_THREADS } from "./unitedway/uwThreads";
 
 export type QuestionState = "awaiting" | "routed" | "answered" | "resolved";
 
@@ -28,7 +28,7 @@ export type ProResponse = {
 export type FollowUp = { kind: "followup"; body: string; postedAgo: string };
 /** Peers (and insight repliers) can attach a reaction GIF -- deliberate,
  *  per the doc: the boards speak Gen Z, educational but fun. */
-export type PeerPerspective = { kind: "peer"; handle: string; grade: string; body: string; postedAgo: string; likes?: number; image?: string; imageAlt?: string };
+export type PeerPerspective = { kind: "peer"; handle: string; grade: string; body: string; postedAgo: string; likes?: number; image?: string; imageAlt?: string; /** the replier's community on a regional board (see Thread.place) */ place?: string };
 
 export type Thread = {
   id: string;
@@ -42,6 +42,11 @@ export type Thread = {
   /** Doc's question-card stats row: view count + poster's country. */
   views?: number;
   location?: string;
+  /** United Way boards (12 Oct 2026): the asker's own community
+   *  ("Lansing", "Kalamazoo"), shown as a small, quiet place tag on the
+   *  card and the thread, so a board shared by several communities shows
+   *  who is talking from where. Unset everywhere else. */
+  place?: string;
   state: QuestionState;
   routedScope: string;
   expectedWindow: string;
@@ -66,6 +71,8 @@ export type InsightReply = {
   likes: number;
   image?: string;
   imageAlt?: string;
+  /** the replier's community on a regional board (see Thread.place) */
+  place?: string;
 };
 
 /** A graphic a professional composed for their post (feed v2, 2 Oct 2026):
@@ -116,6 +123,8 @@ export type Insight = {
   /** The comment thread under the insight -- the card's count derives
    *  from this list, so the number is never out of step with the page. */
   replies: InsightReply[];
+  /** the poster's community on a regional board (see Thread.place) */
+  place?: string;
   saved?: boolean;
 };
 
@@ -2298,6 +2307,9 @@ export const INSIGHTS: Insight[] = [
       { proId: "pro-wong", body: "A subject you love first, education second. You can't design a lesson for something you don't understand deeply.", postedAgo: "20h ago", likes: 40 },
     ],
   },
+  // United Way volunteers' posts across communities and after events
+  // (unitedway/uwThreads.ts, 12 Oct 2026)
+  ...UW_INSIGHTS,
 ];
 
 export const OPPORTUNITIES: Opportunity[] = [
@@ -2441,7 +2453,27 @@ export type EventBoard = {
   /** The official Dream Opportunity post that keeps the event going after
    *  the day itself (CEO, 4 Sept): what happened, who you visited, what to
    *  do next, where to keep talking to the people you met, the photos. */
-  official?: { postedAgo: string; summary: string; about: string; next: string[]; communityId: string; communityName: string; photosLabel: string };
+  official?: { postedAgo: string; summary: string; about: string; next: string[]; communityId: string; communityName: string; photosLabel: string; /** the account that posts it; Dream Opportunity when unset */ by?: string; /** its mark (COMPANY_MARKS key); `by` when unset */ mark?: string };
+  // ——— United Way boards (12 Oct 2026) ———
+  // A partner board's events open as a page before the day too, not only
+  // after it: the client asked for "a space like our events tab where
+  // participants could keep the conversation going after events were
+  // done". These are all optional, so every Connect event reads as before.
+  /** how many have said they're going: the upcoming page and ticket */
+  going?: number;
+  /** one line on what happens, and who it's for (the upcoming page) */
+  about?: string;
+  who?: string;
+  /** who is in the room when the host isn't a Connect org: the People tab
+   *  lists these professionals instead of matching `orgs` */
+  proIds?: string[];
+  /** the header's access line; "Attendees + event pros only" when unset */
+  access?: string;
+  /** the partner board this event belongs to, for "Keep talking" */
+  boardId?: string;
+  /** the host team's own debrief after the day (United Way staff, 12 Oct
+   *  2026): what worked, the numbers, next steps by office. Leads Posts. */
+  debrief?: { by: string; role: string; office: string; postedAgo: string; title: string; body: string; worked: string[]; numbers: { value: string; label: string }[]; next: { office: string; task: string }[]; replies: number };
 };
 
 /** One item on an event board's Resources tab. `kind` picks the icon and
@@ -2695,6 +2727,8 @@ export const EVENT_THREADS: Thread[] = [
       { kind: "peer", handle: "Amir", grade: "Junior", body: "posting what you found back here is such a good rule", postedAgo: "4h ago", likes: 83 },
     ],
   },
+  // United Way events' follow-up boards (unitedway/uwThreads.ts)
+  ...UW_EVENT_THREADS,
 ];
 
 export const UPCOMING_SESSION = {
