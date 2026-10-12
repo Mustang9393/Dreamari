@@ -21,7 +21,7 @@ import { DEMO_ALWAYS_SHOW_SPLASH } from "@/components/app/WelcomeSplash";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { careerProfile } from "@/components/career/profiles";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
-import { CareerBehindCard, FeedVersionChip, FlatBreathers, FramedGraphic, captionFor, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
+import { CareerBehindCard, FeedVersionChip, GraphicLayoutSwitch, useGraphicLayout, FlatBreathers, FramedGraphic, captionFor, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
 import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
@@ -999,10 +999,11 @@ export type FeedView = "card" | "aligned" | "rail" | "compact";
 // style toggles, we will be using custom generated ones", "remove the
 // question style toggles too, we will use a custom version of the columns
 // version" -- see the `view` constant in BoardView, fixed to "aligned").
-function FeedControls({ sort, onSort }: { sort: FeedSort; onSort: (s: FeedSort) => void }) {
+function FeedControls({ sort, onSort, graphics = false }: { sort: FeedSort; onSort: (s: FeedSort) => void; /** this list holds graphic posts: offer the layout switch */ graphics?: boolean }) {
   const SORTS: { key: FeedSort; label: string }[] = [{ key: "best", label: "Best" }, { key: "recent", label: "Most Recent" }];
   return (
     <div className="flex flex-wrap items-center gap-[10px] text-[12.5px] leading-[17px] font-semibold">
+      {graphics && <span className="order-last ml-auto"><GraphicLayoutSwitch /></span>}
       {SORTS.map((s, i) => (
         <span key={s.key} className="flex items-center gap-[10px]">
           {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>·</span>}
@@ -2911,12 +2912,7 @@ function FeedPostRow({
            about as tall as its neighbours; phones keep it full width with the
            caption under it. */}
         {item.kind === "insight" && item.insight.graphic
-          ? (
-            <div className="mt-[12px] flex flex-col gap-[14px] sm:flex-row sm:items-start sm:gap-[20px]">
-              <span className="block w-full sm:w-[300px] sm:flex-none lg:w-[340px]"><span className="block overflow-hidden rounded-[14px]" style={{ boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.07)" }}><InsightGraphicView insight={item.insight} /></span></span>
-              {caption && <div className="min-w-0 max-w-[60ch] sm:pt-[2px]"><ClampedExcerpt text={caption} onMore={openDiscussion} /></div>}
-            </div>
-          )
+          ? <GraphicPostBody insight={item.insight} caption={caption} onMore={openDiscussion} />
           : body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} onMore={openDiscussion} />}
 
         {/* counts, spread like Twitter's; save and share at the far right.
@@ -3528,6 +3524,9 @@ function FeedTab({
            action is a light nudge into People, never a dead end. */}
         {/* No v1 / v2 chip here since 4 Oct 2026: the Feed has one layout,
            the rhythm above. Boards keep the chip for their own lists. */}
+        {/* DEMO-ONLY: the graphic layout switch, one quiet line above the
+           posts (the boards carry it in their sort row) */}
+        <div className="hidden justify-end px-[var(--space-4)] pt-[10px] pb-[2px] sm:flex sm:px-[var(--space-5)]"><GraphicLayoutSwitch /></div>
         <SurfaceState id={63} isEmpty={ranked.length === 0} onEmptyAction={onFindPeople}>
           {/* Every row is separated by one faint hairline, Twitter's way,
              instead of a box per post. */}
@@ -4320,7 +4319,7 @@ function BoardView({
              surface is -- loading/slow/error/offline are now real, reviewable
              states (?state=loading&surface=40 etc.), not just a possibility. */}
           <SurfaceState id={40} isEmpty={threads.length === 0 && postedQs.length === 0}>
-            {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+            {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} graphics={insights.some((i) => !!i.graphic)} />}
             {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
             {/* One visual language with the Feed (Chandu, 6 Oct 2026: "let's
                have the other tabs, questions, posts etc look like the feed
@@ -4330,7 +4329,10 @@ function BoardView({
                between panel segments. */}
             <div className="w-full">
             <BoardFeedList
-              items={threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> }))}
+              items={weaveGraphicPosts(
+                threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> })),
+                insights.filter((i) => !!i.graphic).map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId), reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> })),
+              )}
               wrap={boardItem}
               breatherAt={feedV2 ? (i, isLast) => (i >= 3 && (i - 3) % 5 === 0 && !isLast ? breather((["career", "opportunity", "moment"] as const)[Math.floor((i - 3) / 5) % 3], Math.floor((i - 3) / 5)) : null) : undefined}
             />
@@ -4346,7 +4348,7 @@ function BoardView({
         <div className="relative flex flex-col gap-[var(--space-4)]">
           {/* Surface 41, same wrap (27 Sept 2026). */}
           <SurfaceState id={41} isEmpty={insights.length === 0}>
-            {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+            {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} graphics={insights.some((i) => !!i.graphic)} />}
             {/* Posts carry their own variety through the pros' graphics, so
                no breathers here (Chandu, 2 Oct 2026). The rows are the
                Feed's rows (6 Oct 2026: one visual language). */}
@@ -4446,6 +4448,41 @@ function OpportunityUpdateCard({ item }: { item: RelevantItem }) {
       <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
     </Link>
   );
+}
+
+/** A pro's graphic post in a feed row: the caption above, then the graphic
+ *  in the chosen layout (DEMO-ONLY switch in the sort row). Phones always
+ *  get the portrait at full width. */
+function GraphicPostBody({ insight, caption, onMore }: { insight: Insight; caption: string; onMore: () => void }) {
+  const layout = useGraphicLayout();
+  const cap = caption ? <div className="mt-[8px] max-w-[60ch]"><ClampedExcerpt text={caption} onMore={onMore} /></div> : null;
+  const portrait = <span className="block overflow-hidden rounded-[14px]" style={{ boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6)" }}><InsightGraphicView insight={insight} /></span>;
+  return (
+    <>
+      {cap}
+      <span className="mt-[12px] block w-full sm:hidden">{portrait}</span>
+      <span className="mt-[12px] hidden w-full sm:block">
+        {layout === "tall" ? <span className="block w-[300px] lg:w-[340px]">{portrait}</span>
+          : layout === "framed" ? <FramedGraphic insight={insight} height={460} />
+            : <InsightGraphicView insight={insight} wide />}
+      </span>
+    </>
+  );
+}
+
+/** A board opens on Questions, so the pros' graphic posts land there too,
+ *  not only on the Posts tab (12 Oct 2026, Chandu: "They should be
+ *  everywhere since the pros are posting them, they need to land somewhere
+ *  right?"): one after the second question, then one after every third. */
+function weaveGraphicPosts<T>(questions: T[], graphics: T[]): T[] {
+  if (!graphics.length) return questions;
+  const out: T[] = [];
+  let g = 0;
+  questions.forEach((q, i) => {
+    out.push(q);
+    if (g < graphics.length && (i === 1 || (i > 1 && (i - 1) % 3 === 0))) out.push(graphics[g++]);
+  });
+  return out;
 }
 
 /** One verified firm post (Industry Updates): the firm and the kind of thing

@@ -1,3 +1,11 @@
+## 2026-10-12: Connect graphic posts: three layouts behind a quiet switch; graphics on board Questions
+
+**Why (Chandu):** "show community board and the feeds with graphic posts as well. They should be everywhere since the pros are posting them, they need to land somewhere right?"; "I don't like the caption sitting on the right"; "what about just leaving the right side blank? ... or doing the same post within a blurred background?"; then "let's put all three in there with a switch that's subtle and doesn't fight with the UI."
+- **Layouts** (`GraphicPostBody` in `ConnectExperience.tsx`): the caption sits above the graphic in all three. Tall: the 4:5 portrait at 340px, the right side left empty (X, Threads). Framed: the portrait in a blurred copy of its own ground (Reddit desktop). Wide (default): a 16:9 version drawn for the feed (`InsightGraphicView wide` in `FeedBreathers.tsx`): the photo across, the words in a portrait-sized column at the left over a soft scrim, the mark at half scale. Phones always show the portrait full width.
+- **Switch** (DEMO-ONLY, `GraphicLayoutSwitch`, `useGraphicLayout`): "Graphics: Tall · Framed · Wide" in the sort row's own quiet text, at the right end of Best · Most Recent on a board with graphic posts, and one quiet line above the main Feed. One choice everywhere, kept for the session; `?gfx=tall|framed|wide` (or a|b|c) sets it.
+- **Board Questions:** a board's graphic posts are woven into its Questions list (after the second question, then every third), not only the Posts tab, since a board opens on Questions.
+- **Next:** keep the winning layout, remove the other two and the switch.
+
 ## 2026-10-12: Connect feed: graphic posts at their own size
 
 **Why (Chandu):** "make sure the feed doesn't look awkward where the graphic posts come in." A pro's portrait graphic (about 430px wide) sat in a 580px-tall blurred frame across the whole column, so one post took most of a screen, mostly filler, between compact text posts.

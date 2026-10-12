@@ -92,6 +92,50 @@ export function FeedVersionChip() {
   );
 }
 
+// ---- graphic post layout (DEMO-ONLY: graphic layout comparison) ---------------
+// 12 Oct 2026, Chandu: "let's put all three in there with a switch that's
+// subtle and doesn't fight with the UI." Tall (the portrait, right side
+// blank), Framed (the portrait in a blurred copy of itself), Wide (a 16:9
+// version drawn for the feed). The caption sits above the graphic in all
+// three. One choice for the feed and every board, kept for the session.
+export type GraphicLayout = "tall" | "framed" | "wide";
+let gfxMode: GraphicLayout = "wide";
+const gfxSubs = new Set<() => void>();
+function readGfx(): GraphicLayout {
+  if (typeof window === "undefined") return "wide";
+  const q = new URLSearchParams(window.location.search).get("gfx");
+  const fromUrl = q === "a" || q === "tall" ? "tall" : q === "b" || q === "framed" ? "framed" : q === "c" || q === "wide" ? "wide" : null;
+  if (fromUrl) return fromUrl;
+  try { const v = window.sessionStorage.getItem("dreamari:connect-gfx"); if (v === "tall" || v === "framed" || v === "wide") return v; } catch { /* fine */ }
+  return "wide";
+}
+export function setGraphicLayout(v: GraphicLayout) {
+  gfxMode = v;
+  try { window.sessionStorage.setItem("dreamari:connect-gfx", v); } catch { /* fine */ }
+  gfxSubs.forEach((f) => f());
+}
+export function useGraphicLayout(): GraphicLayout {
+  useEffect(() => { const want = readGfx(); if (want !== gfxMode) { gfxMode = want; gfxSubs.forEach((f) => f()); } }, []);
+  return useSyncExternalStore((f) => { gfxSubs.add(f); return () => { gfxSubs.delete(f); }; }, () => gfxMode, () => "wide" as GraphicLayout);
+}
+/** The switch: the sort row's own quiet text style, so it reads as one more
+ *  option in that row rather than a control of its own. */
+export function GraphicLayoutSwitch() {
+  const mode = useGraphicLayout();
+  const opts: { key: GraphicLayout; label: string }[] = [{ key: "tall", label: "Tall" }, { key: "framed", label: "Framed" }, { key: "wide", label: "Wide" }];
+  return (
+    <div role="group" aria-label="Graphic post layout" className="ml-auto flex items-center gap-[10px] text-[12.5px] leading-[17px] font-semibold">
+      <span style={{ color: "var(--muted-foreground)", opacity: 0.7 }}>Graphics</span>
+      {opts.map((o, i) => (
+        <span key={o.key} className="flex items-center gap-[10px]">
+          {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>·</span>}
+          <button type="button" aria-pressed={mode === o.key} onClick={() => setGraphicLayout(o.key)} className="dm-quiet cursor-pointer" style={{ color: mode === o.key ? "var(--foreground)" : "var(--muted-foreground)" }}>{o.label}</button>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 // ---- shared bits ---------------------------------------------------------------
 
 const INK = "#0e0c20";
@@ -579,10 +623,10 @@ export function resolvePlacement(g: InsightGraphic): { valign: "top" | "middle" 
 /** The Dreamari mark, small, in a corner: the brand on every graphic, so a
  *  repost carries it back to us (Joshua, 4 Oct 2026, "our watermark at the
  *  bottom left, like Gemini does"). */
-function BrandMark({ corner, color }: { corner: "tl" | "tr" | "bl" | "br"; color: string }) {
+function BrandMark({ corner, color, scale = 1 }: { corner: "tl" | "tr" | "bl" | "br"; color: string; /** the wide feed version is 2x the portrait's width, so its mark is half the share */ scale?: number }) {
   const pos: React.CSSProperties = { [corner[0] === "t" ? "top" : "bottom"]: "4.2cqi", [corner[1] === "l" ? "left" : "right"]: "4.6cqi" };
   return (
-    <span aria-hidden className="absolute z-[2] flex items-center gap-[0.9cqi] opacity-[0.85]" style={{ ...pos, color }}>
+    <span aria-hidden className="absolute z-[2] flex origin-bottom-right items-center gap-[0.9cqi] opacity-[0.85]" style={{ ...pos, color, transform: scale !== 1 ? `scale(${scale})` : undefined }}>
       <span className="block" style={{ width: "4.6cqi", height: "2.6cqi", background: "currentColor", maskImage: "url(/images/app/logo-mark.svg)", WebkitMaskImage: "url(/images/app/logo-mark.svg)", maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "center", WebkitMaskPosition: "center" }} />
       <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "2.6cqi", letterSpacing: "0.04em", lineHeight: 1 }}>DREAMARI</span>
     </span>
@@ -619,8 +663,11 @@ function EditableWords({ value, onChange, style, autoFocus }: { value: string; o
   );
 }
 
-export function InsightGraphicView({ insight, compact = false, graphic, editable }: {
+export function InsightGraphicView({ insight, compact = false, graphic, editable, wide = false }: {
   insight: Insight; compact?: boolean; graphic?: Insight["graphic"];
+  /** a feed-width version: the photo across 16:9, the words in a portrait-sized
+   *  column at their side, so every size inside reads exactly as the portrait */
+  wide?: boolean;
   /** the composer's in-place editing: the words become a text box and the picture dims behind them */
   editable?: { onText: (text: string) => void; dim?: boolean; autoFocus?: boolean };
 }) {
@@ -648,13 +695,15 @@ export function InsightGraphicView({ insight, compact = false, graphic, editable
   const size = (n <= 40 ? 9.6 : n <= 70 ? 8.4 : n <= 100 ? 7.3 : 6.4) * font.scale;
   const items = align === "center" ? "items-center text-center" : align === "right" ? "items-end text-right" : "items-start text-left";
   return (
-    <span aria-hidden data-graphic className={`relative block aspect-[4/5] w-full overflow-hidden rounded-[12px] border ${compact ? "mt-[10px] max-w-[440px]" : ""}`} style={{ borderColor: "rgba(255,255,255,0.1)", background: INK, containerType: "inline-size" }}>
-      <GraphicGround t={t} color={color} sizes={compact ? "(max-width: 640px) 100vw, 440px" : "(max-width: 640px) 100vw, 560px"} />
+    <span aria-hidden data-graphic className={`relative block ${wide ? "aspect-[16/9]" : "aspect-[4/5]"} w-full overflow-hidden rounded-[12px] border ${compact ? "mt-[10px] max-w-[440px]" : ""}`} style={{ borderColor: "rgba(255,255,255,0.1)", background: INK, containerType: "inline-size" }}>
+      <GraphicGround t={t} color={color} sizes={wide ? "(max-width: 640px) 100vw, 860px" : compact ? "(max-width: 640px) 100vw, 440px" : "(max-width: 640px) 100vw, 560px"} />
       <GraphicEffects effects={g.effects} light={light} color={color} />
       {editable?.dim && <span aria-hidden className="absolute inset-0 z-[1]" style={{ background: "rgba(5,6,16,0.45)" }} />}
+      {/* wide: a soft scrim behind the words' side so they read on any photo */}
+      {wide && <span aria-hidden className="absolute inset-y-0 left-0 z-[1] w-[70%]" style={{ background: light ? "linear-gradient(90deg, rgba(6,8,18,0.62), rgba(6,8,18,0.28) 70%, transparent)" : "linear-gradient(90deg, rgba(255,255,255,0.7), rgba(255,255,255,0.3) 70%, transparent)" }} />}
       {/* the mark's own ink: a photo's corner can be darker or lighter than where the words sit */}
-      <BrandMark corner={mark} color={(t.auto?.corners[mark] ?? t.ink) === "light" ? "#ffffff" : "#1b1824"} />
-      <span className={`absolute inset-0 z-[2] flex flex-col px-[8cqi] ${valign === "top" ? "justify-start pt-[16cqi]" : valign === "bottom" ? "justify-end pb-[16cqi]" : "justify-center"}`} style={{ color: ink }}>
+      <BrandMark corner={wide ? "br" : mark} scale={wide ? 0.5 : 1} color={(t.auto?.corners[wide ? "br" : mark] ?? t.ink) === "light" ? "#ffffff" : "#1b1824"} />
+      <span className={`absolute z-[2] flex flex-col px-[8cqi] ${wide ? "inset-y-0 left-0 w-[52%] justify-center" : `inset-0 ${valign === "top" ? "justify-start pt-[16cqi]" : valign === "bottom" ? "justify-end pb-[16cqi]" : "justify-center"}`}`} style={{ color: ink, ...(wide ? { containerType: "inline-size" } : {}) }}>
         <span className={`flex flex-col ${items}`} style={block}>
           {t.rule && <span className="mb-[3cqi] block h-[0.9cqi] w-[9cqi] rounded-full" style={{ background: color }} />}
           {/* The credit rides with the words, never its own slot (4 Oct 2026):
