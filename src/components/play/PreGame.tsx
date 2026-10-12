@@ -29,6 +29,8 @@ import { CheckBody } from "./interactions";
 import { SKILL_MEANING } from "./skills";
 import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
 import type { Level, PreGame, Simulation } from "./types";
+import { ArtVersionToggle } from "./ArtVersionToggle";
+import type { ArtVersion } from "./ib-v2-scenes";
 
 export type PreGameMode = "start" | "howto" | "lesson" | "handoff";
 
@@ -64,7 +66,13 @@ export function PreGameFlow({
   inRun,
   onClose,
   onStart,
+  artVersion,
+  onArtVersion,
 }: {
+  /** DEMO-ONLY: v1/v2 comparison. The run's scene-art version and its
+   *  switch, shown on the start screen when the simulation has a v2 set. */
+  artVersion?: ArtVersion;
+  onArtVersion?: (version: ArtVersion) => void;
   simulation: Simulation;
   level: Level;
   preGame: PreGame;
@@ -206,7 +214,7 @@ export function PreGameFlow({
       />
 
       {mode === "start" && (
-        <header className="relative z-10 flex px-[16px] pt-[16px] sm:px-[28px] sm:pt-[24px]">
+        <header className="relative z-10 flex items-center justify-between gap-[12px] px-[16px] pt-[16px] sm:px-[28px] sm:pt-[24px]">
           {inRun ? (
             <button type="button" onClick={() => { playSelect(); onClose(); }} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full px-[16px] py-[9px] text-[13px] font-bold" style={{ ...GLASS, color: "var(--foreground)" }}>
               <X className="h-[14px] w-[14px]" aria-hidden /> Close
@@ -216,6 +224,9 @@ export function PreGameFlow({
               <ChevronLeft className="h-[15px] w-[15px]" aria-hidden /> Back
             </button>
           )}
+          {/* DEMO-ONLY: v1/v2 comparison. Sets the scene art for the run
+             (v1 sprites over rooms, v2 Joshua's painted scenes). */}
+          {artVersion && onArtVersion && <ArtVersionToggle version={artVersion} onChange={onArtVersion} accent={accent} size="start" />}
         </header>
       )}
       {total > 0 && (

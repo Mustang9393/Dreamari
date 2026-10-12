@@ -5,6 +5,7 @@ import { SimulationPlayer } from "@/components/play/SimulationPlayer";
 import { AMT_LEVEL_1_V2 } from "@/components/play/amt-level-1-v2";
 import type { Level } from "@/components/play/types";
 import { toCoreLevel } from "@/components/play/coreKit";
+import { hasV2Art } from "@/components/play/ib-v2-scenes";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
@@ -81,7 +82,11 @@ export default async function GamePage({
       {/* DEMO-ONLY: ?screen=<beat id> opens the level on that screen (a link
          straight to the torque wrench for Josh, 6 Oct 2026). Flag for Usman:
          remove for production with the other qaSkip shortcuts. */}
-      <SimulationPlayer key={level.id} simulation={simulation} level={level} startAt={Array.isArray(query.screen) ? query.screen[0] : query.screen} />
+      {/* DEMO-ONLY: v1/v2 comparison. ?v=2 on a simulation with a v2 art set
+         (ib-v2-scenes.ts: Investment Banking) plays the run with Joshua's
+         painted scenes and no sprites; the start screen and HUD toggles keep
+         this param in step. AMT's ?v=2 above is its lab level, unrelated. */}
+      <SimulationPlayer key={level.id} simulation={simulation} level={level} startAt={Array.isArray(query.screen) ? query.screen[0] : query.screen} artVersion={version === "2" && hasV2Art(simulation.id) ? 2 : 1} />
     </>
   );
 }

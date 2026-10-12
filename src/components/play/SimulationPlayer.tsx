@@ -66,6 +66,8 @@ import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, STRIKE_TRIGGER,
 import { SKILL_MEANING } from "./skills";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type Ending, type Level, type Mood, type Simulation, type Tier } from "./types";
 import { ConnectInterstitial } from "./ConnectInterstitial";
+import { ArtVersionToggle } from "./ArtVersionToggle";
+import { hasV2Art, v2SceneFor, v2SourcesFor, type ArtVersion, type V2Image } from "./ib-v2-scenes";
 import { LocalBurst } from "@/components/build/ui";
 import { logActivity } from "@/lib/activityEvents";
 
@@ -95,8 +97,22 @@ const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain",
 /** A beat that moves the score: a scored kind that is not a practice question. */
 const isScored = (b: Beat) => SCORED_KINDS.has(b.kind) && !b.practice;
 
-export function SimulationPlayer({ simulation, level, startAt }: { simulation: Simulation; level: Level; startAt?: string }) {
+export function SimulationPlayer({ simulation, level, startAt, artVersion: initialArtVersion = 1 }: { simulation: Simulation; level: Level; startAt?: string; artVersion?: ArtVersion }) {
   const router = useRouter();
+  // DEMO-ONLY: v1/v2 comparison (ib-v2-scenes.ts). v2 swaps the scene
+  // treatment only -- Joshua's painted scenes, no sprites -- never the run:
+  // flipping it mid-beat keeps the beat, the score and every other state.
+  // The URL's ?v=2 mirrors it so a reload keeps the version.
+  const v2Available = hasV2Art(simulation.id);
+  const [artVersion, setArtVersionState] = useState<ArtVersion>(initialArtVersion);
+  const v2 = v2Available && artVersion === 2;
+  const setArtVersion = useCallback((next: ArtVersion) => {
+    setArtVersionState(next);
+    const url = new URL(window.location.href);
+    if (next === 2) url.searchParams.set("v", "2");
+    else url.searchParams.delete("v");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }, []);
   // Opens on "Start Level N" instead of navigating straight there -- one
   // real Connect interaction (Like/Comment/Ask a professional, always
   // skippable) between levels, direct instruction 17 Sept 2026.
@@ -286,6 +302,15 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
   // Art is sticky: a beat without its own scene keeps the last one, so the
   // unillustrated beats feel like they happen in the same room.
   const scene = sceneFor(level, index, beat, cinematic, phase === "feedback");
+  // DEMO-ONLY: v1/v2 comparison. A v2 beat with a painted scene of its own
+  // shows it (a Best verdict can swap in an approval scene); every other v2
+  // beat keeps the v1 room above, with nobody standing in it.
+  const v2Scene: V2Image | undefined = v2 ? v2SceneFor(simulation.id, beat.id, phase === "feedback" ? result?.tier : undefined) : undefined;
+  const sceneSrc = v2Scene?.src ?? scene.src;
+  // The Best verdict's scene, fetched (at the size next/image will ask for)
+  // while the question is still up, so the cut to it is not a black frame.
+  const v2BestScene = v2 && phase !== "feedback" ? v2SceneFor(simulation.id, beat.id, "best") : undefined;
+  const v2Warm = v2BestScene && v2BestScene.src !== v2Scene?.src ? v2BestScene : undefined;
   // Wired 27 Sept 2026: a real loading view for the level's first paint,
   // gated on the actual scene image finishing (or, for a moodlit "none"
   // scene with no photo, resolving the moment that's known) -- not a fake
@@ -543,13 +568,14 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
       if (b.art) wanted.add(b.art);
       const room = locationFor(b.id);
       if (room) wanted.add(room.src);
+      if (v2) for (const src of v2SourcesFor(simulation.id, b.id)) wanted.add(src);
     }
     for (const src of wanted) {
       const img = new window.Image();
       img.decoding = "async";
       img.src = src;
     }
-  }, [index, level.beats]);
+  }, [index, level.beats, v2, simulation.id]);
 
   // Music: the Main Song runs for the whole level, switching to the
   // Promotion Song only once an ending actually advances the player --
@@ -616,7 +642,7 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
   // keepScene (directed): the person the script shows stays in the room
   // while the question is answered (RN v2: "IMAGE: DA RN SIM ROSA" on 8 and
   // 30, Tyler on 41), instead of stepping aside behind a blur.
-  const showStage = scene.mode === "location" && (beat.kind === "card" || beat.kind === "review" || !revealed || reacting || (directed && Boolean(beat.keepScene)));
+  const showStage = !v2 && scene.mode === "location" && (beat.kind === "card" || beat.kind === "review" || !revealed || reacting || (directed && Boolean(beat.keepScene)));
   const stageCast: { name: string; slot: CharSlot; tier?: Tier; z?: number }[] = [];
   if (showStage && scene.mode === "location") {
     if (scene.characterAnchors && beat.castMembers) {
@@ -723,9 +749,9 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
   // plate taking over from the last one).
   const lastSceneSrc = useRef<string | null>(null);
   useEffect(() => {
-    if (lastSceneSrc.current !== null && lastSceneSrc.current !== scene.src) playSceneChange();
-    lastSceneSrc.current = scene.src;
-  }, [scene.src]);
+    if (lastSceneSrc.current !== null && lastSceneSrc.current !== sceneSrc) playSceneChange();
+    lastSceneSrc.current = sceneSrc;
+  }, [sceneSrc]);
   // A distinct cue the moment a standalone interactive screen actually takes
   // over -- fires once on the false-to-true edge, not on every render while
   // it stays true.
@@ -774,10 +800,37 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
          the artist, real parallax is a small change. */}
       <div
         ref={sceneHost}
-        aria-hidden={scene.mode === "none" || !scene.alt}
+        aria-hidden={v2Scene ? false : scene.mode === "none" || !scene.alt}
         className="pointer-events-none absolute inset-0 overflow-hidden"
       >
-        {scene.mode === "none" ? (
+        {v2Scene ? (
+          // DEMO-ONLY: v1/v2 comparison. The painted scene IS the cast, so
+          // there is no sprite layer and no giant name title behind anyone:
+          // the dialogue box's name plate (and role, on an introduction)
+          // carries who is speaking. The boss arrival keeps its spotlight,
+          // which is lighting, not a sprite. Darkened and blurred behind
+          // questions exactly as a v1 picture is.
+          <div className="absolute inset-0">
+            <V2Backdrop
+              scene={v2Scene}
+              filter={drained ? (dimmed && !beat.keepScene ? "blur(7px) grayscale(1) brightness(0.55)" : "grayscale(1) brightness(0.6) contrast(1.1)") : dimmed ? (beat.keepScene ? "brightness(0.72)" : "blur(7px) brightness(0.7) saturate(0.45)") : undefined}
+              slowFilter={drained}
+              onReady={markSceneReady}
+            />
+            {v2Warm && (
+              <div aria-hidden className="invisible absolute inset-0">
+                <V2Backdrop scene={v2Warm} />
+              </div>
+            )}
+            {bossEntrance && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 motion-safe:animate-[fade-slide-up_0.9s_ease-out_both]"
+                style={{ background: "radial-gradient(38% 60% at 50% 42%, rgba(255,206,120,0.22) 0%, transparent 70%), radial-gradient(ellipse at center, transparent 30%, rgba(4,6,14,0.72) 100%)" }}
+              />
+            )}
+          </div>
+        ) : scene.mode === "none" ? (
           <AmbientBackdrop mood={mood} accent={accent} />
         ) : scene.mode === "hero" ? (
           // Static on purpose -- the slow zoom this used to carry pushed a
@@ -821,7 +874,7 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
             {/* The boss arrival (directed, doc screen 24): the room drops
                into shadow around a warm spotlight behind the character, so
                the entrance reads as an event before a word is read. */}
-            {intro && <IntroSplash key={intro.name} name={intro.name} accent={accent} />}
+            {intro && !v2 && <IntroSplash key={intro.name} name={intro.name} accent={accent} />}
             {bossEntrance && (
               <div
                 aria-hidden
@@ -934,6 +987,8 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
         }
         onBack={index > 0 ? goBack : undefined}
         onOpenConnect={DEMO_CONNECT_SHORTCUT && nextLevel ? () => setConnectOpen(true) : undefined}
+        // DEMO-ONLY: v1/v2 comparison, the in-game switch for the current screen.
+        artToggle={v2Available ? <ArtVersionToggle version={artVersion} onChange={setArtVersion} accent={accent} /> : undefined}
       />
 
       {pip && ownPlan ? (
@@ -1007,7 +1062,7 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
           annotate={annotate}
           locked={locked}
           paused={phase !== "beat"}
-          ambient={scene.mode === "none"}
+          ambient={!v2Scene && scene.mode === "none"}
           // The big cinematic character already carries the speaker -- the
           // dialogue box's small round portrait would just be a second,
           // redundant face on screen at the same time.
@@ -1031,7 +1086,9 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
           reactor={directed ? reactor : beat.speaker}
           // The big reacting character already carries the face on a
           // directed level; the card only shows one when nobody is on stage.
-          portraitOff={directed && reacting && bigCharacterVisible}
+          // DEMO-ONLY: v1/v2 comparison. The verdict's face is a cut of the
+          // expression sprite, so v2 leaves it out.
+          portraitOff={v2 || (directed && reacting && bigCharacterVisible)}
         />
       )}
       {flying && result && <ScoreFlight key={`flight-${beat.id}${repair ? "-fix" : ""}`} delta={result.delta} onLand={land} />}
@@ -1044,7 +1101,7 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
           simulation={simulation}
           stageRole={level.role}
           nextLevelLabel={`Level ${nextLevel.n} · ${nextLevel.role}`}
-          onContinue={() => router.push(`/play/${simulation.id}?level=${nextLevel.n}`)}
+          onContinue={() => router.push(`/play/${simulation.id}?level=${nextLevel.n}${v2 ? "&v=2" : ""}`)}
         />
       )}
 
@@ -1077,6 +1134,9 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
           inRun={preGameInRun}
           onClose={closePreGame}
           onStart={closePreGame}
+          // DEMO-ONLY: v1/v2 comparison, the start screen's switch.
+          artVersion={v2Available ? artVersion : undefined}
+          onArtVersion={v2Available ? setArtVersion : undefined}
         />
       )}
 
@@ -1266,6 +1326,42 @@ function LocationBackdrop({
           transform: `translate3d(${offset.x * -6}px, ${offset.y * -4}px, 0) scale(${DESKTOP_PLATE_SCALE})`,
           filter,
         }}
+        onLoad={onReady}
+      />
+    </>
+  );
+}
+
+/** DEMO-ONLY: v1/v2 comparison. One of Joshua's painted scenes
+ *  (ib-v2-scenes.ts), characters already in the room. Built like
+ *  LocationBackdrop: a cover crop at the image's own focal point, a separate
+ *  one for phones (a 390px phone sees about a quarter of a 16:9 scene, so its
+ *  crop is chosen to keep the face in), the desktop plate a touch oversized
+ *  with the same entrance push. Keyed on the picture, so a cut to a new scene
+ *  (or a flip from v1) plays that entrance again. */
+function V2Backdrop({ scene, filter, slowFilter, onReady }: { scene: V2Image; filter?: string; slowFilter?: boolean; onReady?: () => void }) {
+  return (
+    <>
+      <Image
+        key={`m-${scene.src}`}
+        src={scene.src}
+        alt={scene.alt}
+        fill
+        priority
+        sizes="100vw"
+        className={`object-cover transition-[filter] sm:hidden ${slowFilter ? "duration-[1100ms]" : "duration-500"}`}
+        style={{ objectPosition: plateObjectPosition(scene.mobileFocal), filter }}
+        onLoad={onReady}
+      />
+      <Image
+        key={`d-${scene.src}`}
+        src={scene.src}
+        alt={scene.alt}
+        fill
+        priority
+        sizes="100vw"
+        className={`hidden object-cover transition-[filter] motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both] sm:block ${slowFilter ? "duration-[1100ms]" : "duration-500"}`}
+        style={{ objectPosition: plateObjectPosition(scene.focal), transform: `scale(${DESKTOP_PLATE_SCALE})`, filter }}
         onLoad={onReady}
       />
     </>
@@ -2794,7 +2890,12 @@ export function Hud({
   onGuide,
   onBack,
   onOpenConnect,
+  artToggle,
 }: {
+  /** DEMO-ONLY: v1/v2 comparison. The scene-art switch, at the end of the
+   *  progress row: in the HUD's own flow, so it never sits over the dialogue
+   *  box, the choices or a HUD control on any screen size. */
+  artToggle?: React.ReactNode;
   /** Replaces "Level N" in the level line (Level.sectionAfter). */
   sectionLabel?: string;
   /** DEMO-ONLY (Level.qaSkip): skip this screen without answering. */
@@ -2988,6 +3089,9 @@ export function Hud({
             );
           })}
         </span>
+        {/* Negative margins keep the row (and so the whole HUD) the height it
+           is without the switch, so v1's layout does not move for it. */}
+        {artToggle && <span className="-my-[9px] flex flex-none">{artToggle}</span>}
       </div>
       <MusicFailedPill />
     </header>
