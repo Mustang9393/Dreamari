@@ -1,3 +1,9 @@
+## 2026-10-13: IB v2: Joshua's revised scenes; scene briefs for the other simulations
+
+**Why:** Joshua sent revised versions of nine IB v2 scenes ("here are my updates") and asked to "update the other games and unique screens based on the new standards". Chandu: "for now just update the IB games. I'll see if I can generate images for other games."
+- `public/images/play/ib/v2/`: nine scenes replaced in place (same file names, so every mapped beat picks them up; the glass-door thumbs-up was not revised). Fixes visible: one sun per sunset, the duplicate "G" logo gone, more buttoned-up outfits. Two are 3:2 (1536x1024); the existing crops hold faces clear of the HUD and the dialogue box on desktop and phone (checked L1-07, 10, 21, 24, 26, 27, 29).
+- `docs/reference/sim-scene-briefs.md`: briefs for Registered Nurse (9 new scenes), Aviation Maintenance (10) and IB's unmapped beats (11), each with a cast sheet, framing rules for the phone crop and dialogue box, ready-to-paste prompts and the AI-tell checklist from the first batch, plus make-first priorities. RN and AMT need their own entry in `ib-v2-scenes.ts` when images arrive.
+
 ## 2026-10-12: United Way boards: staff across offices first, then events that keep the conversation going; students second
 
 **Why (the reframe, Chandu):** "the ask was mainly about the employees having a platform to communicate from these 4 different locations. The student part wasn't even mentioned, but we'll have that as a nice to have. Focus on United Way chapters or the 4 groups connecting and collaborating, and the events. Make that the first POV, then students." The client (United Way of South Central Michigan) needs its staff in Kalamazoo, Battle Creek, Lansing and Jackson to talk and work together on one board, plus events whose conversation keeps going after the day. Students are a nice-to-have.
