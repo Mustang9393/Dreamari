@@ -10,6 +10,7 @@ import "@/components/glossary/glossary-fit.css";
 import "@/components/glossary/glossary-worlds.css";
 import "@/components/glossary/glossary-signal.css";
 import "@/components/glossary/glossary-qlayout.css";
+import "@/components/glossary/glossary-levels.css";
 
 export const metadata: Metadata = {
   title: "Glossary Lab · Dreamari",

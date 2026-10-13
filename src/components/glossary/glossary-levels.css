@@ -1,0 +1,378 @@
+/* Glossary Levels 2+ (13 Oct 2026): the pieces Joshua's Replit adds on top
+   of Level 1 (scene cards, the one-blank sentence, select-all, the
+   multi-step case, number entry, the case and path Power Plays, the concept
+   teach card, the Dream Sneakers value ticker, results actions and the
+   map's Play button). Review: docs/reference/glossary-levels-2-4-review.md.
+
+   Every interactive piece reuses .glossary-option, so each theme's tile
+   styling applies unchanged; this file only lays out the new pieces and
+   reads the existing ramp (--qa-*), the refine surfaces (--refine-*) and
+   Signal's palette (--sig-*). No blur, no backdrop-filter, no new colors.
+   Loaded after glossary-qlayout.css on both glossary routes. */
+
+/* --------------------------------------------------------- scene cards */
+.glossary-game-lab .glossary-question-profit-scene.glossary-scene {
+  flex-wrap: wrap;
+  text-align: center;
+  row-gap: calc(10px / var(--qa-k, 1));
+}
+.glossary-game-lab .glossary-question-profit-scene.glossary-scene:not(.glossary-scene-figures) { flex-direction: column; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-scene :is(b, .glossary-scene-line) { color: var(--foreground); }
+.glossary-game-lab .glossary-scene .glossary-scene-line {
+  margin: 0;
+  font: 700 calc(var(--qa-a, 18px) / var(--qa-k, 1)) / 1.35 var(--font-display);
+  letter-spacing: -.005em;
+}
+.glossary-game-lab .glossary-scene .glossary-scene-note { margin: 0; font: 600 calc(var(--qa-hint, 14px) / var(--qa-k, 1)) / 1.4 var(--font-body); color: var(--muted-foreground); }
+.glossary-game-lab .glossary-scene .glossary-scene-title { display: block; }
+
+/* figures: label over number, operators between */
+.glossary-game-lab .glossary-scene .glossary-scene-figure { gap: 4px; padding: 6px 10px; }
+.glossary-game-lab .glossary-scene .glossary-scene-figure.is-result {
+  padding: 8px 14px;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--glossary-accent) 18%, transparent);
+}
+.glossary-game-lab .glossary-scene-figures > strong { align-self: center; }
+
+/* shares: a grid of equal shares; the owned ones light up when answered */
+.glossary-game-lab .glossary-scene .glossary-scene-shares {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: calc(8px / var(--qa-k, 1));
+  width: min(100%, 560px);
+}
+.glossary-game-lab .glossary-scene-shares > i {
+  display: block;
+  aspect-ratio: 1.25;
+  border: 2px solid color-mix(in srgb, var(--glossary-accent) 45%, var(--glass-border));
+  border-radius: 8px;
+  background: transparent;
+  transition: background-color .35s ease var(--share-delay, 0ms), border-color .35s ease var(--share-delay, 0ms), transform .35s ease var(--share-delay, 0ms);
+}
+.glossary-game-lab .glossary-scene-shares > i.is-owned {
+  border-color: var(--glossary-accent);
+  background: var(--glossary-accent);
+  transform: translateY(-3px);
+}
+
+/* split: an ownership bar */
+.glossary-game-lab .glossary-scene .glossary-scene-split {
+  display: flex;
+  flex-direction: row;
+  width: min(100%, 620px);
+  height: calc(44px / var(--qa-k, 1));
+  overflow: hidden;
+  border-radius: 12px;
+}
+.glossary-game-lab .glossary-scene-split > i { display: flex; align-items: center; justify-content: center; min-width: 0; background: var(--glossary-accent); color: #05070f; }
+.glossary-game-lab .glossary-scene-split > i[data-part="1"] { background: var(--chart-2, var(--hero-accent-teal)); }
+.glossary-game-lab .glossary-scene-split em { font: 800 calc(var(--qa-hint, 14px) / var(--qa-k, 1)) / 1 var(--font-display); font-style: normal; }
+.glossary-game-lab .glossary-scene .glossary-scene-split-labels { display: flex; flex-direction: row; justify-content: space-between; width: min(100%, 620px); }
+
+/* compare: two options side by side */
+.glossary-game-lab .glossary-scene .glossary-scene-compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(12px / var(--qa-k, 1)); width: 100%; }
+.glossary-game-lab .glossary-scene .glossary-scene-compare-card {
+  align-items: flex-start;
+  gap: 6px;
+  padding: calc(12px / var(--qa-k, 1)) calc(16px / var(--qa-k, 1));
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  text-align: left;
+}
+.glossary-game-lab .glossary-scene-compare-card > strong { color: var(--glossary-accent); font: 800 calc(var(--qa-a, 18px) / var(--qa-k, 1)) / 1.2 var(--font-display) !important; }
+.glossary-game-lab .glossary-scene-compare-card ul,
+.glossary-game-lab .glossary-path-points { margin: 0; padding: 0; list-style: none; }
+.glossary-game-lab .glossary-scene-compare-card li,
+.glossary-game-lab .glossary-path-points li { position: relative; padding-left: 14px; font: 600 calc(var(--qa-hint, 14px) / var(--qa-k, 1)) / 1.45 var(--font-body); color: var(--foreground); }
+.glossary-game-lab .glossary-scene-compare-card li::before,
+.glossary-game-lab .glossary-path-points li::before { content: ""; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 50%; background: var(--glossary-accent); }
+
+/* ledger (kit piece, unused by Levels 2 to 4) */
+.glossary-game-lab .glossary-scene-ledger { display: grid; grid-template-columns: auto auto; gap: 4px 24px; margin: 0; font: 700 calc(var(--qa-a, 18px) / var(--qa-k, 1)) / 1.3 var(--font-body); }
+.glossary-game-lab .glossary-scene-ledger dt { text-align: left; color: var(--muted-foreground); }
+.glossary-game-lab .glossary-scene-ledger dd { margin: 0; text-align: right; color: var(--foreground); }
+
+/* ------------------------------------------------ the one-blank sentence */
+.glossary-game-lab .glossary-sentence-card {
+  margin: 0;
+  padding: calc(18px / var(--qa-k, 1)) calc(24px / var(--qa-k, 1));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--refine-radius, 20px);
+  background: var(--refine-surface, var(--card));
+  box-shadow: var(--refine-depth, none);
+  color: var(--foreground);
+  font: 700 calc(var(--qa-a, 18px) / var(--qa-k, 1)) / 1.7 var(--font-body);
+  text-align: center;
+}
+.glossary-game-lab .glossary-sentence-blank {
+  display: inline-flex;
+  min-width: 6.5em;
+  justify-content: center;
+  margin: 0 .3em;
+  padding: 0 .5em;
+  border-bottom: 3px solid var(--glossary-accent);
+  color: var(--glossary-accent);
+  transition: color .2s, border-color .2s;
+}
+.glossary-game-lab .glossary-sentence-blank.is-correct { color: var(--world-food-farming-nature); border-color: var(--world-food-farming-nature); }
+.glossary-game-lab .glossary-sentence-blank.is-wrong { color: var(--danger, #e0483e); border-color: var(--danger, #e0483e); }
+
+/* ------------------------------------------- select-all, number, Check */
+.glossary-game-lab .glossary-check-key { border-radius: 6px !important; }
+.glossary-game-lab .glossary-check-key.is-on { border-color: var(--glossary-accent) !important; background: var(--glossary-accent); color: #05070f !important; }
+.glossary-game-lab .glossary-number-step { display: flex; flex-direction: column; align-items: center; gap: var(--qa-gap, 16px); width: 100%; }
+.glossary-game-lab .glossary-number-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: min(100%, 420px);
+  justify-content: center;
+  padding: calc(12px / var(--qa-k, 1)) calc(20px / var(--qa-k, 1));
+  border: 2px solid var(--glass-border);
+  border-radius: var(--refine-radius, 16px);
+  background: var(--refine-surface, var(--card));
+  box-shadow: var(--refine-depth, none);
+  color: var(--foreground);
+  font: 800 calc(var(--qa-fig, 32px) / var(--qa-k, 1)) / 1.1 var(--font-display);
+}
+.glossary-game-lab .glossary-number-field:focus-within { outline: 2px solid var(--glossary-accent); outline-offset: 3px; }
+.glossary-game-lab .glossary-number-field.is-correct { border-color: var(--world-food-farming-nature); color: var(--world-food-farming-nature); }
+.glossary-game-lab .glossary-number-field.is-wrong { border-color: var(--danger, #e0483e); }
+.glossary-game-lab .glossary-number-field input { width: 6.5ch; min-width: 0; border: 0; outline: 0; background: transparent; color: inherit; -webkit-text-fill-color: currentColor; font: inherit; text-align: center; }
+.glossary-game-lab .glossary-number-field input::placeholder { color: var(--muted-foreground); opacity: .45; }
+.glossary-game-lab .glossary-qa-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: calc(var(--qa-btn-h, 50px) / var(--qa-k, 1));
+  border-radius: var(--refine-radius, var(--radius-md));
+  background: var(--glossary-accent);
+  color: #05070f;
+  font: 700 calc(var(--qa-btn, 16px) / var(--qa-k, 1)) / 1 var(--font-display);
+  cursor: pointer;
+}
+.glossary-game-lab .glossary-number-step .glossary-qa-check { width: min(100%, 420px); }
+.glossary-game-lab .glossary-qa-check:disabled {
+  opacity: 1 !important;
+  /* solid, not glass: a waiting Check can sit over the cloud floor */
+  background: color-mix(in srgb, var(--card) 88%, var(--foreground)) !important;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent) !important;
+  -webkit-text-fill-color: currentColor;
+  box-shadow: inset 0 0 0 1px var(--glass-border) !important;
+  cursor: not-allowed;
+}
+.glossary-game-lab .glossary-qa-check:disabled::after { display: none !important; }
+
+/* step dots in the bubble */
+.glossary-game-lab .glossary-step-dots { display: inline-flex; align-items: center; gap: 6px; }
+.glossary-game-lab .glossary-step-dots > i { width: 9px; height: 9px; border-radius: 50%; background: var(--glass-border); transition: background-color .25s, transform .25s; }
+.glossary-game-lab .glossary-step-dots > i.is-now { background: var(--glossary-accent); transform: scale(1.2); }
+.glossary-game-lab .glossary-step-dots > i.is-done { background: var(--world-food-farming-nature); }
+
+/* ------------------------------------------------------- Power Play case */
+.glossary-game-lab .glossary-power-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--power-accent, var(--hero-accent-purple));
+  font: 800 calc(13px / var(--qa-k, 1)) / 1 var(--font-display);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.glossary-game-lab .glossary-power-kicker svg { width: 16px; height: 16px; }
+.glossary-game-lab .glossary-path-option { justify-content: flex-start !important; }
+.glossary-game-lab .glossary-path-label { color: var(--foreground); font: 800 calc(var(--qa-a-display, 22px) / var(--qa-k, 1)) / 1.2 var(--font-display); }
+.glossary-game-lab .glossary-power-finish { width: min(100%, 420px); align-self: center; }
+
+/* --------------------------------------------- concept teach card (front) */
+.glossary-game-lab .glossary-concept-panel {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  animation: none !important;
+  transform: none !important;
+}
+.glossary-game-lab .glossary-concept-medallion {
+  display: grid;
+  place-items: center;
+  width: clamp(96px, calc(16dvh / var(--vz, 1)), 132px);
+  aspect-ratio: 1;
+  border: 2px solid color-mix(in srgb, var(--glossary-accent) 55%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--glossary-accent) 14%, transparent);
+  color: var(--glossary-accent);
+}
+.glossary-game-lab .glossary-concept-medallion svg { width: 46%; height: 46%; stroke-width: 1.7; }
+.glossary-game-lab .glossary-concept-formula {
+  max-width: 100%;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--glossary-accent) 12%, transparent);
+  color: var(--foreground);
+  font: 800 clamp(17px, calc(2.4dvh / var(--vz, 1)), 22px) / 1.3 var(--font-display);
+  text-align: center;
+}
+.glossary-game-lab .glossary-concept-face .glossary-flashcard-definition { font-size: clamp(16px, calc(2.2dvh / var(--vz, 1)), 19px) !important; }
+/* Dreamy leans over the card's top corner, outside the flip. */
+.glossary-game-lab .glossary-flashbook-shell { position: relative; }
+.glossary-game-lab .glossary-concept-dreamy {
+  position: absolute;
+  z-index: 4;
+  top: -54px;
+  right: -22px;
+  pointer-events: none;
+  animation: glossary-concept-peek .45s cubic-bezier(.2, .8, .3, 1.2) both;
+}
+@keyframes glossary-concept-peek { from { opacity: 0; transform: translateY(14px) rotate(-6deg); } to { opacity: 1; transform: none; } }
+@media (max-width: 640px) {
+  .glossary-game-lab .glossary-concept-dreamy { top: -46px; right: -6px; }
+  .glossary-game-lab .glossary-concept-panel { flex-direction: row; gap: 12px; }
+  .glossary-game-lab .glossary-concept-medallion { width: 76px; }
+  .glossary-game-lab .glossary-concept-formula { font-size: 16px; }
+}
+
+/* ------------------------------------------------- the value ticker */
+.glossary-game-lab .glossary-valuation {
+  display: grid;
+  gap: 6px;
+  width: min(100%, 380px);
+  padding: 16px 18px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--refine-radius, 20px);
+  background: var(--refine-surface, var(--card));
+  box-shadow: var(--refine-depth, none);
+  color: var(--foreground);
+  text-align: left;
+}
+.glossary-game-lab .glossary-valuation-kicker { display: flex; align-items: center; gap: 6px; color: var(--muted-foreground); font: 800 11px / 1.2 var(--font-body); letter-spacing: .12em; text-transform: uppercase; }
+.glossary-game-lab .glossary-valuation-kicker svg { width: 14px; height: 14px; color: var(--glossary-accent); }
+.glossary-game-lab .glossary-valuation-value { font: 800 32px / 1.05 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.glossary-game-lab .glossary-valuation.is-reached .glossary-valuation-value { color: var(--glossary-accent); }
+.glossary-game-lab .glossary-valuation-track { display: block; height: 6px; overflow: hidden; border-radius: 999px; background: var(--glass-surface-2); }
+.glossary-game-lab .glossary-valuation-track > i { display: block; height: 100%; border-radius: inherit; background: var(--glossary-accent); transition: width 1.4s cubic-bezier(.2, .7, .3, 1); }
+.glossary-game-lab .glossary-valuation-next { display: flex; align-items: center; gap: 6px; font: 700 14px / 1.35 var(--font-body); }
+.glossary-game-lab .glossary-valuation-next svg { width: 16px; height: 16px; flex: none; color: var(--world-food-farming-nature); }
+.glossary-game-lab .glossary-valuation-note { color: var(--muted-foreground); font: 600 11px / 1.3 var(--font-body); }
+.glossary-game-lab .glossary-welcome-copy .glossary-valuation { margin: 0 0 24px; }
+
+/* The intro headline for Levels 2+: a sentence, not "Meet Dream Sneakers",
+   so it runs smaller than Level 1's two-word title. */
+.glossary-game-shell.glossary-game-lab .glossary-welcome-scene.is-story .glossary-welcome-copy h1.glossary-welcome-story { font-size: clamp(36px, calc(4.2vw / var(--vz, 1)), 58px) !important; }
+.glossary-game-shell.glossary-game-lab .glossary-welcome-scene.is-story .glossary-welcome-copy h1.glossary-welcome-story em { max-width: 14ch !important; }
+@media (max-width: 640px) {
+  .glossary-game-shell.glossary-game-lab .glossary-welcome-scene.is-story .glossary-welcome-copy h1.glossary-welcome-story { font-size: 32px !important; }
+  .glossary-game-lab .glossary-welcome-copy .glossary-valuation { margin-bottom: 14px; padding: 12px 14px; }
+  .glossary-game-lab .glossary-welcome-copy .glossary-valuation-value { font-size: 26px; }
+}
+
+/* ----------------------------------------------------- results screen */
+.glossary-game-lab .glossary-complete-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: min(100%, 380px); }
+.glossary-game-lab .glossary-complete-stats > span {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--refine-radius, 16px);
+  background: var(--refine-surface, var(--card));
+  box-shadow: var(--refine-depth, none);
+  color: var(--foreground);
+}
+.glossary-game-lab .glossary-complete-stats small { display: flex; align-items: center; justify-content: center; gap: 4px; color: var(--muted-foreground); font: 800 10.5px / 1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; }
+.glossary-game-lab .glossary-complete-stats small svg { width: 12px; height: 12px; color: var(--glossary-accent); }
+.glossary-game-lab .glossary-complete-stats b { font: 800 22px / 1.1 var(--font-display); font-variant-numeric: tabular-nums; }
+.glossary-game-lab .glossary-complete-actions { display: flex; flex-direction: column; gap: 10px; width: min(100%, 380px); }
+.glossary-game-lab .glossary-complete-secondary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.glossary-game-lab .glossary-complete-secondary > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-surface-1);
+  color: var(--foreground);
+  font: 700 15px / 1 var(--font-display);
+  cursor: pointer;
+}
+.glossary-game-lab .glossary-complete-secondary svg { width: 16px; height: 16px; }
+
+/* The results screen paints every direct child div as a panel (fit.css,
+   lab.css for Signal); the stat row and the actions are groups, not cards,
+   so their tiles and buttons carry the material instead. */
+.glossary-game-shell.glossary-game-lab .glossary-complete-screen > div:is(.glossary-complete-stats, .glossary-complete-actions) {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* ------------------------------------------------------- map Play button */
+.glossary-game-lab .glossary-level-map footer .glossary-map-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--glossary-accent);
+  color: #05070f;
+  font: 800 13px / 1 var(--font-display);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.glossary-game-lab .glossary-level-map footer .glossary-map-play svg { width: 14px; height: 14px; fill: currentColor; }
+
+/* Two short answers (Stock / Bond, Margin / Cost) split the row in half
+   instead of taking two of four word-tile columns. */
+@container (min-width: 760px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa-asks[data-answer-shape="words"] .glossary-option-list:has(> :nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+/* ----------------------------------------------- two-bucket sorts */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-sort-grid[data-buckets="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+
+/* ----------------------------------------------------- Signal (pixel) */
+.glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-sentence-card, .glossary-valuation, .glossary-complete-stats > span, .glossary-number-field, .glossary-scene-compare-card) {
+  border: 1px solid var(--sig-line) !important;
+  border-radius: 3px !important;
+  background: var(--sig-panel) !important;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .45) !important;
+  color: var(--sig-text);
+}
+.glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-sentence-card, .glossary-scene-line, .glossary-scene-compare-card li, .glossary-path-points li, .glossary-valuation-next) { font-family: var(--sig-mono) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-valuation-value, .glossary-complete-stats b, .glossary-number-field, .glossary-path-label, .glossary-scene-compare-card > strong, .glossary-concept-formula, .glossary-power-kicker) { font-family: var(--sig-font) !important; letter-spacing: .02em; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-scene-shares > i, .glossary-scene-split, .glossary-concept-medallion, .glossary-concept-formula, .glossary-check-key, .glossary-step-dots > i, .glossary-sentence-blank, .glossary-qa-check, .glossary-complete-secondary > button, .glossary-level-map footer .glossary-map-play) { border-radius: 0 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-actions { border: 0 !important; background: none !important; box-shadow: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-concept-formula { color: var(--sig-gold); }
+
+/* --------------------------------------------------- Orbit (ink on paper) */
+.glossary-game-lab.glossary-lab-atmosphere-v3 :is(.glossary-sentence-card, .glossary-valuation, .glossary-complete-stats > span, .glossary-number-field, .glossary-scene, .glossary-scene-compare-card, .glossary-path-option, .glossary-concept-face) :is(p, li, strong, em, b, small, dt, dd, input, span) { color: var(--refine-ink); -webkit-text-fill-color: currentColor; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 :is(.glossary-sentence-card, .glossary-valuation, .glossary-number-field) { color: var(--refine-ink); }
+/* the scene line outranked the rule above and drew paper-white on paper */
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-scene :is(p, li, strong:not(.glossary-scene-compare-card > strong), em, dt, dd) { color: var(--refine-ink) !important; -webkit-text-fill-color: currentColor; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-sentence-blank { color: var(--refine-accent) !important; border-color: var(--refine-accent); }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-sentence-blank.is-correct { color: var(--world-food-farming-nature) !important; border-color: var(--world-food-farming-nature); }
+
+@media (max-width: 640px) {
+  .glossary-game-lab .glossary-scene .glossary-scene-shares { gap: 5px; }
+  .glossary-game-lab .glossary-scene .glossary-scene-compare { grid-template-columns: minmax(0, 1fr); }
+  .glossary-game-lab .glossary-sentence-card { padding: 12px 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glossary-game-lab .glossary-scene-shares > i,
+  .glossary-game-lab .glossary-valuation-track > i,
+  .glossary-game-lab .glossary-concept-dreamy { transition: none !important; animation: none !important; }
+}

@@ -3,10 +3,10 @@
 import Image from "next/image";
 import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createContext, Fragment, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Activity, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
+import { Activity, ArrowLeftRight, Banknote, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Coins, Database, Flame, HandCoins, HeartPulse, Landmark, LineChart, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Percent, PieChart, PiggyBank, Play, Plug, Receipt, ScrollText, Siren, Sparkles, Stethoscope, TrendingDown, TrendingUp, TriangleAlert, UserRound, Users, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
 import { goBackOr, QuickLinksMenu } from "@/components/app/chrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -27,7 +27,7 @@ import {
   serverGlossaryProgressSnapshot,
   subscribeGlossaryProgress,
 } from "./progress";
-import type { GlossaryCareer, GlossaryLesson, GlossaryQuestion } from "./data";
+import type { ChainStep, GlossaryCareer, GlossaryLesson, GlossaryQuestion, ParagraphPowerPlay, SceneCard } from "./data";
 import { SparkBar } from "@/components/flow/SparkBar";
 
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
@@ -147,9 +147,22 @@ function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large")
   }
   return size === "small" ? SIGNAL_ASSETS_SMALL : SIGNAL_ASSETS;
 }
+/** Whether the playing lesson has term art at all. Only Level 1's five
+ *  words do; Levels 2+ are abstract money words with no honest picture, so
+ *  every art lookup returns nothing and the screens fall back to glyphs,
+ *  scene cards and Dreamy (13 Oct 2026, Joshua: "we should not force an
+ *  image where it does not help learning"). Without this, a label such as
+ *  "Money used to grow" matched Level 1's Profit coins by keyword. */
+const LessonArtContext = createContext(true);
+const NO_ART: Record<string, string> = {};
 /** The theme's term art. `small` for anything drawn under ~64px. */
 function useTermAssets(size: "large" | "small" = "large"): Record<string, string> {
-  return assetsFor(useAtmosphere(), size);
+  const atmosphere = useAtmosphere();
+  const hasArt = useContext(LessonArtContext);
+  return hasArt ? assetsFor(atmosphere, size) : NO_ART;
+}
+function lessonHasArt(lesson: GlossaryLesson): boolean {
+  return lesson.terms.every((term) => term.id in TERM_ASSETS);
 }
 
 const MASTERY_TARGET = 2;
@@ -217,6 +230,24 @@ const TERM_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>>
   database: Database,
   bug: Bug,
   workflow: Workflow,
+  // Finance Levels 2 to 4: glyphs, not pictures. They mark a term in the
+  // HUD, on a teach card's medallion and in the unlock gallery; they never
+  // stand in for an illustration.
+  "hand-coins": HandCoins,
+  "piggy-bank": PiggyBank,
+  alert: TriangleAlert,
+  "trending-up": TrendingUp,
+  "pie-chart": PieChart,
+  banknote: Banknote,
+  receipt: Receipt,
+  "arrow-left-right": ArrowLeftRight,
+  percent: Percent,
+  "trending-down": TrendingDown,
+  "chart-line": LineChart,
+  scroll: ScrollText,
+  users: Users,
+  landmark: Landmark,
+  coins: Coins,
 };
 
 function TermIcon({ icon, className }: { icon: string; className?: string }) {
@@ -396,15 +427,62 @@ function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestar
 // ---------------------------------------------------------------------------
 // Screen: Intro ("Meet {Company}")
 
+/** "$50K", "$1.5M", "$30B": the value ladder's own short form. */
+function shortMoney(value: number): string {
+  const units: Array<[number, string]> = [[1e9, "B"], [1e6, "M"], [1e3, "K"]];
+  for (const [size, unit] of units) if (value >= size) return `$${Number((value / size).toFixed(1))}${unit}`;
+  return `$${value}`;
+}
+
+/** Dream Sneakers' value, the story prop that grows lesson by lesson
+ *  ($10K to $30B on Joshua's ladder). On the results screen it counts up
+ *  from the value before the lesson; on an intro it shows the next goal.
+ *  A game value, not money the student earns (the Replit says so too). */
+function ValuationTicker({ from, to, milestone, mode }: { from: number; to: number; milestone: string; mode: "goal" | "reached" }) {
+  const reduced = useReducedMotion();
+  const animate = mode === "reached" && !reduced && from !== to;
+  const [shown, setShown] = useState(animate ? from : to);
+  useEffect(() => {
+    if (!animate) return;
+    let frame = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / 1400);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setShown(Math.round(from + (to - from) * eased));
+      if (t < 1) frame = window.requestAnimationFrame(tick);
+    };
+    const delay = window.setTimeout(() => { frame = window.requestAnimationFrame(tick); }, 350);
+    return () => { window.clearTimeout(delay); window.cancelAnimationFrame(frame); };
+  }, [animate, from, to]);
+  const pct = mode === "reached" ? 100 : Math.max(6, Math.round((from / Math.max(to, 1)) * 100));
+  return (
+    <div className={`glossary-valuation is-${mode}`} aria-label={mode === "reached" ? `Dream Sneakers is now worth $${to.toLocaleString()}. ${milestone}.` : `Dream Sneakers is worth $${from.toLocaleString()}. Finish this level to reach $${to.toLocaleString()}: ${milestone}.`}>
+      <span className="glossary-valuation-kicker"><Building2 aria-hidden /> Dream Sneakers value</span>
+      <b className="glossary-valuation-value">${(mode === "reached" ? shown : from).toLocaleString()}</b>
+      <span className="glossary-valuation-track" aria-hidden><i style={{ width: `${pct}%` }} /></span>
+      <span className="glossary-valuation-next">
+        {mode === "reached" ? <><Check aria-hidden /> {milestone}</> : <>Next: {shortMoney(to)} · {milestone}</>}
+      </span>
+      <small className="glossary-valuation-note">Game value, not real money.</small>
+    </div>
+  );
+}
+
 function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1" }: { lesson: GlossaryLesson; onNext: () => void; variant?: ExperienceVariant; atmosphere?: LabAtmosphere }) {
   const { theme } = useGlobalTheme();
   if (variant === "lab") {
+    const story = lesson.intro;
     return (
-      <div className="glossary-screen glossary-intro-screen glossary-welcome-scene relative flex w-full flex-1 items-center justify-center px-5 py-[var(--space-5)]" data-atmosphere={atmosphere}>
+      <div className={`glossary-screen glossary-intro-screen glossary-welcome-scene relative flex w-full flex-1 items-center justify-center px-5 py-[var(--space-5)] ${story ? "is-story" : ""}`} data-atmosphere={atmosphere}>
         <div className="glossary-welcome-copy">
-          <span className="glossary-welcome-kicker"><Sparkles aria-hidden /> Level 01 · {lesson.title}</span>
-          <h1><span>Meet</span><em>{lesson.exampleCompany}</em></h1>
-          <p>Learn business by playing it.</p>
+          <span className="glossary-welcome-kicker"><Sparkles aria-hidden /> Level {String(lesson.lessonNumber).padStart(2, "0")} · {lesson.title}</span>
+          {/* Levels 2+ open on their own chapter of the story (the Replit's
+             intro headline and line) and the value the level reaches. Level
+             1 keeps "Meet Dream Sneakers". */}
+          {story ? <h1 className="glossary-welcome-story"><em>{story.headline}</em></h1> : <h1><span>Meet</span><em>{lesson.exampleCompany}</em></h1>}
+          <p>{story ? story.line : "Learn business by playing it."}</p>
+          {story ? <ValuationTicker from={lesson.previousCompanyValue ?? 0} to={lesson.companyValue} milestone={lesson.milestone} mode="goal" /> : null}
           <button type="button" onClick={onNext} className="dm-solid glossary-welcome-cta flex cursor-pointer items-center justify-center gap-[8px] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold" style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}>
             Start <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
@@ -415,7 +493,7 @@ function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1" }:
             ? <Image src={SIGNAL_ASSETS.Customer} alt="" width={960} height={540} priority unoptimized className="glossary-welcome-hero glossary-signal-hero" />
             : <>
                 <Image src={assetsFor(atmosphere).Company} alt="" width={768} height={768} priority unoptimized className="glossary-welcome-hero glossary-welcome-shop" />
-                <span className="glossary-welcome-cloud"><DreamyFace pose="happy" size={180} /></span>
+                <span className="glossary-welcome-cloud"><DreamyFace pose={story ? "glasses" : "happy"} size={180} /></span>
                 <Image src={assetsFor(atmosphere).Product} alt="" width={256} height={256} priority unoptimized className="glossary-welcome-product" />
               </>}
         </div>
@@ -535,10 +613,10 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
  *  filter, so the clean vector strokes read as pencil on paper. Ruled
  *  lines and a hand-placed tilt finish the sketchbook feel without a
  *  single new image asset. */
-function SketchFace({ term, definition, icon, artSrc, style }: { term: string; definition?: string; icon: string; artSrc?: string; style?: React.CSSProperties }) {
+function SketchFace({ term, definition, icon, artSrc, style, concept = false, formula }: { term: string; definition?: string; icon: string; artSrc?: string; style?: React.CSSProperties; /** a lab card for a term with no art */ concept?: boolean; formula?: string }) {
   return (
     <span
-      className={`glossary-flashcard-front absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,calc(2dvh/var(--vz,1)),18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden] ${artSrc ? "glossary-lab-card-face" : ""}`}
+      className={`glossary-flashcard-front absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,calc(2dvh/var(--vz,1)),18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden] ${artSrc || concept ? "glossary-lab-card-face" : ""} ${concept ? "glossary-concept-face" : ""}`}
       style={{
         background:
           "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--glossary-accent) 4%, var(--card))",
@@ -555,7 +633,16 @@ function SketchFace({ term, definition, icon, artSrc, style }: { term: string; d
           <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" />
         </filter>
       </svg>
-      <span className="glossary-flashcard-art relative -rotate-2" style={{ filter: artSrc ? undefined : "url(#glossary-sketch)", color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>
+      {concept ? (
+        // A concept card (13 Oct 2026): a term with no honest picture gets
+        // its glyph and, where it has one, the worked line that shows it
+        // ("$30,000 − $25,000 = $5,000") in the art's slot. Same card, same
+        // grid, no forced illustration.
+        <span className="glossary-flashcard-art glossary-concept-panel" aria-hidden={!formula}>
+          <span className="glossary-concept-medallion"><TermIcon icon={icon} /></span>
+          {formula ? <span className="glossary-concept-formula">{formula}</span> : null}
+        </span>
+      ) : <span className="glossary-flashcard-art relative -rotate-2" style={{ filter: artSrc ? undefined : "url(#glossary-sketch)", color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>
         {artSrc ? (
           <Image src={artSrc} alt="" width={360} height={360} className="h-[clamp(148px,calc(26dvh/var(--vz,1)),220px)] w-[clamp(148px,calc(26dvh/var(--vz,1)),220px)] object-contain" priority unoptimized />
         ) : (
@@ -567,28 +654,30 @@ function SketchFace({ term, definition, icon, artSrc, style }: { term: string; d
             <line key={deg} x1="60" y1="4" x2="60" y2="14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" transform={`rotate(${deg} 60 60)`} />
           ))}
         </svg>
-      </span>
+      </span>}
       <span className="glossary-flashcard-title flex flex-col items-center gap-[3px]">
-        <span className="text-[clamp(26px,calc(5.8dvh/var(--vz,1)),34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc ? undefined : "url(#glossary-sketch)" }}>
+        <span className="text-[clamp(26px,calc(5.8dvh/var(--vz,1)),34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc || concept ? undefined : "url(#glossary-sketch)" }}>
           {term}
         </span>
         {/* The hand-drawn underline squiggle. */}
-        <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[110px]" style={{ color: "var(--glossary-accent)", filter: "url(#glossary-sketch)" }}>
+        <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[110px]" style={{ color: "var(--glossary-accent)", filter: concept ? undefined : "url(#glossary-sketch)" }}>
           <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
         </svg>
       </span>
-      {artSrc && definition ? (
+      {(artSrc || concept) && definition ? (
         <span className="glossary-flashcard-definition block max-w-[340px] px-4 text-center text-[clamp(13px,calc(2.2dvh/var(--vz,1)),15px)] leading-[1.4] font-semibold" style={{ color: "var(--foreground)" }}>
           {definition}
         </span>
       ) : null}
       <span className="flex items-center gap-[6px] text-[12px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>
         <RotateCw className="h-[12px] w-[12px] motion-safe:animate-[play-nudge_1.4s_ease-in-out_infinite]" aria-hidden />
-        {artSrc ? "Tap for an example" : "Tap to flip"}
+        {artSrc || concept ? "Tap for an example" : "Tap to flip"}
       </span>
     </span>
   );
 }
+
+const CONCEPT_POSES = ["glasses", "idea", "curious", "heart", "happy"] as const;
 
 function UnlockScreen({
   lesson,
@@ -654,6 +743,15 @@ function UnlockScreen({
          on backface-visibility rather than remounting. Reduced-motion
          crossfades instead of rotating. */}
       <div className="glossary-flashbook-shell relative w-full max-w-[440px]" data-atmosphere={variant === "lab" ? atmosphere : undefined} style={{ perspective: "1400px" }}>
+        {/* A concept card has no picture, so Dreamy keeps it company: he
+           leans over its top corner with a new face for each word (13 Oct
+           2026, Joshua: "bring Dreamy in more frequently with different
+           expressions"). Outside the flipping button, so he never flips. */}
+        {variant === "lab" && !assets[term.id] ? (
+          <span key={term.id} className="glossary-concept-dreamy" aria-hidden>
+            <DreamyFace pose={CONCEPT_POSES[index % CONCEPT_POSES.length]} size={104} />
+          </span>
+        ) : null}
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={term.id}
@@ -680,7 +778,7 @@ function UnlockScreen({
                  so its backface-visibility participates in the button's own
                  3D context rather than being flattened by a wrapper. */}
               {(variant === "default" || !flipped) ? (
-                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? assets[term.id] : undefined} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
+                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? assets[term.id] : undefined} concept={variant === "lab" && !assets[term.id]} formula={term.formula} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
               ) : null}
 
               {/* BACK: the written page, ring-bound edge and all. */}
@@ -695,7 +793,7 @@ function UnlockScreen({
                   transition: reduced ? "opacity 0.15s" : undefined,
                 }}
               >
-                {variant === "lab" ? <Image src={assets[term.id]} alt="" width={280} height={280} className="glossary-flashcard-back-art" aria-hidden unoptimized /> : null}
+                {variant === "lab" && assets[term.id] ? <Image src={assets[term.id]} alt="" width={280} height={280} className="glossary-flashcard-back-art" aria-hidden unoptimized /> : null}
                 <span
                   aria-hidden
                   className="flex w-9 flex-none flex-col items-center justify-evenly border-r py-[var(--space-6)]"
@@ -940,6 +1038,216 @@ function DocumentOptionList({ options, assets, correctIndex, picked, revealed, m
       })}
     </div>
   );
+}
+
+// ---------------------------------------------------------------------------
+// Levels 2+ (13 Oct 2026, from Joshua's Replit): scene cards, the one-blank
+// sentence, select-all and the multi-step case. Every interactive piece is
+// built on the same .glossary-option tiles as Level 1, so each theme's
+// existing tile styling (Drift glass, Signal pixel slabs, Orbit paper,
+// Horizon neon) applies without new per-theme components.
+
+/** The money drawn as a small diagram above a question, in the same card
+ *  material as Level 1's sells-for / costs / left scene. */
+function SceneCardView({ scene, answered = false }: { scene: SceneCard; /** the right answer is in: shares light up, the result line shows */ answered?: boolean }) {
+  const cls = `glossary-question-profit-scene glossary-scene glossary-scene-${scene.kind}`;
+  if (scene.kind === "story") {
+    return <div className={cls}><p className="glossary-scene-line">{scene.text}</p>{scene.note ? <p className="glossary-scene-note">{scene.note}</p> : null}</div>;
+  }
+  if (scene.kind === "figures") {
+    return (
+      <div className={cls} role="group" aria-label={scene.items.map((item) => `${item.label} ${item.value}`).join(", ")}>
+        {scene.items.map((item, i) => (
+          <Fragment key={item.label}>
+            {i > 0 && scene.ops?.[i - 1] ? <strong aria-hidden>{scene.ops[i - 1]}</strong> : null}
+            <div className={`glossary-scene-figure ${scene.highlightLast && i === scene.items.length - 1 ? "is-result" : ""}`} aria-hidden>
+              <small>{item.label}</small>
+              <b>{item.value}</b>
+            </div>
+          </Fragment>
+        ))}
+      </div>
+    );
+  }
+  if (scene.kind === "ledger") {
+    return (
+      <div className={cls}>
+        <small className="glossary-scene-title">{scene.title}</small>
+        <dl className="glossary-scene-ledger">
+          {scene.rows.map((row) => <Fragment key={row.label}><dt>{row.label}</dt><dd data-tone={row.tone}>{row.value}</dd></Fragment>)}
+        </dl>
+      </div>
+    );
+  }
+  if (scene.kind === "shares") {
+    return (
+      <div className={cls}>
+        {scene.note ? <p className="glossary-scene-line">{scene.note}</p> : null}
+        <div className="glossary-scene-shares" role="img" aria-label={answered ? `${scene.owned} of ${scene.total} shares are Maya's` : `${scene.total} equal shares`}>
+          {Array.from({ length: scene.total }, (_, i) => <i key={i} className={answered && i < scene.owned ? "is-owned" : ""} style={{ "--share-delay": `${i * 60}ms` } as React.CSSProperties} />)}
+        </div>
+        <small className="glossary-scene-title">{answered && scene.result ? scene.result : scene.label}</small>
+      </div>
+    );
+  }
+  if (scene.kind === "split") {
+    return (
+      <div className={cls}>
+        {scene.title ? <small className="glossary-scene-title">{scene.title}</small> : null}
+        <div className="glossary-scene-split" role="img" aria-label={scene.parts.map((part) => `${part.label} ${part.pct}%`).join(", ")}>
+          {scene.parts.map((part, i) => <i key={part.label} data-part={i} style={{ flexBasis: `${part.pct}%` }}><em>{part.pct}%</em></i>)}
+        </div>
+        <div className="glossary-scene-split-labels" aria-hidden>{scene.parts.map((part) => <small key={part.label}>{part.label} {part.pct}%</small>)}</div>
+      </div>
+    );
+  }
+  return (
+    <div className={cls}>
+      <small className="glossary-scene-title">{scene.title}</small>
+      <div className="glossary-scene-compare">
+        {scene.options.map((option) => (
+          <div key={option.label} className="glossary-scene-compare-card">
+            <strong>{option.label}</strong>
+            <ul>{option.points.map((point) => <li key={point}>{point}</li>)}</ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** A one-blank sentence; the picked answer drops into the gap. */
+function SentenceCard({ sentence, filled, state }: { sentence: string; filled: string | null; state: "idle" | "correct" | "wrong" }) {
+  const [before, after = ""] = sentence.split("___");
+  return (
+    <p className="glossary-sentence-card" aria-live="polite">
+      {before}
+      <span className={`glossary-sentence-blank is-${filled ? state : "empty"}`}>{filled ?? <span className="sr-only">blank</span>}</span>
+      {after}
+    </p>
+  );
+}
+
+/** Select every answer that fits, then Check. A wrong set marks only what
+ *  the student chose (right picks green, wrong picks red) and never reveals
+ *  a missed one, so the retry still teaches. */
+function MultiSelectCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "multiSelect" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
+  const { playCorrect, playWrong, playSelect } = useMaterialSounds();
+  const order = useMemo(() => shuffleStable(question.options.map((o, i) => ({ o, i })), question.id), [question]);
+  const [chosen, setChosen] = useState<number[]>([]);
+  const [checked, setChecked] = useState<boolean | null>(null);
+  function toggle(i: number) {
+    if (checked === true) return;
+    if (checked === false) { setChecked(null); onReset(); }
+    setChosen((previous) => (previous.includes(i) ? previous.filter((x) => x !== i) : [...previous, i]));
+    window.setTimeout(playSelect, 0);
+  }
+  function check() {
+    const correct = chosen.length === question.correct.length && question.correct.every((c) => chosen.includes(c));
+    setChecked(correct);
+    window.setTimeout(correct ? playCorrect : playWrong, 0);
+    onAnswer({ correct, creditedTermIds: correct && question.termId ? [question.termId] : [] });
+  }
+  return (
+    <div className="glossary-multi-select flex w-full flex-col gap-[var(--qa-gap,16px)]">
+      <div className="glossary-option-list glossary-option-grid flex w-full flex-col gap-[var(--space-3)]" role="group" aria-label={question.prompt}>
+        {order.map(({ o, i }) => {
+          const on = chosen.includes(i);
+          const right = question.correct.includes(i);
+          const verdict = checked === null || !on ? "" : right ? "is-correct" : "is-wrong";
+          return (
+            <button
+              key={o}
+              type="button"
+              role="checkbox"
+              aria-checked={on}
+              onClick={() => toggle(i)}
+              className={`glossary-option dm-tap flex w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)] text-left ${on && checked === null ? "is-selected" : ""} ${verdict}`}
+              style={{ background: "var(--card)", borderColor: verdict === "is-correct" ? CORRECT_COLOR : verdict === "is-wrong" ? "var(--danger, #e0483e)" : on ? "var(--glossary-accent)" : "var(--glass-border)" }}
+            >
+              <span className={`glossary-option-key glossary-check-key flex size-7 flex-none items-center justify-center rounded-[6px] border-[1.5px] ${on ? "is-on" : ""}`} aria-hidden>
+                {on ? <Check className="h-4 w-4" /> : null}
+              </span>
+              <span className="flex-1 text-[15px] leading-[20px] font-medium" style={{ color: "var(--foreground)" }}>{o}</span>
+              {verdict === "is-correct" ? <Check className="h-5 w-5 flex-none" style={{ color: CORRECT_COLOR }} aria-hidden /> : null}
+              {verdict === "is-wrong" ? <X className="h-5 w-5 flex-none" style={{ color: "var(--danger, #e0483e)" }} aria-hidden /> : null}
+            </button>
+          );
+        })}
+      </div>
+      {checked !== true ? (
+        <button type="button" className="glossary-qa-check dm-solid" disabled={chosen.length === 0 || checked === false} onClick={check}>
+          {checked === false ? "Change your picks" : "Check"}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+/** A number to type for one step of a case ($ or %). */
+function NumberStep({ step, onCorrect, onWrong, onReset }: { step: Extract<ChainStep, { answer: number }>; onCorrect: () => void; onWrong: () => void; onReset: () => void }) {
+  const [value, setValue] = useState("");
+  const [verdict, setVerdict] = useState<"idle" | "correct" | "wrong">("idle");
+  const inputId = useId();
+  function check() {
+    const n = Number(value.replace(/[$,%\s]/g, ""));
+    const correct = Number.isFinite(n) && n === step.answer;
+    setVerdict(correct ? "correct" : "wrong");
+    if (correct) onCorrect(); else onWrong();
+  }
+  return (
+    <form className="glossary-number-step" onSubmit={(event) => { event.preventDefault(); if (value.trim() && verdict !== "correct") check(); }}>
+      <label htmlFor={inputId} className="sr-only">{step.prompt}</label>
+      <span className={`glossary-number-field is-${verdict}`}>
+        {step.unit === "$" ? <span aria-hidden>$</span> : null}
+        <input
+          id={inputId}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          value={value}
+          readOnly={verdict === "correct"}
+          onChange={(event) => { setValue(event.target.value); if (verdict === "wrong") { setVerdict("idle"); onReset(); } }}
+          placeholder="0"
+        />
+        {step.unit === "%" ? <span aria-hidden>%</span> : null}
+      </span>
+      {verdict !== "correct" ? <button type="submit" className="glossary-qa-check dm-solid" disabled={!value.trim() || verdict === "wrong"}>Check</button> : null}
+    </form>
+  );
+}
+
+/** One step of a case: a choice on the shared tiles, or a number. */
+function ChainStepBoard({ step, wordTiles, onCorrect, onWrong, onReset }: { step: ChainStep; wordTiles: boolean; onCorrect: () => void; onWrong: () => void; onReset: () => void }) {
+  const [picked, setPicked] = useState<number | null>(null);
+  const [misses, setMisses] = useState<number[]>([]);
+  if ("answer" in step) return <NumberStep step={step} onCorrect={onCorrect} onWrong={onWrong} onReset={onReset} />;
+  const solved = picked === step.correctIndex;
+  return (
+    <OptionList
+      options={step.options}
+      grid={wordTiles}
+      correctIndex={step.correctIndex}
+      picked={picked}
+      missed={misses}
+      revealed={picked !== null && (solved || misses.length >= 2)}
+      onPick={(i) => {
+        if (solved) return;
+        setPicked(i);
+        if (i === step.correctIndex) onCorrect();
+        else {
+          if (!misses.includes(i)) setMisses((previous) => [...previous, i]);
+          onWrong();
+        }
+      }}
+    />
+  );
+}
+
+/** Whether a set of answers reads as short word tiles (one row of four on
+ *  a wide column, a 2x2 on phones) rather than sentences. */
+function isWordSet(options: string[]): boolean {
+  return options.every((option) => !/\s/.test(option.trim()) && option.length <= 14);
 }
 
 function TypeTermCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "typeTerm" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
@@ -1475,7 +1783,7 @@ function SortBucketsCard({ question, onAnswer, onReset, hintSlot }: { question: 
           {allPlaced && <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap any item to move it</p>}
         </>}
 
-      <div className="glossary-sort-grid grid grid-cols-2 gap-[var(--space-3)]">
+      <div className="glossary-sort-grid grid grid-cols-2 gap-[var(--space-3)]" data-buckets={question.buckets.length}>
         {question.buckets.map((bucket) => (
           <div
             key={bucket}
@@ -1616,18 +1924,29 @@ function QuestionScreen({
   question,
   onAnswer,
   onReset,
+  answerState = "idle",
 }: {
   question: GlossaryQuestion;
   onAnswer: (r: AnswerResult) => void;
   onReset: () => void;
+  /** the pending verdict, so Dreamy can react to it */
+  answerState?: "idle" | "correct" | "wrong";
 }) {
   const [picked, setPicked] = useState<number | null>(null);
   const { playCorrect, playWrong } = useMaterialSounds();
   const layout = useContext(QuestionLayoutContext);
+  const hasArt = useContext(LessonArtContext);
   const [misses, setMisses] = useState<number[]>([]);
   const [missCount, setMissCount] = useState(0);
   const assets = useTermAssets();
   const smallAssets = useTermAssets("small");
+  // A case (kind "chain") is answered one step at a time; the bubble says
+  // the current step and a right step moves on after a beat.
+  const [step, setStep] = useState(0);
+  const [stepCleared, setStepCleared] = useState(false);
+  const stepTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (stepTimer.current) window.clearTimeout(stepTimer.current); }, []);
+  const steps = question.kind === "chain" ? question.steps : [];
   const shuffledOptions = useMemo(() => (question.kind === "choice" ? shuffleStable(question.options.map((o, i) => ({ o, i })), question.id) : []), [question]);
   const choiceAssets = question.kind === "choice" ? shuffledOptions.map(({ o, i }) => {
     const icon = question.optionIcons?.[i];
@@ -1658,15 +1977,32 @@ function QuestionScreen({
     // Q2 has no authored prompt; its title ("Match the terms") and hint
     // merge into one plain line.
     ? question.prompt || (question.kind === "matchUp" ? "Match each term to its picture." : question.label || question.type)
+    : question.kind === "chain" && steps.length ? steps[Math.min(step, steps.length - 1)].prompt
     : question.prompt;
+  // A case's progress rides in the bubble, under the step (never "Step 1
+  // of 1", the Replit's quirk); a right step says so for a beat.
+  const stepAside = question.kind === "chain" && steps.length > 1 ? (
+    <div className="glossary-qa-hint-line" aria-live="polite" data-tone={stepCleared ? "done" : "go"}>
+      <span>{stepCleared ? "Right! Next step." : `Step ${step + 1} of ${steps.length}`}</span>
+      <b className="glossary-step-dots" aria-hidden>{steps.map((_, i) => <i key={i} className={i < step || (i === step && stepCleared) ? "is-done" : i === step ? "is-now" : ""} />)}</b>
+    </div>
+  ) : null;
   const board = question.kind === "matchUp" ? <MatchUpCard question={question} onAnswer={onAnswer} onReset={onReset} hintSlot={hintSlot} />
     : question.kind === "sortBuckets" ? <SortBucketsCard question={question} onAnswer={onAnswer} onReset={onReset} hintSlot={hintSlot} />
       : question.kind === "profitBuilder" ? <ProfitBuilderCard question={question} onAnswer={onAnswer} onReset={onReset} framed />
         : null;
   // One-word answers that all carry art read as picture tiles (one row of
-  // four when the column fits them); sentences read as a 2x2.
-  const wordTiles = question.kind === "choice" && question.type !== "Catch the Misuse" && choiceAssets.length > 0 && choiceAssets.every(Boolean) && shuffledOptions.every(({ o }) => !/\s/.test(o.trim()));
-  const scene = question.kind === "choice" && question.visual?.kind === "profit" ? (
+  // four when the column fits them); sentences read as a 2x2. A lesson with
+  // no term art lets short words and figures ("$5,000", "20%") take the
+  // same tiles without pictures.
+  const currentStep = steps[Math.min(step, Math.max(steps.length - 1, 0))];
+  const wordTiles = question.kind === "choice"
+    ? question.type !== "Catch the Misuse" && shuffledOptions.every(({ o }) => !/\s/.test(o.trim())) && (hasArt ? choiceAssets.length > 0 && choiceAssets.every(Boolean) : isWordSet(question.options))
+    : question.kind === "chain" && currentStep && "options" in currentStep ? isWordSet(currentStep.options) : false;
+  const pickedCorrect = question.kind === "choice" && picked !== null && shuffledOptions[picked]?.i === question.correctIndex;
+  const scene = question.kind === "choice" && question.scene ? <SceneCardView scene={question.scene} answered={pickedCorrect} />
+    : (question.kind === "multiSelect" || question.kind === "chain") && question.scene ? <SceneCardView scene={question.scene} answered={answerState === "correct"} />
+    : question.kind === "choice" && question.visual?.kind === "profit" ? (
     <div className="glossary-question-profit-scene" aria-label={`${question.visual.title} sells for $${question.visual.sells}, costs $${question.visual.costs} to make, $${question.visual.sells - question.visual.costs} left`}>
       <Image src={assets.Product} alt="" width={92} height={92} unoptimized />
       <div><small>{question.visual.title}</small><b>${question.visual.sells}</b><span>Sells for</span></div>
@@ -1676,8 +2012,42 @@ function QuestionScreen({
       <div className="glossary-question-profit-result"><small>Left</small><b>${question.visual.sells - question.visual.costs}</b><span>What is it?</span></div>
     </div>
   ) : null;
-  const dreamy = <span className="glossary-question-dreamy"><DreamyFace pose="curious" size={84} /></span>;
-  const answers = question.kind === "choice" ? (() => {
+  // Dreamy reacts (13 Oct 2026, Joshua: "bring Dreamy in more frequently
+  // with different expressions/reactions"): he asks curious, reads numbers
+  // through his glasses, poses a case with an idea, smiles at a right answer
+  // and looks nervous at a wrong one. Same size, same slot.
+  const restingPose = question.kind === "chain" ? "idea" : question.kind === "multiSelect" || (question.kind === "choice" && (question.scene?.kind === "figures" || question.scene?.kind === "shares" || question.scene?.kind === "split")) ? "glasses" : "curious";
+  const pose = answerState === "correct" || stepCleared ? "happy" : answerState === "wrong" ? "nervous" : restingPose;
+  const dreamy = <span className="glossary-question-dreamy"><DreamyFace pose={pose} size={84} /></span>;
+  const sentence = question.kind === "choice" && question.sentence
+    ? <SentenceCard sentence={question.sentence} filled={picked !== null ? shuffledOptions[picked].o : null} state={picked === null ? "idle" : pickedCorrect ? "correct" : "wrong"} />
+    : null;
+  function clearStep() {
+    if (question.kind !== "chain") return;
+    window.setTimeout(playCorrect, 0);
+    if (step < question.steps.length - 1) {
+      // a right step: a beat of "Right!", then the next step
+      setStepCleared(true);
+      onReset();
+      stepTimer.current = window.setTimeout(() => { setStepCleared(false); setStep((s) => s + 1); }, 750);
+    } else {
+      onAnswer({ correct: true, creditedTermIds: question.termIds ?? [] });
+    }
+  }
+  const answers = question.kind === "multiSelect" ? <MultiSelectCard question={question} onAnswer={onAnswer} onReset={onReset} />
+    : question.kind === "chain" && currentStep ? (
+      <div className="glossary-chain flex w-full flex-col">
+        <ChainStepBoard
+          key={step}
+          step={currentStep}
+          wordTiles={composed !== null && wordTiles}
+          onCorrect={clearStep}
+          onWrong={() => { window.setTimeout(playWrong, 0); onAnswer({ correct: false, creditedTermIds: [] }); }}
+          onReset={onReset}
+        />
+      </div>
+    )
+    : question.kind === "choice" ? (() => {
     const ListComponent = question.type === "Catch the Misuse" ? DocumentOptionList : OptionList;
     return (
       <ListComponent
@@ -1706,12 +2076,13 @@ function QuestionScreen({
     // Boards also carry glossary-question-choice: Dreamy's size and the
     // question's type are owned by that class's rules, so every activity
     // gets exactly the same Dreamy and the same big line.
-    <div className={`glossary-screen glossary-question-screen glossary-question-${question.kind} ${guided ? "" : "glossary-question-choice"} glossary-qa glossary-qa-asks relative flex w-full flex-col`} data-answer-shape={wordTiles ? "words" : "sentences"}>
+    <div className={`glossary-screen glossary-question-screen glossary-question-${question.kind} ${question.kind === "choice" ? "" : "glossary-question-choice"} glossary-qa glossary-qa-asks relative flex w-full flex-col`} data-answer-shape={wordTiles ? "words" : "sentences"}>
       <div className="glossary-question-guide">
         {dreamy}
-        <SpeechBubble aside={guided ? undefined : <div ref={setHintSlot} className="glossary-qa-hint" />}>{line}</SpeechBubble>
+        <SpeechBubble aside={guided ? (stepAside ?? undefined) : <div ref={setHintSlot} className="glossary-qa-hint" />}>{line}</SpeechBubble>
       </div>
       {scene}
+      {sentence}
       {guided ? answers : board}
     </div>
   );
@@ -1951,7 +2322,7 @@ function StreakBanner({ streak, onDismiss }: { streak: number; onDismiss: () => 
 // ---------------------------------------------------------------------------
 // Power Play
 
-function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
+function PowerPlayIntroScreen({ onStart, line }: { onStart: () => void; /** the lesson's own challenge line ("Run the month.") */ line?: string }) {
   return (
     <div className="glossary-screen glossary-power-intro-screen relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center" style={{ background: "radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 55%, transparent), transparent 65%)" }}>
       <DreamyFace pose="idea" size={112} />
@@ -1960,7 +2331,9 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
           <Zap className="h-6 w-6" style={{ color: "var(--power-accent, var(--hero-accent-purple))" }} fill="currentColor" aria-hidden /> Power Play
         </h2>
         <p className="mx-auto max-w-[380px] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>
-          Use everything you just learned to fill in the blanks.
+          {/* Levels 2+ name their own challenge; the Replit told every
+             lesson to "fill in the blanks", even the ones that are not. */}
+          {line ? `${line} Use everything you just learned.` : "Use everything you just learned to fill in the blanks."}
         </p>
       </div>
       <button
@@ -1976,6 +2349,88 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
 }
 
 function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onComplete: () => void }) {
+  const powerPlay = lesson.powerPlay;
+  if (powerPlay.kind === "chain" || powerPlay.kind === "path") return <PowerPlayCaseScreen powerPlay={powerPlay} onComplete={onComplete} />;
+  return <PowerPlayParagraphScreen powerPlay={powerPlay} onComplete={onComplete} />;
+}
+
+/** Levels 3 and 4's Power Play: a case over one scenario ("Run the month"),
+ *  or a funding path to choose first and then its case. Built from the same
+ *  pieces as a question (Dreamy asks, a scene card, the option tiles), so it
+ *  sits in the question frame; a wrong step is marked inline and retried. */
+function PowerPlayCaseScreen({ powerPlay, onComplete }: { powerPlay: Exclude<GlossaryLesson["powerPlay"], ParagraphPowerPlay>; onComplete: () => void }) {
+  const { playCorrect, playWrong, playSweep, playSelect } = useMaterialSounds();
+  const { theme } = useGlobalTheme();
+  const [pathId, setPathId] = useState<string | null>(powerPlay.kind === "chain" ? "main" : null);
+  const [step, setStep] = useState(0);
+  const [status, setStatus] = useState<"go" | "right" | "wrong" | "done">("go");
+  const [burst, setBurst] = useState(0);
+  const timer = useRef<number | null>(null);
+  useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
+  const path = powerPlay.kind === "path" ? powerPlay.paths.find((entry) => entry.id === pathId) ?? null : null;
+  const steps: ChainStep[] = powerPlay.kind === "chain" ? powerPlay.steps : path?.steps ?? [];
+  const choosing = powerPlay.kind === "path" && !path;
+  const current = steps[Math.min(step, Math.max(steps.length - 1, 0))];
+  const line = choosing ? powerPlay.prompt : status === "done" ? "Deal done. You used every word." : current?.prompt ?? "";
+  const pose = status === "done" ? "party" : status === "right" ? "happy" : status === "wrong" ? "nervous" : choosing ? "idea" : "glasses";
+
+  function cleared() {
+    window.setTimeout(playCorrect, 0);
+    if (step < steps.length - 1) {
+      setStatus("right");
+      timer.current = window.setTimeout(() => { setStatus("go"); setStep((s) => s + 1); }, 750);
+    } else {
+      setStatus("done");
+      setBurst((n) => n + 1);
+      window.setTimeout(playSweep, 120);
+    }
+  }
+  const aside = choosing ? null : (
+    <div className="glossary-qa-hint-line" aria-live="polite" data-tone={status === "wrong" ? "wrong" : status === "go" ? "go" : "done"}>
+      <span>{status === "wrong" ? "Not quite. Try another." : status === "right" ? "Right! Next step." : status === "done" ? "Power Play complete" : `Step ${step + 1} of ${steps.length}`}</span>
+      <b className="glossary-step-dots" aria-hidden>{steps.map((_, i) => <i key={i} className={i < step || status === "done" || (i === step && status === "right") ? "is-done" : i === step ? "is-now" : ""} />)}</b>
+    </div>
+  );
+  return (
+    <div className="glossary-screen glossary-question-screen glossary-question-chain glossary-question-choice glossary-qa glossary-qa-asks glossary-power-case relative flex w-full flex-col" data-answer-shape={current && "options" in current && isWordSet(current.options) ? "words" : "sentences"}>
+      <LocalBurst nonce={burst} />
+      <p className="glossary-power-kicker"><Zap aria-hidden fill="currentColor" /> Power Play · {powerPlay.intro.replace(/\.$/, "")}{path ? ` · ${path.label}` : ""}</p>
+      <div className="glossary-question-guide">
+        <span className="glossary-question-dreamy"><DreamyFace pose={pose} size={84} /></span>
+        <SpeechBubble aside={aside ?? undefined}>{line}</SpeechBubble>
+      </div>
+      <SceneCardView scene={powerPlay.scene} answered={status === "done"} />
+      {choosing && powerPlay.kind === "path" ? (
+        <div className="glossary-option-list glossary-path-list flex w-full flex-col gap-[var(--space-3)]" role="group" aria-label="Funding paths">
+          {powerPlay.paths.map((entry) => (
+            <button key={entry.id} type="button" className="glossary-option glossary-path-option dm-tap flex w-full cursor-pointer flex-col items-start gap-[var(--space-2)] rounded-[var(--radius-md)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }} onClick={() => { setPathId(entry.id); setStep(0); setStatus("go"); window.setTimeout(playSelect, 0); }}>
+              <b className="glossary-path-label">{entry.label}</b>
+              <ul className="glossary-path-points">{entry.points.map((point) => <li key={point}>{point}</li>)}</ul>
+            </button>
+          ))}
+        </div>
+      ) : status === "done" ? (
+        <button type="button" onClick={onComplete} className="glossary-qa-check glossary-power-finish dm-solid" style={{ ...primaryCtaColors(theme) }}>
+          Finish lesson <ChevronRight className="h-4 w-4" aria-hidden />
+        </button>
+      ) : current ? (
+        <div className="glossary-chain flex w-full flex-col">
+          <ChainStepBoard
+            key={`${pathId}-${step}`}
+            step={current}
+            wordTiles={"options" in current && isWordSet(current.options)}
+            onCorrect={cleared}
+            onWrong={() => { setStatus("wrong"); window.setTimeout(playWrong, 0); }}
+            onReset={() => setStatus("go")}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: ParagraphPowerPlay; onComplete: () => void }) {
+  const lesson = { powerPlay };
   const { playSweep, playWrong, playSelect } = useMaterialSounds();
   const gaps = lesson.powerPlay.answers.length;
   const [values, setValues] = useState<string[]>(() => lesson.powerPlay.answers.map(() => ""));
@@ -2205,10 +2660,19 @@ function CompleteScreen({
   lesson,
   masteredCount,
   onContinue,
+  nextLesson,
+  onNextLesson,
+  onReplay,
+  onLevels,
 }: {
   lesson: GlossaryLesson;
   masteredCount: number;
   onContinue: () => void;
+  /** the next authored level, when there is one (13 Oct 2026) */
+  nextLesson?: GlossaryLesson | null;
+  onNextLesson?: () => void;
+  onReplay?: () => void;
+  onLevels?: () => void;
 }) {
   // The one Dream Score, the same number the app header carries. The game
   // used to multiply its XP by 100 into a private "Dream Score" (15,000 and
@@ -2231,48 +2695,42 @@ function CompleteScreen({
         Lesson Complete!
       </h2>
 
-      <div className="flex w-full max-w-[380px] flex-col items-center gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 14%, var(--card))", borderColor: "var(--glossary-accent)" }}>
-        <span className="flex items-center gap-[6px] text-[15px] font-bold" style={{ color: "var(--glossary-accent)" }}>
-          <Sparkles className="h-4 w-4" aria-hidden /> Dream Score
-        </span>
-        <span className="text-[36px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          {dreamScore.toLocaleString()}
-        </span>
+      {/* The milestone this level unlocks: Dream Sneakers' value counts up
+         from where it stood (the Replit's "$50,000 company value unlocked"). */}
+      <ValuationTicker from={lesson.previousCompanyValue ?? 0} to={lesson.companyValue} milestone={lesson.milestone} mode="reached" />
+
+      {/* Score, XP and mastery as one row of three equal tiles, not a card
+         plus two rows: the value ticker above is now the screen's hero. */}
+      <div className="glossary-complete-stats" role="list">
+        <span role="listitem"><small><Sparkles aria-hidden /> Dream Score</small><b>{dreamScore.toLocaleString()}</b></span>
+        <span role="listitem"><small>XP earned</small><b>+{lesson.xpReward}</b></span>
+        <span role="listitem"><small>Mastered</small><b>{masteryPct}%</b></span>
       </div>
 
-      <div className="flex w-full max-w-[380px] flex-col gap-[var(--space-3)]">
-        <div className="flex items-center justify-between border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-          <span className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>
-            XP Earned
-          </span>
-          <span className="text-[18px] font-extrabold" style={{ color: "var(--glossary-accent)" }}>
-            +{lesson.xpReward} XP
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>
-            Mastery Progress
-          </span>
-          <span className="text-[18px] font-extrabold" style={{ color: "var(--foreground)" }}>
-            {masteryPct}%
-          </span>
-        </div>
+      <div className="glossary-complete-actions">
+        <button
+          type="button"
+          onClick={nextLesson && onNextLesson ? onNextLesson : onContinue}
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+          style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
+        >
+          {nextLesson && onNextLesson ? <>Next: {nextLesson.title}</> : "Continue"} <ChevronRight className="h-4 w-4" aria-hidden />
+        </button>
+        {onReplay || onLevels ? (
+          <div className="glossary-complete-secondary">
+            {onReplay ? <button type="button" className="dm-quiet" onClick={onReplay}><RotateCw aria-hidden /> Replay</button> : null}
+            {onLevels ? <button type="button" className="dm-quiet" onClick={onLevels}><MapIcon aria-hidden /> All levels</button> : null}
+          </div>
+        ) : null}
       </div>
-
-      <button
-        type="button"
-        onClick={onContinue}
-        className="dm-solid flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
-        style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
-      >
-        Continue <ChevronRight className="h-4 w-4" aria-hidden />
-      </button>
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
 // Top-level orchestrator
+
+const THEME_STORAGE_KEY = "dreamari-glossary-theme";
 
 const LAB_ATMOSPHERES: Array<{ id: LabAtmosphere; label: string; detail: string }> = [
   { id: "v1", label: "Drift", detail: "Cloud route" },
@@ -2455,7 +2913,12 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebr
   );
 }
 
-function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: GlossaryCareer; lesson: GlossaryLesson; atmosphere: LabAtmosphere; onClose: () => void }) {
+// DEMO-ONLY: every authored level opens at once (the Replit opens Levels 1
+// to 4 from the start, so the team can review them without replaying). For
+// production set false: a level then opens once the one before is complete.
+const DEMO_UNLOCK_AUTHORED_LEVELS = true;
+
+function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: GlossaryCareer; lesson: GlossaryLesson; atmosphere: LabAtmosphere; onClose: () => void; /** open another authored level (13 Oct 2026) */ onPlay: (lessonNumber: number) => void }) {
   const levels = career.levels;
   // Real progress (9 Oct 2026; Mika's notes: "improve how the level screen
   // should show where the students are currently"). A finished lesson shows
@@ -2470,8 +2933,11 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
   };
   const playingIndex = Math.max(0, levels.findIndex((entry) => entry.number === lesson.lessonNumber));
   const completedCount = levels.reduce((count, _, index) => count + (isComplete(index) ? 1 : 0), 0);
-  const stateOf = (index: number): "complete" | "current" | "locked" => (isComplete(index) ? "complete" : index === playingIndex ? "current" : "locked");
-  const STATE_LABEL = { complete: "Complete", current: "Playing now", locked: "Locked" } as const;
+  // A level is playable when it is authored and either open for the demo or
+  // the level before it is complete. "open" is playable, not yet finished.
+  const isPlayable = (index: number) => Boolean(lessonFor(levels[index].number)) && (DEMO_UNLOCK_AUTHORED_LEVELS || index === 0 || isComplete(index - 1));
+  const stateOf = (index: number): "complete" | "current" | "open" | "locked" => (index === playingIndex ? "current" : isComplete(index) ? "complete" : isPlayable(index) ? "open" : "locked");
+  const STATE_LABEL = { complete: "Complete", current: "Playing now", open: "Ready to play", locked: "Locked" } as const;
   // Drift review (9 Oct): six district boxes reduce paging without adding
   // the scrolling the student flow deliberately avoids. Other maps stay bespoke.
   const pageSize = atmosphere === "v1" ? 6 : 4;
@@ -2506,13 +2972,13 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
         <div className="glossary-level-map-viewport">
         <div className={`glossary-level-map-scroll glossary-map-concept-${atmosphere}`}>
           {atmosphere === "v3" ? <div className="glossary-orbit-core"><DreamyFace pose="glasses" size={90} /><b>Core skill</b><span>Business Basics</span></div> : null}
-          {atmosphere === "v4" ? <div className="glossary-circuit-horizon"><span>START</span><b>ROAD TO $5B</b></div> : null}
+          {atmosphere === "v4" ? <div className="glossary-circuit-horizon"><span>START</span><b>ROAD TO {levels[levels.length - 1]?.unlocks ?? "$30B"}</b></div> : null}
           {levels.slice(page * pageSize, (page + 1) * pageSize).map(({ title, unlocks: value, tier, goal, words, minutes }, slot) => {
             const index = page * pageSize + slot;
             const phase = tier === "Beginner" ? "Beginner · The Startup" : tier === "Intermediate" ? "Intermediate · Scaling Up" : "Advanced · The Big Leagues";
             const firstOfTier = index === 0 || levels[index - 1].tier !== tier;
             const orbitIndex = index === 0 ? 0 : index <= 7 ? index - 1 : index - 8;
-            const orbitCount = index === 0 ? 1 : index <= 7 ? 7 : 9;
+            const orbitCount = index === 0 ? 1 : index <= 7 ? 7 : Math.max(1, levels.length - 8);
             const orbitAngle = -Math.PI / 2 + (orbitIndex / orbitCount) * Math.PI * 2;
             const orbitRadius = index === 0 ? 0 : index <= 7 ? 25 : 41;
             const mapStyle = {
@@ -2526,14 +2992,14 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
                 {firstOfTier && <span className="glossary-map-phase">{phase}</span>}
                 <span className="glossary-map-connector" aria-hidden />
                 <button type="button" onClick={() => setSelected(index)} aria-pressed={selected === index} aria-current={stateOf(index) === "current" ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${STATE_LABEL[stateOf(index)].toLowerCase()}`}>
-                  {atmosphere === "v1" ? <><span className="glossary-district-badge">{stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "current" ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}</span><span className="glossary-district-rank">Level {index + 1}</span></> : stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "current" ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}
+                  {atmosphere === "v1" ? <><span className="glossary-district-badge">{stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "locked" ? <LockKeyhole aria-hidden /> : <b>{index + 1}</b>}</span><span className="glossary-district-rank">Level {index + 1}</span></> : stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "locked" ? <LockKeyhole aria-hidden /> : <b>{index + 1}</b>}
                 </button>
                 <span className="glossary-map-rung-copy">
                   <b>{title}</b>
                   {/* the level in the student's terms: what it is for, the five words, how long, what it opens (6 Oct 2026) */}
                   <span className="glossary-map-rung-goal">{goal}</span>
                   <span className="glossary-map-rung-words" aria-label="Words in this level">{words.map((w) => <i key={w}>{w}</i>)}</span>
-                  <small><span>{minutes} min</span><span><CircleDollarSign aria-hidden /> Unlocks a {value} deal</span><span>{STATE_LABEL[stateOf(index)]}</span></small>
+                  <small><span>{minutes} min</span><span><CircleDollarSign aria-hidden /> Unlocks {value}</span><span>{STATE_LABEL[stateOf(index)]}</span></small>
                 </span>
               </div>
             );
@@ -2548,7 +3014,15 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
         <footer>
           <span className="glossary-map-current-number">{selected + 1}</span>
           <div><b>{selectedLevel.title || lesson.title}</b><span>{selectedLevel.words.map((word) => <small key={word}>{word}</small>)}</span><small>{selectedLevel.minutes} min · {selectedLevel.unlocks}</small></div>
-          <strong>{stateOf(selected) === "current" ? "Playing" : STATE_LABEL[stateOf(selected)]}</strong>
+          {/* The selected level plays from here (the Replit's lesson list
+             opens a lesson on tap). The playing level just closes the map. */}
+          {stateOf(selected) === "current" ? (
+            <button type="button" className="glossary-map-play dm-solid" onClick={onClose}><Play aria-hidden /> Keep playing</button>
+          ) : stateOf(selected) === "open" || (stateOf(selected) === "complete" && lessonFor(selectedLevel.number)) ? (
+            <button type="button" className="glossary-map-play dm-solid" onClick={() => onPlay(selectedLevel.number)}><Play aria-hidden /> {stateOf(selected) === "complete" ? "Play again" : `Play level ${selected + 1}`}</button>
+          ) : (
+            <strong>{STATE_LABEL[stateOf(selected)]}</strong>
+          )}
         </footer>
       </section>
     </div>
@@ -2715,7 +3189,24 @@ function QuestionLayoutToggle({ value, onChange }: { value: QuestionLayout; onCh
 export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: { career: GlossaryCareer; lesson: GlossaryLesson; variant?: ExperienceVariant }) {
   const router = useRouter();
   const [screen, setScreen] = useState<Screen>("intro");
-  const [atmosphere, setAtmosphere] = useState<LabAtmosphere>("v1");
+  const [atmosphere, setAtmosphereState] = useState<LabAtmosphere>("v1");
+  // The theme follows the player from level to level (each level is its own
+  // page load), remembered per browser. ?theme=drift|signal|orbit|horizon
+  // picks one for review (DEMO-ONLY QA shortcut, like ?q= below).
+  const setAtmosphere = useCallback((next: LabAtmosphere) => {
+    setAtmosphereState(next);
+    try { window.localStorage.setItem(THEME_STORAGE_KEY, next); } catch { /* private mode: the pick still applies */ }
+  }, []);
+  useEffect(() => {
+    const byName: Record<string, LabAtmosphere> = { drift: "v1", signal: "v2", orbit: "v3", horizon: "v4" };
+    let saved: string | null = null;
+    try { saved = window.localStorage.getItem(THEME_STORAGE_KEY); } catch { saved = null; }
+    const requested = byName[new URLSearchParams(window.location.search).get("theme") ?? ""] ?? (saved && ["v1", "v2", "v3", "v4"].includes(saved) ? saved as LabAtmosphere : null);
+    if (!requested) return;
+    // localStorage and the URL are external systems, read once after mount.
+    const t = window.setTimeout(() => setAtmosphereState(requested), 0);
+    return () => window.clearTimeout(t);
+  }, []);
   const [showLevels, setShowLevels] = useState(false);
   const [musicStarted, setMusicStarted] = useState(false);
   const [unlockIndex, setUnlockIndex] = useState(0);
@@ -2826,6 +3317,14 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     router.push(`/career/${career.careerSlug}`);
   }
 
+  // Levels are one route with ?lesson=N (both the Play tab's glossary route
+  // and the lab route read it), so moving between levels keeps the path.
+  const nextLesson = career.lessons.find((entry) => entry.lessonNumber === lesson.lessonNumber + 1) ?? null;
+  function playLesson(lessonNumber: number) {
+    setShowLevels(false);
+    router.push(`${window.location.pathname}?lesson=${lessonNumber}`);
+  }
+
   function handleAnswer(result: AnswerResult) {
     if (!result.correct && current) setAttempts((previous) => ({ ...previous, [current.id]: (previous[current.id] ?? 0) + 1 }));
     setPendingResult(result);
@@ -2836,7 +3335,9 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     // and only a recovered answer commits mastery and advances the sequence.
     if (!pendingResult?.correct) return;
     const nextMastery = { ...mastery };
-    for (const id of pendingResult.creditedTermIds) nextMastery[id] = (nextMastery[id] ?? 0) + 1;
+    // One credit per term per question: a Level 3 sort tags all five items
+    // Cash Flow, which must count once, not five times.
+    for (const id of new Set(pendingResult.creditedTermIds)) nextMastery[id] = (nextMastery[id] ?? 0) + 1;
     setMastery(nextMastery);
     if (pendingResult.correct) {
       const nextStreak = streak + 1;
@@ -2936,15 +3437,22 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         </div>
   ) : null;
   const sceneScreen = screen === "unlock" && unlockIndex >= lesson.terms.length ? "unlockComplete" : screen;
+  // A case Power Play (Levels 3 and 4) is built from question pieces, so it
+  // borrows the question frame's layout, type ramp and scenery fit.
+  const caseFinale = screen === "powerPlay" && (lesson.powerPlay.kind === "chain" || lesson.powerPlay.kind === "path");
+  const questionFrame = screen === "question" || caseFinale;
   const activeLayout: QuestionLayout = variant === "lab" ? questionLayout : "current";
-  useQuestionSceneryFit(shellRef, activeLayout, atmosphere, variant === "lab" && screen === "question", `${current?.id ?? ""}-${pendingResult ? (pendingResult.correct ? 1 : 2) : 0}`);
+  useQuestionSceneryFit(shellRef, activeLayout, atmosphere, variant === "lab" && questionFrame, `${caseFinale ? "finale" : current?.id ?? ""}-${pendingResult ? (pendingResult.correct ? 1 : 2) : 0}`);
   return (
     <AtmosphereContext.Provider value={variant === "lab" ? atmosphere : "v1"}>
+    <LessonArtContext.Provider value={lessonHasArt(lesson)}>
     <QuestionLayoutContext.Provider value={activeLayout}>
     <div
       ref={shellRef}
       className={`glossary-game-shell glossary-game-${variant} glossary-lab-atmosphere-${atmosphere} ${variant === "lab" ? "glossary-fit-shell" : ""} marketing-v2 themeable relative flex min-h-dvh w-full flex-col`}
-      data-screen={sceneScreen}
+      data-screen={caseFinale ? "question" : sceneScreen}
+      data-finale={caseFinale ? "case" : undefined}
+      data-level={lesson.lessonNumber}
       data-qlayout={variant === "lab" ? activeLayout : undefined}
       data-question-kind={screen === "question" ? current?.kind : undefined}
       data-answer-state={pendingResult ? (pendingResult.correct ? "correct" : "wrong") : "idle"}
@@ -2973,7 +3481,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
       <main className="glossary-engine-main relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
         {showStreak !== null && <StreakBanner streak={showStreak} onDismiss={() => setShowStreak(null)} />}
         {/* every screen fits the window, never scrolls (8 Oct 2026) */}
-        <FitToScreen enabled={variant === "lab"} compact={screen === "question"} watch={`${screen}-${unlockIndex}-${queueIndex}-${pendingResult ? 1 : 0}`}>
+        <FitToScreen enabled={variant === "lab"} compact={questionFrame} watch={`${screen}-${unlockIndex}-${queueIndex}-${pendingResult ? 1 : 0}`}>
         {screen === "intro" && <IntroScreen lesson={lesson} variant={variant} atmosphere={atmosphere} onNext={() => { setMusicStarted(true); goTo(variant === "lab" ? "unlock" : "dreamyIntro"); }} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => goTo("lessonIntro")} />}
         {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} onStart={() => goTo("unlock")} />}
@@ -2984,9 +3492,9 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
             <UnlockCompleteScreen lesson={lesson} variant={variant} onStartPractice={() => goTo("question")} />
           ))}
         {screen === "question" && current && (
-          <QuestionScreen key={current.id} question={current} onAnswer={handleAnswer} onReset={() => setPendingResult(null)} />
+          <QuestionScreen key={current.id} question={current} onAnswer={handleAnswer} onReset={() => setPendingResult(null)} answerState={pendingResult ? (pendingResult.correct ? "correct" : "wrong") : "idle"} />
         )}
-        {screen === "powerPlayIntro" && <PowerPlayIntroScreen onStart={() => goTo("powerPlay")} />}
+        {screen === "powerPlayIntro" && <PowerPlayIntroScreen line={lesson.powerPlay.intro} onStart={() => goTo("powerPlay")} />}
         {screen === "powerPlay" && <PowerPlayScreen lesson={lesson} onComplete={() => goTo("masteryLoading")} />}
         {screen === "masteryLoading" && <MasteryLoadingScreenGate lesson={lesson} onDone={() => setScreen("complete")} />}
         {screen === "complete" && (
@@ -2995,6 +3503,10 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
             career={career}
             masteredCount={masteredCount}
             onContinue={exitToCareer}
+            nextLesson={variant === "lab" ? nextLesson : null}
+            onNextLesson={nextLesson ? () => playLesson(nextLesson.lessonNumber) : undefined}
+            onReplay={variant === "lab" ? restartGame : undefined}
+            onLevels={variant === "lab" ? () => setShowLevels(true) : undefined}
           />
         )}
         </FitToScreen>
@@ -3012,12 +3524,13 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
       </main>
       </div>
 
-      {variant === "lab" && showLevels ? <LabLevelMap career={career} lesson={lesson} atmosphere={atmosphere} onClose={() => setShowLevels(false)} /> : null}
+      {variant === "lab" && showLevels ? <LabLevelMap career={career} lesson={lesson} atmosphere={atmosphere} onClose={() => setShowLevels(false)} onPlay={playLesson} /> : null}
       {variant === "lab" && screen === "intro" ? <LabAtmosphereSwitcher value={atmosphere} onChange={setAtmosphere} /> : null}
       {variant === "lab" ? <LabThemeMusic atmosphere={atmosphere} enabled={musicStarted} /> : null}
       {variant === "lab" && showLayoutToggle && screen === "question" ? <QuestionLayoutToggle value={questionLayout} onChange={changeQuestionLayout} /> : null}
     </div>
     </QuestionLayoutContext.Provider>
+    </LessonArtContext.Provider>
     </AtmosphereContext.Provider>
   );
 }
@@ -3036,11 +3549,16 @@ function CompleteScreenGate({
   career,
   masteredCount,
   onContinue,
+  ...actions
 }: {
   lesson: GlossaryLesson;
   career: GlossaryCareer;
   masteredCount: number;
   onContinue: () => void;
+  nextLesson?: GlossaryLesson | null;
+  onNextLesson?: () => void;
+  onReplay?: () => void;
+  onLevels?: () => void;
 }) {
   // Lazy initializer, not an effect: this must run exactly once, the instant
   // this screen mounts, not after a render+commit round-trip. The lesson's XP
@@ -3050,5 +3568,5 @@ function CompleteScreenGate({
     saveLessonComplete(career.careerSlug, lesson.id, lesson.terms.map((t) => t.id), lesson.xpReward);
     awardDreamScore(`glossary:${career.careerSlug}:${lesson.id}`, lesson.xpReward);
   });
-  return <CompleteScreen lesson={lesson} masteredCount={masteredCount} onContinue={onContinue} />;
+  return <CompleteScreen lesson={lesson} masteredCount={masteredCount} onContinue={onContinue} {...actions} />;
 }

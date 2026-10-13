@@ -10,6 +10,8 @@
 // and "game with no content," matching the same real-data-vs-placeholder
 // split the rest of the app already uses (career/data.ts's "Coming soon").
 
+import { FIN_LESSON_2, FIN_LESSON_3, FIN_LESSON_4 } from "./data-finance-l2-4";
+
 export type GlossaryTerm = {
   id: string;
   order: number;
@@ -18,7 +20,28 @@ export type GlossaryTerm = {
   example: string;
   icon: string;
   memoryTip?: string;
+  /** A worked line that shows the term instead of a picture, for terms with
+   *  no honest literal image (13 Oct 2026, Joshua: "some finance terms do
+   *  not translate well into a literal graphic"). Shown on the teach card. */
+  formula?: string;
 };
+
+/** A small Dream Sneakers diagram above a question: the money drawn, not a
+ *  picture of the word. One fixed kit, so every industry composes the same
+ *  six shapes (13 Oct 2026, from the Levels 2 to 4 review).
+ *  - story: one line of the plot ("Dream Sneakers wants to open Store #2.")
+ *  - figures: labelled numbers with operators between them
+ *  - ledger: money in and money out rows with a title
+ *  - shares: a grid of equal shares; `owned` light up once answered
+ *  - split: an ownership bar
+ *  - compare: two options side by side, each with its short points */
+export type SceneCard =
+  | { kind: "story"; text: string; note?: string }
+  | { kind: "figures"; items: Array<{ label: string; value: string; note?: string }>; ops?: string[]; highlightLast?: boolean }
+  | { kind: "ledger"; title: string; rows: Array<{ label: string; value: string; tone?: "in" | "out" }> }
+  | { kind: "shares"; total: number; owned: number; label: string; note?: string; result?: string }
+  | { kind: "split"; title?: string; parts: Array<{ label: string; pct: number }> }
+  | { kind: "compare"; title: string; options: Array<{ label: string; points: string[] }> };
 
 type BaseQuestion = {
   id: string;
@@ -44,6 +67,36 @@ export type ChoiceQuestion = BaseQuestion & {
   layout?: "grid";
   /** A visual card above the prompt, e.g. sells-for / costs / left. */
   visual?: { kind: "profit"; title: string; sells: number; costs: number };
+  /** One of the shared scene cards above the prompt (Levels 2+). */
+  scene?: SceneCard;
+  /** A one-blank sentence ("The $25,000 becomes ___ for Dream Sneakers.");
+   *  the picked answer drops into the blank. `___` marks the gap. */
+  sentence?: string;
+};
+
+/** Select every answer that fits (Replit L3: "Select every cost."). */
+export type MultiSelectQuestion = BaseQuestion & {
+  kind: "multiSelect";
+  type: "Select All";
+  options: string[];
+  correct: number[];
+  scene?: SceneCard;
+};
+
+/** One step of a case: a choice, or a number to type ($ or %). */
+export type ChainStep =
+  | { prompt: string; options: string[]; correctIndex: number }
+  | { prompt: string; answer: number; unit: "$" | "%" };
+
+/** A short case over one scenario, answered a step at a time (Replit
+ *  Levels 3 and 4: "Step 1 of 3"). Dreamy says each step; the scene stays.
+ *  Credits every term in `termIds` once the last step is right. */
+export type ChainQuestion = BaseQuestion & {
+  kind: "chain";
+  type: "Case";
+  scene?: SceneCard;
+  steps: ChainStep[];
+  termIds?: string[];
 };
 
 export type TypeTermQuestion = BaseQuestion & {
@@ -80,13 +133,30 @@ export type ProfitBuilderQuestion = BaseQuestion & {
   visual?: { units: number; unitLabel: string; price: number; costs: number };
 };
 
-export type GlossaryQuestion = ChoiceQuestion | TypeTermQuestion | MatchUpQuestion | SortBucketsQuestion | ProfitBuilderQuestion;
+export type GlossaryQuestion = ChoiceQuestion | TypeTermQuestion | MatchUpQuestion | SortBucketsQuestion | ProfitBuilderQuestion | MultiSelectQuestion | ChainQuestion;
 
-export type PowerPlay = {
-  /** {1} {2} ... mark the gaps. */
-  paragraph: string;
-  answers: string[];
-};
+/** The lesson's finale. The fill-in paragraph is Level 1's (kind omitted);
+ *  Levels 3 and 4 run a case, or a choice of path and then a case. */
+export type PowerPlay =
+  | {
+      kind?: "paragraph";
+      /** {1} {2} ... mark the gaps. */
+      paragraph: string;
+      answers: string[];
+      /** The line on the intro screen and Dreamy's instruction. */
+      intro?: string;
+    }
+  | { kind: "chain"; intro: string; scene: SceneCard; steps: ChainStep[] }
+  | {
+      kind: "path";
+      intro: string;
+      scene: SceneCard;
+      prompt: string;
+      paths: Array<{ id: string; label: string; points: string[]; steps: ChainStep[] }>;
+    };
+
+/** Level 1's fill-in Power Play. */
+export type ParagraphPowerPlay = Extract<PowerPlay, { paragraph: string }>;
 
 export type GlossaryLesson = {
   id: string;
@@ -110,6 +180,11 @@ export type GlossaryLesson = {
   reviewQuestions: GlossaryQuestion[];
   powerPlay: PowerPlay;
   facts: string[];
+  /** The lesson's opening (Levels 2+; Level 1 keeps "Meet Dream Sneakers"). */
+  intro?: { headline: string; line: string; hook: string };
+  /** The value the company had before this lesson (the ticker counts up
+   *  from it on the results screen). Level 1 starts from $0. */
+  previousCompanyValue?: number;
 };
 
 /** One level on the game's full path, authored or not. Shown in the
@@ -145,15 +220,17 @@ export type GlossaryCareer = {
 };
 
 // Investment Banking's path, transcribed from Joshua's lesson-list
-// screenshot (Slack, 27 Sept 2026). His header says 20 lessons; the
-// screenshot shows the first 17, so 18-20 are still to be named.
+// screenshot (Slack, 27 Sept 2026), completed to all 20 from his Replit's
+// lesson list (13 Oct 2026). Level 2's goal and Level 3's words follow what
+// those lessons actually teach in the Replit (its list said "Profit" for
+// Level 3 but the lesson teaches Cash Flow; Profit is a Level 1 word).
 // Minutes by tier, as the screenshot shows them: 4 / 5 / 6.
 const MINUTES: Record<GlossaryLevel["tier"], number> = { Beginner: 4, Intermediate: 5, Advanced: 6 };
 const lvl = (number: number, tier: GlossaryLevel["tier"], title: string, words: string, goal: string, unlocks: string): GlossaryLevel => ({ number, tier, title, words: words.split(" · "), goal, unlocks, minutes: MINUTES[tier] });
 const IB_LEVELS: GlossaryLevel[] = [
   lvl(1, "Beginner", "Business Basics", "Company · Product · Service · Customer · Profit", "Launch Dream Sneakers", "$10K"),
-  lvl(2, "Beginner", "Investing Basics", "Investor · Capital · Risk · Return · Ownership", "Meet your first investor", "$50K"),
-  lvl(3, "Beginner", "Money In, Money Out", "Revenue · Cost · Profit · Margin · Loss", "Review your first sales report", "$120K"),
+  lvl(2, "Beginner", "Investing Basics", "Investor · Capital · Risk · Return · Ownership", "Open a second store", "$50K"),
+  lvl(3, "Beginner", "Money In, Money Out", "Revenue · Cost · Cash Flow · Margin · Loss", "Review your first sales report", "$120K"),
   lvl(4, "Beginner", "Ways to Invest", "Stock · Bond · Shareholder · Lender · Interest", "Choose how to raise money", "$250K"),
   lvl(5, "Beginner", "Deal Basics", "Deal · Client · Pitch · Mandate · Advisor", "Prepare your first funding pitch", "$500K"),
   lvl(6, "Beginner", "Banking Team Roles", "Analyst · Associate · VP · Director · Managing Director", "Build your finance team", "$1M"),
@@ -168,6 +245,9 @@ const IB_LEVELS: GlossaryLevel[] = [
   lvl(15, "Advanced", "Public Offerings and Dilution", "Public Offering · Dilution · New Shares · Existing Shareholders · Capital Raise", "Raise major growth capital", "$1B"),
   lvl(16, "Advanced", "Discounted Cash Flow", "DCF · Future Cash Flow · Discount Rate · Present Value · Terminal Value", "Value future growth", "$3B"),
   lvl(17, "Advanced", "Buy-Side vs. Sell-Side", "Buy-Side · Sell-Side · Investment Bank · Hedge Fund · Private Equity", "Choose your role in a major deal", "$5B"),
+  lvl(18, "Advanced", "Mandates & Advisory", "Mandate · Retainer · Success Fee · Engagement Letter · Conflict of Interest", "Hire bankers for a major transaction", "$10B"),
+  lvl(19, "Advanced", "Bookrunner & Roadshow", "Bookrunner · Book of Demand · Pricing · Allocation · Lock-Up Period", "Prepare for global investors", "$20B"),
+  lvl(20, "Advanced", "LBO & Restructuring", "LBO · Sponsor · Exit · Restructuring · Bankruptcy", "Survive your biggest finance challenge", "$30B"),
 ];
 
 // Icon is a semantic slug (matching the xlsx's plain-word Icon column --
@@ -328,6 +408,7 @@ const FIN_LESSON_1: GlossaryLesson = {
   companyValue: 10000,
   nextCompanyValue: 50000,
   nextMilestone: "Meet your first investor",
+  previousCompanyValue: 0,
   terms: FIN_L01_TERMS,
   questions: FIN_L01_QUESTIONS,
   reviewQuestions: FIN_L01_REVIEW,
@@ -347,7 +428,8 @@ const GLOSSARY_CAREERS: Record<string, GlossaryCareer> = {
     careerSlug: "investment-banking",
     careerTitle: "Investment Banking",
     world: "Business & Finance",
-    lessons: [FIN_LESSON_1],
+    // Levels 2 to 4 from Joshua's Replit (13 Oct 2026), data-finance-l2-4.ts.
+    lessons: [FIN_LESSON_1, FIN_LESSON_2, FIN_LESSON_3, FIN_LESSON_4],
     levels: IB_LEVELS,
     // Chapter names are placeholders (ours, not the Replit's), drawn from
     // the levels' own goals: launching the company, growing it, then the
@@ -366,4 +448,13 @@ export function hasGlossary(slug: string): boolean {
 
 export function glossaryFor(slug: string): GlossaryCareer | null {
   return GLOSSARY_CAREERS[slug] ?? null;
+}
+
+/** The authored lesson for `?lesson=` (its number or id), else Level 1. */
+export function lessonFor(career: GlossaryCareer, requested?: string | null): GlossaryLesson | null {
+  if (requested) {
+    const match = career.lessons.find((entry) => entry.id === requested || String(entry.lessonNumber) === requested);
+    if (match) return match;
+  }
+  return career.lessons[0] ?? null;
 }

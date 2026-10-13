@@ -46,7 +46,7 @@ import {
 import {
   saveLessonComplete,
 } from "./progress";
-import type { GlossaryCareer, GlossaryLesson, GlossaryQuestion, GlossaryTerm } from "./data";
+import type { GlossaryCareer, GlossaryLesson, GlossaryQuestion, GlossaryTerm, ParagraphPowerPlay } from "./data";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { LevelsMenu } from "./LevelsMenu";
 
@@ -1649,16 +1649,18 @@ export function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
 }
 
 export function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onComplete: () => void }) {
-  const gaps = lesson.powerPlay.answers.length;
-  const [values, setValues] = useState<string[]>(() => lesson.powerPlay.answers.map(() => ""));
+  // DEMO-ONLY legacy screen (unrouted): only ever plays Level 1's fill-in.
+  const powerPlay = lesson.powerPlay as ParagraphPowerPlay;
+  const gaps = powerPlay.answers.length;
+  const [values, setValues] = useState<string[]>(() => powerPlay.answers.map(() => ""));
   const [checked, setChecked] = useState(false);
   const [burstNonce, setBurstNonce] = useState(0);
-  const allCorrect = checked && lesson.powerPlay.answers.every((a, i) => values[i].trim().toLowerCase() === a.toLowerCase());
+  const allCorrect = checked && powerPlay.answers.every((a, i) => values[i].trim().toLowerCase() === a.toLowerCase());
   const allFilled = values.every((v) => v.trim() !== "");
 
   function check() {
     setChecked(true);
-    const correct = lesson.powerPlay.answers.every((a, i) => values[i].trim().toLowerCase() === a.toLowerCase());
+    const correct = powerPlay.answers.every((a, i) => values[i].trim().toLowerCase() === a.toLowerCase());
     if (correct) {
       playSweep();
       dispatchPlayPulse("celebrate");
@@ -1668,7 +1670,7 @@ export function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson
     }
   }
 
-  const parts = lesson.powerPlay.paragraph.split(/(\{\d+\})/g);
+  const parts = powerPlay.paragraph.split(/(\{\d+\})/g);
 
   return (
     <div className="flex w-full flex-col gap-[var(--space-5)]" style={{ color: "var(--foreground)" }}>
@@ -1679,7 +1681,7 @@ export function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson
         Fill in all {gaps} blanks.
       </p>
       <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
-        {[...lesson.powerPlay.answers]
+        {[...powerPlay.answers]
           .map((a) => a.charAt(0).toUpperCase() + a.slice(1))
           .map((word) => (
             <span key={word} className="rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
@@ -1694,7 +1696,7 @@ export function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson
           const gapMatch = part.match(/^\{(\d+)\}$/);
           if (!gapMatch) return <span key={i}>{part}</span>;
           const gapIndex = Number(gapMatch[1]) - 1;
-          const correct = checked && values[gapIndex].trim().toLowerCase() === lesson.powerPlay.answers[gapIndex].toLowerCase();
+          const correct = checked && values[gapIndex].trim().toLowerCase() === powerPlay.answers[gapIndex].toLowerCase();
           const wrong = checked && !correct;
           return (
             <input

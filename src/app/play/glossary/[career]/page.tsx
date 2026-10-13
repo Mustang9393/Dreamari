@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { glossaryFor } from "@/components/glossary/data";
+import { glossaryFor, lessonFor } from "@/components/glossary/data";
 import { GlossaryLabExperience } from "@/components/glossary/GlossaryLabExperience";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
@@ -19,6 +19,8 @@ import "@/components/glossary/glossary-worlds.css";
 import "@/components/glossary/glossary-signal.css";
 // DEMO-ONLY: prototype question layouts (?qlayout=), loaded last (12 Oct 2026).
 import "@/components/glossary/glossary-qlayout.css";
+// Levels 2+ pieces (scene cards, cases, select-all, the value ticker).
+import "@/components/glossary/glossary-levels.css";
 
 export const metadata: Metadata = {
   title: "Glossary Game · Dreamari",
@@ -33,13 +35,14 @@ export const metadata: Metadata = {
 // authored lesson (glossaryFor) resolve — everything else 404s, since the
 // Career Detail/Home/Play cards that link here already gate on
 // hasGlossary() and show a "Coming soon" state instead of a link for
-// anything else. Only lesson 1 plays today; a `?lesson=` param could pick
-// among more once a career has them.
-export default async function GlossaryGamePage({ params }: { params: Promise<{ career: string }> }) {
+// anything else. `?lesson=` picks an authored level by number or id (13 Oct
+// 2026: Investment Banking Levels 2 to 4); anything else plays Level 1.
+export default async function GlossaryGamePage({ params, searchParams }: { params: Promise<{ career: string }>; searchParams: Promise<{ lesson?: string }> }) {
   const { career: careerSlug } = await params;
+  const { lesson: requested } = await searchParams;
   const career = glossaryFor(careerSlug);
   if (!career) notFound();
-  const lesson = career.lessons[0];
+  const lesson = lessonFor(career, requested);
   if (!lesson) notFound();
   return (
     <>
