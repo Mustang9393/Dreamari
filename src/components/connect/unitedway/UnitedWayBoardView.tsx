@@ -797,18 +797,29 @@ type FeedItem = { id: string; space: string; at: number; pinned?: boolean } & ({
  *  title and when and where, and one thin yellow rule. 4:5, the feed's tall
  *  image size. */
 export function UwPoster({ title, when, where, photo }: { title: string; when?: string; where?: string; photo?: string }) {
+  // "Nov 14 · 10 AM" -> a calendar tile (NOV / 14) and the rest beside it;
+  // anything else stays as a plain line
+  const m = when ? /^([A-Za-z]{3,9})\s+(\d{1,2})\b\s*(?:·\s*)?(.*)$/.exec(when.trim()) : null;
+  const rest = [m ? m[3] : when, where].filter(Boolean).join(" · ");
   return (
     <span className="flex aspect-[4/5] w-full flex-col overflow-hidden rounded-[14px]" style={{ background: "#FBF8F2", boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6)" }}>
-      <span className="relative block flex-[1.8]">
+      <span className="relative block min-h-0 flex-1">
         <Image src={photo ?? D.PHOTOS.volunteers} alt="" fill sizes="340px" className="object-cover" style={{ objectPosition: "50% 35%" }} />
-      </span>
-      <span className="flex flex-1 flex-col justify-between px-[20px] pt-[16px] pb-[18px]">
-        <span className="flex flex-col gap-[8px]">
-          <span aria-hidden className="block h-[3px] w-[36px] rounded-full" style={{ background: D.BRAND.yellow }} />
-          <span className="text-[23px] leading-[27px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#141824" }}>{title}</span>
-          {(when || where) && <span className="text-[13.5px] leading-[18px] font-semibold" style={{ color: "#4A5160" }}>{[when, where].filter(Boolean).join(" · ")}</span>}
+        <span className="absolute top-[12px] left-[12px] rounded-[10px] px-[9px] py-[6px]" style={{ background: "#FBF8F2", boxShadow: "0 6px 16px -8px rgba(0,0,0,0.45)" }}>
+          <Image src={D.BRAND.logo} alt="United Way" width={88} height={41} unoptimized className="block h-[22px] w-auto" />
         </span>
-        <Image src={D.BRAND.logo} alt="United Way" width={88} height={41} unoptimized className="h-[26px] w-auto self-start" />
+      </span>
+      <span className="flex items-center gap-[14px] px-[16px] py-[14px]" style={{ borderTop: `4px solid ${D.BRAND.yellow}` }}>
+        {m && (
+          <span className="flex size-[58px] flex-none flex-col items-center justify-center rounded-[10px]" style={{ background: "#141824", color: "#fff" }}>
+            <span className="text-[11px] leading-[13px] font-extrabold tracking-[0.12em] uppercase" style={{ color: D.BRAND.yellow }}>{m[1].slice(0, 3)}</span>
+            <span className="text-[24px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{m[2]}</span>
+          </span>
+        )}
+        <span className="flex min-w-0 flex-col gap-[4px]">
+          <span className="text-[20px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#141824" }}>{title}</span>
+          {rest && <span className="text-[13.5px] leading-[18px] font-bold" style={{ color: "#3A4150" }}>{rest}</span>}
+        </span>
       </span>
     </span>
   );

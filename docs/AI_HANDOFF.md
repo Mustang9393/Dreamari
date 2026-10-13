@@ -1,3 +1,10 @@
+## 2026-10-14: Announcement posters: a printed flyer; South Central header photo
+
+**Why (Chandu):** "the image used for the header/card for United Way needs to be better ... something more tasteful"; "for the posters, make them a little more tasteful, I don't like the blue wash"; "make sure the white isn't boring and text isn't illegible on the white. I see a lot of blank space on the white area."
+- South Central's board header and Connect card use `uw-scholars.jpg` (United Way's own photo of three volunteers in Live United shirts) instead of the woods work day and the packing room. unitedforscmi.org blocks the in-app browser (BlogVault firewall), so no South Central photo was downloaded; ask Chandu for files if one is wanted.
+- `UwPoster`: United Way's photo untouched, the full-colour mark on a small paper chip in its corner, a 4px yellow rule, then a compact paper strip: a dark calendar tile (NOV / 14, parsed from `when`), the title in dark display type, time and place in dark grey. No blue wash, no empty panel.
+- **Checked:** tsc and eslint clean; the convening poster at 1440.
+
 ## 2026-10-14: United Way boards: no graphic posts, announcements with posters, "Volunteer" tab
 
 **Why (Chandu):** "The graphic posts maybe shouldn't be there in this board. Also for create a post it isn't the composer we have for those ... It probably isn't relevant here. Except for maybe Announcements? There could be an option to upload a poster or generate a poster for an announcement." Then: "rename serve to something better. It sounds off especially from a student's perspective ... maybe volunteer".
