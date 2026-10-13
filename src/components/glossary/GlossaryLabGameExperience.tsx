@@ -2732,11 +2732,12 @@ function CompleteScreen({
 
 const THEME_STORAGE_KEY = "dreamari-glossary-theme";
 
+// Drift and Signal only (13 Oct 2026, Chandu: "let's remove orbit and
+// horizon from the glossary game themes. Keep only drift and signal").
+// Their v3/v4 styling stays in the code, unreachable, until it is cleaned up.
 const LAB_ATMOSPHERES: Array<{ id: LabAtmosphere; label: string; detail: string }> = [
   { id: "v1", label: "Drift", detail: "Cloud route" },
   { id: "v2", label: "Signal", detail: "Focus grid" },
-  { id: "v3", label: "Orbit", detail: "Skill map" },
-  { id: "v4", label: "Horizon", detail: "Power mode" },
 ];
 
 function LabMaterialScenery({ atmosphere }: { atmosphere: LabAtmosphere }) {
@@ -3191,17 +3192,18 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   const [screen, setScreen] = useState<Screen>("intro");
   const [atmosphere, setAtmosphereState] = useState<LabAtmosphere>("v1");
   // The theme follows the player from level to level (each level is its own
-  // page load), remembered per browser. ?theme=drift|signal|orbit|horizon
+  // page load), remembered per browser. ?theme=drift|signal
   // picks one for review (DEMO-ONLY QA shortcut, like ?q= below).
   const setAtmosphere = useCallback((next: LabAtmosphere) => {
     setAtmosphereState(next);
     try { window.localStorage.setItem(THEME_STORAGE_KEY, next); } catch { /* private mode: the pick still applies */ }
   }, []);
   useEffect(() => {
-    const byName: Record<string, LabAtmosphere> = { drift: "v1", signal: "v2", orbit: "v3", horizon: "v4" };
+    const byName: Record<string, LabAtmosphere> = { drift: "v1", signal: "v2" };
     let saved: string | null = null;
     try { saved = window.localStorage.getItem(THEME_STORAGE_KEY); } catch { saved = null; }
-    const requested = byName[new URLSearchParams(window.location.search).get("theme") ?? ""] ?? (saved && ["v1", "v2", "v3", "v4"].includes(saved) ? saved as LabAtmosphere : null);
+    // a saved Orbit or Horizon pick (retired) falls back to Drift
+    const requested = byName[new URLSearchParams(window.location.search).get("theme") ?? ""] ?? (saved && ["v1", "v2"].includes(saved) ? saved as LabAtmosphere : null);
     if (!requested) return;
     // localStorage and the URL are external systems, read once after mount.
     const t = window.setTimeout(() => setAtmosphereState(requested), 0);

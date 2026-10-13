@@ -1,3 +1,7 @@
+## 2026-10-13: Glossary Game: Drift and Signal only
+
+**Why (Chandu):** "let's remove orbit and horizon from the glossary game themes. Keep only drift and signal."
+- `GlossaryLabGameExperience.tsx`: the theme list (intro picker and the top-bar paintbrush) offers Drift and Signal only; `?theme=` accepts drift or signal; a browser that had saved Orbit or Horizon falls back to Drift. The Orbit/Horizon styling (v3/v4 code and CSS) is now unreachable and can be deleted in a cleanup pass.
 ## 2026-10-13 (night): United Way: students only ask; staff post as United Way; far more activity
 
 **Why (Chandu):** "students should not be making posts or announcements in United Way. Students only get to ask, comment, like etc. Nothing else ... The composer still shows a student and student avatar on the United Way POV in the board. Also show way more activity in the feeds."
