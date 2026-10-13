@@ -1,3 +1,13 @@
+## 2026-10-13 (late): Past event boards: one hero, one strip, the conversation
+
+**Why (Chandu):** "we did not clear up the event board details. It's SO MUCH TEXT AND INFO ... too much text and too much info and a lot of competing information. Please simplify. Guide the user's eye." Applies to every past event board (EventView).
+- A past event with photos opens on a photo hero: the lead photo full-bleed, the name large, "date · place · N students" on one line, the partner lockup in the corner. Tapping it opens the photo viewer. No number rings, no QR, no separate "Photos" heading; the rest of the photos are one strip of four thumbnails (the last one "+N").
+- Without photos the ticket header stays, its three rings now one quiet line ("164 students · 12 pros · 23 posts").
+- Questions use the boards' feed rows (BoardThreadRow in BoardFeedList) instead of QuestionCard.
+- The recap's takeaways read at body size with one action (Save a takeaway); "Add to my Plan" left it.
+- Eye path: photo, name, the four tabs, Ask, the conversation.
+- **Checked:** tsc clean, eslint no new warnings; the Fall convening board at 1440.
+
 ## 2026-10-13 (late): United Way feed full width; only students wear generated avatars; small business help as a program card
 
 **Why (Chandu):** "the feeds etc need to take the full width of the surface they are in", "ONLY STUDENTS USE THE BLACK AND WHITE" avatars, "Maybe small business help thing should be a program card like CapCAN is".

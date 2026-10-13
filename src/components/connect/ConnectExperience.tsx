@@ -12,7 +12,7 @@ import { Children, createContext, useCallback, useContext, useEffect, useMemo, u
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { type LucideIcon as ResourceIcon, Handshake, UserRound, Rss } from "lucide-react";
-import { ArrowRight, ChevronLeft, Check, Eye, Briefcase, Lightbulb, Smile, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, MoreHorizontal, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
+import { ArrowRight, ChevronLeft, Check, Eye, Briefcase, Lightbulb, Smile, BookOpen, FileText, FolderOpen, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, MoreHorizontal, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
@@ -4681,6 +4681,25 @@ function EventView({
         <QrSheet name={event.name} seed={event.id} accent={pAccent} lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} onClose={() => setQrOpen(false)} />
       )}
 
+      {/* A past event leads with its own picture (13 Oct 2026, Chandu: "Its
+         SO MUCH TEXT AND INFO ... a lot of competing information. Please
+         simplify. Guide the user's eye."): one photo, the name, when and
+         where, and one quiet line of numbers. The eye goes photo, name, the
+         tabs, then the conversation. No rings, no QR, no separate gallery
+         heading. */}
+      {!preview && event.photos ? (
+        <section aria-label="Event" className="relative flex min-h-[300px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-6)] sm:min-h-[340px]" style={{ background: "#0e0c20", textShadow: CARD_TEXT_SHADOW, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)" }}>
+          <button type="button" onClick={() => setPhotoOpen(0)} aria-label={`Open photos from ${event.name}`} className="absolute inset-0 cursor-pointer">
+            <Image src={event.photos.images[0]} alt="" fill priority sizes="1280px" className="object-cover" />
+          </button>
+          <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,8,22,0.92) 0%, rgba(8,8,22,0.55) 45%, rgba(8,8,22,0.05) 80%)" }} />
+          <div className="pointer-events-none absolute top-[var(--space-5)] right-[var(--space-6)] z-10"><EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} /></div>
+          <div className="pointer-events-none relative z-10 flex flex-col gap-[6px]">
+            <h1 className="text-[30px] leading-[34px] font-extrabold text-balance sm:text-[36px] sm:leading-[40px]" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{event.name}</h1>
+            <p className="text-[14px] leading-[20px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{[event.date, event.location].filter(Boolean).join(" · ")}{typeof event.students === "number" ? ` · ${event.students} students` : ""}</p>
+          </div>
+        </section>
+      ) : (
       <section
         aria-label="Event context"
         className="group relative overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)]"
@@ -4710,9 +4729,7 @@ function EventView({
         {/* who is inside: the numbers a partner nonprofit is paying for, on the
            same frosted discs as the ticket cards */}
         {typeof event.students === "number" && (
-          <div className="relative z-10 mt-[var(--space-4)]">
-            <RingStats items={[[event.students, "Students"], [event.pros ?? 0, "Pros"], [event.postCount ?? 0, "Posts"]]} />
-          </div>
+          <p className="relative z-10 mt-[var(--space-3)] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)`, fontFamily: "var(--font-body)" }}>{event.students} students · {event.pros ?? 0} pros · {event.postCount ?? 0} posts</p>
         )}
         {preview && typeof event.going === "number" && (
           <div className="relative z-10 mt-[var(--space-4)]">
@@ -4720,6 +4737,7 @@ function EventView({
           </div>
         )}
       </section>
+      )}
 
       {preview ? (
         <>
@@ -4769,30 +4787,22 @@ function EventView({
           {/* Photos first: a gallery of the day, not a text link (direct
              feedback, 5 Sept 2026). One big frame, four small, the last one
              carries the rest of the count. Tap opens a viewer; view-only. */}
-          {event.photos && (
-            <section aria-label="Event photos" className="flex flex-col gap-[var(--space-3)]">
-              <div className="flex items-baseline justify-between gap-[var(--space-3)]">
-                <SectionHead>Photos</SectionHead>
-                <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><Images className="h-3.5 w-3.5" aria-hidden /> {event.photos.count} photos</span>
-              </div>
-              {/* four columns, two rows: the first frame takes the left half, four more fill the right */}
-              <ul className="grid grid-cols-4 grid-rows-2 gap-[6px] sm:gap-[8px]" style={{ aspectRatio: "5 / 2" }}>
-                {event.photos.images.slice(0, 5).map((src, index) => {
-                  const last = index === 4;
-                  const more = event.photos!.count - 5;
-                  return (
-                    <li key={src} className={`relative min-h-0 ${index === 0 ? "col-span-2 row-span-2" : ""}`}>
-                      <button type="button" onClick={() => setPhotoOpen(index)} aria-label={`Open photo ${index + 1} of ${event.photos!.count}`} className="dm-tap group relative block h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
-                        <Image src={src} alt="" fill sizes={index === 0 ? "(max-width: 992px) 66vw, 640px" : "(max-width: 992px) 33vw, 320px"} className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
-                        {last && more > 0 && (
-                          <span className="absolute inset-0 flex items-center justify-center text-[18px] font-extrabold" style={{ background: "rgba(9,10,20,0.58)", color: "#FFFFFF", fontFamily: "var(--font-display)" }}>+{more}</span>
-                        )}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
+          {event.photos && event.photos.images.length > 1 && (
+            <ul aria-label="Event photos" className="grid grid-cols-4 gap-[6px] sm:gap-[8px]">
+              {event.photos.images.slice(1, 5).map((src, k) => {
+                const index = k + 1;
+                const last = k === 3;
+                const more = event.photos!.count - 5;
+                return (
+                  <li key={src} className="relative aspect-[4/3] min-h-0">
+                    <button type="button" onClick={() => setPhotoOpen(index)} aria-label={`Open photo ${index + 1} of ${event.photos!.count}`} className="dm-tap group relative block h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+                      <Image src={src} alt="" fill sizes="(max-width: 992px) 25vw, 240px" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
+                      {last && more > 0 && <span className="absolute inset-0 flex items-center justify-center text-[15px] font-extrabold" style={{ background: "rgba(9,10,20,0.58)", color: "#FFFFFF", fontFamily: "var(--font-display)" }}>+{more}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           )}
 
       {/* Six clearly separated rooms instead of one long stacked scroll
@@ -4828,7 +4838,7 @@ function EventView({
             />
           )}
           {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
+          {threads.length > 0 && <BoardFeedList wrap={(id, row) => <div key={id}>{row}</div>} items={threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> }))} />}
           {threads.length === 0 && postedQs.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No questions here yet. Yours could be the first.</p>
           )}
@@ -4909,12 +4919,11 @@ function EventView({
               <div className="mt-[8px]"><ProBadge proId={event.recap.proId} postedAgo={event.recap.postedAgo} /></div>
               <ol className="mt-[6px] flex list-decimal flex-col gap-[6px] pl-5">
                 {event.recap.takeaways.map((t) => (
-                  <li key={t} className="text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>{t}</li>
+                  <li key={t} className="text-[14.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{t}</li>
                 ))}
               </ol>
               <div className="mt-[10px] flex flex-wrap gap-[var(--space-3)]">
                 <QuietCta onClick={onSaveTakeaway} done={takeawaySaved}>{!takeawaySaved && <Bookmark className="h-4 w-4" aria-hidden />} {takeawaySaved ? "Takeaway saved" : "Save a takeaway"}</QuietCta>
-                <QuietCta onClick={() => { setPlanAdded(true); onAddToPlan(); }} done={planAdded}>{!planAdded && <ChevronRight className="h-4 w-4" aria-hidden />} Add to my Plan</QuietCta>
               </div>
             </Card>
           )}
