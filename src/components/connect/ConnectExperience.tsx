@@ -42,6 +42,7 @@ import { UW_EVENT_BOARDS, uwEventById } from "./unitedway/uwEvents";
 import { toggleEventReminder, useEventReminders } from "@/lib/eventReminders";
 import { downloadCalendarFile, parseEventDate } from "@/lib/calendarFile";
 import { replyAs, setReplyAs } from "@/lib/replyAs";
+import { liftSplashVeil } from "@/components/app/SplashVeil";
 import { MentorshipTab } from "./mentorship/MentorshipTab";
 import { EmptyView, Shimmer } from "@/components/app/states";
 import { SurfaceState } from "@/components/app/SurfaceState";
@@ -1501,6 +1502,14 @@ export function ConnectExperience() {
     else if (params.get("dashboard")) setRole("pro");
     else if (params.get("partner")) setRole("partner");
   }, []);
+  // Only the People landing opens Connect's welcome; anywhere else (a board,
+  // an event, a thread, another tab) the pre-paint blur veil must lift at
+  // once, or it sits over the page until its 4s safety timeout (14 Oct 2026,
+  // Chandu: "when I open the actual United Way board it stays blurred with
+  // no modal or anything").
+  useEffect(() => {
+    if (!(view.kind === "home" && view.tab === "people")) liftSplashVeil();
+  }, [view]);
   // One step back, with the browser (8 Oct 2026, Chandu: "when I hit back
   // to Communities from a board... ALWAYS EVERYTHING SHOULD GO ONLY ONE STEP
   // BACK. Please fix this app wide."). Each step into a new screen is now a

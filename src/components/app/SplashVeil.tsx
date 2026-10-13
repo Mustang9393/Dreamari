@@ -20,6 +20,11 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 
+// Connect's welcome lives on its People landing only, so a /connect link to
+// a board, an event, a thread or another tab is never veiled (14 Oct 2026,
+// Chandu: "communities etc are taking a while to load ... the page stays
+// blurred for 2-3 seconds before it loads": the veil sat until its 4s
+// safety lift because nothing on those views opens a welcome).
 export const SPLASH_ROUTES: Record<string, string> = {
   "/profile": "dreamari:welcome:profile",
   "/explore": "dreamari:welcome:explore",
@@ -35,7 +40,7 @@ export const SPLASH_ROUTES: Record<string, string> = {
 };
 
 /** The pre-paint check, as a string for the layout's inline <script>. */
-export const SPLASH_VEIL_SCRIPT = `(function(){try{var r=${JSON.stringify(SPLASH_ROUTES)};var p=location.pathname.replace(/\\/$/,"")||"/";var k=r[p];if(!k)return;var q=new URLSearchParams(location.search);var due=k==="always"||(p==="/profile"&&q.get("welcome")==="1");if(!due){var n=performance.getEntriesByType("navigation")[0];var reload=n&&n.type==="reload";due=reload||sessionStorage.getItem(k+":session")!=="1";}if(due){document.documentElement.setAttribute("data-splash","pending");setTimeout(function(){document.documentElement.removeAttribute("data-splash")},4000);}}catch(e){}})();`;
+export const SPLASH_VEIL_SCRIPT = `(function(){try{var r=${JSON.stringify(SPLASH_ROUTES)};var p=location.pathname.replace(/\\/$/,"")||"/";var k=r[p];if(!k)return;var q=new URLSearchParams(location.search);if(p==="/connect"&&(["board","event","thread","insight","pro","dashboard","partner","admin","saved","following","activity"].some(function(x){return q.has(x)})||(q.get("tab")&&q.get("tab")!=="people")))return;var due=k==="always"||(p==="/profile"&&q.get("welcome")==="1");if(!due){var n=performance.getEntriesByType("navigation")[0];var reload=n&&n.type==="reload";due=reload||sessionStorage.getItem(k+":session")!=="1";}if(due){document.documentElement.setAttribute("data-splash","pending");setTimeout(function(){document.documentElement.removeAttribute("data-splash")},4000);}}catch(e){}})();`;
 
 /** Client-side navigation away from a veiled page clears the veil. */
 export function SplashVeilGuard() {
