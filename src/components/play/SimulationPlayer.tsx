@@ -134,7 +134,10 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
   const resumable = saved && saved.index > 0 && saved.index < level.beats.length ? saved : null;
   // DEMO-ONLY: a ?screen= link opens on that beat with a clean run (ahead
   // of any save), so a reviewer lands on the screen they were sent.
-  const startIndex = startAt ? level.beats.findIndex((b) => b.id === startAt) : -1;
+  // A restart must consume a v2 preview link, even while the original
+  // startAt prop remains mounted after history.replaceState.
+  const [startOverrideDismissed, setStartOverrideDismissed] = useState(false);
+  const startIndex = !startOverrideDismissed && startAt ? level.beats.findIndex((b) => b.id === startAt) : -1;
   const base = startIndex > 0
     ? { index: startIndex, scores: {} as Record<string, Tier> }
     : resumable
@@ -515,6 +518,14 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
   }, [index]);
 
   const restart = () => {
+    // DEMO-ONLY: RN v2 restart exits the ?screen= preview and keeps the
+    // art version, level and mode. Other views keep their reset behavior.
+    if (v2 && simulation.id === "registered-nurse") {
+      setStartOverrideDismissed(true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("screen");
+      window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    }
     // "Reputation resets to 50 and the level restarts from screen 1" -- the
     // rules tab. A fresh run must not inherit the old save, and that
     // includes strikes and whether a plan already fired this level --

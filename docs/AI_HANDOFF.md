@@ -1,3 +1,11 @@
+## 2026-10-13: RN v2 restart consumes the screen-preview override; refined master art prompt
+
+**Why (Chandu):** Restart from `?screen=RN2-47&v=2` returned to “The crisis pulled you off schedule” instead of the beginning. Also requested Joshua’s original master image prompt in the same format, refined to reproduce the newly selected anime treatment.
+- **Cause and fix:** HUD start-over clears the run to open the start card, but `base` reapplied the mounted `startAt` preview prop. RN v2 restart now dismisses that override in component state and removes only `screen` with the native History API. The selected v2, level, mode and remaining query/hash survive. Other views, including v1, retain their previous behavior. Authored beats, sequence, content and scoring are unchanged.
+- **Verified locally:** reported RN2-47 link → HUD restart → start card, then Start Shift → original opening at 50 reputation / zero decisions; reload stays at the start. Express RN1-26 → ending → Start over returns to its original first scene and retains `mode=express&level=1&v=2`. TypeScript, touched-file ESLint, tokens:check, whitespace and webpack production build passed before release; repeated after integrating latest main.
+- **Prompt:** `docs/reference/dreamari-master-image-standard-refined-anime-2026-10-13.txt` preserves the original header, six metadata fields and all 16 numbered section titles. Character guidance specifies anime facial construction, broad hair masses and controlled two-tone cel shading; background guidance specifies large planes, restrained meaningful props and simpler secondary figures. Identity, style and room references have distinct roles; scene continuity and actual UI-safe framing are explicit. Original attachment is preserved. User copy saved in Documents/Dreamari/output/prompts.
+- **Release:** existing explicit request to push ASAP applies. Only this RN v2 reset, prompt reference and handoff changes are staged; local art review artifacts remain untracked. Confirm the deployed reported-link restart after the build is Ready.
+
 ## 2026-10-13: Glossary Game: Drift and Signal only
 
 **Why (Chandu):** "let's remove orbit and horizon from the glossary game themes. Keep only drift and signal."

@@ -1,0 +1,266 @@
+DREAMARI MASTER CAREER SIMULATION IMAGE STANDARD
+Create a single cohesive cinematic 2D anime illustration for a Dreamari career simulation. The character, environment, furniture, props, lighting, shadows, and background people must feel like they were illustrated together as one unified scene, not a character pasted over a separate background.
+CAREER: [CAREER]
+LEVEL / ROLE: [LEVEL + ROLE]
+SCENE: [WHAT IS HAPPENING]
+LOCATION: [WORKPLACE / ENVIRONMENT]
+TIME OF DAY: [TIME]
+CHARACTERS: [CHARACTER DETAILS + REFERENCE IMAGES]
+
+1. Overall visual direction
+Use a premium, polished cinematic Japanese 2D television-anime look with clean two-tone cel shading, strong silhouettes, thin controlled contour lines, expressive anime facial construction, and a simplified hand-designed background.
+The image should feel comparable in production quality to a high-end television anime, but it must remain its own Dreamari visual identity. Do not imitate another franchise's characters, costumes, colors, or world.
+Design the frame as an anime production, not a realistically rendered illustration with anime eyes added afterward.
+Use clear shapes first, selective detail second. Keep the character and background at a compatible level of simplification.
+Avoid the default AI-generated look:
+no hyper-detailed textures everywhere
+no excessive micro-detail
+no photorealistic or painterly skin rendering
+no western comic-book facial modeling
+no heavy black comic contours, crosshatching, stippling, or inked cheek planes
+no 3D-render appearance
+no plastic skin
+no dense soft gradients on faces or clothing
+no excessive sharpening
+no over-rendered hair
+
+2. Background simplification
+The environment should use simplified anime background design:
+clean architectural shapes
+large readable color blocks
+a small number of meaningful details
+simplified furniture and equipment
+limited visual clutter
+clear foreground, midground, and background
+Use broad planes for walls, counters, floors, cabinets, windows, and major equipment. Describe their shape and function without rendering every seam, surface grain, screw, button, or cable.
+Do not fill every surface with objects.
+Only include equipment that helps explain the career or current scene.
+For offices, for example, use a small number of monitors, desks, chairs, plants, documents, or work tools rather than filling the entire frame with screens.
+For clinical spaces, retain the essential bed, rail, headwall, monitor, IV, or relevant care equipment without inventing extra machines or tubing.
+Keep distant trees, buildings, clouds, and plants as grouped shapes. Do not make the view outside more detailed than the main character.
+Background people should be simplified secondary figures with readable silhouettes, minimal faces, broad hair shapes, and a few clothing folds. They should support a functioning workplace without competing with the main characters.
+
+3. Color standard
+Keep the colors vibrant but controlled.
+Use:
+richer blues
+clean sky colors
+canonical, healthy skin tones
+selective warm accents
+deep navy and charcoal
+genuinely dark black points
+Use a clear base color and a restrained shadow color on characters. Broad lighting transitions may appear in the environment, but they must not become dense gradients on every surface.
+Dark areas should remain dark enough to make the image feel premium and cinematic.
+Do not wash the whole image in orange, yellow, or artificial golden-hour lighting.
+The environment may have warm sunlight, but blues, blacks, whites, skin tones, and neutral surfaces must retain their own color.
+Do not lighten, darken, or recolor an existing character's canonical skin tone to match a style reference.
+
+4. Lighting
+Use one believable dominant light source appropriate for the time of day.
+Characters and the environment must respond to that same light source.
+Include:
+consistent shadow direction
+one broad, readable cel-shadow plane on skin where appropriate
+restrained cel-shadow shapes on clothing
+subtle contact shadows
+believable, limited environmental bounce light
+Use shadow shape and value to explain form. Do not model faces with many small cheek, forehead, nose, neck, or under-eye patches.
+Avoid:
+character lighting that does not match the room
+glowing outlines around characters
+artificial halos
+excessive rim lighting
+blown-out highlights
+repeated glare on every surface
+multiple suns or contradictory light directions
+
+5. Reflections and glare
+Surfaces should look premium but not excessively glossy.
+Floors and tables may have a subtle satin or polished finish, but they should not behave like mirrors.
+Use:
+soft, muted reflections
+restrained highlights
+subtle floor contact
+broad, quiet material tones
+Avoid:
+giant light streaks across floors
+bright glare patches on tables
+mirror-like marble
+reflections of every object
+unnecessary specular highlights
+Reflections exist primarily to ground the characters, not to become part of the composition.
+
+6. Character integration
+The character must physically belong in the environment.
+Match:
+perspective
+scale
+lighting
+color temperature
+shadow direction
+line weight
+rendering detail
+At least one environmental element may overlap part of the character when compositionally natural, such as a desk edge, glass partition, chair, doorway, equipment, hospital bed, aircraft component, or workstation.
+Characters should cast believable contact shadows where appropriate.
+A hand holding a tool must connect naturally to the arm and body. A person leaning on a counter, sitting in a bed, or handing something over must have believable physical contact with that environment.
+Never create the appearance of a clean character sprite simply placed over a backdrop.
+
+7. Character rendering
+Main characters should use:
+clean Japanese 2D anime facial construction
+expressive, clearly designed anime eyes that retain adult proportions
+simplified noses and mouths
+smooth base skin color with one broad cel-shadow plane where appropriate
+thin controlled facial lines
+large, intentional hair masses
+a small number of purposeful clothing folds
+readable expressions
+Avoid western comic-book jaw and cheek modeling, heavy brows outlined in black, clusters of forehead creases, crosshatched wrinkles, painterly facial detail, or glossy skin.
+Keep adults visibly adult through facial structure, proportions, posture, and canonical features. Do not make mature characters look like teenagers by enlarging the eyes or shrinking the face excessively.
+Hair is especially important: preserve the hairstyle's silhouette while rebuilding its rendering from broad solid shapes.
+For most hairstyles, start with approximately five to eight major masses, with very few interior separation curves. Treat this as a simplification guide, not a reason to change the canonical hairstyle.
+For short textured or curly hair, use a small number of broad scalloped silhouette clusters, approximately eight to ten where suitable. Retain the character's natural hair texture without drawing individual curls, curls inside curls, spring-like ringlets, or dozens of tiny highlight marks.
+For buns and updos, use a few overlapping solid masses. Do not fill the bun with concentric curling lines.
+For braids, use a limited sequence of broad interlocking shapes rather than drawing every strand within each segment.
+Use one base hair color and, where necessary, one broad shadow or restrained cel accent. Keep gray streaks as a few deliberate shapes.
+Allow only a few purposeful framing locks or flyaways. Do not add fine strands simply to demonstrate detail.
+Characters should generally be visually appealing and professionally designed without being sexualized.
+
+8. Character identity consistency
+When a character already exists, preserve their canonical:
+face silhouette and identifying features
+skin tone
+age
+hairstyle silhouette
+hair color
+eye color
+build
+wardrobe
+accessories
+approximate height
+Use the supplied character reference image as the identity source.
+A style reference controls linework, shading, and simplification only. It must not replace the character's face, ethnicity, clothing, age, or environment.
+Clearly distinguish the inputs:
+character reference: identity only
+location reference: architecture and layout only
+approved Dreamari anime frame: style and rendering only
+existing scene being edited: identity, action, composition, and continuity
+Do not copy a reference character or reference room into an unrelated scene.
+Do not redesign an existing character between scenes. Preserve an approved face and hair design across welcoming, concerned, proud, working, and tired expressions.
+
+9. Cast diversity across careers
+Do not recycle the same face, body type, ethnicity, hairstyle, or overall character design across unrelated Dreamari career simulations.
+Each career should have its own identifiable cast.
+When creating a new character, deliberately vary:
+ethnicity
+facial structure
+age
+hair
+body build
+height
+clothing
+posture
+visual personality
+Two characters with different names should never appear to be the same generated person.
+Simplifying hair must not erase culturally or ethnically meaningful texture. Simplifying a face must not erase age or identifying features.
+
+10. Pose and storytelling
+The scene must communicate what is happening in the simulation.
+Characters should be:
+working
+reacting
+walking
+inspecting
+speaking
+observing
+handing something over
+using equipment
+interacting with coworkers, clients, patients, machinery, documents, or the environment
+Avoid making every character stand directly toward the camera like a portrait.
+Use a clear action and a clear point of attention. Do not invent unrelated activities or make a character operate several tools at once unless the scene explicitly requires it.
+Friendly characters may smile when appropriate because Dreamari should feel aspirational and exciting.
+Expressions should still fit the story moment. A concerned reaction, anxious patient, serious inspection, or urgent incident must remain recognizable after the style is simplified.
+Check anatomy and object handling: the correct number of arms, hands, fingers, and tools; plausible grip; no extra hand created to explain a gesture.
+
+11. Career authenticity
+Every image must visually belong to the specific career.
+Include only the tools, spaces, uniforms, equipment, workplace conditions, and professional relationships that make sense for that role and career level.
+Preserve scene-specific professional details such as protective clothing, identification, clinical equipment, inspection tools, or safety gear when required by the supplied scene.
+Do not invent a procedure, tool use, symptom, uniform, or workplace condition simply to make the frame more dramatic.
+The student should feel:
+“This is what it might actually feel like to work here.”
+
+12. Scene continuity
+Recurring environments must remain recognizable across the simulation.
+Preserve:
+room architecture
+workstation layout
+major furniture
+equipment
+windows and their orientation
+important landmarks
+view outside the windows
+overall color palette
+Use an approved scene or location anchor for recurring spaces rather than inventing the room again from a text description.
+Time-of-day variants should look like the same place at a different time, not a newly invented environment.
+When a person appears in successive states, preserve the same identity, hairstyle design, clothing, camera relationship, and relevant equipment. Change only the action, expression, condition, or lighting required by the story.
+
+13. Time-of-day treatment
+Match the sky and lighting to the story.
+Day: clean blue sky, neutral daylight, moderate contrast.
+Afternoon: slightly warmer sunlight while the sky remains clearly blue.
+Early sunset: blue upper sky with restrained orange/pink near the horizon.
+Late sunset: warmer sky and deeper interior shadows, used selectively for high-aura or important story moments.
+Night: cool dark blues with restrained practical lighting.
+Do not use dramatic sunset lighting simply because it looks attractive. It must correspond to the story.
+Keep the view, room geometry, and cast recognizable across time variants. Do not place a bright daytime skyline behind a night scene or invent a second sun to create extra highlights.
+
+14. Composition for Dreamari UI
+Generate only the illustration.
+Do not generate:
+buttons
+dialogue boxes
+progress bars
+Reputation meters
+names
+captions
+interface icons
+game text
+The Dreamari UI will be placed separately.
+Use the actual target game screen or overlay reference when available. Plan for its top HUD, dialogue card, answer panel, and any career instrument before placing the important visual information.
+Leave visually quiet negative space wherever the planned interface card will appear. A quiet bottom third is a useful starting point, but some instrument panels extend higher; use the actual overlay rather than assuming every slide has the same safe area.
+Important faces, gestures, hands, tools, and story information must remain visible after the UI is added. Do not put a medication packet, scanner head, handover notebook, or other essential action behind the dialogue card.
+Keep faces below the top HUD and above the dialogue area. As a starting guide, faces often belong within approximately the upper 8–45% of the frame; the actual UI and camera composition take priority.
+For mobile, identify the main story subject and keep the essential face and action inside the planned portrait crop. Do not scatter essential faces across both edges of a wide frame.
+If a two-person scene or a wide action cannot remain legible in both crops, create a separately composed portrait version when requested. Do not solve the problem by making characters or props tiny, cutting off important faces, or changing the scene's meaning.
+Verify the illustration inside the real desktop and phone UI before accepting it, not only as a standalone image.
+
+15. Screens and written information
+Keep the quantity of computer monitors and digital displays low.
+If a display is necessary, use simple believable visual information such as:
+a basic chart
+a few bars
+a simplified spreadsheet structure
+simple diagnostic information
+Use a few clean shapes or traces rather than dense generated screen content. Dynamic readings and important instructions belong in the native game UI.
+Do not generate dense fake dashboards, gibberish text, dozens of charts, screens filled with illegible information, names, patient identifiers, or invented numerical readings.
+Documents, badges, notebooks, and labels should remain blank or use sparse non-readable structural marks. If scanning a barcode is essential to the action, use a simple barcode pattern without invented words or numbers.
+
+16. Final quality check
+Before accepting the image, verify:
+STYLE: Does the entire frame look like one coherent Japanese 2D anime production rather than a western comic, painting, or 3D render?
+CHARACTER: Does the person match their canonical identity, age, ethnicity, proportions, wardrobe, and accessories?
+BACKGROUND: Is it intentionally simplified into readable architecture and color blocks rather than over-generated texture?
+LIGHTING: Are character and room lit by the same believable source with consistent shadow direction?
+BLACK POINTS: Are navy, charcoal, and black areas deep enough to feel premium?
+COLOR: Is the image vibrant without becoming oversaturated or washing every surface in warm light?
+GLARE: Are reflections and highlights restrained?
+CLUTTER: Are there only as many screens, devices, props, and people as the story needs?
+GROUNDING: Does the character physically feel inside the environment, with plausible contact and object handling?
+HAIR: Is the hairstyle built from a few broad solid masses with minimal interior strokes, without losing canonical texture or silhouette?
+FACE: Are eyes, nose, mouth, and shadows clean and expressive without comic-book modeling, excessive creases, or childlike de-aging?
+STORY: Can someone understand the action and emotional state before reading the dialogue?
+CONTINUITY: Do recurring characters, rooms, windows, equipment, and time-of-day variants remain consistent?
+UI: Are the essential face, gesture, and tools still visible in the real desktop and phone crops with the interface overlaid?
+If any of these fail, revise only the failing element while preserving the approved identity, scene, composition, and other successful details. Re-check the full frame after the revision so a simplification does not introduce extra hands, missing props, or continuity drift.
+Highest-priority instruction: Favor intentional simplification over additional detail. Dreamari images should feel designed, composed, and art-directed, not like the generator tried to demonstrate how much detail it could create.
