@@ -26,7 +26,7 @@ const MONTHS = [
 const LATEST = MONTHS[MONTHS.length - 1];
 const WEEKLY_ACTIVE = 42;
 
-export const INTERVENTION_BY_GRADE = [
+const INTERVENTION_BY_GRADE = [
   { grade: 9, count: 3 },
   { grade: 10, count: 2 },
   { grade: 11, count: 4 },

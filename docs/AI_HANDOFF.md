@@ -1,3 +1,9 @@
+## 2026-10-13 (late): Counselor v6 Analytics shows v4's charts (replaces the v1 panels)
+
+**Why (Chandu):** "I don't see any of the graphs we have in impact/milestones etc in v4 in v6." The earlier "v1" request meant v4's glow charts; the v1-derived panels (`v6/AnalyticsDetails.tsx`) are removed and v1's files are back to unexported.
+- v6 Analytics renders v4's own screens inside the same v4 wrapper Workspace uses (`V4Embed`: `marketing-v2 themeable` + `data-counselor-version="v4"` + `.v4-content`, which switches on v4's tokens and chart CSS): Readiness = v4 Readiness (indicator dials, gaps donut, readiness by grade) + v4 Milestones (tick gauge per milestone); Postsecondary = v6's measures + v4 College & Career; Engagement = v4 Engagement; My Impact = v4 My Report (CounselorImpact). Career & WBL, Risk and Outcomes keep v6's own panels. Where a v4 screen measures the same thing as v6's cards (Readiness, Engagement), it replaces them so nothing shows twice.
+- **Checked:** tsc and eslint clean; each area renders with no error overlay (light, 1440).
+
 ## 2026-10-13 (night): Counselor v5/v6: Explore's video thumbnails; v6 Analytics gets v1's graphs
 
 **Why (Chandu):** "the videos in v5/v6 of the counselor dashboard need to use the thumbnail we've used in the explore", then "update the analytics part of the v6 to have graphs and details from v1 wherever necessary".

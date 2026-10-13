@@ -67,11 +67,13 @@ import { LogSheetHost, openLog } from "../v5/LogSheet";
 import { ReelStatCard, WATCHES } from "../v5/Videos";
 import { videoPoster } from "@/components/app/companyVideos";
 import { countActivity, useActivity } from "@/lib/activityEvents";
-import { DreamariEngagementPanel } from "../v5/Analytics";
-import { V1Details } from "./AnalyticsDetails";
+import { Readiness as ReadinessV4 } from "../v4/Readiness";
+import { Milestones as MilestonesV4 } from "../v4/Milestones";
+import { CareerCollegeInsights as CollegeCareerV4 } from "../v4/CareerCollegeInsights";
+import { PlatformEngagement as EngagementV4 } from "../v4/PlatformEngagement";
+import { CounselorImpact as ImpactV4 } from "../v4/CounselorImpact";
 import { ExploreSheetHost, openCareer, openSchool } from "../v5/ExploreSheets";
 import { SchoolPoster } from "../v5/ExploreCards";
-import { ImpactView } from "../v5/ImpactView";
 import { CuratedCareerRows, CuratedSchoolRows, PathwaySwitch, PayCuration, WorldPills, isTradeCareer, isTradeSchool, type Pathway } from "../v5/Explore";
 import { V5Prepare, useMeetings, usePrepareMerged } from "../v5/Prepare";
 import { V5Profile } from "../v5/Profile";
@@ -786,8 +788,19 @@ function Analytics({
         ariaLabel="Analytics area"
         layoutId="six-analytics-tabs"
       />
-      {domain === "My Impact" ? <div className="pt-[var(--space-6)]"><ImpactView /></div> : domain === "Outcomes" ? <Outcomes /> : <>
-      {domain === "Engagement" && <div className="py-[var(--space-6)]"><DreamariEngagementPanel /></div>}
+      {/* v4's charts in v6 (13 Oct 2026, Chandu: "I don't see any of the
+         graphs we have in impact/milestones etc in v4 in v6"). The v4
+         screens render as they are, inside the same v4 wrapper Workspace
+         uses: Readiness is v4's Readiness (indicator dials, gaps donut,
+         readiness by grade) and its Milestones (a tick gauge per
+         milestone); Engagement is v4's Engagement; My Impact is v4's My
+         Report; Postsecondary keeps v6's measures and adds v4's College &
+         Career. Each replaces v6's own panels for that area where they
+         measured the same thing, so nothing shows twice. */}
+      {domain === "My Impact" ? <V4Embed><ImpactV4 /></V4Embed>
+        : domain === "Outcomes" ? <Outcomes />
+        : domain === "Readiness" ? <V4Embed><ReadinessV4 /><div className="mt-[var(--space-10)]"><MilestonesV4 /></div></V4Embed>
+        : domain === "Engagement" ? <V4Embed><EngagementV4 /></V4Embed> : <>
       <div className="six-analytics-cards">
         {metrics.map((m, i) => (
           <Metric
@@ -859,9 +872,19 @@ function Analytics({
           </div>
         </section>
       </div>
-      <V1Details domain={domain} students={students} group={group} />
+      {domain === "Postsecondary" && <V4Embed><CollegeCareerV4 /></V4Embed>}
       </>}
     </>
+  );
+}
+
+/** A v4 screen inside v6: the wrapper that turns on v4's tokens and chart
+ *  styles (the same one Workspace uses for Documents and Connect). */
+function V4Embed({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="six-existing marketing-v2 themeable pt-[var(--space-6)]" data-counselor-version="v4">
+      <div className="v4-content">{children}</div>
+    </div>
   );
 }
 
