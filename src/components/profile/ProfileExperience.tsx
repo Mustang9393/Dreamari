@@ -1999,7 +1999,7 @@ export function Top3Tab({
                       <button type="button" onClick={() => openPeek(index)} className="t3s-toggle" aria-label={`Show more about ${career.title}`}>
                         Show more <ChevronRight className="h-4 w-4" aria-hidden />
                       </button>
-                      <Link href={sim ? `/play/${sim.id}` : `/play?focus=${id}`} aria-label={`Play ${career.title}`} className="t3s-play dm-solid"><Play className="h-[12px] w-[12px]" fill="currentColor" aria-hidden /> Play</Link>
+                      <Link href={`/play?focus=${sim ? sim.id : id}`} aria-label={`Play ${career.title}`} className="t3s-play dm-solid"><Play className="h-[12px] w-[12px]" fill="currentColor" aria-hidden /> Play</Link>
                       <IconTip label="Career Report">
                         <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="t3s-report">
                           <FileText className="h-[15px] w-[15px]" aria-hidden />
@@ -2057,7 +2057,7 @@ export function Top3Tab({
                  own switcher between the three careers ("we have the career
                  report tab anyway right?"). Learn more stays at the foot. */}
               <Link
-                href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
+                href={`/play?focus=${sim ? sim.id : id}`}
                 aria-label={`Play ${career.title}`}
                 className="dm-solid mt-[var(--space-1)] flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
                 style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}

@@ -76,10 +76,18 @@ let cachedRaw: string | null | undefined;
 let cached: Store = EMPTY;
 const listeners = new Set<() => void>();
 
+// DEMO-ONLY (14 Oct 2026, Chandu: "when I click on play from a career
+// detail etc. don't save progress. Start from the start of the game. It's a
+// demo so we don't need to resume from continue"): every page load starts
+// with no stored progress. Flip to false to bring saved progress back.
+export const DEMO_START_FRESH = true;
+let clearedThisLoad = false;
+
 export function progressSnapshot(): Store {
   if (typeof window === "undefined") return EMPTY;
   let raw: string | null = null;
   try {
+    if (DEMO_START_FRESH && !clearedThisLoad) { clearedThisLoad = true; window.localStorage.removeItem(KEY); }
     raw = window.localStorage.getItem(KEY);
   } catch {
     return EMPTY;
@@ -120,6 +128,8 @@ function commit(next: Store): void {
 }
 
 export function readRun(store: Store, gameId: string, level: number): RunSave | null {
+  // the demo never resumes a run: every Play starts the level from the top
+  if (DEMO_START_FRESH) return null;
   return store[slot(gameId, level)] ?? null;
 }
 

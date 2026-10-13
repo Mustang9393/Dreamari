@@ -375,7 +375,7 @@ export function MomentBreather({ community }: { community: Community }) {
   const game = community.world === "Business & Finance" ? INVESTMENT_BANKING : community.world === "Health & Medicine" ? REGISTERED_NURSE : null;
   const event = !game ? EVENTS.find((ev) => ev.lifecycle === "Upcoming" && /\d/.test(ev.date)) ?? null : null;
   const photo = game ? game.cover : "/images/connect/events/panel-2.jpg";
-  const href = game ? `/play/${game.id}` : event ? `/connect?event=${event.id}` : "/connect";
+  const href = game ? `/play?focus=${game.id}` : event ? `/connect?event=${event.id}` : "/connect";
   const title = game ? `Day in the Life: ${game.title}` : event ? event.name : "Dream Opportunity events";
   const line = game ? `Play · Level ${game.levels[0].n} · ${game.levels[0].role}` : event ? `${event.date} · ${event.location}` : "Meet pros in person";
   return <MomentCard href={href} photo={photo} title={title} line={line} why={game ? "Try the job for ten minutes" : "Meet pros in person"} play={!!game} />;
@@ -402,7 +402,7 @@ export function PlayBreather({ id }: { id: string }) {
   if (type === "sim") {
     const game = SIMULATIONS.find((s) => s.id === ref);
     if (!game) return null;
-    return <MomentCard href={`/play/${game.id}`} photo={game.cover} title={`Day in the Life: ${game.title}`} line={`Play · Level ${game.levels[0].n} · ${game.levels[0].role}`} why="Try the job for ten minutes" play />;
+    return <MomentCard href={`/play?focus=${game.id}`} photo={game.cover} title={`Day in the Life: ${game.title}`} line={`Play · Level ${game.levels[0].n} · ${game.levels[0].role}`} why="Try the job for ten minutes" play />;
   }
   const glossary = GLOSSARY_GAMES.find((g) => g.careerSlug === ref);
   if (!glossary || !glossary.cover) return null;

@@ -1067,7 +1067,7 @@ function EnvCard({
               {hasSimulation && (
                 <button
                   type="button"
-                  onClick={() => router.push(`/play/${slug}`)}
+                  onClick={() => router.push(`/play?focus=${encodeURIComponent(simulationFor(slug)?.id ?? slug)}`)}
                   className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
                   /* solid dark glass in BOTH themes: the faint white-alpha surface
                      disappeared against the photos (founder feedback) */

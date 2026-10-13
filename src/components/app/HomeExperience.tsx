@@ -369,7 +369,7 @@ function HeroBanner() {
             <span>Level {REGISTERED_NURSE.levels[0].n} · {REGISTERED_NURSE.levels[0].role}. Your first shift is ready.</span>
           }
         >
-          <HeroAction onClick={() => router.push(`/play/${REGISTERED_NURSE.id}`)}>
+          <HeroAction onClick={() => router.push(`/play?focus=${REGISTERED_NURSE.id}`)}>
             <Play className="h-4 w-4" fill="currentColor" aria-hidden /> Play
           </HeroAction>
         </HeroPanel>

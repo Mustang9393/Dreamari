@@ -632,7 +632,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
                 <button
                   type="button"
-                  onClick={() => router.push(`/play/${career.slug}`)}
+                  onClick={() => router.push(`/play?focus=${encodeURIComponent(simulationFor(career.slug)?.id ?? career.slug)}`)}
                   className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
                   style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
                 >

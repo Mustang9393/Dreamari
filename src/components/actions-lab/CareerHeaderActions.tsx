@@ -96,7 +96,10 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
             {games.play && (
             <button
               type="button"
-              onClick={() => router.push(hasSimulation ? `/play/${career.slug}` : "/play")}
+              // the Play page with this game picked, never straight into the
+              // game (14 Oct 2026, Chandu: "let's make the play button go to
+              // the play page instead of directly into the game for the demo")
+              onClick={() => router.push(hasSimulation ? `/play?focus=${encodeURIComponent(simulationFor(career.slug)?.id ?? career.slug)}` : "/play")}
               // The world's BRIGHT fill in both themes (9 Oct 2026, Chandu: "light
               // mode amber ... on a darker image or background is bad, we need
               // that same yellow-gradient thing we used for the career simulation
