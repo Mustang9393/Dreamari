@@ -322,7 +322,7 @@ const STAFF_POSTS: StaffPost[] = [
     // the debrief also leads the event's own board (uwEvents.ts)
     id: "sc-s-fall-debrief", kind: "update", author: KZ_YOUTH, postedAgo: "2w ago", eventId: "sc-e-fall-convening",
     title: "Fall regional convening: our debrief",
-    body: "Thanks, all four offices. Here is what worked and what we do next.",
+    body: "Thanks, all four offices. Kalamazoo hosted, Lansing and Jackson brought the vans.",
     worked: ["Mixing towns at every table got students talking.", "The college table was busy all day.", "Vans from Lansing and Jackson brought more students."],
     numbers: [{ value: "164", label: "students" }, { value: "12", label: "volunteers" }, { value: "4", label: "towns" }],
     next: [{ office: "Battle Creek", task: "Host the Nov 14 convening" }, { office: "Lansing", task: "Plan the vans again" }, { office: "Jackson", task: "Run volunteer sign-in" }, { office: "Kalamazoo", task: "Bring the college table back" }],

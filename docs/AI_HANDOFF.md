@@ -1,3 +1,12 @@
+## 2026-10-13 (late): Event boards: Photos tab, pinned tabs that keep your place, the debrief as an editorial piece
+
+**Why (Chandu):** "These pages need better navigation and designs. Also whenever I click on a tab I'm autoscrolled up to the header. Put photos under a tab." Then: "the debrief is good but it's too text heavy and hard to read and information overload. Maybe pin that as a properly designed, editorial kind of design thing."
+- Tabs keep the scroll: the router resets scroll on any URL change, so `setView` now holds the reader's position for a few frames when a board's or an event's own tab changes (community boards had the same jump).
+- Event tabs show what's inside ("Questions 3 · Posts 3 · Photos 41 · People · About") and stay pinned under the app bar.
+- Photos are their own tab: the full grid of the day's photos (the lead one large); the strip under the hero is gone. The hero keeps the lead photo.
+- Team debrief (United Way staff only): a pinned editorial piece. Kicker, one headline ("What worked, and what's next"), a short lede, numbered points (01, 02, 03) beside one line per office for what's next, then the byline and "Talk it over".
+- **Checked:** tsc clean, eslint no new warnings; scroll held on board and event tab switches; Photos tab; the debrief.
+
 ## 2026-10-13 (late): Past event boards: one hero, one strip, the conversation
 
 **Why (Chandu):** "we did not clear up the event board details. It's SO MUCH TEXT AND INFO ... too much text and too much info and a lot of competing information. Please simplify. Guide the user's eye." Applies to every past event board (EventView).

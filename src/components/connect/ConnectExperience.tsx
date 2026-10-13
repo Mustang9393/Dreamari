@@ -1526,12 +1526,22 @@ export function ConnectExperience() {
     return "/connect" + base + asPart + vPart;
   }, [attVersion]);
   const setView = useCallback((next: View, as?: DemoRole) => {
-    const sameBoard = next.kind === "board" && view.kind === "board" && next.id === view.id;
+    // a board's or an event's own tabs are places on the same page, not
+    // steps: replace the URL and keep the scroll (13 Oct 2026, Chandu:
+    // "whenever I click on a tab I'm autoscrolled up to the header")
+    const sameBoard = (next.kind === "board" && view.kind === "board" && next.id === view.id) || (next.kind === "event" && view.kind === "event" && next.id === view.id);
     const tabSwitch = next.kind === "home" && view.kind === "home";
     setViewState(next);
     if (sameBoard || tabSwitch) {
+      const y = window.scrollY;
       window.history.replaceState(window.history.state, "", queryFor(next, as));
-      if (tabSwitch) window.scrollTo(0, 0);
+      if (tabSwitch) { window.scrollTo(0, 0); return; }
+      // the router answers a URL change by resetting the scroll; a tab on
+      // the same page keeps the reader where they were, held for a few
+      // frames until the new tab's content has laid out
+      const until = performance.now() + 400;
+      const hold = () => { if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y); if (performance.now() < until) requestAnimationFrame(hold); };
+      requestAnimationFrame(hold);
       return;
     }
     const depth = viewStack.length + 1;
@@ -4660,7 +4670,7 @@ function EventView({
   // hierarchy"): the event's posts and the pros' posts are one Posts feed,
   // the files live in About. Old links (?filter=insights, resources) land
   // where their content went.
-  const tab = filter === "insights" ? "posts" : filter === "resources" ? "about" : filter === "posts" || filter === "people" || filter === "about" ? filter : "questions";
+  const tab = filter === "insights" ? "posts" : filter === "resources" ? "about" : filter === "photos" && event.photos ? "photos" : filter === "posts" || filter === "people" || filter === "about" ? filter : "questions";
   // the Resources tab's photo viewer: which frame is open, if any
   const [photoOpen, setPhotoOpen] = useState<number | null>(null);
   // a partner board's staff or volunteer view (replyAs): they don't ask
@@ -4787,42 +4797,29 @@ function EventView({
           {/* Photos first: a gallery of the day, not a text link (direct
              feedback, 5 Sept 2026). One big frame, four small, the last one
              carries the rest of the count. Tap opens a viewer; view-only. */}
-          {event.photos && event.photos.images.length > 1 && (
-            <ul aria-label="Event photos" className="grid grid-cols-4 gap-[6px] sm:gap-[8px]">
-              {event.photos.images.slice(1, 5).map((src, k) => {
-                const index = k + 1;
-                const last = k === 3;
-                const more = event.photos!.count - 5;
-                return (
-                  <li key={src} className="relative aspect-[4/3] min-h-0">
-                    <button type="button" onClick={() => setPhotoOpen(index)} aria-label={`Open photo ${index + 1} of ${event.photos!.count}`} className="dm-tap group relative block h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
-                      <Image src={src} alt="" fill sizes="(max-width: 992px) 25vw, 240px" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
-                      {last && more > 0 && <span className="absolute inset-0 flex items-center justify-center text-[15px] font-extrabold" style={{ background: "rgba(9,10,20,0.58)", color: "#FFFFFF", fontFamily: "var(--font-display)" }}>+{more}</span>}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+
 
       {/* Six clearly separated rooms instead of one long stacked scroll
          (direct feedback, 5 Sept 2026): Questions is the tab a reader lands
          on, with the ask composer at its very top. */}
-      <Segmented
-        ariaLabel="Event board section"
-        value={tab}
-        onChange={(key) => onFilter(key)}
-        options={[
-          { key: "questions", label: "Questions" },
-          { key: "posts", label: "Posts" },
-          // "Pro posts", not "Posts" (already taken by the event account's
-          // own tab just above) -- 28 Sept 2026 nomenclature pass: "no
-          // insights anywhere, everything is just called posts" still needs
-          // these two distinct tabs to read as two different things.
-          { key: "people", label: "People" },
-          { key: "about", label: "About" },
-        ]}
-      />
+      {/* the board's rooms, with how much is in each, pinned under the app
+         bar so they stay in reach while reading (13 Oct 2026, Chandu: "These
+         pages need better navigation and designs ... Put photos under a
+         tab") */}
+      <div className="sticky top-[84px] z-30 -mx-[4px] rounded-[var(--radius-lg)] px-[4px] py-[6px]" style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
+        <Segmented
+          ariaLabel="Event board section"
+          value={tab}
+          onChange={(key) => onFilter(key)}
+          options={[
+            { key: "questions", label: `Questions ${threads.length + postedQs.length}` },
+            { key: "posts", label: `Posts ${(event.official ? 1 : 0) + (event.recap ? 1 : 0) + proPosts.length}` },
+            ...(event.photos ? [{ key: "photos", label: `Photos ${event.photos.count}` }] : []),
+            { key: "people", label: "People" },
+            { key: "about", label: "About" },
+          ]}
+        />
+      </div>
 
       {tab === "questions" && (
         <div className="flex flex-col gap-[var(--space-4)]">
@@ -4845,6 +4842,21 @@ function EventView({
         </div>
       )}
 
+      {tab === "photos" && event.photos && (
+        <section aria-label="Event photos" className="flex flex-col gap-[var(--space-3)]">
+          <ul className="grid grid-cols-2 gap-[6px] sm:grid-cols-3 sm:gap-[8px]">
+            {event.photos.images.map((src, index) => (
+              <li key={src} className={`relative min-h-0 ${index === 0 ? "col-span-2 row-span-2" : ""}`} style={{ aspectRatio: index === 0 ? undefined : "4 / 3" }}>
+                <button type="button" onClick={() => setPhotoOpen(index)} aria-label={`Open photo ${index + 1} of ${event.photos!.count}`} className="dm-tap group relative block h-full min-h-[160px] w-full cursor-pointer overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+                  <Image src={src} alt="" fill sizes="(max-width: 992px) 50vw, 420px" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{event.photos.images.length} of {event.photos.count} photos. Tap one to see it full size.</p>
+        </section>
+      )}
+
       {tab === "posts" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           {/* The host team's debrief leads (United Way staff, 12 Oct 2026:
@@ -4852,40 +4864,53 @@ function EventView({
              worked, the numbers, next steps by office, and a way back to the
              staff Team space to talk it over. */}
           {/* the host team's debrief is for the host team only */}
+          {/* The team debrief, pinned as an editorial piece (13 Oct 2026,
+             Chandu: "the debrief is good but it's too text heavy and hard to
+             read and information overload. Maybe pin that as a properly
+             designed, editorial kind of design thing"). One kicker, one
+             headline, a short lede, then two columns with room to breathe:
+             what worked as numbered points, what's next as one line per
+             office. The byline and the way to talk it over close it. */}
           {event.debrief && postAs?.chip === "United Way" && (
-            <Card accent={pAccent}>
-              <div className="flex flex-wrap items-center justify-between gap-[10px]">
-                <span className="flex min-w-0 items-center gap-[10px]">
-                  <OrgAvatar org={event.host} size={36} />
-                  <span className="flex min-w-0 flex-col">
-                    <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{event.debrief.by}</span>
-                    <span className="flex flex-wrap items-center gap-x-[6px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{event.debrief.role} · {event.debrief.postedAgo}<PlaceTag place={event.debrief.office} /></span>
-                  </span>
+            <article aria-label="Team debrief" className="relative overflow-hidden rounded-[var(--radius-xl)] border px-[var(--space-6)] py-[var(--space-8)] sm:px-[var(--space-10)]" style={{ borderColor: `color-mix(in srgb, ${pAccent} 40%, var(--glass-border))`, background: `radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, ${pAccent} 22%, transparent), transparent 60%), var(--glass-surface-1)` }}>
+              <p className="flex items-center gap-[8px] text-[12px] leading-[16px] font-extrabold tracking-[0.12em] uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 55%, var(--foreground))` }}><Pin className="h-3.5 w-3.5" aria-hidden /> Pinned · Team debrief</p>
+              <h2 className="mt-[14px] max-w-[22ch] text-[30px] leading-[35px] font-extrabold text-balance sm:text-[36px] sm:leading-[42px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>What worked, and what&apos;s next</h2>
+              {event.debrief.body && <p className="mt-[12px] max-w-[52ch] text-[16px] leading-[25px]" style={{ color: "var(--muted-foreground)" }}>{event.debrief.body}</p>}
+              <div className="mt-[var(--space-8)] grid grid-cols-1 gap-[var(--space-8)] md:grid-cols-2 md:gap-[var(--space-10)]">
+                <section aria-label="What worked">
+                  <ol className="flex flex-col gap-[var(--space-5)]">
+                    {event.debrief.worked.map((w, i) => (
+                      <li key={w} className="flex items-baseline gap-[14px]">
+                        <span aria-hidden className="w-[34px] flex-none text-[26px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: `color-mix(in srgb, ${pAccent} 60%, var(--foreground))` }}>{String(i + 1).padStart(2, "0")}</span>
+                        <span className="text-[16px] leading-[24px]" style={{ color: "var(--foreground)" }}>{w}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+                <section aria-label="Next, by office" className="md:border-l md:pl-[var(--space-10)]" style={{ borderColor: "var(--glass-border)" }}>
+                  <p className="text-[12px] leading-[16px] font-extrabold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>Next</p>
+                  <ul className="mt-[var(--space-3)] flex flex-col">
+                    {event.debrief.next.map((n) => (
+                      <li key={n.office + n.task} className="flex flex-col gap-[2px] border-t py-[12px] first:border-t-0 first:pt-0" style={{ borderColor: "var(--glass-border)" }}>
+                        <span className="text-[12.5px] leading-[16px] font-bold" style={{ color: `color-mix(in srgb, ${pAccent} 55%, var(--foreground))` }}>{n.office}</span>
+                        <span className="text-[16px] leading-[23px]" style={{ color: "var(--foreground)" }}>{n.task}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </div>
+              <footer className="mt-[var(--space-8)] flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
+                <span className="flex min-w-0 items-center gap-[10px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+                  <OrgAvatar org={event.host} size={28} />
+                  <span className="truncate"><strong className="font-bold" style={{ color: "var(--foreground)" }}>{event.debrief.by}</strong> · {event.debrief.role}, {event.debrief.office} · {event.debrief.postedAgo}</span>
                 </span>
-                <span className="rounded-full px-[10px] py-[3px] text-[11px] leading-[15px] font-extrabold tracking-[0.06em] uppercase" style={{ background: `color-mix(in srgb, ${pAccent} 24%, transparent)`, color: "var(--foreground)" }}>Team debrief</span>
-              </div>
-              <p className="mt-[12px] text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.debrief.title}</p>
-              <p className="mt-[4px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{event.debrief.body}</p>
-              <div className="mt-[14px] grid grid-cols-1 gap-[var(--space-5)] md:grid-cols-2">
-                <div>
-                  <p className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>What worked</p>
-                  <ul className="mt-[6px] flex flex-col gap-[6px]">
-                    {event.debrief.worked.map((w) => <li key={w} className="flex items-start gap-[8px] text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}><CheckCircle2 className="mt-[2px] h-4 w-4 flex-none" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} />{w}</li>)}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Next steps</p>
-                  <ul className="mt-[6px] flex flex-col gap-[6px]">
-                    {event.debrief.next.map((n) => <li key={n.office + n.task} className="flex flex-wrap items-center gap-x-[8px] text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}><PlaceTag place={n.office} />{n.task}</li>)}
-                  </ul>
-                </div>
-              </div>
-              {event.boardId && (
-                <div className="mt-[14px] flex flex-wrap gap-[8px]">
-                  <QuietCta onClick={() => onOpenCommunity?.(event.boardId!, "team")}><MessagesSquare className="h-4 w-4" aria-hidden /> Talk it over in Team · {event.debrief.replies} replies</QuietCta>
-                </div>
-              )}
-            </Card>
+                {event.boardId && (
+                  <button type="button" onClick={() => onOpenCommunity?.(event.boardId!, "team")} className="dm-link flex cursor-pointer items-center gap-[6px] text-[14px] font-bold" style={{ color: `color-mix(in srgb, ${pAccent} 60%, var(--foreground))` }}>
+                    Talk it over · {event.debrief.replies} {event.debrief.replies === 1 ? "reply" : "replies"} <ChevronRight className="h-4 w-4" aria-hidden />
+                  </button>
+                )}
+              </footer>
+            </article>
           )}
 
           {/* The official Dream Opportunity post (CEO, 4 Sept): the event keeps
