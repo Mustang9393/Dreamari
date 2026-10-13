@@ -1,3 +1,10 @@
+## 2026-10-14: Every question has pro answers and student comments; GIFs rationed
+
+**Why (Chandu):** "make sure there is a healthy amount of student comments, don't over use gifs and don't use them consecutively ... make sure every board, every question has student comments + professional answers. Make it realistic."
+- `src/components/connect/threadReplies.ts` (`addThreadVoices`, called once at the end of data.ts over THREADS and EVENT_THREADS): hand-written student comments for every question that had fewer than two (Connect's boards in their casual voice, United Way boards with town tags), and two pro answers for the six United Way questions that had none. A thread keeps its first GIF only.
+- Totals across 91 questions on every board: 0 without a pro answer (was 6), 0 without student comments (was 44), 191 student comments (was 72), 7 GIFs (was 9; the EY first-year thread had three), never two in a row. DEMO-ONLY.
+- **Checked:** tsc clean; counted with a script over THREADS + EVENT_THREADS; mi-t-shadow thread page.
+
 ## 2026-10-14: Announcement posters: a printed flyer; South Central header photo
 
 **Why (Chandu):** "the image used for the header/card for United Way needs to be better ... something more tasteful"; "for the posters, make them a little more tasteful, I don't like the blue wash"; "make sure the white isn't boring and text isn't illegible on the white. I see a lot of blank space on the white area."

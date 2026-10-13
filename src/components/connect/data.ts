@@ -12,6 +12,7 @@
 // verified scope ("what was verified and by whom"). No follower counts, no
 // DMs, no popularity ranking anywhere.
 
+import { addThreadVoices } from "./threadReplies";
 import { UW_EVENT_POSTS, UW_EVENT_THREADS, UW_INSIGHTS, UW_SC_MORE_POSTS, UW_SC_MORE_THREADS, UW_THREADS } from "./unitedway/uwThreads";
 
 export type QuestionState = "awaiting" | "routed" | "answered" | "resolved";
@@ -2734,6 +2735,10 @@ export const EVENT_THREADS: Thread[] = [
   // United Way events' follow-up boards (unitedway/uwThreads.ts)
   ...UW_EVENT_THREADS,
 ];
+
+// every question has pro answers and student comments, one GIF at most
+// (threadReplies.ts, 14 Oct 2026)
+addThreadVoices([...THREADS, ...EVENT_THREADS]);
 
 export const UPCOMING_SESSION = {
   title: "Office hour: Investment banking Q&A",
