@@ -1,3 +1,13 @@
+## 2026-10-13 (night): United Way: small graphics, more answers, Students | Team, staff headshot slots; event Posts as one feed
+
+**Why (Chandu):** "The images ... are way too large ... It's just a random quote ... make it much smaller"; "for each student question ... populate more responses from professionals so it looks like there's motion happening"; "Instead of just the 'staff' toggle, let's have it written as 'Students' and 'Team'"; "For the staff people, let's generate actual images of them like we do the Connect professional profiles ... The United Way logo pic is not it"; earlier, "put the pinned recap inside the feed, have more posts from participants".
+- Event Posts: the host's post and the pinned recap are the first rows of the same feed as the pros' posts; 12 more posts from pros at the four past UW events (`UW_EVENT_POSTS`, DEMO-ONLY).
+- `SmallGraphics` context (ConnectExperience): graphic posts render as a ~150px thumbnail under their caption on the United Way community feeds and every event's Posts; the Tall/Framed/Wide switch is off there.
+- More answers: `MORE_ANSWERS` in uwThreads.ts adds one to three pro answers to every South Central and event question (all now answered), placed before the students' replies.
+- The board toggle is "Students | Team" (two words in one small toggle; Team in United Way yellow).
+- Staff headshots: `StaffMember.photo` and `STAFF_PHOTOS` in uwSouthCentral.ts (all commented out until files exist); `UwAvatar` and `CommentRow` use a photo when set, else the United Way mark. Claude can't generate images here: prompts for the eight people, matched to the pro headshot style, are in `docs/reference/united-way-staff-headshot-prompts.md`.
+- **Checked:** tsc clean, eslint no new warnings; Lansing feed (graphics 148px), the toggle, a thread with three pro answers.
+
 ## 2026-10-13 (late): Event boards: Photos tab, pinned tabs that keep your place, the debrief as an editorial piece
 
 **Why (Chandu):** "These pages need better navigation and designs. Also whenever I click on a tab I'm autoscrolled up to the header. Put photos under a tab." Then: "the debrief is good but it's too text heavy and hard to read and information overload. Maybe pin that as a properly designed, editorial kind of design thing."

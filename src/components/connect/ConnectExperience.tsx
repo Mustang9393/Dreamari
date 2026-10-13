@@ -4569,10 +4569,17 @@ function OpportunityUpdateCard({ item }: { item: RelevantItem }) {
 /** A pro's graphic post in a feed row: the caption above, then the graphic
  *  in the chosen layout (DEMO-ONLY switch in the sort row). Phones always
  *  get the portrait at full width. */
+/** Graphic posts at a small, fixed size (13 Oct 2026, Chandu on the event and
+ *  United Way feeds: "The images ... are way too large. Takes up too much
+ *  space but doesn't provide much value. It's just a random quote ... make
+ *  it much smaller"). A surface wraps its feed in this to opt in. */
+export const SmallGraphics = createContext(false);
 function GraphicPostBody({ insight, caption, onMore }: { insight: Insight; caption: string; onMore: () => void }) {
   const layout = useGraphicLayout();
+  const small = useContext(SmallGraphics);
   const cap = caption ? <div className="mt-[8px] max-w-[60ch]"><ClampedExcerpt text={caption} onMore={onMore} /></div> : null;
   const portrait = <span className="block overflow-hidden rounded-[14px]" style={{ boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6)" }}><InsightGraphicView insight={insight} /></span>;
+  if (small) return <>{cap}<span className="mt-[12px] block w-[150px] sm:w-[170px]">{portrait}</span></>;
   return (
     <>
       {cap}
@@ -4920,6 +4927,7 @@ function EventView({
              the same hairline panel as the pros' posts, in the same row
              shape, so the tab reads as one feed, not a stack of cards. */}
           {(event.official || event.recap || proPosts.length > 0) && (
+            <SmallGraphics.Provider value={true}>
             <BoardFeedList wrap={(id, row) => <div key={id}>{row}</div>} items={[
               ...(event.official ? [{ id: "official", node: (
                 <article className="flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
@@ -4959,6 +4967,7 @@ function EventView({
               })() }] : []),
               ...proPosts.map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId)!, reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> })),
             ]} />
+            </SmallGraphics.Provider>
           )}
           {!event.official && !event.recap && proPosts.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No posts from the event account yet.</p>
@@ -5538,7 +5547,7 @@ function AnswerRow({ r, rid, threadId, threadTitle, collapsed, onToggleCollapse,
 /** A comment under an insight or thread: avatar, name + role chip, the
  *  line itself, then a working like button and the time. `likes` is the
  *  seeded count; the toggle adds the student's own on top. */
-export function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt, collapsed, onToggleCollapse }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string; collapsed?: boolean; onToggleCollapse?: () => void }) {
+export function CommentRow({ id, name, photo, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt, collapsed, onToggleCollapse }: { id: string; name: string; /** a partner's staff headshot (United Way) */ photo?: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string; collapsed?: boolean; onToggleCollapse?: () => void }) {
   const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
   const nav = useContext(ConnectNav);
   // a professional's face and name open their profile; students have none
@@ -5551,9 +5560,9 @@ export function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, li
       {pro ? (
         <ProAvatar proId={pro.id} name={name} size={32} />
       ) : chipTone === "pro" ? (
-        // a partner's staff (United Way): their organization's mark, never a
-        // generated student face
-        <OrgAvatar org={chip} size={32} />
+        // a partner's staff (United Way): their headshot, else their
+        // organization's mark, never a generated student face
+        photo ? <Avatar name={name} photo={photo} size={32} /> : <OrgAvatar org={chip} size={32} />
       ) : (
         <button type="button" onClick={onToggleCollapse} aria-expanded={!collapsed} aria-label={collapsed ? `Expand ${name}'s comment` : `Collapse ${name}'s comment`} className="dm-quiet flex-none cursor-pointer rounded-full">
           <Avatar name={name} size={32} />

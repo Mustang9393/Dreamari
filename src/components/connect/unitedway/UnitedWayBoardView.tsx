@@ -72,7 +72,7 @@ import { BarChart } from "../mentorship/charts";
 import { CommunityHoursChart, RankedRows } from "./uwCharts";
 import { LoginsChart, Sparkline } from "@/components/app/engagementCharts";
 import { Panel, ProProfileView, useProfilePage, RULE } from "../ProProfile";
-import { BoardFeedList, BoardThreadRow, CommentRow, EventTicket, FeedControls, FeedPostRow, type FeedSort, PlaceTag, QrSheet, QuestionCard, ReplyComposer, partnerAccent } from "../ConnectExperience";
+import { BoardFeedList, BoardThreadRow, CommentRow, SmallGraphics, EventTicket, FeedControls, FeedPostRow, type FeedSort, PlaceTag, QrSheet, QuestionCard, ReplyComposer, partnerAccent } from "../ConnectExperience";
 import { INSIGHTS, THREADS, type EventBoard, type Insight, type Thread } from "../data";
 import * as D from "./uwData";
 import { registerUwEvent, toEventBoard, uwEventById } from "./uwEvents";
@@ -684,7 +684,7 @@ function KindLabel({ kind, pinned }: { kind: D.StaffPostKind; pinned?: boolean }
 function StaffByline({ who, ago, size = 26 }: { who: D.StaffMember; ago: string; size?: number }) {
   return (
     <span className="flex min-w-0 items-center gap-[8px]">
-      <UwAvatar size={size} />
+      <UwAvatar size={size} who={who} />
       <span className="flex-none text-[12.5px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{who.name}</span>
       <span className="hidden min-w-0 truncate text-[12px] leading-[16px] font-semibold sm:inline" style={{ color: "var(--muted-foreground)" }}>· {who.role}</span>
       <PlaceTag place={who.office} />
@@ -756,7 +756,7 @@ function StaffPostPage({ p, replies, onReply, onBack, canReply = true }: { p: D.
         <div className="flex flex-col gap-[var(--space-4)]">
           {replies.map((r, i) => {
             const id = `${p.id}-r${i}`;
-            return <CommentRow key={id} id={id} name={r.author.name} chip="United Way" chipTone="pro" meta={`${r.author.role} · ${r.author.office}`} body={r.body} postedAgo={r.postedAgo} likes={0} liked={!!liked[id]} onLike={(k) => setLiked((m) => ({ ...m, [k]: !m[k] }))} />;
+            return <CommentRow key={id} id={id} name={r.author.name} photo={r.author.photo} chip="United Way" chipTone="pro" meta={`${r.author.role} · ${r.author.office}`} body={r.body} postedAgo={r.postedAgo} likes={0} liked={!!liked[id]} onLike={(k) => setLiked((m) => ({ ...m, [k]: !m[k] }))} />;
           })}
         </div>
         {canReply && <ReplyComposer as={{ name: me.name, meta: `${me.role} · ${me.office}` }} onPost={onReply} />}
@@ -795,7 +795,7 @@ function StaffFeedRow({ p, replies, onOpen }: { p: D.StaffPost; replies: number;
     <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer"><span className="sr-only">Open: {p.title}</span></button>
       <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
-      <span className="relative flex-none self-start"><UwAvatar size={44} /></span>
+      <span className="relative flex-none self-start"><UwAvatar size={44} who={p.author} /></span>
       <div className="relative flex min-w-0 flex-1 flex-col">
         <span className="flex min-w-0 flex-wrap items-center gap-x-[8px] gap-y-[2px]">
           <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{p.author.name}</span>
@@ -820,7 +820,8 @@ function StaffFeedRow({ p, replies, onOpen }: { p: D.StaffPost; replies: number;
 /** A United Way staff member's face on the board: United Way's own mark,
  *  never a generated portrait (13 Oct 2026, Chandu: the composer "still
  *  shows a student and student avatar on the United Way POV"). */
-function UwAvatar({ size = 34 }: { size?: number }) {
+function UwAvatar({ size = 34, who }: { size?: number; /** a staff member with a headshot wears it */ who?: D.StaffMember }) {
+  if (who?.photo) return <Avatar name={who.name} photo={who.photo} size={size} />;
   return (
     <span aria-hidden className="flex flex-none items-center justify-center rounded-full" style={{ width: size, height: size, background: BLUE }}>
       <Image src={D.BRAND.logoWhite} alt="" width={size} height={size} unoptimized className="h-[62%] w-auto" />
@@ -828,17 +829,22 @@ function UwAvatar({ size = 34 }: { size?: number }) {
   );
 }
 
-/** Staff only, as an on/off switch: it changes who sees the board, so it
- *  reads as a setting rather than another row of tabs. */
+/** Who the board is for: the students' board or the team's own. Two words
+ *  in one small toggle beside the board tabs, smaller than any tab row so it
+ *  reads as a setting; Team lights in United Way's yellow. */
 function StaffSwitch({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
   return (
-    <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)} className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-full py-[4px] pr-[4px] pl-[2px] text-[13.5px] font-bold" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
-      <ShieldCheck className="h-4 w-4 flex-none" aria-hidden style={{ color: on ? D.BRAND.yellow : "var(--muted-foreground)" }} />
-      {D.COMMUNITY_UI.audience[1].label}
-      <span aria-hidden className="relative h-[22px] w-[38px] flex-none rounded-full transition-colors duration-200" style={{ background: on ? D.BRAND.yellow : "color-mix(in srgb, var(--foreground) 18%, transparent)" }}>
-        <span className="absolute top-[3px] size-[16px] rounded-full bg-white shadow transition-[left] duration-200" style={{ left: on ? 19 : 3 }} />
-      </span>
-    </button>
+    <div role="group" aria-label="Board" className="inline-flex flex-none items-center rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      {D.COMMUNITY_UI.audience.map((a) => {
+        const active = (a.key === "staff") === on;
+        const tone = a.key === "staff" ? { background: D.BRAND.yellow, color: "#1a1300" } : { background: BLUE, color: "#fff" };
+        return (
+          <button key={a.key} type="button" aria-pressed={active} onClick={() => onChange(a.key === "staff")} className={`flex h-[30px] items-center gap-[6px] rounded-full px-[14px] text-[13px] font-bold ${active ? "" : "dm-quiet cursor-pointer"}`} style={active ? tone : { color: "var(--muted-foreground)" }}>
+            {a.key === "staff" ? <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> : <Users className="h-3.5 w-3.5" aria-hidden />}{a.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -906,7 +912,7 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
          switch, not a third row of tabs. */}
       <div className="flex flex-wrap items-end justify-between gap-x-[var(--space-5)] gap-y-[var(--space-3)] border-b" style={{ borderColor: RULE }}>
         <div className="min-w-0 flex-1 pb-[6px]"><TextTabs ariaLabel={C.boards} layoutId="uw-boards" value={current.key} onChange={setSpace} items={spaces.map((x) => ({ key: x.key, label: x.key === "all" ? C.across : x.key }))} /></div>
-        {role === "staff" && <div className="pb-[10px]"><StaffSwitch on={staffOnly} onChange={(v) => setAudience(v ? "staff" : "everyone")} /></div>}
+        {role === "staff" && <div className="pb-[8px]"><StaffSwitch on={staffOnly} onChange={(v) => setAudience(v ? "staff" : "everyone")} /></div>}
       </div>
       {role !== "student" && volunteerPro && (
         <PostComposer key={current.key} pro={volunteerPro} open={composing} onClose={() => setComposing(false)} textOnly={role === "staff"}
@@ -941,21 +947,23 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
         )}
         {role !== "student" && (staffOnly || feedTab === "posts") && (
           <button type="button" onClick={() => setComposing(true)} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-lg)] border py-[8px] pr-[8px] pl-[10px] text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-            {role === "staff" ? <UwAvatar size={34} /> : volunteerPro ? <ProAvatar proId={volunteerPro.id} name={volunteerPro.name} size={34} /> : null}
+            {role === "staff" ? <UwAvatar size={34} who={board.staff.me} /> : volunteerPro ? <ProAvatar proId={volunteerPro.id} name={volunteerPro.name} size={34} /> : null}
             <span className="min-w-0 flex-1 truncate text-[15px]" style={{ color: "var(--muted-foreground)" }}>{staffOnly ? C.staffPlaceholder(where) : `Share something with ${current.key === "all" ? "every community" : where}`}</span>
             <span className="flex flex-none items-center gap-[6px] rounded-full px-[14px] py-[7px] text-[13px] font-bold" style={staffOnly ? { background: D.BRAND.yellow, color: "#1a1300" } : SOLID}><PenLine className="h-3.5 w-3.5" aria-hidden /> Create post</span>
           </button>
         )}
-        {shown.length > 1 && <FeedControls sort={sort} onSort={setSort} graphics={shown.some((it) => it.kind === "post" && !!it.i.graphic)} />}
+        {shown.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
         {shown.length === 0 ? (
           <div className="rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}><EmptyView tier={3} line={staffOnly ? C.emptyStaff : C.empty} /></div>
         ) : (
+          <SmallGraphics.Provider value={true}>
           <BoardFeedList wrap={(id, row) => <div key={id} onClickCapture={(e) => { const mine = shown.find((x) => x.id === id && x.kind === "post" && x.i.id.startsWith("uw-vpost-")); if (mine && mine.kind === "post") { e.stopPropagation(); e.preventDefault(); openPost(mine.i); } }}>{row}</div>} items={shown.map((it) => ({
             id: it.id,
             node: it.kind === "q" ? <BoardThreadRow thread={it.t} onOpen={() => openThread(it.t)} cardProps={card(it.id)} />
               : it.kind === "post" ? (D.VOLUNTEERS[it.i.proId] ? <FeedPostRow item={{ key: it.id, kind: "insight", insight: it.i, pro: D.VOLUNTEERS[it.i.proId], reason: "" }} isNew={false} cardProps={card(it.id)} onLockerSave={() => {}} onHide={() => {}} /> : null)
               : <StaffFeedRow p={it.p} replies={repliesFor(it.p).length} onOpen={() => openStaff(it.p)} />,
           }))} />
+          </SmallGraphics.Provider>
         )}
       </div>
     </div>

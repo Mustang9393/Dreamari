@@ -217,14 +217,31 @@ const SERVE: Shift[] = [
 // the board opens on a space where the four offices talk, ask each other,
 // share what works and plan together. DEMO-ONLY: every staff member (first
 // names and roles, no real people), post, reply and task below.
-const KZ_YOUTH: StaffMember = { name: "Chris", role: "Youth programs", office: "Kalamazoo" };
-const LAN_YOUTH: StaffMember = { name: "Maya", role: "Youth programs", office: "Lansing" };
-const JX_VOL: StaffMember = { name: "Tess", role: "Volunteer center", office: "Jackson" };
-const BC_IMPACT: StaffMember = { name: "Dana", role: "Community impact", office: "Battle Creek" };
-const LAN_EVENTS: StaffMember = { name: "Rob", role: "Events", office: "Lansing" };
-const KZ_IMPACT: StaffMember = { name: "Jess", role: "Community impact", office: "Kalamazoo" };
-const BC_VOL: StaffMember = { name: "Alex", role: "Volunteer engagement", office: "Battle Creek" };
-const JX_YOUTH: StaffMember = { name: "Lena", role: "Youth programs", office: "Jackson" };
+// Staff headshots (13 Oct 2026, Chandu: "For the staff people, let's
+// generate actual images of them like we do the Connect professional
+// profiles ... The United Way logo pic is not it"). Generated outside this
+// repo from docs/reference/united-way-staff-headshot-prompts.md; drop each
+// file into public/images/connect/avatars/ and add its line here. Until a
+// person has one, they wear the United Way mark. DEMO-ONLY people.
+const STAFF_PHOTOS: Record<string, string> = {
+  // "Chris": "/images/connect/avatars/uw-kz-chris.png",
+  // "Jess": "/images/connect/avatars/uw-kz-jess.png",
+  // "Maya": "/images/connect/avatars/uw-lan-maya.png",
+  // "Rob": "/images/connect/avatars/uw-lan-rob.png",
+  // "Tess": "/images/connect/avatars/uw-jx-tess.png",
+  // "Lena": "/images/connect/avatars/uw-jx-lena.png",
+  // "Dana": "/images/connect/avatars/uw-bc-dana.png",
+  // "Alex": "/images/connect/avatars/uw-bc-alex.png",
+};
+const staff = (name: string, role: string, office: string): StaffMember => ({ name, role, office, photo: STAFF_PHOTOS[name] });
+const KZ_YOUTH: StaffMember = staff("Chris", "Youth programs", "Kalamazoo");
+const LAN_YOUTH: StaffMember = staff("Maya", "Youth programs", "Lansing");
+const JX_VOL: StaffMember = staff("Tess", "Volunteer center", "Jackson");
+const BC_IMPACT: StaffMember = staff("Dana", "Community impact", "Battle Creek");
+const LAN_EVENTS: StaffMember = staff("Rob", "Events", "Lansing");
+const KZ_IMPACT: StaffMember = staff("Jess", "Community impact", "Kalamazoo");
+const BC_VOL: StaffMember = staff("Alex", "Volunteer engagement", "Battle Creek");
+const JX_YOUTH: StaffMember = staff("Lena", "Youth programs", "Jackson");
 
 // ——— Communities (13 Oct 2026) ———
 // WHY: Chandu asked for "4 boards for the 4 groups and one for across

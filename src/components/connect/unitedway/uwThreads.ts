@@ -503,3 +503,56 @@ export const UW_EVENT_POSTS: Insight[] = [
   evPost(MENTOR, "uwe-mentor-first", "Orange County", "pro-reyes", "2w ago", "What mentors loved hearing from you", "The best questions were simple: how did you start, and what would you do at my age. Keep asking those.", 31, [["Sofia", "Senior", "Orange County", "My mentor said the same thing!", "2w ago", 5]]),
   evPost(MENTOR, "uwe-mentor-next", "Midlands", "pro-whitfield", "2w ago", "After mentor night: your next step", "Pick one mentor and send one question this month. Then post what you learned here.", 27, [], { text: "One mentor. One question. This month.", bg: "p-above-clouds", font: "display" }),
 ];
+
+// ——— More professionals answering every South Central question (13 Oct
+// 2026, Chandu: "for each student question ... populate more responses from
+// professionals so it looks like there's motion happening here ... Same idea
+// as how you have it on the Connect community boards"). Two or three pros
+// answer each one, in their own field and voice. DEMO-ONLY ———
+const MORE_ANSWERS: Record<string, [proId: string, body: string, ago: string][]> = {
+  "sc-t-nonprofit": [["pro-wong", "Yes. Khan Academy is a nonprofit and pays a real salary. Look at the job, not just the label.", "1d ago"], ["pro-tanaka", "Many big nonprofits pay close to companies for tech and finance roles.", "20h ago"]],
+  "sc-t-government": [["pro-doyle", "Start with a summer job at a city office. Many full-time hires started as interns.", "2d ago"], ["pro-whitfield", "Set alerts on your city's and state's job pages. They post often.", "1d ago"]],
+  "sc-t-student-united": [["pro-wong", "Yes. Many colleges have a chapter. If yours doesn't, start one with two friends.", "3d ago"], ["pro-brooks", "I kept serving in college. It helped me find my first job.", "2d ago"]],
+  "sc-t-health": [["pro-brooks", "We visit schools and homes, give shots, and teach families how to stay well.", "4d ago"], ["pro-ortega", "Public health nurses team up with pharmacists a lot. Every day is different.", "3d ago"]],
+  "sc-t-fafsa": [["pro-okafor", "Bring your parent's tax forms and an hour. CapCAN walks you through each page.", "2d ago"], ["pro-tanaka", "Ask your school counselor too. Many schools run a FAFSA night in the fall.", "1d ago"]],
+  "sc-t-planner": [["pro-doyle", "Many planners start with a bachelor's. A master's helps later, not on day one.", "1h ago"], ["pro-chen", "Learn maps and data tools early. Planners use them every day.", "40m ago"]],
+  "sc-t-msu": [["pro-wong", "Education, social work, public health and nonprofit management all lead there.", "5h ago"], ["pro-doyle", "Public health at MSU is a great path. So is data science at Western.", "3h ago"]],
+  "sc-t-yuw-ask": [["pro-wong", "It's real decision-making. Teens learn how money helps a town.", "4h ago"]],
+  "sc-t-next-convening": [["pro-whitfield", "I'll be at the jobs table. Bring one question you really want answered.", "16h ago"], ["pro-brooks", "Health table again! Come say hi.", "12h ago"]],
+  "sc-t-hours-swap": [["pro-tanaka", "Yes. Hours count in any town. Sign up under Serve and check in at the shift.", "2h ago"], ["pro-wong", "Kalamazoo's reading shift is open to all four towns.", "1h ago"]],
+  "sc-et-favorite": [["pro-doyle", "Mine was hearing your town project ideas. So many good ones.", "6d ago"], ["pro-reyes", "The health table was packed all day. Thank you for the questions!", "6d ago"]],
+  "sc-et-shared-day": [["pro-doyle", "Lansing city staff want to help with the parks project.", "5d ago"]],
+  "sc-et-college-table": [["pro-wong", "Yes! Michigan State and Western both said they'll come back.", "20h ago"], ["pro-whitfield", "I'll bring résumé tips to the college table too.", "18h ago"]],
+  "sc-q-kz-teacher": [["pro-cole", "I teach design workshops on weekends. Seeing a student's first good idea never gets old.", "15m ago"], ["pro-adler", "Coaching patients feels like teaching too. Try tutoring to see if you love it.", "10m ago"]],
+  "sc-q-kz-wmu": [["pro-doyle", "Ask for service learning classes. They often mix class work with real projects.", "1h ago"]],
+  "sc-q-kz-firstjob": [["pro-whitfield", "A grocery or camp job teaches you to show up and talk to people. Recruiters love that.", "3h ago"], ["pro-okafor", "Save part of your first check. Even a little.", "2h ago"]],
+  "sc-q-kz-yuw-join": [["pro-wong", "Yes. Freshmen are welcome. Ask your school's Youth United Way lead.", "6h ago"], ["pro-tanaka", "Join early. You'll have four years to lead.", "5h ago"]],
+  "sc-q-kz-resume": [["pro-tanaka", "Put your best volunteer role first, with one number: hours, people helped, money raised.", "20h ago"], ["pro-weiss", "Keep it to one page. Clear beats long.", "18h ago"]],
+  "sc-q-bc-pharm": [["pro-reyes", "Many techs work while they study for the next step, like nursing or pharmacy school.", "30m ago"]],
+  "sc-q-bc-pt": [["pro-brooks", "PTs and nurses work side by side. It's a great team.", "2h ago"], ["pro-reyes", "Shadow a PT for a day. You'll know fast if you love it.", "1h ago"]],
+  "sc-q-bc-shadow": [["pro-brooks", "Closed shoes, and bring a snack. It's a long, fun day.", "6h ago"]],
+  "sc-q-bc-caring": [["pro-tanaka", "Yes. Ask early. Leads help pick the project and run the team.", "20h ago"], ["pro-wong", "Lead with a friend your first time. It's easier with two.", "18h ago"]],
+  "sc-q-lan-city": [["pro-whitfield", "Look for summer youth jobs on the city site in February.", "10m ago"]],
+  "sc-q-lan-data": [["pro-chen", "Yes! Many nonprofits hire data analysts. Learn spreadsheets first.", "45m ago"], ["pro-rossi", "Try a free coding class. Data work often uses a little code.", "30m ago"]],
+  "sc-q-lan-capcan": [["pro-okafor", "Great that you went. Do the FAFSA as early as you can each year.", "4h ago"], ["pro-tanaka", "Save your FAFSA login somewhere safe. You'll need it every year.", "3h ago"]],
+  "sc-q-lan-code": [["pro-chen", "I started with simple games. Math came later, when I needed it.", "22h ago"]],
+  "sc-q-jx-mentor": [["pro-wong", "Mentors help with homework, plans and confidence. Small talks add up.", "30m ago"], ["pro-whitfield", "Ask your Big about their first job. Great talk starter.", "20m ago"]],
+  "sc-q-jx-bank": [["pro-weiss", "Pick a bank with no monthly fee and a good app.", "3h ago"]],
+  "sc-q-jx-design": [["pro-chen", "Designers and engineers work together on every app you use.", "6h ago"]],
+  "sc-q-jx-mlk": [["pro-tanaka", "I'll be there with my team. See you in the gym!", "16h ago"], ["pro-brooks", "Bring water and a friend. It's a great day.", "14h ago"]],
+  "sc-q-across-van": [["pro-whitfield", "Yes, if there are seats. Ask by Nov 10 so they can plan.", "40m ago"], ["pro-wong", "Kalamazoo has a van too this time. Check with your lead.", "30m ago"]],
+  "sc-q-across-club": [["pro-tanaka", "Jackson's mentor club is great too. Steal the best of each.", "4h ago"]],
+  "sc-q-across-summer": [["pro-whitfield", "Apply to three. Most students who apply to three get one.", "20h ago"], ["pro-doyle", "Our public health office takes summer interns too.", "18h ago"]],
+};
+for (const t of [...UW_THREADS, ...UW_SC_MORE_THREADS, ...UW_EVENT_THREADS]) {
+  const more = MORE_ANSWERS[t.id];
+  if (!more) continue;
+  const hasPrimary = t.responses.some((r) => r.kind === "answer" && r.primary);
+  const answers = more.map(([proId, body, postedAgo], i) => ({ kind: "answer" as const, proId, body, postedAgo, primary: !hasPrimary && i === 0 }));
+  // answers first (the thread page leads with them), then the students' replies
+  const firstPeer = t.responses.findIndex((r) => r.kind === "peer");
+  if (firstPeer < 0) t.responses.push(...answers);
+  else t.responses.splice(firstPeer, 0, ...answers);
+  t.state = "answered";
+  t.comments = Math.max(t.comments ?? 0, t.responses.length + 4);
+}

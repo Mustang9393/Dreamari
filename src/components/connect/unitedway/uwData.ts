@@ -226,7 +226,7 @@ export type Shift = {
 
 /** A United Way staff member, by first name, role and office (a chapter's
  *  short name). Never a real named person. */
-export type StaffMember = { name: string; role: string; office: string };
+export type StaffMember = { name: string; role: string; office: string; /** a real-looking headshot, like the Connect pros'; the United Way mark until one lands (STAFF_PHOTOS in the board file) */ photo?: string };
 export type StaffPostKind = "update" | "ask" | "idea" | "resource";
 export const STAFF_KIND_LABEL: Record<StaffPostKind, string> = { update: "Update", ask: "Ask the team", idea: "Idea", resource: "Shared resource" };
 /** One post in the staff Team space: an update, a question to the other
@@ -464,7 +464,9 @@ export const COMMUNITY_UI = {
   across: "All communities",
   acrossLine: "One board every community shares",
   boards: "Boards",
-  audience: [{ key: "everyone", label: "Everyone" }, { key: "staff", label: "Staff only" }] as const,
+  // 13 Oct 2026, Chandu: "Instead of just the 'staff' toggle, let's have it
+  // written as 'Students' and 'Team'"
+  audience: [{ key: "everyone", label: "Students" }, { key: "staff", label: "Team" }] as const,
   staffNote: "Only United Way staff see this board.",
   show: [{ value: "all", label: "Everything" }, { value: "questions", label: "Questions" }, { value: "posts", label: "Posts" }] as const,
   placeholder: (where: string) => where === "All communities" ? "Ask a question for every community" : `Ask a question in ${where}`,
