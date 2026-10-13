@@ -1,3 +1,11 @@
+## 2026-10-13 (late): United Way feed full width; only students wear generated avatars; small business help as a program card
+
+**Why (Chandu):** "the feeds etc need to take the full width of the surface they are in", "ONLY STUDENTS USE THE BLACK AND WHITE" avatars, "Maybe small business help thing should be a program card like CapCAN is".
+- Community feed: the 720px centred column is gone; it fills the board's surface.
+- Avatars: Nathan Doyle and Denise Marshall had no portrait entry (fell back to a generated student face) and now use `pro-doyle-2.png` / `pro-marshall.png` (the same files Avery Thompson in mentorship and AT&T's Danielle Marshall already use). New `OrgAvatar` (primitives): an organization's mark, or its initial, for people who are neither students nor pros: United Way staff in CommentRow, ReplyComposer and the event debrief; nonprofit and college partners in testimonials.
+- Small business help: a Kalamazoo program card (`sc-small-business`) with a new `"closed"` status ("Closed for now"): no Apply, no volunteers or events on its page. Replaces the removed United Way view panel; its data is gone from `community`.
+- **Checked:** tsc and eslint clean; Lansing feed portraits; the program card and page.
+
 ## 2026-10-13 (late): Counselor v6 Analytics shows v4's charts (replaces the v1 panels)
 
 **Why (Chandu):** "I don't see any of the graphs we have in impact/milestones etc in v4 in v6." The earlier "v1" request meant v4's glow charts; the v1-derived panels (`v6/AnalyticsDetails.tsx`) are removed and v1's files are back to unexported.
