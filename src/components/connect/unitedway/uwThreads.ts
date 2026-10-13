@@ -289,6 +289,8 @@ export const UW_INSIGHTS: Insight[] = [
     // a Jackson volunteer shares what worked
     id: "uwi-sc-reading", boardId: SC, type: "insight", proId: "pro-wong", place: "Jackson",
     title: "What worked at our Jackson reading shifts",
+    // DEMO-ONLY graphic (13 Oct 2026): graphic posts like every other board
+    graphic: { text: "Same reader, same table, every week. That's what made it work.", bg: "p-pastel", font: "classic" },
     body: "We paired each teen with the same young reader every week. Same day, same table. The kids looked forward to it, and so did the teens. Any town can copy this. Ask me how.",
     postedAgo: "2d ago", helpful: 48,
     replies: [
@@ -308,6 +310,41 @@ export const UW_INSIGHTS: Insight[] = [
       { handle: "Jada", grade: "Senior", place: "Jackson", body: "Can Jackson students go to the Battle Creek shadow too?", postedAgo: "5d ago", likes: 5 },
       { proId: "pro-reyes", body: "Yes. It's open to all four towns.", postedAgo: "5d ago", likes: 11 },
     ],
+  },
+  // ——— one post per community board, and one on the shared board (13 Oct
+  // 2026, Communities: "a mix of what's on our boards right now and what's
+  // there live now", so graphic posts like the other boards). DEMO-ONLY ———
+  {
+    id: "uwi-sc-kz-food", boardId: SC, type: "insight", proId: "pro-brooks", place: "Kalamazoo",
+    title: "My first step into nursing was a food crew",
+    body: "As a teen I helped on a Saturday food crew in Kalamazoo. Leading it taught me to plan and talk to people. Those skills got me into nursing. Start as a helper and you can lead by spring.",
+    graphic: { text: "Start as a helper. Lead by spring.", bg: "p-sunset-sea", font: "display" },
+    postedAgo: "5h ago", helpful: 34,
+    replies: [{ handle: "Theo", grade: "Junior", place: "Kalamazoo", body: "Signing up for the food bank crew this Saturday.", postedAgo: "4h ago", likes: 6 }, { proId: "pro-brooks", body: "Love it. Ages 14 and up can join.", postedAgo: "3h ago", likes: 9 }],
+  },
+  {
+    id: "uwi-sc-bc-nurse", boardId: SC, type: "insight", proId: "pro-reyes", place: "Battle Creek",
+    title: "Public health is more than hospitals",
+    body: "In Battle Creek our nurses visit schools, homes and clinics. Many started with a one-year program. Come shadow us in December.",
+    graphic: { text: "Public health nurses work in schools, homes and clinics.", bg: "p-teal-cloud", font: "classic" },
+    postedAgo: "1d ago", helpful: 52,
+    replies: [{ handle: "Nia", grade: "Junior", place: "Battle Creek", body: "Signed up for the shadow day!", postedAgo: "20h ago", likes: 11 }],
+  },
+  {
+    id: "uwi-sc-lan-city", boardId: SC, type: "insight", proId: "pro-doyle", place: "Lansing",
+    title: "What a city job looks like day to day",
+    body: "Parks, roads, housing, water. A city needs writers, planners and people who like numbers. Our summer interns do real work from week one.",
+    graphic: { text: "A city needs writers, planners and people who love numbers.", bg: "p-city-dusk", font: "display" },
+    postedAgo: "7h ago", helpful: 41,
+    replies: [{ handle: "Leo", grade: "Sophomore", place: "Lansing", body: "I didn't know parks had planners. So cool.", postedAgo: "6h ago", likes: 8 }, { handle: "Andre", grade: "Senior", place: "Lansing", body: "Applying for the parks internship this week.", postedAgo: "4h ago", likes: 5 }],
+  },
+  {
+    id: "uwi-sc-across-ask", boardId: SC, type: "insight", proId: "pro-whitfield", place: "Lansing",
+    title: "A tip for every town: one question a month",
+    body: "Students who ask one good question a month hear about openings first. Post yours here. Someone in another town may know the answer.",
+    graphic: { text: "Ask one good question a month.", bg: "p-above-clouds", font: "classic" },
+    postedAgo: "9h ago", helpful: 46,
+    replies: [{ handle: "Jada", grade: "Senior", place: "Jackson", body: "Doing it. This month: how do I get a city internship?", postedAgo: "8h ago", likes: 7 }, { handle: "Theo", grade: "Junior", place: "Kalamazoo", body: "Ask Lansing! They have the parks one.", postedAgo: "7h ago", likes: 10 }],
   },
   {
     id: "uwi-mi-mlk", boardId: MI, type: "insight", proId: "pro-tanaka", place: "Genesee",

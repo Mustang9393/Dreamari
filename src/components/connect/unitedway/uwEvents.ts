@@ -48,10 +48,16 @@ export function toEventBoard(e: UwEvent, board: UwBoard): EventBoard {
     students: f?.students,
     pros: f?.pros,
     postCount: f?.posts,
-    // DEMO-ONLY: the demo student went to every past event on these boards,
-    // so its board is open to them; the real gate is the attendee code
-    // (handoff 9.2), the same as every Connect event
-    entitled: !!f,
+    // 13 Oct 2026, Chandu: "Events: Have them require a code to enter. When
+    // entered, make it look like our other event boards, have a gallery
+    // with photos". So a past event's board is locked until its attendee
+    // code is entered (Connect's own EventCodeSheet; the unlock is shared
+    // with Connect's Your events), then opens as the full event board with
+    // its photo gallery under Resources. DEMO-ONLY: the code is shown in
+    // the sheet's prototype hint and on the staff ticket.
+    entitled: false,
+    code: f?.code,
+    photos: f?.photos,
     recap: f?.recap,
     resources: f?.resources,
     official: f?.official && { ...f.official, communityId: board.id, communityName: board.name, photosLabel: "Event photos", by: board.org, mark: "United Way" },

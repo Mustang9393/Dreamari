@@ -94,20 +94,23 @@ export const STUDENT_TABS = [
 export type StudentTab = typeof STUDENT_TABS[number]["key"];
 export const VOLUNTEER_TABS = [
   { key: "today", label: "Today" },
-  { key: "shifts", label: "Shifts" },
+  // 13 Oct 2026, Chandu: "Rename Shifts to something better, shifts make
+  // it sound bad and like work." The key stays so the Back memo holds.
+  { key: "shifts", label: "Ways to help" },
   // volunteers post across communities and follow up after events
   { key: "talk", label: "Talk" },
   { key: "impact", label: "My Impact" },
 ] as const;
 export type VolunteerTab = typeof VOLUNTEER_TABS[number]["key"];
+// 13 Oct 2026, Chandu: "The order should be: Communities > Events >
+// Programs > Impact. That's it." Team became Communities (one board per
+// community plus one shared by all); By community folded into Impact; the
+// Volunteers tab is gone.
 export const PARTNER_TABS = [
-  // where the offices talk and plan together, then their shared calendar
-  { key: "team", label: "Team" },
+  { key: "team", label: "Communities" },
   { key: "events", label: "Events" },
-  { key: "impact", label: "Impact" },
-  { key: "chapters", label: "By United Way" },
   { key: "programs", label: "Programs" },
-  { key: "people", label: "Volunteers" },
+  { key: "impact", label: "Impact" },
 ] as const;
 export type PartnerTab = typeof PARTNER_TABS[number]["key"];
 
@@ -189,6 +192,12 @@ export type UwFollowUp = {
   resources?: EventResource[];
   /** volunteers who were there (People tab) */
   proIds?: string[];
+  /** the attendee code that opens the board (13 Oct 2026, Chandu: "Have
+   *  them require a code to enter"), printed on the badge and the
+   *  follow-up email, the same gate as every Connect event */
+  code: string;
+  /** the day's photos for the board's gallery; United Way's own */
+  photos?: { count: number; images: string[] };
 };
 
 /** A volunteer shift: for teens (Serve) or adult volunteers (Shifts). */
@@ -228,6 +237,9 @@ export type StaffPost = {
   resource?: { label: string; meta: string };
   /** who does what, one owner per office */
   tasks?: { office: string; owner: string; task: string; done: boolean }[];
+  /** everyone on the community's board sees it (students and volunteers
+   *  too); unset = staff only, behind the board's Staff only switch */
+  public?: boolean;
   /** a past event this debriefs: its event board shows it first on Posts */
   eventId?: string;
   worked?: string[];
@@ -250,6 +262,11 @@ export type UwBoard = {
   /** Team (12 Oct 2026): where United Way staff in every office talk, ask
    *  each other and plan together; the board's first view */
   staff: { title: string; line: string; /** what one place is to staff: "office", "United Way" */ unit: string; all: string; me: StaffMember; posts: StaffPost[] };
+  /** Communities (13 Oct 2026): ids of the questions, posts and staff
+   *  posts that live on the board every community shares. Anything else
+   *  lives on its poster's own community board. Unset: a conversation with
+   *  replies from two or more places is a shared one. */
+  across?: string[];
   /** What one place on the board is, when it isn't a whole United Way
    *  (South Central Michigan, 10 Oct 2026: four communities inside one
    *  United Way, with a regional layer over them). Absent: United Way. */
@@ -403,7 +420,7 @@ export const STAFF_UI = {
   posted: "Posted. Every office can see it.",
   pinned: "Pinned",
   list: "Latest from the team",
-  back: "Back to Team",
+  back: "Back to Communities",
   replies: "Replies",
   reply: "Reply to the team",
   tasks: "Who does what",
@@ -438,6 +455,32 @@ export const TALK_UI = {
   partnerLine: "Posts on the board and its events, by where the poster lives",
 };
 
+/** Communities (13 Oct 2026): the boards every view shares. Chandu:
+ *  "Rename team to communities and have it be a board where students <>
+ *  employee <> volunteers interactions happen like in our other boards.
+ *  Within community, we need 4 boards for the 4 groups and one for across
+ *  communities ... Within these boards there needs to be a switch for
+ *  employee only ... without students or volunteers involved." */
+export const COMMUNITY_UI = {
+  across: "All communities",
+  acrossLine: "One board every community shares",
+  boards: "Boards",
+  audience: [{ key: "everyone", label: "Everyone" }, { key: "staff", label: "Staff only" }] as const,
+  staffNote: "Only United Way staff see this board.",
+  show: [{ value: "all", label: "Everything" }, { value: "questions", label: "Questions" }, { value: "posts", label: "Posts" }] as const,
+  placeholder: (where: string) => where === "All communities" ? "Ask or share something with every community" : `Ask or share something with ${where}`,
+  staffPlaceholder: (where: string) => where === "All communities" ? "Post to staff in every community" : `Post to staff in ${where}`,
+  post: "Post",
+  posted: (where: string) => `Posted to ${where}.`,
+  staffPosted: "Posted. Only staff can see it.",
+  fromUw: "United Way",
+  empty: "Nothing here yet. Be the first to post.",
+  emptyStaff: "No staff posts here yet.",
+  newToday: "new",
+  people: "people here",
+};
+export type Audience = typeof COMMUNITY_UI.audience[number]["key"];
+
 export const HELP_UI = {
   line: "A real person helps you find help nearby.",
   covers: ["Food and meals", "Rent and power bills", "Health care and rides"],
@@ -448,7 +491,7 @@ export const HELP_UI = {
 export const SERVE_UI = {
   title: "Your service hours",
   checkIn: "Check in", checkedIn: "Hours verified",
-  checkLine: "Check in at the shift to count your hours.",
+  checkLine: "Check in when you arrive to count your hours.",
   signUp: "Sign up",
   spots: "spots left",
   letter: "Get hours letter", lettered: "Your signed hours letter is ready.",
@@ -476,7 +519,7 @@ export const ASK = {
 
 export const VOLUNTEER_UI = {
   since: "Since you were last here",
-  checkNote: "Shifts with students need a background check.",
+  checkNote: "Anything with students needs a background check first.",
   routed: "Questions for you",
   answer: "Answer", post: "Post answer", posted: "Posted. Students can see it now.",
   placeholder: "Two or three sentences is plenty",
@@ -492,6 +535,8 @@ export const VOLUNTEER_UI = {
 };
 
 export const PARTNER_UI = {
+  hours: "Volunteer hours by month",
+  voices: "In their words",
   range: [{ key: "month", label: "Month" }, { key: "year", label: "Year" }] as const,
   export: "Export report", exported: "Report ready in Global Results order",
   grf: "Youth Success goals",
@@ -518,7 +563,7 @@ export const SUPPLY_UI = {
 
 export const POST_UI = {
   title: "Post to the board",
-  kinds: [{ key: "event", label: "Event" }, { key: "shift", label: "Shift" }] as const,
+  kinds: [{ key: "event", label: "Event" }, { key: "shift", label: "Way to help" }] as const,
   fields: { title: "Title", where: "Where", date: "Date" },
   placeholders: { event: "Résumé night at the library", shift: "Help at our career fair" },
   submit: "Post",
@@ -632,6 +677,8 @@ const NET_EVENTS: UwEvent[] = [
     id: "uw-e-mentor-night", kind: "Online meetup", title: "Meet a mentor night", where: "Online", virtual: true, about: "Seniors met mentors from three cities. Then they asked anything.", who: "Seniors", date: { month: "Sep", day: 17, time: "6:00 PM", year: 2026 }, going: 212, chapter: null,
     followUp: {
       closesOn: "October 30, 2026", students: 212, pros: 9, posts: 11,
+      // DEMO-ONLY: the code and the photo count; the photos are United Way's own
+      code: "UWMENTOR", photos: { count: 18, images: [PHOTOS.mentor, PHOTOS.scholars, PHOTOS.workplace, PHOTOS.volunteers, PHOTOS.hero, PHOTOS.ignite] },
       official: {
         postedAgo: "3w ago",
         summary: "212 seniors from six cities met mentors online. They asked about college, money and first jobs.",
@@ -713,7 +760,7 @@ export const NETWORK: UwBoard = {
   clearance: { status: "Background check cleared", line: "Renews Mar 2027" },
   volunteerIds: [...VOLUNTEER_IDS],
   today: {
-    since: ["3 new questions in your field", "Jordan thanked you", "2 shifts need people this week"],
+    since: ["3 new questions in your field", "Jordan thanked you", "2 ways to help need people this week"],
     requests: [
       { id: "r2", kind: "Review", minutes: 15, title: "Check Jordan's résumé for Ignite" },
       { id: "r3", kind: "Speak", minutes: 45, title: "Join the Oct 23 first-job panel" },

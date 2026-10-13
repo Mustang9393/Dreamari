@@ -67,13 +67,13 @@ import { Listbox } from "@/components/app/Listbox";
 import { Avatar, CONTACT_INFO, CONTACT_WARNING, ConnectNav, InlineAsk, PrimaryCta, QuietCta, SectionHead, SectionSurface } from "../primitives";
 import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart } from "../mentorship/charts";
-import { ChapterMap, DotDiamondPlot, DualBars, Funnel, GoalArcs, InterestDots, RankedRows, ShareRing } from "./uwCharts";
+import { CommunityHoursChart, RankedRows } from "./uwCharts";
 import { LoginsChart, Sparkline } from "@/components/app/engagementCharts";
 import { Panel, ProProfileView, useProfilePage, RULE } from "../ProProfile";
-import { CommentRow, EventTicket, InsightCard, PlaceTag, QrSheet, QuestionCard, ReplyComposer, partnerAccent } from "../ConnectExperience";
+import { AlignedInsightRow, CommentRow, EventTicket, InsightCard, PlaceTag, QrSheet, QuestionCard, ReplyComposer, partnerAccent } from "../ConnectExperience";
 import { INSIGHTS, THREADS, type EventBoard, type Insight, type Thread } from "../data";
 import * as D from "./uwData";
-import { registerUwEvent, toEventBoard } from "./uwEvents";
+import { registerUwEvent, toEventBoard, uwEventById } from "./uwEvents";
 import { useBackStep } from "@/lib/backStep";
 
 const BLUE = D.BRAND.blue;
@@ -177,14 +177,20 @@ const addToCalendar = (title: string, date: D.Shift["date"], where: string, hour
 
 // ——— Programs: the photo is the card ———
 
+/** Where a program runs, the card's chip (13 Oct 2026, Chandu: "instead of
+ *  the lead, internship etc chips say which community it belongs to"). */
+function useWhereLabel() {
+  const board = useBoard();
+  return (chapter: string | null) => (chapter ? board.chapters.find((c) => c.id === chapter)?.short ?? "" : board.places?.all ?? D.SCOPE.everywhere);
+}
 function ProgramCard({ p, joined, onOpen, wide = false, reason }: { p: D.Program; joined: boolean; onOpen: () => void; wide?: boolean; reason?: string }) {
-  const Icon = KIND_ICON[p.kind];
+  const where = useWhereLabel();
   return (
     <button type="button" onClick={onOpen} className={`dm-tap group relative flex w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left ${wide ? "aspect-[4/3]" : "aspect-[4/5]"}`} style={{ borderColor: "var(--glass-border)", textShadow: CARD_TEXT_SHADOW, boxShadow: "0 18px 40px -26px rgba(0,0,0,0.7)" }}>
       <Image src={p.photo} alt="" fill sizes="(min-width: 1024px) 320px, 50vw" className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]" style={{ objectPosition: p.focus }} />
       <CardProgressiveBlur size="52%" />
       <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(6,8,18,0.92) 0%, rgba(6,8,18,0.55) 38%, transparent 65%)" }} />
-      <span className="absolute top-[10px] left-[10px] z-10 inline-flex items-center gap-[5px] rounded-full px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: BLUE, color: "#fff", textShadow: "none" }}><Icon className="h-3 w-3" aria-hidden />{D.KIND_LABEL[p.kind]}</span>
+      <span className="absolute top-[10px] left-[10px] z-10 inline-flex items-center gap-[5px] rounded-full px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: BLUE, color: "#fff", textShadow: "none" }}><MapPin className="h-3 w-3" aria-hidden />{where(p.chapter)}</span>
       <span className="relative z-10 flex flex-col gap-[4px] p-[var(--space-4)]">
         {/* the same "why" line an event row uses, never a second chip */}
         {reason && <span className="flex items-center gap-[4px] text-[12px] leading-[16px] font-bold" style={{ color: D.BRAND.yellow }}><Sparkles className="h-3 w-3" aria-hidden />{reason}</span>}
@@ -428,23 +434,38 @@ function ProStack({ ids }: { ids: string[] }) {
   );
 }
 
-const KIND_FILTERS: { key: "all" | D.ProgramKind; label: string }[] = [{ key: "all", label: "All" }, ...(Object.keys(D.KIND_LABEL) as D.ProgramKind[]).map((k) => ({ key: k, label: D.KIND_LABEL[k] }))];
-function StudentPrograms({ programs, joined, open }: { programs: D.Program[]; joined: Record<string, boolean>; open: (p: D.Program) => void }) {
-  const [kind, setKind] = useState<"all" | D.ProgramKind>("all");
-  // only the kinds this list actually has, so no chip leads nowhere
-  const kinds = KIND_FILTERS.filter((k) => k.key === "all" || programs.some((p) => p.kind === k.key));
-  const list = programs.filter((p) => kind === "all" || p.kind === kind);
+/** Programs as photo cards, filtered by community (13 Oct 2026, Chandu:
+ *  "filter by these 4 communities etc and one shared across all"). The
+ *  same grid on the student view and the United Way view; staff also get
+ *  the Post tool and each program's reach under its card. */
+function ProgramsGrid({ programs, joined, open, onPost, stats }: { programs: D.Program[]; joined: Record<string, boolean>; open: (p: D.Program) => void; onPost?: () => void; stats?: D.UwBoard["partnerPrograms"] }) {
+  const board = useBoard();
+  const where = useWhereLabel();
+  const { programPlace: place, setProgramPlace: setPlace } = useContext(FiltersCtx);
+  // a community shows its own programs and the ones shared across all of
+  // them (they run there too), so every community's chip leads somewhere
+  const fits = (p: D.Program, k: string) => k === "all" || (k === "shared" ? p.chapter === null : p.chapter === k || p.chapter === null);
+  const n = (k: string) => programs.filter((p) => fits(p, k)).length;
+  const chips = [{ key: "all", label: "All", n: programs.length }, { key: "shared", label: where(null), n: n("shared") }, ...board.chapters.map((c) => ({ key: c.id, label: c.short, n: n(c.id) }))].filter((c) => c.key === "all" || c.n > 0);
+  // the community's own programs first
+  const list = programs.filter((p) => fits(p, place)).sort((a, b) => (a.chapter === null ? 1 : 0) - (b.chapter === null ? 1 : 0));
   return (
     <>
-      <div className="dm-scroll -mx-[4px] flex gap-[6px] overflow-x-auto px-[4px] pb-[2px] [scrollbar-width:none]">
-        {kinds.map((k) => {
-          const on = k.key === kind;
-          return <button key={k.key} type="button" aria-pressed={on} onClick={() => setKind(k.key)} className="dm-quiet flex-none cursor-pointer rounded-full border px-[12px] py-[6px] text-[13px] leading-[17px] font-semibold" style={{ borderColor: on ? BLUE : "var(--glass-border)", background: on ? `color-mix(in srgb, ${BLUE} 30%, transparent)` : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{k.label}</button>;
-        })}
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <div className="min-w-0 flex-1"><CountChips ariaLabel="Community" options={chips} value={chips.some((c) => c.key === place) ? place : "all"} onChange={setPlace} /></div>
+        {onPost && <PrimaryCta size="sm" style={SOLID} onClick={onPost}><Plus className="h-4 w-4" aria-hidden /> {D.POST_UI.title}</PrimaryCta>}
       </div>
-      {list.length === 0 && <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{D.SCOPE.none}</p>}
+      {list.length === 0 && <EmptyView tier={5} query={place} line="Try another community." cta="Show all" onAction={() => setPlace("all")} />}
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((p) => <ProgramCard key={p.id} p={p} joined={!!joined[p.id]} onOpen={() => open(p)} wide />)}
+        {list.map((p) => {
+          const st = stats?.find((r) => r.program === p.title);
+          return (
+            <div key={p.id} className="flex flex-col gap-[8px]">
+              <ProgramCard p={p} joined={!!joined[p.id]} onOpen={() => open(p)} wide />
+              {st && <span className="flex flex-wrap gap-x-[12px] px-[4px] text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><span><strong style={{ color: "var(--foreground)" }}>{st.students}</strong> students</span><span><strong style={{ color: "var(--foreground)" }}>{st.volunteers}</strong> volunteers</span><span><strong style={{ color: "var(--foreground)" }}>{st.hours}</strong> hours</span></span>}
+            </div>
+          );
+        })}
       </div>
     </>
   );
@@ -457,8 +478,8 @@ function StudentPrograms({ programs, joined, open }: { programs: D.Program[]; jo
 const EventsCtx = createContext<{ open: (id: string, filter?: string) => void; toast: (t: string) => void }>({ open: () => {}, toast: () => {} });
 /** The Events and Talk filters, held by the board view so Back from an
  *  event page or a thread lands on the same filter (the Back memo). */
-type Filters = { when: D.EventWhen; setWhen: (w: D.EventWhen) => void; place: string; setPlace: (p: string) => void; show: Show; setShow: (s: Show) => void; office: string; setOffice: (o: string) => void };
-const FiltersCtx = createContext<Filters>({ when: "upcoming", setWhen: () => {}, place: "all", setPlace: () => {}, show: "all", setShow: () => {}, office: "all", setOffice: () => {} });
+type Filters = { when: D.EventWhen; setWhen: (w: D.EventWhen) => void; place: string; setPlace: (p: string) => void; show: Show; setShow: (s: Show) => void; office: string; setOffice: (o: string) => void; audience: D.Audience; setAudience: (a: D.Audience) => void; programPlace: string; setProgramPlace: (p: string) => void };
+const FiltersCtx = createContext<Filters>({ when: "upcoming", setWhen: () => {}, place: "all", setPlace: () => {}, show: "all", setShow: () => {}, office: "all", setOffice: () => {}, audience: "everyone", setAudience: () => {}, programPlace: "all", setProgramPlace: () => {} });
 const isPast = (e: D.UwEvent) => !!e.followUp;
 
 /** United Way events as the Events tab's own tickets: the same card, the
@@ -470,6 +491,8 @@ function UwEventGrid({ events, staff = false }: { events: D.UwEvent[]; /** the s
   const reminders = useEventReminders();
   const [qr, setQr] = useState<EventBoard | null>(null);
   const S = D.STAFF_UI;
+  // a past event's board is code-gated; the unlock is Connect's own
+  const nav = useContext(ConnectNav);
   return (
     <>
       <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
@@ -479,10 +502,10 @@ function UwEventGrid({ events, staff = false }: { events: D.UwEvent[]; /** the s
           const key = staff ? `cohost:${e.id}` : e.id;
           const host = board.chapters.find((c) => c.id === e.chapter)?.short;
           return (
-            <EventTicket key={e.id} event={ev} joined={ev.entitled} onOpenEvent={(id) => open(id, staff && isPast(e) ? "posts" : undefined)} onEnterCode={open} onQr={setQr}
+            <EventTicket key={e.id} event={ev} joined={!!nav?.isEventJoined?.(e.id)} onOpenEvent={(id) => open(id, staff && isPast(e) ? "posts" : undefined)} onEnterCode={open} onQr={setQr}
               reminded={!!reminders[key]} onRemind={isPast(e) ? undefined : () => { if (toggleEventReminder(key)) toast(staff ? S.cohostToast : D.EVENTS_UI.remindToast); }}
               remindLabels={staff ? [S.cohost, S.cohosting] : undefined}
-              hostLine={staff ? (host ? S.hostedBy(host) : board.staff.all) : undefined}
+              hostLine={staff ? `${host ? S.hostedBy(host) : board.staff.all}${e.followUp ? ` · Attendee code ${e.followUp.code}` : ""}` : undefined}
               openLabel={isPast(e) ? D.EVENTS_UI.open : undefined} />
           );
         })}
@@ -624,12 +647,12 @@ function QuestionList({ threads, open }: { threads: Thread[]; open: (t: Thread) 
 /** Light filter chips with counts, so they never read as a second tab bar.
  *  One line that scrolls sideways on a phone (Michigan has eight places),
  *  its scrollbar hidden on every engine (flow-scroll). */
-function CountChips<K extends string>({ options, value, onChange, ariaLabel }: { options: { key: K; label: string; n: number }[]; value: K; onChange: (k: K) => void; ariaLabel: string }) {
+function CountChips<K extends string>({ options, value, onChange, ariaLabel }: { options: { key: K; label: string; n?: number }[]; value: K; onChange: (k: K) => void; ariaLabel: string }) {
   return (
     <div role="group" aria-label={ariaLabel} className="flow-scroll -mx-[4px] flex gap-[6px] overflow-x-auto px-[4px] py-[2px]">
       {options.map((o) => {
         const on = o.key === value;
-        return <button key={o.key} type="button" aria-pressed={on} onClick={() => onChange(o.key)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-[13px] leading-[17px] font-semibold whitespace-nowrap" style={{ borderColor: on ? BLUE : "var(--glass-border)", background: on ? `color-mix(in srgb, ${BLUE} 30%, transparent)` : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{o.label}<span className="font-extrabold tabular-nums" style={{ color: on ? "var(--foreground)" : "var(--accent-subtle)" }}>{o.n}</span></button>;
+        return <button key={o.key} type="button" aria-pressed={on} onClick={() => onChange(o.key)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-[13px] leading-[17px] font-semibold whitespace-nowrap" style={{ borderColor: on ? BLUE : "var(--glass-border)", background: on ? `color-mix(in srgb, ${BLUE} 30%, transparent)` : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{o.label}{o.n !== undefined && <span className="font-extrabold tabular-nums" style={{ color: on ? "var(--foreground)" : "var(--accent-subtle)" }}>{o.n}</span>}</button>;
       })}
     </div>
   );
@@ -645,55 +668,14 @@ function CountChips<K extends string>({ options, value, onChange, ariaLabel }: {
 
 /** Minutes ago, including weeks, for one newest-first list. */
 const agoAll = (ago: string) => { const m = /(\d+)\s*([mhdw])/.exec(ago); return m ? Number(m[1]) * ({ m: 1, h: 60, d: 1440, w: 10080 } as const)[m[2] as "m" | "h" | "d" | "w"] : 0; };
-type TalkItem = { id: string; place?: string; at: number } & ({ kind: "q"; t: Thread } | { kind: "post"; i: Insight });
-type Show = typeof D.TALK_UI.show[number]["value"];
-
-/** The list itself: questions and posts from every community, the
- *  community chips, and the answered/waiting dropdown. */
-function TalkFeed({ threads, posts, openThread, openPost }: { threads: Thread[]; posts: Insight[]; openThread: (t: Thread) => void; openPost: (i: Insight) => void }) {
-  const board = useBoard();
-  const T = D.TALK_UI;
-  const { place, setPlace, show, setShow } = useContext(FiltersCtx);
-  const [saved, setSaved] = useState<Record<string, boolean>>({});
-  const [helpful, setHelpful] = useState<Record<string, boolean>>({});
-  const items: TalkItem[] = [
-    ...threads.map((t) => ({ kind: "q" as const, t, id: t.id, place: t.place, at: agoAll(t.postedAgo) })),
-    ...posts.map((i) => ({ kind: "post" as const, i, id: i.id, place: i.place, at: agoAll(i.postedAgo) })),
-  ].sort((a, b) => a.at - b.at);
-  // a post isn't a question: it shows under Everything, never as waiting
-  const shown = items.filter((it) => show === "all" || (it.kind === "q" && (show === "answered") === isAnswered(it.t)));
-  const n = (k: string) => shown.filter((it) => it.place === k).length;
-  // only the communities with something to show, so no chip leads nowhere
-  const chips = [{ key: "all", label: T.all, n: shown.length }, ...board.chapters.filter((c) => n(c.short) > 0).map((c) => ({ key: c.short, label: c.short, n: n(c.short) }))];
-  const list = shown.filter((it) => place === "all" || it.place === place);
-  const flip = (set: typeof setSaved, id: string) => set((m) => ({ ...m, [id]: !m[id] }));
-  return (
-    <section className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <SectionHead>{T.list}</SectionHead>
-        <Listbox ariaLabel="Show" value={show} onChange={(v) => setShow(v as Show)} options={T.show.map((o) => ({ value: o.value, label: o.label }))}
-          className="flex min-h-[36px] cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
-      </div>
-      <CountChips ariaLabel="Community" options={chips} value={chips.some((c) => c.key === place) ? place : "all"} onChange={setPlace} />
-      {list.length === 0 && <EmptyView tier={5} query={place} line="Try another community." cta="Show all" onAction={() => { setPlace("all"); setShow("all"); }} />}
-      <ul className="flex flex-col gap-[var(--space-3)]">
-        {list.map((it) => (
-          <li key={it.id}>
-            {it.kind === "q"
-              ? <QuestionCard thread={it.t} onOpen={() => openThread(it.t)} saved={!!saved[it.id]} onSave={() => flip(setSaved, it.id)} helpful={!!helpful[it.id]} onHelpful={() => flip(setHelpful, it.id)} />
-              : <InsightCard insight={it.i} onOpen={() => openPost(it.i)} saved={!!saved[it.id]} onSave={() => flip(setSaved, it.id)} helpful={!!helpful[it.id]} onHelpful={() => flip(setHelpful, it.id)} />}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
+type Show = typeof D.COMMUNITY_UI.show[number]["value"];
 
 /** A past event whose board is still open: one row into it. */
-function EventFollowRows() {
+function EventFollowRows({ space = "all" }: { space?: string }) {
   const board = useBoard();
   const { open } = useContext(EventsCtx);
-  const past = board.events.filter(isPast);
+  const chapterId = board.chapters.find((c) => c.short === space)?.id ?? null;
+  const past = board.events.filter((e) => isPast(e) && e.chapter === chapterId);
   if (past.length === 0) return null;
   return (
     <section className="flex flex-col gap-[var(--space-3)]">
@@ -716,109 +698,6 @@ function EventFollowRows() {
         ))}
       </ul>
     </section>
-  );
-}
-
-/** A town picker for a post: where the poster is from. */
-function FromPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const board = useBoard();
-  return (
-    <span className="flex flex-wrap items-center gap-[8px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-      <MapPin className="h-3.5 w-3.5" aria-hidden />{D.TALK_UI.from}
-      <Listbox ariaLabel={D.TALK_UI.from} value={value} onChange={onChange} options={board.chapters.map((c) => ({ value: c.short, label: c.short }))}
-        className="flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
-    </span>
-  );
-}
-
-/** The how-it-works line: three steps, one line each. */
-function TalkSteps() {
-  return (
-    <ol className="grid grid-cols-1 gap-[var(--space-3)] border-t pt-[var(--space-4)] sm:grid-cols-3" style={{ borderColor: RULE }}>
-      {D.TALK_UI.how.map((h, i) => (
-        <li key={h.title} className="flex items-start gap-[10px]">
-          <span className="flex size-[24px] flex-none items-center justify-center rounded-full text-[12px] font-extrabold tabular-nums" style={SOLID}>{i + 1}</span>
-          <span className="flex flex-col gap-[2px]">
-            <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{h.title}</span>
-            <span className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{h.line}</span>
-          </span>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-function StudentTalk({ threads, onAsk, open, openPost, home }: { threads: Thread[]; onAsk: (text: string, topic?: string, place?: string) => void; open: (t: Thread) => void; openPost: (i: Insight) => void; home: string }) {
-  const board = useBoard();
-  const [asked, setAsked] = useState(false);
-  const [from, setFrom] = useState(home);
-  const posts = INSIGHTS.filter((i) => i.boardId === board.id);
-  return (
-    <>
-      <Panel id="uw-talk-title" title={board.talk.title} aside={
-        <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <span className="flex -space-x-[8px]">{board.volunteerIds.slice(0, 4).map((id) => <span key={id} className="rounded-full" style={{ boxShadow: "0 0 0 2px var(--card)" }}><Avatar name={D.VOLUNTEERS[id].name} size={26} /></span>)}</span>
-          {board.volunteerIds.length} {D.ASK.answerHere}
-        </span>
-      }>
-        {/* the student-facing side; staff talk in Team (the board's first view) */}
-        <Eyebrow>For students</Eyebrow>
-        <p className="-mt-[8px] max-w-[64ch] text-[15px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{board.talk.line}</p>
-        {asked ? (
-          <div className="flex flex-col gap-[8px]"><Done text={D.TALK_UI.posted} /><LinkButton onClick={() => setAsked(false)}>{D.TALK_UI.again}</LinkButton></div>
-        ) : (
-          <div className="flex flex-col gap-[10px]">
-            <FromPicker value={from} onChange={setFrom} />
-            <InlineAsk joined defaultOpen accent={BLUE} placeholder={D.TALK_UI.placeholder} onPost={(text) => { onAsk(text, undefined, from); setAsked(true); }} />
-          </div>
-        )}
-        <TalkSteps />
-      </Panel>
-      <EventFollowRows />
-      <TalkFeed threads={threads} posts={posts} openThread={open} openPost={openPost} />
-    </>
-  );
-}
-
-/** Talk for a volunteer: post a tip or a follow-up to every community,
- *  open the boards of past events to answer there, then the same list. */
-function VolunteerTalk({ threads, openThread, openPost, onToast }: { threads: Thread[]; openThread: (t: Thread) => void; openPost: (i: Insight) => void; onToast: (t: string) => void }) {
-  const board = useBoard();
-  const T = D.TALK_UI.volunteer;
-  // the demo volunteer is the one from the board's own team (Deloitte)
-  const me = board.volunteerIds.find((id) => D.VOLUNTEERS[id]?.org === board.team.you) ?? board.volunteerIds[0];
-  const [from, setFrom] = useState(board.chapters[0].short);
-  const [text, setText] = useState("");
-  const [mine, setMine] = useState<Insight[]>([]);
-  const leaks = CONTACT_INFO.test(text);
-  const past = board.events.filter(isPast);
-  const send = () => {
-    setMine((l) => [{ id: `uw-vpost-${Date.now()}`, boardId: board.id, type: "insight", proId: me, place: from, title: text.trim(), body: "", postedAgo: "Just now", helpful: 0, replies: [] }, ...l]);
-    setText("");
-    onToast(T.posted);
-  };
-  return (
-    <>
-      <Panel id="uw-vtalk-title" title={board.talk.title}>
-        <p className="-mt-[4px] max-w-[64ch] text-[15px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{board.talk.line}</p>
-        <FromPicker value={from} onChange={setFrom} />
-        <div className="flex items-start gap-[12px]">
-          <Avatar name={D.VOLUNTEERS[me].name} size={32} />
-          <div className="flex min-w-0 flex-1 flex-col gap-[8px]">
-            <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={280} placeholder={T.placeholder} aria-label={T.placeholder} className="w-full resize-none rounded-[var(--radius-md)] border p-[12px] text-[15px] leading-[21px] outline-none focus-visible:ring-2" style={INPUT_STYLE} />
-            {leaks && <span className="text-[12.5px] font-semibold" style={{ color: D.BRAND.yellow }}>{CONTACT_WARNING}</span>}
-            <PrimaryCta size="sm" className="w-fit" style={SOLID} disabled={!text.trim() || leaks} onClick={send}>{T.post}</PrimaryCta>
-          </div>
-        </div>
-      </Panel>
-      {past.length > 0 && (
-        <section className="flex flex-col gap-[var(--space-4)]">
-          <SectionHead>{D.EVENTS_UI.keepTalking}</SectionHead>
-          <UwEventGrid events={past} />
-        </section>
-      )}
-      <TalkFeed threads={threads} posts={[...mine, ...INSIGHTS.filter((i) => i.boardId === board.id)]} openThread={openThread} openPost={(i) => (i.id.startsWith("uw-vpost-") ? onToast(T.posted) : openPost(i))} />
-    </>
   );
 }
 
@@ -869,13 +748,13 @@ function StaffPostCard({ p, replies, onOpen }: { p: D.StaffPost; replies: StaffR
       <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
       <div className="relative flex flex-col gap-[10px] pr-[22px]">
         <StaffByline who={p.author} ago={p.postedAgo} />
-        <KindLabel kind={p.kind} pinned={p.pinned} />
+        {p.public ? <span className="flex items-center gap-[6px]"><span className="inline-flex items-center gap-[5px] rounded-full px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold" style={SOLID}><Megaphone className="h-3 w-3" aria-hidden />{D.COMMUNITY_UI.fromUw}</span>{p.pinned && <span className="inline-flex items-center gap-[4px] text-[11.5px] leading-[16px] font-bold" style={{ color: "var(--muted-foreground)" }}><Pin className="h-3 w-3" aria-hidden />{D.STAFF_UI.pinned}</span>}</span> : <KindLabel kind={p.kind} pinned={p.pinned} />}
         <span className="flex flex-col gap-[4px]">
           <span className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{p.title}</span>
           <span className="line-clamp-2 text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{p.body}</span>
         </span>
         <span className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <span className="flex items-center gap-[5px]"><MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {replies.length} {replies.length === 1 ? "reply" : "replies"}</span>
+          {replies.length > 0 && <span className="flex items-center gap-[5px]"><MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {replies.length} {replies.length === 1 ? "reply" : "replies"}</span>}
           {offices.length > 0 && <span>From {offices.join(", ")}</span>}
           {p.resource && <span className="flex items-center gap-[5px]"><FileText className="h-3.5 w-3.5" aria-hidden />{p.resource.meta}</span>}
           {p.tasks && <span className="flex items-center gap-[5px]"><CheckCircle2 className="h-3.5 w-3.5" aria-hidden style={{ color: GOOD }} />{done} of {p.tasks.length} done</span>}
@@ -902,7 +781,7 @@ function TaskList({ tasks }: { tasks: NonNullable<D.StaffPost["tasks"]> }) {
 
 /** One staff post, opened: everything, the replies from every office, and
  *  a reply box that posts as the staff member (never as a student). */
-function StaffPostPage({ p, replies, onReply, onBack }: { p: D.StaffPost; replies: StaffReply[]; onReply: (text: string) => void; onBack: () => void }) {
+function StaffPostPage({ p, replies, onReply, onBack, canReply = true }: { p: D.StaffPost; replies: StaffReply[]; onReply: (text: string) => void; onBack: () => void; /** only staff reply to a United Way post (13 Oct 2026: students and volunteers can open its public posts now) */ canReply?: boolean }) {
   const board = useBoard();
   const S = D.STAFF_UI;
   const me = board.staff.me;
@@ -950,66 +829,177 @@ function StaffPostPage({ p, replies, onReply, onBack }: { p: D.StaffPost; replie
             return <CommentRow key={id} id={id} name={r.author.name} chip="United Way" chipTone="pro" meta={`${r.author.role} · ${r.author.office}`} body={r.body} postedAgo={r.postedAgo} likes={0} liked={!!liked[id]} onLike={(k) => setLiked((m) => ({ ...m, [k]: !m[k] }))} />;
           })}
         </div>
-        <ReplyComposer as={{ name: me.name, meta: `${me.role} · ${me.office}` }} onPost={onReply} />
+        {canReply && <ReplyComposer as={{ name: me.name, meta: `${me.role} · ${me.office}` }} onPost={onReply} />}
       </section>
     </>
   );
 }
 
-/** The Team tab: compose, pinned plans, then every office's posts. */
-function StaffTeam({ posts, repliesFor, open, onPost, onStudents }: { posts: D.StaffPost[]; repliesFor: (p: D.StaffPost) => StaffReply[]; open: (p: D.StaffPost) => void; onPost: (kind: D.StaffPostKind, text: string, office: string) => void; onStudents: () => void }) {
+// ——— Communities (13 Oct 2026) ———
+// Chandu: "Rename team to communities and have it be a board where students
+// <> employee <> volunteers interactions happen like in our other boards.
+// But within community, we need 4 boards for the 4 groups and one for
+// across communities for all the different communities to have a common
+// board. The activity should be a mix of what's on our boards right now and
+// what's there live now. Within these boards there needs to be a switch for
+// employee only ... without students or volunteers involved. Also it needs
+// better UI, right now it's not very intuitive." Then: "Talk needs better
+// UX and UI like mentioned" for students and volunteers.
+// So one component serves all three views. A rail lists the boards (the
+// shared one first, then each community, with what's new), the open board
+// fills the rest the way a channel does in a chat app, and its header says
+// where you are and who can see it. Staff get the Everyone / Staff only
+// switch; staff-only boards are tinted and say so. The feed is the
+// shared Connect cards (questions, graphic posts) plus United Way's own
+// posts. Where an item lives: listed in `board.across` (or, with no list,
+// replies from two places) = the shared board; else its poster's community.
+
+type FeedItem = { id: string; space: string; at: number; pinned?: boolean } & ({ kind: "q"; t: Thread } | { kind: "post"; i: Insight } | { kind: "staff"; p: D.StaffPost });
+const isRecent = (ago: string) => /just now|\d+\s*[mh]\b/i.test(ago);
+
+function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThread, openPost, openStaff, onAsk, onStaffPost, onVolunteerPost }: {
+  role: "staff" | "student" | "volunteer";
+  threads: Thread[]; posts: Insight[]; staffPosts: D.StaffPost[];
+  repliesFor: (p: D.StaffPost) => StaffReply[];
+  openThread: (t: Thread) => void; openPost: (i: Insight) => void; openStaff: (p: D.StaffPost) => void;
+  /** each returns the new item's id, so it lands on the board it was posted to */
+  onAsk: (text: string, place: string) => string;
+  onStaffPost: (kind: D.StaffPostKind, text: string, isPublic: boolean) => string;
+  onVolunteerPost: (text: string, place: string) => string;
+}) {
   const board = useBoard();
-  const S = D.STAFF_UI;
-  const { office, setOffice } = useContext(FiltersCtx);
+  const C = D.COMMUNITY_UI;
+  const { place: space, setPlace: setSpace, audience, setAudience, show, setShow } = useContext(FiltersCtx);
+  const staffOnly = role === "staff" && audience === "staff";
+  // where the things posted here went
+  const [placed, setPlaced] = useState<Record<string, string>>({});
   const [kind, setKind] = useState<D.StaffPostKind>("update");
-  const [from, setFrom] = useState(board.staff.me.office);
   const [text, setText] = useState("");
+  const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [helpful, setHelpful] = useState<Record<string, boolean>>({});
   const leaks = CONTACT_INFO.test(text);
-  const sorted = [...posts].sort((a, b) => agoAll(a.postedAgo) - agoAll(b.postedAgo));
-  const pinned = sorted.filter((p) => p.pinned);
-  const rest = sorted.filter((p) => !p.pinned);
-  const n = (o: string) => rest.filter((p) => p.author.office === o).length;
-  const chips = [{ key: "all", label: board.staff.all, n: rest.length }, ...board.chapters.filter((c) => n(c.short) > 0).map((c) => ({ key: c.short, label: c.short, n: n(c.short) }))];
-  const list = rest.filter((p) => office === "all" || p.author.office === office);
+  const across = new Set(board.across ?? []);
+  const shared = (id: string, place: string | undefined, others: (string | undefined)[]) =>
+    across.has(id) || (!board.across && new Set([place, ...others].filter(Boolean)).size >= 2);
+  const spaceOf = (id: string, place: string | undefined, others: (string | undefined)[]) =>
+    placed[id] ?? (shared(id, place, others) || !place ? "all" : place);
+  const everyone: FeedItem[] = [
+    ...threads.map((t) => ({ kind: "q" as const, t, id: t.id, at: agoAll(t.postedAgo), space: spaceOf(t.id, t.place, t.responses.map((r) => ("place" in r ? r.place : undefined))) })),
+    ...posts.map((i) => ({ kind: "post" as const, i, id: i.id, at: agoAll(i.postedAgo), space: spaceOf(i.id, i.place, i.replies.map((r) => r.place)) })),
+    ...staffPosts.filter((p) => p.public).map((p) => ({ kind: "staff" as const, p, id: p.id, pinned: p.pinned, at: agoAll(p.postedAgo), space: spaceOf(p.id, p.author.office, []) })),
+  ];
+  const staffItems: FeedItem[] = staffPosts.filter((p) => !p.public).map((p) => ({ kind: "staff" as const, p, id: p.id, pinned: p.pinned, at: agoAll(p.postedAgo), space: spaceOf(p.id, p.author.office, repliesFor(p).map((r) => r.author.office)) }));
+  const pool = staffOnly ? staffItems : everyone;
+  const spaces = [{ key: "all", label: C.across, line: C.acrossLine }, ...board.chapters.map((c) => ({ key: c.short, label: c.name, line: c.place }))];
+  const current = spaces.find((x) => x.key === space) ?? spaces[0];
+  const inSpace = pool.filter((it) => it.space === current.key);
+  const shown = inSpace
+    .filter((it) => staffOnly || show === "all" || (show === "questions" ? it.kind === "q" : it.kind !== "q"))
+    .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || a.at - b.at);
+  const flip = (set: typeof setSaved, id: string) => set((m) => ({ ...m, [id]: !m[id] }));
+  const where = current.key === "all" ? C.across : current.label;
+  const send = () => {
+    const t = text.trim();
+    const home = current.key === "all" ? board.staff.me.office : current.key;
+    const id = role === "staff" ? onStaffPost(staffOnly ? kind : "update", t, !staffOnly) : role === "volunteer" ? onVolunteerPost(t, home) : onAsk(t, home);
+    setPlaced((m) => ({ ...m, [id]: current.key }));
+    setText("");
+  };
+  // who's been active here, for the header's faces
+  const faces = [...new Set(inSpace.flatMap((it) => it.kind === "q" ? [it.t.handle] : it.kind === "post" ? [D.VOLUNTEERS[it.i.proId]?.name ?? ""] : [it.p.author.name]).filter(Boolean))].slice(0, 5);
+  const me = role === "staff" ? board.staff.me.name : role === "volunteer" ? D.VOLUNTEERS[board.volunteerIds.find((id) => D.VOLUNTEERS[id]?.org === board.team.you) ?? board.volunteerIds[0]]?.name ?? "You" : "Jordan";
+  const tint = staffOnly ? D.BRAND.yellow : BLUE;
   return (
-    <>
-      <Panel id="uw-team-title" title={board.staff.title} aside={<LinkButton onClick={onStudents}>Student side <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>}>
-        <p className="-mt-[4px] max-w-[64ch] text-[15px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{board.staff.line}</p>
-        <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[10px]">
-          <FromPicker value={from} onChange={setFrom} />
-          <div role="group" aria-label="Kind of post" className="flex flex-wrap gap-[6px]">
-            {S.kinds.map((k) => {
-              const on = k === kind;
-              const Icon = STAFF_KIND_ICON[k];
-              return <button key={k} type="button" aria-pressed={on} onClick={() => setKind(k)} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-[13px] leading-[17px] font-semibold" style={{ borderColor: on ? BLUE : "var(--glass-border)", background: on ? `color-mix(in srgb, ${BLUE} 30%, transparent)` : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}><Icon className="h-3.5 w-3.5" aria-hidden />{D.STAFF_KIND_LABEL[k]}</button>;
-            })}
-          </div>
-        </div>
-        <div className="flex items-start gap-[12px]">
-          <Avatar name={board.staff.me.name} size={32} />
-          <div className="flex min-w-0 flex-1 flex-col gap-[8px]">
-            <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={280} placeholder={S.placeholder} aria-label={S.placeholder} className="w-full resize-none rounded-[var(--radius-md)] border p-[12px] text-[15px] leading-[21px] outline-none focus-visible:ring-2" style={INPUT_STYLE} />
-            {leaks && <span className="text-[12.5px] font-semibold" style={{ color: D.BRAND.yellow }}>{CONTACT_WARNING}</span>}
-            <span className="flex flex-wrap items-center gap-[12px]">
-              <PrimaryCta size="sm" style={SOLID} disabled={!text.trim() || leaks} onClick={() => { onPost(kind, text.trim(), from); setText(""); }}>Post</PrimaryCta>
-              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Posts as {board.staff.me.name} · {board.staff.me.role} · {from}</span>
+    <div className="grid grid-cols-1 gap-[var(--space-5)] lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start">
+      {/* the boards: a rail on wide screens, a sideways row on a phone */}
+      <nav aria-label={C.boards} className="lg:sticky lg:top-[88px]">
+        <span className="mb-[8px] hidden px-[4px] lg:block"><Eyebrow tone="var(--muted-foreground)">{C.boards}</Eyebrow></span>
+        <ul className="flow-scroll -mx-[4px] flex gap-[8px] overflow-x-auto px-[4px] py-[2px] lg:mx-0 lg:flex-col lg:gap-[4px] lg:overflow-visible lg:p-0">
+          {spaces.map((x, i) => {
+            const on = x.key === current.key;
+            const items = pool.filter((it) => it.space === x.key);
+            const fresh = items.filter((it) => isRecent(it.kind === "q" ? it.t.postedAgo : it.kind === "post" ? it.i.postedAgo : it.p.postedAgo)).length;
+            return (
+              <li key={x.key} className={`flex-none lg:flex-auto ${i === 0 ? "lg:mb-[8px] lg:border-b lg:pb-[8px]" : ""}`} style={{ borderColor: RULE }}>
+                <button type="button" aria-current={on ? "true" : undefined} onClick={() => setSpace(x.key)} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left lg:border-transparent" style={{ borderColor: on ? `color-mix(in srgb, ${tint} 55%, transparent)` : "var(--glass-border)", background: on ? `color-mix(in srgb, ${tint} 20%, transparent)` : "transparent" }}>
+                  <span className="flex size-[28px] flex-none items-center justify-center rounded-full" style={{ background: on ? tint : "var(--glass-surface-2)", color: on ? (staffOnly ? "#1a1300" : "#fff") : "var(--muted-foreground)" }}>
+                    {x.key === "all" ? <Users className="h-3.5 w-3.5" aria-hidden /> : <MapPin className="h-3.5 w-3.5" aria-hidden />}
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-[14px] leading-[18px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{x.key === "all" ? x.label : x.key}</span>
+                    <span className="text-[11.5px] leading-[15px] font-semibold whitespace-nowrap tabular-nums" style={{ color: "var(--muted-foreground)" }}>{items.length} {items.length === 1 ? "post" : "posts"}</span>
+                  </span>
+                  {fresh > 0 && <span className="flex-none rounded-full px-[7px] py-[1px] text-[11px] leading-[16px] font-extrabold tabular-nums" style={{ background: tint, color: staffOnly ? "#1a1300" : "#fff" }}>{fresh} {C.newToday}</span>}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      <div className="flex min-w-0 flex-col gap-[var(--space-5)]">
+        {/* where you are, who's here, and who can see it */}
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ borderColor: `color-mix(in srgb, ${tint} 45%, var(--glass-border))`, background: `linear-gradient(135deg, color-mix(in srgb, ${tint} ${staffOnly ? 12 : 22}%, transparent), transparent 70%), var(--glass-surface-1)` }}>
+          <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
+            <span className="flex min-w-0 flex-col gap-[4px]">
+              <h2 className="text-[24px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{where}</h2>
+              <span className="text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{current.line}</span>
             </span>
+            {role === "staff" && <div className="w-full sm:w-fit"><Segmented ariaLabel="Who sees this board" value={audience} onChange={setAudience} options={[...C.audience]} grow /></div>}
+          </div>
+          {staffOnly ? (
+            <span className="flex items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><ShieldCheck className="h-4 w-4 flex-none" aria-hidden style={{ color: D.BRAND.yellow }} />{C.staffNote}</span>
+          ) : faces.length > 0 && (
+            <span className="flex items-center gap-[10px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span className="flex -space-x-[8px]">{faces.map((f) => <span key={f} className="rounded-full" style={{ boxShadow: "0 0 0 2px var(--card)" }}><Avatar name={f} size={26} /></span>)}</span>
+              Students, volunteers and United Way staff
+            </span>
+          )}
+          {/* the composer: what it does depends on who you are */}
+          <div className="flex items-start gap-[12px]">
+            <Avatar name={me} size={34} />
+            <div className="flex min-w-0 flex-1 flex-col gap-[10px]">
+              {staffOnly && (
+                <div role="group" aria-label="Kind of post" className="flex flex-wrap gap-[6px]">
+                  {D.STAFF_UI.kinds.map((k) => {
+                    const on = k === kind;
+                    const Icon = STAFF_KIND_ICON[k];
+                    return <button key={k} type="button" aria-pressed={on} onClick={() => setKind(k)} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[11px] py-[5px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: on ? tint : "var(--glass-border)", background: on ? `color-mix(in srgb, ${tint} 22%, transparent)` : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}><Icon className="h-3.5 w-3.5" aria-hidden />{D.STAFF_KIND_LABEL[k]}</button>;
+                  })}
+                </div>
+              )}
+              <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} maxLength={280} placeholder={staffOnly ? C.staffPlaceholder(where) : C.placeholder(where)} aria-label={staffOnly ? C.staffPlaceholder(where) : C.placeholder(where)} className="w-full resize-none rounded-[var(--radius-md)] border p-[12px] text-[15px] leading-[21px] outline-none focus-visible:ring-2" style={INPUT_STYLE} />
+              {leaks && <span className="text-[12.5px] font-semibold" style={{ color: D.BRAND.yellow }}>{CONTACT_WARNING}</span>}
+              <span className="flex flex-wrap items-center gap-[12px]">
+                <PrimaryCta size="sm" style={staffOnly ? { background: D.BRAND.yellow, color: "#1a1300" } : SOLID} disabled={!text.trim() || leaks} onClick={send}>{C.post}</PrimaryCta>
+                <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{role === "student" ? "First name only. Volunteers answer, most within a day." : role === "staff" ? `As ${board.staff.me.name} · ${board.staff.me.role}` : `As ${me}`}</span>
+              </span>
+            </div>
           </div>
         </div>
-      </Panel>
-      {pinned.length > 0 && (
-        <section className="flex flex-col gap-[var(--space-3)]">
-          <Eyebrow tone="var(--muted-foreground)">{S.pinned}</Eyebrow>
-          <ul className="flex flex-col gap-[var(--space-3)]">{pinned.map((p) => <li key={p.id}><StaffPostCard p={p} replies={repliesFor(p)} onOpen={() => open(p)} /></li>)}</ul>
+
+        {!staffOnly && <EventFollowRows space={current.key} />}
+
+        <section className="flex flex-col gap-[var(--space-4)]">
+          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+            <SectionHead>Latest · {shown.length}</SectionHead>
+            {!staffOnly && <Listbox ariaLabel="Show" value={show} onChange={(v) => setShow(v as Show)} options={C.show.map((o) => ({ value: o.value, label: o.label }))}
+              className="flex min-h-[36px] cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />}
+          </div>
+          {shown.length === 0 && <div className="rounded-[var(--radius-lg)]" style={{ background: "var(--glass-surface-1)" }}><EmptyView tier={3} line={staffOnly ? C.emptyStaff : C.empty} /></div>}
+          <ul className="flex flex-col gap-[var(--space-3)]">
+            {shown.map((it) => (
+              <li key={it.id}>
+                {it.kind === "q" ? <QuestionCard thread={it.t} onOpen={() => openThread(it.t)} saved={!!saved[it.id]} onSave={() => flip(setSaved, it.id)} helpful={!!helpful[it.id]} onHelpful={() => flip(setHelpful, it.id)} />
+                  : it.kind === "post" && it.i.graphic ? <AlignedInsightRow graphic insight={it.i} onOpen={() => openPost(it.i)} saved={!!saved[it.id]} onSave={() => flip(setSaved, it.id)} helpful={!!helpful[it.id]} onHelpful={() => flip(setHelpful, it.id)} />
+                  : it.kind === "post" ? <InsightCard insight={it.i} onOpen={() => openPost(it.i)} saved={!!saved[it.id]} onSave={() => flip(setSaved, it.id)} helpful={!!helpful[it.id]} onHelpful={() => flip(setHelpful, it.id)} />
+                  : <StaffPostCard p={it.p} replies={repliesFor(it.p)} onOpen={() => openStaff(it.p)} />}
+              </li>
+            ))}
+          </ul>
         </section>
-      )}
-      <section className="flex flex-col gap-[var(--space-4)]">
-        <SectionHead>{S.list}</SectionHead>
-        <CountChips ariaLabel={board.staff.unit} options={chips} value={chips.some((c) => c.key === office) ? office : "all"} onChange={setOffice} />
-        {list.length === 0 && <EmptyView tier={5} query={office} line="Try another office." cta="Show all" onAction={() => setOffice("all")} />}
-        <ul className="flex flex-col gap-[var(--space-3)]">{list.map((p) => <li key={p.id}><StaffPostCard p={p} replies={repliesFor(p)} onOpen={() => open(p)} /></li>)}</ul>
-      </section>
-    </>
+      </div>
+    </div>
   );
 }
 
@@ -1248,7 +1238,7 @@ function VolunteerToday({ go, nextShift, onToast }: { go: (t: D.VolunteerTab) =>
       {nextShift && (
         <div className="flex items-center gap-[14px] rounded-[var(--radius-lg)] border p-[14px]" style={ITEM}>
           <DateTile month={nextShift.date.month} day={nextShift.date.day} />
-          <span className="flex min-w-0 flex-1 flex-col"><Eyebrow tone="var(--muted-foreground)">Your next shift</Eyebrow><span className="text-[15.5px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{nextShift.title}</span><span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{nextShift.date.time} · {nextShift.where}</span></span>
+          <span className="flex min-w-0 flex-1 flex-col"><Eyebrow tone="var(--muted-foreground)">Coming up for you</Eyebrow><span className="text-[15.5px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{nextShift.title}</span><span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{nextShift.date.time} · {nextShift.where}</span></span>
         </div>
       )}
 
@@ -1263,7 +1253,7 @@ function VolunteerToday({ go, nextShift, onToast }: { go: (t: D.VolunteerTab) =>
       <section className="flex flex-col gap-[var(--space-4)]">
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <SectionHead>{U.requests}</SectionHead>
-          <LinkButton onClick={() => go("shifts")}>All shifts <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
+          <LinkButton onClick={() => go("shifts")}>All ways to help <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
         </div>
         <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3">
           {board.today.requests.map((r) => (
@@ -1329,21 +1319,9 @@ function VolunteerImpact({ onToast }: { onToast: (t: string) => void }) {
         </Panel>
         <Panel id="uw-months-title" title={U.monthsTitle}><BarChart values={M.hours} labels={M.months} accent={BLUE_TEXT} highlight={M.hours.length - 1} height={140} unit="hours" ariaLabel="Hours by month" /></Panel>
       </div>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <Panel id="uw-team-title" title={U.team}>
-          <RankedRows color={BLUE_TEXT} unit="hrs" rows={board.team.rows.map((r) => ({ label: r.label, sub: r.label === board.team.you ? "Your team" : undefined, value: r.value, on: r.label === board.team.you }))} />
-        </Panel>
-        <Panel id="uw-thanks-title" title={U.thanks}>
-          <ul className="flex flex-col gap-[var(--space-3)]">
-            {board.thanks.map((t) => (
-              <li key={t.from} className="flex flex-col gap-[4px]">
-                <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.text}&rdquo;</span>
-                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.from}</span>
-              </li>
-            ))}
-          </ul>
-        </Panel>
-      </div>
+      {/* 13 Oct 2026, Chandu: "remove your team from impact and use the
+         full row for testimonials carousel or cards" */}
+      <Testimonials id="uw-thanks-title" title={U.thanks} items={board.thanks} />
     </>
   );
 }
@@ -1353,7 +1331,6 @@ function VolunteerImpact({ onToast }: { onToast: (t: string) => void }) {
 const TILE_ICONS = [Users, Handshake, Clock, Briefcase];
 // the v4 engagement charts colour themselves through these two variables
 const V4_COLORS = { "--v4-chart-1": BLUE_TEXT, "--v4-chart-2": GOOD } as CSSProperties;
-const PATH_COLORS = [BLUE_TEXT, GOOD, D.BRAND.yellow, "#C79BFF", "color-mix(in srgb, var(--foreground) 35%, transparent)"];
 
 /** A number with its six-month shape under it (v4's engagement stat). */
 function TrendTile({ icon: Icon, value, label, series }: { icon: typeof Users; value: string; label: string; series: number[] }) {
@@ -1367,26 +1344,104 @@ function TrendTile({ icon: Icon, value, label, series }: { icon: typeof Users; v
   );
 }
 
+/** Quotes as a row of cards that slides sideways (13 Oct 2026, Chandu: "use
+ *  the notes from students and show them as testimonial carousels from
+ *  students, nonprofit director and college partner"). Scroll-snap does the
+ *  sliding, so touch, trackpad and the arrows all move it the same way. */
+function Testimonials({ id, title, items }: { id: string; title: string; items: { from: string; text: string }[] }) {
+  const ref = useRef<HTMLUListElement>(null);
+  const step = (dir: 1 | -1) => { const el = ref.current; if (el) el.scrollBy({ left: dir * Math.max(280, el.clientWidth * 0.8), behavior: "smooth" }); };
+  // arrows only when there is more to see than fits
+  const [more, setMore] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setMore(el.scrollWidth > el.clientWidth + 4);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [items.length]);
+  return (
+    <section aria-labelledby={id} className="flex flex-col gap-[var(--space-3)]">
+      <div className="flex items-center justify-between gap-[var(--space-3)]">
+        <h3 id={id} className="text-[18px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
+        {more && (
+          <span className="flex gap-[6px]">
+            {([-1, 1] as const).map((d) => (
+              <IconTip key={d} label={d < 0 ? "Previous" : "Next"}>
+                <button type="button" aria-label={d < 0 ? "Previous" : "Next"} onClick={() => step(d)} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{d < 0 ? <ChevronLeft className="h-4 w-4" aria-hidden /> : <ChevronRight className="h-4 w-4" aria-hidden />}</button>
+              </IconTip>
+            ))}
+          </span>
+        )}
+      </div>
+      <ul ref={ref} className="flow-scroll -mx-[4px] flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-[4px] pb-[4px]">
+        {items.map((v) => {
+          const [who, where] = v.from.split(/,\s*/);
+          return (
+            <li key={v.from + v.text} className="flex w-[85%] flex-none snap-start sm:w-[calc((100%-2*var(--space-3))/2)] lg:w-[calc((100%-2*var(--space-3))/3)]">
+              <figure className="flex w-full flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ ...ITEM, boxShadow: "none" }}>
+                <span aria-hidden className="text-[44px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: BLUE_TEXT }}>&ldquo;</span>
+                <blockquote className="text-[16px] leading-[23px] font-semibold" style={{ color: "var(--foreground)" }}>{v.text}</blockquote>
+                <figcaption className="flex items-center gap-[10px]">
+                  <Avatar name={who} size={30} />
+                  <span className="flex flex-col"><span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{who}</span>{where && <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{where}</span>}</span>
+                </figcaption>
+              </figure>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+const HOURS_COLORS = [BLUE_TEXT, GOOD, D.BRAND.yellow, "#C79BFF", "#FF8FA3", "#6FE3E3"];
+
+/** Impact, one tab (13 Oct 2026). Chandu: "Consolidated impact and by
+ *  community ... The 4 most valuable metrics are the 4 cards we have in the
+ *  second row, remove the header with the 58% etc. Remove youth success
+ *  goals, plans after high school, careers students saved, small business
+ *  help", then "Remove safety, remove the april pilot card ... In by
+ *  community, simplify the UI, use better graphs for the hours by
+ *  community, but also have tabs for each community and one tab for a
+ *  wider view including all communities and combined metrics. Remove talk
+ *  between communities." So: a community picker (the wider view first),
+ *  the four measures leading and following the picker, hours by community
+ *  as lit curves, visits, what students ask, then their words. */
 function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPost: () => void }) {
   const board = useBoard();
   const I = board.impact;
   const U = D.PARTNER_UI;
   const [range, setRange] = useState<"month" | "year">("year");
-  // each tile's six months, from the board's own monthly shape
+  const [picked, setPicked] = useState("all");
+  const total = board.chapters.reduce((n, k) => n + k.students, 0);
+  const c = board.chapters.find((k) => k.id === picked);
+  // DEMO-ONLY: a community's numbers are the region's, by its share of students
+  const share = c ? c.students / total : 1;
+  const scaled = (v: string) => Math.round(Number(v.replace(/,/g, "")) * share).toLocaleString("en-US");
   const shape = I.monthly.map((m) => m.unique / I.monthly[0].unique);
   const series = (key: string) => shape.map((f, i) => Math.round(100 * f * (1 + (key.length % 3) * 0.02 * i)));
-  const points = I.monthly.map((m) => ({ ...m, avg: Math.round((m.total / m.unique) * 100) / 100 }));
-  const declared = I.paths.filter((p) => p.label !== "Still deciding").reduce((n, p) => n + p.count, 0);
-  const all = I.paths.reduce((n, p) => n + p.count, 0);
-  // goals as this year against last year, each as a share of its goal
-  const goals = I.grf.map((g) => (g.unit === "%" ? { label: g.label, sub: `Goal ${g.goal}%`, dot: g.value, diamond: g.last } : { label: g.label, sub: `${g.value.toLocaleString("en-US")} of ${g.goal.toLocaleString("en-US")}`, dot: Math.round((g.value / g.goal) * 100), diamond: Math.round((g.last / g.goal) * 100) }));
+  const points = I.monthly.map((m) => ({ label: m.label, total: Math.round(m.total * share), unique: Math.round(m.unique * share), avg: Math.round((m.total / m.unique) * 100) / 100 }));
+  // DEMO-ONLY: each community's hours spread over the months in the
+  // board's own monthly shape
+  const weights = I.monthly.map((m) => m.unique);
+  const wsum = weights.reduce((n, w) => n + w, 0);
+  const hours = board.chapters.map((k) => ({ id: k.id, label: k.short, values: weights.map((w) => Math.round((k.hours * w) / wsum)) }));
+  const tabs = [{ key: "all", label: board.places?.all ?? "All" }, ...board.chapters.map((k) => ({ key: k.id, label: k.short }))];
+  const voices = [...(I.voices ?? [])].sort((a, b) => (c && b.from.includes(c.short) ? 1 : 0) - (c && a.from.includes(c.short) ? 1 : 0));
   return (
     <div className="flex flex-col gap-[var(--space-5)]" style={V4_COLORS}>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <Segmented ariaLabel="Range" value={range} onChange={setRange} options={[...U.range]} />
-        <QuietCta size="sm" onClick={() => onToast(U.exported)}><Download className="h-3.5 w-3.5" aria-hidden /> {U.export}</QuietCta>
+        {/* the communities as light pills, never a second row of the same tabs */}
+        <div className="min-w-0 flex-1"><CountChips ariaLabel="Community" options={tabs} value={picked} onChange={setPicked} /></div>
+        <span className="flex items-center gap-[8px]">
+          <Segmented ariaLabel="Range" value={range} onChange={setRange} options={[...U.range]} />
+          <QuietCta size="sm" onClick={() => onToast(U.exported)}><Download className="h-3.5 w-3.5" aria-hidden /> {U.export}</QuietCta>
+        </span>
       </div>
-      {I.signal && (
+      {I.signal && !c && (
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${D.BRAND.yellow} 45%, var(--glass-border))`, background: `color-mix(in srgb, ${D.BRAND.yellow} 8%, var(--glass-surface-1))` }}>
           <span className="flex items-center gap-[12px]">
             <span className="text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: D.BRAND.yellow }}>{I.signal.value}</span>
@@ -1395,71 +1450,33 @@ function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPo
           <PrimaryCta size="sm" style={SOLID} onClick={onPost}><Plus className="h-4 w-4" aria-hidden /> {I.signal.action}</PrimaryCta>
         </div>
       )}
-      <div className="grid grid-cols-1 gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:items-center" style={HERO_BOX}>
-        <div className="flex flex-col gap-[4px]">
-          <span className="text-[52px] leading-[54px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{I.outcome.value}</span>
-          <span className="max-w-[24ch] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{I.outcome.line}</span>
-        </div>
-        <Funnel steps={I.funnel} color={BLUE} />
+      <div className="flex flex-col gap-[4px]">
+        <h2 className="text-[24px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c ? c.name : board.name}</h2>
+        <span className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c ? `${c.place} · ${Math.round(share * 100)}% of students` : `${board.places?.all ?? "All"}: ${board.chapters.length} combined · ${total.toLocaleString("en-US")} students`}</span>
       </div>
       <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-4">
-        {I.tiles.map((t, i) => <TrendTile key={t.key} icon={TILE_ICONS[i]} value={range === "month" ? t.month : t.year} label={t.label} series={series(t.key)} />)}
+        {I.tiles.map((t, i) => <TrendTile key={t.key} icon={TILE_ICONS[i]} value={scaled(range === "month" ? t.month : t.year)} label={t.label} series={series(t.key)} />)}
       </div>
-      <Panel id="uw-trend-title" title={U.trend}><LoginsChart data={points} labels={["Visits", "Active students"]} /></Panel>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <Panel id="uw-grf-title" title={U.grf}><DotDiamondPlot rows={goals} dotLabel="This year" diamondLabel="Last year" dotColor={GOOD} diamondColor={BLUE_TEXT} /></Panel>
-        <Panel id="uw-paths-title" title={U.paths}><ShareRing items={I.paths} colors={PATH_COLORS} centre={`${Math.round((declared / all) * 100)}%`} centreLabel={U.pathsCentre} /></Panel>
+      <Panel id="uw-hours-title" title={U.hours}>
+        <CommunityHoursChart months={I.monthly.map((m) => m.label)} series={hours} picked={picked} onPick={setPicked} colors={HOURS_COLORS} />
+      </Panel>
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <Panel id="uw-trend-title" title={U.trend}><LoginsChart data={points} labels={["Visits", "Active students"]} /></Panel>
+        <Panel id="uw-topics-title" title={U.topics}><RankedRows color={BLUE_TEXT} unit="asks" rows={I.topics.map((t) => ({ label: t.label, value: Math.max(1, Math.round(t.value * share)) }))} /></Panel>
       </div>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-        <Panel id="uw-careers-title" title={U.careers}><InterestDots items={I.careers.map((c) => ({ name: c.label, count: c.value }))} sample={I.monthly[I.monthly.length - 1].unique} color={BLUE_TEXT} /></Panel>
-        <Panel id="uw-topics-title" title={U.topics}><RankedRows color={BLUE_TEXT} unit="asks" rows={I.topics.map((t) => ({ label: t.label, value: t.value }))} /></Panel>
-      </div>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-3">
-        <Panel id="uw-safety-title" title={U.safety}>
-          <dl className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-            {I.safety.map((sf) => (
-              <div key={sf.label} className="flex items-baseline justify-between gap-[12px] py-[10px] first:pt-0" style={{ borderColor: RULE }}>
-                <dt className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{sf.label}</dt>
-                <dd className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: sf.value === "Off" ? GOOD : "var(--foreground)" }}>{sf.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </Panel>
-      {I.voices && I.voices.length > 0 && (
-        <Panel id="uw-voices-title" title="In their words" className={I.context || board.network ? "" : "lg:col-span-2"}>
-          <ul className={`grid grid-cols-1 gap-[var(--space-4)] ${I.context || board.network ? "" : "sm:grid-cols-2"}`}>
-            {I.voices.map((v) => (
-              <li key={v.from} className="flex flex-col gap-[4px]">
-                <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{v.text}&rdquo;</span>
-                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{v.from}</span>
+      {voices.length > 0 && <Testimonials id="uw-voices-title" title={U.voices} items={voices} />}
+      {board.network && (
+        <Panel id="uw-network-title" title={board.network.title}>
+          <ul className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-3">
+            {board.network.items.map((n) => (
+              <li key={n.name} className="flex flex-col gap-[4px]">
+                <span className="text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: BLUE_TEXT }}>{n.stat}</span>
+                <span className="text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{n.name}</span>
+                <span className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{n.line}</span>
               </li>
             ))}
           </ul>
         </Panel>
-      )}
-      {(I.context || board.network) && (
-        <div className="contents">
-          {I.context && (
-            <div className="flex flex-col justify-center gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={ITEM}>
-              <span className="text-[40px] leading-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: BLUE_TEXT }}>{I.context.value}</span>
-              <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{I.context.line}</span>
-              <span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>{I.context.source}</span>
-            </div>
-          )}
-          {board.network && (
-            <Panel id="uw-network-title" title={board.network.title}>
-              <ul className="flex flex-col gap-[var(--space-3)]">
-                {board.network.items.map((n) => (
-                  <li key={n.name} className="flex flex-col gap-[4px]">
-                    <span className="text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: BLUE_TEXT }}>{n.stat}</span>
-                    <span className="text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{n.name}</span>
-                    <span className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{n.line}</span>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-          )}
-        </div>
       )}
       {board.partners && (
         <Panel id="uw-partners-title" title={board.partners.title}>
@@ -1469,74 +1486,7 @@ function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPo
           </div>
         </Panel>
       )}
-      {board.community && (
-        <Panel id="uw-community-title" title={board.community.title} className="lg:col-span-3">
-          <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
-            {board.community.items.map((c) => (
-              <li key={c.name} className="flex">
-                <a href={c.url} target="_blank" rel="noopener noreferrer" className="dm-tap flex w-full flex-col gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                  <span className="flex items-start justify-between gap-[10px]">
-                    <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
-                    <ArrowUpRight className="mt-[2px] h-4 w-4 flex-none" aria-hidden style={{ color: BLUE_TEXT }} />
-                  </span>
-                  <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{c.line}</span>
-                  <span className="mt-auto flex items-center gap-[6px] pt-[2px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}><span aria-hidden className="size-[6px] rounded-full" style={{ background: D.BRAND.yellow }} />{c.status}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </Panel>
-      )}
-      </div>
     </div>
-  );
-}
-
-function PartnerChapters() {
-  const board = useBoard();
-  const [picked, setPicked] = useState(board.chapters[0].id);
-  const c = board.chapters.find((k) => k.id === picked)!;
-  const total = board.chapters.reduce((n, k) => n + k.students, 0);
-  return (
-    <>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <SectionSurface className="p-[var(--space-4)]"><ChapterMap chapters={board.chapters} picked={picked} onPick={setPicked} blue={BLUE} yellow={D.BRAND.yellow} height={board.map === "michigan" ? 400 : 300} region={board.map} /></SectionSurface>
-        <div className="flex flex-col justify-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={HERO_BOX}>
-          <span className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c.name}</span>
-          <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.place} · {Math.round((c.students / total) * 100)}% of students here</span>
-          <div className="grid grid-cols-3 gap-[var(--space-3)]">
-            {[{ v: c.students, l: "Students" }, { v: c.volunteers, l: "Volunteers" }, { v: c.hours, l: "Hours" }].map((x) => (
-              <span key={x.l} className="flex flex-col"><span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{x.v.toLocaleString("en-US")}</span><span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{x.l}</span></span>
-            ))}
-          </div>
-        </div>
-      </div>
-      <Panel id="uw-chapters-title" title={board.places?.panel ?? "Students and volunteer hours by United Way"}>
-        <DualBars labels={["Students", "Volunteer hours"]} colors={[BLUE_TEXT, GOOD]} rows={[...board.chapters].sort((a, b) => b.students - a.students).map((k) => ({ label: k.short, a: k.students, b: k.hours, on: k.id === picked, onClick: () => setPicked(k.id) }))} />
-      </Panel>
-      <TalkByCommunity />
-    </>
-  );
-}
-
-/** United Way's read on Talk (12 Oct 2026): how much each community posts
- *  on the shared board, and how often a reply comes from another town,
- *  the client's ask in one number. Counted from the board's own posts,
- *  its events' boards included. */
-function TalkByCommunity() {
-  const board = useBoard();
-  const eventIds = new Set(board.events.map((e) => e.id));
-  const mine = (id: string) => id === board.id || eventIds.has(id);
-  const qs = THREADS.filter((t) => mine(t.boardId));
-  const posts = INSIGHTS.filter((i) => mine(i.boardId));
-  const rows = board.chapters.map((c) => ({ label: c.short, value: qs.filter((t) => t.place === c.short).length + posts.filter((i) => i.place === c.short).length })).filter((r) => r.value > 0).sort((a, b) => b.value - a.value);
-  const crossed = qs.reduce((n, t) => n + t.responses.filter((r) => r.kind === "peer" && r.place && r.place !== t.place).length, 0) + posts.reduce((n, i) => n + i.replies.filter((r) => r.place && r.place !== i.place).length, 0);
-  if (rows.length === 0) return null;
-  return (
-    <Panel id="uw-talk-partner-title" title={D.TALK_UI.partner} aside={<span className="flex items-baseline gap-[6px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}><strong className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: GOOD }}>{crossed}</strong> replies from another town</span>}>
-      <p className="-mt-[4px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{D.TALK_UI.partnerLine}</p>
-      <RankedRows color={BLUE_TEXT} unit="posts" rows={rows} />
-    </Panel>
   );
 }
 
@@ -1556,88 +1506,6 @@ function PostSheet({ onPost, onClose }: { onPost: (kind: "event" | "shift", titl
       </div>
       <PrimaryCta className="w-fit" style={SOLID} disabled={!title.trim() || !date} onClick={() => onPost(kind, title.trim(), where.trim() || "Online", date)}><Plus className="h-4 w-4" aria-hidden /> {U.submit}</PrimaryCta>
     </Sheet>
-  );
-}
-
-function PartnerPrograms({ onPost }: { onPost: () => void }) {
-  const board = useBoard();
-  const rows = board.partnerPrograms;
-  const max = Math.max(...rows.map((r) => r.students));
-  const cols = ["Program", "Students", "Volunteers", "Hours"];
-  return (
-    <>
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <SectionHead>{rows.length} programs</SectionHead>
-        <PrimaryCta size="sm" style={SOLID} onClick={onPost}><Plus className="h-4 w-4" aria-hidden /> {D.POST_UI.title}</PrimaryCta>
-      </div>
-      <SectionSurface className="overflow-x-auto">
-        <table className="w-full min-w-[560px] border-collapse text-[14px]">
-          <thead><tr>{cols.map((c, i) => <th key={c} className={`px-[var(--space-4)] py-[12px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase ${i === 0 ? "text-left" : "text-right"}`} style={{ color: "var(--muted-foreground)", borderBottom: `1px solid ${RULE}` }}>{c}</th>)}</tr></thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.program} style={{ borderBottom: `1px solid ${RULE}` }}>
-                <td className="px-[var(--space-4)] py-[12px]"><span className="block font-bold" style={{ color: "var(--foreground)" }}>{r.program}</span><span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{r.by}</span></td>
-                <td className="px-[var(--space-4)] py-[12px]">
-                  <span className="flex items-center justify-end gap-[10px]"><span className="hidden h-[6px] w-[90px] overflow-hidden rounded-full sm:block" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}><span className="block h-full rounded-full" style={{ width: `${(r.students / max) * 100}%`, background: BLUE_TEXT }} /></span><span className="font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{r.students}</span></span>
-                </td>
-                <td className="px-[var(--space-4)] py-[12px] text-right font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{r.volunteers}</td>
-                <td className="px-[var(--space-4)] py-[12px] text-right font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{r.hours}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </SectionSurface>
-    </>
-  );
-}
-
-function PartnerPeople({ onToast }: { onToast: (t: string) => void }) {
-  const board = useBoard();
-  const U = D.PARTNER_UI;
-  const openPro = useContext(OpenPro);
-  const [reminded, setReminded] = useState<Record<string, boolean>>({});
-  // safety: one tap takes a volunteer off every shift
-  const [paused, setPaused] = useState<Record<string, boolean>>({});
-  const tone = { done: GOOD, training: BLUE_TEXT, pending: D.BRAND.yellow } as const;
-  const pending = board.roster.filter((r) => r.checks !== "done").length;
-  return (
-    <>
-      <div className="flex flex-wrap items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={HERO_BOX}>
-        <ShieldCheck className="h-8 w-8 flex-none" aria-hidden style={{ color: BLUE_TEXT }} />
-        <span className="flex flex-col">
-          <span className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pending} still need a background check or training</span>
-        </span>
-      </div>
-      <Panel id="uw-ops-title" title={U.ops}>
-        <GoalArcs colors={[BLUE_TEXT, GOOD, D.BRAND.yellow]} items={board.ops.map((o) => ({ value: o.value, label: o.label, extra: `Goal ${o.goal}%${o.value >= o.goal ? ", met" : ""}` }))} />
-      </Panel>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <Panel id="uw-roster-title" title={U.roster}>
-          <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-            {board.roster.map((r) => {
-              const pro = D.VOLUNTEERS[r.pro];
-              if (!pro) return null;
-              return (
-                <li key={r.pro} className="flex items-center justify-between gap-[12px] py-[10px] first:pt-0" style={{ borderColor: RULE }}>
-                  <button type="button" onClick={() => openPro(r.pro)} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] text-left">
-                    <Avatar name={pro.name} size={34} />
-                    <span className="min-w-0"><span className="block truncate text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span><span className="block truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{pro.org} · {r.hours} hrs</span></span>
-                  </button>
-                  <span className="flex flex-none items-center gap-[8px]">
-                    <span className="flex items-center gap-[5px] text-[12.5px] font-bold" style={{ color: paused[r.pro] ? D.BRAND.red : tone[r.checks] }}><span aria-hidden className="size-[6px] rounded-full" style={{ background: paused[r.pro] ? D.BRAND.red : tone[r.checks] }} />{paused[r.pro] ? U.paused : U.checks[r.checks]}</span>
-                    {r.checks === "pending" && (reminded[r.pro] ? <Check className="h-4 w-4" aria-label={U.reminded} style={{ color: GOOD }} /> : <QuietCta size="sm" onClick={() => { setReminded((m) => ({ ...m, [r.pro]: true })); onToast(U.reminded); }}>{U.remind}</QuietCta>)}
-                    {r.checks !== "pending" && <QuietCta size="sm" done={!!paused[r.pro]} onClick={() => { setPaused((m) => ({ ...m, [r.pro]: !m[r.pro] })); if (!paused[r.pro]) onToast(U.pausedToast); }}>{paused[r.pro] ? U.resume : U.pause}</QuietCta>}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </Panel>
-        <Panel id="uw-companies-title" title="Hours by company">
-          <RankedRows color={BLUE_TEXT} unit="hrs" rows={board.team.rows.map((r) => ({ label: r.label, value: r.value }))} />
-        </Panel>
-      </div>
-    </>
   );
 }
 
@@ -1668,7 +1536,7 @@ const sortByDate = <T extends { date: { month: string; day: number; year: number
  *  scope and scroll instead of the top of Home (Chandu: "I'll have to
  *  click back and lose my way or last scroll position"). In memory only,
  *  so a fresh load still starts at Home. */
-type Memo = { view: D.UwView; studentTab: D.StudentTab; volunteerTab: D.VolunteerTab; partnerTab: D.PartnerTab; scope: D.Scope; chapter: string; asked: Thread[]; y: number; programId?: string; staffPostId?: string; when: D.EventWhen; place: string; show: Show; office: string };
+type Memo = { view: D.UwView; studentTab: D.StudentTab; volunteerTab: D.VolunteerTab; partnerTab: D.PartnerTab; scope: D.Scope; chapter: string; asked: Thread[]; y: number; programId?: string; staffPostId?: string; when: D.EventWhen; place: string; show: Show; office: string; audience: D.Audience; programPlace: string };
 const MEMO: Record<string, Memo | undefined> = {};
 
 /** A link's `filter`: the board opens on the staff view (Team, or Events
@@ -1737,6 +1605,8 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const [talkPlace, setTalkPlace] = useState(memo?.place ?? "all");
   const [talkShow, setTalkShow] = useState<Show>(memo?.show ?? "all");
   const [office, setOffice] = useState(memo?.office ?? "all");
+  const [audience, setAudience] = useState<D.Audience>(memo?.audience ?? "everyone");
+  const [programPlace, setProgramPlace] = useState(memo?.programPlace ?? "all");
   // staff posts made here, replies added here, and the post that's open
   const [staffMine, setStaffMine] = useState<D.StaffPost[]>([]);
   const [staffReplies, setStaffReplies] = useState<Record<string, D.StaffPost["replies"]>>({});
@@ -1762,12 +1632,14 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const [asked, setAsked] = useState<Thread[]>(memo?.asked ?? []);
   const threads = boardThreads(board.id, asked);
   const ask = (text: string, topic = "Volunteers here", place?: string) => {
-    setAsked((l) => [{ id: `uw-asked-${Date.now()}`, boardId: board.id, type: "question", title: text, handle: "Jordan", grade: "Senior", place, postedAgo: "Just now", state: "routed", routedScope: topic, expectedWindow: "within 1 day", helpful: 0, followers: 0, responses: [] }, ...l]);
+    const id = `uw-asked-${Date.now()}`;
+    setAsked((l) => [{ id, boardId: board.id, type: "question", title: text, handle: "Jordan", grade: "Senior", place, postedAgo: "Just now", state: "routed", routedScope: topic, expectedWindow: "within 1 day", helpful: 0, followers: 0, responses: [] }, ...l]);
     nav?.noteAsked(text, board.id);
+    return id;
   };
   // leaving for a thread, a post or an event page: Back returns here
   const remember = () => {
-    MEMO[board.id] = { view, studentTab, volunteerTab, partnerTab, scope, chapter, asked, y: window.scrollY, programId: program?.id, staffPostId: staffPost?.id, when, place: talkPlace, show: talkShow, office };
+    MEMO[board.id] = { view, studentTab, volunteerTab, partnerTab, scope, chapter, asked, y: window.scrollY, programId: program?.id, staffPostId: staffPost?.id, when, place: talkPlace, show: talkShow, office, audience, programPlace };
     // a reply on the page we hand off to posts as this view's role
     const vol = D.VOLUNTEERS[board.volunteerIds.find((id) => D.VOLUNTEERS[id]?.org === board.team.you) ?? board.volunteerIds[0]];
     setReplyAs(view === "partner" ? { name: board.staff.me.name, chip: "United Way", meta: `${board.staff.me.role} · ${board.staff.me.office}`, tone: "pro" } : view === "volunteer" && vol ? { name: vol.name, chip: "Volunteer", meta: vol.org, tone: "pro" } : null);
@@ -1779,8 +1651,12 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   };
   const openPost = (i: Insight) => { remember(); nav?.openInsight(i.id); };
   // an event opens on Connect's own event page (12 Oct 2026)
+  // a past event's board needs its attendee code first (13 Oct 2026);
+  // an upcoming event's page stays open to everyone
   const openEvent = (id: string, filter?: string) => {
     remember();
+    const ev = uwEventById(id);
+    if (ev && ev.lifecycle !== "Upcoming" && nav?.isEventJoined && !nav.isEventJoined(id)) { nav.enterEventCode?.(id); return; }
     if (nav?.openEvent) nav.openEvent(id, filter);
     else router.push(`/connect?event=${id}${filter ? `&filter=${filter}` : ""}`);
   };
@@ -1788,10 +1664,28 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const openStaffPost = (p: D.StaffPost) => { staffY.current = window.scrollY; setStaffPost(p); window.scrollTo(0, 0); };
   const closeStaffPost = () => { setStaffPost(undefined); const y = staffY.current; window.setTimeout(() => window.scrollTo(0, y), 0); };
   useBackStep(!!staffPost, closeStaffPost);
-  const postStaff = (kind: D.StaffPostKind, text: string, from: string) => {
-    const me = { ...board.staff.me, office: from };
-    setStaffMine((l) => [{ id: `uw-staff-${Date.now()}`, kind, author: me, title: text, body: "", postedAgo: "Just now", replies: [] }, ...l]);
-    onToast(D.STAFF_UI.posted);
+  const postStaff = (kind: D.StaffPostKind, text: string, isPublic: boolean) => {
+    const id = `uw-staff-${Date.now()}`;
+    setStaffMine((l) => [{ id, kind, public: isPublic || undefined, author: board.staff.me, title: text, body: "", postedAgo: "Just now", replies: [] }, ...l]);
+    onToast(isPublic ? D.COMMUNITY_UI.posted("the board") : D.COMMUNITY_UI.staffPosted);
+    return id;
+  };
+  // a volunteer's post lands on the board it was written on
+  const [volunteerMine, setVolunteerMine] = useState<Insight[]>([]);
+  const volunteerMe = board.volunteerIds.find((id) => D.VOLUNTEERS[id]?.org === board.team.you) ?? board.volunteerIds[0];
+  const postVolunteer = (text: string, place: string) => {
+    const id = `uw-vpost-${Date.now()}`;
+    setVolunteerMine((l) => [{ id, boardId: board.id, type: "insight", proId: volunteerMe, place, title: text, body: "", postedAgo: "Just now", helpful: 0, replies: [] }, ...l]);
+    onToast(D.TALK_UI.volunteer.posted);
+    return id;
+  };
+  const boardPosts = [...volunteerMine, ...INSIGHTS.filter((i) => i.boardId === board.id)];
+  const communityProps = {
+    threads, posts: boardPosts, staffPosts, repliesFor,
+    openThread, openStaff: openStaffPost,
+    openPost: (i: Insight) => (i.id.startsWith("uw-vpost-") ? onToast(D.TALK_UI.volunteer.posted) : openPost(i)),
+    onAsk: (text: string, place: string) => ask(text, undefined, place),
+    onStaffPost: postStaff, onVolunteerPost: postVolunteer,
   };
   const local = scope === "local";
   const inScope = (c: string | null) => !local || c === null || c === chapter;
@@ -1828,7 +1722,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const title = view === "volunteer" ? "Volunteer" : board.name;
   // (staff: the counts say it; Team's own panel carries the line)
   const heroLine = view === "student" ? board.line : undefined;
-  const heroStats = view === "partner" ? [{ value: String(board.chapters.length), label: board.chapters.length === 1 ? board.staff.unit : `${board.staff.unit}s` }, { value: String(board.events.length), label: "events" }] : view === "student" ? board.stats : [];
+  const heroStats = view === "partner" ? [{ value: String(board.chapters.length), label: board.chapters.length === 1 ? board.staff.unit : board.staff.unit.endsWith("y") ? `${board.staff.unit.slice(0, -1)}ies` : `${board.staff.unit}s` }, { value: String(board.events.length), label: "events" }] : view === "student" ? board.stats : [];
   const scopeBox = (
     <Listbox ariaLabel="Where" value={local ? chapter : "all"} onChange={(v) => { if (v === "all") setScope("all"); else { setScope("local"); setChapter(v); } }}
       options={[{ value: "all", label: board.places?.all ?? D.SCOPE.everywhere }, ...board.chapters.map((k) => ({ value: k.id, label: k.short }))]}
@@ -1838,13 +1732,13 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
     <BoardCtx.Provider value={board}>
     <OpenPro.Provider value={setProfile}>
     <EventsCtx.Provider value={{ open: openEvent, toast: onToast }}>
-    <FiltersCtx.Provider value={{ when, setWhen, place: talkPlace, setPlace: setTalkPlace, show: talkShow, setShow: setTalkShow, office, setOffice }}>
+    <FiltersCtx.Provider value={{ when, setWhen, place: talkPlace, setPlace: setTalkPlace, show: talkShow, setShow: setTalkShow, office, setOffice, audience, setAudience, programPlace, setProgramPlace }}>
       {applyFor && <ApplySheet p={applyFor} onClose={() => setApplyFor(undefined)} onSend={() => { setApplied((m) => ({ ...m, [applyFor.id]: true })); setJoined((m) => ({ ...m, [applyFor.id]: true })); setApplyFor(undefined); onToast(D.PROGRAM_PAGE.applied); }} />}
       {posting && <PostSheet onPost={post} onClose={() => setPosting(false)} />}
       {toast}
 
       {staffPost ? (
-        <StaffPostPage p={staffPost} replies={repliesFor(staffPost)} onBack={closeStaffPost}
+        <StaffPostPage p={staffPost} replies={repliesFor(staffPost)} onBack={closeStaffPost} canReply={view === "partner"}
           onReply={(text) => setStaffReplies((m) => ({ ...m, [staffPost.id]: [...(m[staffPost.id] ?? []), { author: board.staff.me, body: text, postedAgo: "Just now" }] }))} />
       ) : program ? (
         <ProgramPage p={program} applied={!!applied[program.id]} mentorshipJoined={!!program.mentorship && uw.stage !== "none"}
@@ -1883,31 +1777,29 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
                (Chandu: "we should never repeat these together") */}
             {/* on Events it sits in the Upcoming row instead, so the two
                dropdowns never stack */}
-            {studentTab !== "ask" && studentTab !== "events" && scopeBox}
+            {studentTab !== "ask" && studentTab !== "events" && studentTab !== "programs" && scopeBox}
           </div>
         )}
         <div className={view === "student" ? "hidden" : "w-full sm:w-fit"}>
           {view === "volunteer" && <Segmented ariaLabel="Section" value={volunteerTab} onChange={keep(setVolunteerTab)} options={[...D.VOLUNTEER_TABS]} grow />}
-          {view === "partner" && <Segmented ariaLabel="Section" value={partnerTab} onChange={keep(setPartnerTab)} options={D.PARTNER_TABS.map((t) => (t.key === "chapters" && board.places ? { ...t, label: board.places.tab } : t))} grow />}
+          {view === "partner" && <Segmented ariaLabel="Section" value={partnerTab} onChange={keep(setPartnerTab)} options={[...D.PARTNER_TABS]} grow />}
         </div>
         <motion.div key={`${view}-${view === "student" ? studentTab : view === "volunteer" ? volunteerTab : partnerTab}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)]">
           {view === "student" && studentTab === "home" && <StudentHome shared={(board.shared ?? []).filter((o) => inScope(o.chapter))} go={keep(setStudentTab)} openProgram={openProgram} joined={joined} programs={programs} events={events} served={servedHours} threads={threads} openThread={openThread} />}
-          {view === "student" && studentTab === "programs" && <StudentPrograms programs={programs} joined={joined} open={openProgram} />}
+          {view === "student" && studentTab === "programs" && <ProgramsGrid programs={board.programs} joined={joined} open={openProgram} />}
           {view === "student" && studentTab === "events" && <StudentEvents events={events} where={scopeBox} />}
           {view === "student" && studentTab === "serve" && <StudentServe shifts={serve} signed={served} toggle={flip(setServed)} onToast={onToast} />}
-          {view === "student" && studentTab === "ask" && <StudentTalk threads={threads} onAsk={ask} open={openThread} openPost={openPost} home={board.chapters.find((k) => k.id === chapter)?.short ?? board.chapters[0].short} />}
+          {view === "student" && studentTab === "ask" && <CommunityBoards role="student" {...communityProps} />}
 
           {view === "volunteer" && volunteerTab === "today" && <VolunteerToday go={keep(setVolunteerTab)} nextShift={nextShift} onToast={onToast} />}
           {view === "volunteer" && volunteerTab === "shifts" && <VolunteerShifts shifts={shifts} signed={shiftsSigned} toggle={flip(setShiftsSigned)} />}
-          {view === "volunteer" && volunteerTab === "talk" && <VolunteerTalk threads={threads} openThread={openThread} openPost={openPost} onToast={onToast} />}
+          {view === "volunteer" && volunteerTab === "talk" && <CommunityBoards role="volunteer" {...communityProps} />}
           {view === "volunteer" && volunteerTab === "impact" && <VolunteerImpact onToast={onToast} />}
 
-          {view === "partner" && partnerTab === "team" && <StaffTeam posts={staffPosts} repliesFor={repliesFor} open={openStaffPost} onPost={postStaff} onStudents={() => { setView("student"); setStudentTab("ask"); }} />}
+          {view === "partner" && partnerTab === "team" && <CommunityBoards role="staff" {...communityProps} />}
           {view === "partner" && partnerTab === "events" && <StaffEvents events={sortByDate([...board.events, ...postedEvents])} />}
+          {view === "partner" && partnerTab === "programs" && <ProgramsGrid programs={board.programs} joined={joined} open={openProgram} onPost={() => setPosting(true)} stats={board.partnerPrograms} />}
           {view === "partner" && partnerTab === "impact" && <PartnerImpact onToast={onToast} onPost={() => setPosting(true)} />}
-          {view === "partner" && partnerTab === "chapters" && <PartnerChapters />}
-          {view === "partner" && partnerTab === "programs" && <PartnerPrograms onPost={() => setPosting(true)} />}
-          {view === "partner" && partnerTab === "people" && <PartnerPeople onToast={onToast} />}
         </motion.div>
       </SectionSurface>
       </>)}

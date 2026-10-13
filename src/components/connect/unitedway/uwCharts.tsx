@@ -20,6 +20,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import usaMapModule from "@svg-maps/usa";
 import { Ring } from "../viz";
 import type { Chapter } from "./uwData";
+import { Aurora, GlowStroke, LightGrid, Orb } from "@/components/counselor/v4/charts/glow";
+import { smoothPath } from "@/components/app/engagementCharts";
 
 type UsaMap = { viewBox: string; locations: { id: string; name: string; path: string }[] };
 const USA = (usaMapModule as unknown as { default?: UsaMap }).default ?? (usaMapModule as unknown as UsaMap);
@@ -322,5 +324,60 @@ export function DualBars({ rows, labels, colors }: { rows: { label: string; sub?
       </ul>
       <figcaption className="flex flex-wrap justify-center gap-x-[18px] gap-y-[4px]">{labels.map((l, k) => <span key={l} className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] rounded-full" style={{ background: colors[k] }} />{l}</span>)}</figcaption>
     </figure>
+  );
+}
+
+/** Volunteer hours by month, one lit curve per community (13 Oct 2026,
+ *  Chandu: "use better graphs for the hours by community"; the house rule
+ *  is light, not bars). The whole region shows every community at once;
+ *  picking one lights its curve with the aurora under it and quiets the
+ *  rest, so each community reads against the others. The legend under the
+ *  plot is the comparison and the picker. */
+export function CommunityHoursChart({ months, series, picked, onPick, colors }: { months: string[]; series: { id: string; label: string; values: number[] }[]; picked: string; onPick: (id: string) => void; colors: string[] }) {
+  const W = 1000, H = 260, L = 40, R = 24, T = 20, B = 36;
+  const max = Math.max(1, ...series.flatMap((s) => s.values)) * 1.12;
+  const x = (i: number) => L + (i * (W - L - R)) / Math.max(1, months.length - 1);
+  const y = (v: number) => T + (1 - v / max) * (H - T - B);
+  const box = { x: L, y: T, w: W - L - R, h: H - T - B };
+  const all = picked === "all";
+  const order = [...series].sort((a, b) => (a.id === picked ? 1 : 0) - (b.id === picked ? 1 : 0));
+  const ticks = [0, 0.5, 1].map((f) => Math.round((max / 1.12) * f));
+  return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+      <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`Volunteer hours by month for ${all ? "every community" : series.find((s) => s.id === picked)?.label}`}>
+        <LightGrid xs={months.map((_, i) => x(i))} top={T} bottom={H - B} />
+        {ticks.map((t) => <text key={t} x={L - 8} y={y(t) + 4} textAnchor="end" className="fill-current text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t}</text>)}
+        {months.map((m, i) => <text key={m} x={x(i)} y={H - 10} textAnchor="middle" className="fill-current text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{m}</text>)}
+        {order.map((s) => {
+          const ci = series.indexOf(s);
+          const color = colors[ci % colors.length];
+          const pts = s.values.map((v, i) => ({ x: x(i), y: y(v) }));
+          const d = smoothPath(pts);
+          const on = all || s.id === picked;
+          const last = pts[pts.length - 1];
+          return (
+            <g key={s.id} style={{ opacity: on ? 1 : 0.35, transition: "opacity 240ms ease" }}>
+              {!all && on && <Aurora d={`${d} L${last.x} ${H - B} L${pts[0].x} ${H - B} Z`} box={box} colors={[color, color]} strength={0.35} />}
+              <GlowStroke d={d} color={color} width={on ? 2.5 : 1.6} quiet={!on} />
+              {on && <Orb cx={last.x} cy={last.y} r={all ? 4.5 : 6} color={color} />}
+            </g>
+          );
+        })}
+      </svg>
+      <ul className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
+        {series.map((s, i) => {
+          const on = all || s.id === picked;
+          const total = s.values.reduce((n, v) => n + v, 0);
+          return (
+            <li key={s.id}>
+              <button type="button" aria-pressed={s.id === picked} onClick={() => onPick(s.id === picked ? "all" : s.id)} className="dm-quiet flex w-full cursor-pointer flex-col gap-[2px] rounded-[var(--radius-md)] border px-[12px] py-[8px] text-left" style={{ borderColor: s.id === picked ? colors[i % colors.length] : "var(--glass-border)", opacity: on ? 1 : 0.6 }}>
+                <span className="flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}><span aria-hidden className="size-[8px] rounded-full" style={{ background: colors[i % colors.length], boxShadow: `0 0 8px ${colors[i % colors.length]}` }} />{s.label}</span>
+                <span className="text-[18px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{total.toLocaleString("en-US")} <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>hrs</span></span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

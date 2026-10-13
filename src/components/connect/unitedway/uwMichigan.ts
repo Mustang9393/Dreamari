@@ -156,6 +156,8 @@ const EVENTS: UwEvent[] = [
     id: "mi-e-suw-meetup", kind: "Online meetup", title: "Student United Way meetup", where: "Online", virtual: true, about: "Student United Way groups from across Michigan met online.", who: "High school students", date: { month: "Sep", day: 30, time: "6:00 PM", year: 2026 }, going: 96, chapter: null,
     followUp: {
       closesOn: "November 11, 2026", students: 96, pros: 5, posts: 9,
+      // DEMO-ONLY: the code and the photo count; the photos are United Ways' own
+      code: "SUWMEET", photos: { count: 12, images: ["/images/connect/covers/uw-mi-caring.jpg", "/images/connect/covers/uw-mi-students.jpg", "/images/connect/covers/uw-mi-hero.jpg", "/images/connect/covers/uw-mi-scholars.jpg", "/images/connect/covers/uw-mi-city.jpg"] },
       official: {
         postedAgo: "1w ago",
         summary: "96 students from Grand Rapids, Detroit, Flint, Muskegon and Marquette met online. Each group shared one project that worked.",
@@ -332,7 +334,7 @@ export const MICHIGAN: UwBoard = {
     context: { value: "67%", line: "of young Michigan households can't cover basic costs", source: "ALICE in Michigan, 2026 update" },
     // DEMO-ONLY: a 2-1-1 early warning (the Gemini research's proposal of
     // reading 2-1-1 call trends by ZIP to staff up before a crisis)
-    signal: { value: "+18%", line: "2-1-1 food calls near Pontiac this month", action: "Post a packing shift" },
+    signal: { value: "+18%", line: "2-1-1 food calls near Pontiac this month", action: "Post a packing day" },
     // DEMO-ONLY: monthly activity and plans; the latest month is the high
     monthly: [{ label: "Apr", total: 940, unique: 360 }, { label: "May", total: 1120, unique: 410 }, { label: "Jun", total: 1060, unique: 400 }, { label: "Jul", total: 1240, unique: 455 }, { label: "Aug", total: 1210, unique: 448 }, { label: "Sep", total: 1460, unique: 520 }],
     paths: [{ label: "4-year college", count: 160 }, { label: "2-year college or trade school", count: 142 }, { label: "Job or apprenticeship", count: 121 }, { label: "Military", count: 18 }, { label: "Still deciding", count: 77 }],

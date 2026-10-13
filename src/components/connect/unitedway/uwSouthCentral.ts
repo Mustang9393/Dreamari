@@ -144,6 +144,9 @@ const EVENTS: UwEvent[] = [
     id: "sc-e-fall-convening", kind: "Regional convening", title: "Fall regional convening", where: "Kalamazoo", virtual: false, about: "All four towns met. Students, nonprofits and colleges.", who: "Students and young pros", date: { month: "Sep", day: 26, time: "10:00 AM", year: 2026 }, going: 164, chapter: null,
     followUp: {
       closesOn: "November 7, 2026", students: 164, pros: 12, posts: 23,
+      // DEMO-ONLY: the code and the photo count. Photos are United Ways' own;
+      // not uw-mi-students, whose banner is West Michigan's
+      code: "UWSCFALL", photos: { count: 41, images: [MI.caring, MI.volunteers, MI.team, MI.scholars, "/images/connect/covers/uw-mi-city.jpg", PHOTOS.volunteers] },
       official: {
         postedAgo: "2w ago",
         summary: "164 students from Kalamazoo, Battle Creek, Lansing and Jackson met in Kalamazoo. They talked with nonprofits, city staff and colleges. Then they planned one service day for all four towns.",
@@ -198,7 +201,42 @@ const LAN_YOUTH: StaffMember = { name: "Maya", role: "Youth programs", office: "
 const JX_VOL: StaffMember = { name: "Tess", role: "Volunteer center", office: "Jackson" };
 const BC_IMPACT: StaffMember = { name: "Dana", role: "Community impact", office: "Battle Creek" };
 const LAN_EVENTS: StaffMember = { name: "Rob", role: "Events", office: "Lansing" };
+const KZ_IMPACT: StaffMember = { name: "Jess", role: "Community impact", office: "Kalamazoo" };
+const BC_VOL: StaffMember = { name: "Alex", role: "Volunteer engagement", office: "Battle Creek" };
+const JX_YOUTH: StaffMember = { name: "Lena", role: "Youth programs", office: "Jackson" };
+
+// ——— Communities (13 Oct 2026) ———
+// WHY: Chandu asked for "4 boards for the 4 groups and one for across
+// communities", each with a staff-only switch, and activity that is "a mix
+// of what's on our boards right now and what's there live now". So each
+// office gets its own staff talk (below), each community board gets a
+// United Way post everyone sees, and the shared board keeps the
+// cross-office planning that was live as Team. DEMO-ONLY: all of it.
+const LOCAL_STAFF: StaffPost[] = [
+  // Kalamazoo
+  { id: "sc-s-kz-grant-night", kind: "update", author: KZ_IMPACT, postedAgo: "1h ago", title: "Grant night room is booked", body: "Youth United Way grant night is Mar 12 at the library. I booked the big room. Chris, can you bring the score sheets?", replies: [{ author: KZ_YOUTH, body: "Yes. I'll print 40.", postedAgo: "45m ago" }] },
+  { id: "sc-s-kz-kickoff", kind: "ask", author: KZ_YOUTH, postedAgo: "6h ago", title: "Who can greet families at the kickoff?", body: "Student United kickoff is Nov 5 at 5:30. I need two people at the door for 30 minutes.", replies: [{ author: KZ_IMPACT, body: "I can do it. I'll bring name tags.", postedAgo: "5h ago" }] },
+  // Battle Creek
+  { id: "sc-s-bc-chairs", kind: "update", author: BC_IMPACT, postedAgo: "2h ago", pinned: true, title: "Convening setup: 20 more chairs", body: "The room holds 180. We have 160 chairs. The school next door is lending us 20 more.", tasks: [{ office: "Battle Creek", owner: "Alex", task: "Pick up chairs Friday", done: false }, { office: "Battle Creek", owner: "Dana", task: "Confirm lunch count", done: true }], replies: [{ author: BC_VOL, body: "I can pick them up Friday after lunch.", postedAgo: "1h ago" }] },
+  { id: "sc-s-bc-doc", kind: "idea", author: BC_VOL, postedAgo: "1d ago", title: "Let teens pick the Day of Caring projects?", body: "Last year staff picked every project. This year a teen team could pick three. They know what their friends will show up for.", replies: [{ author: BC_IMPACT, body: "Love it. Let's ask Student United at the next meeting.", postedAgo: "20h ago" }] },
+  // Lansing
+  { id: "sc-s-lan-capcan", kind: "idea", author: LAN_YOUTH, postedAgo: "4h ago", title: "A FAFSA night with CapCAN?", body: "CapCAN helps families with the FAFSA. Could we host one night with them at our office in January?", replies: [{ author: LAN_EVENTS, body: "Yes. I can book the room and the snacks.", postedAgo: "3h ago" }] },
+  { id: "sc-s-lan-vans", kind: "update", author: LAN_EVENTS, postedAgo: "1d ago", title: "Vans for Nov 14 are booked", body: "Two vans, 24 seats. Students sign up with their Student United lead.", replies: [{ author: LAN_YOUTH, body: "Sharing the sign-up with the leads today.", postedAgo: "22h ago" }] },
+  // Jackson
+  { id: "sc-s-jx-mentors", kind: "update", author: JX_VOL, postedAgo: "3h ago", title: "Six new Bigs mentors cleared", body: "Six more mentors passed their checks this week. They start at two schools next month.", replies: [{ author: JX_YOUTH, body: "Great news. I'll set up their first meeting.", postedAgo: "2h ago" }] },
+  { id: "sc-s-jx-gym", kind: "ask", author: JX_YOUTH, postedAgo: "2d ago", title: "Can we use the school gym for MLK Day again?", body: "Last year the gym worked well for 80 people. Tess, do you still have the contact?", replies: [{ author: JX_VOL, body: "Yes. I'll add it here this afternoon.", postedAgo: "2d ago" }] },
+];
+/** United Way posts every member of a community board sees. */
+const PUBLIC_STAFF: StaffPost[] = [
+  { id: "sc-p-kz-kickoff", kind: "update", public: true, author: KZ_YOUTH, postedAgo: "3h ago", title: "Student United kickoff is Nov 5", body: "Meet your chapter and pick your first project. Bring a friend. Snacks are on us.", replies: [] },
+  { id: "sc-p-bc-caring", kind: "update", public: true, author: BC_IMPACT, postedAgo: "1d ago", title: "Youth Day of Caring is May 7", body: "140 spots this year. Every project counts as service hours. Sign-ups open in March.", replies: [] },
+  { id: "sc-p-lan-capitol", kind: "update", public: true, author: LAN_EVENTS, postedAgo: "5h ago", title: "64 students are going to public service day", body: "Meet state staff who started as interns. Juniors and seniors can still join.", replies: [] },
+  { id: "sc-p-jx-bigs", kind: "update", public: true, author: JX_VOL, postedAgo: "8h ago", title: "Bigs in Schools needs 10 more mentors", body: "One hour a week at school. Volunteers can sign up under Ways to help.", replies: [] },
+  { id: "sc-p-convening", kind: "update", public: true, author: BC_VOL, postedAgo: "2h ago", pinned: true, title: "Nov 14: all four towns meet in Battle Creek", body: "Students, nonprofits and colleges, one day. Vans leave from Lansing and Jackson.", replies: [] },
+];
 const STAFF_POSTS: StaffPost[] = [
+  ...LOCAL_STAFF,
+  ...PUBLIC_STAFF,
   {
     id: "sc-s-spring-plan", kind: "resource", author: BC_IMPACT, pinned: true, postedAgo: "1d ago",
     title: "Spring service day plan",
@@ -280,7 +318,10 @@ export const SOUTH_CENTRAL: UwBoard = {
   // the client's ask (12 Oct 2026): "a means of communication between the
   // 4 regions on one board"
   talk: { title: "Across the region", line: "Ask and share with students and volunteers in Kalamazoo, Battle Creek, Lansing and Jackson." },
-  staff: { title: "Across offices", line: "United Way staff in Kalamazoo, Battle Creek, Lansing and Jackson, in one place.", unit: "office", all: "All offices", me: { name: "Alex", role: "Volunteer engagement", office: "Battle Creek" }, posts: STAFF_POSTS },
+  staff: { title: "Across offices", line: "United Way staff in Kalamazoo, Battle Creek, Lansing and Jackson, in one place.", unit: "community", all: "All communities", me: BC_VOL, posts: STAFF_POSTS },
+  // the shared board: the cross-office planning that was live as Team, the
+  // students' cross-town threads, and the convening news
+  across: ["sc-s-spring-plan", "sc-s-yuw-voting", "sc-s-bigs-sheet", "sc-s-spring-idea", "sc-s-convening-plan", "sc-s-fall-debrief", "sc-p-convening", "sc-t-yuw-ask", "sc-t-next-convening", "uwi-sc-across-ask"],
   name: "South Central Michigan",
   line: "Find work that helps your town.",
   places: { all: "Whole region", tab: "By community", panel: "Students and volunteer hours by community" },
@@ -334,6 +375,7 @@ export const SOUTH_CENTRAL: UwBoard = {
   thanks: [
     { from: "Ava, junior", text: "I didn't know city planner was a job. Now I want it." },
     { from: "Jordan, college sophomore", text: "Your tip got me a nonprofit internship." },
+    { from: "Nia, junior in Battle Creek", text: "You made public health sound like a real plan for me." },
   ],
   impact: {
     // DEMO-ONLY: every number below. The four tiles are the four measures
@@ -342,6 +384,9 @@ export const SOUTH_CENTRAL: UwBoard = {
       { from: "Student, Lansing", text: "I asked a social worker real questions. Now I know my next step." },
       { from: "Nonprofit director, Kalamazoo", text: "Two students from the board now volunteer with us every week." },
       { from: "College partner, Kalamazoo", text: "Our students found service work that fits their majors." },
+      { from: "Student, Jackson", text: "A volunteer from Lansing answered me in one day. I applied that week." },
+      { from: "Nonprofit director, Battle Creek", text: "Our Day of Caring had more teens than ever. Many found us here." },
+      { from: "College partner, Lansing", text: "High school students now visit campus already knowing what they want to ask." },
     ],
     outcome: { value: "58%", line: "took a next step within 30 days" },
     funnel: [{ label: "Reached", value: 1240 }, { label: "Asked", value: 860 }, { label: "Connected", value: 520 }, { label: "Joined", value: 310 }],

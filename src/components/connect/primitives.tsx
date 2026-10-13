@@ -24,6 +24,11 @@ export const ConnectNav = createContext<{
   /** an event page or its follow-up board (a United Way board's events
    *  open on Connect's own event board, 12 Oct 2026) */
   openEvent?: (id: string, filter?: string) => void;
+  /** whether an event's board is unlocked, and the attendee-code sheet
+   *  for one that isn't (United Way boards, 13 Oct 2026: their events are
+   *  code-gated like Connect's, and an unlock is shared with Your events) */
+  isEventJoined?: (id: string) => boolean;
+  enterEventCode?: (id: string) => void;
   /** the Mentorship tab, optionally with one program open (a partner board hands off here) */
   openMentorship?: (program?: string) => void;
   openSaved: () => void;

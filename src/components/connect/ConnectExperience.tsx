@@ -1622,8 +1622,10 @@ export function ConnectExperience() {
         }
       },
       askFollowUp: (boardId: string, proName: string) => setAskOpen({ boardId, text: `Following up on ${proName}'s answer: ` }),
+      isEventJoined: (id: string) => !!eventJoined[id],
+      enterEventCode: (id: string) => setCodeOpenFor(id),
     }),
-    [setView, follows, say],
+    [setView, follows, say, eventJoined],
   );
 
 
@@ -5854,7 +5856,7 @@ export function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoa
               </IconTip>
             </div>
             <p className="mt-[6px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-              Event codes come from a Dreamari event: on your badge, the closing slide, or the follow-up email. They unlock a private board for attendees.
+              Event codes come from {event.host === "United Way" ? "a United Way event" : "a Dreamari event"}: on your badge, the closing slide, or the follow-up email. They unlock a private board for attendees.
             </p>
             <label className="mt-[var(--space-4)] block">
               <span className="sr-only">Event code</span>
