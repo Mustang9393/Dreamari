@@ -791,22 +791,24 @@ type FeedItem = { id: string; space: string; at: number; pinned?: boolean } & ({
  *  its counts. Public posts carry the United Way chip. */
 /** An announcement poster made from the post's own details (14 Oct 2026,
  *  Chandu: "Except for maybe Announcements? There could be an option to
- *  upload a poster or generate a poster for an announcement"). United
- *  Way's own photo under its blue, the white mark, the title large, when
- *  and where in yellow: a flyer, not a quote card. 4:5, the feed's tall
+ *  upload a poster or generate a poster"; then "make them a little more
+ *  tasteful, I don't like the blue wash"). A printed flyer: United Way's own
+ *  photo, untouched, over a paper panel with the full-colour mark, the
+ *  title and when and where, and one thin yellow rule. 4:5, the feed's tall
  *  image size. */
 export function UwPoster({ title, when, where, photo }: { title: string; when?: string; where?: string; photo?: string }) {
   return (
-    <span className="relative flex aspect-[4/5] w-full flex-col justify-between overflow-hidden rounded-[14px] p-[22px]" style={{ background: BLUE, boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6)" }}>
-      <Image src={photo ?? D.PHOTOS.volunteers} alt="" fill sizes="340px" className="object-cover" style={{ objectPosition: "50% 30%" }} />
-      <span aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(to top, ${BLUE} 0%, color-mix(in srgb, ${BLUE} 88%, transparent) 42%, color-mix(in srgb, ${BLUE} 25%, transparent) 75%, transparent 100%)` }} />
-      <span className="relative z-10 flex items-center justify-between">
-        <Image src={D.BRAND.logoWhite} alt="United Way" width={88} height={41} unoptimized className="h-[34px] w-auto" />
-        <span className="rounded-full px-[10px] py-[3px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ background: D.BRAND.yellow, color: "#1a1300" }}>{D.ANNOUNCE_UI.kicker}</span>
+    <span className="flex aspect-[4/5] w-full flex-col overflow-hidden rounded-[14px]" style={{ background: "#FBF8F2", boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6)" }}>
+      <span className="relative block flex-[1.8]">
+        <Image src={photo ?? D.PHOTOS.volunteers} alt="" fill sizes="340px" className="object-cover" style={{ objectPosition: "50% 35%" }} />
       </span>
-      <span className="relative z-10 flex flex-col gap-[10px]">
-        <span className="text-[28px] leading-[31px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{title}</span>
-        {(when || where) && <span className="flex flex-col gap-[2px] text-[15px] leading-[20px] font-bold" style={{ color: D.BRAND.yellow }}>{when && <span>{when}</span>}{where && <span>{where}</span>}</span>}
+      <span className="flex flex-1 flex-col justify-between px-[20px] pt-[16px] pb-[18px]">
+        <span className="flex flex-col gap-[8px]">
+          <span aria-hidden className="block h-[3px] w-[36px] rounded-full" style={{ background: D.BRAND.yellow }} />
+          <span className="text-[23px] leading-[27px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#141824" }}>{title}</span>
+          {(when || where) && <span className="text-[13.5px] leading-[18px] font-semibold" style={{ color: "#4A5160" }}>{[when, where].filter(Boolean).join(" · ")}</span>}
+        </span>
+        <Image src={D.BRAND.logo} alt="United Way" width={88} height={41} unoptimized className="h-[26px] w-auto self-start" />
       </span>
     </span>
   );
