@@ -912,10 +912,12 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
       {/* the board itself, in the other boards' clothes (13 Oct 2026,
          Chandu: "Please refer the feed designs we have in the other boards
          ... See how the questions and posts tabs look in other
-         communities"): one centred column; Questions and Posts; Best / Most
+         communities"): Questions and Posts; Best / Most
          Recent with the Tall / Framed / Wide graphic switch; the same rows
          (BoardThreadRow, FeedPostRow) in the same hairline panel. */}
-      <div className="mx-auto flex w-full max-w-[720px] flex-col gap-[var(--space-4)]">
+      {/* the full width of the board's surface (13 Oct 2026, Chandu: "the
+         feeds etc need to take the full width of the surface they are in") */}
+      <div className="flex w-full flex-col gap-[var(--space-4)]">
         {staffOnly ? (
           <span className="flex items-center gap-[8px] text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}><ShieldCheck className="h-4 w-4 flex-none" aria-hidden style={{ color: D.BRAND.yellow }} />{C.staffNote}</span>
         ) : (
