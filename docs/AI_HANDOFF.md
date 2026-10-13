@@ -1,3 +1,9 @@
+## 2026-10-13 (night): United Way: students only ask; staff post as United Way; far more activity
+
+**Why (Chandu):** "students should not be making posts or announcements in United Way. Students only get to ask, comment, like etc. Nothing else ... The composer still shows a student and student avatar on the United Way POV in the board. Also show way more activity in the feeds."
+- Students: only Ask (placeholder "Ask a question in <community>"), plus comments and likes on the shared pages. Posting is staff and volunteers only.
+- Staff wear United Way's mark (`UwAvatar`) in the composer, their feed rows and post bylines, never a generated portrait; volunteers' composer shows their real ProAvatar.
+- Activity (DEMO-ONLY, `UW_SC_MORE_THREADS` / `UW_SC_MORE_POSTS` in uwThreads.ts, merged into THREADS/INSIGHTS): 20 more questions with pro answers and student replies and 10 more pro posts (5 graphic) across the four communities and the shared board; each board now has 5 to 7 questions and 4 posts.
 ## 2026-10-13: V2-only RN anime simplification and corrected-match judgment
 
 **Why (Chandu):** “some characters are still comic book like ... hairstyles are too detailed”; “Room 12 images need better more anime like art”; after correcting an answer the next character still gave a negative judgment. Scope clarified: “only make these changes in v2”; then “Keep going and push asap please.”

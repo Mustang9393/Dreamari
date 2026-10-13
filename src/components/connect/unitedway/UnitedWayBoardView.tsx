@@ -66,7 +66,7 @@ import { EmptyView } from "@/components/app/states";
 import { Listbox } from "@/components/app/Listbox";
 import { PostComposer } from "../PostComposer";
 import { TextTabs } from "@/components/app/TextTabs";
-import { Avatar, CONTACT_INFO, CONTACT_WARNING, ConnectNav, InlineAsk, PrimaryCta, QuietCta, SectionHead, SectionSurface } from "../primitives";
+import { Avatar, CONTACT_INFO, CONTACT_WARNING, ConnectNav, InlineAsk, PrimaryCta, ProAvatar, QuietCta, SectionHead, SectionSurface } from "../primitives";
 import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart } from "../mentorship/charts";
 import { CommunityHoursChart, RankedRows } from "./uwCharts";
@@ -680,7 +680,7 @@ function KindLabel({ kind, pinned }: { kind: D.StaffPostKind; pinned?: boolean }
 function StaffByline({ who, ago, size = 26 }: { who: D.StaffMember; ago: string; size?: number }) {
   return (
     <span className="flex min-w-0 items-center gap-[8px]">
-      <Avatar name={who.name} size={size} />
+      <UwAvatar size={size} />
       <span className="flex-none text-[12.5px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{who.name}</span>
       <span className="hidden min-w-0 truncate text-[12px] leading-[16px] font-semibold sm:inline" style={{ color: "var(--muted-foreground)" }}>· {who.role}</span>
       <PlaceTag place={who.office} />
@@ -791,7 +791,7 @@ function StaffFeedRow({ p, replies, onOpen }: { p: D.StaffPost; replies: number;
     <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer"><span className="sr-only">Open: {p.title}</span></button>
       <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
-      <span className="relative flex-none self-start"><Avatar name={p.author.name} size={44} /></span>
+      <span className="relative flex-none self-start"><UwAvatar size={44} /></span>
       <div className="relative flex min-w-0 flex-1 flex-col">
         <span className="flex min-w-0 flex-wrap items-center gap-x-[8px] gap-y-[2px]">
           <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{p.author.name}</span>
@@ -810,6 +810,17 @@ function StaffFeedRow({ p, replies, onOpen }: { p: D.StaffPost; replies: number;
         </span>
       </div>
     </article>
+  );
+}
+
+/** A United Way staff member's face on the board: United Way's own mark,
+ *  never a generated portrait (13 Oct 2026, Chandu: the composer "still
+ *  shows a student and student avatar on the United Way POV"). */
+function UwAvatar({ size = 34 }: { size?: number }) {
+  return (
+    <span aria-hidden className="flex flex-none items-center justify-center rounded-full" style={{ width: size, height: size, background: BLUE }}>
+      <Image src={D.BRAND.logoWhite} alt="" width={size} height={size} unoptimized className="h-[62%] w-auto" />
+    </span>
   );
 }
 
@@ -882,7 +893,6 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
     setSpace(boardId);
   };
   const volunteerPro = D.VOLUNTEERS[board.volunteerIds.find((id) => D.VOLUNTEERS[id]?.org === board.team.you) ?? board.volunteerIds[0]];
-  const me = role === "staff" ? board.staff.me.name : role === "volunteer" ? D.VOLUNTEERS[board.volunteerIds.find((id) => D.VOLUNTEERS[id]?.org === board.team.you) ?? board.volunteerIds[0]]?.name ?? "You" : "Jordan";
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       {/* 13 Oct 2026, Chandu: "the left menu is overkill. just do tabs? But
@@ -925,7 +935,7 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
         )}
         {role !== "student" && (staffOnly || feedTab === "posts") && (
           <button type="button" onClick={() => setComposing(true)} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-lg)] border py-[8px] pr-[8px] pl-[10px] text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-            <Avatar name={me} size={34} />
+            {role === "staff" ? <UwAvatar size={34} /> : volunteerPro ? <ProAvatar proId={volunteerPro.id} name={volunteerPro.name} size={34} /> : null}
             <span className="min-w-0 flex-1 truncate text-[15px]" style={{ color: "var(--muted-foreground)" }}>{staffOnly ? C.staffPlaceholder(where) : `Share something with ${current.key === "all" ? "every community" : where}`}</span>
             <span className="flex flex-none items-center gap-[6px] rounded-full px-[14px] py-[7px] text-[13px] font-bold" style={staffOnly ? { background: D.BRAND.yellow, color: "#1a1300" } : SOLID}><PenLine className="h-3.5 w-3.5" aria-hidden /> Create post</span>
           </button>

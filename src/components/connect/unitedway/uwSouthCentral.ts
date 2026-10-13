@@ -325,7 +325,7 @@ export const SOUTH_CENTRAL: UwBoard = {
   staff: { title: "Across offices", line: "United Way staff in Kalamazoo, Battle Creek, Lansing and Jackson, in one place.", unit: "community", all: "All communities", me: BC_VOL, posts: STAFF_POSTS },
   // the shared board: the cross-office planning that was live as Team, the
   // students' cross-town threads, and the convening news
-  across: ["sc-s-spring-plan", "sc-s-yuw-voting", "sc-s-bigs-sheet", "sc-s-spring-idea", "sc-s-convening-plan", "sc-s-fall-debrief", "sc-p-convening", "sc-t-yuw-ask", "sc-t-next-convening", "uwi-sc-across-ask"],
+  across: ["sc-s-spring-plan", "sc-s-yuw-voting", "sc-s-bigs-sheet", "sc-s-spring-idea", "sc-s-convening-plan", "sc-s-fall-debrief", "sc-p-convening", "sc-t-yuw-ask", "sc-t-next-convening", "uwi-sc-across-ask", "sc-q-across-van", "sc-q-across-club", "sc-q-across-summer", "uwi-sc-across-health", "uwi-sc-across-code"],
   name: "South Central Michigan",
   line: "Find work that helps your town.",
   places: { all: "All communities", tab: "By community", panel: "Students and volunteer hours by community" },

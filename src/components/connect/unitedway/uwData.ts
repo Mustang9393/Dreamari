@@ -464,7 +464,7 @@ export const COMMUNITY_UI = {
   audience: [{ key: "everyone", label: "Everyone" }, { key: "staff", label: "Staff only" }] as const,
   staffNote: "Only United Way staff see this board.",
   show: [{ value: "all", label: "Everything" }, { value: "questions", label: "Questions" }, { value: "posts", label: "Posts" }] as const,
-  placeholder: (where: string) => where === "All communities" ? "Ask or share something with every community" : `Ask or share something with ${where}`,
+  placeholder: (where: string) => where === "All communities" ? "Ask a question for every community" : `Ask a question in ${where}`,
   staffPlaceholder: (where: string) => where === "All communities" ? "Post to staff in every community" : `Post to staff in ${where}`,
   post: "Post",
   posted: (where: string) => `Posted to ${where}.`,

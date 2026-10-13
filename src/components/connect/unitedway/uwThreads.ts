@@ -412,3 +412,71 @@ export const UW_EVENT_THREADS: Thread[] = [
     ],
   },
 ];
+
+// ——— More activity on South Central's community boards (13 Oct 2026,
+// Chandu: "show way more activity in the feeds"). DEMO-ONLY: every
+// question, answer, reply and count below. Students only ask, comment and
+// like; professionals answer and post. Positive framing, first names,
+// 8th-grade copy. Ids listed in uwSouthCentral.ts `across` sit on the
+// shared board; the rest sit on their asker's or poster's community. ———
+type Ans = [proId: string, body: string, ago: string];
+type Peer = [handle: string, grade: string, place: string, body: string, ago: string, likes: number];
+function q(id: string, place: string, handle: string, grade: string, ago: string, title: string, answers: Ans[], peers: Peer[] = [], helpful = 12, context?: string): Thread {
+  return {
+    id, boardId: SC, type: "question", title, context, handle, grade, place, postedAgo: ago,
+    state: answers.length ? "answered" : "routed", routedScope: "Volunteers here", expectedWindow: "within 1 day",
+    helpful, followers: Math.round(helpful / 4), comments: answers.length + peers.length + Math.round(helpful / 8), views: helpful * 14,
+    responses: [
+      ...answers.map(([proId, body, postedAgo], i) => ({ kind: "answer" as const, proId, primary: i === 0, postedAgo, body })),
+      ...peers.map(([h, g, p, body, postedAgo, likes]) => ({ kind: "peer" as const, handle: h, grade: g, place: p, body, postedAgo, likes })),
+    ],
+  };
+}
+type Reply = [who: string, grade: string | null, place: string | null, body: string, ago: string, likes: number];
+function post(id: string, place: string, proId: string, ago: string, title: string, body: string, helpful: number, replies: Reply[] = [], graphic?: Insight["graphic"]): Insight {
+  return {
+    id, boardId: SC, type: "insight", proId, place, title, body, graphic, postedAgo: ago, helpful,
+    replies: replies.map(([who, grade, p, b, a, likes]) => (grade ? { handle: who, grade, place: p ?? undefined, body: b, postedAgo: a, likes } : { proId: who, body: b, postedAgo: a, likes })),
+  };
+}
+
+export const UW_SC_MORE_THREADS: Thread[] = [
+  // Kalamazoo
+  q("sc-q-kz-teacher", "Kalamazoo", "Mia", "Junior", "40m ago", "How did you know teaching was right for you?", [["pro-wong", "I tutored my little cousin and loved the moment it clicked for her. Try a reading shift and see how it feels.", "20m ago"]], [["Theo", "Junior", "Kalamazoo", "The reading shift is so fun. The kids are hilarious.", "10m ago", 6]], 22),
+  q("sc-q-kz-wmu", "Kalamazoo", "Owen", "Senior", "3h ago", "Does Western have service work that counts for class?", [["pro-wong", "Yes. Many classes there count service hours. Ask about it on your campus visit.", "2h ago"]], [["Ava", "Junior", "Kalamazoo", "My sister did this for her teaching class. She loved it.", "1h ago", 9]], 31),
+  q("sc-q-kz-firstjob", "Kalamazoo", "Lila", "Sophomore", "5h ago", "What is a good first job at 16?", [["pro-tanaka", "Anything where you work with people: a library, a food bank, a camp. Those teach skills every job needs.", "4h ago"]], [], 18),
+  q("sc-q-kz-yuw-join", "Kalamazoo", "Sam", "Freshman", "8h ago", "Can freshmen join Youth United Way?", [], [], 7),
+  q("sc-q-kz-resume", "Kalamazoo", "Ava", "Junior", "1d ago", "What goes on a résumé if I only have volunteer work?", [["pro-whitfield", "Volunteer work is real work. Write what you did and what changed. Food drive lead counts.", "1d ago"]], [["Mia", "Junior", "Kalamazoo", "Saving this. Thank you!", "20h ago", 4]], 44),
+  // Battle Creek
+  q("sc-q-bc-pharm", "Battle Creek", "Diego", "Junior", "1h ago", "How long does it take to become a pharmacy tech?", [["pro-ortega", "Most programs take under a year. Some stores even train you while you work.", "45m ago"]], [["Nia", "Junior", "Battle Creek", "Wait, they pay you while you learn? Love that.", "30m ago", 5]], 26),
+  q("sc-q-bc-pt", "Battle Creek", "Grace", "Senior", "4h ago", "What does a physical therapist do all day?", [["pro-adler", "I help people move again after they get hurt. Lots of talking, lots of cheering people on.", "3h ago"]], [], 19),
+  q("sc-q-bc-shadow", "Battle Creek", "Nia", "Junior", "9h ago", "What should I wear to the nurse shadow day?", [["pro-reyes", "Comfy shoes and plain clothes. We give you a badge. Bring one question.", "8h ago"]], [["Amaya", "Junior", "Battle Creek", "I'm going too! See you there.", "7h ago", 8]], 15),
+  q("sc-q-bc-caring", "Battle Creek", "Eli", "Sophomore", "1d ago", "Can I lead a project at Youth Day of Caring?", [], [], 9),
+  // Lansing
+  q("sc-q-lan-city", "Lansing", "Andre", "Senior", "30m ago", "What jobs does a city office have for teens?", [["pro-doyle", "Parks, libraries and summer programs hire teens. Data and writing help too.", "15m ago"]], [["Leo", "Sophomore", "Lansing", "I'm applying to the parks one!", "5m ago", 3]], 21),
+  q("sc-q-lan-data", "Lansing", "Priya", "Junior", "2h ago", "Is data science a real job at nonprofits?", [["pro-doyle", "Yes. I use data to find where help is needed most. Start with a stats class.", "1h ago"]], [], 28),
+  q("sc-q-lan-capcan", "Lansing", "Sam", "Senior", "6h ago", "Did anyone go to a CapCAN FAFSA night?", [], [["Andre", "Senior", "Lansing", "Yes. They helped my mom with every page. Took one hour.", "5h ago", 11]], 17),
+  q("sc-q-lan-code", "Lansing", "Jaden", "Sophomore", "1d ago", "Do I need to be good at math to code?", [["pro-rossi", "Not great, just curious. Most code is logic, like a puzzle. Try a free class first.", "1d ago"]], [["Priya", "Junior", "Lansing", "I'm bad at math and I love coding!", "20h ago", 14]], 39),
+  // Jackson
+  q("sc-q-jx-mentor", "Jackson", "Jada", "Senior", "1h ago", "What do you do with your Big each week?", [], [["Kai", "Junior", "Jackson", "We do homework, then play cards. My Big helped me pick classes.", "40m ago", 9]], 20),
+  q("sc-q-jx-bank", "Jackson", "Marcus", "Junior", "5h ago", "How do I open my first bank account?", [["pro-okafor", "Bring an ID and a parent if you're under 18. Ask for a student account with no fees.", "4h ago"]], [], 33),
+  q("sc-q-jx-design", "Jackson", "Ruby", "Sophomore", "8h ago", "Can art be a job, not just a hobby?", [["pro-cole", "Yes! Brands, games and nonprofits all need designers. Start a folder of your best work.", "7h ago"]], [["Jada", "Senior", "Jackson", "This made my day.", "6h ago", 7]], 41),
+  q("sc-q-jx-mlk", "Jackson", "Kai", "Junior", "1d ago", "Who's coming to MLK Day of Service?", [], [["Ruby", "Sophomore", "Jackson", "Me and three friends!", "20h ago", 5], ["Marcus", "Junior", "Jackson", "Count me in.", "18h ago", 3]], 12),
+  // shared board
+  q("sc-q-across-van", "Kalamazoo", "Owen", "Senior", "2h ago", "Can Kalamazoo students ride the Lansing van on Nov 14?", [], [["Sam", "Senior", "Lansing", "Ask your Student United lead. We had two open seats last time.", "1h ago", 6]], 10),
+  q("sc-q-across-club", "Jackson", "Ruby", "Sophomore", "7h ago", "Which town has the best service club? Let's swap ideas.", [["pro-wong", "Love this. Each town, post one project that worked. Then steal one!", "6h ago"]], [["Theo", "Junior", "Kalamazoo", "Kalamazoo: teen grant voting.", "5h ago", 12], ["Nia", "Junior", "Battle Creek", "Battle Creek: park clean-up with a picnic.", "5h ago", 10], ["Leo", "Sophomore", "Lansing", "Lansing: food box crew!", "4h ago", 9]], 52),
+  q("sc-q-across-summer", "Battle Creek", "Grace", "Senior", "1d ago", "Summer plans: who is doing an internship?", [["pro-tanaka", "Great question to ask early. Most summer spots open in February.", "1d ago"]], [["Andre", "Senior", "Lansing", "Parks internship in Lansing, fingers crossed.", "22h ago", 8]], 34),
+];
+
+export const UW_SC_MORE_POSTS: Insight[] = [
+  post("uwi-sc-kz-teach", "Kalamazoo", "pro-wong", "2h ago", "Teaching is about the light-bulb moment", "The best part of my job is the moment a student gets it. If you love that feeling, teaching might be for you. Try a reading shift this month.", 38, [["Mia", "Junior", "Kalamazoo", "This is exactly why I want to teach.", "1h ago", 5]], { text: "The best part of the job is the moment it clicks.", bg: "p-snow-peak", font: "classic" }),
+  post("uwi-sc-kz-interview", "Kalamazoo", "pro-tanaka", "1d ago", "Three things I look for in a first job interview", "Show up on time. Make eye contact. Ask one question about the job. That's it. You don't need a long résumé to do well.", 61, [["Owen", "Senior", "Kalamazoo", "Short and clear. Thanks!", "20h ago", 7]]),
+  post("uwi-sc-bc-pharm", "Battle Creek", "pro-ortega", "3h ago", "A day as a pharmacist", "I answer questions, check medicines and help people feel better. Every day is different. Ask me anything about pharmacy school.", 33, [["Diego", "Junior", "Battle Creek", "How many years is pharmacy school?", "2h ago", 4], ["pro-ortega", null, null, "Usually six to eight after high school. Many start as techs first.", "1h ago", 9]], { text: "Every day is different. That's the fun part.", bg: "p-peak-dawn", font: "display" }),
+  post("uwi-sc-bc-pt", "Battle Creek", "pro-adler", "1d ago", "Why I love physical therapy", "I get to watch people walk again after an injury. It takes science and a lot of heart. Shadow day spots are open in December.", 29, [["Grace", "Senior", "Battle Creek", "Signing up!", "1d ago", 3]]),
+  post("uwi-sc-lan-code", "Lansing", "pro-rossi", "4h ago", "You don't need to be a genius to code", "I learned to code at 17 with free videos. Start small: make a simple website about something you love.", 47, [["Jaden", "Sophomore", "Lansing", "Starting tonight!", "3h ago", 8]], { text: "Start small. Build something you love.", bg: "p-night-sky", font: "display" }),
+  post("uwi-sc-lan-audit", "Lansing", "pro-weiss", "2d ago", "What an auditor really does", "I help companies and nonprofits keep honest records. If you like puzzles and numbers, look at accounting.", 22, []),
+  post("uwi-sc-jx-design", "Jackson", "pro-cole", "2h ago", "Your sketchbook is your first portfolio", "Every drawing counts. Take photos of your best ten pages. That is how I got my first design job.", 55, [["Ruby", "Sophomore", "Jackson", "I have so many sketchbooks! Doing this.", "1h ago", 10]], { text: "Your sketchbook is your first portfolio.", bg: "s-studio", font: "display" }),
+  post("uwi-sc-jx-money", "Jackson", "pro-okafor", "1d ago", "One money tip for your first paycheck", "Save a little from every check, even five dollars. It adds up faster than you think.", 40, [["Marcus", "Junior", "Jackson", "Opening my account this week.", "20h ago", 6]]),
+  post("uwi-sc-across-health", "Battle Creek", "pro-brooks", "5h ago", "Health jobs in every town", "Kalamazoo, Battle Creek, Lansing and Jackson all have clinics that hire teens to help out. Ask at the front desk. That's how I started.", 36, [["Nia", "Junior", "Battle Creek", "Asking at our clinic Monday.", "4h ago", 5], ["Kai", "Junior", "Jackson", "Didn't know Jackson had this!", "3h ago", 4]], { text: "Every town has a clinic. Ask at the front desk.", bg: "p-teal-cloud", font: "classic" }),
+  post("uwi-sc-across-code", "Lansing", "pro-chen", "1d ago", "A coding club for all four towns?", "If students in each town want to learn together, I can run one online night a month. Reply if you'd join.", 58, [["Jaden", "Sophomore", "Lansing", "Yes please!", "1d ago", 9], ["Owen", "Senior", "Kalamazoo", "I'm in.", "22h ago", 7], ["Ruby", "Sophomore", "Jackson", "Me too!", "20h ago", 6]]),
+];
