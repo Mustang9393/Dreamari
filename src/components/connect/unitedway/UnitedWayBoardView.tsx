@@ -66,7 +66,7 @@ import { EmptyView } from "@/components/app/states";
 import { Listbox } from "@/components/app/Listbox";
 import { PostComposer } from "../PostComposer";
 import { TextTabs } from "@/components/app/TextTabs";
-import { Avatar, CONTACT_INFO, CONTACT_WARNING, ConnectNav, InlineAsk, PrimaryCta, ProAvatar, QuietCta, SectionHead, SectionSurface } from "../primitives";
+import { Avatar, CONTACT_INFO, CONTACT_WARNING, ConnectNav, InlineAsk, OrgAvatar, PrimaryCta, ProAvatar, QuietCta, SectionHead, SectionSurface } from "../primitives";
 import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart } from "../mentorship/charts";
 import { CommunityHoursChart, RankedRows } from "./uwCharts";
@@ -1329,7 +1329,9 @@ function Testimonials({ id, title, items }: { id: string; title: string; items: 
                 <span aria-hidden className="text-[44px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: BLUE_TEXT }}>&ldquo;</span>
                 <blockquote className="text-[16px] leading-[23px] font-semibold" style={{ color: "var(--foreground)" }}>{v.text}</blockquote>
                 <figcaption className="flex items-center gap-[10px]">
-                  <Avatar name={who} size={30} />
+                  {/* students wear their avatar; a nonprofit or college partner
+                     is not a student, so a quiet initial instead */}
+                  {/student|junior|senior|sophomore|freshman/i.test(v.from) ? <Avatar name={who} size={30} /> : <OrgAvatar org={who} size={30} />}
                   <span className="flex flex-col"><span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{who}</span>{where && <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{where}</span>}</span>
                 </figcaption>
               </figure>

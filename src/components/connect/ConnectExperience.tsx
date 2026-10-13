@@ -22,7 +22,7 @@ import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks"
 import { careerProfile } from "@/components/career/profiles";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
 import { CareerBehindCard, FeedVersionChip, GraphicLayoutSwitch, useGraphicLayout, FlatBreathers, FramedGraphic, captionFor, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
-import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
+import { CompanyMark, Avatar, OrgAvatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
@@ -4846,7 +4846,7 @@ function EventView({
             <Card accent={pAccent}>
               <div className="flex flex-wrap items-center justify-between gap-[10px]">
                 <span className="flex min-w-0 items-center gap-[10px]">
-                  <Avatar name={event.debrief.by} size={36} />
+                  <OrgAvatar org={event.host} size={36} />
                   <span className="flex min-w-0 flex-col">
                     <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{event.debrief.by}</span>
                     <span className="flex flex-wrap items-center gap-x-[6px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{event.debrief.role} · {event.debrief.postedAgo}<PlaceTag place={event.debrief.office} /></span>
@@ -5513,6 +5513,10 @@ export function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, li
          toggle without nesting a button inside a button. */}
       {pro ? (
         <ProAvatar proId={pro.id} name={name} size={32} />
+      ) : chipTone === "pro" ? (
+        // a partner's staff (United Way): their organization's mark, never a
+        // generated student face
+        <OrgAvatar org={chip} size={32} />
       ) : (
         <button type="button" onClick={onToggleCollapse} aria-expanded={!collapsed} aria-label={collapsed ? `Expand ${name}'s comment` : `Collapse ${name}'s comment`} className="dm-quiet flex-none cursor-pointer rounded-full">
           <Avatar name={name} size={32} />
@@ -5588,7 +5592,7 @@ export function ReplyComposer({ onPost, as }: { onPost: (text: string) => void; 
   };
   return (
     <div id="dm-reply-composer" className="flex items-start gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
-      <Avatar name={as?.name ?? "Jordan Rivera"} size={32} />
+      {as && !PROS.some((p) => p.name === as.name) ? <OrgAvatar org="United Way" size={32} /> : <Avatar name={as?.name ?? "Jordan Rivera"} size={32} />}
       <div className="min-w-0 flex-1">
         <HoverBeam strength={0.85} active={focused}>
         <label className="block">

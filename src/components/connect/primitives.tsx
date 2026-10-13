@@ -167,6 +167,11 @@ const AVATAR_PHOTO: Record<string, string> = {
   "Daniel Kim": `${AV}/pro-kim.jpg`,
   "Lena Novak": `${AV}/pro-novak.jpg`,
   "Tiana Freeman": `${AV}/pro-freeman.png`,
+  // 13 Oct 2026 (Chandu: "ONLY STUDENTS USE THE BLACK AND WHITE" avatars):
+  // these two pros had no entry, so they fell back to a generated student
+  // face; each file was made for them (named for them)
+  "Nathan Doyle": `${AV}/pro-doyle-2.png`,
+  "Denise Marshall": `${AV}/pro-marshall.png`,
   // Nine new volunteers (9 Sept 2026), each with their own real portrait --
   // .png since these came in as png, unlike the rest of this jpg set.
   "Xavier Brennan": `${AV}/pro-brennan.png`,
@@ -281,6 +286,20 @@ export function volunteerTier(pro: { activeDaysAgo: number }): VolunteerTier | n
   if (pro.activeDaysAgo <= 7) return { name: "Gold", color: TIER_COLOR, note: "Helps every week" };
   if (pro.activeDaysAgo <= 30) return { name: "Silver", color: TIER_COLOR, note: "Helps every month" };
   return null;
+}
+
+/** An organization's face for someone who is neither a student nor a
+ *  Connect professional (a partner's staff, a quoted partner): the
+ *  organization's own mark on its brand colour, or its initial. Generated
+ *  black-and-white avatars are for students only (13 Oct 2026, Chandu). */
+export function OrgAvatar({ org, size = 34 }: { org: string; size?: number }) {
+  const brand = COMPANY_BRAND[org];
+  const mark = COMPANY_MARKS[org]?.src;
+  return (
+    <span aria-hidden className="inline-flex flex-none items-center justify-center overflow-hidden rounded-full" style={{ width: size, height: size, background: brand?.bg ?? "color-mix(in srgb, var(--primary) 26%, var(--card))", color: brand?.ink ?? "var(--foreground)" }}>
+      {mark ? <Image src={mark} alt="" width={size} height={size} unoptimized className="h-[60%] w-auto" /> : <span className="font-extrabold" style={{ fontSize: Math.round(size * 0.42) }}>{org.charAt(0)}</span>}
+    </span>
+  );
 }
 
 export function ProAvatar({ proId, name, size = 34, className = "" }: { proId: string; name: string; size?: number; className?: string }) {
