@@ -112,6 +112,23 @@ const PROGRAMS: Program[] = [
     url: "https://capcan.org/",
   },
   {
+    // WHY (13 Oct 2026, Chandu: "Maybe small business help thing should be
+    // a program card like CapCAN is"). Odein's note listed UWSCMI's
+    // Kalamazoo small business programs; they were a panel on the United
+    // Way view, removed earlier today with "small business help". Now one
+    // program card in Kalamazoo. Never shown as open: the grants' portal is
+    // closed (follow their social media for the next round) and the loan
+    // fund's page says it is inactive and points to the grants. $5,000 and
+    // "City of Kalamazoo" are from the grants' page.
+    id: "sc-small-business", title: "Small business help", kind: "work", photo: PHOTOS.workplace, focus: "50% 35%",
+    line: "Grants and loans for small businesses in Kalamazoo.",
+    about: "Both are paused right now. A new round is posted on their social media.",
+    gets: ["Micro-enterprise grants up to $5,000", "A small business loan fund", "For businesses in the City of Kalamazoo"],
+    who: "Small business owners", where: "City of Kalamazoo", by: "United Way of South Central Michigan", status: "closed",
+    chapter: "kzoo",
+    url: "https://unitedforscmi.org/battle-creek-kalamazoo/kalamazoo-micro-enterprise-grants/",
+  },
+  {
     // DEMO-ONLY: research could not confirm Youth United Way still meets
     // (see uwMichigan.ts)
     id: "sc-yuw", title: "Youth United Way", kind: "lead", photo: PHOTOS.volunteers, focus: "50% 40%",
@@ -436,21 +453,6 @@ export const SOUTH_CENTRAL: UwBoard = {
     { program: "Youth United Way", by: "Kalamazoo", students: 96, volunteers: 8, hours: 90 },
     { program: "Bigs in Schools", by: "Jackson", students: 112, volunteers: 19, hours: 130 },
   ],
-  // WHY (10 Oct 2026): the same forwarded note listed UWSCMI's Kalamazoo
-  // small business programs. They are for business owners, not students,
-  // so they stay off the student and volunteer views and sit on the United
-  // Way view only, as one small panel that links to each program's page.
-  // Status is the pages' own, never shown as open: the loan fund's page
-  // says it is currently inactive and points to the grants; the grants'
-  // portal is closed and the page says to follow their social media for
-  // updates. $5,000 and "City of Kalamazoo" are from the grants' page.
-  community: {
-    title: "Small business help",
-    items: [
-      { name: "Kalamazoo Micro-Enterprise Grants", line: "$5,000 grants for very small businesses in the City of Kalamazoo.", status: "Closed for now", url: "https://unitedforscmi.org/battle-creek-kalamazoo/kalamazoo-micro-enterprise-grants/" },
-      { name: "Kalamazoo Small Business Loan Fund", line: "Its page points to the grants instead.", status: "Inactive", url: "https://unitedforscmi.org/battle-creek-kalamazoo/kalamazoo-small-business-loan-fund/" },
-    ],
-  },
   roster: [
     { pro: "pro-doyle", checks: "done", hours: 18 },
     { pro: "pro-wong", checks: "done", hours: 15 },

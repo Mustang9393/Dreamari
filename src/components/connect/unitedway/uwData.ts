@@ -136,7 +136,9 @@ export type Program = {
   when?: string;
   where: string;
   by: string;
-  status: "open" | "soon" | "returning";
+  /** "closed": paused by its own program, never shown as open (Kalamazoo's
+   *  small business help, 13 Oct 2026) */
+  status: "open" | "soon" | "returning" | "closed";
   /** how you join, three short steps */
   steps?: string[];
   deadline?: string;
@@ -375,6 +377,7 @@ export const PROGRAM_PAGE = {
   tabs: [{ key: "about", label: "About" }, { key: "how", label: "How it works" }, { key: "ask", label: "Questions" }] as const,
   apply: "Apply",
   applied: "Application sent",
+  closed: "Closed for now",
   track: ["Applied", "In review", "Decision"],
   trackLine: "Updates show up here.",
   runBy: "Run by",

@@ -114,7 +114,7 @@ export function DateTile({ month, day, size = "md" }: { month: string; day: numb
 }
 function StatusDot({ status }: { status: D.Program["status"] }) {
   const tone = status === "open" ? GOOD : D.BRAND.yellow;
-  const label = status === "open" ? "Open" : status === "returning" ? "Back soon" : "Soon";
+  const label = status === "open" ? "Open" : status === "returning" ? "Back soon" : status === "closed" ? D.PROGRAM_PAGE.closed : "Soon";
   return <span className="inline-flex items-center gap-[5px] rounded-full px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(6,8,18,0.62)", color: "#fff", backdropFilter: "blur(6px)" }}><span aria-hidden className="size-[6px] rounded-full" style={{ background: tone }} />{label}</span>;
 }
 const KIND_ICON: Record<D.ProgramKind, typeof Handshake> = { mentor: Handshake, work: Briefcase, college: GraduationCap, internship: Briefcase, summer: Sun, lead: Crown };
@@ -304,7 +304,7 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
   // its own United Way's upcoming events first, then the ones open to
   // everyone; two tickets, one row
   const ahead = events.filter((e) => !isPast(e));
-  const related = (p.chapter ? [...ahead.filter((e) => e.chapter === p.chapter), ...ahead.filter((e) => e.chapter === null)] : ahead).slice(0, 2);
+  const related = p.status === "closed" ? [] : (p.chapter ? [...ahead.filter((e) => e.chapter === p.chapter), ...ahead.filter((e) => e.chapter === null)] : ahead).slice(0, 2);
   const about = threads.filter((t) => t.routedScope === p.title);
   const facts = [{ k: "Who", v: p.who }, ...(p.when ? [{ k: "When", v: p.when }] : []), { k: "Where", v: p.where }, ...(p.deadline ? [{ k: "Apply", v: p.deadline.replace(/^Apply /, "") }] : [])];
   return (
@@ -328,6 +328,7 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
       <div className="flex flex-wrap items-center gap-[var(--space-3)]">
         {p.mentorship
           ? (mentorshipJoined ? <PrimaryCta onClick={onMentorship} style={SOLID}>{U.continueMentorship} <ChevronRight className="h-4 w-4" aria-hidden /></PrimaryCta> : <PrimaryCta onClick={onApply} style={SOLID}>{U.interested}</PrimaryCta>)
+          : p.status === "closed" ? null
           : applied ? <Done text={P.applied} /> : <PrimaryCta onClick={onApply} style={SOLID}>{P.apply}</PrimaryCta>}
         {p.mentorship && !mentorshipJoined && <QuietCta onClick={onMentorship}>{U.openMentorship}</QuietCta>}
         <QuietCta onClick={() => { setTab("ask"); setAsking(true); }}><MessagesSquare className="h-4 w-4" aria-hidden /> {P.ask}</QuietCta>
@@ -361,10 +362,13 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
                 <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{p.by}</span>
                 {chapter && <span className="flex items-center gap-[6px] text-[13px]" style={{ color: "var(--muted-foreground)" }}><MapPin className="h-3.5 w-3.5" aria-hidden />{chapter.place}</span>}
               </div>
+              {/* a closed program has no volunteers or events to send anyone to */}
+              {p.status !== "closed" && (
               <div className="flex flex-col gap-[10px]">
                 <Eyebrow tone="var(--muted-foreground)">{P.people}</Eyebrow>
                 <ProStack ids={board.volunteerIds.slice(0, 5)} />
               </div>
+              )}
             </div>
           </div>
         )}
