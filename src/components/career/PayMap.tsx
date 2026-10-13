@@ -115,17 +115,30 @@ export function PayMap({
   const all = [...values.values()];
   const min = Math.min(...all);
   const max = Math.max(...all);
+  // clamped to the palette, so no value can fall off its dark end
   const shade = (v: number) => {
-    const t = max === min ? 0.6 : (v - min) / (max - min);
-    return `color-mix(in srgb, ${accent} ${Math.round(22 + t * 78)}%, #14121f)`;
+    const t = max === min ? 0.6 : Math.min(1, Math.max(0, (v - min) / (max - min)));
+    // the low end starts at 45% of the accent, so the lowest-paying state
+    // still reads as the map's colour, never as black
+    return `color-mix(in srgb, ${accent} ${Math.round(45 + t * 55)}%, #14121f)`;
   };
+  // A state with no published pay (14 Oct 2026, Chandu: "some states ...
+  // are shown as black. Don't do that. Use the same colors and just say NA
+  // as the hover text"): a mid tone from the same palette, read as NA.
+  const NA = "NA";
+  const missingFill = shade((min + max) / 2);
   const activeValue = active ? values.get(active) : undefined;
 
   return (
     <div className="relative">
       {/* readout: the hovered or chosen state and what it pays there */}
       <div className="absolute top-0 right-0 z-10 flex min-h-[44px] flex-col items-end text-right">
-        {active && activeValue ? (
+        {active && !activeValue ? (
+          <>
+            <span className="text-[15px] leading-[22px] font-semibold">{active}</span>
+            <span className="text-[15px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--muted-foreground)" }}>{NA}</span>
+          </>
+        ) : active && activeValue ? (
           <>
             <span className="text-[15px] leading-[22px] font-semibold">{active}</span>
             <span className="text-[15px] leading-[22px] font-bold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }}>{formatPay(activeValue)}</span>
@@ -138,7 +151,8 @@ export function PayMap({
       <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Pay by state across the United States" className="w-full" style={{ maxHeight: 560 }} onMouseLeave={() => setActive(null)}>
         {USA.locations.map((location) => {
           const name = displayName(location.name);
-          const value = values.get(name) ?? base;
+          const value = values.get(name);
+          const label = value === undefined ? `${name}: ${NA}` : `${name}: ${formatPay(value)}`;
           const isActive = active === name;
           const isYours = yourState === name;
           const move = REPOSITION[location.name];
@@ -150,20 +164,20 @@ export function PayMap({
               transform={move ? `translate(${move.tx} ${move.ty}) scale(${move.s})` : undefined}
               role="button"
               tabIndex={0}
-              aria-label={`${name}: ${formatPay(value)}`}
+              aria-label={label}
               onMouseEnter={() => setActive(name)}
               onFocus={() => setActive(name)}
               onClick={() => setActive(name)}
               className="cursor-pointer outline-none transition-[fill,opacity] duration-150"
               style={{
-                fill: shade(value),
+                fill: value === undefined ? missingFill : shade(value),
                 opacity: active && !isActive ? 0.72 : 1,
                 stroke: isYours ? "#ffffff" : isActive ? `color-mix(in srgb, ${accent} 70%, #ffffff)` : "rgba(10,9,20,0.75)",
                 strokeWidth: isYours ? 2.5 : isActive ? 1.5 : 0.75,
                 strokeLinejoin: "round",
               }}
             >
-              <title>{`${name}: ${formatPay(value)}`}</title>
+              <title>{label}</title>
             </path>
           );
         })}
