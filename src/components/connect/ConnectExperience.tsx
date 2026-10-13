@@ -4913,49 +4913,52 @@ function EventView({
             </article>
           )}
 
-          {/* The official Dream Opportunity post (CEO, 4 Sept): the event keeps
-             going after the day ends. Rows and short lists, no essay. */}
-          {event.official && (
-            <Card accent={pAccent}>
-              <div className="flex items-center gap-[10px]">
-                {/* a brand's reversed mark on its own colour (United Way's
-                   white lockup on United Way blue), so it reads in light mode */}
-                <span className="flex h-[36px] w-[36px] flex-none items-center justify-center rounded-full" style={COMPANY_BRAND[event.official.mark ?? ""] ? { background: COMPANY_BRAND[event.official.mark!].bg } : { background: "color-mix(in srgb, var(--primary) 22%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 55%, transparent)" }}>
-                  <LetterMark name={event.official.mark ?? event.official.by ?? "Dream Opportunity"} ink="#FFFFFF" letterHeight={14} />
-                </span>
-                <span className="flex min-w-0 flex-col">
-                  <span className="flex items-center gap-[5px] text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{event.official.by ?? "Dream Opportunity"} <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} /></span>
-                  <span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Official event account · {event.official.postedAgo}</span>
-                </span>
-              </div>
-              <p className="mt-[12px] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{event.official.summary}</p>
-              <div className="mt-[14px] flex flex-wrap gap-[8px]">
-                <QuietCta onClick={() => onOpenCommunity?.(event.official!.communityId, event.boardId ? "talk" : undefined)}>Keep talking in {event.official.communityName} <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></QuietCta>
-              </div>
-            </Card>
-          )}
-
-          {/* Pinned host recap with three takeaways (handoff 10.3) */}
-          {event.recap && (
-            <Card>
-              <span className="flex items-center gap-[6px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-                <Pin className="h-3.5 w-3.5" aria-hidden /> Pinned recap
-              </span>
-              <div className="mt-[8px]"><ProBadge proId={event.recap.proId} postedAgo={event.recap.postedAgo} /></div>
-              <ol className="mt-[6px] flex list-decimal flex-col gap-[6px] pl-5">
-                {event.recap.takeaways.map((t) => (
-                  <li key={t} className="text-[14.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{t}</li>
-                ))}
-              </ol>
-              <div className="mt-[10px] flex flex-wrap gap-[var(--space-3)]">
-                <QuietCta onClick={onSaveTakeaway} done={takeawaySaved}>{!takeawaySaved && <Bookmark className="h-4 w-4" aria-hidden />} {takeawaySaved ? "Takeaway saved" : "Save a takeaway"}</QuietCta>
-              </div>
-            </Card>
-          )}
-
-          {/* the pros' posts from the event, in the board feed's rows */}
-          {proPosts.length > 0 && (
-            <BoardFeedList wrap={(id, row) => <div key={id}>{row}</div>} items={proPosts.map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId)!, reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> }))} />
+          {/* One feed (13 Oct 2026, Chandu: "the feed (posts) in the event
+             I've opened has three cards. Instead put the pinned recap inside
+             the feed, have more posts from participants"): the event
+             account's post and the pinned recap are the first two rows of
+             the same hairline panel as the pros' posts, in the same row
+             shape, so the tab reads as one feed, not a stack of cards. */}
+          {(event.official || event.recap || proPosts.length > 0) && (
+            <BoardFeedList wrap={(id, row) => <div key={id}>{row}</div>} items={[
+              ...(event.official ? [{ id: "official", node: (
+                <article className="flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
+                  <span className="flex h-[44px] w-[44px] flex-none items-center justify-center rounded-full" style={COMPANY_BRAND[event.official.mark ?? ""] ? { background: COMPANY_BRAND[event.official.mark!].bg } : { background: "color-mix(in srgb, var(--primary) 22%, transparent)" }}>
+                    <LetterMark name={event.official.mark ?? event.official.by ?? "Dream Opportunity"} ink="#FFFFFF" letterHeight={15} />
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="flex items-center gap-[6px] text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{event.official.by ?? "Dream Opportunity"} <VerifiedBadge size={13} /></span>
+                    <span className="text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Event host · {event.official.postedAgo}</span>
+                    <p className="mt-[12px] max-w-[62ch] text-[16px] leading-[24px]" style={{ color: "var(--foreground)" }}>{event.official.summary}</p>
+                    <button type="button" onClick={() => onOpenCommunity?.(event.official!.communityId, event.boardId ? "talk" : undefined)} className="dm-link mt-[12px] flex w-fit cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>Keep talking in {event.official.communityName} <ChevronRight className="h-4 w-4" aria-hidden /></button>
+                  </div>
+                </article>
+              ) }] : []),
+              ...(event.recap ? [{ id: "recap", node: (() => {
+                const rp = proById(event.recap!.proId);
+                return (
+                  <article className="flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
+                    <span className="flex-none self-start"><ProAvatar proId={rp.id} name={rp.name} size={44} /></span>
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="flex flex-wrap items-center gap-x-[8px] gap-y-[2px]">
+                        <span className="flex items-center gap-[5px] text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{rp.name} <VerifiedBadge size={13} /></span>
+                        <span className="inline-flex items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--muted-foreground)" }}><Pin className="h-3 w-3" aria-hidden /> Pinned recap</span>
+                      </span>
+                      <span className="text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{rp.role} · {event.recap!.postedAgo}</span>
+                      <ol className="mt-[12px] flex flex-col gap-[10px]">
+                        {event.recap!.takeaways.map((t, i) => (
+                          <li key={t} className="flex items-baseline gap-[12px] text-[16px] leading-[24px]" style={{ color: "var(--foreground)" }}>
+                            <span aria-hidden className="w-[22px] flex-none text-[15px] font-extrabold tabular-nums" style={{ color: "var(--accent-subtle)" }}>{i + 1}</span>{t}
+                          </li>
+                        ))}
+                      </ol>
+                      <span className="mt-[12px]"><QuietCta onClick={onSaveTakeaway} done={takeawaySaved}>{!takeawaySaved && <Bookmark className="h-4 w-4" aria-hidden />} {takeawaySaved ? "Saved" : "Save"}</QuietCta></span>
+                    </div>
+                  </article>
+                );
+              })() }] : []),
+              ...proPosts.map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId)!, reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> })),
+            ]} />
           )}
           {!event.official && !event.recap && proPosts.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No posts from the event account yet.</p>

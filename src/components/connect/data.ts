@@ -12,7 +12,7 @@
 // verified scope ("what was verified and by whom"). No follower counts, no
 // DMs, no popularity ranking anywhere.
 
-import { UW_EVENT_THREADS, UW_INSIGHTS, UW_SC_MORE_POSTS, UW_SC_MORE_THREADS, UW_THREADS } from "./unitedway/uwThreads";
+import { UW_EVENT_POSTS, UW_EVENT_THREADS, UW_INSIGHTS, UW_SC_MORE_POSTS, UW_SC_MORE_THREADS, UW_THREADS } from "./unitedway/uwThreads";
 
 export type QuestionState = "awaiting" | "routed" | "answered" | "resolved";
 
@@ -2312,6 +2312,7 @@ export const INSIGHTS: Insight[] = [
   // (unitedway/uwThreads.ts, 12 Oct 2026)
   ...UW_INSIGHTS,
   ...UW_SC_MORE_POSTS,
+  ...UW_EVENT_POSTS,
 ];
 
 export const OPPORTUNITIES: Opportunity[] = [
