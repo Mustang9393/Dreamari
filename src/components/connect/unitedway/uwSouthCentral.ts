@@ -266,11 +266,11 @@ const LOCAL_STAFF: StaffPost[] = [
 ];
 /** United Way posts every member of a community board sees. */
 const PUBLIC_STAFF: StaffPost[] = [
-  { id: "sc-p-kz-kickoff", kind: "update", public: true, author: KZ_YOUTH, postedAgo: "3h ago", title: "Student United kickoff is Nov 5", body: "Meet your chapter and pick your first project. Bring a friend. Snacks are on us.", replies: [] },
+  { id: "sc-p-kz-kickoff", kind: "update", public: true, author: KZ_YOUTH, postedAgo: "3h ago", title: "Student United kickoff is Nov 5", body: "Meet your chapter and pick your first project. Bring a friend. Snacks are on us.", poster: { kind: "made", title: "Student United kickoff", when: "Nov 5 · 5:30 PM", where: "Kalamazoo", photo: MI.caring }, replies: [] },
   { id: "sc-p-bc-caring", kind: "update", public: true, author: BC_IMPACT, postedAgo: "1d ago", title: "Youth Day of Caring is May 7", body: "140 spots this year. Every project counts as service hours. Sign-ups open in March.", replies: [] },
   { id: "sc-p-lan-capitol", kind: "update", public: true, author: LAN_EVENTS, postedAgo: "5h ago", title: "64 students are going to public service day", body: "Meet state staff who started as interns. Juniors and seniors can still join.", replies: [] },
   { id: "sc-p-jx-bigs", kind: "update", public: true, author: JX_VOL, postedAgo: "8h ago", title: "Bigs in Schools needs 10 more mentors", body: "One hour a week at school. Volunteers can sign up under Ways to help.", replies: [] },
-  { id: "sc-p-convening", kind: "update", public: true, author: BC_VOL, postedAgo: "2h ago", pinned: true, title: "Nov 14: all four towns meet in Battle Creek", body: "Students, nonprofits and colleges, one day. Vans leave from Lansing and Jackson.", replies: [] },
+  { id: "sc-p-convening", kind: "update", public: true, author: BC_VOL, postedAgo: "2h ago", pinned: true, title: "Nov 14: all four towns meet in Battle Creek", body: "Students, nonprofits and colleges, one day. Vans leave from Lansing and Jackson.", poster: { kind: "made", title: "South Central convening", when: "Nov 14 · 10 AM", where: "Battle Creek", photo: MI.volunteers }, replies: [] },
 ];
 const STAFF_POSTS: StaffPost[] = [
   ...LOCAL_STAFF,

@@ -1,3 +1,11 @@
+## 2026-10-14: United Way boards: no graphic posts, announcements with posters, "Volunteer" tab
+
+**Why (Chandu):** "The graphic posts maybe shouldn't be there in this board. Also for create a post it isn't the composer we have for those ... It probably isn't relevant here. Except for maybe Announcements? There could be an option to upload a poster or generate a poster for an announcement." Then: "rename serve to something better. It sounds off especially from a student's perspective ... maybe volunteer".
+- Graphic posts removed from every United Way board and United Way event (the `graphic` field and its args are gone from uwThreads.ts); volunteers' Create post is the shared PostComposer, text only.
+- Staff post through `AnnounceSheet`: title, details, when, where and a poster (No poster / Make a poster / Upload a poster) on the students' board; a plain post on Team. `StaffPost.poster` is `{ kind: "made", title, when, where, photo }` or `{ kind: "upload", src }` (a data URL in the demo). `UwPoster` makes the poster: United Way's own photo under its blue, the white mark, an "Announcement" tag, the title, when and where in yellow, 4:5 at the feed's tall size. Two seeded announcements carry made posters (the Nov 14 convening, the Student United kickoff).
+- The student tab Serve is now "Volunteer" (key unchanged); "shift" left the student copy ("reading buddies", "check in when you arrive").
+- **Checked:** tsc and eslint clean; the convening poster in the feed; the announcement sheet.
+
 ## 2026-10-13 (night): Staff faces, one graphic size, graphic posts that inform
 
 **Why (Chandu):** "don't give that [the logo] as a pfp for United Way people. Use actual images"; "Don't shrink the graphic posts this much, just use the tall variation of what we had and kill the others. Realistic Twitter proportions"; "graphic posts should be more like posts not answers to questions etc. The quotes need to be relevant and useful to community members. Not random quotes".

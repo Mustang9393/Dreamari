@@ -789,6 +789,76 @@ type FeedItem = { id: string; space: string; at: number; pinned?: boolean } & ({
 /** A United Way staff post as a feed row, the same shape as the board's
  *  question and post rows: avatar, name, role and office, the post, then
  *  its counts. Public posts carry the United Way chip. */
+/** An announcement poster made from the post's own details (14 Oct 2026,
+ *  Chandu: "Except for maybe Announcements? There could be an option to
+ *  upload a poster or generate a poster for an announcement"). United
+ *  Way's own photo under its blue, the white mark, the title large, when
+ *  and where in yellow: a flyer, not a quote card. 4:5, the feed's tall
+ *  image size. */
+export function UwPoster({ title, when, where, photo }: { title: string; when?: string; where?: string; photo?: string }) {
+  return (
+    <span className="relative flex aspect-[4/5] w-full flex-col justify-between overflow-hidden rounded-[14px] p-[22px]" style={{ background: BLUE, boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6)" }}>
+      <Image src={photo ?? D.PHOTOS.volunteers} alt="" fill sizes="340px" className="object-cover" style={{ objectPosition: "50% 30%" }} />
+      <span aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(to top, ${BLUE} 0%, color-mix(in srgb, ${BLUE} 88%, transparent) 42%, color-mix(in srgb, ${BLUE} 25%, transparent) 75%, transparent 100%)` }} />
+      <span className="relative z-10 flex items-center justify-between">
+        <Image src={D.BRAND.logoWhite} alt="United Way" width={88} height={41} unoptimized className="h-[34px] w-auto" />
+        <span className="rounded-full px-[10px] py-[3px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ background: D.BRAND.yellow, color: "#1a1300" }}>{D.ANNOUNCE_UI.kicker}</span>
+      </span>
+      <span className="relative z-10 flex flex-col gap-[10px]">
+        <span className="text-[28px] leading-[31px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{title}</span>
+        {(when || where) && <span className="flex flex-col gap-[2px] text-[15px] leading-[20px] font-bold" style={{ color: D.BRAND.yellow }}>{when && <span>{when}</span>}{where && <span>{where}</span>}</span>}
+      </span>
+    </span>
+  );
+}
+
+function PosterView({ poster }: { poster: NonNullable<D.StaffPost["poster"]> }) {
+  return poster.kind === "made"
+    ? <UwPoster title={poster.title} when={poster.when} where={poster.where} photo={poster.photo} />
+    // eslint-disable-next-line @next/next/no-img-element -- a staff upload, a data URL in the demo
+    : <img src={poster.src} alt="" className="block w-full rounded-[14px] object-cover" style={{ aspectRatio: "4 / 5", boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6)" }} />;
+}
+
+/** The staff composer: an announcement for the students' board (with an
+ *  optional poster, made or uploaded), or a plain post to the team. */
+function AnnounceSheet({ team, where: whereDefault, onPost, onClose }: { team: boolean; where: string; onPost: (title: string, body: string, poster?: D.StaffPost["poster"]) => void; onClose: () => void }) {
+  const A = D.ANNOUNCE_UI;
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [when, setWhen] = useState("");
+  const [where, setWhere] = useState(whereDefault);
+  const [choice, setChoice] = useState<D.PosterChoice>(team ? "none" : "made");
+  const [upload, setUpload] = useState<string>();
+  const leaks = CONTACT_INFO.test(title + body);
+  const poster: D.StaffPost["poster"] = choice === "made" && title.trim() ? { kind: "made", title: title.trim(), when: when.trim() || undefined, where: where.trim() || undefined } : choice === "upload" && upload ? { kind: "upload", src: upload } : undefined;
+  return (
+    <Sheet title={team ? A.teamTitle : A.title} onClose={onClose} titleId="uw-announce-title">
+      <Field label={A.fields.title}><input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={80} placeholder={A.placeholders.title} className={INPUT} style={INPUT_STYLE} /></Field>
+      <Field label={A.fields.body}><textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} maxLength={400} placeholder={A.placeholders.body} className="w-full resize-none rounded-[var(--radius-md)] border p-[12px] text-[15px] leading-[21px] outline-none focus-visible:ring-2" style={INPUT_STYLE} /></Field>
+      {!team && (
+        <>
+          <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
+            <Field label={A.fields.when}><input value={when} onChange={(e) => setWhen(e.target.value)} placeholder={A.placeholders.when} className={INPUT} style={INPUT_STYLE} /></Field>
+            <Field label={A.fields.where}><input value={where} onChange={(e) => setWhere(e.target.value)} placeholder={A.placeholders.where} className={INPUT} style={INPUT_STYLE} /></Field>
+          </div>
+          <Field label={A.poster}>
+            <ChoiceChips options={A.posterOptions.map((o) => o.label)} value={[A.posterOptions.find((o) => o.key === choice)!.label]} onChange={(v) => setChoice(A.posterOptions.find((o) => o.label === v[0])!.key)} />
+          </Field>
+          {choice === "upload" && (
+            <label className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border border-dashed p-[14px] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+              <Plus className="h-4 w-4" aria-hidden /> {upload ? "Change image" : `Choose an image · ${A.uploadHint}`}
+              <input type="file" accept="image/png,image/jpeg" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = () => setUpload(String(r.result)); r.readAsDataURL(f); }} />
+            </label>
+          )}
+          {poster && <span className="block w-[220px]"><PosterView poster={poster} /></span>}
+        </>
+      )}
+      {leaks && <span className="text-[12.5px] font-semibold" style={{ color: D.BRAND.yellow }}>{CONTACT_WARNING}</span>}
+      <PrimaryCta className="w-fit" style={SOLID} disabled={!title.trim() || leaks} onClick={() => { onPost(title.trim(), body.trim(), team ? undefined : poster); onClose(); }}>{A.post}</PrimaryCta>
+    </Sheet>
+  );
+}
+
 function StaffFeedRow({ p, replies, onOpen }: { p: D.StaffPost; replies: number; onOpen: () => void }) {
   const done = p.tasks?.filter((t) => t.done).length ?? 0;
   return (
@@ -807,6 +877,7 @@ function StaffFeedRow({ p, replies, onOpen }: { p: D.StaffPost; replies: number;
         </span>
         <h3 className="mt-[12px] max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>{p.title}</h3>
         {p.body && <p className="mt-[6px] line-clamp-3 max-w-[60ch] text-[14.5px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{p.body}</p>}
+        {p.poster && <span className="mt-[12px] block w-full sm:w-[300px] lg:w-[340px]"><PosterView poster={p.poster} /></span>}
         <span className="mt-[14px] flex flex-wrap items-center gap-x-[var(--space-5)] gap-y-[4px] text-[13px] font-semibold" style={{ color: "color-mix(in srgb, var(--muted-foreground) 80%, transparent)" }}>
           {replies > 0 && <span className="flex items-center gap-[6px]"><MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {replies}</span>}
           {p.resource && <span className="flex items-center gap-[6px]"><FileText className="h-[16px] w-[16px]" aria-hidden />{p.resource.meta}</span>}
@@ -855,7 +926,7 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
   openThread: (t: Thread) => void; openPost: (i: Insight) => void; openStaff: (p: D.StaffPost) => void;
   /** each returns the new item's id, so it lands on the board it was posted to */
   onAsk: (text: string, place: string) => string;
-  onStaffPost: (title: string, body: string, isPublic: boolean) => string;
+  onStaffPost: (title: string, body: string, isPublic: boolean, poster?: D.StaffPost["poster"]) => string;
   onVolunteerPost: (post: { title: string; body: string; graphic?: Insight["graphic"] }, place: string) => string;
 }) {
   const board = useBoard();
@@ -914,8 +985,14 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
         <div className="min-w-0 flex-1 pb-[6px]"><TextTabs ariaLabel={C.boards} layoutId="uw-boards" value={current.key} onChange={setSpace} items={spaces.map((x) => ({ key: x.key, label: x.key === "all" ? C.across : x.key }))} /></div>
         {role === "staff" && <div className="pb-[8px]"><StaffSwitch on={staffOnly} onChange={(v) => setAudience(v ? "staff" : "everyone")} /></div>}
       </div>
-      {role !== "student" && volunteerPro && (
-        <PostComposer key={current.key} pro={volunteerPro} open={composing} onClose={() => setComposing(false)} textOnly={role === "staff"}
+      {role === "staff" && composing && (
+        <AnnounceSheet team={staffOnly} where={current.key === "all" ? "" : current.key} onClose={() => setComposing(false)}
+          onPost={(title, body, poster) => { const id = onStaffPost(title, body, !staffOnly, poster); setPlaced((m) => ({ ...m, [id]: current.key })); }} />
+      )}
+      {role === "volunteer" && volunteerPro && (
+        // a volunteer posts text here, no graphics (14 Oct 2026: "The graphic
+        // posts maybe shouldn't be there in this board")
+        <PostComposer key={current.key} pro={volunteerPro} open={composing} onClose={() => setComposing(false)} textOnly
           prompts={["What worked this week", "Something students should know", "A date to save"]}
           boards={spaces.map((x) => ({ id: x.key, name: x.key === "all" ? C.across : x.key }))} initialBoard={current.key} onPublish={publish} />
       )}
@@ -949,7 +1026,7 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
           <button type="button" onClick={() => setComposing(true)} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-lg)] border py-[8px] pr-[8px] pl-[10px] text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
             {role === "staff" ? <UwAvatar size={34} who={board.staff.me} /> : volunteerPro ? <ProAvatar proId={volunteerPro.id} name={volunteerPro.name} size={34} /> : null}
             <span className="min-w-0 flex-1 truncate text-[15px]" style={{ color: "var(--muted-foreground)" }}>{staffOnly ? C.staffPlaceholder(where) : `Share something with ${current.key === "all" ? "every community" : where}`}</span>
-            <span className="flex flex-none items-center gap-[6px] rounded-full px-[14px] py-[7px] text-[13px] font-bold" style={staffOnly ? { background: D.BRAND.yellow, color: "#1a1300" } : SOLID}><PenLine className="h-3.5 w-3.5" aria-hidden /> Create post</span>
+            <span className="flex flex-none items-center gap-[6px] rounded-full px-[14px] py-[7px] text-[13px] font-bold" style={staffOnly ? { background: D.BRAND.yellow, color: "#1a1300" } : SOLID}><PenLine className="h-3.5 w-3.5" aria-hidden /> {role === "staff" ? (staffOnly ? "Post to team" : "Announcement") : "Create post"}</span>
           </button>
         )}
         {shown.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
@@ -1622,9 +1699,9 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const openStaffPost = (p: D.StaffPost) => { staffY.current = window.scrollY; setStaffPost(p); window.scrollTo(0, 0); };
   const closeStaffPost = () => { setStaffPost(undefined); const y = staffY.current; window.setTimeout(() => window.scrollTo(0, y), 0); };
   useBackStep(!!staffPost, closeStaffPost);
-  const postStaff = (title: string, body: string, isPublic: boolean) => {
+  const postStaff = (title: string, body: string, isPublic: boolean, poster?: D.StaffPost["poster"]) => {
     const id = `uw-staff-${Date.now()}`;
-    setStaffMine((l) => [{ id, kind: "update", public: isPublic || undefined, author: board.staff.me, title, body, postedAgo: "Just now", replies: [] }, ...l]);
+    setStaffMine((l) => [{ id, kind: "update", public: isPublic || undefined, author: board.staff.me, title, body, poster, postedAgo: "Just now", replies: [] }, ...l]);
     onToast(isPublic ? D.COMMUNITY_UI.posted("the board") : D.COMMUNITY_UI.staffPosted);
     return id;
   };

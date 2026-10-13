@@ -89,7 +89,10 @@ export const STUDENT_TABS = [
   { key: "ask", label: "Communities" },
   { key: "programs", label: "Programs" },
   { key: "events", label: "Events" },
-  { key: "serve", label: "Serve" },
+  // 14 Oct 2026, Chandu: "rename serve to something better. It sounds off
+  // especially from a student's perspective ... maybe volunteer". The key
+  // stays so links and the Back memo hold.
+  { key: "serve", label: "Volunteer" },
 ] as const;
 export type StudentTab = typeof STUDENT_TABS[number]["key"];
 export const VOLUNTEER_TABS = [
@@ -263,6 +266,9 @@ export type StaffPost = {
   resource?: { label: string; meta: string };
   /** who does what, one owner per office */
   tasks?: { office: string; owner: string; task: string; done: boolean }[];
+  /** an announcement's poster (14 Oct 2026): one United Way made from the
+   *  post's own details, or an image staff uploaded */
+  poster?: { kind: "made"; title: string; when?: string; where?: string; photo?: string } | { kind: "upload"; src: string };
   /** everyone on the community's board sees it (students and volunteers
    *  too); unset = staff only, behind the board's Staff only switch */
   public?: boolean;
@@ -481,6 +487,17 @@ export const TALK_UI = {
  *  Within community, we need 4 boards for the 4 groups and one for across
  *  communities ... Within these boards there needs to be a switch for
  *  employee only ... without students or volunteers involved." */
+export const ANNOUNCE_UI = {
+  title: "New announcement", teamTitle: "Post to the team",
+  fields: { title: "Title", body: "Details", when: "When", where: "Where" },
+  placeholders: { title: "Student United kickoff is Nov 5", body: "Who it's for and what to bring", when: "Nov 5, 5:30 PM", where: "Kalamazoo" },
+  poster: "Poster", posterOptions: [{ key: "none", label: "No poster" }, { key: "made", label: "Make a poster" }, { key: "upload", label: "Upload a poster" }] as const,
+  uploadHint: "PNG or JPG",
+  post: "Post",
+  kicker: "Announcement",
+};
+export type PosterChoice = typeof ANNOUNCE_UI.posterOptions[number]["key"];
+
 export const COMMUNITY_UI = {
   across: "All communities",
   acrossLine: "One board every community shares",

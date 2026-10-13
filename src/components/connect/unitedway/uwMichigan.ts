@@ -162,7 +162,7 @@ const EVENTS: UwEvent[] = [
         postedAgo: "1w ago",
         summary: "96 students from Grand Rapids, Detroit, Flint, Muskegon and Marquette met online. Each group shared one project that worked.",
         about: "Each Michigan United Way runs its own teen groups. This meetup let them learn from each other.",
-        next: ["Post the project idea you want to try.", "Ask a group in another city how they did theirs.", "Find a Day of Caring near you in Serve."],
+        next: ["Post the project idea you want to try.", "Ask a group in another city how they did theirs.", "Find a Day of Caring near you in Volunteer."],
       },
       recap: { proId: "pro-brooks", postedAgo: "1w ago", takeaways: ["Every group started small. One drive, one day, one cause.", "Groups in other cities want to help you. Just ask here.", "Write down what worked so the next class can use it."] },
       proIds: ["pro-brooks", "pro-okafor", "pro-tanaka"],
