@@ -211,6 +211,37 @@
   color: var(--glossary-accent);
 }
 .glossary-game-lab .glossary-concept-medallion svg { width: 46%; height: 46%; stroke-width: 1.7; }
+/* The worked formula stays on the card when a supporting illustration is
+   added. Isolate its size from the legacy .flashcard-art img height rules. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-concept-medallion.has-art {
+  width: clamp(112px, calc(22dvh / var(--vz, 1)), 180px);
+  border: 0;
+  background: transparent;
+  flex-shrink: 0;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-concept-medallion.has-art img { width: 100% !important; height: 100% !important; object-fit: contain; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-concept-medallion img { image-rendering: pixelated; }
+@media (max-width: 640px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-concept-medallion.has-art { width: 100px; }
+}
+/* Contextual L2+ sprites need a readable slot, not the old 32px glyph slot.
+   Keep every match tile the same size and let its label use the remaining
+   column. Exact figures and longer scenario copy do not gain decoration. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout][data-level]:not([data-level="1"]) .glossary-question-screen.glossary-qa .glossary-match-tile img {
+  width: calc(64px / var(--qa-k, 1)) !important;
+  height: calc(54px / var(--qa-k, 1)) !important;
+  max-height: calc((var(--qa-match-row, 60px) - 6px) / var(--qa-k, 1));
+  object-fit: contain;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout][data-level]:not([data-level="1"]) .glossary-question-screen.glossary-qa .glossary-match-column { grid-auto-rows: 64px !important; gap: 5px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout][data-level]:not([data-level="1"]) .glossary-question-screen.glossary-qa .glossary-match-tile { padding-inline: 6px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout][data-level]:not([data-level="1"]) .glossary-question-screen.glossary-qa .glossary-match-right > span.flex-1 { gap: 4px !important; }
+  /* The link code is a badge, not another column stealing label space. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout][data-level]:not([data-level="1"]) .glossary-question-screen.glossary-qa .glossary-match-lock-code { position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; font-size: 10px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"][data-qlayout][data-level]:not([data-level="1"]) .glossary-question-screen.glossary-qa .glossary-match-tile img { width: calc(42px / var(--qa-k, 1)) !important; height: calc(42px / var(--qa-k, 1)) !important; }
+}
 .glossary-game-lab .glossary-concept-formula {
   max-width: 100%;
   padding: 10px 16px;

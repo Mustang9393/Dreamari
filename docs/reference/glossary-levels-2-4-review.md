@@ -1,5 +1,11 @@
 # Glossary Game: Levels 2 to 4 review (Joshua's Replit vs our Level 1)
 
+Update, 13 Oct 2026: Chandu subsequently requested theme-consistent assets for
+Levels 2 to 4 and a scalable prompt for future careers. The new supporting
+term-art pipeline is documented in `../handoff/play-sop/12-glossary-art-pipeline.md`.
+This supersedes only the no-new-term-art recommendation below. Exact numeric
+scene cards, authored questions, copy, types, order and scoring are unchanged.
+
 Prepared 13 Oct 2026 for Chandu and Mika. Source: https://dceeai.replit.app/ib-glossary-game, walked end to end in headless Chrome (desktop 1440x900, phone 390x844). No sign-in or payment was needed.
 
 Screenshots: `/private/tmp/claude-501/-Users-chandump-dreamari--claude-worktrees-gracious-wright-2b5bb8/f41e9d51-da7a-4701-8e96-2647b4172794/scratchpad/replit-glossary/` (file names below are relative to that folder). Our build's contact sheets: `.../scratchpad/glossary-l2-4/`.

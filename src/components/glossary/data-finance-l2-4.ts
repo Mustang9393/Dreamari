@@ -17,9 +17,10 @@
 // - 8th-grade reading level, no em dashes.
 //
 // Icons are semantic slugs resolved to the design system's line icons in
-// GlossaryLabGameExperience.tsx (TERM_ICON_MAP). These terms have no term
-// art on purpose (Joshua: "we should not force an image where it does not
-// help learning"); scene cards draw the money instead.
+// GlossaryLabGameExperience.tsx (TERM_ICON_MAP). Terms use supporting term
+// art only when a career-scoped illustration helps the meaning. The Oct 13
+// asset pass is independent of this content file (termArt.ts); scene cards
+// still draw the exact numbers instead of baking answers into pictures.
 
 import type { GlossaryLesson, GlossaryQuestion, GlossaryTerm } from "./data";
 

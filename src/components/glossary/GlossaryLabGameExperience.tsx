@@ -29,6 +29,7 @@ import {
 } from "./progress";
 import type { ChainStep, GlossaryCareer, GlossaryLesson, GlossaryQuestion, ParagraphPowerPlay, SceneCard } from "./data";
 import { SparkBar } from "@/components/flow/SparkBar";
+import { glossaryTermAssets } from "./termArt";
 
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
 // the DreamAri_Glossary_Content_Template_v1.xlsx schema, then reskinned into
@@ -147,21 +148,17 @@ function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large")
   }
   return size === "small" ? SIGNAL_ASSETS_SMALL : SIGNAL_ASSETS;
 }
-/** Whether the playing lesson has term art at all. Only Level 1's five
- *  words do; Levels 2+ are abstract money words with no honest picture, so
- *  every art lookup returns nothing and the screens fall back to glyphs,
- *  scene cards and Dreamy (13 Oct 2026, Joshua: "we should not force an
- *  image where it does not help learning"). Without this, a label such as
- *  "Money used to grow" matched Level 1's Profit coins by keyword. */
-const LessonArtContext = createContext(true);
-const NO_ART: Record<string, string> = {};
+/** Keep Level 1's presentation rules intact. New term art is career-scoped,
+ *  not a keyword guess: Revenue is not Profit, and Cash Flow is not money
+ *  left over. Number/share/ledger scenes remain the teaching diagrams. */
+const LessonArtContext = createContext<{ legacy: boolean; large: Record<string, string>; small: Record<string, string> }>({ legacy: true, large: TERM_ASSETS, small: TERM_ASSETS });
 /** The theme's term art. `small` for anything drawn under ~64px. */
 function useTermAssets(size: "large" | "small" = "large"): Record<string, string> {
   const atmosphere = useAtmosphere();
-  const hasArt = useContext(LessonArtContext);
-  return hasArt ? assetsFor(atmosphere, size) : NO_ART;
+  const art = useContext(LessonArtContext);
+  return art.legacy ? assetsFor(atmosphere, size) : art[size];
 }
-function lessonHasArt(lesson: GlossaryLesson): boolean {
+function lessonHasLegacyArt(lesson: GlossaryLesson): boolean {
   return lesson.terms.every((term) => term.id in TERM_ASSETS);
 }
 
@@ -256,7 +253,12 @@ function TermIcon({ icon, className }: { icon: string; className?: string }) {
 }
 
 function termAssetFor(label: string, assets: Record<string, string> = TERM_ASSETS): string | null {
-  const normalized = label.toLowerCase();
+  const normalized = label.trim().toLowerCase();
+  const exact = Object.entries(assets).find(([id]) => id.toLowerCase() === normalized);
+  if (exact) return exact[1];
+  // Existing Level 1 aliases only. Never map new meanings to a generic
+  // money/sneaker image. Matching already has an authored pair.termId.
+  if (!assets.Company || !assets.Product) return null;
   if (normalized.includes("profit") || normalized.includes("money") || normalized.includes("revenue")) return assets.Profit;
   if (normalized.includes("customer") || normalized.includes("buyer") || normalized.includes("person")) return assets.Customer;
   if (normalized.includes("service") || normalized.includes("custom") || normalized.includes("design")) return assets.Service;
@@ -637,9 +639,9 @@ function SketchFace({ term, definition, icon, artSrc, style, concept = false, fo
         // A concept card (13 Oct 2026): a term with no honest picture gets
         // its glyph and, where it has one, the worked line that shows it
         // ("$30,000 − $25,000 = $5,000") in the art's slot. Same card, same
-        // grid, no forced illustration.
+        // grid. A supporting illustration never replaces the worked maths.
         <span className="glossary-flashcard-art glossary-concept-panel" aria-hidden={!formula}>
-          <span className="glossary-concept-medallion"><TermIcon icon={icon} /></span>
+          <span className={`glossary-concept-medallion ${artSrc ? "has-art" : ""}`}>{artSrc ? <Image src={artSrc} alt="" width={180} height={180} className="h-full w-full object-contain" priority unoptimized /> : <TermIcon icon={icon} />}</span>
           {formula ? <span className="glossary-concept-formula">{formula}</span> : null}
         </span>
       ) : <span className="glossary-flashcard-art relative -rotate-2" style={{ filter: artSrc ? undefined : "url(#glossary-sketch)", color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>
@@ -697,6 +699,13 @@ function UnlockScreen({
   const assets = useTermAssets();
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
+  useEffect(() => {
+    const next = lesson.terms[index + 1];
+    if (variant !== "lab" || !next || !assets[next.id]) return;
+    const image = new window.Image();
+    image.decoding = "async";
+    image.src = assets[next.id];
+  }, [assets, index, lesson.terms, variant]);
   // The flipbook: each term's page starts on its sketch face and flips in
   // real 3D to the written side. Reset per term (a new page starts art-up).
   const [flipped, setFlipped] = useState(false);
@@ -778,7 +787,7 @@ function UnlockScreen({
                  so its backface-visibility participates in the button's own
                  3D context rather than being flattened by a wrapper. */}
               {(variant === "default" || !flipped) ? (
-                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? assets[term.id] : undefined} concept={variant === "lab" && !assets[term.id]} formula={term.formula} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
+                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? assets[term.id] : undefined} concept={variant === "lab" && (!assets[term.id] || !!term.formula)} formula={term.formula} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
               ) : null}
 
               {/* BACK: the written page, ring-bound edge and all. */}
@@ -1603,7 +1612,7 @@ function MatchUpCard({ question, onAnswer, onReset, hintSlot }: { question: Extr
             const pair = question.pairs.find((p) => p.right === right)!;
             const done = matched.has(pair.left);
             const linkNumber = question.pairs.findIndex((candidate) => candidate.left === pair.left) + 1;
-            const artwork = assets[pair.left] ?? termAssetFor(right, assets);
+            const artwork = assets[pair.termId] ?? assets[pair.left] ?? termAssetFor(right, assets);
             return (
               <button
                 key={right}
@@ -1651,6 +1660,10 @@ function MatchUpCard({ question, onAnswer, onReset, hintSlot }: { question: Extr
 function SortBucketsCard({ question, onAnswer, onReset, hintSlot }: { question: Extract<GlossaryQuestion, { kind: "sortBuckets" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void; hintSlot?: HTMLElement | null }) {
   const { playCorrect, playWrong, playSelect } = useMaterialSounds();
   const assets = useTermAssets("small");
+  const legacyArt = useContext(LessonArtContext).legacy;
+  // L1 sorts pictured objects. New conceptual statements must not wear
+  // their correct bucket's picture, which would reveal the answer.
+  const itemArt = (text: string, bucket: string) => termAssetFor(legacyArt ? bucket : text, assets);
   const [placed, setPlaced] = useState<Record<string, string>>({});
   const [picked, setPicked] = useState<string | null>(null);
 
@@ -1749,7 +1762,7 @@ function SortBucketsCard({ question, onAnswer, onReset, hintSlot }: { question: 
   return (
     <div ref={sortRef} className="glossary-sort-buckets flex w-full flex-col gap-[var(--space-4)]">
       {dragPoint && dragging ? createPortal(<div className="glossary-drag-preview marketing-v2" data-atmosphere={dragTheme || undefined} style={{ left: dragPoint.x, top: dragPoint.y }} aria-hidden>
-        {termAssetFor(items.find((item) => item.text === dragging)?.bucket ?? "", assets) ? <Image src={termAssetFor(items.find((item) => item.text === dragging)?.bucket ?? "", assets)!} alt="" width={64} height={64} unoptimized /> : null}
+        {itemArt(dragging, items.find((item) => item.text === dragging)?.bucket ?? "") ? <Image src={itemArt(dragging, items.find((item) => item.text === dragging)?.bucket ?? "")!} alt="" width={64} height={64} unoptimized /> : null}
         <span>{dragging}</span>
       </div>, document.body) : null}
       {!allPlaced && (
@@ -1770,7 +1783,7 @@ function SortBucketsCard({ question, onAnswer, onReset, hintSlot }: { question: 
                 className={`glossary-sort-token dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold ${picked === item.text ? "is-picked is-selected" : ""} ${dragging === item.text ? "is-dragging" : ""}`}
                 style={{ background: "var(--card)", borderColor: picked === item.text ? "var(--accent)" : "var(--glass-border)", color: "var(--foreground)" }}
               >
-                {termAssetFor(item.bucket, assets) ? <Image src={termAssetFor(item.bucket, assets)!} alt="" width={56} height={56} className="glossary-sort-art" draggable={false} aria-hidden unoptimized /> : null}
+                {itemArt(item.text, item.bucket) ? <Image src={itemArt(item.text, item.bucket)!} alt="" width={56} height={56} className="glossary-sort-art" draggable={false} aria-hidden unoptimized /> : null}
                 {item.text}
               </button>
             ))}
@@ -1935,7 +1948,7 @@ function QuestionScreen({
   const [picked, setPicked] = useState<number | null>(null);
   const { playCorrect, playWrong } = useMaterialSounds();
   const layout = useContext(QuestionLayoutContext);
-  const hasArt = useContext(LessonArtContext);
+  const hasArt = useContext(LessonArtContext).legacy;
   const [misses, setMisses] = useState<number[]>([]);
   const [missCount, setMissCount] = useState(0);
   const assets = useTermAssets();
@@ -3275,12 +3288,15 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   useEffect(() => {
     if (variant !== "lab") return;
     const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING] : ["happy", "curious", "party"].map((pose) => dreamyAssetFor(atmosphere, pose, true));
-    [...Object.values(assetsFor(atmosphere, "small")), ...mascot].forEach((src) => {
+    const small = lessonHasLegacyArt(lesson) ? assetsFor(atmosphere, "small") : glossaryTermAssets(career.careerSlug, atmosphere, "small");
+    const large = lessonHasLegacyArt(lesson) ? assetsFor(atmosphere) : glossaryTermAssets(career.careerSlug, atmosphere);
+    const first = large[lesson.terms[0]?.id];
+    [...lesson.terms.map((term) => small[term.id]), first, ...mascot].filter(Boolean).forEach((src) => {
       const asset = new window.Image();
       asset.decoding = "async";
       asset.src = src;
     });
-  }, [variant, atmosphere]);
+  }, [variant, atmosphere, career.careerSlug, lesson]);
 
   const mainLoopLength = lesson.questions.length;
   const current = queue[queueIndex];
@@ -3387,7 +3403,10 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   // accent are darkened again in glossary-worlds.css. Worlds without an
   // entry keep the token. DEMO-ONLY until the token set grows a fill ramp.
   const accent = variant === "lab" && globalTheme === "light" ? (LIGHT_WORLD_FILL[career.world] ?? worldAccent) : worldAccent;
-  const termArt = assetsFor(variant === "lab" ? atmosphere : "v1", "small");
+  const artAtmosphere = variant === "lab" ? atmosphere : "v1";
+  const legacyArt = lessonHasLegacyArt(lesson);
+  const termArt = legacyArt ? assetsFor(artAtmosphere, "small") : glossaryTermAssets(career.careerSlug, artAtmosphere, "small");
+  const largeTermArt = legacyArt ? assetsFor(artAtmosphere) : glossaryTermAssets(career.careerSlug, artAtmosphere);
 
   // The HUD stays a strip under the bar (Chandu, 6 Oct 2026, after a
   // one-row try: "the milestone circles can be under the progress bar ...
@@ -3447,7 +3466,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   useQuestionSceneryFit(shellRef, activeLayout, atmosphere, variant === "lab" && questionFrame, `${caseFinale ? "finale" : current?.id ?? ""}-${pendingResult ? (pendingResult.correct ? 1 : 2) : 0}`);
   return (
     <AtmosphereContext.Provider value={variant === "lab" ? atmosphere : "v1"}>
-    <LessonArtContext.Provider value={lessonHasArt(lesson)}>
+    <LessonArtContext.Provider value={{ legacy: legacyArt, large: largeTermArt, small: termArt }}>
     <QuestionLayoutContext.Provider value={activeLayout}>
     <div
       ref={shellRef}

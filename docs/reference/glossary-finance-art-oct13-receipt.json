@@ -1,0 +1,1298 @@
+{
+  "schemaVersion": 1,
+  "career": "investment-banking",
+  "version": "finance-oct13",
+  "provider": "built-in image_gen",
+  "references": {
+    "drift": [
+      {
+        "path": "public/images/glossary/themes-oct08/drift/customer.webp",
+        "sha256": "ba7295fc0eb1d41338ef33cdd64dd3391f7a2543faddbfec763ff4b3c56378cf"
+      },
+      {
+        "path": "public/images/glossary/themes-oct08/drift/company.webp",
+        "sha256": "f7e468e71692003bf604a5b6054e5cf87b2ab661abc956639fc73446d48a0e15"
+      },
+      {
+        "path": "public/images/glossary/themes-oct08/drift/profit.webp",
+        "sha256": "71e13a089e0d5e1871a11e20521c2e4d55cd571957d568d4a39e238aad69606e"
+      }
+    ],
+    "signal": [
+      {
+        "path": "public/images/glossary/signal/cloud-sale-sneaker.webp",
+        "sha256": "7e95f8f200b465850fdc62c1da7cc5d05f57766d1b323bbb7fe875da18ce5656"
+      },
+      {
+        "path": "public/images/glossary/signal/building.webp",
+        "sha256": "dfb07581df4ebc8aceaa3d037a464c1ca61bd406e8342a33ace9c03a24ac6ea6"
+      },
+      {
+        "path": "public/images/glossary/signal/coins-320.webp",
+        "sha256": "54f32115db13823610ba1efdb87c786de92ef2c87fb2cba99d87c164c84c4423"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "id": "Investor",
+      "level": 2,
+      "theme": "drift",
+      "sourceName": "exec-55ed264c-5315-43d0-9667-0d6a9a6cb78c.png",
+      "sourceSha256": "e10ed1e4f4b2f4380d4a6879499ff8c24d6204b1bf6e8d25a5ded9c4cead3dc5",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Dreamy floats beside a short curved arrow directing a single gold coin toward a miniature sneaker boutique. This shows a person committing money to a business, not buying a shoe. Dreamy is interested and hopeful. One compact composition; cloud, coin, direction arrow, tiny boutique. No guaranteed-profit cue.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/investor.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 65452,
+          "sha256": "387daa1d7494cddcdf2b03148bd5def0666f739ad05f780154aaa6a080eda599",
+          "alphaBounds": {
+            "left": 38,
+            "top": 87,
+            "width": 691,
+            "height": 592,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/investor-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 15174,
+          "sha256": "80576237ff7ea749fe37037ffbe630f89865a6adabbb4561422e45fa7d405894",
+          "alphaBounds": {
+            "left": 13,
+            "top": 29,
+            "width": 230,
+            "height": 198,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Investor",
+      "level": 2,
+      "theme": "signal",
+      "sourceName": "exec-bdd70897-0d04-4a5c-b254-6b7729f55989.png",
+      "sourceSha256": "62f3734aec64776e1c53428fbfe489bfc95e2ea42b50a1c41903165884b88d15",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Dreamy floats beside a short curved arrow directing a single gold coin toward a miniature sneaker boutique. This shows a person committing money to a business, not buying a shoe. Dreamy is interested and hopeful. One compact composition; cloud, coin, direction arrow, tiny boutique. No guaranteed-profit cue.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/investor.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 20988,
+          "sha256": "7cad358406c948975d7cb6f094dfd54be36c13bb45acd3a5639b855d520290de",
+          "alphaBounds": {
+            "left": 48,
+            "top": 84,
+            "width": 672,
+            "height": 600,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/investor-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 20198,
+          "sha256": "17f31e07f227a2d1b42ae9ae2be84b1cea984d29b3492e79543bec4d9a160b33",
+          "alphaBounds": {
+            "left": 48,
+            "top": 60,
+            "width": 224,
+            "height": 200,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Capital",
+      "level": 2,
+      "theme": "drift",
+      "sourceName": "exec-dea906da-9525-4e1a-a52f-8e9ecc7cdfde.png",
+      "sourceSha256": "56a277fd5d9842c5f623f6651ba73fc8f954ce0c929aeb9ba97a9966a47a7163",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: An open navy business cashbox with a few gold star coins beside a compact rolled shop blueprint and one sky-blue miniature storefront wall. Money available to build and grow the business. No savings pig, no unrelated graph, no promised return.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/capital.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 80488,
+          "sha256": "3b1c4bf3a4503f0c048bd4f830c71c142f4f548e4967e06d8428f943f2487143",
+          "alphaBounds": {
+            "left": 38,
+            "top": 116,
+            "width": 691,
+            "height": 535,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/capital-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 18074,
+          "sha256": "8a1baa19b5b173444d6d239fba7eeaa100898327f5ef5582d880002aa3fdbd0f",
+          "alphaBounds": {
+            "left": 13,
+            "top": 38,
+            "width": 230,
+            "height": 179,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Capital",
+      "level": 2,
+      "theme": "signal",
+      "sourceName": "exec-aed2c8e8-fa27-42ce-9471-f0c11599ad3f.png",
+      "sourceSha256": "25911034b84970a110e2a1bba7679ce7531859d0b92f11cc4a6a853bfbfaaacb",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: An open navy business cashbox with a few gold star coins beside a compact rolled shop blueprint and one sky-blue miniature storefront wall. Money available to build and grow the business. No savings pig, no unrelated graph, no promised return.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/capital.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 22182,
+          "sha256": "0dee4e5f0e1b8e71964c9ecdd4430ab0569d99b9033a9a11aa925ff6bae8123f",
+          "alphaBounds": {
+            "left": 48,
+            "top": 102,
+            "width": 672,
+            "height": 564,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/capital-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 18724,
+          "sha256": "3a8f0c41a1b86ff77f1b4601417b003be579b42fc4ca5b8c367c5c74478899db",
+          "alphaBounds": {
+            "left": 48,
+            "top": 66,
+            "width": 224,
+            "height": 188,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Risk",
+      "level": 2,
+      "theme": "drift",
+      "sourceName": "exec-83f90400-15a8-452d-983e-e454f2a406e2.png",
+      "sourceSha256": "98e03d622b52f32955d74fa302429ff8dd513d17eced3739d4f9a10e88c8dd59",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Dreamy with a gently concerned expression floats beside a gold coin at a short forked track: one branch solid, the other ends at a visible gap. A restrained amber warning triangle marks the uncertain branch. The coin has not fallen. Convey possibility of loss, not certain failure. Avoid scary expression.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/risk.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 73332,
+          "sha256": "1a819337218c71ba526ef32299e75fbdeaad81e1c5294a21547fdbd4b996987e",
+          "alphaBounds": {
+            "left": 38,
+            "top": 74,
+            "width": 691,
+            "height": 618,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/risk-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16972,
+          "sha256": "4ec4cc7e56c76f844d259662cd0ee7cf48ee857e4391514be6019afc833e16be",
+          "alphaBounds": {
+            "left": 13,
+            "top": 25,
+            "width": 230,
+            "height": 206,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Risk",
+      "level": 2,
+      "theme": "signal",
+      "sourceName": "exec-ffda2888-a609-4b34-b2e6-be27a4f985d2.png",
+      "sourceSha256": "de7e560b68483132e32b590bdb5d17556fe76dfe1853b7899ccce2bef7996935",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Dreamy with a gently concerned expression floats beside a gold coin at a short forked track: one branch solid, the other ends at a visible gap. A restrained amber warning triangle marks the uncertain branch. The coin has not fallen. Convey possibility of loss, not certain failure. Avoid scary expression.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/risk.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 17654,
+          "sha256": "37b9b5c86156952a2713f91487ad50a45778d9d745dfb044667e4edab00c9e29",
+          "alphaBounds": {
+            "left": 48,
+            "top": 90,
+            "width": 672,
+            "height": 588,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/risk-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 15982,
+          "sha256": "50a7ac322148e656aa88c3b1ce8a123932ae6e000c002dd9510f72b90c7a382e",
+          "alphaBounds": {
+            "left": 48,
+            "top": 62,
+            "width": 224,
+            "height": 196,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Return",
+      "level": 2,
+      "theme": "drift",
+      "sourceName": "exec-5dcd99ad-173c-4b81-ac4c-39842f0a2749.png",
+      "sourceSha256": "47c41bee5eab6c4466008948a57a062d5fb3acffd058d2813c51feff4d525874",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A short navy-blue stack of original investment coins and a visibly separate pair of gold gain coins beside it, joined by one small curved arrow returning toward the viewer. The newly gained amount is the focal point. No guaranteed upward graph or promised amount.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/return.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 76634,
+          "sha256": "bb85b6642772d51e4717e97a0bb6dca93e3e9a8e21508b309a93987e58416cac",
+          "alphaBounds": {
+            "left": 38,
+            "top": 65,
+            "width": 691,
+            "height": 636,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/return-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16882,
+          "sha256": "c9399bb4b4f8ca5db9e68ef106980e26a12e4a9680462bb01c399910837ac330",
+          "alphaBounds": {
+            "left": 13,
+            "top": 22,
+            "width": 230,
+            "height": 212,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Return",
+      "level": 2,
+      "theme": "signal",
+      "sourceName": "exec-fe9566df-f5d9-4754-b491-4222423dfbec.png",
+      "sourceSha256": "436eae41462d5a1cff62747439092a6c60860434afba03915938901f509ff06e",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A short navy-blue stack of original investment coins and a visibly separate pair of gold gain coins beside it, joined by one small curved arrow returning toward the viewer. The newly gained amount is the focal point. No guaranteed upward graph or promised amount.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/return.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 16874,
+          "sha256": "190b0cfb85eb58306dc126cf673f74605eab5503d848f1e0205923162140cc8f",
+          "alphaBounds": {
+            "left": 48,
+            "top": 138,
+            "width": 672,
+            "height": 486,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/return-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 14208,
+          "sha256": "8f1d0c92c7d41602782fb8940363e886c9236c6eca71963464f9432230cb0326",
+          "alphaBounds": {
+            "left": 48,
+            "top": 78,
+            "width": 224,
+            "height": 162,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Ownership",
+      "level": 2,
+      "theme": "drift",
+      "sourceName": "exec-9cbc6d00-da44-4840-a367-082b6d43662c.png",
+      "sourceSha256": "4670b156498b5dd00b79d24cab11e7b90edfe9aa1af3e599533d40ff62503410",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A round navy company token embossed with a small cloud-roof storefront, divided into broad ownership sectors. One cream-and-gold sector is slightly separated from the rest. It depicts part of a company, not money. No specific fractions, percentages, digits or count tied to an answer.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/ownership.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 73988,
+          "sha256": "ed08d69f42ee1d8ee33bf9b37f1dae932cc893b493309021cbad7cf3457ef602",
+          "alphaBounds": {
+            "left": 38,
+            "top": 48,
+            "width": 691,
+            "height": 670,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/ownership-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16584,
+          "sha256": "52915854ccce205c7442239d2e7e15e2480dfda3c35bd2efb70caac5329d7ad4",
+          "alphaBounds": {
+            "left": 13,
+            "top": 16,
+            "width": 230,
+            "height": 224,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Ownership",
+      "level": 2,
+      "theme": "signal",
+      "sourceName": "exec-9ebd639f-f5d6-4454-8a11-082f077dc420.png",
+      "sourceSha256": "8269e78e8ffe6c3ae12ac652b19aacb4a232491d2fd24eb05796a1c299a9e826",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A round navy company token embossed with a small cloud-roof storefront, divided into broad ownership sectors. One cream-and-gold sector is slightly separated from the rest. It depicts part of a company, not money. No specific fractions, percentages, digits or count tied to an answer.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/ownership.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 24198,
+          "sha256": "007b38f223948476c1b84844d7094858304ef2a92e0d9d7ceadcc22ade7db0c8",
+          "alphaBounds": {
+            "left": 48,
+            "top": 48,
+            "width": 672,
+            "height": 666,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/ownership-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 20074,
+          "sha256": "e8e476f1026dcfb880f0e25f61856590c06daafcee5d15b8a72a910347fcadc1",
+          "alphaBounds": {
+            "left": 48,
+            "top": 48,
+            "width": 224,
+            "height": 222,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Revenue",
+      "level": 3,
+      "theme": "drift",
+      "sourceName": "exec-4baa2afd-a3a1-47c1-a66c-c2f7ec621d4f.png",
+      "sourceSha256": "52a281511892038410e9ea66dfc1aca0c6302df5a0cd93153d90e4a92ccc03b5",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: One cream/navy sneaker beside a compact sky-blue checkout tray. A short incoming arrow carries gold coins into the tray. Show money earned from sales before costs, not leftover profit. No cash register text or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/revenue.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 72888,
+          "sha256": "9827761b86d33998e0f466f23a3a0b2606e36a55d374f434db0aeef47015345c",
+          "alphaBounds": {
+            "left": 38,
+            "top": 103,
+            "width": 691,
+            "height": 560,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/revenue-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16398,
+          "sha256": "ba9cd6f126ea8a396f71b1436a24e45a9e7d09a34643934ab6d7e07c95a96176",
+          "alphaBounds": {
+            "left": 13,
+            "top": 34,
+            "width": 230,
+            "height": 187,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Revenue",
+      "level": 3,
+      "theme": "signal",
+      "sourceName": "exec-46c91b97-d4e1-488f-8e9b-e4cbebaeea68.png",
+      "sourceSha256": "aa62bcf235c07c8ec41a38fdb9cedc71ec6020bde1f3b5d2c28466a7e5603183",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: One cream/navy sneaker beside a compact sky-blue checkout tray. A short incoming arrow carries gold coins into the tray. Show money earned from sales before costs, not leftover profit. No cash register text or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/revenue.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 14328,
+          "sha256": "f2afc899b6dfbdaad7167a1ca37123efbcd81c61c0da0bda56295b825a5a32f7",
+          "alphaBounds": {
+            "left": 48,
+            "top": 168,
+            "width": 672,
+            "height": 432,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/revenue-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 13660,
+          "sha256": "15c073c9d836841b4ea335684c165e9ace8fec010f45e824514007c0f1c58bde",
+          "alphaBounds": {
+            "left": 48,
+            "top": 88,
+            "width": 224,
+            "height": 144,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Cost",
+      "level": 3,
+      "theme": "drift",
+      "sourceName": "exec-ab9de515-309c-4e75-8724-ebc63cc2db1b.png",
+      "sourceSha256": "3b244821794ab09572967503892b1a0ad85c6cad41b2818a88ca413e834e5d1f",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Gold coins leaving a compact navy business purse along a short outgoing arrow toward a cream material roll and a simple blank expense receipt. This shows spending to run a sneaker business. No torn money or failure cue.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/cost.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 71384,
+          "sha256": "4ea0cf28c9e42c13ed780469d6fb71aebceaeac60fe148256aab5fb4b2c67a27",
+          "alphaBounds": {
+            "left": 38,
+            "top": 96,
+            "width": 691,
+            "height": 575,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/cost-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16460,
+          "sha256": "fb31cd4059feb877c2c532621399f85293e83756f08b7cc0140c1514ab22d7ea",
+          "alphaBounds": {
+            "left": 13,
+            "top": 32,
+            "width": 230,
+            "height": 192,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Cost",
+      "level": 3,
+      "theme": "signal",
+      "sourceName": "exec-03855f61-c391-4f32-87c3-ff5f7b98d094.png",
+      "sourceSha256": "16f018f21b0cc67cb0f7c32ca15b5f58805d9966a25b51659977d46e2b0590b2",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Gold coins leaving a compact navy business purse along a short outgoing arrow toward a cream material roll and a simple blank expense receipt. This shows spending to run a sneaker business. No torn money or failure cue.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/cost.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 16294,
+          "sha256": "63ac99d98471418bbc3aedbb90b294af70fdac9417637eae19d44b018a8c3d54",
+          "alphaBounds": {
+            "left": 48,
+            "top": 144,
+            "width": 672,
+            "height": 480,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/cost-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 15750,
+          "sha256": "bbdec2aa3117a3bf992ff2abf4593019408657af39df22fa9545941746e52156",
+          "alphaBounds": {
+            "left": 48,
+            "top": 80,
+            "width": 224,
+            "height": 160,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Cash Flow",
+      "level": 3,
+      "theme": "drift",
+      "sourceName": "exec-e356e14b-c654-4ada-ab39-02b860c78c9c.png",
+      "sourceSha256": "b045425408a23b1375bf58e6a0cd94bdb40bd20aaabfc12d3afb60e1ad5468cc",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A compact cloud-roof sneaker boutique in the center, with one broad cyan incoming arrow and one broad gold outgoing arrow, each with a single coin. Both directions equally visible. Money moves in and out, not just revenue or profit. No text, numbers or chart.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/cash-flow.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 66678,
+          "sha256": "ef65afa20d133ebfc9315838bccc5d07b28a3f73e2931850cc123976c65ea293",
+          "alphaBounds": {
+            "left": 38,
+            "top": 100,
+            "width": 691,
+            "height": 567,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/cash-flow-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 15674,
+          "sha256": "ba8e9c5bf63e86ad08b096b4cc7fd52a270726899176153c0382e24a8a17167c",
+          "alphaBounds": {
+            "left": 13,
+            "top": 33,
+            "width": 230,
+            "height": 190,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Cash Flow",
+      "level": 3,
+      "theme": "signal",
+      "sourceName": "exec-fd81e6f7-793e-4a4f-91fd-bc265502c52a.png",
+      "sourceSha256": "d0a515f0ce8a812e0e6b78b2ad17ad60d608d8b26a4f270c33518b03230857c9",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A compact cloud-roof sneaker boutique in the center, with one broad cyan incoming arrow and one broad gold outgoing arrow, each with a single coin. Both directions equally visible. Money moves in and out, not just revenue or profit. No text, numbers or chart.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/cash-flow.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 21192,
+          "sha256": "9294d9a8508d2bf865416f698643845f4b8aa5f41a7044abb584f0f641fd0cee",
+          "alphaBounds": {
+            "left": 48,
+            "top": 120,
+            "width": 672,
+            "height": 528,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/cash-flow-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 20408,
+          "sha256": "f0c77503cbd2396b7ead8f88ab1aa8ae51f01b9aab98c5e54eb465ee138a186a",
+          "alphaBounds": {
+            "left": 48,
+            "top": 72,
+            "width": 224,
+            "height": 176,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Margin",
+      "level": 3,
+      "theme": "drift",
+      "sourceName": "exec-c4c14bbf-7783-46be-ad39-e2956ea0b7e8.png",
+      "sourceSha256": "fe10dd66e1af2335d2016212c702bb04e77c5cb9687af8d6c8f9726940cdba7d",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A compact cream sales ticket with a horizontal navy sale bar: a large muted-blue costs segment and a smaller gold kept segment, the gold section lifted slightly forward. One star coin rests beside the kept section. Show a portion of each sale kept after costs, not total money or company ownership. No exact numeric ratio or percent sign.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/margin.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 57880,
+          "sha256": "091c1284d49e812b588a26bbfed66631ea439b8a4de2b9a0fd9cb22f24c8aab5",
+          "alphaBounds": {
+            "left": 38,
+            "top": 66,
+            "width": 691,
+            "height": 635,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/margin-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 13822,
+          "sha256": "3b38b4f50395cdbc1f69d0ca808e6608cbf7fadd578d50ca1aa6321f9a746c0e",
+          "alphaBounds": {
+            "left": 13,
+            "top": 22,
+            "width": 230,
+            "height": 212,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Margin",
+      "level": 3,
+      "theme": "signal",
+      "sourceName": "exec-e266c9fd-9d21-4b03-b378-ffae90230b45.png",
+      "sourceSha256": "eecea0042d3a4c8c911d4e3ad1d4b5d6f6b8c135e3650fbf50a6cbbc4ce0e298",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A compact cream sales ticket with a horizontal navy sale bar: a large muted-blue costs segment and a smaller gold kept segment, the gold section lifted slightly forward. One star coin rests beside the kept section. Show a portion of each sale kept after costs, not total money or company ownership. No exact numeric ratio or percent sign.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/margin.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 23658,
+          "sha256": "36181083909fae0bcc349a6df6c24b14ecd45fd63abc480d8667c8958eefef1b",
+          "alphaBounds": {
+            "left": 48,
+            "top": 78,
+            "width": 672,
+            "height": 606,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/margin-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 19796,
+          "sha256": "0a8aa12ef9b9fefbd93a7894079557bace730d0c3b3eac8cfeab7afda7eae875",
+          "alphaBounds": {
+            "left": 48,
+            "top": 58,
+            "width": 224,
+            "height": 202,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Loss",
+      "level": 3,
+      "theme": "drift",
+      "sourceName": "exec-036138e1-098f-4aa8-934f-e97d9e872031.png",
+      "sourceSha256": "a79e058e601810ccf99e460e6d2db6b40b5005434ee62601c3b8a449dee72de0",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A simple cream/navy business ledger tray with a small incoming gold coin pile on the left and a visibly larger outgoing coin pile on the right, joined by a restrained downward balance arrow. The difference is a short empty recess in the tray. Show spending more than earning, not a broken coin or gambling.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/loss.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 55386,
+          "sha256": "14fcf9601e9f0f0a0f4b63949234fd0099bc57b2b8c9a22b61f903544a451eb7",
+          "alphaBounds": {
+            "left": 38,
+            "top": 182,
+            "width": 691,
+            "height": 402,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/loss-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 12772,
+          "sha256": "5824cad49ae258d927900f367a893ad45b9cbd0796e612a6043ea7f8fb905a76",
+          "alphaBounds": {
+            "left": 13,
+            "top": 61,
+            "width": 230,
+            "height": 134,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Loss",
+      "level": 3,
+      "theme": "signal",
+      "sourceName": "exec-4b630568-05f3-406c-98e3-9a6ac4083ed7.png",
+      "sourceSha256": "dc533188708a2a9489806783df321221974913647851fdcf6e92ba36edbe1b0a",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A simple cream/navy business ledger tray with a small incoming gold coin pile on the left and a visibly larger outgoing coin pile on the right, joined by a restrained downward balance arrow. The difference is a short empty recess in the tray. Show spending more than earning, not a broken coin or gambling.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/loss.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 14310,
+          "sha256": "b51f7c90f2381f8b7efcce5f951c49741614c61e4576701a27cfb5247794143c",
+          "alphaBounds": {
+            "left": 48,
+            "top": 174,
+            "width": 672,
+            "height": 414,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/loss-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 12142,
+          "sha256": "4f0620b02035716958beb18a840ac8454480c772a179953ef1e996ca734eda27",
+          "alphaBounds": {
+            "left": 48,
+            "top": 90,
+            "width": 224,
+            "height": 138,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Stock",
+      "level": 4,
+      "theme": "drift",
+      "sourceName": "exec-2ddd42bc-a9da-4c21-8ee2-88b252c224e9.png",
+      "sourceSha256": "f53a33f455b1b427f56445482d10d60af31a9c641cce6f0f63b27da97b50c826",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: One cream-and-navy share certificate with a cloud-roof storefront embossed as its seal and a small gold ownership-sector badge overlapping its lower corner. Only abstract decorative rules on the certificate, never letters or numbers. Stock is ownership, not a chart predicting prices.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "exec-24c0020f-9b9e-4200-80e9-d6b5072fbda3.png",
+          "inputSha256": "4e983d1a7939d720a8d984d80cc6863faa7c917d0b352ac5e7e74a5d09bf02e9",
+          "prompt": "Use case: precise-object-edit. Change ONLY the circular badge overlapping the lower-right of this Stock certificate. Replace its star coin emblem with a simple segmented ownership disk: deep navy sectors with one gold sector separated slightly, no face, no human silhouettes, no currency mark, no star. Keep the certificate's cloud-roof storefront seal, blank rules, composition, colors, satin 3D materials, light and depth exactly unchanged. No graph, arrows, words, digits, other characters or new props. Preserve genuine transparent alpha. This is company ownership, not money lent or promised gains."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/stock.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 75636,
+          "sha256": "03e0c503468f601d44eb70360e19df68c3b6791aa30d1f3b0d379a1ac60e84fd",
+          "alphaBounds": {
+            "left": 38,
+            "top": 71,
+            "width": 691,
+            "height": 624,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/stock-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 17278,
+          "sha256": "1c3cf39229c5d32717053bde7eb2283a996d1ff5f9550244ac6a2fe6f71b737f",
+          "alphaBounds": {
+            "left": 13,
+            "top": 24,
+            "width": 230,
+            "height": 208,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Stock",
+      "level": 4,
+      "theme": "signal",
+      "sourceName": "exec-5d6117d9-8d23-45c2-b5fb-adcf4d2c5591.png",
+      "sourceSha256": "4ab5e891fdca3d3cbca985eb18876237e49585a0bfee26e389a417447f967c10",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: One cream-and-navy share certificate with a cloud-roof storefront embossed as its seal and a small gold ownership-sector badge overlapping its lower corner. Only abstract decorative rules on the certificate, never letters or numbers. Stock is ownership, not a chart predicting prices.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "exec-c09ff10d-818f-427e-b44b-1dd1c7e19d04.png",
+          "inputSha256": "4d5ebf3d8223918553720226bcda3b9661c75cf8baae5150d87c0284c79533b1",
+          "prompt": "Use case: precise-object-edit. Change ONLY the circular badge overlapping the lower-right of this Stock certificate. Replace its human/people emblem with a simple segmented ownership disk: deep navy sectors with one gold sector separated slightly, no face, no human silhouettes, no currency mark, no star. Keep the certificate's cloud-roof storefront seal, blank rules, composition, colors, pixel grid, stepped navy outlines and pixel-art technique exactly unchanged. No graph, arrows, words, digits, other characters or new props. Preserve genuine transparent alpha. This is company ownership, not money lent or promised gains."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/stock.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 23710,
+          "sha256": "ff21fa4ac31d53b1ab26638a41f1598993968ad8f0291eb19baebe640e5f1c20",
+          "alphaBounds": {
+            "left": 54,
+            "top": 114,
+            "width": 666,
+            "height": 534,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/stock-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 19604,
+          "sha256": "483f2f761b03c60f47b04b851e6603a92b8adaa98365ac24ce0f9d7fd79c6c46",
+          "alphaBounds": {
+            "left": 50,
+            "top": 70,
+            "width": 222,
+            "height": 178,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Bond",
+      "level": 4,
+      "theme": "drift",
+      "sourceName": "exec-9cad5fef-53b8-42e1-a6ef-187f957ac0f0.png",
+      "sourceSha256": "e4bdface98f5febc77b26adbe6ff1ec547e209bb6db91d52a2dca5f9ea96de4f",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A cream loan agreement with a navy seal, beside a small gold coin stack and a broad curved repayment arrow looping back to the coins. Show borrowed money that is paid back. No company ownership sector, no chain handcuffs, no text or digits.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/bond.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 74360,
+          "sha256": "3f01179393479ec91ac98fe48fcc200b9e98e51b710ba9a82c03b1aa94721acb",
+          "alphaBounds": {
+            "left": 38,
+            "top": 65,
+            "width": 691,
+            "height": 637,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/bond-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16924,
+          "sha256": "bf135d554667ebc226f73f83493fbea0bd7f706c98d0015ce28e7166badb5fae",
+          "alphaBounds": {
+            "left": 13,
+            "top": 22,
+            "width": 230,
+            "height": 212,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Bond",
+      "level": 4,
+      "theme": "signal",
+      "sourceName": "exec-1a0b8792-de0f-4ddb-a742-555a43c99f71.png",
+      "sourceSha256": "3c8ead846da6166f14dc38927897ffe131d745610a75b2bb023b911ac43650cf",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A cream loan agreement with a navy seal, beside a small gold coin stack and a broad curved repayment arrow looping back to the coins. Show borrowed money that is paid back. No company ownership sector, no chain handcuffs, no text or digits.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "exec-d8cbdec9-efc6-4978-aef0-92012c50b602.png",
+          "inputSha256": "040056e00976b496d65f7135834555f0878e36ad861a281d5dfa7b1d9d95df4a",
+          "prompt": "Use case: precise-object-edit. Change only the lime-green repayment arrow in this pixel-art Bond sprite to the canonical Signal cyan/white/blue palette: cyan main face, white highlight pixels, deep-blue stepped shadow and navy outline. Preserve its position, shape, direction and visible pixel grid. Keep Dreamy, certificate, gold coins, all proportions and other colors exactly unchanged. Preserve genuinely transparent alpha. No extra objects, no new text or numbers, no smooth gradient or 3D effect."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/bond.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 20396,
+          "sha256": "74a28bfa09599d8464f2c2775ea22908d692c91301f87b0839885d2d98857c8c",
+          "alphaBounds": {
+            "left": 48,
+            "top": 120,
+            "width": 672,
+            "height": 528,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/bond-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 18442,
+          "sha256": "dcdc4b548982849747fa89184235f4c16be23b6aa1dc40127671594313c38865",
+          "alphaBounds": {
+            "left": 48,
+            "top": 72,
+            "width": 224,
+            "height": 176,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Shareholder",
+      "level": 4,
+      "theme": "drift",
+      "sourceName": "exec-1fb9076c-0a65-4b50-a036-2bb89cbf1151.png",
+      "sourceSha256": "86b29441d3144ae82a9f6cfb115b911551ec5e31345a3d79207bbd6c06bc0f5b",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Dreamy floats proudly beside a cream-and-navy share certificate with a small gold ownership-sector badge. Dreamy holds nothing. Clear ownership of stock, no shopping bag, no lending arrow, no other characters.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "exec-9f7e4aaa-798a-4158-bf22-c32c42bf14b2.png",
+          "inputSha256": "545c17bbd87ec38c32c762593a2636f347300e82752d5f8ec4a37f8170113813",
+          "prompt": "Use case: precise-object-edit. Edit the attached drift shareholder illustration. Change ONLY the design inside the certificate: remove all rising bar charts and upward arrows. Replace that chart with a clear miniature cloud-roof storefront emblem, meaning ownership of a company. Preserve the gold segmented ownership badge beside the certificate. Keep Dreamy exactly the same floating cloud identity and expression, never limbs or a human body. Keep composition, palette, proportions, materials, satin premium 3D shading unchanged. No text, numbers, formulas, chart, arrows or promises of gains. Preserve genuine transparent alpha and safe margins. This image represents someone who owns stock, not a guaranteed return."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/shareholder.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 58054,
+          "sha256": "21370640598e906301dc8825767ff0134a3f064e77edf984c3bad83afe57ce7d",
+          "alphaBounds": {
+            "left": 38,
+            "top": 95,
+            "width": 691,
+            "height": 577,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/shareholder-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 14298,
+          "sha256": "64abd3032b6beea618a333077d215c0a145d68d95d73e71f15fa594830f121a3",
+          "alphaBounds": {
+            "left": 13,
+            "top": 32,
+            "width": 230,
+            "height": 192,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Shareholder",
+      "level": 4,
+      "theme": "signal",
+      "sourceName": "exec-48de31be-365f-44ab-8a7f-083990c77fd2.png",
+      "sourceSha256": "29fb38e28c6cc3bf8ea5eea64f7291f3417215e743a28411635c1773266abfc2",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Dreamy floats proudly beside a cream-and-navy share certificate with a small gold ownership-sector badge. Dreamy holds nothing. Clear ownership of stock, no shopping bag, no lending arrow, no other characters.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "exec-c3264de8-88e4-48ba-8b90-2f0612a6ce95.png",
+          "inputSha256": "27bcd4dc7a219e84a3d7725982a3bd5a720e35d3085beffae028662fa92a6819",
+          "prompt": "Use case: precise-object-edit. Edit the attached signal shareholder illustration. Change ONLY the design inside the certificate: remove all rising bar charts and upward arrows. Replace that chart with a clear miniature cloud-roof storefront emblem, meaning ownership of a company. Preserve the gold segmented ownership badge beside the certificate. Keep Dreamy exactly the same floating cloud identity and expression, never limbs or a human body. Keep composition, palette, proportions, materials, crisp pixel-art square clusters and navy outline unchanged. No text, numbers, formulas, chart, arrows or promises of gains. Preserve genuine transparent alpha and safe margins. This image represents someone who owns stock, not a guaranteed return."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/shareholder.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 16896,
+          "sha256": "4154d18694750f79606268751d51309f5b18b2895fd8c333fd86ed0e3178c111",
+          "alphaBounds": {
+            "left": 48,
+            "top": 168,
+            "width": 672,
+            "height": 426,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/shareholder-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 16102,
+          "sha256": "b3e323ad5ebc24076aa80110f8252e51ed0a1c1b5bd4dd9752e5305a7bdf1bd1",
+          "alphaBounds": {
+            "left": 48,
+            "top": 88,
+            "width": 224,
+            "height": 142,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Lender",
+      "level": 4,
+      "theme": "drift",
+      "sourceName": "exec-efda7f87-bd1d-4e3c-a3d1-989c80640697.png",
+      "sourceSha256": "48bfd54f4eb66ef0773f539a00465e4c6c10af278bfb14a3e79914a642fa2733",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Dreamy floats beside a compact navy bank vault and a small gold coin stack travelling out and back along a single broad loop arrow. The return-to-lender cue distinguishes lending from ownership. Dreamy holds nothing. No share certificate or shopping bag.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/lender.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 74726,
+          "sha256": "6ceccd32cec7ce640c2a38843007a2573163b79cfb44d311499534a99d706f51",
+          "alphaBounds": {
+            "left": 38,
+            "top": 70,
+            "width": 691,
+            "height": 627,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/lender-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 18170,
+          "sha256": "cb9d36abcbced45fbdb363fb02320909e0ce79460e8f6aa6f3da5d90b7a42de2",
+          "alphaBounds": {
+            "left": 13,
+            "top": 23,
+            "width": 230,
+            "height": 210,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Lender",
+      "level": 4,
+      "theme": "signal",
+      "sourceName": "exec-ee947fa4-68e1-4577-9198-f1ae7917f1c8.png",
+      "sourceSha256": "90396d51a6bb8bce1358fe38f926e9a65e45d342a889ed5fab6efbde11fd7839",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Dreamy floats beside a compact navy bank vault and a small gold coin stack travelling out and back along a single broad loop arrow. The return-to-lender cue distinguishes lending from ownership. Dreamy holds nothing. No share certificate or shopping bag.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/lender.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 22534,
+          "sha256": "86954293c8e7884a5d1c7d66f1984dd2c58075f75d7fa1bc5f9f7e219e312a2e",
+          "alphaBounds": {
+            "left": 48,
+            "top": 108,
+            "width": 672,
+            "height": 552,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/lender-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 19256,
+          "sha256": "81e439ce4179d1847a912f2fad4d23b33a8b7f110195e782650d3b713cff6b90",
+          "alphaBounds": {
+            "left": 48,
+            "top": 68,
+            "width": 224,
+            "height": 184,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Interest",
+      "level": 4,
+      "theme": "drift",
+      "sourceName": "exec-b8e2b008-9812-4563-a372-9c38c9fe450d.png",
+      "sourceSha256": "5371e4afb1f63ebb00b70b621b5c3f3d124346779e725b505641c4f66b24847a",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A short navy-blue principal coin stack beside one clearly separate extra gold star coin, under a broad curved repayment arrow. The added gold coin is the focus: extra money paid for borrowing. No digits, percent symbols, guaranteed investment-return chart or share certificate.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/drift/interest.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 70190,
+          "sha256": "642291d4c6f6ee899217dca6a4feb7549548dd1a33260d0ac85b15fe711e8ada",
+          "alphaBounds": {
+            "left": 38,
+            "top": 96,
+            "width": 691,
+            "height": 574,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/drift/interest-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16202,
+          "sha256": "7e92ea99cfdf694dbb378d5ab20c9f04b68a358a24ff54967a6dea073739ed5a",
+          "alphaBounds": {
+            "left": 13,
+            "top": 32,
+            "width": 230,
+            "height": 192,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Interest",
+      "level": 4,
+      "theme": "signal",
+      "sourceName": "exec-5e22ab5c-0ba5-4b7a-ae7e-c5229312974b.png",
+      "sourceSha256": "f579bc6eac54aca5b9798f19bc0297677011248e954343f0094ceea53807eec1",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A short navy-blue principal coin stack beside one clearly separate extra gold star coin, under a broad curved repayment arrow. The added gold coin is the focus: extra money paid for borrowing. No digits, percent symbols, guaranteed investment-return chart or share certificate.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/finance-oct13/signal/interest.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 16444,
+          "sha256": "fb8edc8f630fcaf8d7eef2b67f715ca90aae6625f95b7cddf1dd8724ba012fde",
+          "alphaBounds": {
+            "left": 48,
+            "top": 138,
+            "width": 672,
+            "height": 492,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/finance-oct13/signal/interest-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 13822,
+          "sha256": "38520dd3be75577c777561d83c49474e770693db9fdf015b90b1aa8a5b8a0037",
+          "alphaBounds": {
+            "left": 48,
+            "top": 78,
+            "width": 224,
+            "height": 164,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    }
+  ]
+}
