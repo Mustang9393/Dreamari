@@ -6,6 +6,10 @@ Last updated: 21 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 
 ## How to use this repo
 
+### Registered Nurse v1/v2 image comparison (13 October 2026)
+
+DEMO-ONLY: `?v=2` on `/play/registered-nurse` opts into the 18 selected full-scene paintings in `public/images/play/rn/v2/`. The existing start-screen and HUD switches compare v1/v2 on the same run; v1 remains the default. The 36 full-game and 19 Express beats are mapped. RN start/lesson art follows the switch immediately. Script, decisions and scoring are unchanged. Trailer art is unchanged. Known portrait/overlay limits are documented in the RN release entry in `docs/AI_HANDOFF.md`. Chandu explicitly requested publishing this comparison for sharing.
+
 1. Read this file, then the spec for the feature you are building in `docs/handoff/specs/`. Each spec is short and overwrites itself; it is the current state, not a history.
 2. Copy, numbers and content come from the data files listed below, never from screenshots or older docs.
 3. Design tokens come from the certified Figma export, not from this repo's `design-tokens/` folder. Layout, behaviour and copy come from `src/`. See `docs/DESIGN_SYSTEM_ALIGNMENT.md`.

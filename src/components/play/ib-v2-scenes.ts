@@ -26,7 +26,239 @@ export type V2Image = { src: string; alt: string; focal: Point; mobileFocal: Poi
 
 const DIR = "/images/play/ib/v2";
 
+// DEMO-ONLY: generated nursing artwork test; existing scripts remain untouched.
+const RN_IMAGES = {
+  "rn_rosa_station_dawn": {
+    "src": "/images/play/rn/v2/rosa-station-dawn.png",
+    "alt": "rosa station dawn",
+    "focal": {
+      "x": 0.53,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.39,
+      "y": 0.3
+    }
+  },
+  "rn_rosa_explains_station_morning": {
+    "src": "/images/play/rn/v2/rosa-explains-station-morning.png",
+    "alt": "rosa explains station morning",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.47,
+      "y": 0.3
+    }
+  },
+  "rn_pov_call_lights_corridor_morning": {
+    "src": "/images/play/rn/v2/pov-call-lights-corridor-morning.png",
+    "alt": "pov call lights corridor morning",
+    "focal": {
+      "x": 0.6,
+      "y": 0.34
+    },
+    "mobileFocal": {
+      "x": 0.93,
+      "y": 0.34
+    }
+  },
+  "rn_denise_reads_notes_station_afternoon": {
+    "src": "/images/play/rn/v2/denise-reads-notes-station-afternoon.png",
+    "alt": "denise reads notes station afternoon",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.5,
+      "y": 0.3
+    }
+  },
+  "rn_tyler_huddle_morning": {
+    "src": "/images/play/rn/v2/tyler-huddle-morning.png",
+    "alt": "tyler huddle morning",
+    "focal": {
+      "x": 0.52,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.47,
+      "y": 0.3
+    }
+  },
+  "rn_room12_distress_midday": {
+    "src": "/images/play/rn/v2/room12-distress-midday.png",
+    "alt": "room12 distress midday",
+    "focal": {
+      "x": 0.65,
+      "y": 0.33
+    },
+    "mobileFocal": {
+      "x": 0.65,
+      "y": 0.33
+    }
+  },
+  "rn_pov_med_cart_rosa_afternoon": {
+    "src": "/images/play/rn/v2/pov-med-cart-rosa-afternoon.png",
+    "alt": "pov med cart rosa afternoon",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.64,
+      "y": 0.3
+    }
+  },
+  "rn_night_report_station_night": {
+    "src": "/images/play/rn/v2/night-report-station-night.png",
+    "alt": "night report station night",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.5,
+      "y": 0.3
+    }
+  },
+  "rn_rosa_proud_station_late_day": {
+    "src": "/images/play/rn/v2/rosa-proud-station-late-day.png",
+    "alt": "rosa proud station late day",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.47,
+      "y": 0.3
+    }
+  },
+  "rn_room12_anxious_morning": {
+    "src": "/images/play/rn/v2/room12-anxious-morning.png",
+    "alt": "room12 anxious morning",
+    "focal": {
+      "x": 0.65,
+      "y": 0.33
+    },
+    "mobileFocal": {
+      "x": 0.65,
+      "y": 0.33
+    }
+  },
+  "rn_rosa_concerned_station_morning": {
+    "src": "/images/play/rn/v2/rosa-concerned-station-morning.png",
+    "alt": "rosa concerned station morning",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.47,
+      "y": 0.3
+    }
+  },
+  "rn_riverbend_lobby_morning": {
+    "src": "/images/play/rn/v2/riverbend-lobby-morning.png",
+    "alt": "riverbend lobby morning",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.5,
+      "y": 0.3
+    }
+  },
+  "rn_four_west_station_morning": {
+    "src": "/images/play/rn/v2/four-west-station-morning.png",
+    "alt": "four west station morning",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.5,
+      "y": 0.3
+    }
+  },
+  "rn_four_west_corridor_morning": {
+    "src": "/images/play/rn/v2/four-west-corridor-morning.png",
+    "alt": "four west corridor morning",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.5,
+      "y": 0.3
+    }
+  },
+  "rn_four_west_staff_room_day": {
+    "src": "/images/play/rn/v2/four-west-staff-room-day.png",
+    "alt": "four west staff room day",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.5,
+      "y": 0.3
+    }
+  },
+  "rn_yvonne_lobby_trailer": {
+    "src": "/images/play/rn/v2/yvonne-lobby-trailer.png",
+    "alt": "yvonne lobby trailer",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.5,
+      "y": 0.3
+    }
+  },
+  "rn_four_west_ward_night": {
+    "src": "/images/play/rn/v2/four-west-ward-night.png",
+    "alt": "four west ward night",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.5,
+      "y": 0.3
+    }
+  },
+  "rn_denise_concerned_station_afternoon": {
+    "src": "/images/play/rn/v2/denise-concerned-station-afternoon.png",
+    "alt": "denise concerned station afternoon",
+    "focal": {
+      "x": 0.5,
+      "y": 0.3
+    },
+    "mobileFocal": {
+      "x": 0.5,
+      "y": 0.3
+    }
+  }
+} satisfies Record<string, V2Image>;
+
+// DEMO-ONLY: keep the RN start and lesson art in sync with the live toggle.
+// Return stable objects so switching art never rebuilds the game data.
+const RN_PRE_GAME_ART = {
+  cover: RN_IMAGES.rn_four_west_station_morning,
+  lesson: RN_IMAGES.rn_room12_anxious_morning,
+};
+
+export function v2PreGameArtFor(simulationId: string): { cover: V2Image; lesson?: V2Image } | undefined {
+  return simulationId === "registered-nurse" ? RN_PRE_GAME_ART : undefined;
+}
+
 const IMAGES = {
+  ...RN_IMAGES,
   christinaPresentsOfficeDay: {
     src: `${DIR}/christina-presents-office-day.webp`,
     alt: "Christina in the bright Cobalt Capital office, an open hand out as if introducing you.",
@@ -99,7 +331,7 @@ type ImageKey = keyof typeof IMAGES;
  *  Best verdict is up: v1's room clears for the reactor's proud face at that
  *  moment, and the nearest v2 equivalent is Christina's thumbs up. Any other
  *  verdict keeps `image` (there is no concerned Christina scene yet). */
-type BeatArt = { image: ImageKey; best?: ImageKey };
+type BeatArt = { image: ImageKey; best?: ImageKey; wrong?: ImageKey };
 
 // Investment Banking, Level 1 (ib-level-1-v2.ts), plus the two Level 2 beats
 // that match a scene exactly. Any beat not listed keeps its v1 room.
@@ -145,7 +377,223 @@ const IB_BEATS: Record<string, BeatArt> = {
   "L2-21": { image: "marcusBoardroomSunset" },
 };
 
+const RN_BEATS: Record<string, BeatArt> = {
+  "RN2-04": {
+    "image": "rn_rosa_station_dawn",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN2-05": {
+    "image": "rn_rosa_station_dawn",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN2-06": {
+    "image": "rn_rosa_station_dawn"
+  },
+  "RN2-07": {
+    "image": "rn_rosa_station_dawn",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN2-08": {
+    "image": "rn_rosa_proud_station_late_day",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN2-10": {
+    "image": "rn_rosa_explains_station_morning",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN2-11": {
+    "image": "rn_rosa_explains_station_morning"
+  },
+  "RN2-15": {
+    "image": "rn_rosa_explains_station_morning",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN2-17": {
+    "image": "rn_rosa_explains_station_morning",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN2-18": {
+    "image": "rn_rosa_explains_station_morning",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN2-30": {
+    "image": "rn_rosa_proud_station_late_day",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN2-32": {
+    "image": "rn_rosa_explains_station_morning"
+  },
+  "RN2-33": {
+    "image": "rn_rosa_explains_station_morning"
+  },
+  "RN2-26": {
+    "image": "rn_pov_call_lights_corridor_morning"
+  },
+  "RN2-29": {
+    "image": "rn_pov_call_lights_corridor_morning"
+  },
+  "RN2-35": {
+    "image": "rn_denise_reads_notes_station_afternoon",
+    "wrong": "rn_denise_concerned_station_afternoon"
+  },
+  "RN2-36": {
+    "image": "rn_denise_reads_notes_station_afternoon",
+    "wrong": "rn_denise_concerned_station_afternoon"
+  },
+  "RN2-37": {
+    "image": "rn_denise_reads_notes_station_afternoon"
+  },
+  "RN2-38": {
+    "image": "rn_denise_reads_notes_station_afternoon",
+    "wrong": "rn_denise_concerned_station_afternoon"
+  },
+  "RN2-40": {
+    "image": "rn_tyler_huddle_morning"
+  },
+  "RN2-41": {
+    "image": "rn_tyler_huddle_morning"
+  },
+  "RN2-43": {
+    "image": "rn_room12_distress_midday"
+  },
+  "RN2-44": {
+    "image": "rn_room12_distress_midday"
+  },
+  "RN2-45": {
+    "image": "rn_room12_distress_midday"
+  },
+  "RN2-47": {
+    "image": "rn_pov_med_cart_rosa_afternoon"
+  },
+  "RN2-48": {
+    "image": "rn_pov_med_cart_rosa_afternoon"
+  },
+  "RN2-50": {
+    "image": "rn_night_report_station_night"
+  },
+  "RN2-51": {
+    "image": "rn_night_report_station_night"
+  },
+  "RN2-54": {
+    "image": "rn_night_report_station_night"
+  },
+  "RN2-53": {
+    "image": "rn_rosa_proud_station_late_day",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN2-23": {
+    "image": "rn_room12_anxious_morning"
+  },
+  "RN2-24": {
+    "image": "rn_room12_anxious_morning"
+  },
+  "RN2-01": {
+    "image": "rn_riverbend_lobby_morning"
+  },
+  "RN2-02": {
+    "image": "rn_four_west_station_morning"
+  },
+  "RN2-03": {
+    "image": "rn_four_west_corridor_morning"
+  },
+  "RN2-28": {
+    "image": "rn_four_west_staff_room_day"
+  },
+  "RN1-01": {
+    "image": "rn_riverbend_lobby_morning"
+  },
+  "RN1-02": {
+    "image": "rn_four_west_station_morning"
+  },
+  "RN1-03": {
+    "image": "rn_four_west_corridor_morning"
+  },
+  "RN1-04": {
+    "image": "rn_rosa_station_dawn"
+  },
+  "RN1-04b": {
+    "image": "rn_rosa_station_dawn"
+  },
+  "RN1-05": {
+    "image": "rn_rosa_station_dawn"
+  },
+  "RN1-06": {
+    "image": "rn_rosa_explains_station_morning",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN1-07": {
+    "image": "rn_rosa_explains_station_morning"
+  },
+  "RN1-08": {
+    "image": "rn_rosa_explains_station_morning"
+  },
+  "RN1-09": {
+    "image": "rn_rosa_explains_station_morning",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN1-10": {
+    "image": "rn_rosa_explains_station_morning"
+  },
+  "RN1-11": {
+    "image": "rn_rosa_explains_station_morning"
+  },
+  "RN1-12": {
+    "image": "rn_four_west_staff_room_day",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN1-13": {
+    "image": "rn_four_west_staff_room_day",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN1-14": {
+    "image": "rn_rosa_explains_station_morning",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN1-15": {
+    "image": "rn_pov_call_lights_corridor_morning"
+  },
+  "RN1-16": {
+    "image": "rn_rosa_explains_station_morning"
+  },
+  "RN1-17": {
+    "image": "rn_rosa_explains_station_morning",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN1-18": {
+    "image": "rn_denise_reads_notes_station_afternoon",
+    "wrong": "rn_denise_concerned_station_afternoon"
+  },
+  "RN1-19": {
+    "image": "rn_denise_reads_notes_station_afternoon",
+    "wrong": "rn_denise_concerned_station_afternoon"
+  },
+  "RN1-20": {
+    "image": "rn_denise_reads_notes_station_afternoon",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN1-21": {
+    "image": "rn_tyler_huddle_morning"
+  },
+  "RN1-22": {
+    "image": "rn_tyler_huddle_morning"
+  },
+  "RN1-23": {
+    "image": "rn_room12_distress_midday"
+  },
+  "RN1-24": {
+    "image": "rn_night_report_station_night"
+  },
+  "RN1-25": {
+    "image": "rn_rosa_proud_station_late_day",
+    "wrong": "rn_rosa_concerned_station_morning"
+  },
+  "RN1-26": {
+    "image": "rn_night_report_station_night"
+  }
+};
+
 const V2_ART: Record<string, Record<string, BeatArt>> = {
+  "registered-nurse": RN_BEATS,
   "investment-banking": IB_BEATS,
 };
 
@@ -158,12 +606,13 @@ export function hasV2Art(simulationId: string): boolean {
 export function v2SceneFor(simulationId: string, beatId: string, verdict?: Tier): V2Image | undefined {
   const art = V2_ART[simulationId]?.[beatId];
   if (!art) return undefined;
-  return IMAGES[verdict === "best" && art.best ? art.best : art.image];
+  const selected = verdict === "best" && art.best ? art.best : (verdict === "wrong" || verdict === "risky") && art.wrong ? art.wrong : art.image;
+  return IMAGES[selected];
 }
 
 /** Every v2 image a beat can show, for warming the next beats' pictures. */
 export function v2SourcesFor(simulationId: string, beatId: string): string[] {
   const art = V2_ART[simulationId]?.[beatId];
   if (!art) return [];
-  return art.best ? [IMAGES[art.image].src, IMAGES[art.best].src] : [IMAGES[art.image].src];
+  return [art.image, art.best, art.wrong].filter((key): key is ImageKey => Boolean(key)).map(key => IMAGES[key].src);
 }

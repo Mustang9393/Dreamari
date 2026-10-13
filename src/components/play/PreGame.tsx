@@ -30,7 +30,7 @@ import { SKILL_MEANING } from "./skills";
 import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
 import type { Level, PreGame, Simulation } from "./types";
 import { ArtVersionToggle } from "./ArtVersionToggle";
-import type { ArtVersion } from "./ib-v2-scenes";
+import { v2PreGameArtFor, type ArtVersion } from "./ib-v2-scenes";
 
 export type PreGameMode = "start" | "howto" | "lesson" | "handoff";
 
@@ -89,7 +89,12 @@ export function PreGameFlow({
   const [step, setStep] = useState(0);
   const reduceMotion = useReducedMotion();
   const router = useRouter();
-  const lessonScreens = useMemo(() => preGame.lesson?.screens ?? [], [preGame.lesson]);
+  const preGameArt = artVersion === 2 ? v2PreGameArtFor(simulation.id) : undefined;
+  const lessonScreens = useMemo(() => {
+    const screens = preGame.lesson?.screens ?? [];
+    const image = preGameArt?.lesson?.src;
+    return image ? screens.map(screen => screen.image ? { ...screen, image } : screen) : screens;
+  }, [preGame.lesson, preGameArt]);
   // Copy that follows the career: the points a decision is worth, and what
   // "start" means here (an internship, a first shift...).
   const points = level.points ?? 5;
@@ -167,7 +172,7 @@ export function PreGameFlow({
 
   const screen = mode === "lesson" ? lessonScreens[step] : undefined;
   const photo = screen?.image;
-  const backdrop = photo ?? simulation.cover;
+  const backdrop = photo ?? preGameArt?.cover.src ?? simulation.cover;
   // Sharp art on the title screen and behind a lesson's own photo; the
   // teaching screens blur and dim it so the copy always wins.
   const filter = mode === "start"
@@ -196,7 +201,7 @@ export function PreGameFlow({
             animate={{ scale: 1.06 }}
             transition={{ duration: reduceMotion ? 0 : 18, ease: "easeOut" }}
           >
-            <Image src={backdrop} alt="" fill priority sizes="100vw" className="object-cover" style={{ filter, transition: "filter 0.7s ease" }} />
+            <Image src={backdrop} alt="" fill priority sizes={preGameArt ? "(max-width: 639px) 178svh, 100vw" : "100vw"} className="object-cover" style={{ filter, transition: "filter 0.7s ease" }} />
           </motion.div>
         </motion.div>
       </AnimatePresence>

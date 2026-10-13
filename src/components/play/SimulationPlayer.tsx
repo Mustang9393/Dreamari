@@ -1348,7 +1348,7 @@ function V2Backdrop({ scene, filter, slowFilter, onReady }: { scene: V2Image; fi
         alt={scene.alt}
         fill
         priority
-        sizes="100vw"
+        sizes="(max-width: 639px) 178svh, 100vw"
         className={`object-cover transition-[filter] sm:hidden ${slowFilter ? "duration-[1100ms]" : "duration-500"}`}
         style={{ objectPosition: plateObjectPosition(scene.mobileFocal), filter }}
         onLoad={onReady}

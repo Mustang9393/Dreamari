@@ -1,3 +1,24 @@
+## 2026-10-13: Publish RN painted scenes behind the v1/v2 comparison
+
+**Why (Chandu):** “Please push the newly generated RN game as a v2 toggled view so i can share and compare?” Publish the reviewed set through the existing Dreamari main/Vercel integration, while keeping the original art as v1 and the default.
+- `public/images/play/rn/v2/`: 18 selected canonical-cast paintings. No attempt images, gallery controls, source prompt documents or archive are published.
+- `ib-v2-scenes.ts`: maps the 36 current full-game beats and the legacy/Express beats to painted scenes and concerned reactions. Existing v1 rooms and sprites remain available; same-beat switching preserves decisions, progress, score and current beat. Sharing `?v=2` and reloading retain v2; v1 clears the art-version parameter.
+- `PreGame.tsx`: RN start and lesson pictures derive from the live art version. This replaces the local test's server-only lesson override, which could leave lesson art on the wrong version after toggling. No lesson copy, checks or script data changes.
+- `SimulationPlayer.tsx`: full-height mobile cover images request enough source width to avoid undersampling. Existing HUD/start switches are reused; no layout or new control is introduced.
+- Source scope: original full/Express scripts, game definitions, scoring and decisions are unchanged. Unrelated glossary edits in the active checkout are excluded. Five trailer assignments are still prepared only; the trailer retains its original images.
+- Known art limits remain reviewable behind v2: portrait crops can lose a second person, and some medication/handover props sit behind native game panels. This is a comparison release, not a claim that every scene is final.
+- Validation: TypeScript, touched-file ESLint, tokens:check and diff whitespace checks pass. Full production build passes with webpack; local Turbopack could not resolve this worktree’s external node_modules symlink, so its environmental failure was not treated as an application failure. Browser verified same-beat v1 → v2 → v1, stable 50 reputation/0 decisions, and both original/generated lesson images. Deployment verification follows this commit. No security settings or sharing protections changed.
+
+## 2026-10-13: Isolated Registered Nurse full image-set test
+
+**Why (Chandu):** test the Dreamari master cinematic anime image standard on the Registered Nurse game already in the code, as a full cohesive set rather than a generic nurse illustration.
+- **Isolation:** branch `codex/registered-nurse-art-test`, based on `ac239a66`, port 3013. Original active checkout and live game are unchanged. No deployment, push or commit.
+- **Art:** 18 built-in imagegen PNGs preserve Rosa, Denise, Tyler, Yvonne and the original Room 12 patient. The source is `rn-level-1-v2.ts` plus the current `sim-scene-briefs.md`; finance images are style references only. Exact prompts, selected outputs, QA and mapping are in the dated RN image-set artifact folder.
+- **Visual wiring:** `ib-v2-scenes.ts` adds RN image/beat maps and concerned reactions, covering 36 full-game and 19 Express beats. `/play/[game]/page.tsx` swaps lesson images only in v2. Existing version switches remain. Five trailer image assignments are prepared in the artifact manifest, not wired into the trailer. Content, scores, choices and game script are unchanged.
+- **Sampling:** mobile V2Backdrop `sizes` accounts for the full-height landscape cover crop; 100vw previously selected undersized images. No layout, scrolling, portal, picker or control change.
+- **Review:** all 18 PNGs inspected and served with HTTP 200; all beat mappings resolve; tsc and touched-file eslint pass. Representative desktop and phone screenshots were reviewed, not a complete end-to-end completion of every branch. The final Tyler crop adjustment still needs a fresh phone check because the browser viewport override stopped applying in the last pass.
+- **Verdict:** cohesive art direction works, but not ready to ship automatically. Phone two-shots lose secondary characters; the corridor cannot show four call lamps, the patient and cart in one portrait crop; real dialogue/instrument panels cover medication and handover props. These need scene-specific portrait framing and UI-safe action placement. The morning night nurse appears younger than the brief, the proud Rosa sky is near sunset, and some hair/sky detailing remains more elaborate than the master standard.
+
 ## 2026-10-13: IB v2: Joshua's revised scenes; scene briefs for the other simulations
 
 **Why:** Joshua sent revised versions of nine IB v2 scenes ("here are my updates") and asked to "update the other games and unique screens based on the new standards". Chandu: "for now just update the IB games. I'll see if I can generate images for other games."
