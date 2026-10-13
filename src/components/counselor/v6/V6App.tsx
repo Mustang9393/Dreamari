@@ -65,6 +65,7 @@ import { setCounselorBase } from "@/lib/counselorBase";
 import { Dropdown, Option } from "@/components/colleges/filterKit";
 import { LogSheetHost, openLog } from "../v5/LogSheet";
 import { ReelStatCard, WATCHES } from "../v5/Videos";
+import { videoPoster } from "@/components/app/companyVideos";
 import { countActivity, useActivity } from "@/lib/activityEvents";
 import { DreamariEngagementPanel } from "../v5/Analytics";
 import { ExploreSheetHost, openCareer, openSchool } from "../v5/ExploreSheets";
@@ -453,6 +454,7 @@ export function V6App({
             <h2>{FOR_YOU_VIDEOS[video].title}</h2>
             <video
               src={FOR_YOU_VIDEOS[video].video}
+              poster={videoPoster(FOR_YOU_VIDEOS[video].video)}
               controls
               autoPlay
               className="six-player"

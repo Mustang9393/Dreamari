@@ -34,3 +34,17 @@ export const COMPANY_VIDEOS: CompanyVideo[] = [
   // Kellogg's office (WK Kellogg Co), not Kellanova: the Kellogg's mark stays.
   { company: "Kellogg's", title: "Office Tour", video: "/videos/app/reel-kelloggs-office-tour.mp4", poster: "/images/videos/reel-kelloggs-office-tour-cover.jpg" },
 ];
+
+/** The thumbnail Explore shows for a clip, by its video path: the company
+ *  rail's designed cover when there is one, else a saved frame of the clip
+ *  in /images/videos. Undefined for a clip with neither (the aviation
+ *  clips), so callers fall back to the clip's own first frame. Used by the
+ *  counselor dashboard's video cards (13 Oct 2026, Chandu: "the videos in
+ *  v5/v6 of the counselor dashboard need to use the thumbnail we've used
+ *  in the explore"). */
+const SAVED_FRAMES: Record<string, string> = {
+  "/videos/app/reel-povywa-jpmc-ohio.mp4": "/images/videos/reel-povywa-jpmc-ohio.jpg",
+};
+export function videoPoster(video: string): string | undefined {
+  return COMPANY_VIDEOS.find((v) => v.video === video)?.poster ?? SAVED_FRAMES[video];
+}

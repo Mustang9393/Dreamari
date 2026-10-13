@@ -8,7 +8,9 @@ import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Play, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
+import Image from "next/image";
 import { FOR_YOU_VIDEOS } from "@/components/app/catalog";
+import { videoPoster } from "@/components/app/companyVideos";
 import { countActivity, useActivity } from "@/lib/activityEvents";
 
 /** DEMO-ONLY: mock watch counts and career tags for FOR_YOU_VIDEOS, in the
@@ -30,6 +32,7 @@ export const WATCHES: { watched: number; career: string }[] = [
  *  4:5, not the reel's 9:16 ("the cards don't have to be that tall"). */
 export function ReelStatCard({ src, title, watched, career, onOpen }: { src: string; title: string; watched: number; career: string; onOpen: () => void }) {
   const ref = useRef<HTMLVideoElement>(null);
+  const poster = videoPoster(src);
   return (
     <button
       type="button"
@@ -37,10 +40,12 @@ export function ReelStatCard({ src, title, watched, career, onOpen }: { src: str
       onPointerEnter={() => { const v = ref.current; if (v && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) v.play().catch(() => {}); }}
       onPointerLeave={() => ref.current?.pause()}
       aria-label={`${title}, ${watched} students watched`}
-      className="dm-tap relative flex aspect-[4/5] cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left"
+      className="dm-tap group relative flex aspect-[4/5] cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left"
       style={{ borderColor: "var(--glass-surface-2)", background: "#000" }}
     >
       <video ref={ref} src={`${src}#t=0.5`} className="absolute inset-0 h-full w-full object-cover" muted loop playsInline preload="metadata" />
+      {/* Explore's own thumbnail on top, fading out while the clip plays on hover */}
+      {poster && <Image src={poster} alt="" fill sizes="240px" className="object-cover transition-opacity duration-300 group-hover:opacity-0" />}
       <span className="absolute top-[12px] left-[12px] z-[1] flex flex-col items-center rounded-[var(--radius-md)] px-[12px] py-[6px]" style={{ background: "rgba(8,10,22,0.62)", color: "#fff", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
         <span className="text-[22px] leading-[26px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{watched}</span>
         <span className="text-[11.5px] leading-[14px] font-semibold">Watched</span>
@@ -77,7 +82,7 @@ export function MostWatched({ titled = true }: { titled?: boolean } = {}) {
               <span className="text-[16px] font-semibold">{FOR_YOU_VIDEOS[open].title}</span>
               <IconTip label="Close"><button type="button" aria-label="Close" onClick={() => setOpen(null)} className="flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.12)" }}><X className="h-5 w-5" aria-hidden /></button></IconTip>
             </div>
-            <video src={FOR_YOU_VIDEOS[open].video} controls autoPlay playsInline className="max-h-[calc(80dvh/var(--vz,1))] rounded-[var(--radius-lg)]" style={{ aspectRatio: "9 / 16", background: "#000" }} />
+            <video src={FOR_YOU_VIDEOS[open].video} poster={videoPoster(FOR_YOU_VIDEOS[open].video)} controls autoPlay playsInline className="max-h-[calc(80dvh/var(--vz,1))] rounded-[var(--radius-lg)]" style={{ aspectRatio: "9 / 16", background: "#000" }} />
           </div>
         </div>,
         document.body,
