@@ -4641,7 +4641,6 @@ function EventView({
   // what professionals posted after the event (a United Way volunteer's
   // follow-up, 12 Oct 2026); none on Connect's own boards yet
   const proPosts = INSIGHTS.filter((i) => i.boardId === event.id);
-  const nav = useContext(ConnectNav);
   // Before the day (12 Oct 2026, United Way boards): the same header, then
   // what it is, who it's for, Remind me, My Plan and a calendar file. The
   // conversation opens here once the event has happened.
@@ -4656,7 +4655,12 @@ function EventView({
   const pAccent = partnerAccent(event.host);
   const [qrOpen, setQrOpen] = useState(false);
   // Falls back to Questions for any old/unrecognised ?filter= value.
-  const tab = filter === "posts" || filter === "insights" || filter === "resources" || filter === "people" || filter === "about" ? filter : "questions";
+  // Four rooms, not six (13 Oct 2026, Chandu: "There is so much copy on
+  // the event boards ... reduce copy and clutter and use better information
+  // hierarchy"): the event's posts and the pros' posts are one Posts feed,
+  // the files live in About. Old links (?filter=insights, resources) land
+  // where their content went.
+  const tab = filter === "insights" ? "posts" : filter === "resources" ? "about" : filter === "posts" || filter === "people" || filter === "about" ? filter : "questions";
   // the Resources tab's photo viewer: which frame is open, if any
   const [photoOpen, setPhotoOpen] = useState<number | null>(null);
   // a partner board's staff or volunteer view (replyAs): they don't ask
@@ -4694,8 +4698,7 @@ function EventView({
           {/* on phones the corner lockup owns the first row, so the text starts
              under it; from sm the text clears it on the right instead */}
           <div className="min-w-[220px] flex-1 self-start pt-[48px] sm:pt-[8px] sm:pr-[240px]">
-            <p className="text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>{event.lifecycle}</p>
-            <h1 className="mt-[6px] text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h1>
+            <h1 className="text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h1>
             {/* the name carries the partnership; the line under it says when
                and where (the company is not repeated) */}
             <p className="mt-[6px] flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
@@ -4716,12 +4719,6 @@ function EventView({
             <RingStats items={[[event.going + (reminded ? 1 : 0), "Going"]]} />
           </div>
         )}
-        <div className="relative z-10 mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
-          <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
-            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 70%, ${eventInk})` }} />
-            {event.access ?? "Attendees + event pros only"}
-          </span>
-        </div>
       </section>
 
       {preview ? (
@@ -4779,7 +4776,7 @@ function EventView({
                 <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><Images className="h-3.5 w-3.5" aria-hidden /> {event.photos.count} photos</span>
               </div>
               {/* four columns, two rows: the first frame takes the left half, four more fill the right */}
-              <ul className="grid grid-cols-4 grid-rows-2 gap-[6px] sm:gap-[8px]" style={{ aspectRatio: "2 / 1" }}>
+              <ul className="grid grid-cols-4 grid-rows-2 gap-[6px] sm:gap-[8px]" style={{ aspectRatio: "5 / 2" }}>
                 {event.photos.images.slice(0, 5).map((src, index) => {
                   const last = index === 4;
                   const more = event.photos!.count - 5;
@@ -4812,8 +4809,6 @@ function EventView({
           // own tab just above) -- 28 Sept 2026 nomenclature pass: "no
           // insights anywhere, everything is just called posts" still needs
           // these two distinct tabs to read as two different things.
-          { key: "insights", label: "Pro posts" },
-          { key: "resources", label: "Resources" },
           { key: "people", label: "People" },
           { key: "about", label: "About" },
         ]}
@@ -4846,7 +4841,8 @@ function EventView({
              staff across four offices are the board's first audience): what
              worked, the numbers, next steps by office, and a way back to the
              staff Team space to talk it over. */}
-          {event.debrief && (
+          {/* the host team's debrief is for the host team only */}
+          {event.debrief && postAs?.chip === "United Way" && (
             <Card accent={pAccent}>
               <div className="flex flex-wrap items-center justify-between gap-[10px]">
                 <span className="flex min-w-0 items-center gap-[10px]">
@@ -4860,16 +4856,6 @@ function EventView({
               </div>
               <p className="mt-[12px] text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.debrief.title}</p>
               <p className="mt-[4px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{event.debrief.body}</p>
-              {event.debrief.numbers.length > 0 && (
-                <div className="mt-[14px] flex flex-wrap gap-x-[var(--space-6)] gap-y-[8px]">
-                  {event.debrief.numbers.map((n) => (
-                    <span key={n.label} className="flex flex-col">
-                      <span className="text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{n.value}</span>
-                      <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{n.label}</span>
-                    </span>
-                  ))}
-                </div>
-              )}
               <div className="mt-[14px] grid grid-cols-1 gap-[var(--space-5)] md:grid-cols-2">
                 <div>
                   <p className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>What worked</p>
@@ -4908,16 +4894,6 @@ function EventView({
                 </span>
               </div>
               <p className="mt-[12px] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{event.official.summary}</p>
-              <p className="mt-[10px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{event.official.about}</p>
-              <p className="mt-[14px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>What to do next</p>
-              <ul className="mt-[6px] flex flex-col gap-[6px]">
-                {event.official.next.map((line, i) => (
-                  <li key={line} className="flex items-start gap-[10px] text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>
-                    <span className="mt-[1px] flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: `color-mix(in srgb, ${pAccent} 30%, transparent)`, color: "var(--foreground)" }}>{i + 1}</span>
-                    {line}
-                  </li>
-                ))}
-              </ul>
               <div className="mt-[14px] flex flex-wrap gap-[8px]">
                 <QuietCta onClick={() => onOpenCommunity?.(event.official!.communityId, event.boardId ? "talk" : undefined)}>Keep talking in {event.official.communityName} <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></QuietCta>
               </div>
@@ -4931,7 +4907,6 @@ function EventView({
                 <Pin className="h-3.5 w-3.5" aria-hidden /> Pinned recap
               </span>
               <div className="mt-[8px]"><ProBadge proId={event.recap.proId} postedAgo={event.recap.postedAgo} /></div>
-              <p className="mt-[8px] text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Great meeting everyone. Three things I hope you remember:</p>
               <ol className="mt-[6px] flex list-decimal flex-col gap-[6px] pl-5">
                 {event.recap.takeaways.map((t) => (
                   <li key={t} className="text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>{t}</li>
@@ -4944,21 +4919,18 @@ function EventView({
             </Card>
           )}
 
-          {!event.official && !event.recap && (
+          {/* the pros' posts from the event, in the board feed's rows */}
+          {proPosts.length > 0 && (
+            <BoardFeedList wrap={(id, row) => <div key={id}>{row}</div>} items={proPosts.map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId)!, reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> }))} />
+          )}
+          {!event.official && !event.recap && proPosts.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No posts from the event account yet.</p>
           )}
         </div>
       )}
 
-      {tab === "insights" && (proPosts.length > 0 ? (
-        <div className="flex flex-col gap-[var(--space-3)]">
-          {proPosts.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => nav?.openInsight(i.id)} {...cardProps(i.id)} />)}
-        </div>
-      ) : (
-        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Posts from professionals at this event will appear here after the answer round.</p>
-      ))}
 
-      {tab === "resources" && (
+      {tab === "about" && (
         <div className="flex flex-col gap-[var(--space-6)]">
 
           {/* Files: the icon says what it is, the title says which, one small
@@ -5085,7 +5057,7 @@ function EventView({
           <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
             <SectionHead>Students</SectionHead>
             <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
-              <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{event.students ?? 0}</strong> students attended. Names stay private here; you will meet people through the Questions and Posts tabs.
+              <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{event.students ?? 0}</strong> students went. Their names stay private.
             </p>
           </div>
         </div>
@@ -5110,7 +5082,8 @@ function EventView({
           <div className="flex flex-col gap-[6px] border-t pt-[var(--space-4)] text-[13px] leading-[19px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
             <span className="flex items-center gap-[6px]"><Calendar className="h-[13px] w-[13px] flex-none" aria-hidden /> {event.nextDate ? `Next: ${event.nextDate} · Last: ${event.date}` : `Last: ${event.date}`}</span>
             <span className="flex items-center gap-[6px]"><MapPin className="h-[13px] w-[13px] flex-none" aria-hidden /> {event.location}</span>
-            {event.closesOn && <span className="flex items-center gap-[6px]"><ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden /> This board closes to new questions on {event.closesOn}.</span>}
+            <span className="flex items-center gap-[6px]"><Users className="h-[13px] w-[13px] flex-none" aria-hidden /> {event.access ?? "Attendees + event pros only"}</span>
+            {event.closesOn && <span className="flex items-center gap-[6px]"><ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden /> Open for questions until {event.closesOn}</span>}
           </div>
         </div>
       )}

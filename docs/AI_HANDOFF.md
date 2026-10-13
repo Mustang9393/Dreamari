@@ -1,3 +1,11 @@
+## 2026-10-13 (evening): Event boards: less copy, four tabs
+
+**Why (Chandu):** "There is so much copy on the event boards ... reduce copy and clutter and use better information hierarchy and design hierarchy." Applies to every event board (EventView), Connect's and United Way's.
+- Six tabs became four: Questions, Posts (the official post, the pinned recap and the pros' posts, now in the board feed's FeedPostRow), People, About (files first, then the details). Old links (?filter=insights, resources) land where their content went.
+- Header: no lifecycle eyebrow, no access footer (the access line moved to About). The photo gallery, which leads the board since earlier today (before that it was under Resources on every board), is shorter (5:2).
+- Official post: the summary and "Keep talking" only (no "about" paragraph, no numbered next steps). Recap: no intro line. The staff debrief shows only to United Way staff (replyAs) and drops the numbers the header already shows. People: "164 students went. Their names stay private."
+- **Checked:** tsc clean, eslint no new warnings; the Fall convening board in Questions, Posts and About.
+
 ## 2026-10-13 (later): United Way boards: feed like the other boards, tab hierarchy, every event code-gated, no pro openings
 
 **Why (Chandu, same day, reviewing the pushed build):** "where is the code requirement for event boards?", "the left menu is overkill. just do tabs? But the tabs need proper design hierarchy, don't repeat the same tabs design everywhere", "show one that's already joined, and some that need code", "Where is the gallery ... inside the event boards that have already been attended?", "whatever gibberish I enter as a code lets me in", "when I'm on United Way POV don't show me an ASK cta with a student profile ... Only student POV gets ask. Others get the composer we gave for the other boards + feeds", "all and whole region should be the same thing", "the students also need the communities tab", "Remove all professionals sharing internships or opportunities from the board altogether", "the name and pfp etc should be on the post not just the graphic", "Please refer the feed designs we have in the other boards", "have the same tall framed wide toggles".
