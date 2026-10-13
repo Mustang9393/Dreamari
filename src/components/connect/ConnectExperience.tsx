@@ -21,7 +21,7 @@ import { DEMO_ALWAYS_SHOW_SPLASH } from "@/components/app/WelcomeSplash";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { careerProfile } from "@/components/career/profiles";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
-import { CareerBehindCard, FeedVersionChip, GraphicLayoutSwitch, useGraphicLayout, FlatBreathers, FramedGraphic, captionFor, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
+import { CareerBehindCard, FeedVersionChip, FlatBreathers, FramedGraphic, captionFor, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
 import { CompanyMark, Avatar, OrgAvatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
@@ -34,7 +34,7 @@ import { AttCommunityView } from "./att/AttCommunityView";
 import { AttCommunityView as AttCommunityViewV1 } from "./att/v1/AttCommunityView";
 import type { AttVersion } from "./att/VersionChip";
 import { ATT_ID } from "./att/attData";
-import { NETWORK, UW_ID } from "./unitedway/uwData";
+import { NETWORK, UW_ID, staffPhoto } from "./unitedway/uwData";
 import { MICHIGAN, UW_MI_ID } from "./unitedway/uwMichigan";
 import { SOUTH_CENTRAL, UW_SC_ID } from "./unitedway/uwSouthCentral";
 import { UnitedWayBoardView } from "./unitedway/UnitedWayBoardView";
@@ -1021,11 +1021,10 @@ export type FeedView = "card" | "aligned" | "rail" | "compact";
 // style toggles, we will be using custom generated ones", "remove the
 // question style toggles too, we will use a custom version of the columns
 // version" -- see the `view` constant in BoardView, fixed to "aligned").
-export function FeedControls({ sort, onSort, graphics = false }: { sort: FeedSort; onSort: (s: FeedSort) => void; /** this list holds graphic posts: offer the layout switch */ graphics?: boolean }) {
+export function FeedControls({ sort, onSort }: { sort: FeedSort; onSort: (s: FeedSort) => void }) {
   const SORTS: { key: FeedSort; label: string }[] = [{ key: "best", label: "Best" }, { key: "recent", label: "Most Recent" }];
   return (
     <div className="flex flex-wrap items-center gap-[10px] text-[12.5px] leading-[17px] font-semibold">
-      {graphics && <span className="order-last ml-auto"><GraphicLayoutSwitch /></span>}
       {SORTS.map((s, i) => (
         <span key={s.key} className="flex items-center gap-[10px]">
           {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>·</span>}
@@ -3582,9 +3581,6 @@ function FeedTab({
            action is a light nudge into People, never a dead end. */}
         {/* No v1 / v2 chip here since 4 Oct 2026: the Feed has one layout,
            the rhythm above. Boards keep the chip for their own lists. */}
-        {/* DEMO-ONLY: the graphic layout switch, one quiet line above the
-           posts (the boards carry it in their sort row) */}
-        <div className="hidden justify-end px-[var(--space-4)] pt-[10px] pb-[2px] sm:flex sm:px-[var(--space-5)]"><GraphicLayoutSwitch /></div>
         <SurfaceState id={63} isEmpty={ranked.length === 0} onEmptyAction={onFindPeople}>
           {/* Every row is separated by one faint hairline, Twitter's way,
              instead of a box per post. */}
@@ -4464,7 +4460,7 @@ function BoardView({
         <div className="relative flex flex-col gap-[var(--space-4)]">
           {/* Surface 41, same wrap (27 Sept 2026). */}
           <SurfaceState id={41} isEmpty={insights.length === 0}>
-            {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} graphics={insights.some((i) => !!i.graphic)} />}
+            {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
             {/* Posts carry their own variety through the pros' graphics, so
                no breathers here (Chandu, 2 Oct 2026). The rows are the
                Feed's rows (6 Oct 2026: one visual language). */}
@@ -4569,25 +4565,19 @@ function OpportunityUpdateCard({ item }: { item: RelevantItem }) {
 /** A pro's graphic post in a feed row: the caption above, then the graphic
  *  in the chosen layout (DEMO-ONLY switch in the sort row). Phones always
  *  get the portrait at full width. */
-/** Graphic posts at a small, fixed size (13 Oct 2026, Chandu on the event and
- *  United Way feeds: "The images ... are way too large. Takes up too much
- *  space but doesn't provide much value. It's just a random quote ... make
- *  it much smaller"). A surface wraps its feed in this to opt in. */
-export const SmallGraphics = createContext(false);
+/** A graphic post's picture, one size everywhere (13 Oct 2026, Chandu:
+ *  "just use the tall variation of what we had and kill the others.
+ *  Realistic Twitter proportions of the image posts"): a portrait at a
+ *  feed image's width (300 to 340px) beside the column on wide screens,
+ *  full width on a phone, the caption above it. The Framed and Wide
+ *  layouts, the small size and the A/B switch are gone. */
 function GraphicPostBody({ insight, caption, onMore }: { insight: Insight; caption: string; onMore: () => void }) {
-  const layout = useGraphicLayout();
-  const small = useContext(SmallGraphics);
   const cap = caption ? <div className="mt-[8px] max-w-[60ch]"><ClampedExcerpt text={caption} onMore={onMore} /></div> : null;
-  const portrait = <span className="block overflow-hidden rounded-[14px]" style={{ boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6)" }}><InsightGraphicView insight={insight} /></span>;
-  if (small) return <>{cap}<span className="mt-[12px] block w-[150px] sm:w-[170px]">{portrait}</span></>;
   return (
     <>
       {cap}
-      <span className="mt-[12px] block w-full sm:hidden">{portrait}</span>
-      <span className="mt-[12px] hidden w-full sm:block">
-        {layout === "tall" ? <span className="block w-[300px] lg:w-[340px]">{portrait}</span>
-          : layout === "framed" ? <FramedGraphic insight={insight} height={460} />
-            : <InsightGraphicView insight={insight} wide />}
+      <span className="mt-[12px] block w-full sm:w-[300px] lg:w-[340px]">
+        <span className="block overflow-hidden rounded-[14px]" style={{ boxShadow: "0 14px 34px -18px rgba(0,0,0,0.6)" }}><InsightGraphicView insight={insight} /></span>
       </span>
     </>
   );
@@ -4908,7 +4898,7 @@ function EventView({
               </div>
               <footer className="mt-[var(--space-8)] flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
                 <span className="flex min-w-0 items-center gap-[10px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-                  <OrgAvatar org={event.host} size={28} />
+                  <Avatar name={event.debrief.by} photo={staffPhoto({ name: event.debrief.by })} size={28} />
                   <span className="truncate"><strong className="font-bold" style={{ color: "var(--foreground)" }}>{event.debrief.by}</strong> · {event.debrief.role}, {event.debrief.office} · {event.debrief.postedAgo}</span>
                 </span>
                 {event.boardId && (
@@ -4927,7 +4917,6 @@ function EventView({
              the same hairline panel as the pros' posts, in the same row
              shape, so the tab reads as one feed, not a stack of cards. */}
           {(event.official || event.recap || proPosts.length > 0) && (
-            <SmallGraphics.Provider value={true}>
             <BoardFeedList wrap={(id, row) => <div key={id}>{row}</div>} items={[
               ...(event.official ? [{ id: "official", node: (
                 <article className="flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
@@ -4967,7 +4956,6 @@ function EventView({
               })() }] : []),
               ...proPosts.map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId)!, reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> })),
             ]} />
-            </SmallGraphics.Provider>
           )}
           {!event.official && !event.recap && proPosts.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No posts from the event account yet.</p>
@@ -5562,7 +5550,7 @@ export function CommentRow({ id, name, photo, chip, chipTone, meta, body, posted
       ) : chipTone === "pro" ? (
         // a partner's staff (United Way): their headshot, else their
         // organization's mark, never a generated student face
-        photo ? <Avatar name={name} photo={photo} size={32} /> : <OrgAvatar org={chip} size={32} />
+        photo || chip === "United Way" ? <Avatar name={name} photo={photo ?? staffPhoto({ name })} size={32} /> : <OrgAvatar org={chip} size={32} />
       ) : (
         <button type="button" onClick={onToggleCollapse} aria-expanded={!collapsed} aria-label={collapsed ? `Expand ${name}'s comment` : `Collapse ${name}'s comment`} className="dm-quiet flex-none cursor-pointer rounded-full">
           <Avatar name={name} size={32} />
@@ -5638,7 +5626,7 @@ export function ReplyComposer({ onPost, as }: { onPost: (text: string) => void; 
   };
   return (
     <div id="dm-reply-composer" className="flex items-start gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
-      {as && !PROS.some((p) => p.name === as.name) ? <OrgAvatar org="United Way" size={32} /> : <Avatar name={as?.name ?? "Jordan Rivera"} size={32} />}
+      {as && !PROS.some((p) => p.name === as.name) ? <Avatar name={as.name} photo={staffPhoto({ name: as.name })} size={32} /> : <Avatar name={as?.name ?? "Jordan Rivera"} size={32} />}
       <div className="min-w-0 flex-1">
         <HoverBeam strength={0.85} active={focused}>
         <label className="block">

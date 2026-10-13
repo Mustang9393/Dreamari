@@ -288,9 +288,9 @@ export const UW_INSIGHTS: Insight[] = [
   {
     // a Jackson volunteer shares what worked
     id: "uwi-sc-reading", boardId: SC, type: "insight", proId: "pro-wong", place: "Jackson",
-    title: "What worked at our Jackson reading shifts",
+    title: "Reading buddy shifts in Jackson: how they work",
     // DEMO-ONLY graphic (13 Oct 2026): graphic posts like every other board
-    graphic: { text: "Same reader, same table, every week. That's what made it work.", bg: "p-pastel", font: "classic" },
+    graphic: { text: "Reading buddies · Jackson · Tuesdays 4 PM · 1 hour · Counts as service", bg: "p-pastel", font: "classic" },
     body: "We paired each teen with the same young reader every week. Same day, same table. The kids looked forward to it, and so did the teens. Any town can copy this. Ask me how.",
     postedAgo: "2d ago", helpful: 48,
     replies: [
@@ -316,33 +316,33 @@ export const UW_INSIGHTS: Insight[] = [
   // there live now", so graphic posts like the other boards). DEMO-ONLY ———
   {
     id: "uwi-sc-kz-food", boardId: SC, type: "insight", proId: "pro-brooks", place: "Kalamazoo",
-    title: "My first step into nursing was a food crew",
-    body: "As a teen I helped on a Saturday food crew in Kalamazoo. Leading it taught me to plan and talk to people. Those skills got me into nursing. Start as a helper and you can lead by spring.",
-    graphic: { text: "Start as a helper. Lead by spring.", bg: "p-sunset-sea", font: "display" },
+    title: "Saturday food crew needs teen helpers",
+    body: "The Kalamazoo food bank needs teen helpers on Saturdays at 9 AM. Ages 14 and up. It counts as service hours, and leads learn to plan and run a team. That is how I started before nursing.",
+    graphic: { text: "Saturday food crew · Kalamazoo · 9 AM · Ages 14+ · Counts as service", bg: "p-sunset-sea", font: "display" },
     postedAgo: "5h ago", helpful: 34,
     replies: [{ handle: "Theo", grade: "Junior", place: "Kalamazoo", body: "Signing up for the food bank crew this Saturday.", postedAgo: "4h ago", likes: 6 }, { proId: "pro-brooks", body: "Love it. Ages 14 and up can join.", postedAgo: "3h ago", likes: 9 }],
   },
   {
     id: "uwi-sc-bc-nurse", boardId: SC, type: "insight", proId: "pro-reyes", place: "Battle Creek",
-    title: "Public health is more than hospitals",
-    body: "In Battle Creek our nurses visit schools, homes and clinics. Many started with a one-year program. Come shadow us in December.",
-    graphic: { text: "Public health nurses work in schools, homes and clinics.", bg: "p-teal-cloud", font: "classic" },
+    title: "Shadow a public health nurse on Dec 10",
+    body: "Spend a day with our public health nurses in Battle Creek on Dec 10. You will visit a school and a clinic. Open to juniors and seniors. Sign up in Programs.",
+    graphic: { text: "Shadow a public health nurse · Dec 10 · Battle Creek · Juniors and seniors", bg: "p-teal-cloud", font: "classic" },
     postedAgo: "1d ago", helpful: 52,
     replies: [{ handle: "Nia", grade: "Junior", place: "Battle Creek", body: "Signed up for the shadow day!", postedAgo: "20h ago", likes: 11 }],
   },
   {
     id: "uwi-sc-lan-city", boardId: SC, type: "insight", proId: "pro-doyle", place: "Lansing",
-    title: "What a city job looks like day to day",
-    body: "Parks, roads, housing, water. A city needs writers, planners and people who like numbers. Our summer interns do real work from week one.",
-    graphic: { text: "A city needs writers, planners and people who love numbers.", bg: "p-city-dusk", font: "display" },
+    title: "City summer jobs open in February",
+    body: "City offices post summer jobs for teens in February: parks, libraries and youth programs. Set a reminder now. Our interns do real work from week one.",
+    graphic: { text: "City summer jobs open in February · Parks · Libraries · Youth programs", bg: "p-city-dusk", font: "display" },
     postedAgo: "7h ago", helpful: 41,
     replies: [{ handle: "Leo", grade: "Sophomore", place: "Lansing", body: "I didn't know parks had planners. So cool.", postedAgo: "6h ago", likes: 8 }, { handle: "Andre", grade: "Senior", place: "Lansing", body: "Applying for the parks internship this week.", postedAgo: "4h ago", likes: 5 }],
   },
   {
     id: "uwi-sc-across-ask", boardId: SC, type: "insight", proId: "pro-whitfield", place: "Lansing",
-    title: "A tip for every town: one question a month",
-    body: "Students who ask one good question a month hear about openings first. Post yours here. Someone in another town may know the answer.",
-    graphic: { text: "Ask one good question a month.", bg: "p-above-clouds", font: "classic" },
+    title: "How to get answers from all four towns",
+    body: "Post your question on this board and students and pros in Kalamazoo, Battle Creek, Lansing and Jackson can all answer. Most answers come within a day.",
+    graphic: { text: "Ask once, hear from four towns · Most answers come within a day", bg: "p-above-clouds", font: "classic" },
     postedAgo: "9h ago", helpful: 46,
     replies: [{ handle: "Jada", grade: "Senior", place: "Jackson", body: "Doing it. This month: how do I get a city internship?", postedAgo: "8h ago", likes: 7 }, { handle: "Theo", grade: "Junior", place: "Kalamazoo", body: "Ask Lansing! They have the parks one.", postedAgo: "7h ago", likes: 10 }],
   },
@@ -469,15 +469,15 @@ export const UW_SC_MORE_THREADS: Thread[] = [
 ];
 
 export const UW_SC_MORE_POSTS: Insight[] = [
-  post("uwi-sc-kz-teach", "Kalamazoo", "pro-wong", "2h ago", "Teaching is about the light-bulb moment", "The best part of my job is the moment a student gets it. If you love that feeling, teaching might be for you. Try a reading shift this month.", 38, [["Mia", "Junior", "Kalamazoo", "This is exactly why I want to teach.", "1h ago", 5]], { text: "The best part of the job is the moment it clicks.", bg: "p-snow-peak", font: "classic" }),
+  post("uwi-sc-kz-teach", "Kalamazoo", "pro-wong", "2h ago", "Become a reading tutor this fall", "The best part of my job is the moment a student gets it. If you love that feeling, teaching might be for you. Try a reading shift this month.", 38, [["Mia", "Junior", "Kalamazoo", "This is exactly why I want to teach.", "1h ago", 5]], { text: "Become a reading tutor · 2 hours a week · After school · Training included", bg: "p-snow-peak", font: "classic" }),
   post("uwi-sc-kz-interview", "Kalamazoo", "pro-tanaka", "1d ago", "Three things I look for in a first job interview", "Show up on time. Make eye contact. Ask one question about the job. That's it. You don't need a long résumé to do well.", 61, [["Owen", "Senior", "Kalamazoo", "Short and clear. Thanks!", "20h ago", 7]]),
-  post("uwi-sc-bc-pharm", "Battle Creek", "pro-ortega", "3h ago", "A day as a pharmacist", "I answer questions, check medicines and help people feel better. Every day is different. Ask me anything about pharmacy school.", 33, [["Diego", "Junior", "Battle Creek", "How many years is pharmacy school?", "2h ago", 4], ["pro-ortega", null, null, "Usually six to eight after high school. Many start as techs first.", "1h ago", 9]], { text: "Every day is different. That's the fun part.", bg: "p-peak-dawn", font: "display" }),
+  post("uwi-sc-bc-pharm", "Battle Creek", "pro-ortega", "3h ago", "How to start in pharmacy, fast", "Pharmacy tech training takes under a year, and many stores pay you while you learn. Later you can go on to pharmacy school. Ask me anything about it.", 33, [["Diego", "Junior", "Battle Creek", "How many years is pharmacy school?", "2h ago", 4], ["pro-ortega", null, null, "Usually six to eight after high school. Many start as techs first.", "1h ago", 9]], { text: "Pharmacy tech: under 1 year of training · Many stores pay while you learn", bg: "p-peak-dawn", font: "display" }),
   post("uwi-sc-bc-pt", "Battle Creek", "pro-adler", "1d ago", "Why I love physical therapy", "I get to watch people walk again after an injury. It takes science and a lot of heart. Shadow day spots are open in December.", 29, [["Grace", "Senior", "Battle Creek", "Signing up!", "1d ago", 3]]),
-  post("uwi-sc-lan-code", "Lansing", "pro-rossi", "4h ago", "You don't need to be a genius to code", "I learned to code at 17 with free videos. Start small: make a simple website about something you love.", 47, [["Jaden", "Sophomore", "Lansing", "Starting tonight!", "3h ago", 8]], { text: "Start small. Build something you love.", bg: "p-night-sky", font: "display" }),
+  post("uwi-sc-lan-code", "Lansing", "pro-rossi", "4h ago", "Learn to code for free, in three steps", "I learned to code at 17 with free videos. Start small: make a simple website about something you love.", 47, [["Jaden", "Sophomore", "Lansing", "Starting tonight!", "3h ago", 8]], { text: "Learn to code free: pick 1 course · build 1 small site · share it here", bg: "p-night-sky", font: "display" }),
   post("uwi-sc-lan-audit", "Lansing", "pro-weiss", "2d ago", "What an auditor really does", "I help companies and nonprofits keep honest records. If you like puzzles and numbers, look at accounting.", 22, []),
-  post("uwi-sc-jx-design", "Jackson", "pro-cole", "2h ago", "Your sketchbook is your first portfolio", "Every drawing counts. Take photos of your best ten pages. That is how I got my first design job.", 55, [["Ruby", "Sophomore", "Jackson", "I have so many sketchbooks! Doing this.", "1h ago", 10]], { text: "Your sketchbook is your first portfolio.", bg: "s-studio", font: "display" }),
+  post("uwi-sc-jx-design", "Jackson", "pro-cole", "2h ago", "Build your first design portfolio", "Every drawing counts. Take photos of your best ten pages. That is how I got my first design job.", 55, [["Ruby", "Sophomore", "Jackson", "I have so many sketchbooks! Doing this.", "1h ago", 10]], { text: "Start a portfolio: your 10 best pages · a photo of each · 1 line on why", bg: "s-studio", font: "display" }),
   post("uwi-sc-jx-money", "Jackson", "pro-okafor", "1d ago", "One money tip for your first paycheck", "Save a little from every check, even five dollars. It adds up faster than you think.", 40, [["Marcus", "Junior", "Jackson", "Opening my account this week.", "20h ago", 6]]),
-  post("uwi-sc-across-health", "Battle Creek", "pro-brooks", "5h ago", "Health jobs in every town", "Kalamazoo, Battle Creek, Lansing and Jackson all have clinics that hire teens to help out. Ask at the front desk. That's how I started.", 36, [["Nia", "Junior", "Battle Creek", "Asking at our clinic Monday.", "4h ago", 5], ["Kai", "Junior", "Jackson", "Didn't know Jackson had this!", "3h ago", 4]], { text: "Every town has a clinic. Ask at the front desk.", bg: "p-teal-cloud", font: "classic" }),
+  post("uwi-sc-across-health", "Battle Creek", "pro-brooks", "5h ago", "Teen helper spots at clinics in all four towns", "Kalamazoo, Battle Creek, Lansing and Jackson all have clinics that hire teens to help out. Ask at the front desk. That's how I started.", 36, [["Nia", "Junior", "Battle Creek", "Asking at our clinic Monday.", "4h ago", 5], ["Kai", "Junior", "Jackson", "Didn't know Jackson had this!", "3h ago", 4]], { text: "Clinics in all 4 towns take teen helpers · Ask at the front desk", bg: "p-teal-cloud", font: "classic" }),
   post("uwi-sc-across-code", "Lansing", "pro-chen", "1d ago", "A coding club for all four towns?", "If students in each town want to learn together, I can run one online night a month. Reply if you'd join.", 58, [["Jaden", "Sophomore", "Lansing", "Yes please!", "1d ago", 9], ["Owen", "Senior", "Kalamazoo", "I'm in.", "22h ago", 7], ["Ruby", "Sophomore", "Jackson", "Me too!", "20h ago", 6]]),
 ];
 
@@ -490,18 +490,18 @@ function evPost(boardId: string, id: string, place: string, proId: string, ago: 
 }
 const FALL = "sc-e-fall-convening", YLU = "sc-e-ylu-summer", MIM = "mi-e-suw-meetup", MENTOR = "uw-e-mentor-night";
 export const UW_EVENT_POSTS: Insight[] = [
-  evPost(FALL, "uwe-fall-data", "Lansing", "pro-doyle", "6d ago", "Every town needs people who love numbers", "At the city office table, students asked what data people do all day. We find where help is needed most, then show it so others act. Start with one stats class.", 58, [["Leo", "Sophomore", "Lansing", "Taking stats next year now!", "5d ago", 9], ["Jada", "Senior", "Jackson", "Can I shadow you?", "5d ago", 6]], { text: "Every town needs people who love numbers.", bg: "p-city-dusk", font: "display" }),
+  evPost(FALL, "uwe-fall-data", "Lansing", "pro-doyle", "6d ago", "Data jobs you can aim for near home", "At the city office table, students asked what data people do all day. We find where help is needed most, then show it so others act. Start with one stats class.", 58, [["Leo", "Sophomore", "Lansing", "Taking stats next year now!", "5d ago", 9], ["Jada", "Senior", "Jackson", "Can I shadow you?", "5d ago", 6]], { text: "Data jobs near you: city offices · health departments · nonprofits", bg: "p-city-dusk", font: "display" }),
   evPost(FALL, "uwe-fall-projects", "Kalamazoo", "pro-wong", "1w ago", "Your project ideas, one by one", "I read every card from the project table. The best ones started small: a reading corner, a coat drive, a park clean-up. Pick one and post your first step here.", 44, [["Theo", "Junior", "Kalamazoo", "Our reading corner starts next week!", "6d ago", 11]]),
-  evPost(FALL, "uwe-fall-health", "Battle Creek", "pro-brooks", "5d ago", "Health jobs you asked about", "Most of you asked if you need med school. You don't. Nursing, pharmacy tech and imaging start with one or two years of school.", 39, [["Nia", "Junior", "Battle Creek", "This changed my plan. Thank you!", "4d ago", 8]], { text: "You don't need med school to work in health.", bg: "p-teal-cloud", font: "classic" }),
+  evPost(FALL, "uwe-fall-health", "Battle Creek", "pro-brooks", "5d ago", "Health jobs that take one to two years", "Most of you asked if you need med school. You don't. Nursing, pharmacy tech and imaging start with one or two years of school.", 39, [["Nia", "Junior", "Battle Creek", "This changed my plan. Thank you!", "4d ago", 8]], { text: "Health jobs in 1 to 2 years: nursing assistant · pharmacy tech · imaging", bg: "p-teal-cloud", font: "classic" }),
   evPost(FALL, "uwe-fall-follow", "Lansing", "pro-whitfield", "4d ago", "How to follow up with someone you met", "Send one short note within a week. Say where you met and ask one question. That's it. Most people answer.", 52, [["Andre", "Senior", "Lansing", "Sent mine today. She already wrote back!", "3d ago", 14]]),
-  evPost(FALL, "uwe-fall-tables", "Kalamazoo", "pro-tanaka", "3d ago", "What every table told students", "Show up. Ask questions. Help where you can. Every table said some version of that. It's how most of us got our first job.", 47, [], { text: "Show up. Ask questions. Help where you can.", bg: "p-peak-dawn", font: "display" }),
+  evPost(FALL, "uwe-fall-tables", "Kalamazoo", "pro-tanaka", "3d ago", "Save the date: next convening Nov 14", "All four towns meet again on Nov 14 in Battle Creek. Vans leave from Lansing and Jackson. Bring one question for each table you want to visit.", 47, [], { text: "Next convening · Nov 14 · Battle Creek · Vans from Lansing and Jackson", bg: "p-peak-dawn", font: "display" }),
   evPost(YLU, "uwe-ylu-serve", "Jackson", "pro-doyle", "6w ago", "Serving as a group changes the work", "Young Leaders United picked one project for the fall. Doing it together made it faster and more fun. Bring a friend next time.", 21, [["Kai", "Junior", "Jackson", "Bringing my cousin to the next one.", "6w ago", 3]]),
-  evPost(YLU, "uwe-ylu-teach", "Kalamazoo", "pro-wong", "7w ago", "Teaching is a public good", "Many of you asked about teaching jobs. Schools in all four towns need tutors now. It's a great first step.", 18, [], { text: "Schools in every town need tutors now.", bg: "p-snow-peak", font: "classic" }),
+  evPost(YLU, "uwe-ylu-teach", "Kalamazoo", "pro-wong", "7w ago", "Tutors needed in all four towns", "Many of you asked about teaching jobs. Schools in all four towns need tutors now. It's a great first step.", 18, [], { text: "Tutors needed in all 4 towns this fall · 2 hours a week", bg: "p-snow-peak", font: "classic" }),
   evPost(YLU, "uwe-ylu-resume", "Lansing", "pro-whitfield", "7w ago", "Put your service on your résumé", "Service hours show you show up. List what you did and what changed. Recruiters notice.", 26, []),
   evPost(MIM, "uwe-mim-start", "West Michigan", "pro-tanaka", "1w ago", "Starting a group at your school", "Every group at the meetup started with three friends and one idea. Start small. Then ask other cities how they grew.", 19, [["Ana", "Junior", "West Michigan", "We started with four. Now we're twelve!", "6d ago", 7]]),
-  evPost(MIM, "uwe-mim-money", "Southeast Michigan", "pro-okafor", "1w ago", "Raising money for a cause", "Set a small goal, tell people why it matters, and thank every giver. That works for a bake sale and for a bank.", 23, [], { text: "Set a small goal. Say why. Thank every giver.", bg: "p-pastel", font: "classic" }),
+  evPost(MIM, "uwe-mim-money", "Southeast Michigan", "pro-okafor", "1w ago", "How to run a drive at your school", "Set a small goal, tell people why it matters, and thank every giver. That works for a bake sale and for a bank.", 23, [], { text: "Run a drive: set a goal · say why it matters · thank every giver", bg: "p-pastel", font: "classic" }),
   evPost(MENTOR, "uwe-mentor-first", "Orange County", "pro-reyes", "2w ago", "What mentors loved hearing from you", "The best questions were simple: how did you start, and what would you do at my age. Keep asking those.", 31, [["Sofia", "Senior", "Orange County", "My mentor said the same thing!", "2w ago", 5]]),
-  evPost(MENTOR, "uwe-mentor-next", "Midlands", "pro-whitfield", "2w ago", "After mentor night: your next step", "Pick one mentor and send one question this month. Then post what you learned here.", 27, [], { text: "One mentor. One question. This month.", bg: "p-above-clouds", font: "display" }),
+  evPost(MENTOR, "uwe-mentor-next", "Midlands", "pro-whitfield", "2w ago", "Your next step after mentor night", "Pick one mentor and send one question this month. Then post what you learned here.", 27, [], { text: "After mentor night: pick 1 mentor · send 1 question by Nov 1", bg: "p-above-clouds", font: "display" }),
 ];
 
 // ——— More professionals answering every South Central question (13 Oct

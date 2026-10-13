@@ -72,7 +72,7 @@ import { BarChart } from "../mentorship/charts";
 import { CommunityHoursChart, RankedRows } from "./uwCharts";
 import { LoginsChart, Sparkline } from "@/components/app/engagementCharts";
 import { Panel, ProProfileView, useProfilePage, RULE } from "../ProProfile";
-import { BoardFeedList, BoardThreadRow, CommentRow, SmallGraphics, EventTicket, FeedControls, FeedPostRow, type FeedSort, PlaceTag, QrSheet, QuestionCard, ReplyComposer, partnerAccent } from "../ConnectExperience";
+import { BoardFeedList, BoardThreadRow, CommentRow, EventTicket, FeedControls, FeedPostRow, type FeedSort, PlaceTag, QrSheet, QuestionCard, ReplyComposer, partnerAccent } from "../ConnectExperience";
 import { INSIGHTS, THREADS, type EventBoard, type Insight, type Thread } from "../data";
 import * as D from "./uwData";
 import { registerUwEvent, toEventBoard, uwEventById } from "./uwEvents";
@@ -756,7 +756,7 @@ function StaffPostPage({ p, replies, onReply, onBack, canReply = true }: { p: D.
         <div className="flex flex-col gap-[var(--space-4)]">
           {replies.map((r, i) => {
             const id = `${p.id}-r${i}`;
-            return <CommentRow key={id} id={id} name={r.author.name} photo={r.author.photo} chip="United Way" chipTone="pro" meta={`${r.author.role} · ${r.author.office}`} body={r.body} postedAgo={r.postedAgo} likes={0} liked={!!liked[id]} onLike={(k) => setLiked((m) => ({ ...m, [k]: !m[k] }))} />;
+            return <CommentRow key={id} id={id} name={r.author.name} photo={D.staffPhoto(r.author)} chip="United Way" chipTone="pro" meta={`${r.author.role} · ${r.author.office}`} body={r.body} postedAgo={r.postedAgo} likes={0} liked={!!liked[id]} onLike={(k) => setLiked((m) => ({ ...m, [k]: !m[k] }))} />;
           })}
         </div>
         {canReply && <ReplyComposer as={{ name: me.name, meta: `${me.role} · ${me.office}` }} onPost={onReply} />}
@@ -820,8 +820,8 @@ function StaffFeedRow({ p, replies, onOpen }: { p: D.StaffPost; replies: number;
 /** A United Way staff member's face on the board: United Way's own mark,
  *  never a generated portrait (13 Oct 2026, Chandu: the composer "still
  *  shows a student and student avatar on the United Way POV"). */
-function UwAvatar({ size = 34, who }: { size?: number; /** a staff member with a headshot wears it */ who?: D.StaffMember }) {
-  if (who?.photo) return <Avatar name={who.name} photo={who.photo} size={size} />;
+function UwAvatar({ size = 34, who }: { size?: number; /** the staff member, who wears their own face */ who?: D.StaffMember }) {
+  if (who) return <Avatar name={who.name} photo={D.staffPhoto(who)} size={size} />;
   return (
     <span aria-hidden className="flex flex-none items-center justify-center rounded-full" style={{ width: size, height: size, background: BLUE }}>
       <Image src={D.BRAND.logoWhite} alt="" width={size} height={size} unoptimized className="h-[62%] w-auto" />
@@ -956,14 +956,12 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
         {shown.length === 0 ? (
           <div className="rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}><EmptyView tier={3} line={staffOnly ? C.emptyStaff : C.empty} /></div>
         ) : (
-          <SmallGraphics.Provider value={true}>
           <BoardFeedList wrap={(id, row) => <div key={id} onClickCapture={(e) => { const mine = shown.find((x) => x.id === id && x.kind === "post" && x.i.id.startsWith("uw-vpost-")); if (mine && mine.kind === "post") { e.stopPropagation(); e.preventDefault(); openPost(mine.i); } }}>{row}</div>} items={shown.map((it) => ({
             id: it.id,
             node: it.kind === "q" ? <BoardThreadRow thread={it.t} onOpen={() => openThread(it.t)} cardProps={card(it.id)} />
               : it.kind === "post" ? (D.VOLUNTEERS[it.i.proId] ? <FeedPostRow item={{ key: it.id, kind: "insight", insight: it.i, pro: D.VOLUNTEERS[it.i.proId], reason: "" }} isNew={false} cardProps={card(it.id)} onLockerSave={() => {}} onHide={() => {}} /> : null)
               : <StaffFeedRow p={it.p} replies={repliesFor(it.p).length} onOpen={() => openStaff(it.p)} />,
           }))} />
-          </SmallGraphics.Provider>
         )}
       </div>
     </div>

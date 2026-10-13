@@ -1,3 +1,11 @@
+## 2026-10-13 (night): Staff faces, one graphic size, graphic posts that inform
+
+**Why (Chandu):** "don't give that [the logo] as a pfp for United Way people. Use actual images"; "Don't shrink the graphic posts this much, just use the tall variation of what we had and kill the others. Realistic Twitter proportions"; "graphic posts should be more like posts not answers to questions etc. The quotes need to be relevant and useful to community members. Not random quotes".
+- Staff faces: `staffPhoto()` in uwData.ts. South Central's eight have fixed portraits (interim: the AT&T board's five people plus three Connect pros who never appear on a United Way board: pro-johnson, pro-vega, pro-novak); staff on the other boards get one from the same set by name. Used by UwAvatar, CommentRow (chip "United Way"), ReplyComposer and the event debrief byline. The generated headshots in docs/reference/united-way-staff-headshot-prompts.md replace them when they land (STAFF_PHOTOS).
+- Graphic posts: one size everywhere, the old Tall (300 to 340px, full width on phones). Framed, Wide, the small size and the GraphicLayoutSwitch are gone from the Feed and every board (FeedControls lost its `graphics` prop).
+- All 16 United Way graphics rewritten from quotes to useful cards (what, when, where, who, what it counts for), with post-style titles; four bodies rewritten to match; the duplicate "follow up" post became "Save the date: next convening Nov 14".
+- **Checked:** tsc clean, eslint no new warnings; Lansing feed graphic and staff faces.
+
 ## 2026-10-13 (night): United Way: small graphics, more answers, Students | Team, staff headshot slots; event Posts as one feed
 
 **Why (Chandu):** "The images ... are way too large ... It's just a random quote ... make it much smaller"; "for each student question ... populate more responses from professionals so it looks like there's motion happening"; "Instead of just the 'staff' toggle, let's have it written as 'Students' and 'Team'"; "For the staff people, let's generate actual images of them like we do the Connect professional profiles ... The United Way logo pic is not it"; earlier, "put the pinned recap inside the feed, have more posts from participants".
