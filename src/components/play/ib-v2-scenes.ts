@@ -29,7 +29,7 @@ const DIR = "/images/play/ib/v2";
 // DEMO-ONLY: generated nursing artwork test; existing scripts remain untouched.
 const RN_IMAGES = {
   "rn_rosa_station_dawn": {
-    "src": "/images/play/rn/v2/rosa-station-dawn.png",
+    "src": "/images/play/rn/v2/rosa-station-dawn-anime.png",
     "alt": "rosa station dawn",
     "focal": {
       "x": 0.53,
@@ -41,7 +41,7 @@ const RN_IMAGES = {
     }
   },
   "rn_rosa_explains_station_morning": {
-    "src": "/images/play/rn/v2/rosa-explains-station-morning.png",
+    "src": "/images/play/rn/v2/rosa-explains-station-morning-anime.png",
     "alt": "rosa explains station morning",
     "focal": {
       "x": 0.5,
@@ -53,7 +53,7 @@ const RN_IMAGES = {
     }
   },
   "rn_pov_call_lights_corridor_morning": {
-    "src": "/images/play/rn/v2/pov-call-lights-corridor-morning.png",
+    "src": "/images/play/rn/v2/pov-call-lights-corridor-morning-anime.png",
     "alt": "pov call lights corridor morning",
     "focal": {
       "x": 0.6,
@@ -65,7 +65,7 @@ const RN_IMAGES = {
     }
   },
   "rn_denise_reads_notes_station_afternoon": {
-    "src": "/images/play/rn/v2/denise-reads-notes-station-afternoon.png",
+    "src": "/images/play/rn/v2/denise-reads-notes-station-afternoon-anime.png",
     "alt": "denise reads notes station afternoon",
     "focal": {
       "x": 0.5,
@@ -77,7 +77,7 @@ const RN_IMAGES = {
     }
   },
   "rn_tyler_huddle_morning": {
-    "src": "/images/play/rn/v2/tyler-huddle-morning.png",
+    "src": "/images/play/rn/v2/tyler-huddle-morning-anime.png",
     "alt": "tyler huddle morning",
     "focal": {
       "x": 0.52,
@@ -89,7 +89,7 @@ const RN_IMAGES = {
     }
   },
   "rn_room12_distress_midday": {
-    "src": "/images/play/rn/v2/room12-distress-midday.png",
+    "src": "/images/play/rn/v2/room12-distress-midday-anime.png",
     "alt": "room12 distress midday",
     "focal": {
       "x": 0.65,
@@ -101,7 +101,7 @@ const RN_IMAGES = {
     }
   },
   "rn_pov_med_cart_rosa_afternoon": {
-    "src": "/images/play/rn/v2/pov-med-cart-rosa-afternoon.png",
+    "src": "/images/play/rn/v2/pov-med-cart-rosa-afternoon-anime.png",
     "alt": "pov med cart rosa afternoon",
     "focal": {
       "x": 0.5,
@@ -113,7 +113,7 @@ const RN_IMAGES = {
     }
   },
   "rn_night_report_station_night": {
-    "src": "/images/play/rn/v2/night-report-station-night.png",
+    "src": "/images/play/rn/v2/night-report-station-night-anime.png",
     "alt": "night report station night",
     "focal": {
       "x": 0.5,
@@ -125,7 +125,7 @@ const RN_IMAGES = {
     }
   },
   "rn_rosa_proud_station_late_day": {
-    "src": "/images/play/rn/v2/rosa-proud-station-late-day.png",
+    "src": "/images/play/rn/v2/rosa-proud-station-late-day-anime.png",
     "alt": "rosa proud station late day",
     "focal": {
       "x": 0.5,
@@ -137,7 +137,7 @@ const RN_IMAGES = {
     }
   },
   "rn_room12_anxious_morning": {
-    "src": "/images/play/rn/v2/room12-anxious-morning.png",
+    "src": "/images/play/rn/v2/room12-anxious-morning-anime.png",
     "alt": "room12 anxious morning",
     "focal": {
       "x": 0.65,
@@ -149,7 +149,7 @@ const RN_IMAGES = {
     }
   },
   "rn_rosa_concerned_station_morning": {
-    "src": "/images/play/rn/v2/rosa-concerned-station-morning.png",
+    "src": "/images/play/rn/v2/rosa-concerned-station-morning-anime.png",
     "alt": "rosa concerned station morning",
     "focal": {
       "x": 0.5,
@@ -233,7 +233,7 @@ const RN_IMAGES = {
     }
   },
   "rn_denise_concerned_station_afternoon": {
-    "src": "/images/play/rn/v2/denise-concerned-station-afternoon.png",
+    "src": "/images/play/rn/v2/denise-concerned-station-afternoon-anime.png",
     "alt": "denise concerned station afternoon",
     "focal": {
       "x": 0.5,

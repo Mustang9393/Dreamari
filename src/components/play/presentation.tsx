@@ -11,7 +11,13 @@ import { createContext, useContext } from "react";
 // `coreKit` (9 Oct 2026): the level was passed through toCoreLevel
 // (coreKit.ts), so anything still drawn by the player itself rather than by
 // a beat field (the foil seal, the ending backdrop) stays out too.
-export type Presentation = { directed: boolean; cinematic?: boolean; coreKit?: boolean };
+export type Presentation = {
+  directed: boolean;
+  cinematic?: boolean;
+  coreKit?: boolean;
+  /** v2 comparison only: acknowledge a fully corrected matching board. */
+  creditCorrections?: boolean;
+};
 
 const PresentationContext = createContext<Presentation>({ directed: false });
 

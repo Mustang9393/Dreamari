@@ -237,7 +237,8 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
   // The core kit (coreKit.ts): the level's beats are already plain; this
   // also keeps the player's own bespoke celebrations out.
   const coreKit = Boolean(level.coreKit);
-  const presentation = useMemo(() => ({ directed, cinematic, coreKit }), [directed, cinematic, coreKit]);
+  // DEMO-ONLY: correction credit belongs to v2; v1 keeps its existing rules.
+  const presentation = useMemo(() => ({ directed, cinematic, coreKit, creditCorrections: v2 }), [directed, cinematic, coreKit, v2]);
   // The optional run-up (Level.preGame): the start card shows when the level
   // opens fresh, and the HUD's ? reopens it at any time. Never a gate.
   // DERIVED for a fresh run, not seeded into state: on the first paint the

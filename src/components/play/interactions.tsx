@@ -2914,15 +2914,15 @@ export function BossOverlay({ beat, onResolve, locked, accent = "var(--primary)"
  *
  *  Now: either column can start a pair, a right answer flashes green and clears
  *  both tiles off the board, a wrong one shakes red and lets go. The board
- *  emptying is the progress bar. The handoff's rule still holds -- no partial
- *  credit, one wrong pair scores the beat Wrong -- it is just enforced by
- *  remembering that a mistake happened rather than by a submit step.
+ *  emptying is the progress bar. V1 keeps the handoff's strict rule: one
+ *  wrong pair scores the beat Wrong. V2 acknowledges a fully corrected
+ *  board with partial credit; a first-try completion is still Best.
  */
 type Side = "term" | "def";
 type TileState = "idle" | "picked" | "right" | "wrong" | "done";
 
 export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Resolve }) {
-  const { directed } = usePresentation();
+  const { directed, creditCorrections } = usePresentation();
   // Definitions are shuffled once per mount, deterministically per beat so the
   // layout never jumps between renders.
   const defs = useMemo(
@@ -2968,8 +2968,12 @@ export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Res
       settled.current = true;
       playSweep();
       window.setTimeout(() => {
-        const right = !missed.current;
-        onResolve(right ? "best" : "wrong", right ? beat.whenRight : beat.whenWrong);
+        const firstTry = !missed.current;
+        // v2: every pair is now correct, so acknowledge the recovery with
+        // partial credit and the existing success line. v1's strict
+        // first-attempt rule remains exactly as it was.
+        const tier = firstTry ? "best" : creditCorrections ? "acceptable" : "wrong";
+        onResolve(tier, firstTry || creditCorrections ? beat.whenRight : beat.whenWrong);
       }, 420);
     }, ok ? 260 : 520);
   }
