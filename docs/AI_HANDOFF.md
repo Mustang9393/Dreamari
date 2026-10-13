@@ -1,3 +1,8 @@
+## 2026-10-13: Explore rows without counts; colour partner logos
+
+**Why (Chandu):** "Remove the number counters next to the row titles on explore. No numbers." and "In the landing page. Use colored logos instead of the black and white ones."
+- `ExploreLab.tsx`: the row title no longer prints its card count.
+- `PartnerTicker.tsx`: the partner wall shows its original colour artwork everywhere. On a dark page it sits on a white rounded panel (sponsor-wall style) so the black marks (JPMorgan, Brand Licensing, Jimmy Choo, Versace) stay readable; the greyscale-invert filter is removed.
 ## 2026-10-13: United Way boards: Communities, code-gated events with galleries, one Impact tab
 
 **Why (Chandu):** "Rename team to communities and have it be a board where students <> employee <> volunteers interactions happen like in our other boards ... 4 boards for the 4 groups and one for across communities ... a switch for employee only ... it needs better UI, right now it's not very intuitive." Then: "The order should be: Communities > Events > Programs > Impact, that's it", "Talk needs better UX and UI", programs "filter by these 4 communities etc and one shared across all", events "require a code to enter ... have a gallery with photos", Impact "consolidated impact and by community", "Rename Shifts to something better".

@@ -113,7 +113,7 @@ export function BuiltByStamp() {
         <p className="mx-auto mt-5 max-w-[720px] text-[clamp(16px,calc(0.6vw/var(--vz,1))+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
           {DO_COPY.lead}
         </p>
-        {/* Both audiences use the original partner composition; this view is monochrome. */}
+        {/* Both audiences use the original partner composition, in colour. */}
         <PartnerLogoGrid tone="dark" className="mx-auto mt-10 w-full max-w-[1100px] sm:mt-12" />
       </div>
     </section>

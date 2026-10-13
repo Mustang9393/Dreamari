@@ -248,7 +248,9 @@ function Rail({ title, subtitle, count, onViewAll, peek = false, children }: { t
       <div className="flex flex-col gap-[var(--space-1)]">
         <div className="flex items-baseline justify-between gap-[12px]">
           <h2 className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            {title}{typeof count === "number" && <span className="pl-[8px] text-[15px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{count}</span>}
+            {/* No count beside a row title (13 Oct 2026, Chandu: "Remove the
+               number counters next to the row titles on explore. No numbers.") */}
+            {title}
           </h2>
           {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
         </div>

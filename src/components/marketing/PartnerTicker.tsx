@@ -60,7 +60,12 @@ const PARTNERS = [
  */
 export function PartnerLogoGrid({ className = "", tone = "dark" }: { className?: string; tone?: "dark" | "light" }) {
   return (
-    <div className={className} aria-label="Corporate partners" role="group">
+    // Colour logos everywhere (13 Oct 2026, Chandu: "use colored logos
+    // instead of the black and white ones"). On a dark page the wall sits on
+    // a white panel, the way a sponsor wall does, so the black marks
+    // (JPMorgan, Brand Licensing, Jimmy Choo, Versace) still read; the old
+    // greyscale-invert filter is gone.
+    <div className={`${className} ${tone === "dark" ? "rounded-[24px] bg-white px-[clamp(12px,3vw,40px)] py-[clamp(10px,2.4vw,32px)]" : ""}`} style={tone === "dark" ? { boxShadow: "0 30px 80px -40px rgba(0,0,0,0.7)" } : undefined} aria-label="Corporate partners" role="group">
       <Image
         src="/images/marketing/partners/partner-composition.png"
         width={1920}
@@ -69,9 +74,6 @@ export function PartnerLogoGrid({ className = "", tone = "dark" }: { className?:
         unoptimized
         loading="lazy"
         className="block h-auto w-full"
-        // Preserve the internal shading and lettering of badges (GDC,
-        // Pop-Tarts, IWCE, etc.) instead of flattening them to silhouettes.
-        style={tone === "dark" ? { filter: "grayscale(1) invert(1) contrast(0.6) brightness(1.4)", opacity: 0.85 } : undefined}
       />
       <ul className="sr-only">
         {PARTNERS.map((name) => <li key={name}>{name}</li>)}
