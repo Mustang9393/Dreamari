@@ -351,3 +351,31 @@ html.light .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-la
    gold at 40% opacity (grey on pale yellow measured under 2:1 in light). */
 html.light .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] :is(.glossary-profit-builder > button, .glossary-power-play-screen > button):disabled { opacity: 1 !important; background: #e4e9f2 !important; color: #4f586c !important; box-shadow: 0 4px 0 #c9d1e4 !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] :is(.glossary-profit-builder > button, .glossary-power-play-screen > button):disabled { opacity: 1 !important; background: color-mix(in srgb, var(--sig-text) 12%, var(--sig-bg)) !important; color: var(--sig-mut) !important; box-shadow: 0 4px 0 rgba(0,0,0,.35) !important; }
+
+/* Signal's welcome, readable at every title length (14 Oct 2026, Chandu:
+   "Signal is hard to read, the welcome screen for Investing Basics etc. ...
+   because the title is long [it] messes up scale and readability"). The
+   copy column was 388px with a 89px pixel headline, so "Dream Sneakers
+   Wants to Grow" broke into four lines; the small labels were 10-11px pixel
+   type. Now: a wider column, the headline sized by its length, and every
+   small line in the body face at a readable size. Pixel type stays on the
+   headline and the value only. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy { width: min(620px, 100%) !important; max-width: min(620px, 100%) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy h1.glossary-welcome-story em { font-size: clamp(40px, calc(4.8vw / var(--vz, 1)), 74px) !important; line-height: 1.02 !important; text-wrap: balance; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy h1.glossary-welcome-story[data-length="long"] em { font-size: clamp(36px, calc(4vw / var(--vz, 1)), 62px) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy .glossary-welcome-kicker { font: 700 14px/1.4 "Roboto", var(--font-body), system-ui, sans-serif !important; letter-spacing: .08em !important; text-transform: uppercase; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-valuation-kicker { font: 700 13px/1.4 "Roboto", var(--font-body), system-ui, sans-serif !important; letter-spacing: .06em !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-valuation-next { font-size: 15px !important; line-height: 1.4 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-valuation-note { font-size: 13px !important; line-height: 1.4 !important; opacity: .85; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-cta { font-size: 18px !important; }
+/* phones and narrow windows: one column, the scene above, the copy at full
+   width, so nothing wraps one word per line */
+@media (max-width: 760px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-scene[data-atmosphere] { grid-template-columns: 1fr !important; width: 100% !important; gap: 8px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-world { order: -1; width: min(100%, 300px) !important; height: clamp(130px, calc(22dvh / var(--vz, 1)), 200px) !important; justify-self: center; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy { width: 100% !important; max-width: 100% !important; align-items: center; text-align: center; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy h1.glossary-welcome-story em,
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy h1.glossary-welcome-story[data-length="long"] em { font-size: clamp(34px, calc(10vw / var(--vz, 1)), 46px) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy > p { font-size: 18px !important; max-width: 32ch; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy .glossary-welcome-cta { width: 100%; }
+}
