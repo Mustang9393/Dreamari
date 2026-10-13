@@ -534,3 +534,7 @@
   margin-inline: auto !important;
 }
 
+
+/* the whole level card is the click target (14 Oct 2026) */
+.glossary-game-shell.glossary-game-lab .glossary-map-rung { cursor: pointer; transition: border-color .15s, background-color .15s; }
+.glossary-game-shell.glossary-game-lab .glossary-map-rung:hover { border-color: color-mix(in srgb, var(--foreground) 35%, var(--glass-border)); }

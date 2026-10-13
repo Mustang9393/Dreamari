@@ -3002,7 +3002,10 @@ function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: 
               "--map-y": `${50 + Math.sin(orbitAngle) * orbitRadius}%`,
             } as React.CSSProperties;
             return (
-              <div className={`glossary-map-rung glossary-map-rung-${slot} is-${stateOf(index)} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={mapStyle} data-tier={tier} key={title}>
+              // the whole card picks the level, not just its badge (14 Oct
+              // 2026, Chandu: "the whole card should be clickable"); the badge
+              // stays the keyboard button
+              <div className={`glossary-map-rung glossary-map-rung-${slot} is-${stateOf(index)} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={mapStyle} data-tier={tier} key={title} onClick={() => setSelected(index)}>
                 {firstOfTier && <span className="glossary-map-phase">{phase}</span>}
                 <span className="glossary-map-connector" aria-hidden />
                 <button type="button" onClick={() => setSelected(index)} aria-pressed={selected === index} aria-current={stateOf(index) === "current" ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${STATE_LABEL[stateOf(index)].toLowerCase()}`}>
