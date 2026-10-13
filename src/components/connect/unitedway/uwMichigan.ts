@@ -153,7 +153,7 @@ const EVENTS: UwEvent[] = [
   // DEMO-ONLY: a past statewide meetup whose board stays open (12 Oct
   // 2026), so Michigan's Events show the conversation after the day
   {
-    id: "mi-e-suw-meetup", kind: "Online meetup", title: "Student United Way meetup", where: "Online", virtual: true, about: "Student United Way groups from across Michigan met online.", who: "High school students", date: { month: "Sep", day: 30, time: "6:00 PM", year: 2026 }, going: 96, chapter: null,
+    id: "mi-e-suw-meetup", kind: "Online meetup", title: "Student United Way meetup", where: "Online", virtual: true, about: "Student United Way groups from across Michigan met online.", who: "High school students", date: { month: "Sep", day: 30, time: "6:00 PM", year: 2026 }, going: 96, chapter: null, joined: true,
     followUp: {
       closesOn: "November 11, 2026", students: 96, pros: 5, posts: 9,
       // DEMO-ONLY: the code and the photo count; the photos are United Ways' own

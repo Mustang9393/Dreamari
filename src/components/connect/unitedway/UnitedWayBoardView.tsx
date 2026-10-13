@@ -51,7 +51,7 @@ import Image from "next/image";
 import { Fragment, createContext, useContext, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Backpack, Briefcase, Calendar, CalendarPlus, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, FileText, GraduationCap, HandHeart, Handshake, Heart, Lightbulb, MapPin, Megaphone, MessageCircleQuestion, MessageSquareOff, MessagesSquare, Phone, Pin, Plus, ShieldCheck, Sparkles, Sun, Timer, Users, X, Crown } from "lucide-react";
+import { ArrowUpRight, Backpack, Briefcase, Calendar, CalendarPlus, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, FileText, GraduationCap, HandHeart, Handshake, Heart, Lightbulb, MapPin, Megaphone, MessageCircleQuestion, MessageSquareOff, MessagesSquare, PenLine, Phone, Pin, Plus, ShieldCheck, Sparkles, Sun, Timer, Users, X, Crown } from "lucide-react";
 import { setReplyAs } from "@/lib/replyAs";
 import { downloadCalendarFile } from "@/lib/calendarFile";
 import { toggleEventReminder, useEventReminders } from "@/lib/eventReminders";
@@ -64,13 +64,15 @@ import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { EmptyView } from "@/components/app/states";
 import { Listbox } from "@/components/app/Listbox";
+import { PostComposer } from "../PostComposer";
+import { TextTabs } from "@/components/app/TextTabs";
 import { Avatar, CONTACT_INFO, CONTACT_WARNING, ConnectNav, InlineAsk, PrimaryCta, QuietCta, SectionHead, SectionSurface } from "../primitives";
 import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart } from "../mentorship/charts";
 import { CommunityHoursChart, RankedRows } from "./uwCharts";
 import { LoginsChart, Sparkline } from "@/components/app/engagementCharts";
 import { Panel, ProProfileView, useProfilePage, RULE } from "../ProProfile";
-import { AlignedInsightRow, CommentRow, EventTicket, InsightCard, PlaceTag, QrSheet, QuestionCard, ReplyComposer, partnerAccent } from "../ConnectExperience";
+import { BoardFeedList, BoardThreadRow, CommentRow, EventTicket, FeedControls, FeedPostRow, type FeedSort, PlaceTag, QrSheet, QuestionCard, ReplyComposer, partnerAccent } from "../ConnectExperience";
 import { INSIGHTS, THREADS, type EventBoard, type Insight, type Thread } from "../data";
 import * as D from "./uwData";
 import { registerUwEvent, toEventBoard, uwEventById } from "./uwEvents";
@@ -391,29 +393,6 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
   );
 }
 
-/** One opportunity a professional shared: who shared it (their face opens
- *  their profile), what it is, where, and when. */
-function SharedRow({ o }: { o: D.SharedOpportunity }) {
-  const openPro = useContext(OpenPro);
-  const pro = D.VOLUNTEERS[o.proId];
-  return (
-    <li className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
-      <div className="flex items-center justify-between gap-[8px]">
-        <Pill>{o.kind}</Pill>
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{o.when}</span>
-      </div>
-      <div className="flex flex-col gap-[4px]">
-        <span className="text-[16px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{o.title}</span>
-        <span className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{o.org} · {o.line}</span>
-      </div>
-      {pro && (
-        <button type="button" onClick={() => openPro(o.proId)} className="dm-quiet flex w-fit cursor-pointer items-center gap-[8px] rounded-full pr-[10px] text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>
-          <Avatar name={pro.name} size={26} /> Shared by {pro.name.split(" ")[0]}
-        </button>
-      )}
-    </li>
-  );
-}
 
 /** A row of volunteer faces that open their profiles. */
 function ProStack({ ids }: { ids: string[] }) {
@@ -446,16 +425,19 @@ function ProgramsGrid({ programs, joined, open, onPost, stats }: { programs: D.P
   // them (they run there too), so every community's chip leads somewhere
   const fits = (p: D.Program, k: string) => k === "all" || (k === "shared" ? p.chapter === null : p.chapter === k || p.chapter === null);
   const n = (k: string) => programs.filter((p) => fits(p, k)).length;
-  const chips = [{ key: "all", label: "All", n: programs.length }, { key: "shared", label: where(null), n: n("shared") }, ...board.chapters.map((c) => ({ key: c.id, label: c.short, n: n(c.id) }))].filter((c) => c.key === "all" || c.n > 0);
+  // one all-encompassing chip, never "All" beside "Whole region" (13 Oct
+  // 2026, Chandu: "all and whole region should be the same thing")
+  const chips = [{ key: "all", label: where(null), n: programs.length }, ...board.chapters.map((c) => ({ key: c.id, label: c.short, n: n(c.id) }))].filter((c) => c.key === "all" || c.n > 0);
   // the community's own programs first
-  const list = programs.filter((p) => fits(p, place)).sort((a, b) => (a.chapter === null ? 1 : 0) - (b.chapter === null ? 1 : 0));
+  const at = chips.some((c) => c.key === place) ? place : "all";
+  const list = programs.filter((p) => fits(p, at)).sort((a, b) => (a.chapter === null ? 1 : 0) - (b.chapter === null ? 1 : 0));
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <div className="min-w-0 flex-1"><CountChips ariaLabel="Community" options={chips} value={chips.some((c) => c.key === place) ? place : "all"} onChange={setPlace} /></div>
+        <div className="min-w-0 flex-1"><CountChips ariaLabel="Community" options={chips} value={at} onChange={setPlace} /></div>
         {onPost && <PrimaryCta size="sm" style={SOLID} onClick={onPost}><Plus className="h-4 w-4" aria-hidden /> {D.POST_UI.title}</PrimaryCta>}
       </div>
-      {list.length === 0 && <EmptyView tier={5} query={place} line="Try another community." cta="Show all" onAction={() => setPlace("all")} />}
+      {list.length === 0 && <EmptyView tier={5} query={at} line="Try another community." cta="Show all" onAction={() => setPlace("all")} />}
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
         {list.map((p) => {
           const st = stats?.find((r) => r.program === p.title);
@@ -502,7 +484,7 @@ function UwEventGrid({ events, staff = false }: { events: D.UwEvent[]; /** the s
           const key = staff ? `cohost:${e.id}` : e.id;
           const host = board.chapters.find((c) => c.id === e.chapter)?.short;
           return (
-            <EventTicket key={e.id} event={ev} joined={!!nav?.isEventJoined?.(e.id)} onOpenEvent={(id) => open(id, staff && isPast(e) ? "posts" : undefined)} onEnterCode={open} onQr={setQr}
+            <EventTicket key={e.id} gated event={ev} joined={!!nav?.isEventJoined?.(e.id)} onOpenEvent={(id) => open(id, staff && isPast(e) ? "posts" : undefined)} onEnterCode={open} onQr={setQr}
               reminded={!!reminders[key]} onRemind={isPast(e) ? undefined : () => { if (toggleEventReminder(key)) toast(staff ? S.cohostToast : D.EVENTS_UI.remindToast); }}
               remindLabels={staff ? [S.cohost, S.cohosting] : undefined}
               hostLine={staff ? `${host ? S.hostedBy(host) : board.staff.all}${e.followUp ? ` · Attendee code ${e.followUp.code}` : ""}` : undefined}
@@ -529,7 +511,7 @@ function StudentEvents({ events, where }: { events: D.UwEvent[]; /** the board's
       {/* one tab row (Upcoming, Past); where it happens is a dropdown, never
          a second row of the same tabs */}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <div className="w-fit"><Segmented ariaLabel="When" value={when} onChange={setWhen} options={U.when.map((w) => ({ ...w, label: `${w.label} ${w.key === "upcoming" ? upcoming.length : past.length}` }))} /></div>
+        <TextTabs ariaLabel="When" layoutId="uw-when" value={when} onChange={setWhen} items={U.when.map((w) => ({ key: w.key, label: `${w.label} (${w.key === "upcoming" ? upcoming.length : past.length})` }))} />
         <span className="flex flex-wrap items-center gap-[8px]">
         {where}
         <Listbox ariaLabel="Online or in person" value={filter} onChange={(v) => setFilter(v as D.EventFilter)} options={U.filters.map((f) => ({ value: f.key, label: f.label }))}
@@ -670,36 +652,6 @@ function CountChips<K extends string>({ options, value, onChange, ariaLabel }: {
 const agoAll = (ago: string) => { const m = /(\d+)\s*([mhdw])/.exec(ago); return m ? Number(m[1]) * ({ m: 1, h: 60, d: 1440, w: 10080 } as const)[m[2] as "m" | "h" | "d" | "w"] : 0; };
 type Show = typeof D.COMMUNITY_UI.show[number]["value"];
 
-/** A past event whose board is still open: one row into it. */
-function EventFollowRows({ space = "all" }: { space?: string }) {
-  const board = useBoard();
-  const { open } = useContext(EventsCtx);
-  const chapterId = board.chapters.find((c) => c.short === space)?.id ?? null;
-  const past = board.events.filter((e) => isPast(e) && e.chapter === chapterId);
-  if (past.length === 0) return null;
-  return (
-    <section className="flex flex-col gap-[var(--space-3)]">
-      <Eyebrow tone="var(--muted-foreground)">{D.TALK_UI.fromEvents}</Eyebrow>
-      <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
-        {past.map((e) => (
-          <li key={e.id}>
-            <button type="button" onClick={() => open(e.id)} className="dm-tap flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-lg)] border p-[14px] text-left" style={ITEM}>
-              <DateTile month={e.date.month} day={e.date.day} size="sm" />
-              <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
-                <span className="truncate text-[15px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{e.title}</span>
-                <span className="flex flex-wrap items-center gap-x-[10px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  <span className="flex items-center gap-[6px]"><span aria-hidden className="size-[7px] rounded-full" style={{ background: GOOD }} />{D.EVENTS_UI.open}</span>
-                  <span>{e.followUp!.posts} posts</span>
-                </span>
-              </span>
-              <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-            </button>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
 
 // ——— Team: United Way staff across offices (12 Oct 2026) ———
 // The board's first view. Chandu: "the ask was mainly about the employees
@@ -737,32 +689,6 @@ function StaffByline({ who, ago, size = 26 }: { who: D.StaffMember; ago: string;
   );
 }
 
-/** One staff post in the list: the same flat row as a question card. */
-function StaffPostCard({ p, replies, onOpen }: { p: D.StaffPost; replies: StaffReply[]; onOpen: () => void }) {
-  const offices = [...new Set(replies.map((r) => r.author.office).filter((o) => o !== p.author.office))];
-  const done = p.tasks?.filter((t) => t.done).length ?? 0;
-  return (
-    <div className="group relative rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]"><span className="sr-only">Open: {p.title}</span></button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
-      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
-      <div className="relative flex flex-col gap-[10px] pr-[22px]">
-        <StaffByline who={p.author} ago={p.postedAgo} />
-        {p.public ? <span className="flex items-center gap-[6px]"><span className="inline-flex items-center gap-[5px] rounded-full px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold" style={SOLID}><Megaphone className="h-3 w-3" aria-hidden />{D.COMMUNITY_UI.fromUw}</span>{p.pinned && <span className="inline-flex items-center gap-[4px] text-[11.5px] leading-[16px] font-bold" style={{ color: "var(--muted-foreground)" }}><Pin className="h-3 w-3" aria-hidden />{D.STAFF_UI.pinned}</span>}</span> : <KindLabel kind={p.kind} pinned={p.pinned} />}
-        <span className="flex flex-col gap-[4px]">
-          <span className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{p.title}</span>
-          <span className="line-clamp-2 text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{p.body}</span>
-        </span>
-        <span className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {replies.length > 0 && <span className="flex items-center gap-[5px]"><MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {replies.length} {replies.length === 1 ? "reply" : "replies"}</span>}
-          {offices.length > 0 && <span>From {offices.join(", ")}</span>}
-          {p.resource && <span className="flex items-center gap-[5px]"><FileText className="h-3.5 w-3.5" aria-hidden />{p.resource.meta}</span>}
-          {p.tasks && <span className="flex items-center gap-[5px]"><CheckCircle2 className="h-3.5 w-3.5" aria-hidden style={{ color: GOOD }} />{done} of {p.tasks.length} done</span>}
-        </span>
-      </div>
-    </div>
-  );
-}
 
 /** Who does what, one owner per office. */
 function TaskList({ tasks }: { tasks: NonNullable<D.StaffPost["tasks"]> }) {
@@ -855,7 +781,51 @@ function StaffPostPage({ p, replies, onReply, onBack, canReply = true }: { p: D.
 // replies from two places) = the shared board; else its poster's community.
 
 type FeedItem = { id: string; space: string; at: number; pinned?: boolean } & ({ kind: "q"; t: Thread } | { kind: "post"; i: Insight } | { kind: "staff"; p: D.StaffPost });
-const isRecent = (ago: string) => /just now|\d+\s*[mh]\b/i.test(ago);
+
+/** A United Way staff post as a feed row, the same shape as the board's
+ *  question and post rows: avatar, name, role and office, the post, then
+ *  its counts. Public posts carry the United Way chip. */
+function StaffFeedRow({ p, replies, onOpen }: { p: D.StaffPost; replies: number; onOpen: () => void }) {
+  const done = p.tasks?.filter((t) => t.done).length ?? 0;
+  return (
+    <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer"><span className="sr-only">Open: {p.title}</span></button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+      <span className="relative flex-none self-start"><Avatar name={p.author.name} size={44} /></span>
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        <span className="flex min-w-0 flex-wrap items-center gap-x-[8px] gap-y-[2px]">
+          <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{p.author.name}</span>
+          {p.public ? <span className="inline-flex items-center gap-[4px] rounded-full px-[8px] py-[1px] text-[11.5px] leading-[16px] font-bold" style={SOLID}><Megaphone className="h-3 w-3" aria-hidden />{D.COMMUNITY_UI.fromUw}</span> : <KindLabel kind={p.kind} />}
+          {p.pinned && <span className="inline-flex items-center gap-[4px] text-[11.5px] font-bold" style={{ color: "var(--muted-foreground)" }}><Pin className="h-3 w-3" aria-hidden />{D.STAFF_UI.pinned}</span>}
+        </span>
+        <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+          <span className="truncate">{p.author.role}</span><PlaceTag place={p.author.office} /><span aria-hidden className="flex-none">·</span><span className="flex-none">{p.postedAgo}</span>
+        </span>
+        <h3 className="mt-[12px] max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>{p.title}</h3>
+        {p.body && <p className="mt-[6px] line-clamp-3 max-w-[60ch] text-[14.5px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{p.body}</p>}
+        <span className="mt-[14px] flex flex-wrap items-center gap-x-[var(--space-5)] gap-y-[4px] text-[13px] font-semibold" style={{ color: "color-mix(in srgb, var(--muted-foreground) 80%, transparent)" }}>
+          {replies > 0 && <span className="flex items-center gap-[6px]"><MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {replies}</span>}
+          {p.resource && <span className="flex items-center gap-[6px]"><FileText className="h-[16px] w-[16px]" aria-hidden />{p.resource.meta}</span>}
+          {p.tasks && <span className="flex items-center gap-[6px]"><CheckCircle2 className="h-[16px] w-[16px]" aria-hidden style={{ color: GOOD }} />{done} of {p.tasks.length} done</span>}
+        </span>
+      </div>
+    </article>
+  );
+}
+
+/** Staff only, as an on/off switch: it changes who sees the board, so it
+ *  reads as a setting rather than another row of tabs. */
+function StaffSwitch({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)} className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-full py-[4px] pr-[4px] pl-[2px] text-[13.5px] font-bold" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
+      <ShieldCheck className="h-4 w-4 flex-none" aria-hidden style={{ color: on ? D.BRAND.yellow : "var(--muted-foreground)" }} />
+      {D.COMMUNITY_UI.audience[1].label}
+      <span aria-hidden className="relative h-[22px] w-[38px] flex-none rounded-full transition-colors duration-200" style={{ background: on ? D.BRAND.yellow : "color-mix(in srgb, var(--foreground) 18%, transparent)" }}>
+        <span className="absolute top-[3px] size-[16px] rounded-full bg-white shadow transition-[left] duration-200" style={{ left: on ? 19 : 3 }} />
+      </span>
+    </button>
+  );
+}
 
 function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThread, openPost, openStaff, onAsk, onStaffPost, onVolunteerPost }: {
   role: "staff" | "student" | "volunteer";
@@ -864,8 +834,8 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
   openThread: (t: Thread) => void; openPost: (i: Insight) => void; openStaff: (p: D.StaffPost) => void;
   /** each returns the new item's id, so it lands on the board it was posted to */
   onAsk: (text: string, place: string) => string;
-  onStaffPost: (kind: D.StaffPostKind, text: string, isPublic: boolean) => string;
-  onVolunteerPost: (text: string, place: string) => string;
+  onStaffPost: (title: string, body: string, isPublic: boolean) => string;
+  onVolunteerPost: (post: { title: string; body: string; graphic?: Insight["graphic"] }, place: string) => string;
 }) {
   const board = useBoard();
   const C = D.COMMUNITY_UI;
@@ -873,11 +843,9 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
   const staffOnly = role === "staff" && audience === "staff";
   // where the things posted here went
   const [placed, setPlaced] = useState<Record<string, string>>({});
-  const [kind, setKind] = useState<D.StaffPostKind>("update");
-  const [text, setText] = useState("");
+  const [composing, setComposing] = useState(false);
   const [saved, setSaved] = useState<Record<string, boolean>>({});
   const [helpful, setHelpful] = useState<Record<string, boolean>>({});
-  const leaks = CONTACT_INFO.test(text);
   const across = new Set(board.across ?? []);
   const shared = (id: string, place: string | undefined, others: (string | undefined)[]) =>
     across.has(id) || (!board.across && new Set([place, ...others].filter(Boolean)).size >= 2);
@@ -893,111 +861,86 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
   const spaces = [{ key: "all", label: C.across, line: C.acrossLine }, ...board.chapters.map((c) => ({ key: c.short, label: c.name, line: c.place }))];
   const current = spaces.find((x) => x.key === space) ?? spaces[0];
   const inSpace = pool.filter((it) => it.space === current.key);
+  // Questions or Posts, like every other board: students land on
+  // Questions, staff and volunteers on Posts
+  const feedTab: "questions" | "posts" = show === "questions" || show === "posts" ? show : role === "student" ? "questions" : "posts";
+  const [sort, setSort] = useState<FeedSort>("recent");
+  const score = (it: FeedItem) => (it.kind === "q" ? it.t.helpful : it.kind === "post" ? it.i.helpful : 0);
   const shown = inSpace
-    .filter((it) => staffOnly || show === "all" || (show === "questions" ? it.kind === "q" : it.kind !== "q"))
-    .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || a.at - b.at);
+    .filter((it) => staffOnly || (feedTab === "questions" ? it.kind === "q" : it.kind !== "q"))
+    .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || (sort === "best" ? score(b) - score(a) : a.at - b.at));
+  const card = (id: string) => ({ saved: !!saved[id], onSave: () => flip(setSaved, id), helpful: !!helpful[id], onHelpful: () => flip(setHelpful, id) });
   const flip = (set: typeof setSaved, id: string) => set((m) => ({ ...m, [id]: !m[id] }));
   const where = current.key === "all" ? C.across : current.label;
-  const send = () => {
-    const t = text.trim();
-    const home = current.key === "all" ? board.staff.me.office : current.key;
-    const id = role === "staff" ? onStaffPost(staffOnly ? kind : "update", t, !staffOnly) : role === "volunteer" ? onVolunteerPost(t, home) : onAsk(t, home);
-    setPlaced((m) => ({ ...m, [id]: current.key }));
-    setText("");
+  const homeOf = (key: string) => (key === "all" ? board.staff.me.office : key);
+  // students ask; staff and volunteers post, the way pros post on every
+  // other board (13 Oct 2026, Chandu: "Only student POV gets ask. Others
+  // get the composer we gave for the other boards + feeds")
+  const publish = ({ title, body, graphic, boardId }: { title: string; body: string; graphic?: Insight["graphic"]; boardId: string }) => {
+    const id = role === "staff" ? onStaffPost(title, body, !staffOnly) : onVolunteerPost({ title, body, graphic }, homeOf(boardId));
+    setPlaced((m) => ({ ...m, [id]: boardId }));
+    setSpace(boardId);
   };
-  // who's been active here, for the header's faces
-  const faces = [...new Set(inSpace.flatMap((it) => it.kind === "q" ? [it.t.handle] : it.kind === "post" ? [D.VOLUNTEERS[it.i.proId]?.name ?? ""] : [it.p.author.name]).filter(Boolean))].slice(0, 5);
+  const volunteerPro = D.VOLUNTEERS[board.volunteerIds.find((id) => D.VOLUNTEERS[id]?.org === board.team.you) ?? board.volunteerIds[0]];
   const me = role === "staff" ? board.staff.me.name : role === "volunteer" ? D.VOLUNTEERS[board.volunteerIds.find((id) => D.VOLUNTEERS[id]?.org === board.team.you) ?? board.volunteerIds[0]]?.name ?? "You" : "Jordan";
-  const tint = staffOnly ? D.BRAND.yellow : BLUE;
   return (
-    <div className="grid grid-cols-1 gap-[var(--space-5)] lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start">
-      {/* the boards: a rail on wide screens, a sideways row on a phone */}
-      <nav aria-label={C.boards} className="lg:sticky lg:top-[88px]">
-        <span className="mb-[8px] hidden px-[4px] lg:block"><Eyebrow tone="var(--muted-foreground)">{C.boards}</Eyebrow></span>
-        <ul className="flow-scroll -mx-[4px] flex gap-[8px] overflow-x-auto px-[4px] py-[2px] lg:mx-0 lg:flex-col lg:gap-[4px] lg:overflow-visible lg:p-0">
-          {spaces.map((x, i) => {
-            const on = x.key === current.key;
-            const items = pool.filter((it) => it.space === x.key);
-            const fresh = items.filter((it) => isRecent(it.kind === "q" ? it.t.postedAgo : it.kind === "post" ? it.i.postedAgo : it.p.postedAgo)).length;
-            return (
-              <li key={x.key} className={`flex-none lg:flex-auto ${i === 0 ? "lg:mb-[8px] lg:border-b lg:pb-[8px]" : ""}`} style={{ borderColor: RULE }}>
-                <button type="button" aria-current={on ? "true" : undefined} onClick={() => setSpace(x.key)} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left lg:border-transparent" style={{ borderColor: on ? `color-mix(in srgb, ${tint} 55%, transparent)` : "var(--glass-border)", background: on ? `color-mix(in srgb, ${tint} 20%, transparent)` : "transparent" }}>
-                  <span className="flex size-[28px] flex-none items-center justify-center rounded-full" style={{ background: on ? tint : "var(--glass-surface-2)", color: on ? (staffOnly ? "#1a1300" : "#fff") : "var(--muted-foreground)" }}>
-                    {x.key === "all" ? <Users className="h-3.5 w-3.5" aria-hidden /> : <MapPin className="h-3.5 w-3.5" aria-hidden />}
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-[14px] leading-[18px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{x.key === "all" ? x.label : x.key}</span>
-                    <span className="text-[11.5px] leading-[15px] font-semibold whitespace-nowrap tabular-nums" style={{ color: "var(--muted-foreground)" }}>{items.length} {items.length === 1 ? "post" : "posts"}</span>
-                  </span>
-                  {fresh > 0 && <span className="flex-none rounded-full px-[7px] py-[1px] text-[11px] leading-[16px] font-extrabold tabular-nums" style={{ background: tint, color: staffOnly ? "#1a1300" : "#fff" }}>{fresh} {C.newToday}</span>}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      <div className="flex min-w-0 flex-col gap-[var(--space-5)]">
-        {/* where you are, who's here, and who can see it */}
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ borderColor: `color-mix(in srgb, ${tint} 45%, var(--glass-border))`, background: `linear-gradient(135deg, color-mix(in srgb, ${tint} ${staffOnly ? 12 : 22}%, transparent), transparent 70%), var(--glass-surface-1)` }}>
-          <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
-            <span className="flex min-w-0 flex-col gap-[4px]">
-              <h2 className="text-[24px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{where}</h2>
-              <span className="text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{current.line}</span>
-            </span>
-            {role === "staff" && <div className="w-full sm:w-fit"><Segmented ariaLabel="Who sees this board" value={audience} onChange={setAudience} options={[...C.audience]} grow /></div>}
+    <div className="flex flex-col gap-[var(--space-5)]">
+      {/* 13 Oct 2026, Chandu: "the left menu is overkill. just do tabs? But
+         the tabs need proper design hierarchy, don't repeat the same tabs
+         design everywhere". The section pills are level 1; the boards are
+         level 2, the app's underline TextTabs; who can see the board is a
+         switch, not a third row of tabs. */}
+      <div className="flex flex-wrap items-end justify-between gap-x-[var(--space-5)] gap-y-[var(--space-3)] border-b" style={{ borderColor: RULE }}>
+        <div className="min-w-0 flex-1 pb-[6px]"><TextTabs ariaLabel={C.boards} layoutId="uw-boards" value={current.key} onChange={setSpace} items={spaces.map((x) => ({ key: x.key, label: x.key === "all" ? C.across : x.key }))} /></div>
+        {role === "staff" && <div className="pb-[10px]"><StaffSwitch on={staffOnly} onChange={(v) => setAudience(v ? "staff" : "everyone")} /></div>}
+      </div>
+      {role !== "student" && volunteerPro && (
+        <PostComposer key={current.key} pro={volunteerPro} open={composing} onClose={() => setComposing(false)} textOnly={role === "staff"}
+          prompts={["What worked this week", "Something students should know", "A date to save"]}
+          boards={spaces.map((x) => ({ id: x.key, name: x.key === "all" ? C.across : x.key }))} initialBoard={current.key} onPublish={publish} />
+      )}
+      {/* the board itself, in the other boards' clothes (13 Oct 2026,
+         Chandu: "Please refer the feed designs we have in the other boards
+         ... See how the questions and posts tabs look in other
+         communities"): one centred column; Questions and Posts; Best / Most
+         Recent with the Tall / Framed / Wide graphic switch; the same rows
+         (BoardThreadRow, FeedPostRow) in the same hairline panel. */}
+      <div className="mx-auto flex w-full max-w-[720px] flex-col gap-[var(--space-4)]">
+        {staffOnly ? (
+          <span className="flex items-center gap-[8px] text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}><ShieldCheck className="h-4 w-4 flex-none" aria-hidden style={{ color: D.BRAND.yellow }} />{C.staffNote}</span>
+        ) : (
+          <div role="tablist" aria-label="Questions or posts" className="flex items-center gap-[var(--space-5)]">
+            {(["questions", "posts"] as const).map((k) => {
+              const on = k === feedTab;
+              const n = inSpace.filter((it) => (k === "questions" ? it.kind === "q" : it.kind !== "q")).length;
+              return <button key={k} type="button" role="tab" aria-selected={on} onClick={() => setShow(k)} className={`flex items-center gap-[6px] text-[15px] leading-[20px] ${on ? "font-bold" : "dm-quiet cursor-pointer font-semibold"}`} style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{k === "questions" ? "Questions" : "Posts"}<span className="rounded-full px-[7px] text-[12px] leading-[18px] font-bold tabular-nums" style={{ background: on ? `color-mix(in srgb, ${BLUE} 30%, transparent)` : "var(--glass-surface-2)" }}>{n}</span></button>;
+            })}
           </div>
-          {staffOnly ? (
-            <span className="flex items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><ShieldCheck className="h-4 w-4 flex-none" aria-hidden style={{ color: D.BRAND.yellow }} />{C.staffNote}</span>
-          ) : faces.length > 0 && (
-            <span className="flex items-center gap-[10px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <span className="flex -space-x-[8px]">{faces.map((f) => <span key={f} className="rounded-full" style={{ boxShadow: "0 0 0 2px var(--card)" }}><Avatar name={f} size={26} /></span>)}</span>
-              Students, volunteers and United Way staff
-            </span>
-          )}
-          {/* the composer: what it does depends on who you are */}
-          <div className="flex items-start gap-[12px]">
+        )}
+        {/* students ask; staff and volunteers post (13 Oct 2026, Chandu:
+           "Only student POV gets ask. Others get the composer we gave for
+           the other boards + feeds") */}
+        {role === "student" && feedTab === "questions" && !staffOnly && (
+          <InlineAsk joined accent={BLUE} placeholder={C.placeholder(where)} onPost={(t) => { const id = onAsk(t, homeOf(current.key)); setPlaced((m) => ({ ...m, [id]: current.key })); }} />
+        )}
+        {role !== "student" && (staffOnly || feedTab === "posts") && (
+          <button type="button" onClick={() => setComposing(true)} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-lg)] border py-[8px] pr-[8px] pl-[10px] text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
             <Avatar name={me} size={34} />
-            <div className="flex min-w-0 flex-1 flex-col gap-[10px]">
-              {staffOnly && (
-                <div role="group" aria-label="Kind of post" className="flex flex-wrap gap-[6px]">
-                  {D.STAFF_UI.kinds.map((k) => {
-                    const on = k === kind;
-                    const Icon = STAFF_KIND_ICON[k];
-                    return <button key={k} type="button" aria-pressed={on} onClick={() => setKind(k)} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[11px] py-[5px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: on ? tint : "var(--glass-border)", background: on ? `color-mix(in srgb, ${tint} 22%, transparent)` : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}><Icon className="h-3.5 w-3.5" aria-hidden />{D.STAFF_KIND_LABEL[k]}</button>;
-                  })}
-                </div>
-              )}
-              <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} maxLength={280} placeholder={staffOnly ? C.staffPlaceholder(where) : C.placeholder(where)} aria-label={staffOnly ? C.staffPlaceholder(where) : C.placeholder(where)} className="w-full resize-none rounded-[var(--radius-md)] border p-[12px] text-[15px] leading-[21px] outline-none focus-visible:ring-2" style={INPUT_STYLE} />
-              {leaks && <span className="text-[12.5px] font-semibold" style={{ color: D.BRAND.yellow }}>{CONTACT_WARNING}</span>}
-              <span className="flex flex-wrap items-center gap-[12px]">
-                <PrimaryCta size="sm" style={staffOnly ? { background: D.BRAND.yellow, color: "#1a1300" } : SOLID} disabled={!text.trim() || leaks} onClick={send}>{C.post}</PrimaryCta>
-                <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{role === "student" ? "First name only. Volunteers answer, most within a day." : role === "staff" ? `As ${board.staff.me.name} · ${board.staff.me.role}` : `As ${me}`}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {!staffOnly && <EventFollowRows space={current.key} />}
-
-        <section className="flex flex-col gap-[var(--space-4)]">
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <SectionHead>Latest · {shown.length}</SectionHead>
-            {!staffOnly && <Listbox ariaLabel="Show" value={show} onChange={(v) => setShow(v as Show)} options={C.show.map((o) => ({ value: o.value, label: o.label }))}
-              className="flex min-h-[36px] cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />}
-          </div>
-          {shown.length === 0 && <div className="rounded-[var(--radius-lg)]" style={{ background: "var(--glass-surface-1)" }}><EmptyView tier={3} line={staffOnly ? C.emptyStaff : C.empty} /></div>}
-          <ul className="flex flex-col gap-[var(--space-3)]">
-            {shown.map((it) => (
-              <li key={it.id}>
-                {it.kind === "q" ? <QuestionCard thread={it.t} onOpen={() => openThread(it.t)} saved={!!saved[it.id]} onSave={() => flip(setSaved, it.id)} helpful={!!helpful[it.id]} onHelpful={() => flip(setHelpful, it.id)} />
-                  : it.kind === "post" && it.i.graphic ? <AlignedInsightRow graphic insight={it.i} onOpen={() => openPost(it.i)} saved={!!saved[it.id]} onSave={() => flip(setSaved, it.id)} helpful={!!helpful[it.id]} onHelpful={() => flip(setHelpful, it.id)} />
-                  : it.kind === "post" ? <InsightCard insight={it.i} onOpen={() => openPost(it.i)} saved={!!saved[it.id]} onSave={() => flip(setSaved, it.id)} helpful={!!helpful[it.id]} onHelpful={() => flip(setHelpful, it.id)} />
-                  : <StaffPostCard p={it.p} replies={repliesFor(it.p)} onOpen={() => openStaff(it.p)} />}
-              </li>
-            ))}
-          </ul>
-        </section>
+            <span className="min-w-0 flex-1 truncate text-[15px]" style={{ color: "var(--muted-foreground)" }}>{staffOnly ? C.staffPlaceholder(where) : `Share something with ${current.key === "all" ? "every community" : where}`}</span>
+            <span className="flex flex-none items-center gap-[6px] rounded-full px-[14px] py-[7px] text-[13px] font-bold" style={staffOnly ? { background: D.BRAND.yellow, color: "#1a1300" } : SOLID}><PenLine className="h-3.5 w-3.5" aria-hidden /> Create post</span>
+          </button>
+        )}
+        {shown.length > 1 && <FeedControls sort={sort} onSort={setSort} graphics={shown.some((it) => it.kind === "post" && !!it.i.graphic)} />}
+        {shown.length === 0 ? (
+          <div className="rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}><EmptyView tier={3} line={staffOnly ? C.emptyStaff : C.empty} /></div>
+        ) : (
+          <BoardFeedList wrap={(id, row) => <div key={id} onClickCapture={(e) => { const mine = shown.find((x) => x.id === id && x.kind === "post" && x.i.id.startsWith("uw-vpost-")); if (mine && mine.kind === "post") { e.stopPropagation(); e.preventDefault(); openPost(mine.i); } }}>{row}</div>} items={shown.map((it) => ({
+            id: it.id,
+            node: it.kind === "q" ? <BoardThreadRow thread={it.t} onOpen={() => openThread(it.t)} cardProps={card(it.id)} />
+              : it.kind === "post" ? (D.VOLUNTEERS[it.i.proId] ? <FeedPostRow item={{ key: it.id, kind: "insight", insight: it.i, pro: D.VOLUNTEERS[it.i.proId], reason: "" }} isNew={false} cardProps={card(it.id)} onLockerSave={() => {}} onHide={() => {}} /> : null)
+              : <StaffFeedRow p={it.p} replies={repliesFor(it.p).length} onOpen={() => openStaff(it.p)} />,
+          }))} />
+        )}
       </div>
     </div>
   );
@@ -1017,7 +960,7 @@ function StaffEvents({ events }: { events: D.UwEvent[] }) {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <div className="w-fit"><Segmented ariaLabel="When" value={when} onChange={setWhen} options={U.when.map((w) => ({ ...w, label: `${w.label} ${w.key === "upcoming" ? upcoming.length : past.length}` }))} /></div>
+        <TextTabs ariaLabel="When" layoutId="uw-when" value={when} onChange={setWhen} items={U.when.map((w) => ({ key: w.key, label: `${w.label} (${w.key === "upcoming" ? upcoming.length : past.length})` }))} />
         <Listbox ariaLabel={board.staff.unit} value={office} onChange={setOffice} options={[{ value: "all", label: board.staff.all }, ...board.chapters.map((c) => ({ value: c.short, label: c.short }))]}
           className="flex min-h-[38px] cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
       </div>
@@ -1115,7 +1058,7 @@ function SuppliesCard() {
   );
 }
 
-function StudentHome({ shared = [], go, openProgram, joined, programs, events, served, threads, openThread }: { shared?: D.SharedOpportunity[]; go: (tab: D.StudentTab) => void; openProgram: (p: D.Program) => void; joined: Record<string, boolean>; programs: D.Program[]; events: D.UwEvent[]; served: number; threads: Thread[]; openThread: (t: Thread) => void }) {
+function StudentHome({ go, openProgram, joined, programs, events, served, threads, openThread }: { go: (tab: D.StudentTab) => void; openProgram: (p: D.Program) => void; joined: Record<string, boolean>; programs: D.Program[]; events: D.UwEvent[]; served: number; threads: Thread[]; openThread: (t: Thread) => void }) {
   const board = useBoard();
   const worlds = useStudentWorlds();
   const fits = (w?: string) => !!w && worlds.includes(w);
@@ -1154,18 +1097,6 @@ function StudentHome({ shared = [], go, openProgram, joined, programs, events, s
         </div>
         {programs.length === 0 && <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{D.SCOPE.none}</p>}
       </section>
-
-      {/* what professionals here post: half of the board's baseline (South
-         Central Michigan, 10 Oct 2026: "students ask questions,
-         professionals share opportunities") */}
-      {shared.length > 0 && (
-        <section className="flex flex-col gap-[var(--space-4)]">
-          <SectionHead>Shared by professionals</SectionHead>
-          <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
-            {shared.slice(0, 4).map((o) => <SharedRow key={o.id} o={o} />)}
-          </ul>
-        </section>
-      )}
 
       <section className="flex flex-col gap-[var(--space-4)]">
         <div className="flex items-center justify-between gap-[var(--space-3)]">
@@ -1279,7 +1210,8 @@ function VolunteerShifts({ shifts, signed, toggle }: { shifts: D.Shift[]; signed
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <div className="w-full sm:w-fit"><Segmented ariaLabel="How long" value={len} onChange={setLen} options={[...U.shiftFilters]} grow /></div>
+        <Listbox ariaLabel="How long" value={len} onChange={(v) => setLen(v as typeof len)} options={U.shiftFilters.map((f) => ({ value: f.key, label: f.label }))}
+          className="flex min-h-[38px] cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
         <span className="flex items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: BLUE_TEXT }} />{U.checkNote}</span>
       </div>
       {list.length === 0 && <EmptyView tier={5} query={len} line="Try All." cta="Show all" onAction={() => setLen("all")} />}
@@ -1429,15 +1361,17 @@ function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPo
   const weights = I.monthly.map((m) => m.unique);
   const wsum = weights.reduce((n, w) => n + w, 0);
   const hours = board.chapters.map((k) => ({ id: k.id, label: k.short, values: weights.map((w) => Math.round((k.hours * w) / wsum)) }));
-  const tabs = [{ key: "all", label: board.places?.all ?? "All" }, ...board.chapters.map((k) => ({ key: k.id, label: k.short }))];
+  const tabs = [{ key: "all", label: board.places?.all ?? D.COMMUNITY_UI.across }, ...board.chapters.map((k) => ({ key: k.id, label: k.short }))];
   const voices = [...(I.voices ?? [])].sort((a, b) => (c && b.from.includes(c.short) ? 1 : 0) - (c && a.from.includes(c.short) ? 1 : 0));
   return (
     <div className="flex flex-col gap-[var(--space-5)]" style={V4_COLORS}>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        {/* the communities as light pills, never a second row of the same tabs */}
-        <div className="min-w-0 flex-1"><CountChips ariaLabel="Community" options={tabs} value={picked} onChange={setPicked} /></div>
+        {/* level 2 under the section pills: underline tabs, never a second
+           pill row; the range is a setting, so a dropdown */}
+        <div className="min-w-0 flex-1"><TextTabs ariaLabel="Community" layoutId="uw-impact-place" items={tabs} value={picked} onChange={setPicked} /></div>
         <span className="flex items-center gap-[8px]">
-          <Segmented ariaLabel="Range" value={range} onChange={setRange} options={[...U.range]} />
+          <Listbox ariaLabel="Range" value={range} onChange={(v) => setRange(v as typeof range)} options={U.range.map((r) => ({ value: r.key, label: r.key === "year" ? "This year" : "This month" }))}
+            className="flex min-h-[36px] cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
           <QuietCta size="sm" onClick={() => onToast(U.exported)}><Download className="h-3.5 w-3.5" aria-hidden /> {U.export}</QuietCta>
         </span>
       </div>
@@ -1651,12 +1585,12 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   };
   const openPost = (i: Insight) => { remember(); nav?.openInsight(i.id); };
   // an event opens on Connect's own event page (12 Oct 2026)
-  // a past event's board needs its attendee code first (13 Oct 2026);
-  // an upcoming event's page stays open to everyone
+  // every event needs its attendee code first (13 Oct 2026, Chandu:
+  // "where is the code requirement for event boards?"); once entered it
+  // stays open (Connect's Your events)
   const openEvent = (id: string, filter?: string) => {
     remember();
-    const ev = uwEventById(id);
-    if (ev && ev.lifecycle !== "Upcoming" && nav?.isEventJoined && !nav.isEventJoined(id)) { nav.enterEventCode?.(id); return; }
+    if (uwEventById(id) && nav?.isEventJoined && !nav.isEventJoined(id)) { nav.enterEventCode?.(id); return; }
     if (nav?.openEvent) nav.openEvent(id, filter);
     else router.push(`/connect?event=${id}${filter ? `&filter=${filter}` : ""}`);
   };
@@ -1664,18 +1598,18 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const openStaffPost = (p: D.StaffPost) => { staffY.current = window.scrollY; setStaffPost(p); window.scrollTo(0, 0); };
   const closeStaffPost = () => { setStaffPost(undefined); const y = staffY.current; window.setTimeout(() => window.scrollTo(0, y), 0); };
   useBackStep(!!staffPost, closeStaffPost);
-  const postStaff = (kind: D.StaffPostKind, text: string, isPublic: boolean) => {
+  const postStaff = (title: string, body: string, isPublic: boolean) => {
     const id = `uw-staff-${Date.now()}`;
-    setStaffMine((l) => [{ id, kind, public: isPublic || undefined, author: board.staff.me, title: text, body: "", postedAgo: "Just now", replies: [] }, ...l]);
+    setStaffMine((l) => [{ id, kind: "update", public: isPublic || undefined, author: board.staff.me, title, body, postedAgo: "Just now", replies: [] }, ...l]);
     onToast(isPublic ? D.COMMUNITY_UI.posted("the board") : D.COMMUNITY_UI.staffPosted);
     return id;
   };
   // a volunteer's post lands on the board it was written on
   const [volunteerMine, setVolunteerMine] = useState<Insight[]>([]);
   const volunteerMe = board.volunteerIds.find((id) => D.VOLUNTEERS[id]?.org === board.team.you) ?? board.volunteerIds[0];
-  const postVolunteer = (text: string, place: string) => {
+  const postVolunteer = (post: { title: string; body: string; graphic?: Insight["graphic"] }, place: string) => {
     const id = `uw-vpost-${Date.now()}`;
-    setVolunteerMine((l) => [{ id, boardId: board.id, type: "insight", proId: volunteerMe, place, title: text, body: "", postedAgo: "Just now", helpful: 0, replies: [] }, ...l]);
+    setVolunteerMine((l) => [{ id, boardId: board.id, type: "insight", proId: volunteerMe, place, title: post.title, body: post.body, graphic: post.graphic, postedAgo: "Just now", helpful: 0, replies: [] }, ...l]);
     onToast(D.TALK_UI.volunteer.posted);
     return id;
   };
@@ -1785,7 +1719,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
           {view === "partner" && <Segmented ariaLabel="Section" value={partnerTab} onChange={keep(setPartnerTab)} options={[...D.PARTNER_TABS]} grow />}
         </div>
         <motion.div key={`${view}-${view === "student" ? studentTab : view === "volunteer" ? volunteerTab : partnerTab}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)]">
-          {view === "student" && studentTab === "home" && <StudentHome shared={(board.shared ?? []).filter((o) => inScope(o.chapter))} go={keep(setStudentTab)} openProgram={openProgram} joined={joined} programs={programs} events={events} served={servedHours} threads={threads} openThread={openThread} />}
+          {view === "student" && studentTab === "home" && <StudentHome go={keep(setStudentTab)} openProgram={openProgram} joined={joined} programs={programs} events={events} served={servedHours} threads={threads} openThread={openThread} />}
           {view === "student" && studentTab === "programs" && <ProgramsGrid programs={board.programs} joined={joined} open={openProgram} />}
           {view === "student" && studentTab === "events" && <StudentEvents events={events} where={scopeBox} />}
           {view === "student" && studentTab === "serve" && <StudentServe shifts={serve} signed={served} toggle={flip(setServed)} onToast={onToast} />}

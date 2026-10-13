@@ -69,8 +69,15 @@ function useHistory() {
   return { g: stack.now, set, reset, undo, redo, canUndo: stack.past.length > 0, canRedo: stack.future.length > 0 };
 }
 
-export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
+export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, initialBoard, textOnly = false }: {
   pro: Pro;
+  /** a partner board's own boards to share to (United Way's communities,
+   *  13 Oct 2026); Connect's communities when unset */
+  boards?: { id: string; name: string }[];
+  initialBoard?: string;
+  /** no graphic option: the author has no Connect profile to sign it with
+   *  (United Way staff) */
+  textOnly?: boolean;
   open: boolean;
   onClose: () => void;
   prompts: string[];
@@ -85,7 +92,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
   // the picture.
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [boardId, setBoardId] = useState(() => boardForPro(pro));
+  const [boardId, setBoardId] = useState(() => initialBoard ?? boardForPro(pro));
   const [tool, setTool] = useState<Tool | null>(null);
   const { g, set, reset, undo, redo, canUndo, canRedo } = useHistory();
   const [typed, setTyped] = useState(false);
@@ -145,7 +152,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
           <span>
             <IconTip label="Close (draft is kept)"><button type="button" onClick={onClose} aria-label="Close" className={iconBtn}><X className="h-5 w-5" aria-hidden /></button></IconTip>
           </span>
-          {(
+          {textOnly ? <span className="text-center text-[14.5px] font-bold">New post</span> : (
             <div role="radiogroup" aria-label="Post type" className="mx-auto flex rounded-full p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
               {([["text", "Text post"], ["graphic", "Graphic post"]] as const).map(([k, label]) => (
                 <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => pickKind(k)} className="dm-quiet h-[30px] cursor-pointer rounded-full px-[14px] text-[13px] font-bold whitespace-nowrap" style={kind === k ? { background: "color-mix(in srgb, var(--foreground) 16%, transparent)", color: "var(--foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
@@ -159,7 +166,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
         {kind === "text" && (
           <>
             <Writing title={title} setTitle={setTitle} body={body} setBody={setBody} prompts={prompts} rows={7} autoFocus />
-            <ShareTo boardId={boardId} setBoardId={setBoardId} ready={ready} title={title} body={body} />
+            <ShareTo boardId={boardId} setBoardId={setBoardId} ready={ready} title={title} body={body} boards={boards} />
           </>
         )}
 
@@ -226,7 +233,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
                 </button>
               ))}
             </nav>
-            <ShareTo boardId={boardId} setBoardId={setBoardId} ready={ready} title={title} body={body} graphic />
+            <ShareTo boardId={boardId} setBoardId={setBoardId} ready={ready} title={title} body={body} graphic boards={boards} />
           </>
         )}
       </section>
@@ -258,9 +265,10 @@ function Writing({ title, setTitle, body, setBody, prompts, rows, autoFocus = fa
 }
 
 /** Share to: one row, opens the communities (Instagram's Add location). */
-function ShareTo({ boardId, setBoardId, ready, title, body, graphic = false }: { boardId: string; setBoardId: (id: string) => void; ready: boolean; title: string; body: string; graphic?: boolean }) {
+function ShareTo({ boardId, setBoardId, ready, title, body, graphic = false, boards }: { boardId: string; setBoardId: (id: string) => void; ready: boolean; title: string; body: string; graphic?: boolean; boards?: { id: string; name: string }[] }) {
   const [open, setOpen] = useState(false);
-  const board = COMMUNITIES.find((c) => c.id === boardId) ?? COMMUNITIES[0];
+  const list = boards ?? COMMUNITIES;
+  const board = list.find((c) => c.id === boardId) ?? list[0];
   return (
     <div className="flex-none border-t" style={{ borderColor: "var(--glass-border)" }}>
       <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[10px] px-[18px] py-[12px] text-left">
@@ -269,11 +277,11 @@ function ShareTo({ boardId, setBoardId, ready, title, body, graphic = false }: {
       </button>
       {open && (
         <ul role="listbox" aria-label="Community" className="dm-scroll max-h-[180px] overflow-y-auto border-t py-[4px]" style={{ borderColor: "var(--glass-border)" }}>
-          {COMMUNITIES.map((c) => <li key={c.id}><button type="button" role="option" aria-selected={c.id === boardId} onClick={() => { setBoardId(c.id); setOpen(false); }} className="dm-quiet flex w-full cursor-pointer items-center justify-between px-[18px] py-[9px] text-left text-[14px]" style={{ fontWeight: c.id === boardId ? 700 : 500 }}>{c.name}{c.id === boardId && <span aria-hidden style={{ color: BLUE }}>✓</span>}</button></li>)}
+          {list.map((c) => <li key={c.id}><button type="button" role="option" aria-selected={c.id === boardId} onClick={() => { setBoardId(c.id); setOpen(false); }} className="dm-quiet flex w-full cursor-pointer items-center justify-between px-[18px] py-[9px] text-left text-[14px]" style={{ fontWeight: c.id === boardId ? 700 : 500 }}>{c.name}{c.id === boardId && <span aria-hidden style={{ color: BLUE }}>✓</span>}</button></li>)}
         </ul>
       )}
       <p className="px-[18px] pb-[12px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
-        {ready ? `Shows in ${board.name} and in students' Feeds.` : graphic ? "Type your words on the picture to share." : !title.trim() ? "Add a title to share." : `${Math.max(0, 40 - body.trim().length)} more characters to share.`}
+        {ready ? (boards ? `Shows on the ${board.name} board.` : `Shows in ${board.name} and in students' Feeds.`) : graphic ? "Type your words on the picture to share." : !title.trim() ? "Add a title to share." : `${Math.max(0, 40 - body.trim().length)} more characters to share.`}
       </p>
     </div>
   );

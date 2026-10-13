@@ -83,22 +83,21 @@ export type UwView = typeof VIEWS[number]["key"];
 
 export const STUDENT_TABS = [
   { key: "home", label: "Home" },
+  // Talk became the community boards, named Communities in every view
+  // (13 Oct 2026, Chandu: "the students also need the communities tab").
+  // The key stays "ask" so links and the Back memo keep working.
+  { key: "ask", label: "Communities" },
   { key: "programs", label: "Programs" },
   { key: "events", label: "Events" },
   { key: "serve", label: "Serve" },
-  // Q&A grew into Talk (12 Oct 2026): the client "needed a means of
-  // communication between the 4 regions on one board". The key stays "ask"
-  // so links and the Back memo keep working.
-  { key: "ask", label: "Talk" },
 ] as const;
 export type StudentTab = typeof STUDENT_TABS[number]["key"];
 export const VOLUNTEER_TABS = [
   { key: "today", label: "Today" },
+  { key: "talk", label: "Communities" },
   // 13 Oct 2026, Chandu: "Rename Shifts to something better, shifts make
   // it sound bad and like work." The key stays so the Back memo holds.
   { key: "shifts", label: "Ways to help" },
-  // volunteers post across communities and follow up after events
-  { key: "talk", label: "Talk" },
   { key: "impact", label: "My Impact" },
 ] as const;
 export type VolunteerTab = typeof VOLUNTEER_TABS[number]["key"];
@@ -172,6 +171,10 @@ export type UwEvent = {
   /** the local United Way that runs it; null = online, open to everyone */
   chapter: string | null;
   url?: string;
+  /** DEMO-ONLY: the demo student already entered this event's code, so
+   *  its ticket shows Open board instead of Enter code (13 Oct 2026,
+   *  Chandu: "show one that's already joined, and some that need code") */
+  joined?: boolean;
   /** set once the event has happened: its board stays open so the people
    *  who were there keep talking (12 Oct 2026). Rendered by Connect's own
    *  event board (uwEvents.ts turns it into an EventBoard). */
@@ -248,9 +251,6 @@ export type StaffPost = {
   replies: { author: StaffMember; body: string; postedAgo: string }[];
 };
 
-/** An opportunity a professional shares on the board: a job, an
- *  internship, a shadow day, a volunteer role at their organization. */
-export type SharedOpportunity = { id: string; title: string; org: string; kind: string; line: string; proId: string; chapter: string | null; when: string };
 
 export type UwBoard = {
   id: string;
@@ -271,10 +271,6 @@ export type UwBoard = {
    *  (South Central Michigan, 10 Oct 2026: four communities inside one
    *  United Way, with a regional layer over them). Absent: United Way. */
   places?: { all: string; tab: string; panel: string };
-  /** opportunities professionals share here (South Central Michigan's
-   *  baseline: "students ask questions, professionals share
-   *  opportunities") */
-  shared?: SharedOpportunity[];
   /** banner title on the student view */
   name: string;
   line: string;
@@ -674,7 +670,7 @@ const NET_EVENTS: UwEvent[] = [
   // DEMO-ONLY: a past event, so the network board shows its board staying
   // open after the day (12 Oct 2026)
   {
-    id: "uw-e-mentor-night", kind: "Online meetup", title: "Meet a mentor night", where: "Online", virtual: true, about: "Seniors met mentors from three cities. Then they asked anything.", who: "Seniors", date: { month: "Sep", day: 17, time: "6:00 PM", year: 2026 }, going: 212, chapter: null,
+    id: "uw-e-mentor-night", kind: "Online meetup", title: "Meet a mentor night", where: "Online", virtual: true, about: "Seniors met mentors from three cities. Then they asked anything.", who: "Seniors", date: { month: "Sep", day: 17, time: "6:00 PM", year: 2026 }, going: 212, chapter: null, joined: true,
     followUp: {
       closesOn: "October 30, 2026", students: 212, pros: 9, posts: 11,
       // DEMO-ONLY: the code and the photo count; the photos are United Way's own

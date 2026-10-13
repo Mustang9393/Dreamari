@@ -172,7 +172,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Andre", grade: "Senior", place: "Lansing", postedAgo: "3d ago", state: "answered",
     routedScope: "Government jobs", expectedWindow: "within 1 day", helpful: 47, followers: 8, comments: 4,
     responses: [
-      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "3d ago", body: "Start with a summer internship. Lansing has lots of state offices. Watch Shared by professionals on Home." },
+      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "3d ago", body: "Start with a summer internship. Lansing has lots of state offices. Look at Programs for the public service internships." },
     ],
   },
   {

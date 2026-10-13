@@ -1021,7 +1021,7 @@ export type FeedView = "card" | "aligned" | "rail" | "compact";
 // style toggles, we will be using custom generated ones", "remove the
 // question style toggles too, we will use a custom version of the columns
 // version" -- see the `view` constant in BoardView, fixed to "aligned").
-function FeedControls({ sort, onSort, graphics = false }: { sort: FeedSort; onSort: (s: FeedSort) => void; /** this list holds graphic posts: offer the layout switch */ graphics?: boolean }) {
+export function FeedControls({ sort, onSort, graphics = false }: { sort: FeedSort; onSort: (s: FeedSort) => void; /** this list holds graphic posts: offer the layout switch */ graphics?: boolean }) {
   const SORTS: { key: FeedSort; label: string }[] = [{ key: "best", label: "Best" }, { key: "recent", label: "Most Recent" }];
   return (
     <div className="flex flex-wrap items-center gap-[10px] text-[12.5px] leading-[17px] font-semibold">
@@ -1169,6 +1169,7 @@ export function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onH
 
 export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful, graphic = false }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; graphic?: boolean }) {
   const pro = proById(insight.proId);
+  const nav = useContext(ConnectNav);
   // On a board a graphic post is the graphic, full width, with its caption
   // and one row of actions under it: no avatar column, no head line, no
   // right-hand count column leaving a hole beside the picture (Chandu, 6 Oct
@@ -1191,7 +1192,21 @@ export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onH
             and the small head keep it a board listing rather than a Feed
             card. */}
         <div className="flex flex-col gap-[12px]">
-          <p className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.name} · {pro.role} · {insight.postedAgo}</p>
+          {/* who posted it, as a real author header above the picture (13 Oct
+              2026, Chandu: "the name and pfp etc should be on the post not
+              just the graphic. The hierarchy is hard to understand"). The
+              avatar and the name open the profile. */}
+          <div className="relative z-20 flex min-w-0 items-center gap-[10px] self-start">
+            <ProAvatar proId={pro.id} name={pro.name} size={38} />
+            <span className="flex min-w-0 flex-col">
+              <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link w-fit cursor-pointer truncate text-left text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
+              <span className="flex min-w-0 items-center gap-[6px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                <span className="truncate">{pro.role} · {pro.org}</span>
+                {insight.place && <PlaceTag place={insight.place} />}
+                <span className="flex-none">· {insight.postedAgo}</span>
+              </span>
+            </span>
+          </div>
           <FramedGraphic insight={insight} height={480} />
           {caption && <p className="line-clamp-3 max-w-[60ch] text-[14.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{caption}</p>}
           <div className="relative z-20 flex items-center gap-[12px]">
@@ -1878,7 +1893,7 @@ export function ConnectExperience() {
             // a partner board's upcoming event has its own page before the
             // day (details, going, Remind me); Connect's own upcoming events
             // carry no `going` and keep the line below (12 Oct 2026)
-            if (eventJoined[event.id] || (event.lifecycle === "Upcoming" && event.going !== undefined)) {
+            if (eventJoined[event.id] || (event.lifecycle === "Upcoming" && event.going !== undefined && !event.code)) {
               return (
                 <EventView
                   event={event}
@@ -2703,7 +2718,7 @@ const OpenBoardAt = createContext<((id: string, filter: "questions" | "insights"
 /** A board's list in the Feed's clothes: rows in one hairline-divided panel
  *  (the Feed's own rule colour), with any breathers sitting between panel
  *  segments rather than inside one. */
-function BoardFeedList({ items, wrap, breatherAt }: { items: { id: string; node: React.ReactNode }[]; wrap: (id: string, row: React.ReactNode) => React.ReactNode; breatherAt?: (index: number, isLast: boolean) => React.ReactNode }) {
+export function BoardFeedList({ items, wrap, breatherAt }: { items: { id: string; node: React.ReactNode }[]; wrap: (id: string, row: React.ReactNode) => React.ReactNode; breatherAt?: (index: number, isLast: boolean) => React.ReactNode }) {
   const out: React.ReactNode[] = [];
   let seg: React.ReactNode[] = [];
   const flush = (k: string) => {
@@ -2731,7 +2746,7 @@ function BoardFeedList({ items, wrap, breatherAt }: { items: { id: string; node:
  *  student's avatar, handle, grade and time; the question; then the pro's
  *  answer as a block under it with their small portrait and name, or the
  *  status where the answer will go. Same counts as every other row. */
-function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; onOpen: () => void; cardProps: { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void } }) {
+export function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; onOpen: () => void; cardProps: { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void } }) {
   const nav = useContext(ConnectNav);
   const answer = thread.responses.find((r): r is ProResponse => r.kind === "answer" && !!r.primary) ?? thread.responses.find((r): r is ProResponse => r.kind === "answer");
   const pro = answer ? PROS.find((p) => p.id === answer.proId) : undefined;
@@ -2794,7 +2809,7 @@ function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; onOpen:
  *  board discussion; every inner control simply sits above that overlay in
  *  paint order (same layered-button trick QuestionCard/InsightCard already
  *  use), so a tap on Follow, Save or the overflow menu never also opens it. */
-function FeedPostRow({
+export function FeedPostRow({
   item,
   isNew,
   cardProps,
@@ -3882,7 +3897,7 @@ function HomeView({
 /** One event, as the Events tab's ticket: extracted unchanged so the Feed
  *  can carry the real card (Chandu, 2 Oct 2026: "the real event cards we
  *  have in our Events tab"). */
-export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, reminded, onRemind, openLabel, remindLabels = ["Remind me", "Reminder set"], hostLine }: {
+export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, reminded, onRemind, openLabel, remindLabels = ["Remind me", "Reminder set"], hostLine, gated = false }: {
   event: EventBoard; joined: boolean; onOpenEvent: (id: string) => void; onEnterCode: (id: string) => void; onQr: (event: EventBoard) => void;
   /** A partner board's upcoming event (United Way, 12 Oct 2026): the
    *  ticket opens the event's own page and offers Remind me in the action
@@ -3896,10 +3911,14 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
   remindLabels?: [string, string];
   /** who hosts it, beside the action (United Way staff view) */
   hostLine?: string;
+  /** every board behind its attendee code, upcoming ones too (United Way,
+   *  13 Oct 2026, Chandu: "where is the code requirement for event
+   *  boards?"): Enter code leads the action row until it's unlocked */
+  gated?: boolean;
 }) {
   const eventInk = "#f6f5fb";
   const upcoming = event.lifecycle === "Upcoming";
-  const preview = upcoming && !!onRemind;
+  const preview = upcoming && !!onRemind && (!gated || joined);
   const pAccent = partnerAccent(event.host);
   const lit = `color-mix(in srgb, ${pAccent} 62%, #ffffff)`;
   
@@ -3968,6 +3987,24 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
                     {openLabel}
                   </span>
                 )}
+              </span>
+            ) : gated ? (
+              <span className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px]">
+                <PrimaryCta className="relative z-20 min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
+              {/* the Feed event card's own Remind me toggle, unchanged */}
+              {onRemind && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onRemind!(); }}
+                aria-pressed={!!reminded}
+                className="dm-quiet relative z-20 flex min-h-[38px] flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[13px] leading-[16px] font-bold"
+                style={{ fontFamily: "var(--font-body)", ...(reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, rgba(255,255,255,0.2))", color: "#fff", background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, rgba(255,255,255,0.06))" } : { borderColor: "rgba(255,255,255,0.22)", color: "#fff", background: "rgba(255,255,255,0.08)" }) }}
+              >
+                {reminded ? <Check className="h-[14px] w-[14px]" aria-hidden /> : remindLabels[0] === "Remind me" ? <Bell className="h-[14px] w-[14px]" aria-hidden /> : <Users className="h-[14px] w-[14px]" aria-hidden />}
+                {reminded ? remindLabels[1] : remindLabels[0]}
+              </button>
+              )}
+              {hostLine && <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}><Building2 className="h-[14px] w-[14px] flex-none" aria-hidden />{hostLine}</span>}
               </span>
             ) : preview ? (
               <span className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px]">
@@ -4622,6 +4659,8 @@ function EventView({
   const tab = filter === "posts" || filter === "insights" || filter === "resources" || filter === "people" || filter === "about" ? filter : "questions";
   // the Resources tab's photo viewer: which frame is open, if any
   const [photoOpen, setPhotoOpen] = useState<number | null>(null);
+  // a partner board's staff or volunteer view (replyAs): they don't ask
+  const [postAs] = useState(replyAs);
   const [openFolder, setOpenFolder] = useState<string | null>(null);
   useEffect(() => {
     if (photoOpen === null) return;
@@ -4727,6 +4766,38 @@ function EventView({
         </>
       ) : (<>
 
+      {/* The day's photos lead the board, above its tabs (13 Oct 2026,
+         Chandu: "Where is the gallery etc inside the event boards that have
+         already been attended?"): under Resources nobody found them. */}
+          {/* Photos first: a gallery of the day, not a text link (direct
+             feedback, 5 Sept 2026). One big frame, four small, the last one
+             carries the rest of the count. Tap opens a viewer; view-only. */}
+          {event.photos && (
+            <section aria-label="Event photos" className="flex flex-col gap-[var(--space-3)]">
+              <div className="flex items-baseline justify-between gap-[var(--space-3)]">
+                <SectionHead>Photos</SectionHead>
+                <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><Images className="h-3.5 w-3.5" aria-hidden /> {event.photos.count} photos</span>
+              </div>
+              {/* four columns, two rows: the first frame takes the left half, four more fill the right */}
+              <ul className="grid grid-cols-4 grid-rows-2 gap-[6px] sm:gap-[8px]" style={{ aspectRatio: "2 / 1" }}>
+                {event.photos.images.slice(0, 5).map((src, index) => {
+                  const last = index === 4;
+                  const more = event.photos!.count - 5;
+                  return (
+                    <li key={src} className={`relative min-h-0 ${index === 0 ? "col-span-2 row-span-2" : ""}`}>
+                      <button type="button" onClick={() => setPhotoOpen(index)} aria-label={`Open photo ${index + 1} of ${event.photos!.count}`} className="dm-tap group relative block h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+                        <Image src={src} alt="" fill sizes={index === 0 ? "(max-width: 992px) 66vw, 640px" : "(max-width: 992px) 33vw, 320px"} className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
+                        {last && more > 0 && (
+                          <span className="absolute inset-0 flex items-center justify-center text-[18px] font-extrabold" style={{ background: "rgba(9,10,20,0.58)", color: "#FFFFFF", fontFamily: "var(--font-display)" }}>+{more}</span>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+
       {/* Six clearly separated rooms instead of one long stacked scroll
          (direct feedback, 5 Sept 2026): Questions is the tab a reader lands
          on, with the ask composer at its very top. */}
@@ -4750,12 +4821,17 @@ function EventView({
 
       {tab === "questions" && (
         <div className="flex flex-col gap-[var(--space-4)]">
+          {/* asking is the student's; staff and volunteers here reply and
+             post (13 Oct 2026, Chandu: "when I'm on United Way POV don't
+             show me an ASK cta with a student profile") */}
+          {!postAs && (
           <InlineAsk
-            joined
-            accent={pAccent}
-            placeholder="Ask what you missed…"
-            onPost={(text) => setPostedQs((current) => [{ id: `${event.id}-local-${current.length}`, title: text }, ...current])}
-          />
+              joined
+              accent={pAccent}
+              placeholder="Ask what you missed…"
+              onPost={(text) => setPostedQs((current) => [{ id: `${event.id}-local-${current.length}`, title: text }, ...current])}
+            />
+          )}
           {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
           {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
           {threads.length === 0 && postedQs.length === 0 && (
@@ -4884,34 +4960,6 @@ function EventView({
 
       {tab === "resources" && (
         <div className="flex flex-col gap-[var(--space-6)]">
-          {/* Photos first: a gallery of the day, not a text link (direct
-             feedback, 5 Sept 2026). One big frame, four small, the last one
-             carries the rest of the count. Tap opens a viewer; view-only. */}
-          {event.photos && (
-            <section aria-label="Event photos" className="flex flex-col gap-[var(--space-3)]">
-              <div className="flex items-baseline justify-between gap-[var(--space-3)]">
-                <SectionHead>Photos</SectionHead>
-                <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><Images className="h-3.5 w-3.5" aria-hidden /> {event.photos.count} photos</span>
-              </div>
-              {/* four columns, two rows: the first frame takes the left half, four more fill the right */}
-              <ul className="grid grid-cols-4 grid-rows-2 gap-[6px] sm:gap-[8px]" style={{ aspectRatio: "2 / 1" }}>
-                {event.photos.images.slice(0, 5).map((src, index) => {
-                  const last = index === 4;
-                  const more = event.photos!.count - 5;
-                  return (
-                    <li key={src} className={`relative min-h-0 ${index === 0 ? "col-span-2 row-span-2" : ""}`}>
-                      <button type="button" onClick={() => setPhotoOpen(index)} aria-label={`Open photo ${index + 1} of ${event.photos!.count}`} className="dm-tap group relative block h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
-                        <Image src={src} alt="" fill sizes={index === 0 ? "(max-width: 992px) 66vw, 640px" : "(max-width: 992px) 33vw, 320px"} className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
-                        {last && more > 0 && (
-                          <span className="absolute inset-0 flex items-center justify-center text-[18px] font-extrabold" style={{ background: "rgba(9,10,20,0.58)", color: "#FFFFFF", fontFamily: "var(--font-display)" }}>+{more}</span>
-                        )}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          )}
 
           {/* Files: the icon says what it is, the title says which, one small
              line says how much. Nothing else until you tap: a folder opens
@@ -5818,7 +5866,10 @@ export function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoa
     // Prototype: one demo token per event. Real validation/redemption is
     // server-side (single-use token hashes, throttling, revocation —
     // handoff 9.2).
-    if (event.code && code.trim().toUpperCase() === event.code) {
+    // DEMO-ONLY (13 Oct 2026, Chandu: "make sure whatever gibberish i enter
+    // as a code lets me in, don't have any gating there"): any code opens
+    // the board, so a demo never stalls on the code
+    if (code.trim()) {
       setError(null);
       setConfirming(true);
     } else {
@@ -5879,7 +5930,7 @@ export function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoa
               </p>
             )}
             <div className="mt-[var(--space-5)]"><PrimaryCta onClick={check} className="w-full">Continue</PrimaryCta></div>
-            <p className="mt-[8px] text-center text-[10.5px]" style={{ color: "var(--muted-foreground)" }}>Prototype: use {event.code} to preview the event board.</p>
+            <p className="mt-[8px] text-center text-[10.5px]" style={{ color: "var(--muted-foreground)" }}>Demo: any code works.</p>
           </>
         )}
       </div>

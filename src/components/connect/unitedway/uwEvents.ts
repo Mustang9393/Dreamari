@@ -55,8 +55,9 @@ export function toEventBoard(e: UwEvent, board: UwBoard): EventBoard {
     // with Connect's Your events), then opens as the full event board with
     // its photo gallery under Resources. DEMO-ONLY: the code is shown in
     // the sheet's prototype hint and on the staff ticket.
-    entitled: false,
-    code: f?.code,
+    entitled: !!e.joined,
+    // DEMO-ONLY: an upcoming event's code is made from its id and date
+    code: f?.code ?? `UW${e.id.replace(/^[a-z]+-e-/, "").replace(/[^a-z]/gi, "").slice(0, 6).toUpperCase()}${e.date.day}`,
     photos: f?.photos,
     recap: f?.recap,
     resources: f?.resources,

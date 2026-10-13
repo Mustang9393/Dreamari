@@ -11,8 +11,10 @@
 // - colleges: Michigan State, Western Michigan and the local community
 //   colleges; users: students, nonprofits, colleges, corporate partners;
 // - baseline engagement: students ask questions, professionals share
-//   opportunities (the "Shared by professionals" section); program
-//   registration and tracking come later;
+//   opportunities; program registration and tracking come later. (13 Oct
+//   2026, Chandu: "Remove all professionals sharing internships or
+//   opportunities from the board altogether", so openings come only from
+//   United Way's own programs.)
 // - what they measure: students connected to nonprofit and public sector
 //   professionals, program participation, volunteer hours and
 //   opportunities accessed, plus testimonials (the partner view's four
@@ -26,7 +28,7 @@
 // marked where it sits; the professionals' shared openings name generic
 // local employers, never a real organization's made-up posting.
 
-import { PHOTOS, type Chapter, type Program, type SharedOpportunity, type Shift, type StaffMember, type StaffPost, type UwBoard, type UwEvent } from "./uwData";
+import { PHOTOS, type Chapter, type Program, type Shift, type StaffMember, type StaffPost, type UwBoard, type UwEvent } from "./uwData";
 
 export const UW_SC_ID = "united-way-south-central";
 
@@ -141,7 +143,7 @@ const EVENTS: UwEvent[] = [
   // files; the groups at the tables are generic, the colleges are the
   // ones the call named.
   {
-    id: "sc-e-fall-convening", kind: "Regional convening", title: "Fall regional convening", where: "Kalamazoo", virtual: false, about: "All four towns met. Students, nonprofits and colleges.", who: "Students and young pros", date: { month: "Sep", day: 26, time: "10:00 AM", year: 2026 }, going: 164, chapter: null,
+    id: "sc-e-fall-convening", kind: "Regional convening", title: "Fall regional convening", where: "Kalamazoo", virtual: false, about: "All four towns met. Students, nonprofits and colleges.", who: "Students and young pros", date: { month: "Sep", day: 26, time: "10:00 AM", year: 2026 }, going: 164, chapter: null, joined: true,
     followUp: {
       closesOn: "November 7, 2026", students: 164, pros: 12, posts: 23,
       // DEMO-ONLY: the code and the photo count. Photos are United Ways' own;
@@ -162,7 +164,18 @@ const EVENTS: UwEvent[] = [
       proIds: ["pro-doyle", "pro-wong", "pro-reyes", "pro-brooks"],
     },
   },
-  { id: "sc-e-panel", kind: "Online panel", title: "Jobs that help your town", where: "Online", virtual: true, about: "A city planner, a social worker and a nonprofit director. Then you ask.", who: "Any student", date: { month: "Oct", day: 28, time: "6:00 PM", year: 2026 }, going: 142, chapter: null },
+  { id: "sc-e-panel", kind: "Online panel", title: "Jobs that help your town", where: "Online", virtual: true, about: "A city planner, a social worker and a nonprofit director. Then you ask.", who: "Any student", date: { month: "Oct", day: 28, time: "6:00 PM", year: 2026 }, going: 142, chapter: null, joined: true },
+  // DEMO-ONLY (13 Oct 2026): a second past event, still locked, so the
+  // board shows one joined board and one behind its code
+  {
+    id: "sc-e-ylu-summer", kind: "Meetup", title: "Young Leaders United summer meetup", where: "Jackson", virtual: false, about: "Young pros and college students met nonprofit leaders in Jackson.", who: "College and young pros", date: { month: "Aug", day: 20, time: "6:00 PM", year: 2026 }, going: 52, chapter: "jx",
+    followUp: {
+      closesOn: "October 31, 2026", students: 52, pros: 6, posts: 8, code: "UWYLU",
+      photos: { count: 16, images: [MI.team, MI.volunteers, MI.caring, PHOTOS.volunteers, MI.scholars] },
+      official: { postedAgo: "7w ago", summary: "52 young leaders met nonprofit staff in Jackson. Many signed up to serve this fall.", about: "Young Leaders United meets in all four towns.", next: ["Post what you learned in Questions.", "Join a service day in your town.", "Save the January meetup in Jackson."] },
+      proIds: ["pro-doyle", "pro-wong", "pro-whitfield"],
+    },
+  },
   { id: "sc-e-kickoff", kind: "Info night", title: "Student United kickoff", where: "Kalamazoo", virtual: false, about: "Meet your chapter. Pick your first project.", who: "High school and college", date: { month: "Nov", day: 5, time: "5:30 PM", year: 2026 }, going: 58, chapter: "kzoo" },
   { id: "sc-e-convening", kind: "Regional convening", title: "South Central convening", where: "Battle Creek", virtual: false, about: "All four towns meet. Students, nonprofits and colleges.", who: "Students and young pros", date: { month: "Nov", day: 14, time: "10:00 AM", year: 2026 }, going: 186, chapter: null },
   { id: "sc-e-capitol", kind: "Visit", title: "Public service day in Lansing", where: "Lansing", virtual: false, about: "See how state jobs work. Meet staff who started as interns.", who: "Juniors and seniors", date: { month: "Dec", day: 4, time: "9:00 AM", year: 2026 }, going: 64, chapter: "lan" },
@@ -180,15 +193,6 @@ const SERVE: Shift[] = [
   { id: "sc-s-youth-doc", kind: "Day of Caring", title: "Youth Day of Caring", where: "Battle Creek", date: { month: "May", day: 7, time: "9:00 AM", year: 2027 }, hours: 4, spots: 140, who: "High school", chapter: "bc" },
 ];
 
-// "Professionals share opportunities" (the call's baseline). DEMO-ONLY:
-// every opening; employers are generic on purpose.
-const SHARED: SharedOpportunity[] = [
-  { id: "sc-o-parks", title: "Parks summer intern", org: "A Lansing city office", kind: "Internship", line: "Paid, 8 weeks, ages 16 and up", proId: "pro-doyle", chapter: "lan", when: "Apply by Mar 1" },
-  { id: "sc-o-tutor", title: "After-school tutor", org: "A Jackson youth program", kind: "Part-time job", line: "$15 an hour, 6 hours a week", proId: "pro-wong", chapter: "jx", when: "Starts Nov 10" },
-  { id: "sc-o-shadow", title: "Shadow a public health nurse", org: "A Battle Creek clinic", kind: "Job shadow", line: "One day, juniors and seniors", proId: "pro-reyes", chapter: "bc", when: "Dec 10" },
-  { id: "sc-o-food", title: "Youth volunteer lead", org: "A Kalamazoo food bank", kind: "Volunteer", line: "Saturdays, counts as service hours", proId: "pro-brooks", chapter: "kzoo", when: "Starts Nov 2" },
-  { id: "sc-o-policy", title: "Policy research assistant", org: "A state office in Lansing", kind: "Internship", line: "For college students, 10 hours a week", proId: "pro-whitfield", chapter: "lan", when: "Spring 2027" },
-];
 
 // ——— Team: staff in the four offices (12 Oct 2026) ———
 // WHY: the client's main ask was for "the employees having a platform to
@@ -324,8 +328,7 @@ export const SOUTH_CENTRAL: UwBoard = {
   across: ["sc-s-spring-plan", "sc-s-yuw-voting", "sc-s-bigs-sheet", "sc-s-spring-idea", "sc-s-convening-plan", "sc-s-fall-debrief", "sc-p-convening", "sc-t-yuw-ask", "sc-t-next-convening", "uwi-sc-across-ask"],
   name: "South Central Michigan",
   line: "Find work that helps your town.",
-  places: { all: "Whole region", tab: "By community", panel: "Students and volunteer hours by community" },
-  shared: SHARED,
+  places: { all: "All communities", tab: "By community", panel: "Students and volunteer hours by community" },
   stats: [{ value: "4", label: "communities" }, { value: String(PROGRAMS.length), label: "programs" }],
   // not uw-mi-students: that class photo carries West Michigan's banner
   photos: { hero: MI.volunteers, heroFocus: "50% 35%", volunteers: PHOTOS.hero, volunteersFocus: "50% 30%" },
@@ -344,11 +347,11 @@ export const SOUTH_CENTRAL: UwBoard = {
   volunteerIds: ["pro-doyle", "pro-wong", "pro-reyes", "pro-brooks", "pro-whitfield", "pro-tanaka", "pro-okafor", "pro-ortega"],
   // DEMO-ONLY: the volunteer's day
   today: {
-    since: ["4 new questions from Lansing and Jackson students", "12 students saved your internship post", "The regional convening needs 6 more volunteers"],
+    since: ["4 new questions from Lansing and Jackson students", "12 students found your post helpful", "The regional convening needs 6 more volunteers"],
     requests: [
       { id: "sc-r1", kind: "Speak", minutes: 45, title: "Join the Oct 28 panel on jobs that help your town" },
       { id: "sc-r2", kind: "Review", minutes: 15, title: "Check Maya's résumé for a city internship" },
-      { id: "sc-r3", kind: "Share", minutes: 10, title: "Post a summer opening at your organization" },
+      { id: "sc-r3", kind: "Share", minutes: 10, title: "Post one tip for students in your town" },
     ],
   },
   // DEMO-ONLY: adult shifts
@@ -423,11 +426,11 @@ export const SOUTH_CENTRAL: UwBoard = {
     { label: "Came back for a 2nd shift", value: 48, goal: 45 },
   ],
   partnerPrograms: [
-    { program: "Student United", by: "Whole region", students: 220, volunteers: 18, hours: 260 },
-    { program: "Young Leaders United", by: "Whole region", students: 64, volunteers: 22, hours: 210 },
-    { program: "Public service internships", by: "Whole region", students: 48, volunteers: 12, hours: 160 },
+    { program: "Student United", by: "All communities", students: 220, volunteers: 18, hours: 260 },
+    { program: "Young Leaders United", by: "All communities", students: 64, volunteers: 22, hours: 210 },
+    { program: "Public service internships", by: "All communities", students: 48, volunteers: 12, hours: 160 },
     { program: "College to career", by: "Lansing and Kalamazoo", students: 140, volunteers: 10, hours: 70 },
-    { program: "Start at community college", by: "Whole region", students: 90, volunteers: 6, hours: 40 },
+    { program: "Start at community college", by: "All communities", students: 90, volunteers: 6, hours: 40 },
     // DEMO-ONLY: CapCAN's counts on this board, like every row here
     { program: "CapCAN", by: "Lansing", students: 84, volunteers: 6, hours: 50 },
     { program: "Youth United Way", by: "Kalamazoo", students: 96, volunteers: 8, hours: 90 },
