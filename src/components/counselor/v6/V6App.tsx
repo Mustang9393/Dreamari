@@ -68,6 +68,7 @@ import { ReelStatCard, WATCHES } from "../v5/Videos";
 import { videoPoster } from "@/components/app/companyVideos";
 import { countActivity, useActivity } from "@/lib/activityEvents";
 import { DreamariEngagementPanel } from "../v5/Analytics";
+import { V1Details } from "./AnalyticsDetails";
 import { ExploreSheetHost, openCareer, openSchool } from "../v5/ExploreSheets";
 import { SchoolPoster } from "../v5/ExploreCards";
 import { ImpactView } from "../v5/ImpactView";
@@ -858,6 +859,7 @@ function Analytics({
           </div>
         </section>
       </div>
+      <V1Details domain={domain} students={students} group={group} />
       </>}
     </>
   );

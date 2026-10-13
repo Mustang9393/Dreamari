@@ -14,22 +14,22 @@ const RECOMMENDATIONS = [
   { emoji: "🏥", stat: "29% of students are exploring Nursing & Healthcare careers", actions: ["Partner with a local hospital or clinic for a job shadow or career fair", "Explore CTE Health Sciences pathway options in your district", "Invite a panel of nurses, doctors, and allied health professionals"] },
 ];
 
-const TOP_SAVED_CAREERS = [
+export const TOP_SAVED_CAREERS = [
   { name: "Investment Banker", count: 52 }, { name: "Software Engineer", count: 47 }, { name: "Entrepreneur / Business Owner", count: 38 },
   { name: "Registered Nurse", count: 35 }, { name: "Psychologist", count: 31 }, { name: "Marketing Manager", count: 24 },
   { name: "Physician / Doctor", count: 22 }, { name: "Graphic Designer", count: 19 }, { name: "Electrician / Skilled Trade", count: 17 }, { name: "Teacher / Educator", count: 15 },
 ];
-const TOP_SIMULATIONS = [
+export const TOP_SIMULATIONS = [
   { name: "Software Engineer", count: 89 }, { name: "Nurse / Nursing", count: 76 }, { name: "Entrepreneur", count: 68 },
   { name: "Criminal Justice / Law", count: 55 }, { name: "Graphic Designer", count: 52 }, { name: "Teacher / Educator", count: 48 },
   { name: "Investment Banker", count: 45 }, { name: "Physician / Doctor", count: 43 }, { name: "Social Worker", count: 41 }, { name: "Marketing Manager", count: 39 },
 ];
-const TOP_MAJORS = [
+export const TOP_MAJORS = [
   { name: "Computer Science", count: 41 }, { name: "Business Administration", count: 36 }, { name: "Nursing / Health Sciences", count: 33 },
   { name: "Psychology", count: 29 }, { name: "Criminal Justice", count: 24 }, { name: "Communications / Media", count: 22 },
   { name: "Engineering", count: 20 }, { name: "Education", count: 18 }, { name: "Finance", count: 16 }, { name: "Art & Design", count: 14 },
 ];
-const TOP_COLLEGES = [
+export const TOP_COLLEGES = [
   { emoji: "🏫", name: "University of California, Los Angeles (UCLA)", count: 28 }, { emoji: "🏛️", name: "Howard University", count: 24 },
   { emoji: "🗽", name: "New York University (NYU)", count: 22 }, { emoji: "🤘", name: "University of Texas at Austin", count: 19 },
   { emoji: "🌸", name: "Spelman College", count: 17 }, { emoji: "☀️", name: "Arizona State University", count: 16 },

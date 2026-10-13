@@ -1,3 +1,10 @@
+## 2026-10-13 (night): Counselor v5/v6: Explore's video thumbnails; v6 Analytics gets v1's graphs
+
+**Why (Chandu):** "the videos in v5/v6 of the counselor dashboard need to use the thumbnail we've used in the explore", then "update the analytics part of the v6 to have graphs and details from v1 wherever necessary".
+- Videos: `videoPoster()` in `app/companyVideos.ts` returns the company rail's designed cover by video path (or a saved frame; the aviation clips have neither and keep their own frame). v5's Most Watched cards (also used by v6) show it and fade it while the clip plays on hover; the v5 and v6 players use it as `poster`.
+- v6 Analytics (`v6/AnalyticsDetails.tsx`, below each area's existing panels): Readiness gets v1's Milestone Tracker as one status line per milestone with a grade switch (follows the page's grade picker) plus caseload progress by grade; Postsecondary gets plans after high school (live roster, follows the grade picker), top saved majors and colleges; Career & WBL gets top saved careers, careers explored in simulations and the career fair planning note; Risk gets students who may need a check-in by grade. Engagement already had v1's logins (v5's panel) and Outcomes has no v1 counterpart. v1's data constants are now exported (CareerCollegeInsights, PlatformEngagement); v1 screens are unchanged.
+- **Checked:** tsc and eslint clean; v5 Most Watched covers; v6 Analytics Readiness, Postsecondary, Career & WBL, Risk.
+
 ## 2026-10-13: RN v2 restart consumes the screen-preview override; refined master art prompt
 
 **Why (Chandu):** Restart from `?screen=RN2-47&v=2` returned to “The crisis pulled you off schedule” instead of the beginning. Also requested Joshua’s original master image prompt in the same format, refined to reproduce the newly selected anime treatment.
