@@ -365,7 +365,11 @@ export const SOUTH_CENTRAL: UwBoard = {
   places: { all: "All communities", tab: "By community", panel: "Students and volunteer hours by community" },
   stats: [{ value: "4", label: "communities" }, { value: String(PROGRAMS.length), label: "programs" }],
   // not uw-mi-students: that class photo carries West Michigan's banner
-  photos: { hero: MI.volunteers, heroFocus: "50% 35%", volunteers: PHOTOS.hero, volunteersFocus: "50% 30%" },
+  // 14 Oct 2026, Chandu: "the image used for the header/card for United Way
+  // needs to be better than what's used now ... something more tasteful":
+  // United Way's own photo of three volunteers in "Live United" shirts, warm
+  // and close, in place of the work-day-in-the-woods shot
+  photos: { hero: PHOTOS.scholars, heroFocus: "50% 32%", volunteers: PHOTOS.hero, volunteersFocus: "50% 30%" },
   map: "southcentral",
   chapters: COMMUNITIES,
   pick: "Pick your community",

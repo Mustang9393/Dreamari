@@ -426,7 +426,8 @@ export const COMMUNITIES: Community[] = [
     name: "United Way · South Central Michigan",
     world: "Teaching & Education",
     purpose: "Careers that help your town, from nonprofits and public service.",
-    photo: "/images/connect/covers/uw-mi-caring.jpg",
+    // the board's own header photo (14 Oct 2026: "more tasteful")
+    photo: "/images/connect/covers/uw-scholars.jpg",
     brandMark: "/images/connect/partners/united-way-white.svg",
     topics: ["Student United", "Young Leaders United", "Nonprofit Jobs", "Public Service"],
     students: 710,
