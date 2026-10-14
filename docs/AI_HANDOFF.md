@@ -1,3 +1,18 @@
+## 2026-10-14: Public | Private communities; Match copy locked; IB art v0 | v1
+
+**Why (client, via Chandu):** "Right now, all Community Boards are shown together. We should clearly separate them into Public Communities and Private Communities ... Private community cards should also have a subtle Private / Invite Only indicator." Joshua: "choose photos where people are elated / jovial. Some of the students look like they are not enjoying."
+- `Community.access?: "private"` in data.ts, set on the four partner boards (AT&T, United Way Student Success, Michigan, South Central). Connect > Communities opens on a TextTabs row, `Public Communities (5) | Private Communities (4)`, with a one-line explainer and that tab's joined count. The old "Community Boards" heading is gone because the tab already names the section. The launch-vote card and the "Most Popular" badge show only on Public.
+- `CommunityCard`: a small dark glass pill, lock icon plus "Private · Invite only", under the title of private cards.
+- Photos: Michigan's card and header now use `uw-mi-scholars.jpg` (smiling graduates). Student Success's card and header now use `uw-volunteers.jpg` (volunteers laughing); the posed portrait moves to its volunteers slot.
+- Plural bug: the Michigan header read "8 United Waies". The `-ies` rule now applies only after a consonant plus y.
+
+**Why (Joshua, Match):** "Right now, it is not obvious enough what students are supposed to do here ... After this update it will be locked until further notice."
+- The V2Flow explore step's title is now "Save up to 3 careers you’re interested in", with the subtitle "We’ll use your picks to recommend similar careers. You can update them later at anytime." Both are word for word as sent, and a code comment marks them LOCKED. LabScreen's h1 now wraps (text-balance instead of nowrap) and its hint is 14px, so the line reads as a subtitle. On a 375px phone the title wraps to two lines.
+
+**Why (Chandu, IB game):** "make v2 > v1 and v1 > v2 and rename the new v2 to v0."
+- The scene-art toggle (ArtVersionToggle) is relabelled. Joshua's painted scenes are now "v1" and the default; sprites over rooms are now "v0" and are reached with `?v=0`. Internal values stay 1 | 2, so only the labels, the default and the URL param changed. This also applies to Registered Nurse, which shares the toggle. AMT's `?v=2` lab level is unrelated and unchanged.
+- **Checked:** tsc clean, eslint with no new warnings (removed the now-unused joinedCount prop). In the browser: both community tabs, the private pills, the Michigan header "8 United Ways", Match at desktop and 375px, and the IB start screen and first beat (painted, v1 selected; v0 sets `?v=0`).
+
 ## 2026-10-14: Glossary artwork release authorized
 
 **Why (Chandu):** "go ahead and push" supersedes the earlier release hold. Publish only the previously reviewed Drift/Signal artwork for Levels 2 to 4 and its integration/prompt pipeline. Main was fast-forwarded from `f5737dbb` to `bd7efca4` before release, preserving Claude's latest Connect and United Way work. The handoff additions from both branches are retained.

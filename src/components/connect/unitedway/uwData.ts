@@ -786,7 +786,9 @@ export const NETWORK: UwBoard = {
   name: "Student Success",
   line: "Mentors, programs and real jobs from United Way.",
   stats: [{ value: "1,100", label: "United Ways" }, { value: "8", label: "programs open" }],
-  photos: { hero: PHOTOS.hero, heroFocus: "62% 40%", volunteers: PHOTOS.volunteers, volunteersFocus: "50% 40%" },
+  // Hero swapped to the laughing volunteers (Joshua, 14 Oct 2026: "choose
+  // photos where people are elated / jovial").
+  photos: { hero: PHOTOS.volunteers, heroFocus: "50% 40%", volunteers: PHOTOS.hero, volunteersFocus: "62% 40%" },
   map: "usa",
   chapters: NET_CHAPTERS,
   pick: "Find your United Way",

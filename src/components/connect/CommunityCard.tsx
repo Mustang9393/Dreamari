@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, ImageOff, Star, X } from "lucide-react";
+import { ArrowUpRight, ImageOff, Lock, Star, X } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -215,6 +215,12 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
       <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
         {/* the title carries the card: bigger than anything under it */}
         <h3 className={`text-[24px] leading-[28px] font-extrabold text-balance ${featured || community.brandMark ? "pr-[104px]" : ""}`} style={{ color: "#FFFFFF" }}>{community.name.replace(/ Careers$/, "")}</h3>
+        {/* a private community says so, quietly, under its name */}
+        {community.access === "private" && (
+          <span className="mt-[8px] inline-flex w-fit items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[11.5px] leading-[16px] font-semibold" style={{ background: "rgba(9,10,20,0.55)", color: "rgba(255,255,255,0.92)", backdropFilter: "blur(6px)", textShadow: "none", fontFamily: "var(--font-body)" }}>
+            <Lock className="h-[11px] w-[11px]" aria-hidden /> Private · Invite only
+          </span>
+        )}
 
         {/* three tiles fill the card's width, the same on every card; the
            marks sit centred under them */}

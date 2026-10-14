@@ -206,6 +206,12 @@ export type Community = {
   centers?: number;
   /** A partner community's own mark, shown large on its card (the AT&T board). */
   brandMark?: string;
+  /** "private": only students in the partner's program or cohort see it
+   *  (14 Oct 2026, client feedback via Chandu: "We should clearly separate
+   *  them into Public Communities and Private Communities ... Several
+   *  partners want a private space ... specifically with their own
+   *  students"). Unset: public, open to every eligible student. */
+  access?: "private";
   /** A partner's own third headline number, in place of Companies (United Way counts its local United Ways). */
   stat?: { value: string; label: string };
 };
@@ -361,6 +367,7 @@ export const COMMUNITIES: Community[] = [
     // standard AT&T marketing material or press kit").
     photo: "/images/connect/covers/att-connected-learning-center.jpg",
     brandMark: "/images/connect/partners/att-white.png",
+    access: "private",
     topics: ["Career Access", "Technology", "Programs", "Virtual Panels"],
     students: 620,
     activePros: 54,
@@ -381,8 +388,11 @@ export const COMMUNITIES: Community[] = [
     name: "United Way · Student Success",
     world: "Teaching & Education",
     purpose: "Mentors, programs and real jobs from United Way.",
-    photo: "/images/connect/covers/uw-hero.jpg",
+    // Joshua (14 Oct 2026): "choose photos where people are elated /
+    // jovial". The volunteers laughing together, not the posed portrait.
+    photo: "/images/connect/covers/uw-volunteers.jpg",
     brandMark: "/images/connect/partners/united-way-white.svg",
+    access: "private",
     topics: ["Mentoring", "Internships", "Career Days", "College Prep"],
     students: 1240,
     activePros: 286,
@@ -406,8 +416,11 @@ export const COMMUNITIES: Community[] = [
     name: "United Way · Michigan",
     world: "Teaching & Education",
     purpose: "Programs, service hours and real jobs from Michigan's United Ways.",
-    photo: "/images/connect/covers/uw-mi-students.jpg",
+    // Joshua (14 Oct 2026): "choose photos where people are elated /
+    // jovial. Some of the students look like they are not enjoying"
+    photo: "/images/connect/covers/uw-mi-scholars.jpg",
     brandMark: "/images/connect/partners/united-way-white.svg",
+    access: "private",
     topics: ["Student United Way", "Summer Jobs", "Mentoring", "College Prep"],
     students: 1380,
     activePros: 212,
@@ -430,6 +443,7 @@ export const COMMUNITIES: Community[] = [
     // the board's own header photo (14 Oct 2026: "more tasteful")
     photo: "/images/connect/covers/uw-scholars.jpg",
     brandMark: "/images/connect/partners/united-way-white.svg",
+    access: "private",
     topics: ["Student United", "Young Leaders United", "Nonprofit Jobs", "Public Service"],
     students: 710,
     activePros: 122,

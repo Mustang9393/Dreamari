@@ -82,11 +82,13 @@ export default async function GamePage({
       {/* DEMO-ONLY: ?screen=<beat id> opens the level on that screen (a link
          straight to the torque wrench for Josh, 6 Oct 2026). Flag for Usman:
          remove for production with the other qaSkip shortcuts. */}
-      {/* DEMO-ONLY: v1/v2 comparison. ?v=2 on a simulation with a v2 art set
+      {/* DEMO-ONLY: v0/v1 comparison. A simulation with a painted art set
          (ib-v2-scenes.ts: Investment Banking and Registered Nurse) plays
-         the run with painted scenes and no sprites; the start screen and HUD toggles keep
-         this param in step. AMT's ?v=2 above is its lab level, unrelated. */}
-      <SimulationPlayer key={level.id} simulation={simulation} level={level} startAt={Array.isArray(query.screen) ? query.screen[0] : query.screen} artVersion={version === "2" && hasV2Art(simulation.id) ? 2 : 1} />
+         with painted scenes and no sprites by default ("v1" since 14 Oct
+         2026); ?v=0 plays the old sprite version ("v0"). The start screen
+         and HUD toggles keep this param in step. AMT's ?v=2 above is its lab
+         level, unrelated. */}
+      <SimulationPlayer key={level.id} simulation={simulation} level={level} startAt={Array.isArray(query.screen) ? query.screen[0] : query.screen} artVersion={version !== "0" && hasV2Art(simulation.id) ? 2 : 1} />
     </>
   );
 }

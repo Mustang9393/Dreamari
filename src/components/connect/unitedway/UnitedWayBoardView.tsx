@@ -1770,7 +1770,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const title = view === "volunteer" ? "Volunteer" : board.name;
   // (staff: the counts say it; Team's own panel carries the line)
   const heroLine = view === "student" ? board.line : undefined;
-  const heroStats = view === "partner" ? [{ value: String(board.chapters.length), label: board.chapters.length === 1 ? board.staff.unit : board.staff.unit.endsWith("y") ? `${board.staff.unit.slice(0, -1)}ies` : `${board.staff.unit}s` }, { value: String(board.events.length), label: "events" }] : view === "student" ? board.stats : [];
+  const heroStats = view === "partner" ? [{ value: String(board.chapters.length), label: board.chapters.length === 1 ? board.staff.unit : /[^aeiou]y$/.test(board.staff.unit) ? `${board.staff.unit.slice(0, -1)}ies` : `${board.staff.unit}s` }, { value: String(board.events.length), label: "events" }] : view === "student" ? board.stats : [];
   const scopeBox = (
     <Listbox ariaLabel="Where" value={local ? chapter : "all"} onChange={(v) => { if (v === "all") setScope("all"); else { setScope("local"); setChapter(v); } }}
       options={[{ value: "all", label: board.places?.all ?? D.SCOPE.everywhere }, ...board.chapters.map((k) => ({ value: k.id, label: k.short }))]}

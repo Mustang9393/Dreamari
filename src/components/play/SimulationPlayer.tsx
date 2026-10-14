@@ -97,19 +97,20 @@ const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain",
 /** A beat that moves the score: a scored kind that is not a practice question. */
 const isScored = (b: Beat) => SCORED_KINDS.has(b.kind) && !b.practice;
 
-export function SimulationPlayer({ simulation, level, startAt, artVersion: initialArtVersion = 1 }: { simulation: Simulation; level: Level; startAt?: string; artVersion?: ArtVersion }) {
+export function SimulationPlayer({ simulation, level, startAt, artVersion: initialArtVersion = 2 }: { simulation: Simulation; level: Level; startAt?: string; artVersion?: ArtVersion }) {
   const router = useRouter();
   // DEMO-ONLY: v1/v2 comparison (ib-v2-scenes.ts). v2 swaps the scene
   // treatment only -- Joshua's painted scenes, no sprites -- never the run:
   // flipping it mid-beat keeps the beat, the score and every other state.
-  // The URL's ?v=2 mirrors it so a reload keeps the version.
+  // Painted scenes (labelled v1) are the default since 14 Oct 2026; the URL's
+  // ?v=0 marks the old sprite version (labelled v0) so a reload keeps it.
   const v2Available = hasV2Art(simulation.id);
   const [artVersion, setArtVersionState] = useState<ArtVersion>(initialArtVersion);
   const v2 = v2Available && artVersion === 2;
   const setArtVersion = useCallback((next: ArtVersion) => {
     setArtVersionState(next);
     const url = new URL(window.location.href);
-    if (next === 2) url.searchParams.set("v", "2");
+    if (next === 1) url.searchParams.set("v", "0");
     else url.searchParams.delete("v");
     window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
   }, []);
@@ -1113,7 +1114,7 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
           simulation={simulation}
           stageRole={level.role}
           nextLevelLabel={`Level ${nextLevel.n} · ${nextLevel.role}`}
-          onContinue={() => router.push(`/play/${simulation.id}?level=${nextLevel.n}${v2 ? "&v=2" : ""}`)}
+          onContinue={() => router.push(`/play/${simulation.id}?level=${nextLevel.n}${v2Available && !v2 ? "&v=0" : ""}`)}
         />
       )}
 

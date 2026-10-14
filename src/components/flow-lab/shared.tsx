@@ -63,7 +63,7 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
   const header = (
     <>
       <div className="mb-1 flex flex-none items-center justify-between gap-3 px-1">
-        <h1 className="text-[17px] font-extrabold whitespace-nowrap uppercase sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
+        <h1 className="text-[17px] font-extrabold text-balance uppercase sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
         {status && (
           <span className="flex flex-none items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold whitespace-nowrap backdrop-blur" style={{ color: "var(--foreground)", background: "var(--glass-surface-2)", borderColor: `color-mix(in srgb, ${SUCCESS} 40%, var(--glass-border))` }}>
             <span aria-hidden className="h-2 w-2 flex-none rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 10px ${SUCCESS}` }} />
@@ -71,7 +71,7 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
           </span>
         )}
       </div>
-      {hint && <p className="mb-2.5 flex-none px-1 text-[12.5px] leading-[16px] font-medium" style={{ color: "var(--muted-foreground)" }}>{hint}</p>}
+      {hint && <p className="mb-2.5 flex-none px-1 text-[14px] leading-[20px] font-medium" style={{ color: "var(--muted-foreground)" }}>{hint}</p>}
       {controls && <div className="mb-2.5 flex flex-none flex-col gap-2 px-1">{controls}</div>}
     </>
   );
@@ -105,7 +105,7 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
            2026: "the spacing here is bad... are we being consistent"). */}
         <div className="flex w-full max-w-[880px] flex-col px-4 sm:px-6">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <h1 className="text-[17px] font-extrabold whitespace-nowrap uppercase sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
+            <h1 className="text-[17px] font-extrabold text-balance uppercase sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
           </div>
           {hint && <p className="-mt-1.5 mb-3 text-[12.5px] leading-[16px] font-medium" style={{ color: "var(--muted-foreground)" }}>{hint}</p>}
         </div>

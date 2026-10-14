@@ -43,6 +43,7 @@ import { toggleEventReminder, useEventReminders } from "@/lib/eventReminders";
 import { downloadCalendarFile, parseEventDate } from "@/lib/calendarFile";
 import { replyAs, setReplyAs } from "@/lib/replyAs";
 import { liftSplashVeil } from "@/components/app/SplashVeil";
+import { TextTabs } from "@/components/app/TextTabs";
 import { MentorshipTab } from "./mentorship/MentorshipTab";
 import { EmptyView, Shimmer } from "@/components/app/states";
 import { SurfaceState } from "@/components/app/SurfaceState";
@@ -1804,7 +1805,6 @@ export function ConnectExperience() {
             onJoinCommunity={(id) => setJoinFor(id)}
             follows={follows}
             onFollow={toggleFollow}
-            joinedCount={Object.values(joined).filter(Boolean).length}
             asked={asked}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onOpenAll={() => setView({ kind: "activity" })}
@@ -3655,7 +3655,6 @@ function HomeView({
   onJoinCommunity,
   follows,
   onFollow,
-  joinedCount,
   asked,
   onOpenThread,
   onOpenAll,
@@ -3680,7 +3679,6 @@ function HomeView({
   onJoinCommunity: (id: string) => void;
   follows: Follows;
   onFollow: (id: string) => void;
-  joinedCount: number;
   asked: AskedQuestion[];
   onOpenThread: (id: string) => void;
   onOpenAll: () => void;
@@ -3714,7 +3712,15 @@ function HomeView({
   const [searchFocused, setSearchFocused] = useState(false);
   const q = query.trim().toLowerCase();
   const hit = (...fields: (string | string[] | undefined)[]) => !q || fields.some((f) => (Array.isArray(f) ? f : [f ?? ""]).some((v) => v.toLowerCase().includes(q)));
-  const searched = COMMUNITIES.filter((c) => hit(c.name, c.world, c.purpose, c.topics, c.professionalsFrom));
+  // Public and Private communities, split (14 Oct 2026, client feedback via
+  // Chandu: "Please make the distinction very clear, potentially with two
+  // tabs at the top: Public Communities | Private Communities"). Private ones
+  // are partner programs and cohorts (Community.access).
+  const [access, setAccess] = useState<"public" | "private">("public");
+  const searchedAll = COMMUNITIES.filter((c) => hit(c.name, c.world, c.purpose, c.topics, c.professionalsFrom));
+  const publicCount = searchedAll.filter((c) => c.access !== "private").length;
+  const privateCount = searchedAll.length - publicCount;
+  const searched = searchedAll.filter((c) => (access === "private") === (c.access === "private"));
   const searchedEvents = EVENTS.filter((e) => hit(e.name, e.host, e.location, e.topics, e.orgs));
 
   return (
@@ -3824,14 +3830,22 @@ function HomeView({
            grid. Search filters this same grid rather than a separate
            "All communities" section. */
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <SectionHead>Community Boards</SectionHead>
-            {/* The card-style A/B switcher that sat here was a lab control in a
-               student's face; the lane still rides ?cards= in the URL. This
-               slot is the doc's joined count. */}
-            {(
-              <span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{joinedCount} joined</span>
-            )}
+          <div className="border-b pb-[6px]" style={{ borderColor: RULE }}>
+            <TextTabs ariaLabel="Community type" layoutId="connect-community-access" value={access} onChange={setAccess}
+              items={[{ key: "public", label: `Public Communities (${publicCount})` }, { key: "private", label: `Private Communities (${privateCount})` }]} />
+          </div>
+          {/* The tab already names the section, so no heading repeats it
+             (14 Oct 2026). The explainer and this tab's joined count share
+             one row instead. */}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-[var(--space-4)] gap-y-[var(--space-1)]">
+            <p className="max-w-[70ch] text-[14.5px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>
+              {access === "public"
+                ? "Open to every student. Ask professionals, read their posts and find opportunities in your field."
+                : "Only for students in a partner's program or cohort. Partners share internships, scholarships, events and announcements with their own students here."}
+            </p>
+            <span className="text-[13px] leading-[18px] font-semibold whitespace-nowrap tabular-nums" style={{ color: "var(--muted-foreground)" }}>
+              {COMMUNITIES.filter((c) => (access === "private") === (c.access === "private") && joined[c.id]).length} joined
+            </span>
           </div>
           {/* Symmetric grid, every tile equal weight: three across, two
              centered beneath. Surface 42, wrapped 27 Sept 2026 the same way
@@ -3841,10 +3855,10 @@ function HomeView({
             <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
               {searched.map((c, index) => (
                 <div key={c.id}>
-                  <CommunityCard community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoinCommunity(c.id)} featured={index === 0} />
+                  <CommunityCard community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoinCommunity(c.id)} featured={access === "public" && index === 0} />
                 </div>
               ))}
-              {!q && (
+              {!q && access === "public" && (
                 <div>
                   <LaunchVoteCard />
                 </div>

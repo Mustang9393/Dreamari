@@ -246,7 +246,8 @@ export const MICHIGAN: UwBoard = {
   name: "Michigan",
   line: "Lead, serve and find real work.",
   stats: [{ value: "35", label: "United Ways" }, { value: String(PROGRAMS.length), label: "programs" }],
-  photos: { hero: MI.hero, heroFocus: "50% 40%", volunteers: MI.volunteers, volunteersFocus: "50% 35%" },
+  // smiling people, not a posed class photo (Joshua, 14 Oct 2026)
+  photos: { hero: MI.scholars, heroFocus: "50% 30%", volunteers: MI.volunteers, volunteersFocus: "50% 35%" },
   map: "michigan",
   chapters: CHAPTERS,
   pick: "Find your Michigan United Way",

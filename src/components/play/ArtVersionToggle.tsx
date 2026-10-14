@@ -9,7 +9,12 @@ import type { ArtVersion } from "./ib-v2-scenes";
 // their place. Never part of the product: remove with ib-v2-scenes.ts once
 // the team picks one.
 
+// Renamed 14 Oct 2026 (Chandu: "make v2 > v1 and v1 > v2 and rename the new
+// v2 to v0"): the painted scenes (internal 2) are now "v1" and the default;
+// sprites over rooms (internal 1) are "v0". Only the labels and the default
+// moved, so the internal 1 | 2 values stay as they were.
 const OPTIONS: ArtVersion[] = [1, 2];
+const LABEL: Record<ArtVersion, string> = { 1: "v0", 2: "v1" };
 
 export function ArtVersionToggle({
   version,
@@ -58,7 +63,7 @@ export function ArtVersionToggle({
               color: on ? "#05070f" : "var(--muted-foreground)",
             }}
           >
-            v{option}
+            {LABEL[option]}
           </button>
         );
       })}
