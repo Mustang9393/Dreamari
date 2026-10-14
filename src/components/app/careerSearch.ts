@@ -2,24 +2,30 @@
 // ranked grid, plus "related" chips built from what the results have in
 // common. Fuzzy on purpose: a student types "finanace", "coding", "planes"
 // or "hospital" and still lands somewhere sensible. No new dependencies; a
-// small scorer over title words, world words and a hand-written keyword
-// index (the Figma catalog carries titles and worlds only).
+// small scorer over title words, explicit category queries and a hand-written
+// keyword index (the Figma catalog carries titles and worlds only).
 
 import { ALL_CATALOG_CAREERS, type CatalogCareer } from "./catalog";
 
-/** Plain words a student might type for each world. */
-const WORLD_KEYWORDS: Record<string, string[]> = {
-  "Business & Finance": ["business", "finance", "money", "banking", "bank", "investing", "investment", "stocks", "wall street", "corporate", "office", "management", "analyst", "deals", "economics"],
-  "Tech & Engineering": ["tech", "technology", "engineering", "computers", "coding", "code", "programming", "software", "developer", "apps", "ai", "data", "internet", "startup"],
-  "Health & Medicine": ["health", "medicine", "medical", "doctor", "hospital", "patients", "nurse", "healthcare", "surgery", "clinic", "biology", "science"],
-  "Farming, Animals & Nature": ["farming", "farm", "animals", "nature", "outdoors", "food", "agriculture", "plants", "environment", "science"],
-  "Building & Construction": ["building", "construction", "trades", "hands-on", "tools", "site", "houses", "electrical", "skilled trade"],
-  "Driving, Flying & Shipping": ["driving", "flying", "shipping", "planes", "airport", "aviation", "transport", "travel", "logistics", "trucks", "drones"],
-  "Arts, Media & Sport": ["arts", "art", "media", "sport", "sports", "creative", "design", "music", "film", "animation", "entertainment", "studio", "games"],
-  "Counseling & Social Work": ["counseling", "counselling", "social work", "helping people", "mental health", "students", "school", "therapy", "psychology"],
-  "Law, Safety & Justice": ["law", "legal", "justice", "court", "safety", "police", "rights", "argue", "debate"],
-  "Personal Care & Community Services": ["personal care", "beauty", "community", "salon", "people", "service"],
-  "Factories & Making Things": ["factory", "making", "maker", "manufacturing", "craft", "design", "materials"],
+/** Only an explicit broad category query expands to an entire world.
+ * Topics such as aviation, coding or nursing belong to individual careers;
+ * sharing a world is not evidence that a career matches that topic. */
+const WORLD_QUERIES: Record<string, string[]> = {
+  "Business & Finance": ["business", "finance", "financial", "money", "economics"],
+  "Tech & Engineering": ["tech", "technology", "engineering"],
+  "Health & Medicine": ["health", "medicine", "medical", "healthcare"],
+  "Farming, Animals & Nature": ["farming", "agriculture", "nature"],
+  "Building & Construction": ["building", "construction", "trades", "skilled trades"],
+  "Driving, Flying & Shipping": ["transport", "transportation", "logistics"],
+  "Arts, Media & Sport": ["arts", "art", "media", "sport", "sports", "creative"],
+  "Counseling & Social Work": ["counseling", "counselling", "social work"],
+  "Law, Safety & Justice": ["law", "legal", "justice", "public safety"],
+  "Personal Care & Community Services": ["personal care", "community services", "beauty"],
+  "Factories & Making Things": ["factory", "factories", "manufacturing"],
+  "Fixing Machines & Engines": ["mechanical repair"],
+  "Food & Cooking": ["food", "cooking", "culinary"],
+  "Teaching & Education": ["teaching", "education"],
+  "Science & Research": ["science", "research"],
 };
 
 /** Words a student might type for a specific career. */
@@ -52,9 +58,13 @@ const TITLE_KEYWORDS: Record<string, string[]> = {
   "Cardiologist": ["heart", "cardiology", "physician", "md"],
   "Therapist": ["mental health", "counseling", "psychology", "talk", "helping people"],
   "School Counselor": ["guidance", "students", "college applications", "school", "helping"],
-  "Airline Pilot": ["planes", "pilot", "flying", "aviation", "cockpit", "travel", "captain"],
-  "Drone Pilot": ["drones", "uav", "flying", "cameras", "remote"],
-  "Air Traffic Controller": ["atc", "airport", "planes", "radar", "aviation"],
+  "Airline Pilot": ["planes", "aircraft", "pilot", "flying", "aviation", "cockpit", "travel", "captain"],
+  "Commercial Pilot": ["planes", "aircraft", "flying", "aviation", "cockpit"],
+  "Flight Attendant": ["aviation", "airline", "planes", "aircraft", "cabin crew", "flying"],
+  "Aviation Maintenance Technician": ["aircraft", "planes", "aviation", "mechanic", "repair", "engines"],
+  "Aerospace Engineer": ["aviation", "aircraft", "planes", "spacecraft", "aeronautical"],
+  "Drone Pilot": ["drones", "uav", "flying", "aviation", "aircraft", "cameras", "remote"],
+  "Air Traffic Controller": ["atc", "airport", "planes", "aircraft", "radar", "aviation"],
   "Truck Driver": ["trucks", "trucking", "cdl", "driving", "roads", "freight", "logistics"],
   "Forklift Operator": ["warehouse", "logistics", "driving", "shipping"],
   "Electrician": ["wiring", "electrical", "trades", "apprenticeship", "hands-on"],
@@ -142,19 +152,17 @@ function distance(a: string, b: string, cap = 2): number {
   return prev[b.length];
 }
 
-type Indexed = { career: CatalogCareer; titleWords: string[]; worldWords: string[]; ownKeywords: string[]; worldKeywords: string[]; keywords: string[]; /** a word's position in the career's own keyword list, earlier is more central */ rank: Map<string, number> };
+type Indexed = { career: CatalogCareer; titleWords: string[]; ownKeywords: string[]; /** a word's position in the career's own keyword list, earlier is more central */ rank: Map<string, number> };
 const INDEX: Indexed[] = ALL_CATALOG_CAREERS.map((career) => {
   const titleWords = words(career.title);
-  const worldWords = words(career.world);
   const raw = TITLE_KEYWORDS[career.title] ?? [];
   const ownKeywords = raw.flatMap(words);
-  const worldKeywords = (WORLD_KEYWORDS[career.world] ?? []).flatMap(words);
   const rank = new Map<string, number>();
   raw.forEach((k, i) => { for (const w of words(k)) if (!rank.has(w)) rank.set(w, i); });
-  return { career, titleWords, worldWords, ownKeywords, worldKeywords, keywords: [...new Set([...ownKeywords, ...worldKeywords])], rank };
+  return { career, titleWords, ownKeywords, rank };
 });
 
-function scoreToken(token: string, item: Indexed): number {
+function scoreToken(token: string, item: Indexed, allowTypos = true): number {
   let best = 0;
   const consider = (candidates: string[], exact: number, starts: number, contains: number) => {
     for (const w of candidates) {
@@ -165,31 +173,30 @@ function scoreToken(token: string, item: Indexed): number {
       else if (token.length >= 5 && w.includes(token)) best = Math.max(best, contains);
     }
   };
-  // the career's own words beat its world's, so "planes" ranks pilots
-  // above truck drivers even though both live in Driving, Flying & Shipping
+  // Score only evidence attached to this career, never inherited topics.
   consider(item.titleWords, 100, 85, 60);
   consider(item.ownKeywords, 80, 65, 50);
   // a career's first keywords are what it is about: "coding" is Software
   // Engineer before Quant, "planes" is Airline Pilot before Air Traffic Controller
   if (best === 80) best += Math.max(0, 4 - (item.rank.get(token) ?? 4));
-  consider(item.worldKeywords, 55, 45, 35);
-  consider(item.worldWords, 50, 40, 30);
   if (best >= 60) return best;
-  // word forms: "plumbing" finds Plumber, "welding" finds Welder. Five
-  // shared leading letters on words of at least six, so "drawing" and
-  // "driving" (three shared) stay apart
+  // Match word forms, not merely five shared letters: "animation" and
+  // "animal" share a prefix but describe different interests.
   if (token.length >= 6) {
-    const stem = token.slice(0, 5);
-    for (const w of item.titleWords) if (w.length >= 6 && w.startsWith(stem)) best = Math.max(best, 78);
-    for (const w of item.ownKeywords) if (w.length >= 6 && w.startsWith(stem)) best = Math.max(best, 58);
+    const stem = (word: string) => word.replace(/(ing|ers?|ed|s)$/, "").replace(/e$/, "");
+    const tokenStem = stem(token);
+    if (tokenStem.length >= 4) {
+      for (const w of item.titleWords) if (w.length >= 5 && stem(w) === tokenStem) best = Math.max(best, 78);
+      for (const w of item.ownKeywords) if (w.length >= 5 && stem(w) === tokenStem) best = Math.max(best, 58);
+    }
   }
-  if (best >= 58) return best;
+  if (best >= 58 || !allowTypos) return best;
   // typo tolerance, kept tight so "drawing" never becomes "driving": one
   // edit from five letters, two from eight; only against title words and
   // keywords, never the world name
   if (token.length >= 5) {
     const cap = token.length >= 8 ? 2 : 1;
-    for (const w of [...item.titleWords, ...item.keywords]) {
+    for (const w of [...item.titleWords, ...item.ownKeywords]) {
       if (w.length < 5) continue;
       const d = distance(token, w, cap);
       if (d > cap) continue;
@@ -204,22 +211,39 @@ export type SearchHit = { career: CatalogCareer; score: number };
 
 /** Ranked hits for a query; empty query returns nothing. */
 export function searchCareers(query: string, world = "All"): SearchHit[] {
+  const normalized = norm(query);
   const tokens = words(query);
   if (tokens.length === 0) return [];
+  // Use typos only when a word has no direct match anywhere in the catalog.
+  // Otherwise "aviation" also finds Animator through "animation" (two edits).
+  const typoTokens = new Set(tokens.filter((token) => !INDEX.some((item) => scoreToken(token, item, false) > 0)));
+  const typoCap = normalized.length >= 8 ? 2 : 1;
+  const categoryWorlds = new Set([...new Set(INDEX.map(({ career }) => career.world))].filter((name) =>
+    [name, ...(WORLD_QUERIES[name] ?? [])].some((term) => {
+      const candidate = norm(term);
+      if (candidate === normalized) return true;
+      // Keep category typos such as "finanace" without treating a topic
+      // appearing anywhere in a world's name as a category request.
+      return normalized.length >= 5 && distance(normalized, candidate, typoCap) <= typoCap;
+    }),
+  ));
   const hits: SearchHit[] = [];
   for (const item of INDEX) {
     if (world !== "All" && item.career.world !== world) continue;
     let total = 0;
     let matched = 0;
     for (const t of tokens) {
-      const s = scoreToken(t, item);
+      const s = scoreToken(t, item, typoTokens.has(t));
       if (s > 0) { total += s; matched += 1; }
     }
-    if (matched === 0) continue;
+    const categoryMatch = categoryWorlds.has(item.career.world);
+    // Every query word must have career-specific evidence. "software
+    // engineer" must not include all engineers or every tech career.
+    if (matched !== tokens.length && !categoryMatch) continue;
+    if (categoryMatch) total = Math.max(total, 55);
     // whole-phrase bonus: "investment banking" typed in full
     if (norm(item.career.title).includes(norm(query))) total += 60;
-    // every word matched beats a partial match
-    total += matched === tokens.length ? 20 : 0;
+    total += 20;
     hits.push({ career: item.career, score: total });
   }
   return hits.sort((a, b) => b.score - a.score || a.career.title.localeCompare(b.career.title));
