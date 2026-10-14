@@ -1,3 +1,12 @@
+## 2026-10-14: Connect UX preview, hamburger entry on main
+
+**Why (Chandu):** "push this as a link only accessible from the hamburger menu on main." Publish the reviewed Connect design as an isolated demo; preserve the current Connect route and navigation.
+- `/connect-preview?tab=communities` renders the reviewed `codex/connect-ux-polish` snapshot from `0870eb52`, in `src/components/connect-preview/`. Internal board/event/role/history links remain under the preview route. Assets, app chrome, tokens and student services are shared; the preview composer Listbox/Portal fixes are isolated too.
+- One "Connect UX preview" link in the hamburger's existing For approval section. No link in the primary desktop navigation, phone bar or Home content. Preview metadata uses noindex/nofollow; existing deployment view gate retained.
+- Current `src/app/connect/page.tsx`, `src/components/connect/`, shared Listbox and CareerReport have zero changes. CommunityCard is byte-identical between original and preview. No duplicate image assets.
+- Chrome at 390px: hamburger link opens preview Communities, standalone poll appears, opening Finance/Back/Feed and professional Demo stay on `/connect-preview`. The prior UX pass's verification/remaining role checks stay recorded on `codex/connect-ux-polish`; this release does not claim those incomplete checks were finished.
+- Validation/release: Production webpack build including TypeScript/37 routes, 508-token checks, whitespace, canonical Connect zero-diff and byte-identical card checks passed. Scoped lint: zero errors/eight existing warnings. Push the tested isolated-menu commit to existing Dreamari main/Vercel integration, as authorized; confirm production Ready and hamburger entry.
+
 ## 2026-10-14: Explore searches stop including unrelated careers
 
 **Why (Chandu):** searching for aviation "shows the relevant results but a bunch of unrelated stuff too"; asked to quickly push a fix for the frontend-only Vercel demo. Production returned 51 careers because every Driving, Flying & Shipping career inherited the aviation keyword, and partial multiword and fuzzy matches admitted unrelated careers.

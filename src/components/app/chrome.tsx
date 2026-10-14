@@ -335,6 +335,15 @@ export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLin
         </Link>
       ))}
       <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>For approval</span>
+      {/* DEMO-ONLY: isolated Connect UX review, hamburger entry only (Chandu, 14 Oct 2026). */}
+      <Link
+        href="/connect-preview?tab=communities"
+        onClick={onNavigate}
+        className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+        style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+      >
+        Connect UX preview
+      </Link>
       <Link
         href="/explore"
         onClick={() => { setSheetsEnabled(!sheets); onNavigate?.(); }}
