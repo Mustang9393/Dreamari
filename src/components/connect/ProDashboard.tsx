@@ -352,7 +352,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
             <ul className="-mt-[var(--space-2)] flex flex-col">
               {localPosts.map((post) => (
                 <li key={post.id} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
-                  <span className="text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: accent }}>Pro tip · Just now</span>
+                  <span className="text-[11px] leading-[15px] font-bold capitalize" style={{ color: accent }}>Pro tip · Just now</span>
                   {/* A graphic post is the graphic, then its caption; no title (Chandu, 6 Oct 2026). */}
                   {post.graphic
                     ? (
@@ -374,7 +374,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                 const s = signals(post.views, post.helpful, post.saves);
                 return (
                   <PanelRow key={post.id} onClick={() => nav?.openInsight(post.id)}>
-                    <span className="text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: accent }}>Pro tip · {post.postedAgo}</span>
+                    <span className="text-[11px] leading-[15px] font-bold capitalize" style={{ color: accent }}>Pro tip · {post.postedAgo}</span>
                     {post.graphic
                       ? (
                         <>

@@ -10,7 +10,7 @@
 
 import { motion } from "framer-motion";
 
-export function TextTabs<K extends string>({ items, value, onChange, ariaLabel, layoutId, className = "", soft = false }: {
+export function TextTabs<K extends string>({ items, value, onChange, ariaLabel, layoutId, className = "", soft = false, caps = true }: {
   items: { key: K; label: string }[];
   value: K;
   onChange: (key: K) => void;
@@ -23,6 +23,8 @@ export function TextTabs<K extends string>({ items, value, onChange, ariaLabel, 
    *  this better"): v4's sub-navigation, 13px sentence case, muted until
    *  active, a hairline under the row */
   soft?: boolean;
+  /** false = Title Case labels, no caps transform (Connect, 14 Oct 2026) */
+  caps?: boolean;
 }) {
   return (
     // data-text-tabs: v4's stylesheet turns every tablist in its content
@@ -34,7 +36,7 @@ export function TextTabs<K extends string>({ items, value, onChange, ariaLabel, 
         const on = item.key === value;
         return (
           <button key={item.key} type="button" role="tab" aria-selected={on} onClick={() => onChange(item.key)}
-            className={`relative flex-none whitespace-nowrap ${soft ? `py-[9px] text-[13px] leading-[16px] ${on ? "font-semibold" : "font-medium"}` : "px-[2px] py-[3px] text-[14px] leading-[18px] font-bold uppercase tracking-[0.01em]"} ${on ? "" : "dm-quiet cursor-pointer"}`}
+            className={`relative flex-none whitespace-nowrap ${soft ? `py-[9px] text-[13px] leading-[16px] ${on ? "font-semibold" : "font-medium"}` : `px-[2px] py-[3px] text-[14px] leading-[18px] font-bold ${caps ? "uppercase tracking-[0.01em]" : "capitalize"}`} ${on ? "" : "dm-quiet cursor-pointer"}`}
             style={{ fontFamily: "var(--font-body)", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
             {item.label}
             {on && <motion.span layoutId={layoutId} aria-hidden className={`absolute inset-x-0 h-[2px] ${soft ? "-bottom-px rounded-full" : "-bottom-[5px]"}`} style={{ background: "var(--accent)" }} transition={{ type: "spring", stiffness: 500, damping: 40 }} />}

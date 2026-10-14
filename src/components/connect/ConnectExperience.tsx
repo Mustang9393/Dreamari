@@ -26,7 +26,7 @@ import { CompanyMark, Avatar, OrgAvatar, COMPANY_BRAND, COMPANY_MARKS, CompanyCh
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
-import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
+import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
 import { useDiscoveryNudge } from "@/lib/nudge";
@@ -590,7 +590,7 @@ function RingStats({ items }: { items: [number, string][] }) {
           >
             <span className="text-[13px] leading-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{value.toLocaleString("en-US")}</span>
           </span>
-          <span className="text-[10.5px] leading-[13px] font-semibold tracking-[0.04em] uppercase" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.7)" }}>{label}</span>
+          <span className="text-[10.5px] leading-[13px] font-semibold capitalize" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.7)" }}>{label}</span>
         </span>
       ))}
     </div>
@@ -1133,7 +1133,7 @@ function AlignedRow({ onOpen, avatarName, proId, head, title, snippet, media, co
       </div>
       <div className="text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
         <p className="text-[18px] leading-[20px] font-extrabold" style={{ color: countTone }}>{count}</p>
-        <p className="mt-[2px] text-[10px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>{countLabel}</p>
+        <p className="mt-[2px] text-[10px] font-bold capitalize" style={{ color: "var(--muted-foreground)" }}>{countLabel}</p>
         <p className="mt-[6px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{time}</p>
       </div>
     </div>
@@ -1287,7 +1287,7 @@ function RailRow({ onOpen, avatarName, proId, head, title, snippet, children }: 
          handler of its own must stay below the overlay button, or it
          swallows the click instead of letting it reach the overlay. */}
       <div className="min-w-0 flex-1 pr-[22px]">
-        <p className="truncate text-[10.5px] font-bold tracking-[0.05em] uppercase" style={{ color: "color-mix(in srgb, var(--muted-foreground) 70%, transparent)" }}>{head}</p>
+        <p className="truncate text-[10.5px] font-bold capitalize" style={{ color: "color-mix(in srgb, var(--muted-foreground) 70%, transparent)" }}>{head}</p>
         <h3 className="mt-[5px] text-[19px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
         {snippet && (
           <p className="mt-[4px] truncate text-[13px]" style={{ color: "var(--muted-foreground)" }}>
@@ -3067,7 +3067,7 @@ function ClampedExcerpt({ text, onMore }: { text: string; onMore: () => void }) 
  *  SectionHead, sized for a 260-300px column instead of the whole page. */
 function RailHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-[12px] leading-[16px] font-extrabold tracking-[0.03em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+    <h3 className="text-[12px] leading-[16px] font-extrabold capitalize" style={{ color: "var(--muted-foreground)" }}>
       {children}
     </h3>
   );
@@ -3831,8 +3831,8 @@ function HomeView({
            "All communities" section. */
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
           <div className="border-b pb-[6px]" style={{ borderColor: RULE }}>
-            <TextTabs ariaLabel="Community type" layoutId="connect-community-access" value={access} onChange={setAccess}
-              items={[{ key: "public", label: `Public Communities (${publicCount})` }, { key: "private", label: `Private Communities (${privateCount})` }]} />
+            <TextTabs caps={false} ariaLabel="Community type" layoutId="connect-community-access" value={access} onChange={setAccess}
+              items={[{ key: "public", label: `Public (${publicCount})` }, { key: "private", label: `Private (${privateCount})` }]} />
           </div>
           {/* The tab already names the section, so no heading repeats it
              (14 Oct 2026). The explainer and this tab's joined count share
@@ -3871,7 +3871,6 @@ function HomeView({
       {/* People after places (direct feedback): the communities are the
          doors, the people are who is behind them. Then what the people you
          already follow did lately, only once you follow someone. */}
-      {tab === "communities" && <PeopleToFollow follows={follows} onFollow={onFollow} />}
 
       {/* People: search companies or careers and find people to follow
          (Joshua Pierce, Slack, 6 Sept 2026) */}
@@ -4341,11 +4340,11 @@ function BoardView({
             {" "}· <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${bannerInk} 90%, transparent)` }}>{community.posts}</strong> posts
           </span>
           {joined ? (
-            <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] uppercase" style={{ color: `color-mix(in srgb, ${communityAccent(community)} 45%, ${bannerInk})` }}>
+            <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold capitalize" style={{ color: `color-mix(in srgb, ${communityAccent(community)} 45%, ${bannerInk})` }}>
               <CheckCircle2 className="h-[14px] w-[14px]" aria-hidden /> Joined
             </span>
           ) : (
-            <button type="button" onClick={onJoin} className="dm-quiet flex cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] uppercase" style={{ color: `color-mix(in srgb, ${communityAccent(community)} 45%, ${bannerInk})` }}>
+            <button type="button" onClick={onJoin} className="dm-quiet flex cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold capitalize" style={{ color: `color-mix(in srgb, ${communityAccent(community)} 45%, ${bannerInk})` }}>
               Join <ChevronRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} />
             </button>
           )}
@@ -4893,7 +4892,7 @@ function EventView({
              office. The byline and the way to talk it over close it. */}
           {event.debrief && postAs?.chip === "United Way" && (
             <article aria-label="Team debrief" className="relative overflow-hidden rounded-[var(--radius-xl)] border px-[var(--space-6)] py-[var(--space-8)] sm:px-[var(--space-10)]" style={{ borderColor: `color-mix(in srgb, ${pAccent} 40%, var(--glass-border))`, background: `radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, ${pAccent} 22%, transparent), transparent 60%), var(--glass-surface-1)` }}>
-              <p className="flex items-center gap-[8px] text-[12px] leading-[16px] font-extrabold tracking-[0.12em] uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 55%, var(--foreground))` }}><Pin className="h-3.5 w-3.5" aria-hidden /> Pinned · Team debrief</p>
+              <p className="flex items-center gap-[8px] text-[12px] leading-[16px] font-extrabold capitalize" style={{ color: `color-mix(in srgb, ${pAccent} 55%, var(--foreground))` }}><Pin className="h-3.5 w-3.5" aria-hidden /> Pinned · Team debrief</p>
               <h2 className="mt-[14px] max-w-[22ch] text-[30px] leading-[35px] font-extrabold text-balance sm:text-[36px] sm:leading-[42px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>What worked, and what&apos;s next</h2>
               {event.debrief.body && <p className="mt-[12px] max-w-[52ch] text-[16px] leading-[25px]" style={{ color: "var(--muted-foreground)" }}>{event.debrief.body}</p>}
               <div className="mt-[var(--space-8)] grid grid-cols-1 gap-[var(--space-8)] md:grid-cols-2 md:gap-[var(--space-10)]">
@@ -4908,7 +4907,7 @@ function EventView({
                   </ol>
                 </section>
                 <section aria-label="Next, by office" className="md:border-l md:pl-[var(--space-10)]" style={{ borderColor: "var(--glass-border)" }}>
-                  <p className="text-[12px] leading-[16px] font-extrabold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>Next</p>
+                  <p className="text-[12px] leading-[16px] font-extrabold capitalize" style={{ color: "var(--muted-foreground)" }}>Next</p>
                   <ul className="mt-[var(--space-3)] flex flex-col">
                     {event.debrief.next.map((n) => (
                       <li key={n.office + n.task} className="flex flex-col gap-[2px] border-t py-[12px] first:border-t-0 first:pt-0" style={{ borderColor: "var(--glass-border)" }}>

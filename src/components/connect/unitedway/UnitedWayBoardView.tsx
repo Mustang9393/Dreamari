@@ -92,7 +92,7 @@ const useBoard = () => useContext(BoardCtx);
 // ——— small pieces ———
 
 export function Eyebrow({ children, tone = BLUE_TEXT }: { children: ReactNode; tone?: string }) {
-  return <span className="block text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: tone }}>{children}</span>;
+  return <span className="block text-[11px] leading-[15px] font-extrabold capitalize" style={{ color: tone }}>{children}</span>;
 }
 function LinkButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
   return <button type="button" onClick={onClick} className="dm-link flex w-fit cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: BLUE_TEXT }}>{children}</button>;
@@ -515,7 +515,7 @@ function StudentEvents({ events, where }: { events: D.UwEvent[]; /** the board's
       {/* one tab row (Upcoming, Past); where it happens is a dropdown, never
          a second row of the same tabs */}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <TextTabs ariaLabel="When" layoutId="uw-when" value={when} onChange={setWhen} items={U.when.map((w) => ({ key: w.key, label: `${w.label} (${w.key === "upcoming" ? upcoming.length : past.length})` }))} />
+        <TextTabs caps={false} ariaLabel="When" layoutId="uw-when" value={when} onChange={setWhen} items={U.when.map((w) => ({ key: w.key, label: `${w.label} (${w.key === "upcoming" ? upcoming.length : past.length})` }))} />
         <span className="flex flex-wrap items-center gap-[8px]">
         {where}
         <Listbox ariaLabel="Online or in person" value={filter} onChange={(v) => setFilter(v as D.EventFilter)} options={U.filters.map((f) => ({ value: f.key, label: f.label }))}
@@ -995,7 +995,7 @@ function CommunityBoards({ role, threads, posts, staffPosts, repliesFor, openThr
          level 2, the app's underline TextTabs; who can see the board is a
          switch, not a third row of tabs. */}
       <div className="flex flex-wrap items-end justify-between gap-x-[var(--space-5)] gap-y-[var(--space-3)] border-b" style={{ borderColor: RULE }}>
-        <div className="min-w-0 flex-1 pb-[6px]"><TextTabs ariaLabel={C.boards} layoutId="uw-boards" value={current.key} onChange={setSpace} items={spaces.map((x) => ({ key: x.key, label: x.key === "all" ? C.across : x.key }))} /></div>
+        <div className="min-w-0 flex-1 pb-[6px]"><TextTabs caps={false} ariaLabel={C.boards} layoutId="uw-boards" value={current.key} onChange={setSpace} items={spaces.map((x) => ({ key: x.key, label: x.key === "all" ? C.across : x.key }))} /></div>
         {role === "staff" && <div className="pb-[8px]"><StaffSwitch on={staffOnly} onChange={(v) => setAudience(v ? "staff" : "everyone")} /></div>}
       </div>
       {role === "staff" && composing && (
@@ -1072,7 +1072,7 @@ function StaffEvents({ events }: { events: D.UwEvent[] }) {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <TextTabs ariaLabel="When" layoutId="uw-when" value={when} onChange={setWhen} items={U.when.map((w) => ({ key: w.key, label: `${w.label} (${w.key === "upcoming" ? upcoming.length : past.length})` }))} />
+        <TextTabs caps={false} ariaLabel="When" layoutId="uw-when" value={when} onChange={setWhen} items={U.when.map((w) => ({ key: w.key, label: `${w.label} (${w.key === "upcoming" ? upcoming.length : past.length})` }))} />
         <Listbox ariaLabel={board.staff.unit} value={office} onChange={setOffice} options={[{ value: "all", label: board.staff.all }, ...board.chapters.map((c) => ({ value: c.short, label: c.short }))]}
           className="flex min-h-[38px] cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
       </div>
@@ -1482,7 +1482,7 @@ function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPo
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         {/* level 2 under the section pills: underline tabs, never a second
            pill row; the range is a setting, so a dropdown */}
-        <div className="min-w-0 flex-1"><TextTabs ariaLabel="Community" layoutId="uw-impact-place" items={tabs} value={picked} onChange={setPicked} /></div>
+        <div className="min-w-0 flex-1"><TextTabs caps={false} ariaLabel="Community" layoutId="uw-impact-place" items={tabs} value={picked} onChange={setPicked} /></div>
         <span className="flex items-center gap-[8px]">
           <Listbox ariaLabel="Range" value={range} onChange={(v) => setRange(v as typeof range)} options={U.range.map((r) => ({ value: r.key, label: r.key === "year" ? "This year" : "This month" }))}
             className="flex min-h-[36px] cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
