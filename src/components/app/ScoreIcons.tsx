@@ -39,25 +39,27 @@ export function StreakFlame({ size = 16, className = "" }: { size?: number; clas
   );
 }
 
-export function ScoreBolt({ size = 16, className = "" }: { size?: number; className?: string }) {
+/** The Dream Score mark: a four point "dream spark" with a small twin, in the
+ *  brand ramp (pale sky into brand blue into the accent violet). It replaces
+ *  the lightning bolt (Chandu, 15 Oct 2026: streak and XP read as clutter, and
+ *  a bolt is every app's XP icon). A spark is already this app's own motion
+ *  language (SparkBar, the nudge sparkle), so the icon and the "+N XP" that
+ *  flies into it speak the same way. */
+const STAR = "M12 2C12.8 7.5 16.5 11.2 22 12C16.5 12.8 12.8 16.5 12 22C11.2 16.5 7.5 12.8 2 12C7.5 11.2 11.2 7.5 12 2Z";
+
+export function DreamSpark({ size = 16, className = "" }: { size?: number; className?: string }) {
   const id = useId().replace(/:/g, "");
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden className={className}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden className={className} style={{ filter: "drop-shadow(0 0 5px color-mix(in srgb, #7FA8FF 55%, transparent))" }}>
       <defs>
-        <linearGradient id={`${id}-fill`} x1="6" y1="3" x2="18" y2="21" gradientUnits="userSpaceOnUse">
-          {/* light, electric: pale sky at the top through brand-400 to a
-             soft violet, never the deep brand blue (direct feedback) */}
+        <linearGradient id={`${id}-fill`} x1="4" y1="8" x2="17" y2="21" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#E3EDFF" />
-          <stop offset="0.45" stopColor="#7FA8FF" />
+          <stop offset="0.5" stopColor="#7FA8FF" />
           <stop offset="1" stopColor="#9D86FF" />
         </linearGradient>
-        <linearGradient id={`${id}-shine`} x1="9" y1="3" x2="12" y2="12" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.95" />
-          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
-        </linearGradient>
       </defs>
-      <path d="M13.6 2.5 5.2 13.4c-.4.5 0 1.2.6 1.2h4.9l-1.6 6.3c-.2.7.7 1.1 1.1.5l8.6-11.2c.4-.5 0-1.2-.6-1.2h-4.9l1.5-6c.2-.7-.7-1.1-1.2-.5Z" fill={`url(#${id}-fill)`} />
-      <path d="M13 4.2 7.6 11.4c.7-.2 1.5-.3 2.3-.3l2.4-6.5c.1-.2.4-.5.7-.4Z" fill={`url(#${id}-shine)`} />
+      <path d={STAR} transform="translate(10 14) scale(0.72) translate(-12 -12)" fill={`url(#${id}-fill)`} />
+      <path d={STAR} transform="translate(18.2 5.8) scale(0.36) translate(-12 -12)" fill="#E3EDFF" />
     </svg>
   );
 }

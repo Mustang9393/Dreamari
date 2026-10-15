@@ -16,7 +16,7 @@ import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { PlayBurst } from "@/components/play/PlayBurst";
 import { Confetti } from "@/components/flow/aurora/Confetti";
 import { GestureHint } from "@/components/flow/GestureHint";
-import { StreakFlame, ScoreBolt } from "@/components/app/ScoreIcons";
+import { StreakFlame, DreamSpark } from "@/components/app/ScoreIcons";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { PlayBackdrop } from "@/components/play/PlayBackdrop";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
@@ -572,8 +572,8 @@ export function FoundationsSection() {
             <StateCell label="StreakFlame">
               <StreakFlame size={30} />
             </StateCell>
-            <StateCell label="ScoreBolt">
-              <ScoreBolt size={30} />
+            <StateCell label="DreamSpark">
+              <DreamSpark size={30} />
             </StateCell>
           </StateGrid>
         </Specimen>

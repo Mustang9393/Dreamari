@@ -1,14 +1,14 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { ScoreBolt, StreakFlame } from "./ScoreIcons";
+import { DreamSpark, StreakFlame } from "./ScoreIcons";
 import { useDreamScore } from "@/lib/dreamScore";
 import { DREAM_SCORE_TARGET_ATTR } from "./xpFlight";
 import { DreamScoreTip, STREAK_TIP } from "./DreamScoreTip";
 import { Shimmer } from "@/components/app/states";
 
-/** THE streak and Dream Score chip: flame and streak, a divider, a filled
- *  bolt and the XP, the same everywhere the top bar appears (desktop nav,
+/** THE streak and Dream Score chip: flame and streak, then the dream spark
+ *  and the XP, no divider, the same everywhere the top bar appears (desktop nav,
  *  phone and tablet header, the Resume Builder's own header). The XP half
  *  carries the flying-XP landing target and re-keys on the total so the
  *  number rolls in when it changes (direct feedback, 18 Sept 2026: one
@@ -29,24 +29,24 @@ export function DreamScoreChip({ className = "" }: { className?: string }) {
   const known = useSyncExternalStore(noopSubscribe, () => true, () => false);
   return (
     <span
-      // no bordered surface: the two numbers sit plain in the bar with air
-      // around them (direct feedback, 19 Sept 2026)
-      className={`flex h-10 flex-none items-center gap-[10px] px-[6px] text-[13px] leading-[18px] font-bold tabular-nums ${className}`}
+      // no surface and no divider: two small numbers with air between them,
+      // the Dream Score leading (bold, full ink) and the streak behind it
+      // (Chandu, 15 Oct 2026: they were clutter, take less space)
+      className={`flex h-10 flex-none items-center gap-[12px] px-[2px] text-[13px] leading-[18px] tabular-nums ${className}`}
       style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}
     >
       <DreamScoreTip text={STREAK_TIP}>
-        <span aria-label="12 day streak" className="flex items-center gap-[5px]"><StreakFlame size={17} /> 12</span>
+        <span aria-label="12 day streak" className="flex items-center gap-[3px] font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}><StreakFlame size={15} />12</span>
       </DreamScoreTip>
-      <span aria-hidden className="h-[14px] w-px" style={{ background: "var(--glass-border)" }} />
       {known ? (
         <DreamScoreTip>
-          <span key={xp} {...{ [DREAM_SCORE_TARGET_ATTR]: "" }} aria-label={`Dream Score ${xp} XP`} className="flex items-center gap-[5px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]">
-            <ScoreBolt size={17} /> {xp.toLocaleString("en-US")}
+          <span key={xp} {...{ [DREAM_SCORE_TARGET_ATTR]: "" }} aria-label={`Dream Score ${xp} XP`} className="flex items-center gap-[4px] font-bold motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]">
+            <DreamSpark size={18} />{xp.toLocaleString("en-US")}
           </span>
         </DreamScoreTip>
       ) : (
-        <span aria-label="Loading Dream Score" className="flex items-center gap-[5px]">
-          <ScoreBolt size={17} />
+        <span aria-label="Loading Dream Score" className="flex items-center gap-[4px]">
+          <DreamSpark size={18} />
           <Shimmer className="h-[12px] w-[28px] rounded-full" />
         </span>
       )}
