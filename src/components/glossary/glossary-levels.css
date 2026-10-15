@@ -456,8 +456,21 @@
 .glossary-game-lab .glossary-unlock-relic { container-type: inline-size; }
 .glossary-game-lab .glossary-unlock-relic .glossary-unlock-relic-word {
   display: grid; flex: 1; place-items: center; width: 100%; padding: 0 4px; text-align: center; overflow-wrap: normal; word-break: keep-all; line-height: 1;
-  font-size: clamp(15px, calc(88cqi / (var(--len, 6) * 0.6)), 40px);
+  font-size: clamp(15px, calc(88cqi / (var(--len, 6) * var(--k, 0.6))), var(--kmax, 40px));
   color: var(--glossary-accent); text-shadow: 0 2px 0 rgba(0,0,0,.28), 0 0 22px color-mix(in srgb, var(--glossary-accent) 38%, transparent);
 }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic .glossary-unlock-relic-word { font-family: "Rozha One", Georgia, serif !important; font-weight: 400; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic .glossary-unlock-relic-word { font-family: var(--sig-font) !important; font-weight: 700; }
+/* Signal's own celebration (15 Oct 2026, Chandu: "Signal should have its own
+   celebratory fonts"): its pixel face (Jersey 20 is condensed, so the words
+   run bigger), gold with a hard pixel shadow like an arcade high-score
+   board, and the headline gets the same hard shadow and a gold glow. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic .glossary-unlock-relic-word {
+  --k: 0.48; --kmax: 54px; font-family: var(--sig-font) !important; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: var(--sig-gold, #fbbf24);
+  text-shadow: 3px 3px 0 #04101f, 0 0 18px color-mix(in srgb, var(--sig-gold, #fbbf24) 45%, transparent);
+}
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale h2 { text-shadow: 4px 4px 0 #04101f, 0 0 30px color-mix(in srgb, var(--sig-gold, #fbbf24) 35%, transparent); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale h2 em { text-shadow: 4px 4px 0 #04101f, 0 0 26px color-mix(in srgb, var(--sig-gold, #fbbf24) 55%, transparent); }
+/* a grid-in-a-grid cell centres its content in the cell, not on its own track
+   (the cloud is wider than its column, so it sat left of centre) */
+.glossary-game-lab .glossary-unlock-gallery-dreamy { place-content: center; }
+
