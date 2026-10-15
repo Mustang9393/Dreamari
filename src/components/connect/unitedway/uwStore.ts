@@ -61,29 +61,26 @@ export function setUwPov(pov: UwPov) {
   set({ pov });
 }
 
-// The United Way role is "on" once someone has opened a United Way board and
-// is viewing as the Team (15 Oct 2026, Chandu: the team's messages must be
-// reachable from anywhere, like Facebook's Messenger). The Team POV is the
-// board's default, so the POV alone cannot say who is a United Way user: a
-// student who never opened the board must never get a team Messages icon.
-// DEMO-ONLY: remembered in localStorage.
-const ACTIVE_KEY = "dreamari:uw-active";
-let active: boolean | null = null;
-function readActive(): boolean {
-  if (active !== null) return active;
-  try { active = window.localStorage.getItem(ACTIVE_KEY) === "1"; } catch { active = false; }
-  return active;
-}
+// On only while a United Way board is on screen (Chandu, 15 Oct 2026: "make
+// sure the dms stuff only appears in the united way teams mode in that
+// board"). The board turns it on when it mounts and off when it unmounts, so
+// the nav icon, the dock and the bell's Team rows never reach another page.
+let active = false;
 export function activateUw() {
-  if (readActive()) return;
+  if (active) return;
   active = true;
-  try { window.localStorage.setItem(ACTIVE_KEY, "1"); } catch { /* active for this visit */ }
   set({});
 }
-/** True while the United Way Team role is the one on screen anywhere in the app. */
+export function deactivateUw() {
+  if (!active) return;
+  active = false;
+  dock = { open: false, key: null };
+  set({});
+}
+/** True only while the United Way board is on screen in the Team role. */
 export function useUwTeamActive(): boolean {
   const [pov] = useUwPov();
-  return useSyncExternalStore(subscribe, readActive, () => false) && pov === "team";
+  return useSyncExternalStore(subscribe, () => active, () => false) && pov === "team";
 }
 
 // The Team messages dock (Messenger-shaped): open or not, and which
