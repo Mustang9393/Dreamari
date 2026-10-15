@@ -36,7 +36,10 @@ export function questionReaction(question: GlossaryQuestion, numericStep = false
  *  mirror him to face its content (15 Oct 2026, Chandu: "always FACE the
  *  content"). "front" never needs a flip. */
 export type DreamyFacing = "left" | "right" | "front";
+// Checked eye by eye at 768px (16 Oct 2026): every Drift head is turned to
+// the right (the right eye foreshortened), except sort and recall, whose
+// props and gaze go left. None is truly frontal.
 export const DREAMY_FACING: Record<DreamyReaction, DreamyFacing> = {
-  welcome: "front", explain: "front", choose: "right", match: "right", sort: "left", calculate: "right",
-  recall: "left", case: "front", hint: "right", correct: "right", retry: "front", mastery: "front",
+  welcome: "right", explain: "right", choose: "right", match: "right", sort: "left", calculate: "right",
+  recall: "left", case: "right", hint: "right", correct: "right", retry: "right", mastery: "right",
 };
