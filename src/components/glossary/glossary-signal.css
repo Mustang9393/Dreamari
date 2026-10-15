@@ -381,3 +381,8 @@ html.light .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-la
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy > p { font-size: 18px !important; max-width: 32ch; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-copy .glossary-welcome-cta { width: 100%; }
 }
+
+/* The feedback card has no Dreamy any more (15 Oct 2026, one Dreamy per
+   screen): the copy takes the whole card, not the old mascot column. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-layout { display: block !important; grid-template-columns: none !important; min-height: 0 !important; padding-left: 0 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-copy { grid-column: auto !important; width: 100%; max-width: none !important; }

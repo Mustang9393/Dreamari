@@ -1976,17 +1976,38 @@ function shuffleStable<T>(items: T[], seed: string): T[] {
   return arr;
 }
 
+/** Plus-shaped sparks (and, in Signal, its pixel coins) rising from behind
+ *  the one Dreamy on a right answer. Mount it to play once. */
+function RewardPluses() {
+  const atmosphere = useAtmosphere();
+  return (
+    <>
+      <span className="glossary-dreamy-pluses" aria-hidden>
+        {[-54, -30, -8, 14, 38, 58, -42, 26].map((dx, i) => <i key={i} style={{ "--dx": `${dx}px`, "--delay": `${i * 0.07}s` } as React.CSSProperties} />)}
+      </span>
+      {atmosphere === "v2" ? (
+        <span className="glossary-signal-coins" aria-hidden>
+          {[-90, -60, -30, 0, 30, 60, 90, -45, 45].map((dx, i) => <i key={i} style={{ "--dx": `${dx}px`, "--delay": `${i * 0.05}s` } as React.CSSProperties} />)}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
 function QuestionScreen({
   question,
   onAnswer,
   onReset,
   answerState = "idle",
+  talking = false,
 }: {
   question: GlossaryQuestion;
   onAnswer: (r: AnswerResult) => void;
   onReset: () => void;
   /** the pending verdict, so Dreamy can react to it */
   answerState?: "idle" | "correct" | "wrong";
+  /** the feedback line is still typing: Dreamy's mouth moves with it */
+  talking?: boolean;
 }) {
   const [picked, setPicked] = useState<number | null>(null);
   const { playCorrect, playWrong } = useMaterialSounds();
@@ -2076,7 +2097,23 @@ function QuestionScreen({
   // react, animate, or shift position").
   const restingPose = questionReaction(question, !!currentStep && "answer" in currentStep);
   const pose = answerState === "correct" || stepCleared ? "correct" : answerState === "wrong" ? "retry" : boardReaction ?? restingPose;
-  const dreamy = <span className="glossary-question-dreamy"><DreamyFace pose={pose} size={84} /></span>;
+  // The reward that used to fly out of the feedback card (Signal's coins,
+  // the talking Dreamy) now happens here, at the one Dreamy (15 Oct 2026,
+  // Chandu: "i also liked how the pluses and dreamy stuff happened in the
+  // reaction box... Use the pluses thing in the main dreamy position when
+  // correct"). Pluses rise from behind him on every right answer, a
+  // matched pair and a cleared case step included.
+  const rewarding = answerState === "correct" || stepCleared || boardReaction === "correct";
+  const dreamy = (
+    <span className="glossary-question-dreamy">
+      {/* the stage is the anchor for the reward, so the pluses rise from
+         Dreamy himself in every theme (Signal's slot is not positioned) */}
+      <span className="glossary-dreamy-stage">
+        {rewarding ? <RewardPluses key={`${answerState}-${step}-${boardReaction}`} /> : null}
+        <DreamyFace pose={pose} size={84} talking={answerState === "correct" ? talking : undefined} />
+      </span>
+    </span>
+  );
   const sentence = question.kind === "choice" && question.sentence
     ? <SentenceCard sentence={question.sentence} filled={picked !== null ? shuffledOptions[picked].o : null} state={picked === null ? "idle" : pickedCorrect ? "correct" : "wrong"} />
     : null;
@@ -2202,14 +2239,18 @@ function useTypewriter(text: string, cps = 60) {
   return { shown: text.slice(0, n), done, finish: () => setN(text.length) };
 }
 
-function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { correct: boolean; text: string; onNext: () => void; isLast: boolean; inline?: boolean }) {
-  const atmosphere = useAtmosphere();
+function FeedbackPanel({ correct, text, onNext, isLast, inline = false, onTyping }: { correct: boolean; text: string; onNext: () => void; isLast: boolean; inline?: boolean; /** true while the line types, so the question's Dreamy can speak it */ onTyping?: (typing: boolean) => void }) {
 
   // The explanation is in the box from the start (Chandu, 6 Oct 2026: "the
   // why is too small and nobody is gonna click that. Show the feedback in
   // the box without needing the tap"), typed in. Tapping finishes the line;
   // Continue (or the keyboard shortcut) alone commits a recovered answer.
   const { shown, done, finish } = useTypewriter(text);
+  useEffect(() => {
+    onTyping?.(!done);
+    return () => onTyping?.(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the parent's setter is stable
+  }, [done]);
   const advance = () => { if (!done) finish(); else if (correct) onNext(); };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -2231,12 +2272,8 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
         onClick={finish}
         aria-live="polite"
       >
-        {atmosphere === "v2" && correct && (
-          // Signal: pixel coins fly up out of the card on a right answer.
-          <span className="glossary-signal-coins" aria-hidden>
-            {[-90, -60, -30, 0, 30, 60, 90, -45, 45].map((dx, i) => <i key={i} style={{ "--dx": `${dx}px`, "--delay": `${i * 0.05}s` } as React.CSSProperties} />)}
-          </span>
-        )}
+        {/* Signal's coins now fly from the question's Dreamy (RewardPluses),
+           not from this card: one reward spot, one Dreamy. */}
         <div className="glossary-feedback-layout">
           {/* No Dreamy here: the one beside the question reacts instead
               (15 Oct 2026, Joshua: one Dreamy per screen, "If Pikachu were
@@ -3258,6 +3295,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   const shellRef = useRef<HTMLDivElement>(null);
   const [mastery, setMastery] = useState<Record<string, number>>({});
   const [pendingResult, setPendingResult] = useState<AnswerResult | null>(null);
+  const [feedbackTyping, setFeedbackTyping] = useState(false);
   const [attempts, setAttempts] = useState<Record<string, number>>({});
   const [streak, setStreak] = useState(0);
   const [showStreak, setShowStreak] = useState<number | null>(null);
@@ -3502,7 +3540,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
             <UnlockCompleteScreen lesson={lesson} variant={variant} onStartPractice={() => goTo("question")} />
           ))}
         {screen === "question" && current && (
-          <QuestionScreen key={current.id} question={current} onAnswer={handleAnswer} onReset={() => setPendingResult(null)} answerState={pendingResult ? (pendingResult.correct ? "correct" : "wrong") : "idle"} />
+          <QuestionScreen key={current.id} question={current} onAnswer={handleAnswer} onReset={() => setPendingResult(null)} answerState={pendingResult ? (pendingResult.correct ? "correct" : "wrong") : "idle"} talking={feedbackTyping} />
         )}
         {screen === "powerPlayIntro" && <PowerPlayIntroScreen line={lesson.powerPlay.intro} onStart={() => goTo("powerPlay")} />}
         {screen === "powerPlay" && <PowerPlayScreen lesson={lesson} onComplete={() => goTo("masteryLoading")} />}
@@ -3529,6 +3567,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
             isLast={queueIndex + 1 >= queue.length}
             inline={variant === "lab"}
             onNext={advanceQuestion}
+            onTyping={setFeedbackTyping}
           />
         )}
       </main>

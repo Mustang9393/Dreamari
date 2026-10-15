@@ -40,6 +40,6 @@ assert.ok(totalSignalBytes<1100000,'Keep the selective Signal set under 1.1 MB')
 const component=await readFile('src/components/glossary/GlossaryLabGameExperience.tsx','utf8');
 const feedback=component.slice(component.indexOf('function FeedbackPanel('),component.indexOf('function FeedbackPanel(')+6000);
 assert.ok(feedback.includes('useTypewriter(text)'));
-assert.ok(feedback.includes('glossary-signal-coins'));
+assert.ok(!feedback.includes('glossary-signal-coins'),'the coins fly from the question Dreamy now (RewardPluses), not the card');
 assert.ok(!feedback.includes('<DreamyFace'),'the feedback card has no Dreamy of its own: one Dreamy per screen (Joshua, 15 Oct 2026)');
 console.log('Passed: 12 Drift poses, activity mapping, selective Signal routing, 8 lossless exports, stable silhouettes, asset budget and existing success dialogue contracts.');

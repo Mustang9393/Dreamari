@@ -1,3 +1,12 @@
+## 2026-10-15 (later still): Glossary Games: the reward moves to the one Dreamy
+
+**Why (Chandu):** "MAke sure all fixes go across signal too, but i also liked how the pluses and dreamy stuff happened in the reaction box. How can we keep that? Use the pluses thing in the main dreamy position when correct."
+
+- `RewardPluses` mounts behind the question's Dreamy on every right answer (a matched pair and a cleared case step too): eight plus-shaped sparks rise and fade (Drift: glowing amber crosses; Signal: hard pixel crosses on a stepped curve) and, in Signal, its pixel coins fountain from the same spot instead of from the card. Anchored on a `.glossary-dreamy-stage` wrapper because Signal's dreamy slot is not positioned.
+- The feedback card reports its typewriter state (`onTyping`) and the experience passes it to `QuestionScreen` as `talking`, so the one Dreamy's mouth moves while the line types, as the card's Dreamy used to.
+- Signal's feedback card lost its 78px mascot column (the copy was wrapping in it); the copy takes the whole card. The mapping test asserts the card no longer carries the coins.
+- Checked on :3012 in Drift and Signal Q1 right answer at 0.4s and after the line finished. Not checked: phone widths, light mode.
+
 ## 2026-10-15 (later): Glossary Games: one Dreamy per screen; Levels 2 to 4 teach cards are words only
 
 **Why:** Chandu, after seeing d49f5ff2: "NO icons at all. We need to redesign the flash cards for levels 2-4 to have no images." And Joshua's note, pasted by Chandu: "having Dreamy next to the question and then again in the feedback box feels redundant. We should generally have one Dreamy visible at a time on each unique screen... If Pikachu were standing next to Ash, you would not also show another Pikachu somewhere else on the same scene... the existing Dreamy can react, animate, or shift position."

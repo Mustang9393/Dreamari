@@ -2604,3 +2604,15 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up { padding: 12px 14px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen:has(.glossary-match-up) { gap: 12px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen:has(.glossary-match-up) h2 { margin: 0 !important; }
+
+/* Reward pluses: plus-shaped sparks rising from behind the one Dreamy on a
+   right answer (15 Oct 2026). Drift: soft glowing crosses in the lab amber.
+   Signal: the same crosses as hard pixels, stepped, plus its coins. */
+.glossary-game-lab .glossary-dreamy-pluses { pointer-events: none; position: absolute; left: 50%; top: 50%; width: 0; height: 0; z-index: 3; }
+.glossary-game-lab .glossary-dreamy-pluses i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 2px; background: var(--lab-amber, #fbbf24); box-shadow: 0 -8px var(--lab-amber, #fbbf24), 0 8px var(--lab-amber, #fbbf24), -8px 0 var(--lab-amber, #fbbf24), 8px 0 var(--lab-amber, #fbbf24); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--lab-amber, #fbbf24) 75%, transparent)); opacity: 0; animation: glossary-plus-rise 1.15s cubic-bezier(.2, .7, .3, 1) var(--delay, 0s) both; }
+@keyframes glossary-plus-rise { 0% { opacity: 0; transform: translate(0, 14px) scale(.3) rotate(0deg); } 18% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx, 0px), -78px) scale(1) rotate(90deg); } }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-dreamy-pluses i { border-radius: 0; filter: none; background: var(--sig-gold); box-shadow: 0 -8px var(--sig-gold), 0 8px var(--sig-gold), -8px 0 var(--sig-gold), 8px 0 var(--sig-gold); animation-timing-function: steps(7, end); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-question-dreamy .glossary-signal-coins { left: 50% !important; top: 55% !important; width: 0; height: 0; opacity: 1; transform: none; z-index: 2; }
+@media (prefers-reduced-motion: reduce) { .glossary-game-lab .glossary-dreamy-pluses { display: none; } }
+/* width: 100%, because Signal sizes its cloud as 100% of the slot; a shrink-wrapped stage would resolve that to 0. */
+.glossary-game-lab .glossary-dreamy-stage { position: relative; display: grid; place-items: center; width: 100%; }
