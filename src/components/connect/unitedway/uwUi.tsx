@@ -133,8 +133,11 @@ export function PersonChip({ who }: { who: UwPerson }) {
 
 /** "Viewing as": the demo POV switch in the board's header (15 Oct 2026,
  *  Maisha: "For demo purposes, we should be able to switch between these
- *  POVs"). Small and quiet like the app's other demo switches (the AT&T
- *  board's version chip), so it reads as a setting, not a tab row. */
+ *  POVs"). Small and quiet like the app's other demo switches. Its own
+ *  hover and focus, not the shared dm-quiet: dm-quiet's !important hover
+ *  fill painted over the selected pill wherever the pointer rested, so a
+ *  POV could still read as picked after the switch (Chandu, 15 Oct). Only
+ *  an unselected option takes a hover fill; keyboard focus gets a ring. */
 export function PovSwitch({ pov, onChange }: { pov: D.UwPov; onChange: (p: D.UwPov) => void }) {
   return (
     <div className="flex w-full min-w-0 flex-col gap-[6px] sm:w-auto sm:flex-row sm:items-center sm:gap-[8px]">
@@ -143,7 +146,7 @@ export function PovSwitch({ pov, onChange }: { pov: D.UwPov; onChange: (p: D.UwP
         {D.POVS.map((o) => {
           const on = o.key === pov;
           return (
-            <button key={o.key} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.key)} className="dm-quiet flex min-h-[32px] flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap sm:flex-none"
+            <button key={o.key} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.key)} className={`flex min-h-[32px] flex-1 items-center justify-center rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-subtle)] focus-visible:ring-offset-1 sm:flex-none ${on ? "cursor-default" : "cursor-pointer hover:bg-[var(--glass-surface-2)]"}`}
               style={on ? { background: o.key === "team" ? D.BRAND.yellow : BLUE, color: o.key === "team" ? "#1a1300" : "#fff" } : { color: MUTED }}>
               {o.label}
             </button>

@@ -40,6 +40,7 @@ import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { EmptyView } from "@/components/app/states";
 import { TextTabs } from "@/components/app/TextTabs";
+import { Listbox } from "@/components/app/Listbox";
 import { Avatar, CONTACT_INFO, CONTACT_WARNING, ConnectNav, OrgAvatar, PrimaryCta, QuietCta, SectionHead, SectionSurface } from "../primitives";
 import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart } from "../mentorship/charts";
@@ -51,7 +52,7 @@ import type { EventBoard } from "../data";
 import * as D from "./uwData";
 import { registerUwEvent, toEventBoard, uwEventById } from "./uwEvents";
 import { useBackStep } from "@/lib/backStep";
-import { useUwPov } from "./uwStore";
+import { takePendingAsk, useUwPov } from "./uwStore";
 import type { UwItem, UwPerson, UwQuestion } from "./uwCommunity";
 import { ItemList, ItemPage, LabelledPosts, PersonSheet, StudentComposer, StudentsSection, UwNavCtx, VolunteersSection, useBoardItems, type UwNav } from "./UwFeed";
 import { TeamWorkspace } from "./UwTeam";
@@ -868,7 +869,7 @@ function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPo
   return (
     <div className="flex flex-col gap-[var(--space-5)]" style={V4_COLORS}>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <div className="min-w-0 flex-1"><TextTabs caps={false} ariaLabel="Community" layoutId="uw-impact-place" items={tabs} value={picked} onChange={setPicked} /></div>
+        <div className="w-full min-w-0 sm:w-auto sm:flex-1"><TextTabs caps={false} ariaLabel="Community" layoutId="uw-impact-place" items={tabs} value={picked} onChange={setPicked} /></div>
         <span className="flex items-center gap-[8px]">
           <PillSelect ariaLabel="Range" value={range} onChange={setRange} options={U.range.map((r) => ({ value: r.key, label: r.key === "year" ? "This year" : "This month" }))} />
           <QuietCta size="sm" onClick={() => onToast(U.exported)}><Download className="h-3.5 w-3.5" aria-hidden /> {U.export}</QuietCta>
@@ -962,6 +963,8 @@ const sectionFromFilter = (f?: string): D.UwSection | undefined =>
 
 export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BACK, initialTab }: { board?: D.UwBoard; onBack: () => void; backLabel?: string; initialTab?: string }) {
   const [memo] = useState(() => { const m = MEMO[board.id]; MEMO[board.id] = undefined; return m; });
+  // a question started in the Mentorship tab opens here, To: United Way Team
+  const [pendingAsk, setPendingAskState] = useState(() => takePendingAsk(board.id));
   const router = useRouter();
   const nav = useContext(ConnectNav);
   const [pov, setPov] = useUwPov();
@@ -1092,6 +1095,9 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   }
 
   const povLine = D.POVS.find((p) => p.key === pov)!.line;
+  const tabOptions = sections.map((k) => ({ key: k, label: pov === "volunteer" && k === "impact" ? "My Impact" : D.SECTION_LABEL[k] }));
+  // phones: as many tabs as fit 390px (Team is short; Opportunities is not)
+  const phoneTabs = sections[2] === "team" ? 3 : 2;
   const heroStats = pov === "team"
     ? [{ value: String(board.chapters.length), label: board.chapters.length === 1 ? board.staff.unit : /[^aeiou]y$/.test(board.staff.unit) ? `${board.staff.unit.slice(0, -1)}ies` : `${board.staff.unit}s` }, { value: String(board.events.length), label: "events" }]
     : pov === "student" ? board.stats : [{ value: board.myImpact.tiles[0].value, label: "hours given" }];
@@ -1108,6 +1114,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
       {posting && <PostSheet onPost={post} onClose={() => setPosting(false)} />}
       {announcing && <AnnounceSheet section={announcing} onClose={() => setAnnouncing(null)} onPost={({ title, body, poster }) => { setAnnouncementMine((l) => [{ id: `uw-ann-${Date.now()}`, kind: "update", public: true, section: announcing, author: board.staff.me, title, body, poster, postedAgo: "Just now", replies: [] }, ...l]); onToast("Posted. Students and volunteers can see it."); }} />}
       {person && <PersonSheet who={person} onClose={() => setPerson(undefined)} />}
+      {pendingAsk && pov === "student" && <StudentComposer programId={pendingAsk.programId} initialText={pendingAsk.text} onClose={() => setPendingAskState(null)} />}
       {toast}
 
       {item ? (
@@ -1144,8 +1151,19 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
       </section>
 
       <SectionSurface className="flex flex-col gap-[var(--space-5)]">
-        <div id="uw-sections" className="flow-scroll -mx-[4px] scroll-mt-[96px] overflow-x-auto px-[4px] pb-[2px]">
-          <div className="w-max min-w-full sm:min-w-0"><Segmented ariaLabel="Section" value={section} onChange={keep(setSection)} options={sections.map((k) => ({ key: k, label: pov === "volunteer" && k === "impact" ? "My Impact" : D.SECTION_LABEL[k] }))} grow dense /></div>
+        {/* one tab row. From sm every section is a tab; on a phone the
+           first two or three are tabs and the rest sit in a More dropdown, so the
+           row fits 390px with no sideways scroll (Chandu, 15 Oct 2026: the
+           Team POV's six tabs scrolled sideways) */}
+        <div id="uw-sections" className="scroll-mt-[96px]">
+          <div className="hidden sm:block"><div className="w-full sm:w-fit"><Segmented ariaLabel="Section" value={section} onChange={keep(setSection)} options={tabOptions} grow dense /></div></div>
+          <div className="flex items-center gap-[8px] sm:hidden">
+            <div className="min-w-0 flex-1"><Segmented ariaLabel="Section" value={section} onChange={keep(setSection)} options={tabOptions.slice(0, phoneTabs)} grow dense /></div>
+            {tabOptions.length > phoneTabs && (
+              <Listbox ariaLabel="More sections" placeholder="More" value={tabOptions.slice(phoneTabs).some((o) => o.key === section) ? section : ""} onChange={(v) => keep(setSection)(v as D.UwSection)} options={tabOptions.slice(phoneTabs).map((o) => ({ value: o.key, label: o.label }))}
+                className="flex min-h-[40px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[13px] font-semibold" style={tabOptions.slice(phoneTabs).some((o) => o.key === section) ? { ...SOLID, borderColor: BLUE } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
+            )}
+          </div>
         </div>
         <motion.div key={`${pov}-${section}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)]">
           {section === "students" && <StudentsSection items={items} show={studentsShow} setShow={setStudentsShow} place={studentsPlace} setPlace={setStudentsPlace} />}

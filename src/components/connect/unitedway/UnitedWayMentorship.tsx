@@ -17,18 +17,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useContext, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { CalendarPlus, Check, ChevronLeft, ChevronRight, Clock, Handshake, MessageSquareOff, ShieldCheck, Users, Video, Briefcase } from "lucide-react";
+import { CalendarPlus, Check, ChevronLeft, ChevronRight, Clock, Handshake, MessageSquareOff, MessagesSquare, ShieldCheck, Users, Video, Briefcase } from "lucide-react";
 import { CARD_TEXT_SHADOW } from "@/components/app/cardChrome";
 import { setUwStage, useUwMentorship, type UwStage } from "@/lib/uwMentorship";
-import { Avatar, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
+import { Avatar, ConnectNav, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
 import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
 import { Panel, ProProfileView, useProfilePage, RULE } from "../ProProfile";
 import { DateTile, Done, Eyebrow, Gets, NoMessages, useToast } from "./UnitedWayBoardView";
 import { Funnel, RankedRows } from "./uwCharts";
 import * as D from "./uwData";
 import { useBackStep } from "@/lib/backStep";
+import { setPendingAsk, setUwPov } from "./uwStore";
 
 const BLUE = D.BRAND.blue;
 const BLUE_TEXT = D.BRAND.blueText;
@@ -225,6 +226,12 @@ function YearPlan() {
 }
 
 function StudentSide({ stage, onOpenPro, onToast }: { stage: UwStage; onOpenPro: (id: string) => void; onToast: (t: string) => void }) {
+  const nav = useContext(ConnectNav);
+  const askTeam = () => {
+    setUwPov("student");
+    setPendingAsk({ boardId: D.UW_ID, programId: D.PROGRAMS.find((p) => p.mentorship)?.id, text: `A question about ${D.MENTORSHIP_PROGRAM.title}: ` });
+    nav?.openBoard(D.UW_ID);
+  };
   const [tab, setTab] = useState<"home" | "plan">("home");
   if (stage === "matched") {
     return (
@@ -246,7 +253,11 @@ function StudentSide({ stage, onOpenPro, onToast }: { stage: UwStage; onOpenPro:
                   <span className="flex flex-col gap-[6px]">
                     <span className="text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{M.meetings.done} of {M.meetings.total} done</span>
                     <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{M.lead.line}</span>
-                    <QuietCta size="sm" className="w-fit" onClick={() => onToast("Your program lead will get back to you")}>{M.lead.contact}</QuietCta>
+                    {/* 15 Oct 2026 (Maisha: "not private messaging between adults and
+                       students"): no private line to the program lead. The
+                       student asks the United Way Team in public, on the
+                       board's Students feed, with the question started */}
+                    <QuietCta size="sm" className="w-fit" onClick={askTeam}><MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {M.lead.contact}</QuietCta>
                   </span>
                 </div>
               </Panel>
@@ -395,7 +406,7 @@ export function UnitedWayMentorship({ onBack }: { onBack: () => void }) {
   useBackStep(!!profile, closeProfile); // one step on Back (8 Oct 2026)
   if (profile) {
     const pro = D.VOLUNTEERS[profile];
-    return <ProProfileView pro={pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={closeProfile} backLabel="Back to e-Mentorship" />;
+    return <ProProfileView pro={pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={closeProfile} backLabel="Back to e-Mentorship" noDirectMessage />;
   }
   const status: ReactNode = stage === "matched" ? "Matched" : stage === "applied" ? "Applied" : stage === "interested" ? "Interested" : "Enrolling";
   return (

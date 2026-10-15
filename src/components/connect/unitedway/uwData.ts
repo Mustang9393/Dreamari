@@ -979,7 +979,7 @@ export const UWM = {
   ],
   mentorId: "pro-okafor",
   mentorWhy: "Matched on: Business & Finance",
-  lead: { title: "Your program lead", org: "Orange County United Way", line: "Your program lead sets up each meeting.", contact: "Contact program lead" },
+  lead: { title: "Your program lead", org: "Orange County United Way", line: "Your program lead sets up each meeting.", contact: "Ask the United Way Team" },
   nextMeeting: { month: "Oct", day: 14, weekday: "Tuesday", time: "4:00 PM", kind: "Video call", by: "Set by your program lead" },
   meetings: { done: 1, total: 7 },
   goals: ["Pick two careers to look into", "Finish my FAFSA", "Practice one interview"],

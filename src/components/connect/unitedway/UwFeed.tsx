@@ -404,11 +404,11 @@ export function ItemPage({ item, onBack, backLabel }: { item: UwItem; onBack: ()
 /** Students ask or share (Maisha: "When asking a question, they should
  *  choose whether it's directed to a Professional Volunteer or the United
  *  Way Team"). Who it's for has no default: the student picks. */
-export function StudentComposer({ onClose, start = "ask", programId, eventId }: { onClose: () => void; start?: "ask" | "share"; programId?: string; /** asked on an event's board: it stays there, never in the main feed */ eventId?: string }) {
+export function StudentComposer({ onClose, start = "ask", programId, eventId, initialText = "" }: { onClose: () => void; start?: "ask" | "share"; programId?: string; /** asked on an event's board: it stays there, never in the main feed */ eventId?: string; initialText?: string }) {
   const nav = useNav();
   const [mode, setMode] = useState<"ask" | "share">(start);
   const [to, setTo] = useState<UwTo | undefined>(programId ? "team" : undefined);
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initialText);
   const leaks = CONTACT_INFO.test(text);
   const ready = text.trim() && !leaks && (mode === "share" || to);
   const post = () => {

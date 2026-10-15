@@ -81,3 +81,16 @@ export function addTeamMessage(key: string, body: string) {
   const id = `uw-team-${Date.now()}`;
   set({ team: { ...state.team, [key]: [...(state.team[key] ?? []), { id, body, postedAgo: "Just now" }] } });
 }
+
+/** A question started somewhere else (the Mentorship tab's "Ask the United
+ *  Way Team"), waiting for its board to open the composer with it. */
+export type PendingAsk = { boardId: string; programId?: string; text: string };
+let pendingAsk: PendingAsk | null = null;
+export function setPendingAsk(p: PendingAsk) { pendingAsk = p; }
+/** Takes the waiting question for this board, once. */
+export function takePendingAsk(boardId: string): PendingAsk | null {
+  if (!pendingAsk || pendingAsk.boardId !== boardId) return null;
+  const p = pendingAsk;
+  pendingAsk = null;
+  return p;
+}
