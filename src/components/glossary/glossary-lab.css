@@ -2625,3 +2625,11 @@
    on every sibling board; the tiles are their own surfaces. Also the
    Glossary perf rule: no backdrop-filter on persistent panels. */
 .glossary-game-lab :is(.glossary-match-up, .glossary-sort-buckets, .glossary-profit-builder, .glossary-document-list, .glossary-type-term, .glossary-option-list, .glossary-chain) { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+/* Dreamy's animated art is 139% of his slot (the atlas keeps an optical
+   margin), so at the left edge of the column it spilled 26px past the main
+   box and was clipped (15 Oct 2026, Chandu: "Dreamy is being cropped on the
+   side of the question in some screens"). The column never scrolls; the
+   shell owns that. Let it overflow. */
+.glossary-game-shell.glossary-game-lab .glossary-engine-main { overflow: visible !important; }
+.glossary-game-shell.glossary-game-lab :is(.glossary-question-guide, .glossary-question-dreamy, .glossary-dreamy-stage, .glossary-power-head) { overflow: visible !important; }

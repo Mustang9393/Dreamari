@@ -3318,10 +3318,16 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
 
   useEffect(() => {
     if (variant !== "lab") return;
-    // Warm only the active theme's common atlases. The remaining poses load
-    // on use, rather than eagerly downloading every animation in both themes.
-    const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING, signalReactionAsset("curious")] : atmosphere === "v1"
-      ? (["welcome", "explain", "correct", "retry", "hint"] as const).map(pose => dreamyReactionAsset(pose, true))
+    // Warm EVERY pose sheet of the active theme at the intro, before any
+    // question. Warming five and loading the rest on use left Dreamy's slot
+    // empty for a second each time he changed pose (15 Oct 2026, Chandu:
+    // "Dreamy is taking 1+ seconds to load on all screens and looks empty
+    // everywhere"). Drift's 12 sheets are ~600 KB together, Signal's four
+    // ~750 KB; both land during the intro and the first flashcards.
+    const mascot = atmosphere === "v2"
+      ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING, SIGNAL_CLOUD_LARGE, ...(["curious", "calculate", "reassure", "celebrate"] as const).map((reaction) => signalReactionAsset(reaction, true))]
+      : atmosphere === "v1"
+      ? (["welcome", "explain", "choose", "match", "sort", "calculate", "recall", "case", "hint", "correct", "retry", "mastery"] as const).map(pose => dreamyReactionAsset(pose, true))
       : ["happy", "curious", "party"].map((pose) => dreamyAssetFor(atmosphere, pose, true));
     const small = lessonHasLegacyArt(lesson) ? assetsFor(atmosphere, "small") : glossaryTermAssets(career.careerSlug, atmosphere, "small");
     const large = lessonHasLegacyArt(lesson) ? assetsFor(atmosphere) : glossaryTermAssets(career.careerSlug, atmosphere);

@@ -1,3 +1,11 @@
+## 2026-10-15 (night): Glossary Games: Dreamy never clipped, every pose sheet preloaded
+
+**Why (Chandu):** "Dreamy is being cropped on the side of the question in some screens"; "Dreamy is taking 1+ seconds to load on all screens and looks empty everywhere"; "Dreamy is missing from drift too" (the unlock screen; same element as Signal's, restored in 273d151b, since Drift shows the gallery Dreamy via glossary-refined.css:282 and hides the copy-block one).
+
+- **Clipping:** Dreamy's animated art is 139% of his slot (optical margin), so at the column's left edge it spilled 26px past `.glossary-engine-main`, which had `overflow: hidden`. The column never scrolls (the shell does), so it is `overflow: visible` now, as are the guide, the slot, the stage and the Power Play head. Measured: no clipping ancestor left on Q1; page scroll size unchanged (800 of 800 at 1280x800).
+- **Preload:** the intro now warms every pose sheet of the active theme (Drift 12, Signal 4 plus the canonical cloud), not five. Network on the intro shows all 12 Drift sheets requested before the first flashcard.
+- **Checked:** Drift Q1 clip measurement, Drift intro network, Drift and Signal unlock-complete. Not checked: phone widths, light mode.
+
 ## 2026-10-15 (evening): Glossary Games: production fixes from Chandu's screenshots
 
 **Why (Chandu):** production screenshots after 87b81d9d: "Alignment issues no plusses nothing please fix everything"; "dreamy is missing from here" (Signal's unlock-complete); "The blurred rectangle behind the content here makes things look bad. Either use a gradual organic progressive blur or don't do it at all."
