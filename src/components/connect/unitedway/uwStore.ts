@@ -34,8 +34,10 @@ type State = {
   nested: Record<string, UwReply[]>;
   /** Team messages and thread replies added here, by channel, DM or message id */
   team: Record<string, TeamMessage[]>;
+  /** Team conversations opened this session, by channel or DM key (unread dots) */
+  seen: Record<string, boolean>;
 };
-const EMPTY: State = { pov: null, reactions: {}, liked: {}, items: [], replies: {}, nested: {}, team: {} };
+const EMPTY: State = { pov: null, reactions: {}, liked: {}, items: [], replies: {}, nested: {}, team: {}, seen: {} };
 let state: State = EMPTY;
 const subs = new Set<() => void>();
 const set = (next: Partial<State>) => { state = { ...state, ...next }; subs.forEach((f) => f()); };
@@ -59,6 +61,40 @@ export function setUwPov(pov: UwPov) {
   set({ pov });
 }
 
+// The United Way role is "on" once someone has opened a United Way board and
+// is viewing as the Team (15 Oct 2026, Chandu: the team's messages must be
+// reachable from anywhere, like Facebook's Messenger). The Team POV is the
+// board's default, so the POV alone cannot say who is a United Way user: a
+// student who never opened the board must never get a team Messages icon.
+// DEMO-ONLY: remembered in localStorage.
+const ACTIVE_KEY = "dreamari:uw-active";
+let active: boolean | null = null;
+function readActive(): boolean {
+  if (active !== null) return active;
+  try { active = window.localStorage.getItem(ACTIVE_KEY) === "1"; } catch { active = false; }
+  return active;
+}
+export function activateUw() {
+  if (readActive()) return;
+  active = true;
+  try { window.localStorage.setItem(ACTIVE_KEY, "1"); } catch { /* active for this visit */ }
+  set({});
+}
+/** True while the United Way Team role is the one on screen anywhere in the app. */
+export function useUwTeamActive(): boolean {
+  const [pov] = useUwPov();
+  return useSyncExternalStore(subscribe, readActive, () => false) && pov === "team";
+}
+
+// The Team messages dock (Messenger-shaped): open or not, and which
+// conversation it should land on.
+let dock: { open: boolean; key: string | null } = { open: false, key: null };
+export function openTeamDock(key: string | null = null) { dock = { open: true, key }; set({}); }
+export function closeTeamDock() { dock = { open: false, key: null }; set({}); }
+export function useTeamDock(): { open: boolean; key: string | null } {
+  return useSyncExternalStore(subscribe, () => dock, () => ({ open: false, key: null }));
+}
+
 const snapshot = () => state;
 export function useUwStore(): State {
   return useSyncExternalStore(subscribe, snapshot, () => EMPTY);
@@ -76,6 +112,10 @@ export function addItem(item: UwItem) {
 export function addReply(itemId: string, reply: UwReply, parentId?: string) {
   if (parentId) set({ nested: { ...state.nested, [parentId]: [...(state.nested[parentId] ?? []), reply] } });
   else set({ replies: { ...state.replies, [itemId]: [...(state.replies[itemId] ?? []), reply] } });
+}
+export function markTeamSeen(key: string) {
+  if (state.seen[key]) return;
+  set({ seen: { ...state.seen, [key]: true } });
 }
 export function addTeamMessage(key: string, body: string) {
   const id = `uw-team-${Date.now()}`;

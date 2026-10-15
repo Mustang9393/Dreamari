@@ -399,6 +399,44 @@ function UwEventGrid({ events, staff = false }: { events: D.UwEvent[]; staff?: b
 
 /** Upcoming or Past, one tab row; where it happens is a dropdown. Staff
  *  also see who hosts and can co-host. */
+/** How many tabs fit a phone row whole, with a More dropdown after them for
+ *  the rest. A tab's name is never clipped (Chandu, 15 Oct 2026: "this
+ *  shouldn't happen to the tabs, don't clip a tab's name, then add a More
+ *  dropdown"): the labels are measured in the row's own font, so it holds at
+ *  320px as much as at 430px. */
+function useFitTabs(labels: string[]): [React.RefObject<HTMLDivElement | null>, number] {
+  const ref = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState(2);
+  const key = labels.join("|");
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const calc = () => {
+      const width = el.getBoundingClientRect().width;
+      if (!width) return;
+      const ctx = document.createElement("canvas").getContext("2d");
+      if (!ctx) return;
+      const cs = getComputedStyle(el);
+      ctx.font = `700 14px ${cs.fontFamily}`;
+      const PAD = 30; // a tab's side padding and the control's gaps
+      const MORE = 112; // the More button and the gap before it
+      const widths = labels.map((l) => ctx.measureText(l).width + PAD);
+      const all = widths.reduce((a, b) => a + b, 0) + 8;
+      if (all <= width) { setFit(labels.length); return; }
+      let used = MORE;
+      let n = 0;
+      for (const w of widths) { if (used + w > width) break; used += w; n++; }
+      setFit(Math.max(1, n));
+    };
+    calc();
+    const ro = new ResizeObserver(calc);
+    ro.observe(el);
+    return () => ro.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- labels are keyed by their joined text
+  }, [key]);
+  return [ref, fit];
+}
+
 function EventsList({ events, staff = false }: { events: D.UwEvent[]; staff?: boolean }) {
   const board = useBoard();
   const { office, setOffice } = useContext(FiltersCtx);
@@ -1090,16 +1128,16 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   };
   const uwNav: UwNav = { board, pov, me, openItem, openPerson, openEvent, go, toast: onToast };
 
+  const tabOptions = sections.map((k) => ({ key: k, label: pov === "volunteer" && k === "impact" ? "My Impact" : D.SECTION_LABEL[k] }));
+  // phones: as many whole tabs as fit, the rest under More
+  const [tabsRef, phoneTabs] = useFitTabs(tabOptions.map((o) => o.label));
+
   if (profile) {
     const pro = D.VOLUNTEERS[profile];
     // no private message option from a board where students are minors
     return <ProProfileView key={pro.id} pro={pro} follows={follows} onFollow={() => flip(setFollows)(profile)} onBack={closeProfile} backLabel="Back to United Way" noDirectMessage />;
   }
 
-  const povLine = D.POVS.find((p) => p.key === pov)!.line;
-  const tabOptions = sections.map((k) => ({ key: k, label: pov === "volunteer" && k === "impact" ? "My Impact" : D.SECTION_LABEL[k] }));
-  // phones: as many tabs as fit 390px (Team is short; Opportunities is not)
-  const phoneTabs = sections[2] === "team" ? 3 : 2;
   // The hero leads with the board's real scale (the same chapter totals the
   // Impact maps add up to), not small counts like "4 communities" or "8
   // events" (Chandu, 15 Oct 2026: "don't show small numbers, this will make
@@ -1151,7 +1189,6 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
         <Image src={D.BRAND.logoWhite} alt="United Way" width={156} height={73} unoptimized className="absolute top-[var(--space-6)] left-[var(--space-6)] z-10 h-[46px] w-auto sm:left-[var(--space-8)] sm:h-[56px]" />
         <div className="relative z-10 flex max-w-[560px] flex-col gap-[8px]">
           <h1 className="text-[32px] leading-[34px] font-extrabold sm:text-[44px] sm:leading-[46px]" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{board.name}</h1>
-          <p className="text-[16px] leading-[22px] font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>{povLine}</p>
           {heroStats.length > 0 && (
             <div className="mt-[6px] flex flex-wrap gap-[8px]">
               {heroStats.map((s) => <span key={s.label} className="rounded-full px-[12px] py-[5px] text-[13px] font-semibold" style={{ background: "rgba(255,255,255,0.14)", color: "#fff", backdropFilter: "blur(8px)", textShadow: "none" }}><strong className="font-extrabold">{s.value}</strong> {s.label}</span>)}
@@ -1160,14 +1197,22 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
         </div>
       </section>
 
-      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
+      {/* One panel, two zones (Chandu, 15 Oct 2026: "break the UI into a header
+          housing the tabs, counts, dropdowns, and then in the next section make
+          the messages use the full width, so it's all sitting in one padding").
+          The header holds the tabs, and each feed section its own count and
+          dropdowns; the rows sit below it at the panel's full width with only a
+          hairline between them. Below lg the panel is a solid band from screen
+          edge to screen edge instead of a boxed card inside the page's
+          gutters, so a phone or tablet keeps its width for the words. */}
+      <SectionSurface flush className="flex flex-col">
         {/* one tab row. From sm every section is a tab; on a phone the
            first two or three are tabs and the rest sit in a More dropdown, so the
            row fits 390px with no sideways scroll (Chandu, 15 Oct 2026: the
            Team POV's six tabs scrolled sideways) */}
-        <div id="uw-sections" className="scroll-mt-[96px]">
+        <div id="uw-sections" className="scroll-mt-[96px] px-[var(--space-4)] pt-[var(--space-4)] sm:px-[var(--space-6)] sm:pt-[var(--space-5)]">
           <div className="hidden sm:block"><div className="w-full sm:w-fit"><Segmented ariaLabel="Section" value={section} onChange={keep(setSection)} options={tabOptions} grow dense /></div></div>
-          <div className="flex items-center gap-[8px] sm:hidden">
+          <div ref={tabsRef} className="flex items-center gap-[8px] sm:hidden">
             <div className="min-w-0 flex-1"><Segmented ariaLabel="Section" value={section} onChange={keep(setSection)} options={tabOptions.slice(0, phoneTabs)} grow dense /></div>
             {tabOptions.length > phoneTabs && (
               <Listbox ariaLabel="More sections" placeholder="More" value={tabOptions.slice(phoneTabs).some((o) => o.key === section) ? section : ""} onChange={(v) => keep(setSection)(v as D.UwSection)} options={tabOptions.slice(phoneTabs).map((o) => ({ value: o.key, label: o.label }))}
@@ -1175,7 +1220,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
             )}
           </div>
         </div>
-        <motion.div key={`${pov}-${section}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)]">
+        <motion.div key={`${pov}-${section}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className={section === "students" || section === "volunteers" ? "flex flex-col" : "flex flex-col gap-[var(--space-6)] px-[var(--space-4)] py-[var(--space-5)] sm:px-[var(--space-6)]"}>
           {section === "students" && <StudentsSection items={items} show={studentsShow} setShow={setStudentsShow} place={studentsPlace} setPlace={setStudentsPlace} />}
           {section === "volunteers" && <VolunteersSection items={items} label={volunteersLabel} setLabel={setVolunteersLabel} place={volunteersPlace} setPlace={setVolunteersPlace} />}
           {section === "team" && pov === "team" && <TeamWorkspace board={board} openEvent={openEvent} toast={onToast} />}

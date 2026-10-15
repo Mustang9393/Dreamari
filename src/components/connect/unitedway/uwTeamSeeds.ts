@@ -25,6 +25,15 @@ const SC_STAFF = {
   Tess: { name: "Tess", role: "Volunteer center", office: "Jackson" },
   Maya: { name: "Maya", role: "Youth programs", office: "Lansing" },
 };
+// DEMO-ONLY: staff at other United Ways, for the All United Ways channel.
+const WW = {
+  Lin: { name: "Lin", role: "Mentor programs", office: "Palm Beach" },
+  Ben: { name: "Ben", role: "Youth programs", office: "Salt Lake" },
+  Ana: { name: "Ana", role: "Student success", office: "Orange County" },
+  Mei: { name: "Mei", role: "Youth programs", office: "Greater Toronto" },
+  Priya: { name: "Priya", role: "Community impact", office: "Mumbai" },
+  Owen: { name: "Owen", role: "Volunteer centre", office: "Manchester" },
+};
 const MI_STAFF = {
   Lee: { name: "Lee", role: "Youth programs", office: "Southeast Michigan" },
   Kim: { name: "Kim", role: "Volunteer center", office: "Genesee" },
@@ -46,6 +55,14 @@ export const TEAM_EXTRA: Record<string, StaffPost[]> = {
     { id: "sc-t-board", kind: "update", channel: "general", author: SC_STAFF.Jess, postedAgo: "1d ago", title: "Board meeting moved to Nov 20", body: "Same room, 9 AM. Each office gets five minutes for its fall update.", replies: [] },
     { id: "sc-t-consumers", kind: "update", channel: "partners", author: SC_STAFF.Rob, postedAgo: "6h ago", title: "Consumers Energy is sending 12 volunteers", body: "They want to help at the Nov 14 convening. Their checks are done.", replies: [{ author: SC_STAFF.Tess, body: "Adding them to the sign-in sheet now.", postedAgo: "4h ago" }] },
     { id: "sc-t-western", kind: "update", channel: "partners", author: SC_STAFF.Jess, postedAgo: "2d ago", title: "Western said yes to the college table", body: "They will bring two advisors and info on service learning classes.", replies: [{ author: SC_STAFF.Chris, body: "Great. Michigan State confirmed too.", postedAgo: "2d ago" }] },
+    // All United Ways: staff at other United Ways (DEMO-ONLY)
+    { id: "ww-welcome", kind: "update", channel: "ww-welcome", pinned: true, author: WW.Lin, postedAgo: "6d ago", title: "Welcome to All United Ways", body: "One place for staff at every United Way to share what works. Please keep student names and details out of this channel.", replies: [{ author: WW.Ana, body: "Glad this exists. Orange County is in.", postedAgo: "6d ago" }, { author: SC_STAFF.Dana, body: "South Central is here too.", postedAgo: "5d ago" }] },
+    { id: "ww-mentors", kind: "ask", channel: "ww-youth", author: WW.Ben, postedAgo: "5h ago", title: "How do you find mentors in small towns?", body: "We have 340 students and 60 mentors. Where did your first 100 mentors come from?", replies: [{ author: WW.Mei, body: "Employer resource groups. One email to each group got us 90 mentors.", postedAgo: "4h ago" }, { author: SC_STAFF.Tess, body: "Local colleges. Their alumni offices said yes right away.", postedAgo: "3h ago" }, { author: WW.Owen, body: "Ask your first mentors to bring a colleague. It doubled ours.", postedAgo: "2h ago" }] },
+    { id: "ww-shadow", kind: "resource", channel: "ww-events", author: WW.Mei, postedAgo: "1d ago", title: "Our job shadow week placed 1,200 students", body: "That was 85 employers in one week. Here is the host guide we sent them. Copy it for your own program.", resource: { label: "Job shadow host guide", meta: "PDF · 6 pages" }, replies: [{ author: WW.Lin, body: "Using this for our November shadow day. Thank you!", postedAgo: "20h ago" }] },
+    { id: "ww-talks", kind: "idea", channel: "ww-events", author: WW.Priya, postedAgo: "2d ago", title: "One career talk a month, shared across offices?", body: "Each office hosts one online talk, and every United Way's students can join. We start with health care in January.", replies: [{ author: WW.Ana, body: "Orange County can host the tech one.", postedAgo: "2d ago" }, { author: SC_STAFF.Chris, body: "Kalamazoo would join. Our students ask about health jobs all the time.", postedAgo: "1d ago" }] },
+    { id: "ww-ementor", kind: "update", channel: "ww-youth", author: WW.Ana, postedAgo: "3d ago", title: "e-Mentorship opens to 11th and 12th graders on Oct 28", body: "Over 400 students signed up in the first week of the pilot. Happy to share what we learned.", replies: [] },
+    { id: "ww-retail", kind: "ask", channel: "ww-partners", author: WW.Owen, postedAgo: "8h ago", title: "A national retailer wants 400 volunteers in 30 offices", body: "They asked for one point of contact per United Way. Who has worked with them before and can make an intro?", replies: [{ author: WW.Ben, body: "Salt Lake did a build day with them. I will send you the contact.", postedAgo: "7h ago" }, { author: SC_STAFF.Rob, body: "Lansing hosted a drive with them last spring. Happy to share the plan.", postedAgo: "5h ago" }] },
+    { id: "ww-grant", kind: "resource", channel: "ww-partners", author: WW.Priya, postedAgo: "3d ago", title: "A youth skills grant is open to any United Way", body: "The grant is up to 50,000 dollars per office. The first step is a two page letter, and the deadline is Dec 1.", resource: { label: "Grant letter template", meta: "Doc · 2 pages" }, replies: [{ author: WW.Lin, body: "Palm Beach is applying. Want to write one letter together?", postedAgo: "2d ago" }] },
   ],
   [UW_MI_ID]: [
     { id: "mi-t-ford", kind: "update", channel: "partners", author: MI_STAFF.Lee, postedAgo: "1d ago", title: "Ford's youth team wants to judge the spring project fair", body: "Four judges, one afternoon in April. Who wants them?", replies: [{ author: MI_STAFF.Pat, body: "West Michigan would love two.", postedAgo: "20h ago" }] },

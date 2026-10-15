@@ -1,7 +1,8 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { Listbox } from "@/components/app/Listbox";
 
 // Charts animate in and animate between values when a filter changes, the
 // way the Replit reference's charts fill up on view (direct feedback: "the
@@ -559,6 +560,53 @@ export function Ring({ pct, size = 84, stroke = 8, accent, children }: { pct: nu
  *  breaks down into more than one category (Student Status, Postsecondary
  *  Plans, Career Pathways, ...) -- a single green arc next to a 3-color
  *  legend was misleading: only one of the three values was ever drawn. */
+/** Segmented tabs that never clip a tab's name (Chandu, 15 Oct 2026: "this
+ *  shouldn't happen to the tabs, don't clip a tab's name, then add a More
+ *  dropdown"). The labels are measured in the row's own font: the tabs that
+ *  fit whole are shown, the rest sit in a More dropdown after them, and when
+ *  every tab fits there is no More. Holds from 320px up. */
+export function FitSegmented<K extends string>({ options, value, onChange, ariaLabel }: { options: { key: K; label: string; badge?: number }[]; value: K; onChange: (key: K) => void; ariaLabel: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState(options.length);
+  const key = options.map((o) => `${o.label}${o.badge ?? ""}`).join("|");
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const calc = () => {
+      const width = el.getBoundingClientRect().width;
+      const ctx = document.createElement("canvas").getContext("2d");
+      if (!width || !ctx) return;
+      ctx.font = `700 14px ${getComputedStyle(el).fontFamily}`;
+      const widths = options.map((o) => ctx.measureText(o.label).width + 30 + (o.badge ? 26 : 0));
+      if (widths.reduce((a, b) => a + b, 0) + 8 <= width) { setFit(options.length); return; }
+      let used = 112;
+      let n = 0;
+      for (const w of widths) { if (used + w > width) break; used += w; n++; }
+      setFit(Math.max(1, n));
+    };
+    calc();
+    const ro = new ResizeObserver(calc);
+    ro.observe(el);
+    return () => ro.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- options are keyed by their labels
+  }, [key]);
+  const shown = options.slice(0, fit);
+  const rest = options.slice(fit);
+  const inMore = rest.some((o) => o.key === value);
+  return (
+    <div ref={ref} className="flex w-full items-center gap-[8px]">
+      <div className={rest.length ? "min-w-0 flex-1" : "w-fit max-w-full"}>
+        <Segmented ariaLabel={ariaLabel} value={inMore ? ("" as K) : value} onChange={onChange} options={shown} grow={rest.length > 0} dense />
+      </div>
+      {rest.length > 0 && (
+        <Listbox ariaLabel={`More ${ariaLabel.toLowerCase()}`} placeholder="More" value={inMore ? value : ""} onChange={(v) => onChange(v as K)} options={rest.map((o) => ({ value: o.key, label: o.label }))}
+          className="flex min-h-[40px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[13px] font-semibold"
+          style={inMore ? { background: "var(--primary)", color: "var(--primary-foreground)", borderColor: "var(--primary)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
+      )}
+    </div>
+  );
+}
+
 export function SegmentedRing({ segments, size = 92, stroke = 10, children }: { segments: { value: number; color: string }[]; size?: number; stroke?: number; children?: React.ReactNode }) {
   const reduce = useReducedMotion();
   const r = (size - stroke) / 2;

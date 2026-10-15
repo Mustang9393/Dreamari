@@ -521,9 +521,20 @@ export function SectionHead({ children, id }: { children: React.ReactNode; id?: 
  *  layer, so it reads as solid ground; items inside it (a follow card, a
  *  world tile) keep using glass-surface-1/2, which now sits one visible
  *  step lighter than this floor instead of floating on the page itself. */
-export function SectionSurface({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+/** The panel every board and feed sits in. Default: a padded card. `flush`
+ *  (15 Oct 2026, Chandu: "the divider lines can go all the way and intersect
+ *  the edges, this should be the model for boards everywhere and feeds"):
+ *  no padding of its own, so the content brings its own header and rows run
+ *  to the panel's edges with hairlines between them. Below lg it is a band
+ *  from screen edge to screen edge (the page's gutters cancelled) instead of
+ *  a boxed card inside them, so a phone or a tablet keeps its width for the
+ *  words. */
+export function SectionSurface({ children, className = "", flush = false }: { children: React.ReactNode; className?: string; flush?: boolean }) {
+  const shape = flush
+    ? "-mx-5 border-y sm:-mx-[var(--space-14)] lg:mx-0 lg:rounded-[var(--radius-xl)] lg:border"
+    : "rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:p-[var(--space-6)]";
   return (
-    <div className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:p-[var(--space-6)] ${className}`} style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+    <div className={`${shape} bg-[var(--card)] border-[color:var(--glass-border)] ${className}`}>
       {children}
     </div>
   );

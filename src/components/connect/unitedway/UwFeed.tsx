@@ -152,46 +152,41 @@ export function ItemRow({ item }: { item: UwItem }) {
   const ev = item.eventId === nav.hereEventId ? undefined : eventName(nav.board, item.eventId);
   const title = item.kind === "question" ? item.title : item.kind === "volunteer-post" ? item.title : undefined;
   return (
-    <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-3)] sm:gap-[14px] sm:px-[var(--space-6)]">
+    <article className="group relative flex flex-col gap-[10px] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-6)]">
       <button type="button" onClick={() => nav.openItem(item)} className="absolute inset-0 z-10 cursor-pointer"><span className="sr-only">Open: {title ?? (item.kind === "student-post" ? item.body : "")}</span></button>
       <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
-      <PersonButton who={item.who} />
-      <div className="relative flex min-w-0 flex-1 flex-col">
-        <div className="flex flex-wrap items-start justify-between gap-x-[10px] gap-y-[6px]">
-          <div className="flex min-w-0 flex-col">
-            <NameButton who={item.who} />
-            <span className="truncate text-[13px] leading-[18px]" style={{ color: MUTED }}>{personLine(item.who)} · {item.postedAgo}</span>
-          </div>
-          {item.kind === "question" ? <ToTag to={item.to} /> : item.kind === "volunteer-post" ? <LabelTag label={item.label} /> : null}
+      {/* Header: the face, the name, who and when, and who it is for. The
+          words sit below at the row's full width, not beside the photo
+          (Chandu, 15 Oct 2026). */}
+      <header className="relative flex items-center gap-[10px]">
+        <PersonButton who={item.who} size={40} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <NameButton who={item.who} />
+          <span className="truncate text-[13px] leading-[18px]" style={{ color: MUTED }}>{personLine(item.who)} · {item.postedAgo}</span>
         </div>
-        {item.kind === "question" && (
-          <>
-            <h3 className="mt-[10px] max-w-[62ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>{item.title}</h3>
-            {item.context && <p className="mt-[4px] line-clamp-2 max-w-[62ch] text-[14.5px] leading-[21px]" style={{ color: MUTED }}>{item.context}</p>}
-          </>
-        )}
+        {item.kind === "question" ? <ToTag to={item.to} /> : item.kind === "volunteer-post" ? <LabelTag label={item.label} /> : null}
+      </header>
+      <div className="relative flex min-w-0 flex-col gap-[8px]">
+        {item.kind === "question" && <h3 className="max-w-[72ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>{item.title}</h3>}
         {item.kind === "volunteer-post" && (
           <>
-            <h3 className="mt-[10px] max-w-[62ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>{item.title}</h3>
-            <p className="mt-[4px] line-clamp-3 max-w-[62ch] text-[14.5px] leading-[21px]" style={{ color: MUTED }}>{item.body}</p>
+            <h3 className="max-w-[72ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>{item.title}</h3>
+            <p className="line-clamp-3 max-w-[72ch] text-[14.5px] leading-[21px]" style={{ color: MUTED }}>{item.body}</p>
           </>
         )}
-        {item.kind === "student-post" && <p className="mt-[10px] line-clamp-4 max-w-[62ch] text-[16px] leading-[24px]" style={{ color: "var(--foreground)" }}>{item.body}</p>}
+        {item.kind === "student-post" && <p className="line-clamp-4 max-w-[72ch] text-[16px] leading-[24px]" style={{ color: "var(--foreground)" }}>{item.body}</p>}
         {ev && item.eventId && (
-          <button type="button" onClick={(e) => { e.stopPropagation(); nav.openEvent(item.eventId!); }} className="dm-link relative z-20 mt-[8px] flex w-fit cursor-pointer items-center gap-[5px] text-[13px] font-bold" style={{ color: BLUE_TEXT }}>
+          <button type="button" onClick={(e) => { e.stopPropagation(); nav.openEvent(item.eventId!); }} className="dm-link relative z-20 flex w-fit cursor-pointer items-center gap-[5px] text-[13px] font-bold" style={{ color: BLUE_TEXT }}>
             <Calendar className="h-3.5 w-3.5" aria-hidden /> {ev} <ChevronRight className="h-3.5 w-3.5" aria-hidden />
           </button>
         )}
         {first && (
-          <div className="mt-[12px] flex gap-[10px] rounded-[var(--radius-md)] px-[12px] py-[10px]" style={{ background: "var(--glass-surface-1)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
-            <PersonButton who={first.who} size={26} />
-            <div className="flex min-w-0 flex-col">
-              <span className="flex min-w-0 items-center gap-[6px] text-[13px] leading-[18px]"><NameButton who={first.who} size={13} /><span className="hidden truncate sm:inline" style={{ color: MUTED }}>{first.who.kind === "student" ? "" : personLine(first.who).split(" · ")[0]}</span></span>
-              <p className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{first.body}</p>
-            </div>
+          <div className="flex flex-col gap-[4px] border-l-2 pl-[12px]" style={{ borderColor: `color-mix(in srgb, ${BLUE} 45%, transparent)` }}>
+            <span className="flex min-w-0 items-center gap-[6px] text-[13px] leading-[18px]"><NameButton who={first.who} size={13} /><span className="hidden truncate sm:inline" style={{ color: MUTED }}>{first.who.kind === "student" ? "" : personLine(first.who).split(" · ")[0]}</span></span>
+            <p className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{first.body}</p>
           </div>
         )}
-        <div className="mt-[10px] flex flex-wrap items-center justify-between gap-x-[var(--space-3)] gap-y-[2px]">
+        <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-3)] gap-y-[2px]">
           <div className="-ml-[12px] flex items-center gap-[2px]">
             <ReactButton id={item.id} />
             <button type="button" onClick={(e) => { e.stopPropagation(); nav.openItem(item); }} className="dm-quiet relative z-20 flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-full px-[12px] text-[13.5px] font-bold" style={{ color: MUTED }}>
@@ -207,10 +202,20 @@ export function ItemRow({ item }: { item: UwItem }) {
 
 /** Rows in one hairline panel, the way the other boards list them. No
  *  overflow clip, so a reaction picker can open above the first row. */
-export function ItemList({ items, empty, page }: { items: UwItem[]; empty: string; /** show this many, then "Show more" */ page?: number }) {
+export function ItemList({ items, empty, page, flush = false }: { items: UwItem[]; empty: string; /** show this many, then "Show more" */ page?: number; /** rows run the full width of the panel they sit in, hairlines only, no box of their own */ flush?: boolean }) {
   const [shown, setShown] = useState(page ?? items.length);
   if (!items.length) return <div className="rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}><EmptyView tier={3} line={empty} /></div>;
   const list = page ? items.slice(0, shown) : items;
+  if (flush) {
+    return (
+      <div className="flex flex-col">
+        <div className="flex flex-col border-t lg:rounded-b-[calc(var(--radius-xl)-1px)] [&>*+*]:border-t [&>*:last-child]:lg:rounded-b-[calc(var(--radius-xl)-1px)]" style={{ borderColor: "var(--glass-border)", background: "var(--background)" }}>
+          {list.map((it) => <div key={it.id} style={{ borderColor: "var(--glass-border)" }}><ItemRow item={it} /></div>)}
+        </div>
+        {page && items.length > shown && <button type="button" onClick={() => setShown((n) => n + page)} className="dm-quiet mx-auto my-[var(--space-4)] flex min-h-[40px] cursor-pointer items-center rounded-full border px-[18px] text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Show more</button>}
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <div className="flex flex-col rounded-[var(--radius-lg)] border [&>*+*]:border-t [&>*+*]:border-[var(--glass-border)] [&>*:first-child]:rounded-t-[var(--radius-lg)] [&>*:last-child]:rounded-b-[var(--radius-lg)]" style={{ borderColor: "var(--glass-border)", background: "var(--background)" }}>
@@ -443,14 +448,16 @@ export function StudentsSection({ items, show, setShow, place, setPlace }: { ite
     .filter((i) => s === "all" || (s === "posts" ? i.kind === "student-post" : i.kind === "question" && (s === "questions" || (s === "to-team" ? i.to === "team" : i.to === "volunteers"))))
     .sort(newestFirst);
   return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-      {nav.pov === "student" && <ComposerBar line="Ask a question or share a post" action="Ask or share" onOpen={() => setComposing("ask")} />}
-      {composing && <StudentComposer start={composing} onClose={() => setComposing(null)} />}
-      <FilterRow count={list.length} noun={nav.pov === "volunteer" ? "for you" : "from students"}>
-        <PillSelect ariaLabel="Show" value={s} onChange={(v) => setShow(v)} options={showOptions} />
-        <PillSelect ariaLabel="Community" value={place} onChange={setPlace} options={placeOptions(nav.board)} />
-      </FilterRow>
-      <ItemList key={`${s}-${place}`} page={10} items={list} empty={nav.pov === "volunteer" ? "No questions for volunteers here yet." : "Nothing here yet. Ask the first question."} />
+    <div className="flex flex-col">
+      <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-4)] sm:px-[var(--space-6)]">
+        {nav.pov === "student" && <ComposerBar line="Ask a question or share a post" action="Ask or share" onOpen={() => setComposing("ask")} />}
+        {composing && <StudentComposer start={composing} onClose={() => setComposing(null)} />}
+        <FilterRow count={list.length} noun={nav.pov === "volunteer" ? "for you" : "from students"}>
+          <PillSelect ariaLabel="Show" value={s} onChange={(v) => setShow(v)} options={showOptions} />
+          <PillSelect ariaLabel="Community" value={place} onChange={setPlace} options={placeOptions(nav.board)} />
+        </FilterRow>
+      </div>
+      <ItemList flush key={`${s}-${place}`} page={10} items={list} empty={nav.pov === "volunteer" ? "No questions for volunteers here yet." : "Nothing here yet. Ask the first question."} />
     </div>
   );
 }
@@ -465,14 +472,16 @@ export function VolunteersSection({ items, label, setLabel, place, setPlace }: {
     .filter((i) => place === "all" || !i.place || i.place === place)
     .sort(newestFirst);
   return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-      {nav.pov === "volunteer" && <ComposerBar line="Share an insight, an opportunity or an event update" action="Share a post" onOpen={() => setComposing(true)} />}
-      {composing && <VolunteerComposer onClose={() => setComposing(false)} />}
-      <FilterRow count={list.length} noun="from volunteers">
-        <PillSelect ariaLabel="Label" value={label} onChange={setLabel} options={[{ value: "all", label: "All posts" }, { value: "insight", label: "Insights" }, { value: "opportunity", label: "Opportunities" }, { value: "event", label: "Event Updates" }]} />
-        <PillSelect ariaLabel="Community" value={place} onChange={setPlace} options={placeOptions(nav.board)} />
-      </FilterRow>
-      <ItemList key={`${label}-${place}`} page={10} items={list} empty="No posts like this yet." />
+    <div className="flex flex-col">
+      <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-4)] sm:px-[var(--space-6)]">
+        {nav.pov === "volunteer" && <ComposerBar line="Share an insight, an opportunity or an event update" action="Share a post" onOpen={() => setComposing(true)} />}
+        {composing && <VolunteerComposer onClose={() => setComposing(false)} />}
+        <FilterRow count={list.length} noun="from volunteers">
+          <PillSelect ariaLabel="Label" value={label} onChange={setLabel} options={[{ value: "all", label: "All posts" }, { value: "insight", label: "Insights" }, { value: "opportunity", label: "Opportunities" }, { value: "event", label: "Event Updates" }]} />
+          <PillSelect ariaLabel="Community" value={place} onChange={setPlace} options={placeOptions(nav.board)} />
+        </FilterRow>
+      </div>
+      <ItemList flush key={`${label}-${place}`} page={10} items={list} empty="No posts like this yet." />
     </div>
   );
 }

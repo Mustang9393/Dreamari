@@ -285,11 +285,22 @@ export type StaffPost = {
  *  organization-wide updates and dedicated communities for departments or
  *  teams, similar to Slack"). */
 export const TEAM_CHANNELS = [
-  { key: "general", label: "General", line: "Updates for every office" },
-  { key: "youth", label: "Youth Programs", line: "Student United, Youth United Way and mentoring" },
-  { key: "volunteer", label: "Volunteer Engagement", line: "Volunteers, checks and shifts" },
-  { key: "events", label: "Events", line: "Planning and recaps" },
-  { key: "partners", label: "Partnerships", line: "Companies, colleges and nonprofits" },
+  { key: "general", group: "office", label: "General", line: "Updates for every office" },
+  { key: "youth", group: "office", label: "Youth Programs", line: "Student United, Youth United Way and mentoring" },
+  { key: "volunteer", group: "office", label: "Volunteer Engagement", line: "Volunteers, checks and shifts" },
+  { key: "events", group: "office", label: "Events", line: "Planning and recaps" },
+  { key: "partners", group: "office", label: "Partnerships", line: "Companies, colleges and nonprofits" },
+  // All United Ways (15 Oct 2026). Maisha: "is there an option within the
+  // board to connect with global communities?"; Chandu: only the United Way
+  // team talks globally. Research on shared channels (Slack's own guidance,
+  // and Slack Connect's 20-organization cap) favours one channel per topic
+  // with a named owner and purpose over one room for everyone, so this is a
+  // small group of topic channels, not a single channel. Staff only, adults
+  // only: nothing about a student belongs in any of them. DEMO-ONLY: owners.
+  { key: "ww-welcome", group: "network", label: "Welcome", line: "Who is here and how we share", owner: "Lin, Palm Beach" },
+  { key: "ww-youth", group: "network", label: "Youth Programs", line: "Mentoring, e-Mentorship and student programs", owner: "Ben, Salt Lake" },
+  { key: "ww-events", group: "network", label: "Career Events", line: "Shadow days, panels and career talks", owner: "Mei, Greater Toronto" },
+  { key: "ww-partners", group: "network", label: "Partners and Funding", line: "Companies, grants and shared sponsors", owner: "Owen, Manchester" },
 ] as const;
 export type TeamChannel = typeof TEAM_CHANNELS[number]["key"];
 

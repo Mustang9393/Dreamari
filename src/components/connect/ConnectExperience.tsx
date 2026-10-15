@@ -24,7 +24,7 @@ import { careerProfile } from "@/components/career/profiles";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
 import { CareerBehindCard, FeedVersionChip, FlatBreathers, FramedGraphic, captionFor, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
 import { CompanyMark, Avatar, OrgAvatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
-import { Segmented } from "./viz";
+import { FitSegmented, Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
 import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
@@ -2812,13 +2812,13 @@ const OpenBoardAt = createContext<((id: string, filter: "questions" | "insights"
 /** A board's list in the Feed's clothes: rows in one hairline-divided panel
  *  (the Feed's own rule colour), with any breathers sitting between panel
  *  segments rather than inside one. */
-export function BoardFeedList({ items, wrap, breatherAt }: { items: { id: string; node: React.ReactNode }[]; wrap: (id: string, row: React.ReactNode) => React.ReactNode; breatherAt?: (index: number, isLast: boolean) => React.ReactNode }) {
+export function BoardFeedList({ items, wrap, breatherAt, edge = false }: { items: { id: string; node: React.ReactNode }[]; edge?: boolean; wrap: (id: string, row: React.ReactNode) => React.ReactNode; breatherAt?: (index: number, isLast: boolean) => React.ReactNode }) {
   const out: React.ReactNode[] = [];
   let seg: React.ReactNode[] = [];
   const flush = (k: string) => {
     if (!seg.length) return;
     out.push(
-      <div key={k} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)]" style={{ borderColor: FEED_RULE, background: "var(--background)", ["--feed-rule" as string]: FEED_RULE }}>
+      <div key={k} className={edge ? "flex flex-col border-t [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)]" : "flex flex-col overflow-hidden rounded-[var(--radius-lg)] border [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)]"} style={{ borderColor: FEED_RULE, background: "var(--background)", ["--feed-rule" as string]: FEED_RULE }}>
         {seg}
       </div>,
     );
@@ -2827,7 +2827,7 @@ export function BoardFeedList({ items, wrap, breatherAt }: { items: { id: string
   items.forEach((it, i) => {
     seg.push(wrap(it.id, it.node));
     const b = breatherAt?.(i, i === items.length - 1);
-    if (b) { flush(`seg-${i}`); out.push(<div key={`b-${i}`}>{b}</div>); }
+    if (b) { flush(`seg-${i}`); out.push(<div key={`b-${i}`} className={edge ? "border-t px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-6)]" : undefined} style={edge ? { borderColor: FEED_RULE } : undefined}>{b}</div>); }
   });
   flush("seg-end");
   return <>{out}</>;
@@ -4471,7 +4471,7 @@ function BoardView({
          glass-surface-1 tint, one visible step up from this floor, so the
          two-level hierarchy (section, then item) reads the same way it now
          does on Connect > People. */}
-      <SectionSurface>
+      <SectionSurface flush>
       {/* At xl the board takes the Feed's own shape (Chandu, 6 Oct 2026: "now
          that we locked the feed width, see what we can do in the two columns
          before and after the feed ... something better, relevant to each
@@ -4490,9 +4490,12 @@ function BoardView({
          readable measure. The response time stays on the About tab and in the
          ask confirmation; the pros stay on the Pros tab and in their answers. */}
       <div className="w-full">
-      <div className="flex min-w-0 flex-col gap-[var(--space-5)]">
-      <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Posts" }, { key: "updates", label: "Opportunities" }, { key: "pros", label: "People" }, { key: "about", label: "About" }]} />
+      <div className="flex min-w-0 flex-col">
+      <div className="px-[var(--space-4)] pt-[var(--space-4)] pb-[var(--space-3)] sm:px-[var(--space-6)] sm:pt-[var(--space-5)]">
+      <FitSegmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Posts" }, { key: "updates", label: "Opportunities" }, { key: "pros", label: "People" }, { key: "about", label: "About" }]} />
+      </div>
 
+      <div className={tab === "questions" || tab === "insights" ? "flex flex-col" : "flex flex-col gap-[var(--space-5)] px-[var(--space-4)] pb-[var(--space-5)] sm:px-[var(--space-6)]"}>
       {tab === "pros" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>
@@ -4542,11 +4545,12 @@ function BoardView({
       )}
 
       {tab === "questions" && (
-        <div className="flex flex-col gap-[var(--space-4)]">
+        <div className="flex flex-col">
           {/* the composer sits at the top of the feed, right under the board's
              header, so asking is the first thing on offer rather than a
              reward for scrolling past every existing thread (direct
              feedback, 5 Sept 2026) */}
+          <div className="px-[var(--space-4)] pb-[var(--space-3)] sm:px-[var(--space-6)]">
           <InlineAsk
             joined={joined}
             onRequireJoin={onJoin}
@@ -4554,13 +4558,14 @@ function BoardView({
             placeholder="Ask a question"
             onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
           />
+          </div>
           {/* Surface 40, 27 Sept 2026: wrapped in SurfaceState (fixed data,
              so status stays "ready") the same way every other fixed-data
              surface is -- loading/slow/error/offline are now real, reviewable
              states (?state=loading&surface=40 etc.), not just a possibility. */}
           <SurfaceState id={40} isEmpty={threads.length === 0 && postedQs.length === 0}>
-            {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
-            {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+            {threads.length + postedQs.length > 1 && <div className="px-[var(--space-4)] pb-[var(--space-3)] sm:px-[var(--space-6)]"><FeedControls sort={sort} onSort={setSort} /></div>}
+            {postedQs.map((q) => <div key={q.id} className="px-[var(--space-4)] pb-[var(--space-3)] sm:px-[var(--space-6)]"><LocalQuestionCard title={q.title} /></div>)}
             {/* One visual language with the Feed (Chandu, 6 Oct 2026: "let's
                have the other tabs, questions, posts etc look like the feed
                UI too ... the replies, views etc should match the other
@@ -4568,7 +4573,7 @@ function BoardView({
                the same hairline-divided panel. Breathers keep their slots
                between panel segments. */}
             <div className="w-full">
-            <BoardFeedList
+            <BoardFeedList edge
               items={threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> }))}
               wrap={boardItem}
               breatherAt={feedV2 ? (i, isLast) => (i >= 3 && (i - 3) % 5 === 0 && !isLast ? breather((["career", "opportunity", "moment"] as const)[Math.floor((i - 3) / 5) % 3], Math.floor((i - 3) / 5)) : null) : undefined}
@@ -4582,15 +4587,15 @@ function BoardView({
         // mark on its corner; the rows inside stay plain (direct feedback,
         // 17 Sept 2026: identify insights everywhere "without repeating it
         // on every card").
-        <div className="relative flex flex-col gap-[var(--space-4)]">
+        <div className="relative flex flex-col">
           {/* Surface 41, same wrap (27 Sept 2026). */}
           <SurfaceState id={41} isEmpty={insights.length === 0}>
-            {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+            {insights.length > 1 && <div className="px-[var(--space-4)] pb-[var(--space-3)] sm:px-[var(--space-6)]"><FeedControls sort={sort} onSort={setSort} /></div>}
             {/* Posts carry their own variety through the pros' graphics, so
                no breathers here (Chandu, 2 Oct 2026). The rows are the
                Feed's rows (6 Oct 2026: one visual language). */}
             <div className="w-full">
-            <BoardFeedList
+            <BoardFeedList edge
               items={insights.map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId), reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> }))}
               wrap={boardItem}
             />
@@ -4632,6 +4637,7 @@ function BoardView({
           )}
         </div>
       )}
+      </div>
       </div>
       </div>
       </SectionSurface>
