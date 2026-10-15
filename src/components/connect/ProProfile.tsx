@@ -834,7 +834,12 @@ export function ProProfileView({
   onBack,
   onOpenDashboard,
   backLabel = "Back",
+  noDirectMessage = false,
 }: {
+  /** a partner board where students are minors (United Way, 15 Oct 2026,
+   *  Maisha: "not private messaging between adults and students"): no
+   *  private message option and no POV chip that would unlock one */
+  noDirectMessage?: boolean;
   pro: Pro;
   follows: Follows;
   onFollow: (id: string) => void;
@@ -877,7 +882,7 @@ export function ProProfileView({
           <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
         </button>
         <div className="flex items-center gap-[var(--space-3)]">
-          <PovChip />
+          {!noDirectMessage && <PovChip />}
           {onOpenDashboard && (
             <QuietCta size="sm" onClick={onOpenDashboard}>
               My dashboard <ChevronRight className="h-3.5 w-3.5" aria-hidden />
@@ -889,7 +894,7 @@ export function ProProfileView({
 
       <ProfileHeaderCard pro={pro} following={following} showCoverControls={!!onOpenDashboard} />
 
-      {pov === "college" && (
+      {pov === "college" && !noDirectMessage && (
         <div className="flex w-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={CARD}>
           <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-bold tracking-[0.04em] uppercase" style={{ color: PRO_ACCENT }}>
             {/* 8 Oct 2026 (Zack Akil review, 7 Oct): he could not tell if a

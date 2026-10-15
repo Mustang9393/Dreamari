@@ -48,6 +48,10 @@ export type Thread = {
    *  card and the thread, so a board shared by several communities shows
    *  who is talking from where. Unset everywhere else. */
   place?: string;
+  /** United Way boards (15 Oct 2026, Maisha's review): who a student's
+   *  question is for. "volunteers" reaches the professional volunteers;
+   *  "team" reaches United Way staff only (volunteers never see it). */
+  to?: "volunteers" | "team";
   state: QuestionState;
   routedScope: string;
   expectedWindow: string;
@@ -126,6 +130,12 @@ export type Insight = {
   replies: InsightReply[];
   /** the poster's community on a regional board (see Thread.place) */
   place?: string;
+  /** United Way boards (15 Oct 2026, Maisha's review): a volunteer post's
+   *  kind. "opportunity" also lists in the board's Opportunities, "event"
+   *  (Event Update) in its Events. */
+  label?: "insight" | "opportunity" | "event";
+  /** the United Way event an Event Update is about */
+  eventId?: string;
   saved?: boolean;
 };
 

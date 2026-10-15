@@ -35,7 +35,7 @@
 // Brand colours (United Way brand standards): Blue #0044B5, Red #FD372C,
 // Yellow #FFBA00, Green #009464.
 
-import { PROS, type EventResource, type Pro } from "../data";
+import { PROS, type Pro } from "../data";
 
 export const UW_ID = "united-way-student-success";
 
@@ -45,7 +45,7 @@ export const BRAND = {
   yellow: "#FFBA00",
   green: "#009464",
   /** United Way blue lifted for text on the app's dark ground (AA contrast) */
-  blueText: "#7FA6FF",
+  blueText: "var(--uw-blue-text, #7FA6FF)",
   logo: "/images/connect/partners/united-way.svg",
   logoWhite: "/images/connect/partners/united-way-white.svg",
 };
@@ -68,53 +68,37 @@ export const PHOTOS = {
 
 // ——— the shared model ———
 
-// United Way's own staff first (12 Oct 2026, Chandu: "the ask was mainly
-// about the employees having a platform to communicate from these 4
-// different locations. The student part wasn't even mentioned, but we'll
-// have that as a nice to have. Focus on United Way chapters or the 4 groups
-// connecting and collaborating, and the events. Make that the first POV,
-// then students"). The board opens on the staff view.
-export const VIEWS = [
-  { key: "partner", label: "United Way" },
-  { key: "student", label: "Students" },
-  { key: "volunteer", label: "Volunteers" },
+// Who is looking (15 Oct 2026, Maisha's review): "it's unclear whether
+// we're viewing the platform as a student, corporate volunteer, or United
+// Way employee (Alex). Let's clearly distinguish these experiences and what
+// each user can post, access, and manage. For demo purposes, we should be
+// able to switch between these POVs." One "Viewing as" switch in the
+// board's header; each POV has its own sections, composer and one line
+// saying what it can do. The choice persists (uwStore.ts, dreamari:uw-pov).
+export const POVS = [
+  { key: "student", label: "Student", line: "You're viewing as a student: ask questions and share posts." },
+  { key: "volunteer", label: "Volunteer", line: "You're viewing as a volunteer: answer students and share posts." },
+  { key: "team", label: "United Way Team", line: "You're viewing as United Way Team: see everything and work with your team." },
 ] as const;
-export type UwView = typeof VIEWS[number]["key"];
+export type UwPov = typeof POVS[number]["key"];
 
-export const STUDENT_TABS = [
-  { key: "home", label: "Home" },
-  // Talk became the community boards, named Communities in every view
-  // (13 Oct 2026, Chandu: "the students also need the communities tab").
-  // The key stays "ask" so links and the Back memo keep working.
-  { key: "ask", label: "Communities" },
-  { key: "programs", label: "Programs" },
-  { key: "events", label: "Events" },
-  // 14 Oct 2026, Chandu: "rename serve to something better. It sounds off
-  // especially from a student's perspective ... maybe volunteer". The key
-  // stays so links and the Back memo hold.
-  { key: "serve", label: "Volunteer" },
-] as const;
-export type StudentTab = typeof STUDENT_TABS[number]["key"];
-export const VOLUNTEER_TABS = [
-  { key: "today", label: "Today" },
-  { key: "talk", label: "Communities" },
-  // 13 Oct 2026, Chandu: "Rename Shifts to something better, shifts make
-  // it sound bad and like work." The key stays so the Back memo holds.
-  { key: "shifts", label: "Ways to help" },
-  { key: "impact", label: "My Impact" },
-] as const;
-export type VolunteerTab = typeof VOLUNTEER_TABS[number]["key"];
-// 13 Oct 2026, Chandu: "The order should be: Communities > Events >
-// Programs > Impact. That's it." Team became Communities (one board per
-// community plus one shared by all); By community folded into Impact; the
-// Volunteers tab is gone.
-export const PARTNER_TABS = [
-  { key: "team", label: "Communities" },
-  { key: "events", label: "Events" },
-  { key: "programs", label: "Programs" },
-  { key: "impact", label: "Impact" },
-] as const;
-export type PartnerTab = typeof PARTNER_TABS[number]["key"];
+// The board's sections (15 Oct 2026, Maisha: "Rather than mixing everyone's
+// content into one feed ... Student Community ... Volunteer Posts ... United
+// Way Team ... These should be clearly separated without creating excessive
+// navigation complexity"). Students, Volunteers and Team are the three
+// communities; Opportunities and Events stay because they have their own job
+// (Maisha: "Major opportunities and event announcements should also appear
+// in their respective dedicated sections"); Impact is the numbers. Team
+// exists only for United Way staff: a student or volunteer never sees it,
+// not even as a disabled tab. Home, Today and the old mixed Communities
+// feed are gone: they repeated what these sections hold.
+export type UwSection = "students" | "volunteers" | "team" | "opportunities" | "events" | "impact";
+export const SECTION_LABEL: Record<UwSection, string> = { students: "Students", volunteers: "Volunteers", team: "Team", opportunities: "Opportunities", events: "Events", impact: "Impact" };
+export const POV_SECTIONS: Record<UwPov, UwSection[]> = {
+  student: ["students", "volunteers", "opportunities", "events"],
+  volunteer: ["students", "volunteers", "opportunities", "events", "impact"],
+  team: ["students", "volunteers", "team", "opportunities", "events", "impact"],
+};
 
 /** A local United Way. lon/lat place its pin on the map. */
 export type Chapter = { id: string; name: string; short: string; place: string; lon: number; lat: number; students: number; volunteers: number; hours: number; url?: string };
@@ -186,20 +170,26 @@ export type UwEvent = {
   followUp?: UwFollowUp;
 };
 
-/** What an event's board holds after the day, in the shape Connect's
- *  event board already shows: counts, the host's official post, a pinned
- *  recap, files and who was in the room. */
+/** What an event's board holds after the day (15 Oct 2026, Maisha's
+ *  review): Questions, the Event Recap & Next Steps, Photos, People and
+ *  About. No posts feed and no files: "Let's avoid duplicating
+ *  conversations already happening in the main community ... Remove
+ *  unnecessary files/slides and the 'Who Hosted a Table' section". */
 export type UwFollowUp = {
   /** the board goes read-only after this date */
   closesOn: string;
   students: number;
   pros: number;
   posts: number;
-  official?: { postedAgo: string; summary: string; about: string; next: string[] };
-  recap?: { proId: string; takeaways: string[]; postedAgo: string };
-  resources?: EventResource[];
-  /** volunteers who were there (People tab) */
+  /** "Event Recap & Next Steps" (Maisha: "The current pinned 'Team
+   *  Debrief' is unclear. Replace it with something like 'Event Recap &
+   *  Next Steps', highlighting key takeaways and what's happening next") */
+  recap?: UwRecap;
+  /** volunteers who were there (People: Professional Volunteers) */
   proIds?: string[];
+  /** United Way staff who were there, by first name (People: United Way
+   *  Team); looked up in the board's staff */
+  team?: string[];
   /** the attendee code that opens the board (13 Oct 2026, Chandu: "Have
    *  them require a code to enter"), printed on the badge and the
    *  follow-up email, the same gate as every Connect event */
@@ -207,6 +197,9 @@ export type UwFollowUp = {
   /** the day's photos for the board's gallery; United Way's own */
   photos?: { count: number; images: string[] };
 };
+/** Three to five takeaways, then what's next: each with its date and where
+ *  on the board it lives (a section, or another event's page). */
+export type UwRecap = { by: string; postedAgo: string; takeaways: string[]; next: { when?: string; text: string; go?: { section: UwSection } | { event: string } }[] };
 
 /** A volunteer shift: for teens (Serve) or adult volunteers (Shifts). */
 export type Shift = {
@@ -269,16 +262,34 @@ export type StaffPost = {
   /** an announcement's poster (14 Oct 2026): one United Way made from the
    *  post's own details, or an image staff uploaded */
   poster?: { kind: "made"; title: string; when?: string; where?: string; photo?: string } | { kind: "upload"; src: string };
-  /** everyone on the community's board sees it (students and volunteers
-   *  too); unset = staff only, behind the board's Staff only switch */
+  /** an announcement everyone sees (students and volunteers too); unset =
+   *  a message in the private Team workspace */
   public?: boolean;
-  /** a past event this debriefs: its event board shows it first on Posts */
+  /** where a public announcement lists (15 Oct 2026, Maisha: "Major
+   *  opportunities and event announcements should also appear in their
+   *  respective dedicated sections"); unset = Events */
+  section?: "events" | "opportunities";
+  /** an opportunity only adults can take (a call for mentors): students
+   *  don't see it */
+  audience?: "volunteers";
+  /** the Team channel a staff message sits in; unset = General */
+  channel?: TeamChannel;
+  /** an event this message is about: opens its board */
   eventId?: string;
-  worked?: string[];
-  numbers?: { value: string; label: string }[];
-  next?: { office: string; task: string }[];
   replies: { author: StaffMember; body: string; postedAgo: string }[];
 };
+
+/** Team channels (15 Oct 2026, Maisha: "a General channel for
+ *  organization-wide updates and dedicated communities for departments or
+ *  teams, similar to Slack"). */
+export const TEAM_CHANNELS = [
+  { key: "general", label: "General", line: "Updates for every office" },
+  { key: "youth", label: "Youth Programs", line: "Student United, Youth United Way and mentoring" },
+  { key: "volunteer", label: "Volunteer Engagement", line: "Volunteers, checks and shifts" },
+  { key: "events", label: "Events", line: "Planning and recaps" },
+  { key: "partners", label: "Partnerships", line: "Companies, colleges and nonprofits" },
+] as const;
+export type TeamChannel = typeof TEAM_CHANNELS[number]["key"];
 
 
 export type UwBoard = {
@@ -713,29 +724,32 @@ const NET_EVENTS: UwEvent[] = [
   // DEMO-ONLY: a past event, so the network board shows its board staying
   // open after the day (12 Oct 2026)
   {
-    id: "uw-e-mentor-night", kind: "Online meetup", title: "Meet a mentor night", where: "Online", virtual: true, about: "Seniors met mentors from three cities. Then they asked anything.", who: "Seniors", date: { month: "Sep", day: 17, time: "6:00 PM", year: 2026 }, going: 212, chapter: null, joined: true,
+    id: "uw-e-mentor-night", kind: "Online Meetup", title: "Meet a Mentor Night", where: "Online", virtual: true, about: "Seniors met mentors from three cities. Then they asked anything.", who: "Seniors", date: { month: "Sep", day: 17, time: "6:00 PM", year: 2026 }, going: 212, chapter: null, joined: true,
     followUp: {
       closesOn: "October 30, 2026", students: 212, pros: 9, posts: 11,
       // DEMO-ONLY: the code and the photo count; the photos are United Way's own
       code: "UWMENTOR", photos: { count: 18, images: [PHOTOS.mentor, PHOTOS.scholars, PHOTOS.workplace, PHOTOS.volunteers, PHOTOS.hero, PHOTOS.ignite] },
-      official: {
-        postedAgo: "3w ago",
-        summary: "212 seniors from six cities met mentors online. They asked about college, money and first jobs.",
-        about: "United Way runs mentor programs in many cities. This night let students meet mentors from more than one.",
-        next: ["Post the one question you still have.", "Raise your hand for e-Mentorship in Programs.", "Save the Oct 23 first-job panel."],
+      recap: {
+        by: "Ana", postedAgo: "3w ago",
+        takeaways: ["A mentor is someone you can ask the small questions too.", "Pick one goal for the year. Your mentor helps you keep it.", "Small rooms of five students worked best.", "Students in other cities had the same worries."],
+        next: [
+          { when: "Oct 23", text: "What a First Job Is Really Like, online", go: { event: "uw-e-panel" } },
+          { when: "Oct 29", text: "Financial Aid Night, online", go: { event: "uw-e-fafsa" } },
+          { text: "Raise your hand for e-Mentorship", go: { section: "opportunities" } },
+        ],
       },
-      recap: { proId: "pro-okafor", postedAgo: "3w ago", takeaways: ["A mentor is someone you can ask the small questions too.", "Pick one goal for the year. Your mentor helps you keep it.", "Students from other cities had the same worries. You are not alone."] },
       proIds: ["pro-okafor", "pro-reyes", "pro-whitfield", "pro-tanaka"],
+      team: ["Ana", "Lin", "Ben"],
     },
   },
-  { id: "uw-e-panel", kind: "Online panel", title: "What a first job is really like", where: "Online", virtual: true, about: "Four volunteers share their first jobs. Then you ask.", who: "Any student", date: { month: "Oct", day: 23, time: "6:00 PM", year: 2026 }, going: 318, world: "Business & Finance", chapter: null },
-  { id: "uw-e-fafsa", kind: "Workshop", title: "Financial aid night", where: "Online", virtual: true, about: "Fill out the FAFSA step by step, with help.", who: "Seniors and families", date: { month: "Oct", day: 29, time: "6:30 PM", year: 2026 }, going: 133, chapter: null },
-  { id: "uw-e-careerday", kind: "Career day", title: "Career Day with local employers", where: "Albuquerque, NM", virtual: false, about: "Visit employer stations. Try a few jobs in one day.", who: "Grades 8 to 12", date: { month: "Nov", day: 6, time: "8:30 AM", year: 2026 }, going: 148, chapter: "nm" },
-  { id: "uw-e-resume", kind: "Workshop", title: "Résumé check with volunteers", where: "Online", virtual: true, about: "Bring the résumé you built here. Get notes the same night.", who: "Any student", date: { month: "Nov", day: 12, time: "5:00 PM", year: 2026 }, going: 240, chapter: null },
-  { id: "uw-e-shadow", kind: "Job shadow", title: "A day at a hospital", where: "West Palm Beach, FL", virtual: false, about: "Shadow nurses, pharmacists and imaging staff for a day.", who: "Juniors and seniors", date: { month: "Nov", day: 20, time: "8:00 AM", year: 2026 }, going: 96, world: "Health & Medicine", chapter: "pbc" },
-  { id: "uw-e-health-panel", kind: "Online panel", title: "Health jobs without med school", where: "Online", virtual: true, about: "A nurse, a pharmacist and a therapist. Two years of school or less to start.", who: "Any student", date: { month: "Dec", day: 3, time: "6:00 PM", year: 2026 }, going: 204, world: "Health & Medicine", chapter: null },
-  { id: "uw-e-ymu", kind: "Info night", title: "Young Men United info night", where: "Columbia, SC", virtual: false, about: "Meet mentors and past interns. Families welcome.", who: "Young men, grades 9 to 12", date: { month: "Jan", day: 14, time: "6:00 PM", year: 2027 }, going: 61, chapter: "mid" },
-  { id: "uw-e-expo", kind: "Career expo", title: "OnTrack Career Expo", where: "Oakland, CA", virtual: false, about: "Hands-on booths and mentors who grew up like you.", who: "High school students", date: { month: "Mar", day: 14, time: "9:00 AM", year: 2027 }, going: 212, chapter: "bay", url: "https://uwba.org/get-involved/events/ontrack/2026-event/partnership/" },
+  { id: "uw-e-panel", kind: "Online Panel", title: "What a First Job Is Really Like", where: "Online", virtual: true, about: "Four volunteers share their first jobs. Then you ask.", who: "Any student", date: { month: "Oct", day: 23, time: "6:00 PM", year: 2026 }, going: 318, world: "Business & Finance", chapter: null },
+  { id: "uw-e-fafsa", kind: "Workshop", title: "Financial Aid Night", where: "Online", virtual: true, about: "Fill out the FAFSA step by step, with help.", who: "Seniors and families", date: { month: "Oct", day: 29, time: "6:30 PM", year: 2026 }, going: 133, chapter: null },
+  { id: "uw-e-careerday", kind: "Career Day", title: "Career Day With Local Employers", where: "Albuquerque, NM", virtual: false, about: "Visit employer stations. Try a few jobs in one day.", who: "Grades 8 to 12", date: { month: "Nov", day: 6, time: "8:30 AM", year: 2026 }, going: 148, chapter: "nm" },
+  { id: "uw-e-resume", kind: "Workshop", title: "Résumé Check With Volunteers", where: "Online", virtual: true, about: "Bring the résumé you built here. Get notes the same night.", who: "Any student", date: { month: "Nov", day: 12, time: "5:00 PM", year: 2026 }, going: 240, chapter: null },
+  { id: "uw-e-shadow", kind: "Job Shadow", title: "A Day at a Hospital", where: "West Palm Beach, FL", virtual: false, about: "Shadow nurses, pharmacists and imaging staff for a day.", who: "Juniors and seniors", date: { month: "Nov", day: 20, time: "8:00 AM", year: 2026 }, going: 96, world: "Health & Medicine", chapter: "pbc" },
+  { id: "uw-e-health-panel", kind: "Online Panel", title: "Health Jobs Without Med School", where: "Online", virtual: true, about: "A nurse, a pharmacist and a therapist. Two years of school or less to start.", who: "Any student", date: { month: "Dec", day: 3, time: "6:00 PM", year: 2026 }, going: 204, world: "Health & Medicine", chapter: null },
+  { id: "uw-e-ymu", kind: "Info Night", title: "Young Men United Info Night", where: "Columbia, SC", virtual: false, about: "Meet mentors and past interns. Families welcome.", who: "Young men, grades 9 to 12", date: { month: "Jan", day: 14, time: "6:00 PM", year: 2027 }, going: 61, chapter: "mid" },
+  { id: "uw-e-expo", kind: "Career Expo", title: "OnTrack Career Expo", where: "Oakland, CA", virtual: false, about: "Hands-on booths and mentors who grew up like you.", who: "High school students", date: { month: "Mar", day: 14, time: "9:00 AM", year: 2027 }, going: 212, chapter: "bay", url: "https://uwba.org/get-involved/events/ontrack/2026-event/partnership/" },
 ];
 export const EVENTS = NET_EVENTS;
 
@@ -752,14 +766,14 @@ const NET_SERVE: Shift[] = [
 // DEMO-ONLY: every staff member (first names and roles), post and reply ———
 const NET_STAFF: StaffPost[] = [
   {
-    id: "uw-s-match-list", kind: "resource", author: { name: "Lin", role: "Mentor programs", office: "Palm Beach" }, pinned: true, postedAgo: "2d ago",
+    id: "uw-s-match-list", kind: "resource", channel: "youth", author: { name: "Lin", role: "Mentor programs", office: "Palm Beach" }, pinned: true, postedAgo: "2d ago",
     title: "Mentor match checklist",
     body: "The checklist our Mentor Center uses before a first meeting. Copy it for your own program.",
     resource: { label: "Mentor match checklist", meta: "PDF · 2 pages" },
     replies: [{ author: { name: "Ben", role: "Youth programs", office: "Salt Lake" }, body: "Using it for our student advocates. Thank you!", postedAgo: "1d ago" }],
   },
   {
-    id: "uw-s-workshops", kind: "ask", author: { name: "Ben", role: "Youth programs", office: "Salt Lake" }, postedAgo: "6h ago",
+    id: "uw-s-workshops", kind: "ask", channel: "youth", author: { name: "Ben", role: "Youth programs", office: "Salt Lake" }, postedAgo: "6h ago",
     title: "Orange County: which e-Mentorship workshop do seniors like most?",
     body: "We want to add one workshop for our seniors. Which one gets the most out of them?",
     replies: [
@@ -768,12 +782,9 @@ const NET_STAFF: StaffPost[] = [
     ],
   },
   {
-    id: "uw-s-mentor-debrief", kind: "update", author: { name: "Ana", role: "Student success", office: "Orange County" }, postedAgo: "3w ago", eventId: "uw-e-mentor-night",
-    title: "Meet a mentor night: our debrief",
-    body: "Thanks to the six cities that joined. What worked and what's next.",
-    worked: ["Small breakout rooms of five students.", "Mentors from three cities in one night.", "A question list sent the day before."],
-    numbers: [{ value: "212", label: "seniors" }, { value: "9", label: "mentors" }, { value: "6", label: "cities" }],
-    next: [{ office: "Orange County", task: "Open e-Mentorship sign-ups" }, { office: "Salt Lake", task: "Host the spring night" }],
+    id: "uw-s-mentor-debrief", kind: "update", channel: "events", author: { name: "Ana", role: "Student success", office: "Orange County" }, postedAgo: "3w ago", eventId: "uw-e-mentor-night",
+    title: "Meet a Mentor Night: the recap is up",
+    body: "Students and volunteers can see the Event Recap & Next Steps on the event board. Add anything I missed here.",
     replies: [{ author: { name: "Lin", role: "Mentor programs", office: "Palm Beach" }, body: "Palm Beach will bring more mentors in spring.", postedAgo: "3w ago" }],
   },
 ];

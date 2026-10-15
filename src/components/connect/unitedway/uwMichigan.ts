@@ -153,28 +153,31 @@ const EVENTS: UwEvent[] = [
   // DEMO-ONLY: a past statewide meetup whose board stays open (12 Oct
   // 2026), so Michigan's Events show the conversation after the day
   {
-    id: "mi-e-suw-meetup", kind: "Online meetup", title: "Student United Way meetup", where: "Online", virtual: true, about: "Student United Way groups from across Michigan met online.", who: "High school students", date: { month: "Sep", day: 30, time: "6:00 PM", year: 2026 }, going: 96, chapter: null, joined: true,
+    id: "mi-e-suw-meetup", kind: "Online Meetup", title: "Student United Way Meetup", where: "Online", virtual: true, about: "Student United Way groups from across Michigan met online.", who: "High school students", date: { month: "Sep", day: 30, time: "6:00 PM", year: 2026 }, going: 96, chapter: null, joined: true,
     followUp: {
       closesOn: "November 11, 2026", students: 96, pros: 5, posts: 9,
       // DEMO-ONLY: the code and the photo count; the photos are United Ways' own
       code: "SUWMEET", photos: { count: 12, images: ["/images/connect/covers/uw-mi-caring.jpg", "/images/connect/covers/uw-mi-students.jpg", "/images/connect/covers/uw-mi-hero.jpg", "/images/connect/covers/uw-mi-scholars.jpg", "/images/connect/covers/uw-mi-city.jpg"] },
-      official: {
-        postedAgo: "1w ago",
-        summary: "96 students from Grand Rapids, Detroit, Flint, Muskegon and Marquette met online. Each group shared one project that worked.",
-        about: "Each Michigan United Way runs its own teen groups. This meetup let them learn from each other.",
-        next: ["Post the project idea you want to try.", "Ask a group in another city how they did theirs.", "Find a Day of Caring near you in Volunteer."],
+      recap: {
+        by: "Pat", postedAgo: "1w ago",
+        takeaways: ["Every group started small. One drive, one day, one cause.", "Each group shared one project in two minutes.", "Groups in other cities want to help you. Just ask here.", "Write down what worked so the next class can use it."],
+        next: [
+          { when: "Jan 21", text: "Student United Way Info Night at Wyoming High School", go: { event: "mi-e-suw" } },
+          { text: "Find a Day of Caring near you", go: { section: "opportunities" } },
+          { text: "Ask a group in another city how they started", go: { section: "students" } },
+        ],
       },
-      recap: { proId: "pro-brooks", postedAgo: "1w ago", takeaways: ["Every group started small. One drive, one day, one cause.", "Groups in other cities want to help you. Just ask here.", "Write down what worked so the next class can use it."] },
       proIds: ["pro-brooks", "pro-okafor", "pro-tanaka"],
+      team: ["Pat", "Jo", "Kim", "Lee"],
     },
   },
-  { id: "mi-e-fafsa", kind: "Workshop", title: "FAFSA night", where: "Online", virtual: true, about: "Fill out the FAFSA with help. Michigan grants need it.", who: "Seniors and families", date: { month: "Oct", day: 27, time: "6:30 PM", year: 2026 }, going: 164, chapter: null },
-  { id: "mi-e-trades", kind: "Online panel", title: "Skilled trades in Michigan", where: "Online", virtual: true, about: "An electrician, a welder and a lineworker. Paid training, no debt.", who: "Any student", date: { month: "Nov", day: 5, time: "6:00 PM", year: 2026 }, going: 231, world: "Tech & Engineering", chapter: null },
-  { id: "mi-e-mcq", kind: "Career day", title: "MiCareerQuest", where: "West Michigan", virtual: false, about: "Try real tools from real jobs. Health, trades, tech and more.", who: "9th and 10th grade", date: { month: "Nov", day: 18, time: "8:30 AM", year: 2026 }, going: 412, chapter: "lake" },
-  { id: "mi-e-health", kind: "Online panel", title: "Health jobs without med school", where: "Online", virtual: true, about: "A nurse, a pharmacist and a therapist. Two years of school or less to start.", who: "Any student", date: { month: "Dec", day: 3, time: "6:00 PM", year: 2026 }, going: 198, world: "Health & Medicine", chapter: null },
-  { id: "mi-e-suw", kind: "Info night", title: "Student United Way info night", where: "Wyoming High School", virtual: false, about: "See what the committees do. Bring a friend.", who: "Grades 9 to 12", date: { month: "Jan", day: 21, time: "5:30 PM", year: 2027 }, going: 58, chapter: "hwm" },
-  { id: "mi-e-resume", kind: "Workshop", title: "Résumé check for summer jobs", where: "Online", virtual: true, about: "Bring the résumé you built here. Get notes the same night.", who: "Any student", date: { month: "Feb", day: 10, time: "5:00 PM", year: 2027 }, going: 187, chapter: null },
-  { id: "mi-e-teen", kind: "Teen night", title: "Teen and Tween Night", where: "Marquette", virtual: false, about: "Talks and games for teens at the youth center.", who: "Ages 11 to 17", date: { month: "May", day: 20, time: "6:00 PM", year: 2027 }, going: 44, chapter: "mqt", url: "https://www.uwmqt.org/" },
+  { id: "mi-e-fafsa", kind: "Workshop", title: "FAFSA Night", where: "Online", virtual: true, about: "Fill out the FAFSA with help. Michigan grants need it.", who: "Seniors and families", date: { month: "Oct", day: 27, time: "6:30 PM", year: 2026 }, going: 164, chapter: null },
+  { id: "mi-e-trades", kind: "Online Panel", title: "Skilled Trades in Michigan", where: "Online", virtual: true, about: "An electrician, a welder and a lineworker. Paid training, no debt.", who: "Any student", date: { month: "Nov", day: 5, time: "6:00 PM", year: 2026 }, going: 231, world: "Tech & Engineering", chapter: null },
+  { id: "mi-e-mcq", kind: "Career Day", title: "MiCareerQuest", where: "West Michigan", virtual: false, about: "Try real tools from real jobs. Health, trades, tech and more.", who: "9th and 10th grade", date: { month: "Nov", day: 18, time: "8:30 AM", year: 2026 }, going: 412, chapter: "lake" },
+  { id: "mi-e-health", kind: "Online Panel", title: "Health Jobs Without Med School", where: "Online", virtual: true, about: "A nurse, a pharmacist and a therapist. Two years of school or less to start.", who: "Any student", date: { month: "Dec", day: 3, time: "6:00 PM", year: 2026 }, going: 198, world: "Health & Medicine", chapter: null },
+  { id: "mi-e-suw", kind: "Info Night", title: "Student United Way Info Night", where: "Wyoming High School", virtual: false, about: "See what the committees do. Bring a friend.", who: "Grades 9 to 12", date: { month: "Jan", day: 21, time: "5:30 PM", year: 2027 }, going: 58, chapter: "hwm" },
+  { id: "mi-e-resume", kind: "Workshop", title: "Résumé Check for Summer Jobs", where: "Online", virtual: true, about: "Bring the résumé you built here. Get notes the same night.", who: "Any student", date: { month: "Feb", day: 10, time: "5:00 PM", year: 2027 }, going: 187, chapter: null },
+  { id: "mi-e-teen", kind: "Teen Night", title: "Teen and Tween Night", where: "Marquette", virtual: false, about: "Talks and games for teens at the youth center.", who: "Ages 11 to 17", date: { month: "May", day: 20, time: "6:00 PM", year: 2027 }, going: 44, chapter: "mqt", url: "https://www.uwmqt.org/" },
 ];
 
 // Serve: real Michigan United Way volunteer days that take teens. Dates are
@@ -202,14 +205,14 @@ const LAKE: StaffMember = { name: "Rae", role: "Volunteer center", office: "Lake
 const SEMI: StaffMember = { name: "Lee", role: "Youth programs", office: "Southeast Michigan" };
 const MI_STAFF: StaffPost[] = [
   {
-    id: "mi-s-caring-calendar", kind: "resource", author: LAKE, pinned: true, postedAgo: "2d ago",
+    id: "mi-s-caring-calendar", kind: "resource", channel: "general", author: LAKE, pinned: true, postedAgo: "2d ago",
     title: "Day of Caring dates, every United Way",
     body: "One calendar with every Michigan Day of Caring. Add yours so we don't pick the same weekend.",
     resource: { label: "Day of Caring calendar", meta: "Sheet · 1 page" },
     replies: [{ author: GEN, body: "Added Flint's MLK Day of Service.", postedAgo: "1d ago" }],
   },
   {
-    id: "mi-s-suw-committees", kind: "ask", author: MQT, postedAgo: "4h ago",
+    id: "mi-s-suw-committees", kind: "ask", channel: "youth", author: MQT, postedAgo: "4h ago",
     title: "West Michigan: how do your Student United Way committees work?",
     body: "Marquette is starting a Student United Way. How many committees do you run, and who leads each one?",
     replies: [
@@ -219,7 +222,7 @@ const MI_STAFF: StaffPost[] = [
     ],
   },
   {
-    id: "mi-s-mlk-plan", kind: "idea", author: GEN, postedAgo: "3d ago",
+    id: "mi-s-mlk-plan", kind: "idea", channel: "volunteer", author: GEN, postedAgo: "3d ago",
     title: "Share one MLK Day plan across the state?",
     body: "Flint's MLK Day of Service ran well with one check-in table and one lead per group. Want one shared plan every United Way can use?",
     replies: [
@@ -228,12 +231,9 @@ const MI_STAFF: StaffPost[] = [
     ],
   },
   {
-    id: "mi-s-meetup-debrief", kind: "update", author: HWM, postedAgo: "1w ago", eventId: "mi-e-suw-meetup",
-    title: "Student United Way meetup: our debrief",
-    body: "Thanks to every United Way that brought a group. Here is what worked and what comes next.",
-    worked: ["Each group shared one project in two minutes.", "Students asked other cities how they started.", "Online made it easy for the U.P. to join."],
-    numbers: [{ value: "96", label: "students" }, { value: "5", label: "United Ways" }, { value: "9", label: "posts after" }],
-    next: [{ office: "Marquette", task: "Start a Student United Way" }, { office: "Genesee", task: "Share the coat drive plan" }, { office: "West Michigan", task: "Host the spring meetup" }],
+    id: "mi-s-meetup-debrief", kind: "update", channel: "events", author: HWM, postedAgo: "1w ago", eventId: "mi-e-suw-meetup",
+    title: "Student United Way Meetup: the recap is up",
+    body: "Students and volunteers can see the Event Recap & Next Steps on the event board. Add anything I missed here.",
     replies: [{ author: MQT, body: "Marquette is starting ours in January.", postedAgo: "6d ago" }],
   },
 ];
