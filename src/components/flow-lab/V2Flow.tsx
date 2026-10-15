@@ -88,7 +88,7 @@ function IndustryPicker({ value, options, onChange }: { value: string; options: 
       value={value}
       onChange={onChange}
       options={[{ value: "", label: label("") }, ...options.map((w) => ({ value: w, label: label(w) }))]}
-      className="dm-quiet h-[42px] min-w-[232px] rounded-[var(--radius-md)] border pr-[10px] pl-[14px] text-[13px] leading-[18px] font-semibold"
+      className="dm-quiet h-[42px] w-[188px] flex-none sm:w-[232px] rounded-[var(--radius-md)] border pr-[10px] pl-[14px] text-[13px] leading-[18px] font-semibold"
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
       panelClassName="p-[6px]"
       // Wider than its trigger so the longest industry name fits on one line
@@ -302,7 +302,17 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
           title="Save up to 3 careers you’re interested in"
           hint="We’ll use your picks to recommend similar careers. You can update them later at anytime."
           controls={
-            <div className="flex flex-wrap items-center gap-2">
+            // One row from tablet up, and nothing in it ever clips (Chandu, 15
+            // Oct 2026, after Usman's Chrome/Windows screenshot showed the
+            // dropdown wrapped under the tabs: "it should always sit in one
+            // row", "no clipping please. Expand the grid if we have to but dont
+            // make the options clip or crop"). The row is sized to its content
+            // (w-max), so the tabs keep their full labels, the dropdown keeps
+            // its width, and when the two outgrow the column the row runs past
+            // it rather than squeezing or wrapping. Phones alone wrap the
+            // dropdown under the tabs: four tabs and a dropdown cannot share
+            // 375px without clipping something.
+            <div className="flex flex-wrap items-center gap-2 sm:w-max sm:max-w-none sm:flex-nowrap">
               {/* Coming back to Explore all is the mix again, whatever was picked before. */}
               <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: key === EXPLORE_ALL ? "" : s.moreWorld }))} options={tabs} />
               {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
