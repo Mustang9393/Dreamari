@@ -386,3 +386,11 @@ html.light .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-la
    screen): the copy takes the whole card, not the old mascot column. */
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-layout { display: block !important; grid-template-columns: none !important; min-height: 0 !important; padding-left: 0 !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-copy { grid-column: auto !important; width: 100%; max-width: none !important; }
+
+/* Every width: the card is copy + button, two columns. The old 78px first
+   column was the mascot's; with one Dreamy per screen it only squeezed the
+   copy into a strip (Chandu, 15 Oct 2026, production screenshot). */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-overlay.is-inline .glossary-feedback-card { grid-template-columns: minmax(0, 1fr) auto !important; align-items: center; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-layout { display: block !important; grid-column: 1 !important; grid-row: 1 !important; min-width: 0; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-copy { display: block !important; min-width: 0; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] :is(.glossary-feedback-cta, .glossary-retry-prompt) { grid-column: 2 !important; grid-row: 1 !important; }
