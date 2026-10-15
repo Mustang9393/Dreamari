@@ -1,4 +1,4 @@
-import type { DreamyPose } from "./dreamyReactions";
+import type { DreamyFacing, DreamyPose } from "./dreamyReactions";
 
 export type SignalReaction = "curious" | "calculate" | "reassure" | "celebrate";
 
@@ -15,3 +15,6 @@ export function signalReaction(pose: DreamyPose): SignalReaction | null {
 export function signalReactionAsset(reaction: SignalReaction, sheet = true): string {
   return `/images/glossary/dreamy-signal-animated-oct15/${reaction}${sheet ? "-sheet" : "-320"}.webp`;
 }
+
+/** Drawn facing, per reviewed Signal reaction (see DREAMY_FACING). */
+export const SIGNAL_FACING: Record<SignalReaction, DreamyFacing> = { curious: "right", calculate: "right", reassure: "left", celebrate: "front" };

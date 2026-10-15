@@ -30,8 +30,8 @@ import {
 import type { ChainStep, GlossaryCareer, GlossaryLesson, GlossaryQuestion, ParagraphPowerPlay, SceneCard } from "./data";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { glossaryTermAssets } from "./termArt";
-import { dreamyReaction, dreamyReactionAsset, questionReaction, type DreamyPose } from "./dreamyReactions";
-import { signalReaction, signalReactionAsset, type SignalReaction } from "./signalReactions";
+import { DREAMY_FACING, dreamyReaction, dreamyReactionAsset, questionReaction, type DreamyPose } from "./dreamyReactions";
+import { SIGNAL_FACING, signalReaction, signalReactionAsset, type SignalReaction } from "./signalReactions";
 import { TickerTapeStorm } from "@/components/play/BagSecured";
 import "./dreamy-reactions.css";
 
@@ -290,6 +290,7 @@ function AnimatedDreamy({ pose, size, talking, signal, reward = false }: { pose:
     <span
       className={signal ? "glossary-signal-cloud glossary-reaction" : "glossary-dreamy-face glossary-dreamy-actor glossary-reaction"}
       data-pose={reaction}
+      data-facing={signal ? SIGNAL_FACING[signal] : DREAMY_FACING[reaction]}
       data-speaking={speaking}
       data-medium={signal ? "signal" : "drift"}
       style={{ width: size, height: signal ? size * (2 / 3) : size }}

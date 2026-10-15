@@ -31,3 +31,12 @@ export function questionReaction(question: GlossaryQuestion, numericStep = false
   }
   return "choose";
 }
+
+/** Which way each pose is drawn looking (props and pupils), so a screen can
+ *  mirror him to face its content (15 Oct 2026, Chandu: "always FACE the
+ *  content"). "front" never needs a flip. */
+export type DreamyFacing = "left" | "right" | "front";
+export const DREAMY_FACING: Record<DreamyReaction, DreamyFacing> = {
+  welcome: "front", explain: "front", choose: "right", match: "right", sort: "left", calculate: "right",
+  recall: "left", case: "front", hint: "right", correct: "right", retry: "front", mastery: "front",
+};
