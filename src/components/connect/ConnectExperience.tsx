@@ -1756,19 +1756,16 @@ export function ConnectExperience() {
         // centred 992px column, because a reading column pinned to the
         // left rail sat awkwardly on wide screens (direct feedback, 4 Sept
         // 2026).
-        // 15 Oct 2026 (Chandu: "this double width etc is bad, make the feed
-        // content take the full width of its container... see what codex did
-        // with the normal feed"): a board is now ONE reading column (992px)
-        // whose header, tabs and feed all fill it, instead of a 1440 page
-        // with a narrower 860 feed floating inside it. The Feed tab is one
-        // 1200px column (feed + a slim rail). Communities/People/etc. and the
-        // dashboards keep the full 1440.
+        // 15 Oct 2026 (Chandu: "when I open a board especially united way the
+        // margins are still too much on the sides... same margins everywhere
+        // please"): the home tabs (Feed included), every board, event board
+        // and the dashboards use the app's one page column (1440px, px-5 then
+        // 56px from sm, the same as Home, Explore and the top nav), and the
+        // board's content fills it. A board's header, tabs and feed are one
+        // width, never a narrower column inside a wider page. Reading views (a
+        // thread, an insight, a profile) keep their centred 992px column.
         className={`relative z-10 mx-auto flex w-full flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8 ${
-          view.kind === "home" && view.tab === "feed"
-            ? "max-w-[1200px]"
-            : view.kind === "home" || view.kind === "partner" || view.kind === "proDashboard" || view.kind === "admin"
-              ? "max-w-[1440px]"
-              : "max-w-[992px]"
+          view.kind === "home" || view.kind === "board" || view.kind === "event" || view.kind === "partner" || view.kind === "proDashboard" || view.kind === "admin" ? "max-w-[1440px]" : "max-w-[992px]"
         }`}
       >
         {/* The demo role switcher is a utility, not part of the page: it
