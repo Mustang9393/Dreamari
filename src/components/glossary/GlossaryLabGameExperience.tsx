@@ -940,8 +940,12 @@ function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: 
         </div>
         <div className="glossary-unlock-gallery" aria-label={`${lesson.terms.length} unlocked terms`}>
           <span className="glossary-unlock-gallery-aura" aria-hidden />
-          {/* No second Dreamy among the relics: the copy block's is the one
-             (15 Oct 2026, Joshua: one Dreamy per screen). */}
+          {/* Signal's one Dreamy on this screen (its copy-block Dreamy is
+             hidden by glossary-signal.css); Drift hides this one and shows
+             the copy block's instead. One per theme, never two (15 Oct 2026,
+             Joshua: one Dreamy per screen; Chandu: "dreamy is missing from
+             here"). */}
+          <span className="glossary-unlock-gallery-dreamy" aria-hidden><DreamyFace pose="mastery" size={224} /></span>
           {lesson.terms.map((term, index) => (
             <motion.figure
               key={term.id}

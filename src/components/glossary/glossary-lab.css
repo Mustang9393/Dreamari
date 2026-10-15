@@ -2616,3 +2616,12 @@
 @media (prefers-reduced-motion: reduce) { .glossary-game-lab .glossary-dreamy-pluses { display: none; } }
 /* width: 100%, because Signal sizes its cloud as 100% of the slot; a shrink-wrapped stage would resolve that to 0. */
 .glossary-game-lab .glossary-dreamy-stage { position: relative; display: grid; place-items: center; width: 100%; }
+
+/* No blurred slab behind a board (15 Oct 2026, Chandu: "The blurred
+   rectangle behind the content here makes things look bad. Either use a
+   gradual organic progressive blur or don't do it at all"). The match
+   board carried backdrop-filter: blur(20px) on a transparent box, so the
+   clouds behind it went soft inside a hard-edged rectangle. Off, here and
+   on every sibling board; the tiles are their own surfaces. Also the
+   Glossary perf rule: no backdrop-filter on persistent panels. */
+.glossary-game-lab :is(.glossary-match-up, .glossary-sort-buckets, .glossary-profit-builder, .glossary-document-list, .glossary-type-term, .glossary-option-list, .glossary-chain) { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }

@@ -1,3 +1,13 @@
+## 2026-10-15 (evening): Glossary Games: production fixes from Chandu's screenshots
+
+**Why (Chandu):** production screenshots after 87b81d9d: "Alignment issues no plusses nothing please fix everything"; "dreamy is missing from here" (Signal's unlock-complete); "The blurred rectangle behind the content here makes things look bad. Either use a gradual organic progressive blur or don't do it at all."
+
+- **Signal feedback card:** two columns (copy, button) at every width; the old 78px mascot column squeezed the copy into a strip once the card lost its Dreamy. (4bcdafdb)
+- **Signal unlock-complete:** the gallery Dreamy is back (`mastery`, Signal's celebrate sprite). It is Signal's ONLY Dreamy on that screen: `glossary-signal.css` hides the copy-block one, and Drift hides the gallery one. Removing it for the one-per-screen rule had left Signal with none.
+- **Match board blur:** `.glossary-match-up` had `backdrop-filter: blur(20px)` on a transparent box, a hard-edged blurred rectangle over the clouds. Off, and off on the sibling boards too (perf rule as well).
+- **Wide widths:** the 111px left shift of Signal's question block seen in the pane at 1860x1000 was a resize artifact (FitToScreen's transform-origin is set in px and not re-measured on a viewport change); a fresh load at that size centres it over the HUD. Not changed.
+- **Checked:** Signal Q1 right at 1860x1000 (pluses + coins from Dreamy, copy spans the card); Signal unlock-complete after five unlocks; Drift match board. Production lags main by a deploy; verify dreamari.vercel.app shows 4bcdafdb or later before judging.
+
 ## 2026-10-15 (later still): Glossary Games: the reward moves to the one Dreamy
 
 **Why (Chandu):** "MAke sure all fixes go across signal too, but i also liked how the pluses and dreamy stuff happened in the reaction box. How can we keep that? Use the pluses thing in the main dreamy position when correct."
