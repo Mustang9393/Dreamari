@@ -3228,7 +3228,7 @@ function FeedEventCard({ event, proName, reminded, onToggleRemind, onOpen }: { e
         className="dm-quiet relative z-20 flex-none cursor-pointer rounded-full border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-bold"
         style={reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--border))", color: "var(--foreground)", background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--glass-surface-1))" } : { borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}
       >
-        {reminded ? "Reminder set" : "Remind me"}
+        {reminded ? "Reminder Set" : "Remind Me"}
       </button>
     </div>
   );
@@ -3737,9 +3737,7 @@ function HomeView({
   // are partner programs and cohorts (Community.access).
   const [access, setAccess] = useState<"public" | "private">("public");
   const searchedAll = COMMUNITIES.filter((c) => hit(c.name, c.world, c.purpose, c.topics, c.professionalsFrom));
-  const publicCount = searchedAll.filter((c) => c.access !== "private").length;
-  const privateCount = searchedAll.length - publicCount;
-  const searched = searchedAll.filter((c) => (access === "private") === (c.access === "private"));
+    const searched = searchedAll.filter((c) => (access === "private") === (c.access === "private"));
   const searchedEvents = EVENTS.filter((e) => hit(e.name, e.host, e.location, e.topics, e.orgs));
 
   return (
@@ -3851,7 +3849,7 @@ function HomeView({
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
           <div className="border-b pb-[6px]" style={{ borderColor: RULE }}>
             <TextTabs caps={false} ariaLabel="Community type" layoutId="connect-community-access" value={access} onChange={setAccess}
-              items={[{ key: "public", label: `Public (${publicCount})` }, { key: "private", label: `Private (${privateCount})` }]} />
+              items={[{ key: "public", label: "Public" }, { key: "private", label: "Private" }]} />
           </div>
           {/* The tab already names the section, so no heading repeats it
              (14 Oct 2026). The explainer and this tab's joined count share
@@ -3944,7 +3942,7 @@ function HomeView({
 /** One event, as the Events tab's ticket: extracted unchanged so the Feed
  *  can carry the real card (Chandu, 2 Oct 2026: "the real event cards we
  *  have in our Events tab"). */
-export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, reminded, onRemind, openLabel, remindLabels = ["Remind me", "Reminder set"], hostLine, gated = false }: {
+export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, reminded, onRemind, openLabel, remindLabels = ["Remind Me", "Reminder Set"], hostLine, gated = false }: {
   event: EventBoard; joined: boolean; onOpenEvent: (id: string) => void; onEnterCode: (id: string) => void; onQr: (event: EventBoard) => void;
   /** A partner board's upcoming event (United Way, 12 Oct 2026): the
    *  ticket opens the event's own page and offers Remind me in the action
@@ -4027,7 +4025,7 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
           <div className="mt-[var(--space-4)] flex min-h-[38px] items-center">
             {joined ? (
               <span className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px]">
-                <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open board <ChevronRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
+                <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open Board <ChevronRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
                 {openLabel && (
                   <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
                     <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: "var(--world-food-farming-nature)", boxShadow: "0 0 0 3px color-mix(in srgb, var(--world-food-farming-nature) 28%, transparent)" }} />
@@ -4037,7 +4035,7 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
               </span>
             ) : gated ? (
               <span className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px]">
-                <PrimaryCta className="relative z-20 min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
+                <PrimaryCta className="relative z-20 min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter Code</PrimaryCta>
               {/* the Feed event card's own Remind me toggle, unchanged */}
               {onRemind && (
               <button
@@ -4047,7 +4045,7 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
                 className="dm-quiet relative z-20 flex min-h-[38px] flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[13px] leading-[16px] font-bold"
                 style={{ fontFamily: "var(--font-body)", ...(reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, rgba(255,255,255,0.2))", color: "#fff", background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, rgba(255,255,255,0.06))" } : { borderColor: "rgba(255,255,255,0.22)", color: "#fff", background: "rgba(255,255,255,0.08)" }) }}
               >
-                {reminded ? <Check className="h-[14px] w-[14px]" aria-hidden /> : remindLabels[0] === "Remind me" ? <Bell className="h-[14px] w-[14px]" aria-hidden /> : <Users className="h-[14px] w-[14px]" aria-hidden />}
+                {reminded ? <Check className="h-[14px] w-[14px]" aria-hidden /> : remindLabels[0] === "Remind Me" ? <Bell className="h-[14px] w-[14px]" aria-hidden /> : <Users className="h-[14px] w-[14px]" aria-hidden />}
                 {reminded ? remindLabels[1] : remindLabels[0]}
               </button>
               )}
@@ -4063,7 +4061,7 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
                 className="dm-quiet relative z-20 flex min-h-[38px] flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[13px] leading-[16px] font-bold"
                 style={{ fontFamily: "var(--font-body)", ...(reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, rgba(255,255,255,0.2))", color: "#fff", background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, rgba(255,255,255,0.06))" } : { borderColor: "rgba(255,255,255,0.22)", color: "#fff", background: "rgba(255,255,255,0.08)" }) }}
               >
-                {reminded ? <Check className="h-[14px] w-[14px]" aria-hidden /> : remindLabels[0] === "Remind me" ? <Bell className="h-[14px] w-[14px]" aria-hidden /> : <Users className="h-[14px] w-[14px]" aria-hidden />}
+                {reminded ? <Check className="h-[14px] w-[14px]" aria-hidden /> : remindLabels[0] === "Remind Me" ? <Bell className="h-[14px] w-[14px]" aria-hidden /> : <Users className="h-[14px] w-[14px]" aria-hidden />}
                 {reminded ? remindLabels[1] : remindLabels[0]}
               </button>
               {hostLine && <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}><Building2 className="h-[14px] w-[14px] flex-none" aria-hidden />{hostLine}</span>}
@@ -4071,7 +4069,7 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
             ) : upcoming ? (
               <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
             ) : (
-              <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
+              <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter Code</PrimaryCta>
             )}
           </div>
         </div>
@@ -4791,8 +4789,8 @@ function EventView({
         <>
           <div className="flex flex-wrap items-center gap-[var(--space-3)]">
             {reminded
-              ? <QuietCta done onClick={() => { toggleEventReminder(event.id); setRemindNote(false); }}><Check className="h-4 w-4" aria-hidden /> Reminder set</QuietCta>
-              : <PrimaryCta onClick={() => { setRemindNote(toggleEventReminder(event.id)); dispatchAuroraPulse("select"); }}><Bell className="h-4 w-4" aria-hidden /> Remind me</PrimaryCta>}
+              ? <QuietCta done onClick={() => { toggleEventReminder(event.id); setRemindNote(false); }}><Check className="h-4 w-4" aria-hidden /> Reminder Set</QuietCta>
+              : <PrimaryCta onClick={() => { setRemindNote(toggleEventReminder(event.id)); dispatchAuroraPulse("select"); }}><Bell className="h-4 w-4" aria-hidden /> Remind Me</PrimaryCta>}
             <QuietCta onClick={() => { setPlanAdded(true); onAddToPlan(); }} done={planAdded}>{planAdded ? "In My Plan" : "Add to My Plan"}</QuietCta>
             {calDate && (
               <IconTip label="Add to calendar">

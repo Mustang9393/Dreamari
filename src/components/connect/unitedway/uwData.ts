@@ -444,7 +444,7 @@ export const EVENTS_UI = {
   open: "Conversation open",
   noPast: "No past events yet. After an event, its board opens here.",
   going: "going",
-  remind: "Remind me", reminded: "Reminder set", remindToast: "We'll remind you before it starts.",
+  remind: "Remind Me", reminded: "Reminder Set", remindToast: "We'll remind you before it starts.",
   keepTalking: "Keep talking after",
 };
 export type EventFilter = typeof EVENTS_UI.filters[number]["key"];
@@ -510,7 +510,7 @@ export const ANNOUNCE_UI = {
 export type PosterChoice = typeof ANNOUNCE_UI.posterOptions[number]["key"];
 
 export const COMMUNITY_UI = {
-  across: "All communities",
+  across: "All Communities",
   acrossLine: "One board every community shares",
   boards: "Boards",
   // 13 Oct 2026, Chandu: "Instead of just the 'staff' toggle, let's have it
@@ -518,8 +518,8 @@ export const COMMUNITY_UI = {
   audience: [{ key: "everyone", label: "Students" }, { key: "staff", label: "Team" }] as const,
   staffNote: "Only United Way staff see this board.",
   show: [{ value: "all", label: "Everything" }, { value: "questions", label: "Questions" }, { value: "posts", label: "Posts" }] as const,
-  placeholder: (where: string) => where === "All communities" ? "Ask a question for every community" : `Ask a question in ${where}`,
-  staffPlaceholder: (where: string) => where === "All communities" ? "Post to staff in every community" : `Post to staff in ${where}`,
+  placeholder: (where: string) => where === "All Communities" ? "Ask a question for every community" : `Ask a question in ${where}`,
+  staffPlaceholder: (where: string) => where === "All Communities" ? "Post to staff in every community" : `Post to staff in ${where}`,
   post: "Post",
   posted: (where: string) => `Posted to ${where}.`,
   staffPosted: "Posted. Only staff can see it.",

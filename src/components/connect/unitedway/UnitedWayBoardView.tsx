@@ -518,7 +518,7 @@ function Announcements({ posts, open, onNew }: { posts: D.StaffPost[]; open: (p:
   if (!posts.length && !onNew) return null;
   return (
     <section className="flex flex-col gap-[var(--space-3)]">
-      <SubHead aside={onNew && <PrimaryCta size="sm" style={SOLID} onClick={onNew}><Megaphone className="h-4 w-4" aria-hidden /> New announcement</PrimaryCta>}>From United Way</SubHead>
+      <SubHead aside={onNew && <PrimaryCta size="sm" style={SOLID} onClick={onNew}><Megaphone className="h-4 w-4" aria-hidden /> New Announcement</PrimaryCta>}>From United Way</SubHead>
       {posts.length === 0 ? <p className="text-[14px]" style={{ color: MUTED }}>No announcements yet.</p> : (
         <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-3">
           {posts.map((p) => (
@@ -1200,7 +1200,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
                 <SubHead>Events</SubHead>
                 <EventsList events={events} staff={pov === "team"} />
               </section>
-              <LabelledPosts items={items} label="event" title="Event Updates from volunteers" />
+              <LabelledPosts items={items} label="event" title="Event Updates From Volunteers" />
             </>
           )}
           {section === "impact" && (pov === "team" ? <PartnerImpact onToast={onToast} onPost={() => setPosting(true)} /> : <VolunteerImpact onToast={onToast} />)}
