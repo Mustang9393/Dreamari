@@ -1,0 +1,306 @@
+{
+  "version": "dreamy-drift-animated-oct15-v2",
+  "method": "built-in ImageGen, four generated facial frames per pose",
+  "assets": [
+    {
+      "theme": "drift",
+      "id": "welcome",
+      "sourceSha256": "31c63b801b9bf3489f9840d5ccd51d68ea282fd43e02c85f2e66a1e9b3b06ed1",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/welcome.webp",
+          "bytes": 28602,
+          "sha256": "a2be8f96efe2989374389cad0bf16761a26829291a66486aec9787464625f8f6",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/welcome-256.webp",
+          "bytes": 7360,
+          "sha256": "68767e31cf65c1864d1ad839fd82af79e43bb8c39cb0310ed38fa062418b1889",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/welcome-sheet.webp",
+          "bytes": 41386,
+          "sha256": "fc21893c5ae09970c001f7b6eda92c59654fcdb6d5060cc26cb1d0588cdbfc23",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "explain",
+      "sourceSha256": "2fff2c6c7f87cbd2f419669b7d12ebed480538a16c1f411fa90a01931265c6d1",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/explain.webp",
+          "bytes": 31166,
+          "sha256": "1722b20ea9e49ab8f8f84b4e242ea9b6e471c9b01cd619ce684402e4b6ac21c6",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/explain-256.webp",
+          "bytes": 7976,
+          "sha256": "fe2a4c79f1d1ebbd54951292bb9e3b6d553fe9d3d2ec5713ddc1cc526eb870ed",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/explain-sheet.webp",
+          "bytes": 45526,
+          "sha256": "ca43679cda3a7f175d214999abca15a3beacf96cff5c7ab2218104da1129acf3",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "choose",
+      "sourceSha256": "8435dced168f5458be01f2355fcd3623409d6312bab321d0c438267d65863b8f",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/choose.webp",
+          "bytes": 30486,
+          "sha256": "95d19924267376949550c188ce1263a6cf291267b9eed8a0145e719128be6024",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/choose-256.webp",
+          "bytes": 7988,
+          "sha256": "f979973dfa325e5bbdddee4604c07b47658364668a6ba5b27708c2285aa507ce",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/choose-sheet.webp",
+          "bytes": 44576,
+          "sha256": "cc82ea6a2ad6627056b6abbc2a243ec64b4ca3e4c1486e419c4ef9b95689414f",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "match",
+      "sourceSha256": "71f0e6c1385b87848fb1badb305c931b48d4a5ac5da3f82e3b099b88cea7bab7",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/match.webp",
+          "bytes": 37322,
+          "sha256": "6f07cc44b4b3e6e6726c449566245932cf3f2ec47ab1d6c1a2235fb2397666de",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/match-256.webp",
+          "bytes": 9216,
+          "sha256": "63c118a20466225d419ff402c2a735197199024df91ff848e6b619b1f29cdcb8",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/match-sheet.webp",
+          "bytes": 53064,
+          "sha256": "1918c7c0dd784dbf6a3ffb48af8c97cab8f882bfd54e6ebfb654157e20efb97f",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "sort",
+      "sourceSha256": "fab1c296e65a08adfadf720a7e4266efe4f185974dedeb7f5bd1e2974489a5bd",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/sort.webp",
+          "bytes": 36538,
+          "sha256": "47e69b33cb1801314fac88207bf05ec2ede475082c0589e7103682689b3ca0a9",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/sort-256.webp",
+          "bytes": 8822,
+          "sha256": "ad0c73a8b357b244d412d978534eaca8b809f8a679cd93e1f0a1641a8cb9601b",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/sort-sheet.webp",
+          "bytes": 51760,
+          "sha256": "920d90b37fd707e5f66446b6237833d3a0577b1731249144eb3e8a88d7d9b616",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "calculate",
+      "sourceSha256": "43a92a008a5a266c0e6058cf191c14d98b262b7e98a0c9ad29d6d46a761881d2",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/calculate.webp",
+          "bytes": 36980,
+          "sha256": "4608b0a79b686e25ad362ca1eef6692f70f4f803481d4ee8c179906dc80a973c",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/calculate-256.webp",
+          "bytes": 9010,
+          "sha256": "68a4a4dcfae1e93e32f9ee619c4f6dd731c389f53283a8235d6b44df06f646cd",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/calculate-sheet.webp",
+          "bytes": 54002,
+          "sha256": "02ec4b7c40e04842933cd71529db967242e1b8b03ee8e3853646f192b97dcb4a",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "recall",
+      "sourceSha256": "d8f3b627cbbdb3ebc9f94123bce7d5d8280ea2ccd683416bdbedb1f298cd64f4",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/recall.webp",
+          "bytes": 38120,
+          "sha256": "a18fc5bf0fc166988cbeac03595b00bb65c4ce7555e62b967465f73042411c0b",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/recall-256.webp",
+          "bytes": 9316,
+          "sha256": "3871a4b645550215c1f3ce85a731c96b3924053314d1956a1572e4a9438b2f7a",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/recall-sheet.webp",
+          "bytes": 55722,
+          "sha256": "c103bef78727107cad30d8701a5e2a90b0b8715fbc70829b1e1b42ac9ed1cf91",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "case",
+      "sourceSha256": "0d9fa7e6cc63b24efa26aec0170602fb38a84d0db0216b35f0931e17a5d2ab34",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/case.webp",
+          "bytes": 28792,
+          "sha256": "dba98947df45674e108ea0898808e3143c2f33624c6e19452984bad1560f5989",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/case-256.webp",
+          "bytes": 7168,
+          "sha256": "52488a5470d33b4f045aefbdc0e0c9578a589abfbdaac91c0da2d17375b0f32f",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/case-sheet.webp",
+          "bytes": 42720,
+          "sha256": "ab14e6cbc08ea1c961babdca286e831d4d847a1124dc5641ab574cbd65c9293f",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "hint",
+      "sourceSha256": "7001275c3d0f0735dda695e56a80311308424dfb77d042ecd524e4fea359c6c0",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/hint.webp",
+          "bytes": 35394,
+          "sha256": "765eda59e3fe1403d1e2fd85506bb4cd6269e29ff69c14d2ece291d3a5cfee9b",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/hint-256.webp",
+          "bytes": 8488,
+          "sha256": "09813d8f52d44aca1055ea03dc40cda649f25a6ffe51ba29eeb4ae35a30c9c36",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/hint-sheet.webp",
+          "bytes": 52494,
+          "sha256": "e1507f5da0578242c7a97883873939dfcf4c02625e90838d6782ad5338ed0993",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "correct",
+      "sourceSha256": "2949ed3f3dc24530348d664f4d5f821549b6b4ceb85f53edddea85ba5995fd11",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/correct.webp",
+          "bytes": 30240,
+          "sha256": "5df633df5f5b0c131d2639901574bf097b9203e772c50af48595547645302d24",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/correct-256.webp",
+          "bytes": 7582,
+          "sha256": "9a93e8a984e49b1ab1254f9c09ad4d1e55b11b2ba5dcc67f243e90c749801feb",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/correct-sheet.webp",
+          "bytes": 45064,
+          "sha256": "b62cc67cf0c3f2fdc9812b119c6b9a77db147e028f1a8d9fcc450e795d827874",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "retry",
+      "sourceSha256": "039201ef917805e38048435cecf3cfcb0575cb6d6b966a441161dc555ab01136",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/retry.webp",
+          "bytes": 31476,
+          "sha256": "971481c7d9c2bc9d2e238d94664813f637bb8f586dffe8fbd3ba1adfd5abe80f",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/retry-256.webp",
+          "bytes": 7824,
+          "sha256": "508fc1c3e0e6d6cbd9594fa341b05f03c16971324bb8972c9492dacf2a67665a",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/retry-sheet.webp",
+          "bytes": 47594,
+          "sha256": "797db23c4bb128c3c2a01d26fd3c2878b969f19e7b1242a3636fff8909fd07e4",
+          "size": 768
+        }
+      ]
+    },
+    {
+      "theme": "drift",
+      "id": "mastery",
+      "sourceSha256": "8bf9ce19d6186208843c45f33c4b22dbc02e6936e8b766cb6b8977b44d538cef",
+      "outputs": [
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/mastery.webp",
+          "bytes": 49206,
+          "sha256": "b21c224d3b7d19ad613b70987af471615cd313b64e4852493daea04a53385b41",
+          "size": 768
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/mastery-256.webp",
+          "bytes": 11554,
+          "sha256": "df6c7e0d8407544658766cf4c68217c9091f86c9c325448fed90fa0da8fcc3dd",
+          "size": 256
+        },
+        {
+          "file": "public/images/glossary/dreamy-drift-animated-oct15-v2/drift/mastery-sheet.webp",
+          "bytes": 70170,
+          "sha256": "622b14e914f64b28db7cb54779d795a260131f4ec2925f44d2b41bb198ea9176",
+          "size": 768
+        }
+      ]
+    }
+  ]
+}

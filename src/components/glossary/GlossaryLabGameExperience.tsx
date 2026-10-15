@@ -30,6 +30,8 @@ import {
 import type { ChainStep, GlossaryCareer, GlossaryLesson, GlossaryQuestion, ParagraphPowerPlay, SceneCard } from "./data";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { glossaryTermAssets } from "./termArt";
+import { dreamyReaction, dreamyReactionAsset, questionReaction, type DreamyPose } from "./dreamyReactions";
+import "./dreamy-reactions.css";
 
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
 // the DreamAri_Glossary_Content_Template_v1.xlsx schema, then reskinned into
@@ -97,11 +99,10 @@ const SIGNAL_ASSETS_SMALL: Record<string, string> = {
   Customer: "/images/glossary/signal/cloud-sale-sneaker-320.webp",
   Profit: "/images/glossary/signal/coins-320.webp",
 };
+const SIGNAL_BG = "/images/glossary/signal/bg.webp";
 const SIGNAL_CLOUD = "/images/glossary/signal/cloud-320.webp";
 const SIGNAL_CLOUD_LARGE = "/images/glossary/signal/cloud.webp";
-// The speaking gif, re-encoded as an animated webp (618KB -> 189KB).
 const SIGNAL_CLOUD_SPEAKING = "/images/glossary/signal/cloud-speaking.webp";
-const SIGNAL_BG = "/images/glossary/signal/bg.webp";
 
 /** The playing theme, so every component (term art, mascot, bubble) can
  *  swap its skin without a prop threaded through forty call sites. */
@@ -267,6 +268,31 @@ function termAssetFor(label: string, assets: Record<string, string> = TERM_ASSET
   return null;
 }
 
+/** Complete faces share one optical frame. Facial frames are in a single
+ * atlas, so blinking/talking never swaps image URLs or changes layout. */
+function AnimatedDreamy({ pose, size, talking }: { pose: DreamyPose; size: number; talking?: boolean }) {
+  const reduced = useReducedMotion();
+  const reaction = dreamyReaction(pose);
+  const [autoTalking, setAutoTalking] = useState(true);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setAutoTalking(false), 2600);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const speaking = !reduced && (talking ?? autoTalking);
+  return (
+    <span
+      className="glossary-dreamy-face glossary-dreamy-actor glossary-reaction"
+      data-pose={reaction}
+      data-speaking={speaking}
+      data-medium="drift"
+      style={{ width: size, height: size }}
+      aria-hidden
+    >
+      <span className="glossary-reaction-canvas" style={{ backgroundImage: `url("${dreamyReactionAsset(pose, !reduced)}")` }} data-still={!!reduced} />
+    </span>
+  );
+}
+
 /** Signal's mascot: the pixel cloud with the reference's pixel glasses and
  *  blink, speaking (the gif) for a couple of seconds whenever it has a new
  *  line, then still. `pose` keeps Dreamy's vocabulary: party gets pixel
@@ -305,21 +331,21 @@ function SignalCloud({ pose, size, talking }: { pose: string; size: number; /** 
   );
 }
 
-function DreamyFace({ pose, size = 96, talking }: { pose: "happy" | "glasses" | "idea" | "curious" | "party" | "nervous" | "puzzle" | "heart"; size?: number; talking?: boolean }) {
+function DreamyFace({ pose, size = 96, talking }: { pose: DreamyPose; size?: number; talking?: boolean }) {
   const atmosphere = useAtmosphere();
-  if (atmosphere === "v2") return <SignalCloud pose={pose} size={size * 1.6} talking={talking} />;
+  if (atmosphere === "v2") {
+    // Chandu held the new Signal sprites after review. Keep the canonical
+    // live pixel rig and animated speaking WebP, not the candidate atlas.
+    const legacyPose = ({ welcome: "happy", explain: "idea", choose: "curious", match: "curious", sort: "curious", calculate: "glasses", recall: "curious", case: "idea", hint: "idea", correct: "happy", retry: "puzzle", mastery: "party" } as Record<string, string>)[pose] ?? pose;
+    return <SignalCloud pose={legacyPose} size={size * 1.6} talking={talking} />;
+  }
+  if (atmosphere === "v1") {
+    return <AnimatedDreamy key={dreamyReaction(pose)} pose={pose} size={size} talking={talking} />;
+  }
   return (
     <span key={pose} className="glossary-dreamy-face glossary-dreamy-actor" data-pose={pose} style={{ width: size, height: size }} aria-hidden>
       <span className="glossary-dreamy-aura" />
-      <Image
-        src={dreamyAssetFor(atmosphere, pose, size <= 112)}
-        alt=""
-        width={size * 1.5}
-        height={size * 1.5}
-        className="glossary-dreamy-sprite"
-        style={{ width: size, height: size }}
-        unoptimized
-      />
+      <Image src={dreamyAssetFor(atmosphere, pose, size <= 112)} alt="" width={size} height={size} className="glossary-dreamy-sprite" unoptimized />
     </span>
   );
 }
@@ -679,7 +705,7 @@ function SketchFace({ term, definition, icon, artSrc, style, concept = false, fo
   );
 }
 
-const CONCEPT_POSES = ["glasses", "idea", "curious", "heart", "happy"] as const;
+const CONCEPT_POSES = ["explain", "hint", "explain", "case", "explain"] as const;
 
 function UnlockScreen({
   lesson,
@@ -888,14 +914,14 @@ function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: 
       <div className="glossary-screen glossary-unlock-complete-screen glossary-unlock-finale relative w-full flex-1" aria-labelledby="glossary-unlock-title">
         <LocalBurst nonce={1} />
         <div className="glossary-unlock-finale-copy">
-          <div className="glossary-unlock-finale-dreamy"><DreamyFace pose="happy" size={132} /></div>
+          <div className="glossary-unlock-finale-dreamy"><DreamyFace pose="mastery" size={132} /></div>
           <span className="glossary-unlock-finale-kicker">LEARNING COMPLETE</span>
           <h2 id="glossary-unlock-title">{lesson.terms.length} terms<br /><em>unlocked.</em></h2>
           <p>Now put them to work.</p>
         </div>
         <div className="glossary-unlock-gallery" aria-label={`${lesson.terms.length} unlocked terms`}>
           <span className="glossary-unlock-gallery-aura" aria-hidden />
-          <span className="glossary-unlock-gallery-dreamy" aria-hidden><DreamyFace pose="happy" size={224} /></span>
+          <span className="glossary-unlock-gallery-dreamy" aria-hidden><DreamyFace pose="mastery" size={224} /></span>
           {lesson.terms.map((term, index) => (
             <motion.figure
               key={term.id}
@@ -967,13 +993,13 @@ const CORRECT_COLOR = "var(--world-food-farming-nature)";
 
 type AnswerResult = { correct: boolean; creditedTermIds: string[] };
 
-function OptionList({ options, assets, grid = false, correctIndex, picked, revealed, missed = [], onPick }: { options: string[]; assets?: (string | null)[]; grid?: boolean; correctIndex: number; picked: number | null; revealed: boolean; missed?: number[]; onPick: (i: number) => void }) {
-  // Pictures on the tiles are all or nothing (Chandu, 6 Oct 2026: "use the
-  // graphic assets for the answer tiles. If all tiles can't have an image,
-  // please don't use one for it"): a set of term names gets every term's
-  // art; a set of definitions, where only one answer happens to be a term,
-  // gets none, so the four tiles stay the same shape.
-  const allArt = !!assets && assets.length === options.length && assets.every(Boolean);
+function OptionList({ options, grid = false, correctIndex, picked, revealed, missed = [], onPick }: { options: string[]; grid?: boolean; correctIndex: number; picked: number | null; revealed: boolean; missed?: number[]; onPick: (i: number) => void }) {
+  // No term art on answer tiles (Chandu, 15 Oct 2026: "remove the images
+  // from answer tiles where they are small and not really legible ... not
+  // with the answers anywhere because they are illegible"). The 6 Oct
+  // all-or-nothing picture tiles are gone; the art stays on the flashcards,
+  // the unlock relic and the match cards, where it renders large enough to
+  // read.
   return (
     <div className={`glossary-option-list flex w-full flex-col gap-[var(--space-3)] ${grid ? "glossary-option-grid" : ""}`}>
       {options.map((option, i) => {
@@ -994,7 +1020,6 @@ function OptionList({ options, assets, grid = false, correctIndex, picked, revea
             <span className="glossary-option-key flex size-7 flex-none items-center justify-center rounded-full border-[1.5px] text-[13px] font-bold" style={{ borderColor: "var(--muted-foreground)", color: "var(--foreground)" }}>
               {String.fromCharCode(65 + i)}
             </span>
-            {allArt ? <Image src={assets![i]!} alt="" width={52} height={52} className="glossary-choice-art" aria-hidden unoptimized /> : null}
             <span className="flex-1 text-[15px] leading-[20px] font-medium" style={{ color: "var(--foreground)" }}>
               {option}
             </span>
@@ -1013,8 +1038,7 @@ function OptionList({ options, assets, grid = false, correctIndex, picked, revea
 // treatment where relevant" allowance). Same options/correctIndex/onPick
 // contract as OptionList, just laid out as one bordered sheet with divided
 // rows instead of separately boxed buttons -- no interaction change.
-function DocumentOptionList({ options, assets, correctIndex, picked, revealed, missed = [], onPick }: { options: string[]; assets?: (string | null)[]; grid?: boolean; correctIndex: number; picked: number | null; revealed: boolean; missed?: number[]; onPick: (i: number) => void }) {
-  const termAssets = useTermAssets("small");
+function DocumentOptionList({ options, correctIndex, picked, revealed, missed = [], onPick }: { options: string[]; grid?: boolean; correctIndex: number; picked: number | null; revealed: boolean; missed?: number[]; onPick: (i: number) => void }) {
   return (
     <div className="glossary-document-list flex w-full flex-col overflow-hidden rounded-[var(--radius-md)] border" data-label="MISUSE REVIEW" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       {options.map((option, i) => {
@@ -1022,7 +1046,6 @@ function DocumentOptionList({ options, assets, correctIndex, picked, revealed, m
         const isCorrect = i === correctIndex;
         const dim = revealed && !isPicked && !isCorrect;
         const textColor = revealed && isCorrect ? CORRECT_COLOR : revealed && isPicked && !isCorrect ? "var(--danger, #e0483e)" : "var(--foreground)";
-        const artwork = assets?.[i] ?? termAssetFor(option, termAssets);
         return (
           <button
             key={option}
@@ -1036,7 +1059,6 @@ function DocumentOptionList({ options, assets, correctIndex, picked, revealed, m
             <span className="flex size-7 flex-none items-center justify-center rounded-full border-[1.5px] text-[13px] font-bold" style={{ borderColor: revealed && (isCorrect || isPicked) ? textColor : "var(--muted-foreground)", color: textColor }}>
               {String.fromCharCode(65 + i)}
             </span>
-            {artwork ? <Image src={artwork} alt="" width={52} height={52} className="glossary-document-art" aria-hidden unoptimized /> : null}
             <span className="flex-1 text-[15px] leading-[20px] font-medium" style={{ color: "var(--foreground)" }}>
               {option}
             </span>
@@ -1330,7 +1352,7 @@ function TypeTermCard({ question, onAnswer, onReset }: { question: Extract<Gloss
   );
 }
 
-function MatchUpCard({ question, onAnswer, onReset, hintSlot }: { question: Extract<GlossaryQuestion, { kind: "matchUp" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void; /** in the framed layouts the live hint and the count sit in Dreamy's bubble */ hintSlot?: HTMLElement | null }) {
+function MatchUpCard({ question, onAnswer, onReset, hintSlot, onReaction }: { question: Extract<GlossaryQuestion, { kind: "matchUp" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void; onReaction?: (pose: "correct" | "retry" | null) => void; /** in the framed layouts the live hint and the count sit in Dreamy's bubble */ hintSlot?: HTMLElement | null }) {
   const { playCorrect, playWrong, playSelect } = useMaterialSounds();
   const assets = useTermAssets("small");
   const atmosphere = useAtmosphere();
@@ -1428,6 +1450,7 @@ function MatchUpCard({ question, onAnswer, onReset, hintSlot }: { question: Extr
   }
 
   function unlink(left: string) {
+    onReaction?.(null);
     setMatched((current) => {
       const next = new Set(current);
       next.delete(left);
@@ -1446,6 +1469,7 @@ function MatchUpCard({ question, onAnswer, onReset, hintSlot }: { question: Extr
     setWrongFlash(null);
     setFlashLine(null);
     if (pair.right === right) {
+      onReaction?.("correct");
       playCorrect();
       const next = new Set(matched);
       next.add(left);
@@ -1481,6 +1505,7 @@ function MatchUpCard({ question, onAnswer, onReset, hintSlot }: { question: Extr
 
     } else {
       playWrong();
+      onReaction?.("retry");
       setWrongFlash(left);
       setPickedLeft(null);
       feedbackTimers.current.push(window.setTimeout(() => setWrongFlash(null), 400));
@@ -1660,10 +1685,10 @@ function MatchUpCard({ question, onAnswer, onReset, hintSlot }: { question: Extr
 function SortBucketsCard({ question, onAnswer, onReset, hintSlot }: { question: Extract<GlossaryQuestion, { kind: "sortBuckets" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void; hintSlot?: HTMLElement | null }) {
   const { playCorrect, playWrong, playSelect } = useMaterialSounds();
   const assets = useTermAssets("small");
-  const legacyArt = useContext(LessonArtContext).legacy;
-  // L1 sorts pictured objects. New conceptual statements must not wear
-  // their correct bucket's picture, which would reveal the answer.
-  const itemArt = (text: string, bucket: string) => termAssetFor(legacyArt ? bucket : text, assets);
+  // The bucket headers keep their picture; the items being sorted are the
+  // answers, so they carry none (15 Oct 2026, Chandu: "not with the answers
+  // anywhere because they are illegible"). Before this, L1 sorted pictured
+  // objects at 26 to 38px.
   const [placed, setPlaced] = useState<Record<string, string>>({});
   const [picked, setPicked] = useState<string | null>(null);
 
@@ -1762,7 +1787,6 @@ function SortBucketsCard({ question, onAnswer, onReset, hintSlot }: { question: 
   return (
     <div ref={sortRef} className="glossary-sort-buckets flex w-full flex-col gap-[var(--space-4)]">
       {dragPoint && dragging ? createPortal(<div className="glossary-drag-preview marketing-v2" data-atmosphere={dragTheme || undefined} style={{ left: dragPoint.x, top: dragPoint.y }} aria-hidden>
-        {itemArt(dragging, items.find((item) => item.text === dragging)?.bucket ?? "") ? <Image src={itemArt(dragging, items.find((item) => item.text === dragging)?.bucket ?? "")!} alt="" width={64} height={64} unoptimized /> : null}
         <span>{dragging}</span>
       </div>, document.body) : null}
       {!allPlaced && (
@@ -1783,7 +1807,6 @@ function SortBucketsCard({ question, onAnswer, onReset, hintSlot }: { question: 
                 className={`glossary-sort-token dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold ${picked === item.text ? "is-picked is-selected" : ""} ${dragging === item.text ? "is-dragging" : ""}`}
                 style={{ background: "var(--card)", borderColor: picked === item.text ? "var(--accent)" : "var(--glass-border)", color: "var(--foreground)" }}
               >
-                {itemArt(item.text, item.bucket) ? <Image src={itemArt(item.text, item.bucket)!} alt="" width={56} height={56} className="glossary-sort-art" draggable={false} aria-hidden unoptimized /> : null}
                 {item.text}
               </button>
             ))}
@@ -1948,11 +1971,9 @@ function QuestionScreen({
   const [picked, setPicked] = useState<number | null>(null);
   const { playCorrect, playWrong } = useMaterialSounds();
   const layout = useContext(QuestionLayoutContext);
-  const hasArt = useContext(LessonArtContext).legacy;
   const [misses, setMisses] = useState<number[]>([]);
   const [missCount, setMissCount] = useState(0);
   const assets = useTermAssets();
-  const smallAssets = useTermAssets("small");
   // A case (kind "chain") is answered one step at a time; the bubble says
   // the current step and a right step moves on after a beat.
   const [step, setStep] = useState(0);
@@ -1961,14 +1982,6 @@ function QuestionScreen({
   useEffect(() => () => { if (stepTimer.current) window.clearTimeout(stepTimer.current); }, []);
   const steps = question.kind === "chain" ? question.steps : [];
   const shuffledOptions = useMemo(() => (question.kind === "choice" ? shuffleStable(question.options.map((o, i) => ({ o, i })), question.id) : []), [question]);
-  const choiceAssets = question.kind === "choice" ? shuffledOptions.map(({ o, i }) => {
-    const icon = question.optionIcons?.[i];
-    if (icon === "shopping-bag") return smallAssets.Customer;
-    if (icon === "sneaker") return smallAssets.Product;
-    if (icon === "building") return smallAssets.Company;
-    return question.layout === "grid" || o.length <= 20 ? termAssetFor(o, smallAssets) : null;
-  }) : [];
-
   // No enclosing card here on purpose -- wrapping the whole question (prompt,
   // Dreamy, and the already-boxed answer options) in one more outer card
   // was boxes-inside-boxes, per direct feedback. Every renderer below
@@ -1986,6 +1999,14 @@ function QuestionScreen({
   // The live hint of a board (drag or tap, the match count) renders into
   // Dreamy's bubble through this slot instead of its own strip.
   const [hintSlot, setHintSlot] = useState<HTMLDivElement | null>(null);
+  const [boardReaction, setBoardReaction] = useState<"correct" | "retry" | null>(null);
+  const reactionTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (reactionTimer.current) window.clearTimeout(reactionTimer.current); }, []);
+  const reactToMatch = useCallback((pose: "correct" | "retry" | null) => {
+    if (reactionTimer.current) window.clearTimeout(reactionTimer.current);
+    setBoardReaction(pose);
+    if (pose) reactionTimer.current = window.setTimeout(() => setBoardReaction(null), 1600);
+  }, []);
   const line = question.kind === "matchUp" || question.kind === "sortBuckets"
     // Q2 has no authored prompt; its title ("Match the terms") and hint
     // merge into one plain line.
@@ -2000,17 +2021,16 @@ function QuestionScreen({
       <b className="glossary-step-dots" aria-hidden>{steps.map((_, i) => <i key={i} className={i < step || (i === step && stepCleared) ? "is-done" : i === step ? "is-now" : ""} />)}</b>
     </div>
   ) : null;
-  const board = question.kind === "matchUp" ? <MatchUpCard question={question} onAnswer={onAnswer} onReset={onReset} hintSlot={hintSlot} />
+  const board = question.kind === "matchUp" ? <MatchUpCard question={question} onAnswer={onAnswer} onReset={onReset} hintSlot={hintSlot} onReaction={reactToMatch} />
     : question.kind === "sortBuckets" ? <SortBucketsCard question={question} onAnswer={onAnswer} onReset={onReset} hintSlot={hintSlot} />
       : question.kind === "profitBuilder" ? <ProfitBuilderCard question={question} onAnswer={onAnswer} onReset={onReset} framed />
         : null;
-  // One-word answers that all carry art read as picture tiles (one row of
-  // four when the column fits them); sentences read as a 2x2. A lesson with
-  // no term art lets short words and figures ("$5,000", "20%") take the
-  // same tiles without pictures.
+  // One-word answers read as word tiles (one row of four when the column
+  // fits them); sentences read as a 2x2. Short words and figures ("$5,000",
+  // "20%") take the same tiles; no pictures on any of them (15 Oct 2026).
   const currentStep = steps[Math.min(step, Math.max(steps.length - 1, 0))];
   const wordTiles = question.kind === "choice"
-    ? question.type !== "Catch the Misuse" && shuffledOptions.every(({ o }) => !/\s/.test(o.trim())) && (hasArt ? choiceAssets.length > 0 && choiceAssets.every(Boolean) : isWordSet(question.options))
+    ? question.type !== "Catch the Misuse" && isWordSet(question.options)
     : question.kind === "chain" && currentStep && "options" in currentStep ? isWordSet(currentStep.options) : false;
   const pickedCorrect = question.kind === "choice" && picked !== null && shuffledOptions[picked]?.i === question.correctIndex;
   const scene = question.kind === "choice" && question.scene ? <SceneCardView scene={question.scene} answered={pickedCorrect} />
@@ -2029,8 +2049,8 @@ function QuestionScreen({
   // with different expressions/reactions"): he asks curious, reads numbers
   // through his glasses, poses a case with an idea, smiles at a right answer
   // and looks nervous at a wrong one. Same size, same slot.
-  const restingPose = question.kind === "chain" ? "idea" : question.kind === "multiSelect" || (question.kind === "choice" && (question.scene?.kind === "figures" || question.scene?.kind === "shares" || question.scene?.kind === "split")) ? "glasses" : "curious";
-  const pose = answerState === "correct" || stepCleared ? "happy" : answerState === "wrong" ? "nervous" : restingPose;
+  const restingPose = questionReaction(question, !!currentStep && "answer" in currentStep);
+  const pose = answerState === "correct" || stepCleared ? "correct" : answerState === "wrong" ? "retry" : boardReaction ?? restingPose;
   const dreamy = <span className="glossary-question-dreamy"><DreamyFace pose={pose} size={84} /></span>;
   const sentence = question.kind === "choice" && question.sentence
     ? <SentenceCard sentence={question.sentence} filled={picked !== null ? shuffledOptions[picked].o : null} state={picked === null ? "idle" : pickedCorrect ? "correct" : "wrong"} />
@@ -2065,7 +2085,6 @@ function QuestionScreen({
     return (
       <ListComponent
         options={shuffledOptions.map((s) => s.o)}
-        assets={choiceAssets}
         grid={question.layout === "grid" || (composed !== null && wordTiles)}
         correctIndex={shuffledOptions.findIndex((s) => s.i === question.correctIndex)}
         picked={picked}
@@ -2194,7 +2213,7 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
           </span>
         )}
         <div className="glossary-feedback-layout">
-          <span className="glossary-feedback-dreamy"><DreamyFace pose={correct ? "party" : "puzzle"} size={76} talking={!done} /></span>
+          <span className="glossary-feedback-dreamy"><DreamyFace pose={correct ? "correct" : "retry"} size={76} talking={!done} /></span>
           <div className="glossary-feedback-copy">
             <span className="glossary-feedback-title flex items-center gap-[8px] text-[19px] font-extrabold" style={{ color: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
               <span className="flex size-6 flex-none items-center justify-center rounded-full" style={{ background: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
@@ -2385,7 +2404,7 @@ function PowerPlayCaseScreen({ powerPlay, onComplete }: { powerPlay: Exclude<Glo
   const choosing = powerPlay.kind === "path" && !path;
   const current = steps[Math.min(step, Math.max(steps.length - 1, 0))];
   const line = choosing ? powerPlay.prompt : status === "done" ? "Deal done. You used every word." : current?.prompt ?? "";
-  const pose = status === "done" ? "party" : status === "right" ? "happy" : status === "wrong" ? "nervous" : choosing ? "idea" : "glasses";
+  const pose = status === "done" ? "mastery" : status === "right" ? "correct" : status === "wrong" ? "retry" : current && "answer" in current ? "calculate" : "case";
 
   function cleared() {
     window.setTimeout(playCorrect, 0);
@@ -3290,7 +3309,11 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
 
   useEffect(() => {
     if (variant !== "lab") return;
-    const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING] : ["happy", "curious", "party"].map((pose) => dreamyAssetFor(atmosphere, pose, true));
+    // Warm only the active theme's common atlases. The remaining poses load
+    // on use, rather than eagerly downloading every animation in both themes.
+    const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING] : atmosphere === "v1"
+      ? (["welcome", "explain", "correct", "retry"] as const).map(pose => dreamyReactionAsset(pose, true))
+      : ["happy", "curious", "party"].map((pose) => dreamyAssetFor(atmosphere, pose, true));
     const small = lessonHasLegacyArt(lesson) ? assetsFor(atmosphere, "small") : glossaryTermAssets(career.careerSlug, atmosphere, "small");
     const large = lessonHasLegacyArt(lesson) ? assetsFor(atmosphere) : glossaryTermAssets(career.careerSlug, atmosphere);
     const first = large[lesson.terms[0]?.id];

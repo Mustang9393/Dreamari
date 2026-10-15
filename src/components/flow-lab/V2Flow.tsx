@@ -54,12 +54,49 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
+import { Listbox } from "@/components/app/Listbox";
+import { WORLD_COLORS } from "@/components/app/worlds";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { MAX_SAVED, buildSignals, careerById, demoFirst, exploreMoreWorlds, mixedForStudent, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
 import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PicksTray, ProfileTabs, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
 type Step = "interests" | "explore" | "rank" | "top3";
+
+// Explore all's industry filter is one dropdown, not a row of chips (Chandu,
+// 15 Oct 2026: "In the match screen for the explore everything I want a drop
+// down but a better designed version than this", over a screenshot of a
+// native <select>). Fourteen chips wrapped to three lines and pushed the
+// grid down; a native <select> paints the OS's own popup, which reads as a
+// foreign control on Windows and Chromebooks (CROSS_BROWSER_GUARDRAILS.md).
+// The shared Listbox is the app's own panel on every platform; this only
+// dresses it: the trigger sits in the same row as the world tabs at the
+// tabs' height, and every industry carries its world colour as a dot, the
+// same colour its cards use below, so the list and the grid read as one.
+// "All industries" (the mix) gets a dot of every colour.
+const MIX_DOT = "conic-gradient(from 0deg, var(--world-tech-engineering-design), var(--world-helping-human-services), var(--world-food-farming-nature), var(--world-teaching-learning), var(--world-tech-engineering-design))";
+function IndustryPicker({ value, options, onChange }: { value: string; options: string[]; onChange: (world: string) => void }) {
+  const label = (world: string) => (
+    <span className="flex min-w-0 items-center gap-[9px]">
+      <span aria-hidden className="h-[8px] w-[8px] flex-none rounded-full" style={{ background: world ? (WORLD_COLORS[world] ?? "var(--muted-foreground)") : MIX_DOT }} />
+      <span className="truncate">{world || "All industries"}</span>
+    </span>
+  );
+  return (
+    <Listbox
+      ariaLabel="Industry"
+      value={value}
+      onChange={onChange}
+      options={[{ value: "", label: label("") }, ...options.map((w) => ({ value: w, label: label(w) }))]}
+      className="dm-quiet h-[42px] min-w-[232px] rounded-[var(--radius-md)] border pr-[10px] pl-[14px] text-[13px] leading-[18px] font-semibold"
+      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+      panelClassName="p-[6px]"
+      // Wider than its trigger so the longest industry name fits on one line
+      // (the shared Listbox sizes its panel to the trigger by default).
+      panelStyle={{ width: 320, maxWidth: "calc(100vw - 16px)" }}
+    />
+  );
+}
 type State = {
   step: Step;
   worlds: string[];
@@ -265,10 +302,10 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
           title="Save up to 3 careers you’re interested in"
           hint="We’ll use your picks to recommend similar careers. You can update them later at anytime."
           controls={
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Coming back to Explore all is the mix again, whatever was picked before. */}
               <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: key === EXPLORE_ALL ? "" : s.moreWorld }))} options={tabs} />
-              {isAll && <ChipRow small ariaLabel="Any other industry" options={[{ key: "", label: "All" }, ...others.map((w) => ({ key: w, label: w }))]} value={[moreWorld]} max={1} onChange={([w]) => setState((s) => ({ ...s, moreWorld: w ?? "" }))} />}
+              {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
             </div>
           }
         >

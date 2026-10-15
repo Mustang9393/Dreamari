@@ -401,20 +401,21 @@ function UwEventGrid({ events, staff = false }: { events: D.UwEvent[]; staff?: b
  *  also see who hosts and can co-host. */
 function EventsList({ events, staff = false }: { events: D.UwEvent[]; staff?: boolean }) {
   const board = useBoard();
-  const U = D.EVENTS_UI;
-  const { when, setWhen, office, setOffice } = useContext(FiltersCtx);
+  const { office, setOffice } = useContext(FiltersCtx);
   const here = (e: D.UwEvent) => office === "all" || e.chapter === null || e.chapter === office;
   const placed = events.filter(here);
-  const upcoming = placed.filter((e) => !isPast(e));
-  const past = placed.filter(isPast).reverse();
-  const list = when === "upcoming" ? upcoming : past;
+  // One list, one card. 15 Oct 2026 (Chandu: "the only filters should be by
+  // communities, Kalamazoo, Battle Creek etc. The event cards should be the
+  // same"): the Upcoming/Past tabs are gone, upcoming events lead by date and
+  // past ones follow on the same card ("Conversation open" still marks
+  // them), and the community is the only filter.
+  const list = [...placed.filter((e) => !isPast(e)), ...placed.filter(isPast).reverse()];
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <TextTabs caps={false} ariaLabel="When" layoutId="uw-when" value={when} onChange={setWhen} items={U.when.map((w) => ({ key: w.key, label: `${w.label} (${w.key === "upcoming" ? upcoming.length : past.length})` }))} />
         <PillSelect ariaLabel={staff ? board.staff.unit : "Where"} value={office} onChange={setOffice} options={[{ value: "all", label: board.places?.all ?? (staff ? board.staff.all : D.SCOPE.everywhere) }, ...board.chapters.map((c) => ({ value: c.id, label: c.short }))]} />
       </div>
-      {list.length === 0 && <p className="text-[14px] font-semibold" style={{ color: MUTED }}>{when === "past" ? U.noPast : "Nothing here yet. Try another place."}</p>}
+      {list.length === 0 && <p className="text-[14px] font-semibold" style={{ color: MUTED }}>Nothing here yet. Try another place.</p>}
       <UwEventGrid events={list} staff={staff} />
     </>
   );
@@ -1028,6 +1029,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const [applied, setApplied] = useState<Record<string, boolean>>({});
   const [posting, setPosting] = useState(false);
   const [announcing, setAnnouncing] = useState<"events" | "opportunities" | null>(null);
+  const [eventsTab, setEventsTab] = useState<"events" | "announcements">("events");
   const [when, setWhen] = useState<D.EventWhen>(memo?.when ?? "upcoming");
   const [office, setOffice] = useState(memo?.office ?? "all");
   const [programPlace, setProgramPlace] = useState(memo?.programPlace ?? "all");
@@ -1195,12 +1197,20 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
           )}
           {section === "events" && (
             <>
-              <Announcements posts={evAnnouncements} open={openAnnouncement} onNew={pov === "team" ? () => setAnnouncing("events") : undefined} />
-              <section className="flex flex-col gap-[var(--space-4)]">
-                <SubHead>Events</SubHead>
-                <EventsList events={events} staff={pov === "team"} />
-              </section>
-              <LabelledPosts items={items} label="event" title="Event Updates From Volunteers" />
+              {/* Events and Announcements are two tabs, not one long page
+                  (15 Oct 2026, Chandu: "make announcements and event tabs, I
+                  shouldn't need to scroll to get to events"). Events leads. */}
+              <TextTabs caps={false} ariaLabel="Events section" layoutId="uw-events-tab" value={eventsTab} onChange={(k) => setEventsTab(k as "events" | "announcements")} items={[{ key: "events", label: "Events" }, { key: "announcements", label: `Announcements (${evAnnouncements.length})` }]} />
+              {eventsTab === "announcements" ? (
+                <Announcements posts={evAnnouncements} open={openAnnouncement} onNew={pov === "team" ? () => setAnnouncing("events") : undefined} />
+              ) : (
+                <>
+                  <section className="flex flex-col gap-[var(--space-4)]">
+                    <EventsList events={events} staff={pov === "team"} />
+                  </section>
+                  <LabelledPosts items={items} label="event" title="Event Updates From Volunteers" />
+                </>
+              )}
             </>
           )}
           {section === "impact" && (pov === "team" ? <PartnerImpact onToast={onToast} onPost={() => setPosting(true)} /> : <VolunteerImpact onToast={onToast} />)}
