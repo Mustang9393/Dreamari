@@ -409,10 +409,20 @@
 }
 
 /* Words-only teach card (Levels 2+, 15 Oct 2026): one centred column, the
-   definition as the body copy, the worked line in its strip underneath,
-   and nothing where a picture or glyph would be. */
-.glossary-game-lab .glossary-flashcard-front.glossary-words-face { grid-template-columns: 1fr !important; grid-template-rows: auto auto auto 1fr !important; justify-items: center; align-content: start; row-gap: 14px !important; padding: 34px 36px 24px !important; text-align: center; }
-.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-title { grid-column: 1 !important; grid-row: 1 !important; justify-self: center !important; align-items: center; }
-.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-definition { grid-column: 1 !important; grid-row: 2 !important; justify-self: center !important; max-width: 380px; font-size: clamp(17px, calc(2.8dvh / var(--vz, 1)), 21px) !important; line-height: 1.45 !important; font-weight: 600; text-align: center !important; }
-.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-words-formula { grid-column: 1 !important; grid-row: 3 !important; justify-self: center; margin-top: 4px; }
-.glossary-game-lab .glossary-flashcard-front.glossary-words-face > span:last-child { grid-column: 1 !important; grid-row: 4 !important; align-self: end !important; justify-self: center !important; }
+   term and definition as the composition (bigger, centred in the card, not
+   parked at the top of an empty box: Chandu, "centre the word and also think
+   about the sizes and layout and composition"), the worked line in its strip
+   underneath, the tap hint pinned to the card's foot. */
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face { grid-template-columns: 1fr !important; grid-template-rows: auto auto auto !important; align-content: center !important; justify-items: center; row-gap: 18px !important; padding: 40px 48px 60px !important; text-align: center; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-title { grid-column: 1 !important; grid-row: 1 !important; justify-self: center !important; align-items: center; gap: 8px; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-title > span { font-size: clamp(36px, calc(6.4dvh / var(--vz, 1)), 52px) !important; letter-spacing: -.01em; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-title > svg { width: 140px; height: 10px; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-definition { grid-column: 1 !important; grid-row: 2 !important; justify-self: center !important; max-width: 520px; padding: 0; font-size: clamp(19px, calc(3dvh / var(--vz, 1)), 24px) !important; line-height: 1.4 !important; font-weight: 600; text-align: center !important; text-wrap: balance; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-words-formula { grid-column: 1 !important; grid-row: 3 !important; justify-self: center; margin-top: 2px; font-size: 20px; padding: 10px 18px; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > span:last-child { position: absolute; left: 0; right: 0; bottom: 20px; width: auto !important; justify-content: center !important; justify-self: auto !important; text-align: center; grid-row: auto !important; grid-column: auto !important; }
+/* A words card is shorter than a picture card: no art to make room for. */
+.glossary-game-shell.glossary-game-lab .glossary-flashbook-shell:has(.glossary-words-face) > div > button { height: clamp(250px, calc(38dvh / var(--vz, 1)), 330px) !important; }
+/* Dreamy leans over the card's top-right corner, so he must face left, into
+   the card (15 Oct 2026, Chandu: "Make sure dreamy always faces the
+   prominent content"). The sprites face right; mirror them here. */
+.glossary-game-lab .glossary-concept-dreamy :is(.glossary-dreamy-face, .glossary-signal-cloud) { transform: scaleX(-1); }
