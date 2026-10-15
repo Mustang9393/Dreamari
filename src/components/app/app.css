@@ -228,15 +228,75 @@
     border-radius: var(--radius-sm, 8px);
   }
 }
+/* The selected option of a tab row, radio group or pressed-button group
+   never takes this hover (15 Oct 2026). The fill is !important, so it
+   painted over the selected pill wherever the pointer rested: after a
+   switch, the old option could still read as picked and the new one as
+   not (found on the United Way POV switch, then on every segmented
+   control using dm-quiet). :where() keeps the specificity of the plain
+   .dm-quiet:hover, so overrides such as calm.css still win. Segmented
+   controls should use .dm-seg below. */
 @media (hover: hover) {
-.dm-quiet:hover {
+.dm-quiet:hover:not(:where([role="tab"][aria-selected="true"], [role="radio"][aria-checked="true"], [role="menuitemradio"][aria-checked="true"], :is([role="group"], [role="radiogroup"], [role="tablist"]) > [aria-pressed="true"])) {
   background: var(--glass-surface-2) !important;
   color: var(--foreground) !important;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 14%, transparent);
 }
 }
-.dm-quiet:active {
+.dm-quiet:active:not(:where([role="tab"][aria-selected="true"], [role="radio"][aria-checked="true"], [role="menuitemradio"][aria-checked="true"], :is([role="group"], [role="radiogroup"], [role="tablist"]) > [aria-pressed="true"])) {
   background: color-mix(in srgb, var(--foreground) 12%, transparent) !important;
+}
+
+/* Options in a segmented control or tab row (15 Oct 2026). Only an
+   unselected option takes a hover, and it stays inside the option's own
+   shape: a soft wash with no ring, no halo and no forced radius, lighter
+   than any selected pill so the option under a resting pointer never
+   reads as picked. Underline tabs ([data-text-tabs], v4's .v4-tabs) take
+   no wash at all: the word darkens, the way text tabs always have, since
+   a box around a bare word hugs its letters. Keyboard focus is a ring,
+   never a fill; it sits 1px outside the option so it fits the 3-4px
+   padding of every pill track without being clipped. */
+.dm-seg {
+  transition: background-color 140ms ease, color 140ms ease;
+}
+@media (hover: hover) {
+  .dm-seg:not(:where([aria-selected="true"], [aria-checked="true"], [aria-pressed="true"])):hover {
+    background-color: color-mix(in srgb, var(--foreground) 7%, transparent) !important;
+    color: var(--foreground) !important;
+  }
+  :where([data-text-tabs], .v4-tabs) > .dm-seg:hover {
+    background-color: transparent !important;
+  }
+}
+.dm-seg.dm-seg:focus-visible {
+  outline: 2px solid var(--primary, #2f6bf2);
+  outline-offset: 1px;
+}
+/* An underline tab is a bare word in a scrolling row: an outline around
+   it hugs the letters and loses its top and bottom to the row's clip. Its
+   ring sits 6px out from the word and within the tab's own height; the
+   row makes room on the side of a focused first or last tab, and its
+   content does not move. */
+:where([data-text-tabs], .v4-tabs) > .dm-seg.dm-seg:focus-visible {
+  outline: none;
+}
+:where([data-text-tabs], .v4-tabs) > .dm-seg:focus-visible::before {
+  content: "";
+  position: absolute;
+  inset: 0 -6px;
+  border: 2px solid var(--primary, #2f6bf2);
+  border-radius: 6px;
+  pointer-events: none;
+}
+[data-text-tabs][data-text-tabs]:has(> .dm-seg:first-child:focus-visible),
+.v4-content .v4-tabs[role="tablist"]:has(> .dm-seg:first-child:focus-visible) {
+  padding-left: 8px !important;
+  margin-left: -8px !important;
+}
+[data-text-tabs][data-text-tabs]:has(> .dm-seg:last-child:focus-visible),
+.v4-content .v4-tabs[role="tablist"]:has(> .dm-seg:last-child:focus-visible) {
+  padding-right: 8px !important;
+  margin-right: -8px !important;
 }
 
 /* Text links and inline actions: bare text can't cast a shadow onto anything

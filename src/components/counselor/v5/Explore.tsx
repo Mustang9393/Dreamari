@@ -197,7 +197,7 @@ function Pills({ items, value, onChange, label }: { items: string[]; value: stri
         const on = value === w;
         return (
           <button key={w} type="button" aria-pressed={on} onClick={() => onChange(w)}
-            className={`${on ? "" : "dm-quiet "}inline-flex h-9 flex-none cursor-pointer items-center rounded-full border px-[14px] text-[13.5px] font-semibold whitespace-nowrap`}
+            className={`dm-seg ${on ? "" : "cursor-pointer "}inline-flex h-9 flex-none cursor-pointer items-center rounded-full border px-[14px] text-[13.5px] font-semibold whitespace-nowrap`}
             style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             {w}
           </button>

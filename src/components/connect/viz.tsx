@@ -41,7 +41,7 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
             role="tab"
             aria-selected={on}
             onClick={() => onChange(option.key)}
-            className={`dm-quiet relative flex min-h-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] ${dense ? "px-[7px] sm:px-[14px]" : "px-[14px]"} text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}
+            className={`dm-seg relative flex min-h-[34px] ${on ? "cursor-default" : "cursor-pointer"} items-center justify-center rounded-[var(--radius-sm)] ${dense ? "px-[7px] sm:px-[14px]" : "px-[14px]"} text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}
             style={{ color: on ? "#FFFFFF" : "var(--muted-foreground)" }}
           >
             {on && (

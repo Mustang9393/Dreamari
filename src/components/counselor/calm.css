@@ -20,7 +20,8 @@
      previews where the active one sits.
    - Figures (.cc-figure): no fill; the number turns blue and its small
      chevron (.cc-go, always shown, quiet) nudges right. */
-.counselor-calm .dm-quiet:hover {
+/* never on a selected tab or pill (app.css, 15 Oct 2026) */
+.counselor-calm .dm-quiet:hover:not(:where([role="tab"][aria-selected="true"], [role="radio"][aria-checked="true"], [role="menuitemradio"][aria-checked="true"], :is([role="group"], [role="radiogroup"], [role="tablist"]) > [aria-pressed="true"])) {
   background: color-mix(in srgb, var(--foreground) 5%, transparent) !important;
   box-shadow: none !important;
 }

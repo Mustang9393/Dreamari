@@ -159,7 +159,7 @@ export function V5Home() {
             const on = world === w.world;
             return (
               <button key={w.world} type="button" role="tab" aria-selected={on} onClick={() => setWorld(w.world)}
-                className="dm-quiet inline-flex h-9 flex-none cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13.5px] font-semibold whitespace-nowrap"
+                className={`dm-seg inline-flex h-9 flex-none ${on ? "" : "cursor-pointer "}items-center gap-[8px] rounded-full border px-[14px] text-[13.5px] font-semibold whitespace-nowrap`}
                 style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
                 {w.world}{w.world !== "All" && <span className="tabular-nums" style={{ opacity: 0.7 }}>{w.students}</span>}
               </button>

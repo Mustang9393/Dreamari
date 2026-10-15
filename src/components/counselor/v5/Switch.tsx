@@ -28,7 +28,7 @@ export function PillSwitch<K extends string>({ items, value, onChange, label, cl
         const on = it.key === value;
         return (
           <button key={it.key} type="button" aria-pressed={on} onClick={() => onChange(it.key)}
-            className={`seg-item ${on ? "" : "dm-quiet "}flex h-full flex-none cursor-pointer items-center rounded-[9px] px-[14px] text-[13px] leading-[16px] whitespace-nowrap tabular-nums ${on ? "font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
+            className={`seg-item dm-seg flex h-full flex-none cursor-pointer items-center rounded-[9px] px-[14px] text-[13px] leading-[16px] whitespace-nowrap tabular-nums ${on ? "font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
             style={{ background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>
             {text(it)}
           </button>
@@ -57,7 +57,7 @@ export function CardTabs<K extends string>({ items, value, onChange, label, clas
         const on = it.key === value;
         return (
           <button key={it.key} type="button" role="tab" aria-selected={on} tabIndex={on ? 0 : -1} onClick={() => onChange(it.key)} onKeyDown={(e) => onKey(e, i)}
-            className={`relative flex h-[32px] flex-none cursor-pointer items-center text-[12.5px] leading-[16px] whitespace-nowrap tabular-nums ${on ? "font-semibold" : "dm-quiet font-medium"}`}
+            className={`relative flex h-[32px] flex-none cursor-pointer items-center text-[12.5px] leading-[16px] whitespace-nowrap tabular-nums ${on ? "font-semibold" : "cursor-pointer font-medium"} dm-seg`}
             style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
             {text(it)}
             {on && <span aria-hidden className="absolute inset-x-0 -bottom-px h-[2px] rounded-full" style={{ background: "var(--accent)" }} />}

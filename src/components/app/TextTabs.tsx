@@ -36,7 +36,7 @@ export function TextTabs<K extends string>({ items, value, onChange, ariaLabel, 
         const on = item.key === value;
         return (
           <button key={item.key} type="button" role="tab" aria-selected={on} onClick={() => onChange(item.key)}
-            className={`relative flex-none whitespace-nowrap ${soft ? `py-[9px] text-[13px] leading-[16px] ${on ? "font-semibold" : "font-medium"}` : `px-[2px] py-[3px] text-[14px] leading-[18px] font-bold ${caps ? "uppercase tracking-[0.01em]" : "capitalize"}`} ${on ? "" : "dm-quiet cursor-pointer"}`}
+            className={`relative flex-none whitespace-nowrap ${soft ? `py-[9px] text-[13px] leading-[16px] ${on ? "font-semibold" : "font-medium"}` : `px-[2px] py-[3px] text-[14px] leading-[18px] font-bold ${caps ? "uppercase tracking-[0.01em]" : "capitalize"}`} dm-seg ${on ? "" : "cursor-pointer"}`}
             style={{ fontFamily: "var(--font-body)", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
             {item.label}
             {on && <motion.span layoutId={layoutId} aria-hidden className={`absolute inset-x-0 h-[2px] ${soft ? "-bottom-px rounded-full" : "-bottom-[5px]"}`} style={{ background: "var(--accent)" }} transition={{ type: "spring", stiffness: 500, damping: 40 }} />}
