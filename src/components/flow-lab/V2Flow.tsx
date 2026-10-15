@@ -75,21 +75,26 @@ type Step = "interests" | "explore" | "rank" | "top3";
 // same colour its cards use below, so the list and the grid read as one.
 // "All industries" (the mix) gets a dot of every colour.
 const MIX_DOT = "conic-gradient(from 0deg, var(--world-tech-engineering-design), var(--world-helping-human-services), var(--world-food-farming-nature), var(--world-teaching-learning), var(--world-tech-engineering-design))";
-function IndustryPicker({ value, options, onChange }: { value: string; options: string[]; onChange: (world: string) => void }) {
-  const label = (world: string) => (
+const ALL_LABEL = "All industries";
+function worldLabel(world: string) {
+  return (
     <span className="flex min-w-0 items-center gap-[9px]">
       <span aria-hidden className="h-[8px] w-[8px] flex-none rounded-full" style={{ background: world ? (WORLD_COLORS[world] ?? "var(--muted-foreground)") : MIX_DOT }} />
-      <span className="truncate">{world || "All industries"}</span>
+      <span className="truncate">{world || ALL_LABEL}</span>
     </span>
   );
+}
+const PICKER_TRIGGER = "dm-quiet h-[42px] rounded-[var(--radius-md)] border pr-[10px] pl-[14px] text-[13px] leading-[18px] font-semibold";
+const PICKER_STYLE = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+function IndustryPicker({ value, options, onChange }: { value: string; options: string[]; onChange: (world: string) => void }) {
   return (
     <Listbox
       ariaLabel="Industry"
       value={value}
       onChange={onChange}
-      options={[{ value: "", label: label("") }, ...options.map((w) => ({ value: w, label: label(w) }))]}
-      className="dm-quiet h-[42px] w-[188px] flex-none sm:w-[232px] rounded-[var(--radius-md)] border pr-[10px] pl-[14px] text-[13px] leading-[18px] font-semibold"
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+      options={[{ value: "", label: worldLabel("") }, ...options.map((w) => ({ value: w, label: worldLabel(w) }))]}
+      className={`${PICKER_TRIGGER} w-[232px] flex-none`}
+      style={PICKER_STYLE}
       panelClassName="p-[6px]"
       // Wider than its trigger so the longest industry name fits on one line
       // (the shared Listbox sizes its panel to the trigger by default).
@@ -108,9 +113,16 @@ type State = {
   saved: string[];
   rank: string[];
 };
-// DEMO-ONLY: see the mount effect. Business & Finance leads the tabs.
+// DEMO-ONLY: see the mount effect. Business & Finance leads the tabs when
+// the student picked it in Build; it is never added to picks that left it
+// out (Chandu, 15 Oct 2026: "if they pick other things in build dont show
+// it. Joshua will always pick business and finance in build so make sure
+// in that case business and finance is always there"). Until then this
+// prepended it to every set of picks, which is how a two-world Build
+// showed three tabs.
+const BF = "Business & Finance";
 function businessFirst(s: State): State {
-  const BF = "Business & Finance";
+  if (!s.worlds.includes(BF)) return s;
   return { ...s, worlds: [BF, ...s.worlds.filter((w) => w !== BF)], activeTab: BF };
 }
 
@@ -170,8 +182,11 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     // The demo's Match never shows the lab's stand-in Build (direct
     // instruction, 28 Sept 2026: "DO NOT HAVE THE MOCK BUILD THING IN MATCH
     // FLOW, the build is already there"). With no Build answers in this
-    // browser (incognito, a direct link), it opens on Business & Finance.
-    if (demo && next.step === "interests") next = businessFirst({ ...next, step: "explore", fromBuild: next.worlds.length > 0 });
+    // browser (incognito, the hamburger's Match link), it opens on Business
+    // & Finance: that is the demo path (Chandu, 15 Oct 2026: "When we come
+    // from the hamburger for demo, business and finance should be every
+    // visible").
+    if (demo && next.step === "interests") next = businessFirst({ ...next, step: "explore", fromBuild: next.worlds.length > 0, worlds: next.worlds.length > 0 ? next.worlds : [BF] });
     // Default to the strongest (first chosen) world, never a leftover tab.
     if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_ALL) next = { ...next, activeTab: next.worlds[0] ?? "" };
     // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only storage read after mount, same pattern as the counselor version chip
@@ -302,21 +317,32 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
           title="Save up to 3 careers you’re interested in"
           hint="We’ll use your picks to recommend similar careers. You can update them later at anytime."
           controls={
-            // One row from tablet up, and nothing in it ever clips (Chandu, 15
-            // Oct 2026, after Usman's Chrome/Windows screenshot showed the
-            // dropdown wrapped under the tabs: "it should always sit in one
-            // row", "no clipping please. Expand the grid if we have to but dont
-            // make the options clip or crop"). The row is sized to its content
-            // (w-max), so the tabs keep their full labels, the dropdown keeps
-            // its width, and when the two outgrow the column the row runs past
-            // it rather than squeezing or wrapping. Phones alone wrap the
-            // dropdown under the tabs: four tabs and a dropdown cannot share
-            // 375px without clipping something.
-            <div className="flex flex-wrap items-center gap-2 sm:w-max sm:max-w-none sm:flex-nowrap">
-              {/* Coming back to Explore all is the mix again, whatever was picked before. */}
-              <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: key === EXPLORE_ALL ? "" : s.moreWorld }))} options={tabs} />
-              {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
-            </div>
+            // Nothing in the controls ever clips or wraps (Chandu, 15 Oct 2026,
+            // after Usman's Chrome/Windows screenshot showed the dropdown
+            // wrapped under the tabs: "it should always sit in one row", "no
+            // clipping please. Expand the grid if we have to but dont make the
+            // options clip or crop", then for tablet and phone: "IF the
+            // dropdown needs to come down a row, then explore all should be in
+            // the same row"). From lg up: one row sized to its content (w-max),
+            // so the tabs keep their full labels and the dropdown its width;
+            // if they outgrow the column the row runs past it rather than
+            // squeezing. Below lg: the student's worlds on one row (their
+            // track scrolls sideways if it must), then Explore all and its
+            // dropdown together on the next, always fully on screen.
+            <>
+              <div className="hidden w-max max-w-none flex-nowrap items-center gap-2 lg:flex">
+                {/* Coming back to Explore all is the mix again, whatever was picked before. */}
+                <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: key === EXPLORE_ALL ? "" : s.moreWorld }))} options={tabs} />
+                {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
+              </div>
+              <div className="flex flex-col gap-2 lg:hidden">
+                {state.worlds.length > 0 && <Segmented ariaLabel="Your worlds" value={isAll ? "" : state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: "" }))} options={state.worlds.map((w) => ({ key: w, label: w }))} />}
+                <div className="flex flex-nowrap items-center gap-2">
+                  <Segmented ariaLabel="Explore all" value={isAll ? EXPLORE_ALL : ""} onChange={() => setState((s) => ({ ...s, activeTab: EXPLORE_ALL, moreWorld: "" }))} options={[{ key: EXPLORE_ALL, label: EXPLORE_ALL }]} />
+                  {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
+                </div>
+              </div>
+            </>
           }
         >
           <SurfaceState id={17} isEmpty={ranked.length === 0} what="career" onEmptyAction={chooseAnotherWorld}>
