@@ -509,3 +509,37 @@
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-unlock-relic:nth-of-type(5) { grid-column: 3 !important; grid-row: 3 !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-unlock-gallery-dreamy { grid-column: 2 !important; grid-row: 2 / span 2 !important; align-self: center; height: auto !important; }
 }
+
+/* World design systems (16 Oct 2026): in Drift the world's poster face is the
+   display face for titles, card terms, kickers and the results line, and the
+   world's body face carries everything else. Custom properties take
+   !important so the fit stylesheet's one-face rule (Nunito for the whole
+   game, 9 Oct) yields to the world. Business & Finance keeps Nunito as its
+   body, so the finance game reads as it did. Signal keeps Jersey and Roboto. */
+.glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) { --font-body: var(--glossary-body) !important; }
+/* Loaded last (this file is the last glossary sheet on the route), so the
+   per-screen !important font rules in the other sheets yield to it. */
+/* Out-specifies the fit sheet's `[data-screen]:not(.v2) :is(h1, h2, h3,
+   .dm-solid, ...) { font-family: var(--font-display) !important }` by one
+   repeated class, so the world face wins on exactly these elements. */
+.glossary-game-shell.glossary-game-lab.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) :is(h1, h2, h1 em, h2 em, .glossary-flashcard-title > span, .glossary-complete-title, .glossary-complete-kicker, .glossary-welcome-story, .glossary-welcome-story em, .glossary-welcome-copy h1, .glossary-power-kicker, .glossary-unlock-finale-copy h2, .glossary-unlock-finale-copy h2 em, .glossary-unlock-relic figcaption, .glossary-mastery-hud > header b, .glossary-mastery-hud-title) { font-family: var(--glossary-display) !important; font-weight: var(--glossary-display-weight, 800) !important; }
+
+/* Layout guardrails for generated content (16 Oct 2026, Chandu: "rules in
+   place so words dont get clipped, wrap, layouts dont break, scaling,
+   positioning"). Long terms scale down instead of overflowing; labels wrap
+   to two lines instead of being cut; tiles, chips and slots size to their
+   words; nothing inside a card can push past its edge. */
+.glossary-game-lab .glossary-flashcard-title > span { font-size: clamp(22px, calc(64px - var(--term-chars, 8) * 2.4px), 52px) !important; max-width: 100%; text-wrap: balance; overflow-wrap: anywhere; }
+.glossary-game-lab .glossary-flashcard-definition { max-width: min(100%, 560px); overflow-wrap: anywhere; text-wrap: pretty; }
+.glossary-game-lab .glossary-words-formula { max-width: 100%; overflow-wrap: anywhere; white-space: normal; text-align: center; }
+.glossary-game-lab .glossary-mastery-token-label { max-width: 76px !important; white-space: normal !important; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.1 !important; text-overflow: clip; text-wrap: balance; }
+.glossary-game-lab .glossary-unlock-relic figcaption { overflow-wrap: anywhere; text-wrap: balance; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: clamp(11px, 1.2vw, 15px) !important; }
+.glossary-game-lab :is(.glossary-option, .glossary-document-option, .glossary-match-tile, .glossary-sort-token, .glossary-sort-bucket, .glossary-word-chip, .glossary-path-option, .glossary-speech-bubble, .glossary-feedback-text, .glossary-power-paragraph) { min-width: 0; overflow-wrap: anywhere; hyphens: auto; }
+.glossary-game-lab :is(.glossary-match-tile, .glossary-sort-token) { white-space: normal; }
+.glossary-game-lab .glossary-match-tile .glossary-match-label { text-wrap: balance; }
+.glossary-game-lab .glossary-word-chip { white-space: nowrap; max-width: 100%; }
+.glossary-game-lab .glossary-power-blank { width: auto; min-width: 136px; max-width: 100%; }
+.glossary-game-lab .glossary-power-paragraph > * { max-width: 100%; }
+.glossary-game-lab .glossary-welcome-story { overflow-wrap: anywhere; text-wrap: balance; }
+.glossary-game-lab .glossary-speech-bubble p { text-wrap: pretty; }
+.glossary-game-lab :is(.glossary-flashcard-front, .glossary-flashcard-back, .glossary-option, .glossary-match-tile, .glossary-sort-bucket, .glossary-mastery-hud, .glossary-complete-stats > span) { overflow: hidden; }

@@ -1,5 +1,7 @@
-// DEMO-ONLY content: the Registered Nurse glossary, written here to prove the
-// generator on a second career (16 Oct 2026). Riverside Clinic is this
+// DEMO-ONLY content: the Nursing glossary, under the Health & Medicine world,
+// written here to prove the generator on a second industry (16 Oct 2026).
+// Glossaries are per industry, grouped under career worlds; Registered Nurse
+// is this one's example career (its hub card and cover). Riverside Clinic is this
 // career's "Dream Sneakers": the one story every example ties back to. Two
 // playable levels, four more on the roadmap. Eighth-grade copy, no dashes,
 // every example names the clinic. Replace with the content team's sheet
@@ -7,11 +9,9 @@
 
 import type { GlossaryBlueprint } from "../generate";
 
-export const REGISTERED_NURSE_GLOSSARY: GlossaryBlueprint = {
-  careerSlug: "registered-nurse",
-  careerTitle: "Registered Nurse",
-  world: "Health & Medicine",
-  subject: "nursing",
+export const NURSING_GLOSSARY: GlossaryBlueprint = {
+  industry: { slug: "nursing", title: "Medical Terms", subject: "nursing", world: "Health & Medicine" },
+  exampleCareerSlug: "registered-nurse",
   company: "Riverside Clinic",
   idPrefix: "RN",
   chapters: [

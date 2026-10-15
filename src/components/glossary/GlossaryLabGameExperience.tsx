@@ -33,6 +33,7 @@ import { glossaryTermAssets } from "./termArt";
 import { DREAMY_FACING, dreamyReaction, dreamyReactionAsset, questionReaction, type DreamyPose } from "./dreamyReactions";
 import { SIGNAL_FACING, signalReaction, signalReactionAsset, type SignalReaction } from "./signalReactions";
 import { TickerTapeStorm } from "@/components/play/BagSecured";
+import { worldTheme } from "./industries";
 import "./dreamy-reactions.css";
 
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
@@ -713,7 +714,7 @@ export function SketchFace({ term, definition, icon, artSrc, style, concept = fa
           ))}
         </svg>
       </span>}
-      <span className="glossary-flashcard-title flex flex-col items-center gap-[3px]">
+      <span className="glossary-flashcard-title flex flex-col items-center gap-[3px]" style={{ "--term-chars": term.length } as React.CSSProperties}>
         <span className="text-[clamp(26px,calc(5.8dvh/var(--vz,1)),34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc || concept || words ? undefined : "url(#glossary-sketch)" }}>
           {term}
         </span>
@@ -2680,6 +2681,7 @@ export function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay:
               type="text"
               aria-label={`Blank ${gapIndex + 1}`}
               data-power-blank={gapIndex}
+              size={Math.max(8, lesson.powerPlay.answers[gapIndex].length + 1)}
               onFocus={() => { lastBlank.current = gapIndex; }}
               value={values[gapIndex]}
               onChange={(e) => { setValues((prev) => prev.map((v, idx) => (idx === gapIndex ? e.target.value : v))); setChecked(false); }}
@@ -3619,6 +3621,11 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
       data-answer-state={pendingResult ? (pendingResult.correct ? "correct" : "wrong") : "idle"}
       data-keyboard-open={visibleHeight !== null && visibleHeight < window.innerHeight * .75 ? "true" : undefined}
       style={{
+        // The world's design system (16 Oct 2026): accent, poster display
+        // face, body face. Industries under one world share it. Drift wears
+        // the faces (glossary-lab.css); Signal keeps its pixel faces and
+        // takes the accent only.
+        ...worldTheme(career.world),
         "--glossary-accent": accent,
         "--glossary-visible-height": visibleHeight !== null ? `${visibleHeight}px` : undefined,
         background: variant === "lab" ? "transparent" : "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 16%, transparent), transparent 65%), var(--background)",

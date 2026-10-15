@@ -2663,3 +2663,4 @@
 /* Alone on the welcome scene he stands RIGHT of the copy, so right-facing
    poses mirror to look at it (same facing rule as the card corner). */
 .glossary-game-lab .glossary-welcome-cloud.is-alone .glossary-reaction[data-facing="right"] { transform: scaleX(-1); }
+

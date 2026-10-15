@@ -12,7 +12,9 @@
 
 import { FIN_LESSON_2, FIN_LESSON_3, FIN_LESSON_4 } from "./data-finance-l2-4";
 import { buildGlossaryCareer } from "./generate";
-import { REGISTERED_NURSE_GLOSSARY } from "./blueprints/registered-nurse";
+import { NURSING_GLOSSARY } from "./blueprints/health";
+import { CAREER_INDUSTRY } from "./industries";
+import { worldForCareer } from "@/components/play/games";
 
 export type GlossaryTerm = {
   id: string;
@@ -210,7 +212,12 @@ export type GlossaryLevel = {
  *  difficulty level and the difficulty be a signal for the chapters"). */
 export type GlossaryChapter = { number: number; name: string; tier: GlossaryLevel["tier"] };
 
+/** One industry's glossary (16 Oct 2026: glossaries are per industry, not
+ *  per career). `careerSlug` is the example career whose hub card, cover and
+ *  Level 1 art introduce it; every career in the world plays the same game. */
 export type GlossaryCareer = {
+  industrySlug: string;
+  industryTitle: string;
   careerSlug: string;
   careerTitle: string;
   world: string;
@@ -425,8 +432,10 @@ const FIN_LESSON_1: GlossaryLesson = {
   ],
 };
 
-const GLOSSARY_CAREERS: Record<string, GlossaryCareer> = {
-  "investment-banking": {
+const GLOSSARY_INDUSTRIES: Record<string, GlossaryCareer> = {
+  finance: {
+    industrySlug: "finance",
+    industryTitle: "Finance Terms",
     careerSlug: "investment-banking",
     careerTitle: "Investment Banking",
     world: "Business & Finance",
@@ -443,18 +452,30 @@ const GLOSSARY_CAREERS: Record<string, GlossaryCareer> = {
       { number: 3, name: "The Big Leagues", tier: "Advanced" },
     ],
   },
-  // Generated from a blueprint (16 Oct 2026): the proof that any career's
+  // Generated from a blueprint (16 Oct 2026): the proof that any industry's
   // term list becomes levels and games. See generate.ts and
   // docs/handoff/specs/glossary-system.md.
-  "registered-nurse": buildGlossaryCareer(REGISTERED_NURSE_GLOSSARY),
+  nursing: buildGlossaryCareer(NURSING_GLOSSARY),
 };
 
-export function hasGlossary(slug: string): boolean {
-  return slug in GLOSSARY_CAREERS;
+/** The glossary for an industry slug ("finance", "nursing") or for a career
+ *  slug: the career's own industry (CAREER_INDUSTRY), else the first
+ *  glossary registered under the career's world. */
+export function glossaryFor(slug: string): GlossaryCareer | null {
+  if (GLOSSARY_INDUSTRIES[slug]) return GLOSSARY_INDUSTRIES[slug];
+  const mapped = CAREER_INDUSTRY[slug];
+  if (mapped && GLOSSARY_INDUSTRIES[mapped]) return GLOSSARY_INDUSTRIES[mapped];
+  const world = worldForCareer(slug);
+  return world ? Object.values(GLOSSARY_INDUSTRIES).find((entry) => entry.world === world) ?? null : null;
 }
 
-export function glossaryFor(slug: string): GlossaryCareer | null {
-  return GLOSSARY_CAREERS[slug] ?? null;
+export function hasGlossary(slug: string): boolean {
+  return glossaryFor(slug) !== null;
+}
+
+/** Every industry with a playable glossary, in registry order. */
+export function glossaryIndustries(): GlossaryCareer[] {
+  return Object.values(GLOSSARY_INDUSTRIES);
 }
 
 /** The authored lesson for `?lesson=` (its number or id), else Level 1. */

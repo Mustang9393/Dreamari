@@ -29,6 +29,7 @@
 // every example names the company, no em dashes.
 
 import type { GlossaryCareer, GlossaryChapter, GlossaryLesson, GlossaryLevel, GlossaryQuestion, GlossaryTerm } from "./data";
+import { type IndustryMeta, worldSystem } from "./industries";
 
 export type TermSeed = {
   term: string;
@@ -66,12 +67,11 @@ export type LevelSeed = {
 };
 
 export type GlossaryBlueprint = {
-  careerSlug: string;
-  careerTitle: string;
-  /** Exact WORLD_COLORS key. */
-  world: string;
-  /** "finance", "nursing", "aviation": the subject word in the game's copy. */
-  subject: string;
+  /** The industry this glossary is: slug, title, subject and the world
+   *  whose design system it wears (industries.ts). */
+  industry: IndustryMeta;
+  /** The career whose hub card and cover introduce this glossary. */
+  exampleCareerSlug?: string;
   /** The one story every example ties back to ("Dream Sneakers"). */
   company: string;
   /** Lesson id prefix, globally unique ("FIN", "RN"). */
@@ -81,6 +81,10 @@ export type GlossaryBlueprint = {
 };
 
 const MINUTES: Record<GlossaryLevel["tier"], number> = { Beginner: 4, Intermediate: 5, Advanced: 6 };
+/** Copy limits, in characters. Measured against the real slots at 375px and
+ *  1280px: HUD token label (two lines of 9px), word tile, match card right
+ *  side, teach card definition at 24px, one Power Play sentence. */
+export const LIMITS = { term: 22, cue: 34, definition: 120, example: 150, formula: 28 } as const;
 const DEFAULT_FACT = "Learning the words of a job is the first step to doing it. Say each one out loud once.";
 
 /** The example with its term replaced by `mark` (first match, any case,
@@ -217,7 +221,8 @@ export function buildLesson(bp: GlossaryBlueprint, level: LevelSeed, previousVal
 /** Everything the engine needs for one career. Throws on a bad blueprint. */
 export function buildGlossaryCareer(bp: GlossaryBlueprint): GlossaryCareer {
   const problems = validateBlueprint(bp);
-  if (problems.length) throw new Error(`Glossary blueprint "${bp.careerSlug}" is not playable:\n- ${problems.join("\n- ")}`);
+  if (problems.length) throw new Error(`Glossary blueprint "${bp.industry.slug}" is not playable:\n- ${problems.join("\n- ")}`);
+  const industry = bp.industry;
   const lessons: GlossaryLesson[] = [];
   let previous = 0;
   for (const level of bp.levels) {
@@ -234,12 +239,14 @@ export function buildGlossaryCareer(bp: GlossaryBlueprint): GlossaryCareer {
     unlocks: level.unlocks,
     minutes: MINUTES[level.tier],
   }));
-  return { careerSlug: bp.careerSlug, careerTitle: bp.careerTitle, world: bp.world, subject: bp.subject, lessons, levels, chapters: bp.chapters };
+  return { industrySlug: industry.slug, industryTitle: industry.title, careerSlug: bp.exampleCareerSlug ?? industry.slug, careerTitle: industry.title, world: industry.world, subject: industry.subject, lessons, levels, chapters: bp.chapters };
 }
 
 /** The content intake checklist, as code. Empty list means playable. */
 export function validateBlueprint(bp: GlossaryBlueprint): string[] {
   const problems: string[] = [];
+  if (!worldSystem(bp.industry.world)) problems.push(`"${bp.industry.world}" is not a career world (industries.ts WORLD_SYSTEMS)`);
+  if (!/^[a-z][a-z-]*$/.test(bp.industry.slug)) problems.push(`industry slug "${bp.industry.slug}" must be lowercase letters and dashes (it is a route)`);
   if (!bp.levels.length) problems.push("no levels");
   if (!bp.levels.some((l) => l.terms)) problems.push("no level has terms; nothing to play");
   const numbers = new Set<number>();
@@ -248,6 +255,8 @@ export function validateBlueprint(bp: GlossaryBlueprint): string[] {
     numbers.add(level.number);
     if (!level.terms) continue;
     const where = `level ${level.number} (${level.title})`;
+    if (level.title.length > 30) problems.push(`${where}: level title is ${level.title.length} characters; the HUD and map hold 30`);
+    if (level.goal.length > 48) problems.push(`${where}: goal is ${level.goal.length} characters; the welcome line holds 48`);
     if (level.terms.length !== 5) problems.push(`${where}: ${level.terms.length} terms, needs exactly 5`);
     const names = level.terms.map((t) => t.term.toLowerCase());
     if (new Set(names).size !== names.length) problems.push(`${where}: duplicate term names`);
@@ -256,6 +265,16 @@ export function validateBlueprint(bp: GlossaryBlueprint): string[] {
     const defs = level.terms.map((t) => t.definition);
     if (new Set(defs).size !== defs.length) problems.push(`${where}: duplicate definitions`);
     for (const t of level.terms) {
+      // Length limits are layout rules (16 Oct 2026, Chandu: "make sure there
+      // are rules in place so words dont get clipped, wrap, layouts dont
+      // break"): a term must fit a HUD token and a word tile, a cue a match
+      // card, a definition a teach card at 24px, an example two lines of the
+      // Power Play paragraph.
+      if (t.term.length > LIMITS.term) problems.push(`${where}: term "${t.term}" is ${t.term.length} characters; the HUD tokens and word tiles hold ${LIMITS.term}`);
+      if (t.cue.length > LIMITS.cue) problems.push(`${where}: cue for "${t.term}" is ${t.cue.length} characters; match and sort cards hold ${LIMITS.cue}`);
+      if (t.definition.length > LIMITS.definition) problems.push(`${where}: definition for "${t.term}" is ${t.definition.length} characters; the teach card and answer tiles hold ${LIMITS.definition}`);
+      if (t.example.length > LIMITS.example) problems.push(`${where}: example for "${t.term}" is ${t.example.length} characters; the Power Play paragraph holds ${LIMITS.example} per sentence`);
+      if (t.formula && t.formula.length > LIMITS.formula) problems.push(`${where}: formula for "${t.term}" is ${t.formula.length} characters; the worked line holds ${LIMITS.formula}`);
       if (!blank(t.example, t.term, "_")) problems.push(`${where}: the example for "${t.term}" never says the word, so it cannot become a blank`);
       if (!t.example.includes(bp.company)) problems.push(`${where}: the example for "${t.term}" does not name ${bp.company}`);
       if (/—|–/.test(`${t.definition} ${t.example} ${t.cue}`)) problems.push(`${where}: "${t.term}" copy uses a dash; write it as two sentences`);
