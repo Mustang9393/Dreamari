@@ -1732,7 +1732,20 @@ export function ConnectExperience() {
       {/* The home view carries a sidebar on wide screens, so it gets a wider
           column than a thread or a board, which are reading surfaces. */}
       <main
-        style={{ fontFamily: FEED_FONT }}
+        style={{
+          fontFamily: FEED_FONT,
+          // 15 Oct 2026 (Chandu: "fix the surface colors, in dark mode they
+          // are too transparent and light, not enough contrast, especially
+          // the composer, people cards, stuff inside event boards"): inside
+          // Connect the shared glass washes (3-9% white in dark, near-white
+          // in light) are replaced by solid tints of the page's own
+          // foreground over its own background, so a card reads as a card in
+          // both themes and the border carries a real edge. Scoped to this
+          // page; the app-wide tokens are untouched.
+          ["--glass-surface-1" as string]: "color-mix(in srgb, var(--foreground) 7%, var(--background))",
+          ["--glass-surface-2" as string]: "color-mix(in srgb, var(--foreground) 12%, var(--background))",
+          ["--glass-border" as string]: "color-mix(in srgb, var(--foreground) 22%, transparent)",
+        }}
         // Same side padding as every other tab (px-5, then the 56px rail from
         // sm). Home, the boards and the dashboards fill the shared 1440
         // column -- the same width every other main screen caps at, sized
@@ -1743,8 +1756,19 @@ export function ConnectExperience() {
         // centred 992px column, because a reading column pinned to the
         // left rail sat awkwardly on wide screens (direct feedback, 4 Sept
         // 2026).
+        // 15 Oct 2026 (Chandu: "this double width etc is bad, make the feed
+        // content take the full width of its container... see what codex did
+        // with the normal feed"): a board is now ONE reading column (992px)
+        // whose header, tabs and feed all fill it, instead of a 1440 page
+        // with a narrower 860 feed floating inside it. The Feed tab is one
+        // 1200px column (feed + a slim rail). Communities/People/etc. and the
+        // dashboards keep the full 1440.
         className={`relative z-10 mx-auto flex w-full flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8 ${
-          view.kind === "home" || view.kind === "board" || view.kind === "partner" || view.kind === "proDashboard" || view.kind === "admin" ? "max-w-[1440px]" : "max-w-[992px]"
+          view.kind === "home" && view.tab === "feed"
+            ? "max-w-[1200px]"
+            : view.kind === "home" || view.kind === "partner" || view.kind === "proDashboard" || view.kind === "admin"
+              ? "max-w-[1440px]"
+              : "max-w-[992px]"
         }`}
       >
         {/* The demo role switcher is a utility, not part of the page: it
@@ -3405,7 +3429,6 @@ function FeedTab({
   // hiding a post also demotes its pro/board in the ranking (rankFeed's own
   // `demotedProIds`/`demotedBoardIds`), so their OTHER content quietly sinks
   // too, not just the one post that was hidden.
-  const [composing, setComposing] = useState(false);
   const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
   const [demotedProIds, setDemotedProIds] = useState<Set<string>>(new Set());
   const [demotedBoardIds, setDemotedBoardIds] = useState<Set<string>>(new Set());
@@ -3622,10 +3645,12 @@ function FeedTab({
     // "the composer can expand to the right so it becomes more prominent
     // and it avoids a lot of unnecessary wrapping"); the feed slides over
     // and narrows, and settles back when the form closes.
-    <div className={`-mt-[24px] grid w-full grid-cols-1 items-start gap-x-[var(--space-6)] transition-[grid-template-columns] duration-300 ease-out ${composing ? "xl:grid-cols-[38%_minmax(0,1fr)_22%]" : "xl:grid-cols-[22%_minmax(0,1fr)_22%]"}`}>
-      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="Ask a professional">
-        <FeedComposer side onOpenChange={setComposing} />
-      </aside>
+    // 15 Oct 2026, ported from Codex's Connect UX polish (codex/connect-ux-polish):
+    // one stable reading surface instead of three columns. The composer sits
+    // at the top of the feed's own bordered surface (opening it grows the
+    // surface downward, it never rewraps the feed), and the one slim
+    // "People you might like" rail only appears from 1100px.
+    <div className="grid w-full grid-cols-1 items-start gap-x-[var(--space-8)] min-[1100px]:grid-cols-[minmax(0,1fr)_224px]">
       <section className="flex w-full min-w-0 flex-col" aria-label="Your feed">
         {/* The feed column alone is solid; the side columns keep the
            gradient (direct ask: "have the gradient background on the two
@@ -3636,8 +3661,8 @@ function FeedTab({
            ground edge to edge without moving any content off the tab
            bar's alignment, and the side lines only exist where there are
            gradient columns beside them. */}
-        <div className="flex flex-col border-b max-xl:[box-shadow:0_0_0_100vmax_var(--background)] max-xl:[clip-path:inset(0_-100vmax)] xl:border-x" style={{ borderColor: FEED_RULE, background: "var(--background)" }}>
-        <div className="xl:hidden"><FeedComposer /></div>
+        <div className="flex flex-col overflow-clip rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--background)" }}>
+        <div className="border-b" style={{ borderColor: "var(--glass-border)" }}><FeedComposer /></div>
         {/* Surface 63 (28 Sept 2026, new -- ids up to 62 were already
            claimed by Connect's and the rest of the app's other surfaces): a
            student following no one still gets a full feed built from
@@ -3650,7 +3675,7 @@ function FeedTab({
         <SurfaceState id={63} isEmpty={ranked.length === 0} onEmptyAction={onFindPeople}>
           {/* Every row is separated by one faint hairline, Twitter's way,
              instead of a box per post. */}
-          <div className="flex flex-col border-t [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)] xl:border-t-0" style={{ borderColor: FEED_RULE, ["--feed-rule" as string]: FEED_RULE }}>
+          <div className="flex flex-col [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)]" style={{ borderColor: FEED_RULE, ["--feed-rule" as string]: FEED_RULE }}>
             {noFollows && (
               <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
                 <p className="text-[14px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>Follow a few professionals to personalise your feed.</p>
@@ -3683,7 +3708,7 @@ function FeedTab({
         </div>
       </section>
 
-      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="People you might like">
+      <aside className="hidden min-[1100px]:sticky min-[1100px]:top-[96px] min-[1100px]:block min-[1100px]:self-start min-[1100px]:pt-[var(--space-4)]" aria-label="People you might like">
         <DiscoverRail
           pros={recommendedPros.slice(0, 4)}
           onDismissPro={(id) => setDismissedPros((d) => add(d, id))}
@@ -4441,7 +4466,7 @@ function BoardView({
          are gone; the middle track widens from 696px to 860px, still a
          readable measure. The response time stays on the About tab and in the
          ask confirmation; the pros stay on the Pros tab and in their answers. */}
-      <div className="mx-auto w-full max-w-[860px]">
+      <div className="w-full">
       <div className="flex min-w-0 flex-col gap-[var(--space-5)]">
       <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Posts" }, { key: "updates", label: "Opportunities" }, { key: "pros", label: "People" }, { key: "about", label: "About" }]} />
 

@@ -3675,8 +3675,6 @@ function HomeView({
   // are partner programs and cohorts (Community.access).
   const [access, setAccess] = useState<"public" | "private">("public");
   const searchedAll = COMMUNITIES.filter((c) => hit(c.name, c.world, c.purpose, c.topics, c.professionalsFrom));
-  const publicCount = searchedAll.filter((c) => c.access !== "private").length;
-  const privateCount = searchedAll.length - publicCount;
   const searched = searchedAll.filter((c) => (access === "private") === (c.access === "private"));
   const searchedEvents = EVENTS.filter((e) => hit(e.name, e.host, e.location, e.topics, e.orgs));
 
@@ -3789,7 +3787,7 @@ function HomeView({
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
           <div className="border-b pb-[6px]" style={{ borderColor: RULE }}>
             <TextTabs ariaLabel="Community type" layoutId="connect-community-access" value={access} onChange={setAccess}
-              items={[{ key: "public", label: `Public (${publicCount})` }, { key: "private", label: `Private (${privateCount})` }]} />
+              items={[{ key: "public", label: "Public" }, { key: "private", label: "Private" }]} />
           </div>
           {/* The tab already names the section, so no heading repeats it
              (14 Oct 2026). The explainer and this tab's joined count share
