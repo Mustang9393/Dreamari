@@ -487,3 +487,25 @@
 @media (max-width: 640px) {
   .glossary-game-shell.glossary-game-lab .glossary-welcome-scene.is-story .glossary-welcome-copy h1.glossary-welcome-story { font-size: 44px !important; }
 }
+
+/* Wide screens: the same three-column cluster as the phone, so Capital and
+   Risk sit close to the middle instead of at the far edges (15 Oct 2026,
+   Chandu: "Capital and Risk can come closer to the centre ... they look too
+   far apart"). Investor on top, Capital and Risk beside Dreamy, Return and
+   Ownership below, Dreamy spanning the two lower rows so he is the centre. */
+@media (min-width: 641px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery { width: min(100%, 540px) !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 14px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(1) { grid-column: 2 !important; grid-row: 1 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(2) { grid-column: 1 !important; grid-row: 2 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(3) { grid-column: 3 !important; grid-row: 2 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(4) { grid-column: 1 !important; grid-row: 3 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(5) { grid-column: 3 !important; grid-row: 3 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery-dreamy { grid-column: 2 !important; grid-row: 2 / span 2 !important; align-self: center; height: auto !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-unlock-gallery { width: min(100%, 540px) !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 14px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-unlock-relic:nth-of-type(1) { grid-column: 2 !important; grid-row: 1 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-unlock-relic:nth-of-type(2) { grid-column: 1 !important; grid-row: 2 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-unlock-relic:nth-of-type(3) { grid-column: 3 !important; grid-row: 2 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-unlock-relic:nth-of-type(4) { grid-column: 1 !important; grid-row: 3 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-unlock-relic:nth-of-type(5) { grid-column: 3 !important; grid-row: 3 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-unlock-gallery-dreamy { grid-column: 2 !important; grid-row: 2 / span 2 !important; align-self: center; height: auto !important; }
+}

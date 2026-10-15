@@ -1,3 +1,7 @@
+## 2026-10-15 (night): Glossary Games: unlock tiles closer to the centre on wide screens
+
+**Why (Chandu, 15 Oct):** "the Capital and Risk tiles can come closer to the centre more than where they are now because now they look too far apart." Wide screens used a five column grid (Capital in column 1, Risk in column 5, a hole beside Dreamy); from 641px the gallery now uses the phone's three column cluster at 540px wide in both Drift and Signal: Investor on top, Capital and Risk beside Dreamy, Return and Ownership below, Dreamy spanning the two lower rows (measured centred in Signal). Not pushed.
+
 ## 2026-10-15 (night): Glossary Games: Level welcome screens cut to a headline and one goal line
 
 **Why (Chandu, 15 Oct):** "There's so much copy on the welcome screens for each level. We need to reduce that dramatically and make sure the main content is larger." Levels 2+ showed a kicker, a headline, a story sentence, and a value ticker (name, dollar value, a bar, "Next: $50K . Open a second store", "Game value, not real money"). Now: the level kicker, the headline (up to 84px, was 58), one line "Goal: Open a second store", and Start; the level's art carries the rest. Level 1 keeps its single line. The ticker component stays for the "reached" state on the Complete screen, where the game-value note still shows. Signal gets its pixel face for the goal line. Checked at 800 and 430 wide in Drift and Signal. Not pushed.
