@@ -32,6 +32,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { glossaryTermAssets } from "./termArt";
 import { dreamyReaction, dreamyReactionAsset, questionReaction, type DreamyPose } from "./dreamyReactions";
 import { signalReaction, signalReactionAsset, type SignalReaction } from "./signalReactions";
+import { TickerTapeStorm } from "@/components/play/BagSecured";
 import "./dreamy-reactions.css";
 
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
@@ -154,6 +155,11 @@ function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large")
  *  not a keyword guess: Revenue is not Profit, and Cash Flow is not money
  *  left over. Number/share/ledger scenes remain the teaching diagrams. */
 const LessonArtContext = createContext<{ legacy: boolean; large: Record<string, string>; small: Record<string, string> }>({ legacy: true, large: TERM_ASSETS, small: TERM_ASSETS });
+/** Levels 2+ carry no term graphics anywhere: no teach-card art, no HUD
+ *  tokens, no relics, no match or bucket pictures (15 Oct 2026, Chandu: "I
+ *  told you take the images out of levels 2-4. All graphics for terms.").
+ *  Every consumer of the art map already has a no-art branch. */
+const NO_TERM_ART = { legacy: false, large: {} as Record<string, string>, small: {} as Record<string, string> };
 /** The theme's term art. `small` for anything drawn under ~64px. */
 function useTermAssets(size: "large" | "small" = "large"): Record<string, string> {
   const atmosphere = useAtmosphere();
@@ -271,7 +277,7 @@ function termAssetFor(label: string, assets: Record<string, string> = TERM_ASSET
 
 /** Complete faces share one optical frame. Facial frames are in a single
  * atlas, so blinking/talking never swaps image URLs or changes layout. */
-function AnimatedDreamy({ pose, size, talking, signal }: { pose: DreamyPose; size: number; talking?: boolean; /** Signal's reviewed pixel reactions (four poses); without it, Drift's atlas */ signal?: SignalReaction }) {
+function AnimatedDreamy({ pose, size, talking, signal, reward = false }: { pose: DreamyPose; size: number; talking?: boolean; /** Signal's reviewed pixel reactions (four poses); without it, Drift's atlas */ signal?: SignalReaction; /** play the reward pluses behind him once, on mount */ reward?: boolean }) {
   const reduced = useReducedMotion();
   const reaction = dreamyReaction(pose);
   const [autoTalking, setAutoTalking] = useState(true);
@@ -289,6 +295,7 @@ function AnimatedDreamy({ pose, size, talking, signal }: { pose: DreamyPose; siz
       style={{ width: size, height: signal ? size * (2 / 3) : size }}
       aria-hidden
     >
+      {reward ? <RewardPluses /> : null}
       <span className="glossary-reaction-canvas" style={{ backgroundImage: `url("${signal ? signalReactionAsset(signal, !reduced) : dreamyReactionAsset(pose, !reduced)}")` }} data-still={!!reduced} />
     </span>
   );
@@ -332,7 +339,7 @@ function SignalCloud({ pose, size, talking }: { pose: string; size: number; /** 
   );
 }
 
-function DreamyFace({ pose, size = 96, talking }: { pose: DreamyPose; size?: number; talking?: boolean }) {
+function DreamyFace({ pose, size = 96, talking, reward }: { pose: DreamyPose; size?: number; talking?: boolean; reward?: boolean }) {
   const atmosphere = useAtmosphere();
   if (atmosphere === "v2") {
     // Signal mixes Codex's four reviewed pixel reactions (curious, calculate,
@@ -341,12 +348,12 @@ function DreamyFace({ pose, size = 96, talking }: { pose: DreamyPose; size?: num
     // right-answer dialogue (15 Oct 2026, Chandu: "use a mix of existing
     // assets and its fresh assets").
     const signal = signalReaction(pose);
-    if (signal) return <AnimatedDreamy key={`signal-${signal}`} pose={pose} size={size * 1.6} talking={talking} signal={signal} />;
+    if (signal) return <AnimatedDreamy key={`signal-${signal}`} pose={pose} size={size * 1.6} talking={talking} signal={signal} reward={reward} />;
     const legacyPose = ({ welcome: "happy", explain: "idea", choose: "curious", match: "curious", sort: "curious", calculate: "glasses", recall: "curious", case: "idea", hint: "idea", correct: "happy", retry: "puzzle", mastery: "party" } as Record<string, string>)[pose] ?? pose;
     return <SignalCloud pose={legacyPose} size={size * 1.6} talking={talking} />;
   }
   if (atmosphere === "v1") {
-    return <AnimatedDreamy key={dreamyReaction(pose)} pose={pose} size={size} talking={talking} />;
+    return <AnimatedDreamy key={dreamyReaction(pose)} pose={pose} size={size} talking={talking} reward={reward} />;
   }
   return (
     <span key={pose} className="glossary-dreamy-face glossary-dreamy-actor" data-pose={pose} style={{ width: size, height: size }} aria-hidden>
@@ -958,7 +965,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: 
               {assets[term.id] ? (
                 <Image src={assets[term.id]} alt="" width={168} height={168} className="glossary-unlock-relic-art" unoptimized />
               ) : (
-                <TermIcon icon={term.icon} className="glossary-unlock-relic-fallback" />
+                <span className="glossary-unlock-relic-fallback glossary-unlock-relic-initial" aria-hidden>{term.term.charAt(0)}</span>
               )}
               <figcaption>{term.term}</figcaption>
             </motion.figure>
@@ -2735,7 +2742,16 @@ function CompleteScreen({
   const dreamScore = useDreamScore();
   const masteryPct = Math.round((masteredCount / lesson.terms.length) * 100);
   const { theme } = useGlobalTheme();
+  const atmosphere = useAtmosphere();
+  const reduced = useReducedMotion();
   const { playSweep } = useMaterialSounds();
+  // The finish line as a payoff, not a results form (15 Oct 2026, Chandu:
+  // "these type of screens can be so much better and feel more celebratory
+  // like we did for career simulations"): the simulations' ticker-tape storm
+  // (Drift) or a pixel coin rain (Signal) over the whole room, Dreamy big
+  // with the reward pluses, and the rest arriving in order: kicker, title,
+  // the value counting up, the three tiles, then the buttons.
+  const rise = (delay: number) => reduced ? {} : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { delay, duration: 0.55, ease: [0.2, 0.8, 0.3, 1] as [number, number, number, number] } };
   // The lesson's finish line had a burst and a party Dreamy but no sound at all.
   // playSweep is this area's own "level-up" sound (Power Play solved uses it), so
   // completing the whole lesson gets at least that.
@@ -2744,11 +2760,13 @@ function CompleteScreen({
   }, [playSweep]);
   return (
     <div className="glossary-screen glossary-complete-screen relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center">
+      {atmosphere === "v2" ? <SignalCoinRain /> : <TickerTapeStorm world="Business & Finance" accent="#fbbf24" />}
       <LocalBurst nonce={1} />
-      <DreamyFace pose="party" size={120} />
-      <h2 className="glossary-complete-title text-[28px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+      <DreamyFace pose="mastery" size={150} reward />
+      <motion.p className="glossary-complete-kicker" {...rise(0.15)}>Level {String(lesson.lessonNumber).padStart(2, "0")} · {lesson.title}</motion.p>
+      <motion.h2 className="glossary-complete-title text-[28px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }} {...rise(0.3)}>
         Lesson Complete!
-      </h2>
+      </motion.h2>
 
       {/* The milestone this level unlocks: Dream Sneakers' value counts up
          from where it stood (the Replit's "$50,000 company value unlocked"). */}
@@ -2756,13 +2774,13 @@ function CompleteScreen({
 
       {/* Score, XP and mastery as one row of three equal tiles, not a card
          plus two rows: the value ticker above is now the screen's hero. */}
-      <div className="glossary-complete-stats" role="list">
+      <motion.div className="glossary-complete-stats" role="list" {...rise(1.1)}>
         <span role="listitem"><small><Sparkles aria-hidden /> Dream Score</small><b>{dreamScore.toLocaleString()}</b></span>
         <span role="listitem"><small>XP earned</small><b>+{lesson.xpReward}</b></span>
         <span role="listitem"><small>Mastered</small><b>{masteryPct}%</b></span>
-      </div>
+      </motion.div>
 
-      <div className="glossary-complete-actions">
+      <motion.div className="glossary-complete-actions" {...rise(1.5)}>
         <button
           type="button"
           onClick={nextLesson && onNextLesson ? onNextLesson : onContinue}
@@ -2777,8 +2795,24 @@ function CompleteScreen({
             {onLevels ? <button type="button" className="dm-quiet" onClick={onLevels}><MapIcon aria-hidden /> All levels</button> : null}
           </div>
         ) : null}
-      </div>
+      </motion.div>
     </div>
+  );
+}
+
+/** Signal's finish-line weather: pixel coins raining through the whole room
+ *  once, the same coin as the right-answer fountain. */
+function SignalCoinRain() {
+  const reduced = useReducedMotion();
+  if (reduced || typeof document === "undefined") return null;
+  // Portalled to the body: inside the screen it would sit in FitToScreen's
+  // transformed box (fixed resolves against it) and Signal paints every
+  // child div of the results screen as a panel.
+  return createPortal(
+    <div className="glossary-signal-coinrain" aria-hidden>
+      {Array.from({ length: 34 }, (_, i) => <i key={i} style={{ "--x": `${(i * 37 + 11) % 100}%`, "--delay": `${(i % 9) * 0.28}s`, "--dur": `${2.4 + (i % 5) * 0.35}s`, "--size": `${10 + (i % 3) * 4}px` } as React.CSSProperties} />)}
+    </div>,
+    document.body,
   );
 }
 
@@ -3463,8 +3497,11 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   const accent = variant === "lab" && globalTheme === "light" ? (LIGHT_WORLD_FILL[career.world] ?? worldAccent) : worldAccent;
   const artAtmosphere = variant === "lab" ? atmosphere : "v1";
   const legacyArt = lessonHasLegacyArt(lesson);
-  const termArt = legacyArt ? assetsFor(artAtmosphere, "small") : glossaryTermAssets(career.careerSlug, artAtmosphere, "small");
-  const largeTermArt = legacyArt ? assetsFor(artAtmosphere) : glossaryTermAssets(career.careerSlug, artAtmosphere);
+  // Levels 2+ carry no term graphics at all (15 Oct 2026): the HUD reads
+  // these maps directly, so they are emptied here as well as in the context.
+  const noTermArt = lesson.lessonNumber > 1;
+  const termArt = noTermArt ? NO_TERM_ART.small : legacyArt ? assetsFor(artAtmosphere, "small") : glossaryTermAssets(career.careerSlug, artAtmosphere, "small");
+  const largeTermArt = noTermArt ? NO_TERM_ART.large : legacyArt ? assetsFor(artAtmosphere) : glossaryTermAssets(career.careerSlug, artAtmosphere);
 
   // The HUD stays a strip under the bar (Chandu, 6 Oct 2026, after a
   // one-row try: "the milestone circles can be under the progress bar ...
@@ -3490,7 +3527,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
                   <span key={t.id} className={`glossary-mastery-token ${done ? "is-mastered" : ""}`} role="img" aria-label={`${t.term}: ${progress} of ${MASTERY_TARGET} mastery checks`}>
                     <span className="glossary-mastery-token-ring" style={{ background: `conic-gradient(var(--glossary-accent) ${progress / MASTERY_TARGET * 100}%, var(--glass-surface-2) 0)` }}>
                       <span className="glossary-mastery-token-core">
-                        {termArt[t.id] ? <Image src={termArt[t.id]} alt="" width={42} height={42} className="glossary-mastery-token-art" unoptimized /> : <TermIcon icon={t.icon} className="glossary-mastery-token-fallback" />}
+                        {termArt[t.id] ? <Image src={termArt[t.id]} alt="" width={42} height={42} className="glossary-mastery-token-art" unoptimized /> : <b className="glossary-mastery-token-initial" aria-hidden>{t.term.charAt(0)}</b>}
                       </span>
                     </span>
                     <span className="glossary-mastery-token-label" aria-hidden>{t.term}</span>
@@ -3521,7 +3558,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   useQuestionSceneryFit(shellRef, activeLayout, atmosphere, variant === "lab" && questionFrame, `${current?.id ?? ""}-${pendingResult ? (pendingResult.correct ? 1 : 2) : 0}`);
   return (
     <AtmosphereContext.Provider value={variant === "lab" ? atmosphere : "v1"}>
-    <LessonArtContext.Provider value={{ legacy: legacyArt, large: largeTermArt, small: termArt }}>
+    <LessonArtContext.Provider value={noTermArt ? NO_TERM_ART : { legacy: legacyArt, large: largeTermArt, small: termArt }}>
     <QuestionLayoutContext.Provider value={activeLayout}>
     <div
       ref={shellRef}

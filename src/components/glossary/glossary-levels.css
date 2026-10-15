@@ -426,3 +426,20 @@
    the card (15 Oct 2026, Chandu: "Make sure dreamy always faces the
    prominent content"). The sprites face right; mirror them here. */
 .glossary-game-lab .glossary-concept-dreamy :is(.glossary-dreamy-face, .glossary-signal-cloud) { transform: scaleX(-1); }
+
+/* Results screen as a payoff (15 Oct 2026). */
+.glossary-game-lab .glossary-complete-kicker { margin: 0; color: var(--glossary-accent); font: 800 12px / 1 var(--font-display); letter-spacing: .16em; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-kicker { font-family: var(--sig-mono) !important; color: var(--sig-gold); }
+.glossary-game-lab .glossary-complete-screen > .glossary-dreamy-face { animation: glossary-complete-hero-pop .8s cubic-bezier(.18, 1.2, .3, 1) both; }
+@keyframes glossary-complete-hero-pop { from { opacity: 0; transform: scale(.4) translateY(30px); } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
+.glossary-game-lab .glossary-complete-screen > .glossary-dreamy-face .glossary-dreamy-pluses i { animation-duration: 1.6s; animation-delay: calc(.35s + var(--delay, 0s)); }
+.glossary-signal-coinrain { pointer-events: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; z-index: 6; overflow: hidden; display: block; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; }
+.glossary-signal-coinrain i { position: absolute; left: var(--x); top: -24px; width: var(--size, 12px); height: var(--size, 12px); background: var(--sig-gold, #f5c542); box-shadow: inset -3px -3px 0 #d97706, inset 3px 3px 0 #fde68a; animation: glossary-coin-fall var(--dur, 2.6s) steps(14, end) var(--delay, 0s) both; }
+@keyframes glossary-coin-fall { 0% { transform: translateY(0) rotate(0); opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(110vh) rotate(180deg); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .glossary-game-lab .glossary-complete-screen > .glossary-dreamy-face { animation: none; } }
+
+/* Levels 2+ have no term graphics (15 Oct 2026): the relic and the HUD token
+   carry the term's initial as their mark instead of an icon. */
+.glossary-game-lab .glossary-unlock-relic-initial { display: grid; place-items: center; width: 100%; height: 100%; font: 800 clamp(40px, 7vh, 64px) / 1 var(--font-display); color: var(--glossary-accent); }
+.glossary-game-lab .glossary-mastery-token-initial { display: grid; place-items: center; width: 100%; height: 100%; font: 800 16px / 1 var(--font-display); color: var(--foreground); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-unlock-relic-initial, .glossary-mastery-token-initial) { font-family: var(--sig-font) !important; }
