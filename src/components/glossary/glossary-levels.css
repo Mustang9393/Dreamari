@@ -422,10 +422,11 @@
 .glossary-game-lab .glossary-flashcard-front.glossary-words-face > span:last-child { position: absolute; left: 0; right: 0; bottom: 20px; width: auto !important; justify-content: center !important; justify-self: auto !important; text-align: center; grid-row: auto !important; grid-column: auto !important; }
 /* A words card is shorter than a picture card: no art to make room for. */
 .glossary-game-shell.glossary-game-lab .glossary-flashbook-shell:has(.glossary-words-face) > div > button { height: clamp(250px, calc(38dvh / var(--vz, 1)), 330px) !important; }
-/* Dreamy leans over the card's top-right corner, so he must face left, into
-   the card (15 Oct 2026, Chandu: "Make sure dreamy always faces the
-   prominent content"). The sprites face right; mirror them here. */
-.glossary-game-lab .glossary-concept-dreamy :is(.glossary-dreamy-face, .glossary-signal-cloud) { transform: scaleX(-1); }
+/* Dreamy always faces the content (15 Oct 2026, Chandu: "please mirror or
+   flip dreamy to always FACE the content/questions"). The sprites look
+   LEFT as drawn, so over the card's top-right corner they already look into
+   the card; beside a bubble, on the left, the stage is mirrored (see
+   glossary-lab.css). */
 
 /* Results screen as a payoff (15 Oct 2026). */
 .glossary-game-lab .glossary-complete-kicker { margin: 0; color: var(--glossary-accent); font: 800 12px / 1 var(--font-display); letter-spacing: .16em; text-transform: uppercase; }
