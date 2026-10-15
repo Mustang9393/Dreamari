@@ -24,14 +24,6 @@ export type GlossaryTerm = {
    *  no honest literal image (13 Oct 2026, Joshua: "some finance terms do
    *  not translate well into a literal graphic"). Shown on the teach card. */
   formula?: string;
-  /** No picture on the teach card: Dreamy and the worked line carry it
-   *  (15 Oct 2026, Joshua: "we do not need a custom image for every
-   *  vocabulary term. Some terms are too abstract, and forcing a visual can
-   *  actually make the concept harder to understand... For terms like
-   *  Margin, Cash Flow, Risk, etc., let the interaction and Dreamy carry
-   *  the visual experience"). The term's small token (HUD, match cards,
-   *  the unlock relics) is unchanged: that is a collectible, not a lesson. */
-  abstract?: true;
 };
 
 /** A small Dream Sneakers diagram above a question: the money drawn, not a

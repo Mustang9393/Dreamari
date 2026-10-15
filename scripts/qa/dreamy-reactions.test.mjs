@@ -41,6 +41,5 @@ const component=await readFile('src/components/glossary/GlossaryLabGameExperienc
 const feedback=component.slice(component.indexOf('function FeedbackPanel('),component.indexOf('function FeedbackPanel(')+6000);
 assert.ok(feedback.includes('useTypewriter(text)'));
 assert.ok(feedback.includes('glossary-signal-coins'));
-assert.ok(feedback.includes('pose={correct ? "correct" : "hint"}'),'the feedback card celebrates a right answer and hints on a wrong one; the question-side Dreamy never shares its pose');
-assert.ok(feedback.includes('talking={!done}'));
+assert.ok(!feedback.includes('<DreamyFace'),'the feedback card has no Dreamy of its own: one Dreamy per screen (Joshua, 15 Oct 2026)');
 console.log('Passed: 12 Drift poses, activity mapping, selective Signal routing, 8 lossless exports, stable silhouettes, asset budget and existing success dialogue contracts.');

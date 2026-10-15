@@ -1,3 +1,11 @@
+## 2026-10-15 (later): Glossary Games: one Dreamy per screen; Levels 2 to 4 teach cards are words only
+
+**Why:** Chandu, after seeing d49f5ff2: "NO icons at all. We need to redesign the flash cards for levels 2-4 to have no images." And Joshua's note, pasted by Chandu: "having Dreamy next to the question and then again in the feedback box feels redundant. We should generally have one Dreamy visible at a time on each unique screen... If Pikachu were standing next to Ash, you would not also show another Pikachu somewhere else on the same scene... the existing Dreamy can react, animate, or shift position."
+
+- **One Dreamy per screen.** The feedback card has no Dreamy any more; the question-side Dreamy reacts instead (`correct` / `retry`, back to Codex's original pose line). This supersedes the earlier same-screen fix (two different poses) from d49f5ff2. The unlock-complete gallery Dreamy and the streak banner's Dreamy are gone for the same rule. `dreamy-reactions.test.mjs` now asserts the feedback card renders no `DreamyFace`.
+- **Words-only teach cards, Levels 2+.** `SketchFace` has a `words` mode: no picture, no icon medallion, one centred column (term, definition at 17 to 21px, the worked line in its strip, "Tap for an example"). `UnlockScreen` uses it for `lessonNumber > 1` in the lab. Level 1 keeps its five pictures. The per-term `abstract` flag from d49f5ff2 is removed; the rule is by level. The small tokens (HUD, relics, match cards, sort buckets) keep their art.
+- **Checked:** tsc, the mapping test; Drift and Signal Level 3 cards (Revenue, Margin), Drift Q1 wrong/right with the single Dreamy. Not checked: phone widths, light mode, the inline feedback card at the 640px breakpoint where `.glossary-feedback-dreamy` had its own absolute slot (now empty rules).
+
 ## 2026-10-15: Glossary Games: Dreamy never doubles up, Signal's reviewed reactions, one-paragraph Power Play on every level, abstract terms without forced art
 
 Took over from Codex (its Drift pack was pushed at f31dc6ab; its Signal pack and `signalReactions.ts` were still uncommitted in `/Users/chandump/dreamari-glossary-oct08`, the checkout behind :4178). Branch cut from origin/main in `.worktrees/glossary-tiles` (:3012).

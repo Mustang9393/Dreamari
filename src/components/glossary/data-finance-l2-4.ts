@@ -28,10 +28,10 @@ import type { GlossaryLesson, GlossaryQuestion, GlossaryTerm } from "./data";
 
 const L02_TERMS: GlossaryTerm[] = [
   { id: "Investor", order: 1, term: "Investor", definition: "A person or group that puts money into a business.", example: "Maya puts $25,000 into Dream Sneakers. She is an investor.", icon: "hand-coins" },
-  { id: "Capital", abstract: true, order: 2, term: "Capital", definition: "Money a business uses to grow.", example: "Maya's $25,000 becomes capital to open Store #2.", icon: "piggy-bank" },
-  { id: "Risk", abstract: true, order: 3, term: "Risk", definition: "The chance of losing money.", example: "If Store #2 fails, Maya could lose some of her money.", icon: "alert" },
-  { id: "Return", abstract: true, order: 4, term: "Return", definition: "What an investor gains.", example: "Maya's $25,000 grows to $30,000. Her return is $5,000.", icon: "trending-up", formula: "$30,000 − $25,000 = $5,000" },
-  { id: "Ownership", abstract: true, order: 5, term: "Ownership", definition: "The part of a company you own.", example: "Maya gets 2 of 10 shares, so she owns 20% of Dream Sneakers.", icon: "pie-chart", formula: "2 of 10 shares = 20%" },
+  { id: "Capital", order: 2, term: "Capital", definition: "Money a business uses to grow.", example: "Maya's $25,000 becomes capital to open Store #2.", icon: "piggy-bank" },
+  { id: "Risk", order: 3, term: "Risk", definition: "The chance of losing money.", example: "If Store #2 fails, Maya could lose some of her money.", icon: "alert" },
+  { id: "Return", order: 4, term: "Return", definition: "What an investor gains.", example: "Maya's $25,000 grows to $30,000. Her return is $5,000.", icon: "trending-up", formula: "$30,000 − $25,000 = $5,000" },
+  { id: "Ownership", order: 5, term: "Ownership", definition: "The part of a company you own.", example: "Maya gets 2 of 10 shares, so she owns 20% of Dream Sneakers.", icon: "pie-chart", formula: "2 of 10 shares = 20%" },
 ];
 
 const L02_QUESTIONS: GlossaryQuestion[] = [
@@ -176,9 +176,9 @@ export const FIN_LESSON_2: GlossaryLesson = {
 const L03_TERMS: GlossaryTerm[] = [
   { id: "Revenue", order: 1, term: "Revenue", definition: "All the money a business earns from sales.", example: "Dream Sneakers earns revenue every time someone buys sneakers.", icon: "banknote", formula: "500 pairs × $200 = $100,000" },
   { id: "Cost", order: 2, term: "Cost", definition: "Money a business spends.", example: "Materials, rent and wages are costs for Dream Sneakers.", icon: "receipt" },
-  { id: "Cash Flow", abstract: true, order: 3, term: "Cash Flow", definition: "Money moving in and out of a business.", example: "Sneaker sales bring money in. Rent and wages send money out.", icon: "arrow-left-right" },
-  { id: "Margin", abstract: true, order: 4, term: "Margin", definition: "How much of each sale is kept after costs.", example: "If Dream Sneakers keeps $40 of a $100 sale, its margin is 40%.", icon: "percent", formula: "$40 kept of $100 = 40%" },
-  { id: "Loss", abstract: true, order: 5, term: "Loss", definition: "When a business spends more than it earns.", example: "Dream Sneakers has a loss when its costs are bigger than its sales.", icon: "trending-down", formula: "$30,000 in, $40,000 out = $10,000 loss" },
+  { id: "Cash Flow", order: 3, term: "Cash Flow", definition: "Money moving in and out of a business.", example: "Sneaker sales bring money in. Rent and wages send money out.", icon: "arrow-left-right" },
+  { id: "Margin", order: 4, term: "Margin", definition: "How much of each sale is kept after costs.", example: "If Dream Sneakers keeps $40 of a $100 sale, its margin is 40%.", icon: "percent", formula: "$40 kept of $100 = 40%" },
+  { id: "Loss", order: 5, term: "Loss", definition: "When a business spends more than it earns.", example: "Dream Sneakers has a loss when its costs are bigger than its sales.", icon: "trending-down", formula: "$30,000 in, $40,000 out = $10,000 loss" },
 ];
 
 const L03_QUESTIONS: GlossaryQuestion[] = [
@@ -333,7 +333,7 @@ const L04_TERMS: GlossaryTerm[] = [
   { id: "Bond", order: 2, term: "Bond", definition: "Money borrowed from investors.", example: "Dream Sneakers can sell a bond to borrow money for a new factory.", icon: "scroll" },
   { id: "Shareholder", order: 3, term: "Shareholder", definition: "A person who owns stock.", example: "Anyone who owns Dream Sneakers stock is a shareholder.", icon: "users" },
   { id: "Lender", order: 4, term: "Lender", definition: "A person or group that lends money.", example: "A bank that loans money to Dream Sneakers is a lender.", icon: "landmark" },
-  { id: "Interest", abstract: true, order: 5, term: "Interest", definition: "Extra money paid for borrowing money.", example: "Dream Sneakers pays interest on the money it borrows from lenders.", icon: "coins", formula: "10% of $1,000 = $100" },
+  { id: "Interest", order: 5, term: "Interest", definition: "Extra money paid for borrowing money.", example: "Dream Sneakers pays interest on the money it borrows from lenders.", icon: "coins", formula: "10% of $1,000 = $100" },
 ];
 
 const L04_QUESTIONS: GlossaryQuestion[] = [

@@ -407,3 +407,12 @@
   .glossary-game-lab .glossary-valuation-track > i,
   .glossary-game-lab .glossary-concept-dreamy { transition: none !important; animation: none !important; }
 }
+
+/* Words-only teach card (Levels 2+, 15 Oct 2026): one centred column, the
+   definition as the body copy, the worked line in its strip underneath,
+   and nothing where a picture or glyph would be. */
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face { grid-template-columns: 1fr !important; grid-template-rows: auto auto auto 1fr !important; justify-items: center; align-content: start; row-gap: 14px !important; padding: 34px 36px 24px !important; text-align: center; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-title { grid-column: 1 !important; grid-row: 1 !important; justify-self: center !important; align-items: center; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-definition { grid-column: 1 !important; grid-row: 2 !important; justify-self: center !important; max-width: 380px; font-size: clamp(17px, calc(2.8dvh / var(--vz, 1)), 21px) !important; line-height: 1.45 !important; font-weight: 600; text-align: center !important; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-words-formula { grid-column: 1 !important; grid-row: 3 !important; justify-self: center; margin-top: 4px; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > span:last-child { grid-column: 1 !important; grid-row: 4 !important; align-self: end !important; justify-self: center !important; }

@@ -647,10 +647,10 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
  *  filter, so the clean vector strokes read as pencil on paper. Ruled
  *  lines and a hand-placed tilt finish the sketchbook feel without a
  *  single new image asset. */
-function SketchFace({ term, definition, icon, artSrc, style, concept = false, formula }: { term: string; definition?: string; icon: string; artSrc?: string; style?: React.CSSProperties; /** a lab card for a term with no art */ concept?: boolean; formula?: string }) {
+function SketchFace({ term, definition, icon, artSrc, style, concept = false, formula, words = false }: { term: string; definition?: string; icon: string; artSrc?: string; style?: React.CSSProperties; /** a lab card for a term with no art */ concept?: boolean; formula?: string; /** Levels 2+: words only, no picture and no icon (Chandu, 15 Oct 2026: "NO icons at all") */ words?: boolean }) {
   return (
     <span
-      className={`glossary-flashcard-front absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,calc(2dvh/var(--vz,1)),18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden] ${artSrc || concept ? "glossary-lab-card-face" : ""} ${concept ? "glossary-concept-face" : ""}`}
+      className={`glossary-flashcard-front absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,calc(2dvh/var(--vz,1)),18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden] ${artSrc || concept || words ? "glossary-lab-card-face" : ""} ${concept ? "glossary-concept-face" : ""} ${words ? "glossary-words-face" : ""}`}
       style={{
         background:
           "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--glossary-accent) 4%, var(--card))",
@@ -667,7 +667,7 @@ function SketchFace({ term, definition, icon, artSrc, style, concept = false, fo
           <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" />
         </filter>
       </svg>
-      {concept ? (
+      {words ? null : concept ? (
         // A concept card (13 Oct 2026): a term with no honest picture gets
         // its glyph and, where it has one, the worked line that shows it
         // ("$30,000 − $25,000 = $5,000") in the art's slot. Same card, same
@@ -690,22 +690,25 @@ function SketchFace({ term, definition, icon, artSrc, style, concept = false, fo
         </svg>
       </span>}
       <span className="glossary-flashcard-title flex flex-col items-center gap-[3px]">
-        <span className="text-[clamp(26px,calc(5.8dvh/var(--vz,1)),34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc || concept ? undefined : "url(#glossary-sketch)" }}>
+        <span className="text-[clamp(26px,calc(5.8dvh/var(--vz,1)),34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc || concept || words ? undefined : "url(#glossary-sketch)" }}>
           {term}
         </span>
         {/* The hand-drawn underline squiggle. */}
-        <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[110px]" style={{ color: "var(--glossary-accent)", filter: concept ? undefined : "url(#glossary-sketch)" }}>
+        <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[110px]" style={{ color: "var(--glossary-accent)", filter: concept || words ? undefined : "url(#glossary-sketch)" }}>
           <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
         </svg>
       </span>
-      {(artSrc || concept) && definition ? (
+      {(artSrc || concept || words) && definition ? (
         <span className="glossary-flashcard-definition block max-w-[340px] px-4 text-center text-[clamp(13px,calc(2.2dvh/var(--vz,1)),15px)] leading-[1.4] font-semibold" style={{ color: "var(--foreground)" }}>
           {definition}
         </span>
       ) : null}
+      {/* Words card: the worked line sits under the definition, in the
+         maths' own strip, where the picture used to be. */}
+      {words && formula ? <span className="glossary-concept-formula glossary-words-formula">{formula}</span> : null}
       <span className="flex items-center gap-[6px] text-[12px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>
         <RotateCw className="h-[12px] w-[12px] motion-safe:animate-[play-nudge_1.4s_ease-in-out_infinite]" aria-hidden />
-        {artSrc || concept ? "Tap for an example" : "Tap to flip"}
+        {artSrc || concept || words ? "Tap for an example" : "Tap to flip"}
       </span>
     </span>
   );
@@ -729,21 +732,25 @@ function UnlockScreen({
   const term = lesson.terms[index];
   const { playCorrect } = useMaterialSounds();
   const assets = useTermAssets();
-  // An abstract term's teach card shows no picture (Joshua, 15 Oct 2026):
-  // Dreamy leans in and the worked line carries it. The art stays on the
-  // small tokens (HUD, relics, match cards), where it is a collectible.
-  const cardArt = (t: GlossaryLesson["terms"][number]) => (t.abstract ? undefined : assets[t.id]);
-  const termArt = cardArt(term);
+  // Levels 2+ teach with words only: no picture, no icon (Chandu, 15 Oct
+  // 2026: "NO icons at all. We need to redesign the flash cards for levels
+  // 2-4 to have no images", after Joshua: "we do not need a custom image for
+  // every vocabulary term... let the interaction and Dreamy carry the visual
+  // experience"). Dreamy leans in and the worked line carries the maths.
+  // Level 1 keeps its five pictures. The small tokens (HUD, relics, match
+  // cards) keep their art everywhere: those are collectibles, not lessons.
+  const wordsOnly = variant === "lab" && lesson.lessonNumber > 1;
+  const termArt = wordsOnly ? undefined : assets[term.id];
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
   useEffect(() => {
     const next = lesson.terms[index + 1];
-    const nextArt = next && !next.abstract ? assets[next.id] : undefined;
+    const nextArt = next && !wordsOnly ? assets[next.id] : undefined;
     if (variant !== "lab" || !nextArt) return;
     const image = new window.Image();
     image.decoding = "async";
     image.src = nextArt;
-  }, [assets, index, lesson.terms, variant]);
+  }, [assets, index, lesson.terms, variant, wordsOnly]);
   // The flipbook: each term's page starts on its sketch face and flips in
   // real 3D to the written side. Reset per term (a new page starts art-up).
   const [flipped, setFlipped] = useState(false);
@@ -825,7 +832,7 @@ function UnlockScreen({
                  so its backface-visibility participates in the button's own
                  3D context rather than being flattened by a wrapper. */}
               {(variant === "default" || !flipped) ? (
-                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? termArt : undefined} concept={variant === "lab" && (!termArt || !!term.formula)} formula={term.formula} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
+                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? termArt : undefined} words={wordsOnly} concept={variant === "lab" && (!termArt || !!term.formula)} formula={term.formula} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
               ) : null}
 
               {/* BACK: the written page, ring-bound edge and all. */}
@@ -933,10 +940,8 @@ function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: 
         </div>
         <div className="glossary-unlock-gallery" aria-label={`${lesson.terms.length} unlocked terms`}>
           <span className="glossary-unlock-gallery-aura" aria-hidden />
-          {/* "correct", not a second "mastery": in Signal this one sits among the
-             relics while the copy block's Dreamy is also on screen (15 Oct 2026,
-             the same-asset-twice rule). Drift hides this one. */}
-          <span className="glossary-unlock-gallery-dreamy" aria-hidden><DreamyFace pose="correct" size={224} /></span>
+          {/* No second Dreamy among the relics: the copy block's is the one
+             (15 Oct 2026, Joshua: one Dreamy per screen). */}
           {lesson.terms.map((term, index) => (
             <motion.figure
               key={term.id}
@@ -2062,15 +2067,15 @@ function QuestionScreen({
   ) : null;
   // Dreamy reacts (13 Oct 2026, Joshua: "bring Dreamy in more frequently
   // with different expressions/reactions"): he asks curious, reads numbers
-  // through his glasses, poses a case with an idea and looks reassuring at
-  // a wrong one. Same size, same slot. A graded RIGHT answer is NOT shown
-  // here: the feedback card's own Dreamy carries "correct", so this one
-  // keeps the activity's pose (15 Oct 2026, Chandu: "the pose of dreamy
-  // near the question and the reaction/explanation dialogue box is the
-  // same. This shouldn't happen"). A cleared case step and a matched pair
-  // still smile here, since no card opens for those.
+  // through his glasses, poses a case with an idea, smiles at a right answer
+  // and looks reassuring at a wrong one. Same size, same slot. He is the
+  // ONLY Dreamy on the screen: the feedback card has none (15 Oct 2026,
+  // Joshua: "having Dreamy next to the question and then again in the
+  // feedback box feels redundant. We should generally have one Dreamy
+  // visible at a time on each unique screen... the existing Dreamy can
+  // react, animate, or shift position").
   const restingPose = questionReaction(question, !!currentStep && "answer" in currentStep);
-  const pose = stepCleared ? "correct" : answerState === "wrong" ? "retry" : boardReaction ?? restingPose;
+  const pose = answerState === "correct" || stepCleared ? "correct" : answerState === "wrong" ? "retry" : boardReaction ?? restingPose;
   const dreamy = <span className="glossary-question-dreamy"><DreamyFace pose={pose} size={84} /></span>;
   const sentence = question.kind === "choice" && question.sentence
     ? <SentenceCard sentence={question.sentence} filled={picked !== null ? shuffledOptions[picked].o : null} state={picked === null ? "idle" : pickedCorrect ? "correct" : "wrong"} />
@@ -2233,14 +2238,11 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
           </span>
         )}
         <div className="glossary-feedback-layout">
-          {/* This Dreamy and the question-side one never share a pose (15 Oct
-              2026, Chandu: "the pose of dreamy near the question and the
-              reaction/explanation dialogue box is the same. This shouldn't
-              happen"). Right: he celebrates here while the question-side one
-              keeps the activity's pose. Wrong: the question-side one
-              reassures (retry) while this one gives the hint the student
-              needs to change their answer. */}
-          <span className="glossary-feedback-dreamy"><DreamyFace pose={correct ? "correct" : "hint"} size={76} talking={!done} /></span>
+          {/* No Dreamy here: the one beside the question reacts instead
+              (15 Oct 2026, Joshua: one Dreamy per screen, "If Pikachu were
+              standing next to Ash, you would not also show another Pikachu
+              somewhere else on the same scene"). Chandu had first flagged
+              the two slots showing the same pose. */}
           <div className="glossary-feedback-copy">
             <span className="glossary-feedback-title flex items-center gap-[8px] text-[19px] font-extrabold" style={{ color: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
               <span className="flex size-6 flex-none items-center justify-center rounded-full" style={{ background: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
@@ -2372,7 +2374,8 @@ function StreakBanner({ streak, onDismiss }: { streak: number; onDismiss: () => 
   return (
     <div className="glossary-streak-banner" role="status" aria-live="polite">
       <LocalBurst nonce={1} />
-      <DreamyFace pose="party" size={62} />
+      {/* No Dreamy in the banner: the question's own Dreamy is on screen
+         under it (15 Oct 2026, Joshua: one Dreamy per screen). */}
       <span><Flame className="h-5 w-5" fill="currentColor" aria-hidden /> {streak} in a row!</span>
     </div>
   );
