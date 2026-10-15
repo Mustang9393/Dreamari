@@ -24,6 +24,14 @@ export type GlossaryTerm = {
    *  no honest literal image (13 Oct 2026, Joshua: "some finance terms do
    *  not translate well into a literal graphic"). Shown on the teach card. */
   formula?: string;
+  /** No picture on the teach card: Dreamy and the worked line carry it
+   *  (15 Oct 2026, Joshua: "we do not need a custom image for every
+   *  vocabulary term. Some terms are too abstract, and forcing a visual can
+   *  actually make the concept harder to understand... For terms like
+   *  Margin, Cash Flow, Risk, etc., let the interaction and Dreamy carry
+   *  the visual experience"). The term's small token (HUD, match cards,
+   *  the unlock relics) is unchanged: that is a collectible, not a lesson. */
+  abstract?: true;
 };
 
 /** A small Dream Sneakers diagram above a question: the money drawn, not a
@@ -137,26 +145,24 @@ export type GlossaryQuestion = ChoiceQuestion | TypeTermQuestion | MatchUpQuesti
 
 /** The lesson's finale. The fill-in paragraph is Level 1's (kind omitted);
  *  Levels 3 and 4 run a case, or a choice of path and then a case. */
-export type PowerPlay =
-  | {
-      kind?: "paragraph";
-      /** {1} {2} ... mark the gaps. */
-      paragraph: string;
-      answers: string[];
-      /** The line on the intro screen and Dreamy's instruction. */
-      intro?: string;
-    }
-  | { kind: "chain"; intro: string; scene: SceneCard; steps: ChainStep[] }
-  | {
-      kind: "path";
-      intro: string;
-      scene: SceneCard;
-      prompt: string;
-      paths: Array<{ id: string; label: string; points: string[]; steps: ChainStep[] }>;
-    };
+/** One Power Play is one final activity: one paragraph that uses all five
+ *  of the lesson's terms, filled in together (Joshua, 15 Oct 2026: "1 Power
+ *  Play = 1 final activity. All 5 lesson terms should be used together in
+ *  one paragraph/scenario. Do not break the Power Play into Step 1 of 5,
+ *  Step 2 of 5... This should be consistent across every level going
+ *  forward."). The stepped case and funding-path finales Levels 3 and 4
+ *  shipped with on 13 Oct were cut for that rule; the type only allows the
+ *  paragraph now so a new level cannot bring the steps back. */
+export type PowerPlay = {
+  kind?: "paragraph";
+  /** {1} {2} ... mark the gaps. */
+  paragraph: string;
+  answers: string[];
+  /** The line on the intro screen and the kicker over the activity. */
+  intro?: string;
+};
 
-/** Level 1's fill-in Power Play. */
-export type ParagraphPowerPlay = Extract<PowerPlay, { paragraph: string }>;
+export type ParagraphPowerPlay = PowerPlay;
 
 export type GlossaryLesson = {
   id: string;

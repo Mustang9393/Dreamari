@@ -31,6 +31,7 @@ import type { ChainStep, GlossaryCareer, GlossaryLesson, GlossaryQuestion, Parag
 import { SparkBar } from "@/components/flow/SparkBar";
 import { glossaryTermAssets } from "./termArt";
 import { dreamyReaction, dreamyReactionAsset, questionReaction, type DreamyPose } from "./dreamyReactions";
+import { signalReaction, signalReactionAsset, type SignalReaction } from "./signalReactions";
 import "./dreamy-reactions.css";
 
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
@@ -270,7 +271,7 @@ function termAssetFor(label: string, assets: Record<string, string> = TERM_ASSET
 
 /** Complete faces share one optical frame. Facial frames are in a single
  * atlas, so blinking/talking never swaps image URLs or changes layout. */
-function AnimatedDreamy({ pose, size, talking }: { pose: DreamyPose; size: number; talking?: boolean }) {
+function AnimatedDreamy({ pose, size, talking, signal }: { pose: DreamyPose; size: number; talking?: boolean; /** Signal's reviewed pixel reactions (four poses); without it, Drift's atlas */ signal?: SignalReaction }) {
   const reduced = useReducedMotion();
   const reaction = dreamyReaction(pose);
   const [autoTalking, setAutoTalking] = useState(true);
@@ -281,14 +282,14 @@ function AnimatedDreamy({ pose, size, talking }: { pose: DreamyPose; size: numbe
   const speaking = !reduced && (talking ?? autoTalking);
   return (
     <span
-      className="glossary-dreamy-face glossary-dreamy-actor glossary-reaction"
+      className={signal ? "glossary-signal-cloud glossary-reaction" : "glossary-dreamy-face glossary-dreamy-actor glossary-reaction"}
       data-pose={reaction}
       data-speaking={speaking}
-      data-medium="drift"
-      style={{ width: size, height: size }}
+      data-medium={signal ? "signal" : "drift"}
+      style={{ width: size, height: signal ? size * (2 / 3) : size }}
       aria-hidden
     >
-      <span className="glossary-reaction-canvas" style={{ backgroundImage: `url("${dreamyReactionAsset(pose, !reduced)}")` }} data-still={!!reduced} />
+      <span className="glossary-reaction-canvas" style={{ backgroundImage: `url("${signal ? signalReactionAsset(signal, !reduced) : dreamyReactionAsset(pose, !reduced)}")` }} data-still={!!reduced} />
     </span>
   );
 }
@@ -334,8 +335,13 @@ function SignalCloud({ pose, size, talking }: { pose: string; size: number; /** 
 function DreamyFace({ pose, size = 96, talking }: { pose: DreamyPose; size?: number; talking?: boolean }) {
   const atmosphere = useAtmosphere();
   if (atmosphere === "v2") {
-    // Chandu held the new Signal sprites after review. Keep the canonical
-    // live pixel rig and animated speaking WebP, not the candidate atlas.
+    // Signal mixes Codex's four reviewed pixel reactions (curious, calculate,
+    // reassure, celebrate: activities, gentle correction, milestones) with
+    // the canonical live rig, which keeps welcoming, teaching and the
+    // right-answer dialogue (15 Oct 2026, Chandu: "use a mix of existing
+    // assets and its fresh assets").
+    const signal = signalReaction(pose);
+    if (signal) return <AnimatedDreamy key={`signal-${signal}`} pose={pose} size={size * 1.6} talking={talking} signal={signal} />;
     const legacyPose = ({ welcome: "happy", explain: "idea", choose: "curious", match: "curious", sort: "curious", calculate: "glasses", recall: "curious", case: "idea", hint: "idea", correct: "happy", retry: "puzzle", mastery: "party" } as Record<string, string>)[pose] ?? pose;
     return <SignalCloud pose={legacyPose} size={size * 1.6} talking={talking} />;
   }
@@ -723,14 +729,20 @@ function UnlockScreen({
   const term = lesson.terms[index];
   const { playCorrect } = useMaterialSounds();
   const assets = useTermAssets();
+  // An abstract term's teach card shows no picture (Joshua, 15 Oct 2026):
+  // Dreamy leans in and the worked line carries it. The art stays on the
+  // small tokens (HUD, relics, match cards), where it is a collectible.
+  const cardArt = (t: GlossaryLesson["terms"][number]) => (t.abstract ? undefined : assets[t.id]);
+  const termArt = cardArt(term);
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
   useEffect(() => {
     const next = lesson.terms[index + 1];
-    if (variant !== "lab" || !next || !assets[next.id]) return;
+    const nextArt = next && !next.abstract ? assets[next.id] : undefined;
+    if (variant !== "lab" || !nextArt) return;
     const image = new window.Image();
     image.decoding = "async";
-    image.src = assets[next.id];
+    image.src = nextArt;
   }, [assets, index, lesson.terms, variant]);
   // The flipbook: each term's page starts on its sketch face and flips in
   // real 3D to the written side. Reset per term (a new page starts art-up).
@@ -782,7 +794,7 @@ function UnlockScreen({
            leans over its top corner with a new face for each word (13 Oct
            2026, Joshua: "bring Dreamy in more frequently with different
            expressions"). Outside the flipping button, so he never flips. */}
-        {variant === "lab" && !assets[term.id] ? (
+        {variant === "lab" && !termArt ? (
           <span key={term.id} className="glossary-concept-dreamy" aria-hidden>
             <DreamyFace pose={CONCEPT_POSES[index % CONCEPT_POSES.length]} size={104} />
           </span>
@@ -813,7 +825,7 @@ function UnlockScreen({
                  so its backface-visibility participates in the button's own
                  3D context rather than being flattened by a wrapper. */}
               {(variant === "default" || !flipped) ? (
-                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? assets[term.id] : undefined} concept={variant === "lab" && (!assets[term.id] || !!term.formula)} formula={term.formula} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
+                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? termArt : undefined} concept={variant === "lab" && (!termArt || !!term.formula)} formula={term.formula} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
               ) : null}
 
               {/* BACK: the written page, ring-bound edge and all. */}
@@ -828,7 +840,7 @@ function UnlockScreen({
                   transition: reduced ? "opacity 0.15s" : undefined,
                 }}
               >
-                {variant === "lab" && assets[term.id] ? <Image src={assets[term.id]} alt="" width={280} height={280} className="glossary-flashcard-back-art" aria-hidden unoptimized /> : null}
+                {variant === "lab" && termArt ? <Image src={termArt} alt="" width={280} height={280} className="glossary-flashcard-back-art" aria-hidden unoptimized /> : null}
                 <span
                   aria-hidden
                   className="flex w-9 flex-none flex-col items-center justify-evenly border-r py-[var(--space-6)]"
@@ -921,7 +933,10 @@ function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: 
         </div>
         <div className="glossary-unlock-gallery" aria-label={`${lesson.terms.length} unlocked terms`}>
           <span className="glossary-unlock-gallery-aura" aria-hidden />
-          <span className="glossary-unlock-gallery-dreamy" aria-hidden><DreamyFace pose="mastery" size={224} /></span>
+          {/* "correct", not a second "mastery": in Signal this one sits among the
+             relics while the copy block's Dreamy is also on screen (15 Oct 2026,
+             the same-asset-twice rule). Drift hides this one. */}
+          <span className="glossary-unlock-gallery-dreamy" aria-hidden><DreamyFace pose="correct" size={224} /></span>
           {lesson.terms.map((term, index) => (
             <motion.figure
               key={term.id}
@@ -2047,10 +2062,15 @@ function QuestionScreen({
   ) : null;
   // Dreamy reacts (13 Oct 2026, Joshua: "bring Dreamy in more frequently
   // with different expressions/reactions"): he asks curious, reads numbers
-  // through his glasses, poses a case with an idea, smiles at a right answer
-  // and looks nervous at a wrong one. Same size, same slot.
+  // through his glasses, poses a case with an idea and looks reassuring at
+  // a wrong one. Same size, same slot. A graded RIGHT answer is NOT shown
+  // here: the feedback card's own Dreamy carries "correct", so this one
+  // keeps the activity's pose (15 Oct 2026, Chandu: "the pose of dreamy
+  // near the question and the reaction/explanation dialogue box is the
+  // same. This shouldn't happen"). A cleared case step and a matched pair
+  // still smile here, since no card opens for those.
   const restingPose = questionReaction(question, !!currentStep && "answer" in currentStep);
-  const pose = answerState === "correct" || stepCleared ? "correct" : answerState === "wrong" ? "retry" : boardReaction ?? restingPose;
+  const pose = stepCleared ? "correct" : answerState === "wrong" ? "retry" : boardReaction ?? restingPose;
   const dreamy = <span className="glossary-question-dreamy"><DreamyFace pose={pose} size={84} /></span>;
   const sentence = question.kind === "choice" && question.sentence
     ? <SentenceCard sentence={question.sentence} filled={picked !== null ? shuffledOptions[picked].o : null} state={picked === null ? "idle" : pickedCorrect ? "correct" : "wrong"} />
@@ -2213,7 +2233,14 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
           </span>
         )}
         <div className="glossary-feedback-layout">
-          <span className="glossary-feedback-dreamy"><DreamyFace pose={correct ? "correct" : "retry"} size={76} talking={!done} /></span>
+          {/* This Dreamy and the question-side one never share a pose (15 Oct
+              2026, Chandu: "the pose of dreamy near the question and the
+              reaction/explanation dialogue box is the same. This shouldn't
+              happen"). Right: he celebrates here while the question-side one
+              keeps the activity's pose. Wrong: the question-side one
+              reassures (retry) while this one gives the hint the student
+              needs to change their answer. */}
+          <span className="glossary-feedback-dreamy"><DreamyFace pose={correct ? "correct" : "hint"} size={76} talking={!done} /></span>
           <div className="glossary-feedback-copy">
             <span className="glossary-feedback-title flex items-center gap-[8px] text-[19px] font-extrabold" style={{ color: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
               <span className="flex size-6 flex-none items-center justify-center rounded-full" style={{ background: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
@@ -2381,84 +2408,7 @@ function PowerPlayIntroScreen({ onStart, line }: { onStart: () => void; /** the 
 }
 
 function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onComplete: () => void }) {
-  const powerPlay = lesson.powerPlay;
-  if (powerPlay.kind === "chain" || powerPlay.kind === "path") return <PowerPlayCaseScreen powerPlay={powerPlay} onComplete={onComplete} />;
-  return <PowerPlayParagraphScreen powerPlay={powerPlay} onComplete={onComplete} />;
-}
-
-/** Levels 3 and 4's Power Play: a case over one scenario ("Run the month"),
- *  or a funding path to choose first and then its case. Built from the same
- *  pieces as a question (Dreamy asks, a scene card, the option tiles), so it
- *  sits in the question frame; a wrong step is marked inline and retried. */
-function PowerPlayCaseScreen({ powerPlay, onComplete }: { powerPlay: Exclude<GlossaryLesson["powerPlay"], ParagraphPowerPlay>; onComplete: () => void }) {
-  const { playCorrect, playWrong, playSweep, playSelect } = useMaterialSounds();
-  const { theme } = useGlobalTheme();
-  const [pathId, setPathId] = useState<string | null>(powerPlay.kind === "chain" ? "main" : null);
-  const [step, setStep] = useState(0);
-  const [status, setStatus] = useState<"go" | "right" | "wrong" | "done">("go");
-  const [burst, setBurst] = useState(0);
-  const timer = useRef<number | null>(null);
-  useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
-  const path = powerPlay.kind === "path" ? powerPlay.paths.find((entry) => entry.id === pathId) ?? null : null;
-  const steps: ChainStep[] = powerPlay.kind === "chain" ? powerPlay.steps : path?.steps ?? [];
-  const choosing = powerPlay.kind === "path" && !path;
-  const current = steps[Math.min(step, Math.max(steps.length - 1, 0))];
-  const line = choosing ? powerPlay.prompt : status === "done" ? "Deal done. You used every word." : current?.prompt ?? "";
-  const pose = status === "done" ? "mastery" : status === "right" ? "correct" : status === "wrong" ? "retry" : current && "answer" in current ? "calculate" : "case";
-
-  function cleared() {
-    window.setTimeout(playCorrect, 0);
-    if (step < steps.length - 1) {
-      setStatus("right");
-      timer.current = window.setTimeout(() => { setStatus("go"); setStep((s) => s + 1); }, 750);
-    } else {
-      setStatus("done");
-      setBurst((n) => n + 1);
-      window.setTimeout(playSweep, 120);
-    }
-  }
-  const aside = choosing ? null : (
-    <div className="glossary-qa-hint-line" aria-live="polite" data-tone={status === "wrong" ? "wrong" : status === "go" ? "go" : "done"}>
-      <span>{status === "wrong" ? "Not quite. Try another." : status === "right" ? "Right! Next step." : status === "done" ? "Power Play complete" : `Step ${step + 1} of ${steps.length}`}</span>
-      <b className="glossary-step-dots" aria-hidden>{steps.map((_, i) => <i key={i} className={i < step || status === "done" || (i === step && status === "right") ? "is-done" : i === step ? "is-now" : ""} />)}</b>
-    </div>
-  );
-  return (
-    <div className="glossary-screen glossary-question-screen glossary-question-chain glossary-question-choice glossary-qa glossary-qa-asks glossary-power-case relative flex w-full flex-col" data-answer-shape={current && "options" in current && isWordSet(current.options) ? "words" : "sentences"}>
-      <LocalBurst nonce={burst} />
-      <p className="glossary-power-kicker"><Zap aria-hidden fill="currentColor" /> Power Play · {powerPlay.intro.replace(/\.$/, "")}{path ? ` · ${path.label}` : ""}</p>
-      <div className="glossary-question-guide">
-        <span className="glossary-question-dreamy"><DreamyFace pose={pose} size={84} /></span>
-        <SpeechBubble aside={aside ?? undefined}>{line}</SpeechBubble>
-      </div>
-      <SceneCardView scene={powerPlay.scene} answered={status === "done"} />
-      {choosing && powerPlay.kind === "path" ? (
-        <div className="glossary-option-list glossary-path-list flex w-full flex-col gap-[var(--space-3)]" role="group" aria-label="Funding paths">
-          {powerPlay.paths.map((entry) => (
-            <button key={entry.id} type="button" className="glossary-option glossary-path-option dm-tap flex w-full cursor-pointer flex-col items-start gap-[var(--space-2)] rounded-[var(--radius-md)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }} onClick={() => { setPathId(entry.id); setStep(0); setStatus("go"); window.setTimeout(playSelect, 0); }}>
-              <b className="glossary-path-label">{entry.label}</b>
-              <ul className="glossary-path-points">{entry.points.map((point) => <li key={point}>{point}</li>)}</ul>
-            </button>
-          ))}
-        </div>
-      ) : status === "done" ? (
-        <button type="button" onClick={onComplete} className="glossary-qa-check glossary-power-finish dm-solid" style={{ ...primaryCtaColors(theme) }}>
-          Finish lesson <ChevronRight className="h-4 w-4" aria-hidden />
-        </button>
-      ) : current ? (
-        <div className="glossary-chain flex w-full flex-col">
-          <ChainStepBoard
-            key={`${pathId}-${step}`}
-            step={current}
-            wordTiles={"options" in current && isWordSet(current.options)}
-            onCorrect={cleared}
-            onWrong={() => { setStatus("wrong"); window.setTimeout(playWrong, 0); }}
-            onReset={() => setStatus("go")}
-          />
-        </div>
-      ) : null}
-    </div>
-  );
+  return <PowerPlayParagraphScreen powerPlay={lesson.powerPlay} onComplete={onComplete} />;
 }
 
 function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: ParagraphPowerPlay; onComplete: () => void }) {
@@ -2470,6 +2420,7 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
   const [burstNonce, setBurstNonce] = useState(0);
   const allCorrect = checked && lesson.powerPlay.answers.every((a, i) => values[i].trim().toLowerCase() === a.toLowerCase());
   const allFilled = values.every((v) => v.trim() !== "");
+  const someWrong = checked && !allCorrect;
 
   // Chips drag into the blanks with the match game's tether (9 Oct 2026,
   // Chandu: "for the powerplay I think the chips should be able to be
@@ -2572,12 +2523,27 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
 
   return (
     <div ref={boardRef} className="glossary-screen glossary-power-play-screen relative flex w-full flex-col gap-[var(--space-5)]" style={{ color: "var(--foreground)" }}>
-      <h2 className="flex items-center justify-center gap-[8px] text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-        <Zap className="h-5 w-5" style={{ color: "var(--power-accent, var(--hero-accent-purple))" }} fill="currentColor" aria-hidden /> Power Play
-      </h2>
-      <p className="text-center text-[14px]" style={{ color: "var(--muted-foreground)" }}>
-        Drag a word into each blank, or type it.
-      </p>
+      {/* Dreamy gives the instruction, the way he asks every question
+         (15 Oct 2026, Chandu: "use one of our new dreamy assets for
+         powerplay wherever it can sit without looking awkward"). The kicker
+         and the guide share one <header> so the theme rules keyed on
+         `> div:nth-of-type(1|2)` (the bank, the paragraph) still count. */}
+      <header className="glossary-power-head flex flex-col gap-[var(--space-3)]">
+        <p className="glossary-power-kicker"><Zap aria-hidden fill="currentColor" /> Power Play{lesson.powerPlay.intro ? ` · ${lesson.powerPlay.intro.replace(/\.$/, "")}` : ""}</p>
+        <div className="glossary-question-guide">
+          <span className="glossary-question-dreamy"><DreamyFace pose={allCorrect ? "correct" : someWrong ? "retry" : "recall"} size={84} /></span>
+          <SpeechBubble
+            tone={allCorrect ? "correct" : someWrong ? "wrong" : "neutral"}
+            aside={allCorrect ? undefined : (
+              <div className="glossary-qa-hint-line" aria-live="polite" data-tone={someWrong ? "wrong" : "go"}>
+                <span>{someWrong ? "Swap the words marked red." : "Spelling counts."}</span>
+              </div>
+            )}
+          >
+            {allCorrect ? "You used every word." : someWrong ? "Not quite. A few words are in the wrong spot." : "Drag a word into each blank, or type it."}
+          </SpeechBubble>
+        </div>
+      </header>
       {/* the word bank: the theme's own chips, on no panel of their own
          (8 Oct 2026, Chandu: "why is this not restyled anywhere") */}
       {/* the tether draws in the screen's own space; an <svg>, so the
@@ -2589,7 +2555,7 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
           <circle cx={tether.x2} cy={tether.y2} r={6} />
         </svg>
       )}
-      <div className="glossary-power-bank flex flex-wrap justify-center gap-[var(--space-2)]">
+      <div className="glossary-power-bank flex flex-wrap justify-center gap-[var(--space-3)]">
         {[...lesson.powerPlay.answers]
           .map((a) => a.charAt(0).toUpperCase() + a.slice(1))
           .map((word) => (
@@ -2599,7 +2565,7 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
               {...chipHandlers(word)}
               onClick={() => tapChip(word)}
               aria-label={`Put ${word} in a blank`}
-              className={`glossary-word-chip glossary-power-chip rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold glossary-power-drag-chip cursor-grab touch-none select-none active:cursor-grabbing ${values.some((v) => v.trim().toLowerCase() === word.toLowerCase()) ? "is-used" : ""}`}
+              className={`glossary-word-chip glossary-power-chip rounded-[var(--radius-sm)] border px-[var(--space-5)] py-[10px] text-[15px] font-semibold glossary-power-drag-chip cursor-grab touch-none select-none active:cursor-grabbing ${values.some((v) => v.trim().toLowerCase() === word.toLowerCase()) ? "is-used" : ""}`}
               style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
             >
               {word}
@@ -2607,7 +2573,11 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
           ))}
       </div>
 
-      <div className="glossary-power-paragraph relative flex flex-wrap items-baseline gap-x-[6px] gap-y-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-[17px] leading-[32px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      {/* The story reads as a board, not a form (15 Oct 2026, Chandu: "It
+         looks cramped and more like a form right now"): bigger, airier
+         sentences, and each blank is a slot a word tile drops into (a dashed
+         pill that fills solid), not an underlined text field. */}
+      <div className="glossary-power-paragraph relative flex flex-wrap items-center gap-x-[8px] gap-y-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-[18px] leading-[40px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <LocalBurst nonce={burstNonce} />
         {parts.map((part, i) => {
           const gapMatch = part.match(/^\{(\d+)\}$/);
@@ -2624,7 +2594,7 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
               onFocus={() => { lastBlank.current = gapIndex; }}
               value={values[gapIndex]}
               onChange={(e) => { setValues((prev) => prev.map((v, idx) => (idx === gapIndex ? e.target.value : v))); setChecked(false); }}
-              className={`glossary-power-blank w-[110px] border-b-2 bg-transparent text-center font-bold outline-none disabled:opacity-100 ${blankTarget === gapIndex ? "is-drop-target" : ""}`}
+              className={`glossary-power-blank text-center font-bold outline-none disabled:opacity-100 ${blankTarget === gapIndex ? "is-drop-target" : ""} ${values[gapIndex].trim() ? "is-filled" : ""} ${correct ? "is-correct" : wrong ? "is-wrong" : ""}`}
               style={{
                 // The purple accent (Power Play's own theme color, used for
                 // the underline/border below) is too low-contrast against
@@ -2640,34 +2610,28 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
         })}
       </div>
 
-      {allCorrect && (
-        <div className="flex flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-md)] border p-[var(--space-4)] text-center" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--card))", borderColor: CORRECT_COLOR }}>
-          <span className="flex items-center gap-[8px] text-[16px] font-extrabold" style={{ color: CORRECT_COLOR }}>
-            <Trophy className="h-5 w-5" aria-hidden /> Complete
-          </span>
-        </div>
-      )}
-
-      <button
-        type="button"
-        disabled={!allFilled}
-        onClick={allCorrect ? onComplete : check}
-        className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
-        style={{ background: allCorrect ? CORRECT_COLOR : "var(--power-accent, var(--hero-accent-purple))", color: allCorrect ? "#05070f" : "var(--power-ink, #fff)", fontFamily: "var(--font-display)" }}
-      >
-        {allCorrect ? (
-          <>
-            Finish Lesson <ChevronRight className="h-4 w-4" aria-hidden />
-          </>
-        ) : (
-          <>
-            Check Answers <Zap className="h-4 w-4" fill="currentColor" aria-hidden />
-          </>
-        )}
-      </button>
-      <p className="text-center text-[11px]" style={{ color: "var(--muted-foreground)" }}>
-        Exact spelling
-      </p>
+      {/* One compact button, centred under the board. The old full-width bar
+         plus a "Complete" card plus an "Exact spelling" footnote read as a
+         form; Dreamy's line now carries the result and the spelling note. */}
+      <footer className="glossary-power-foot flex justify-center">
+        <button
+          type="button"
+          disabled={!allFilled}
+          onClick={allCorrect ? onComplete : check}
+          className="glossary-power-check dm-solid flex cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-8)] py-[var(--space-4)] text-[16px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+          style={{ background: allCorrect ? CORRECT_COLOR : "var(--power-accent, var(--hero-accent-purple))", color: allCorrect ? "#05070f" : "var(--power-ink, #fff)", fontFamily: "var(--font-display)" }}
+        >
+          {allCorrect ? (
+            <>
+              Finish Lesson <ChevronRight className="h-4 w-4" aria-hidden />
+            </>
+          ) : (
+            <>
+              Check Answers <Zap className="h-4 w-4" fill="currentColor" aria-hidden />
+            </>
+          )}
+        </button>
+      </footer>
     </div>
   );
 }
@@ -3311,8 +3275,8 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     if (variant !== "lab") return;
     // Warm only the active theme's common atlases. The remaining poses load
     // on use, rather than eagerly downloading every animation in both themes.
-    const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING] : atmosphere === "v1"
-      ? (["welcome", "explain", "correct", "retry"] as const).map(pose => dreamyReactionAsset(pose, true))
+    const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING, signalReactionAsset("curious")] : atmosphere === "v1"
+      ? (["welcome", "explain", "correct", "retry", "hint"] as const).map(pose => dreamyReactionAsset(pose, true))
       : ["happy", "curious", "party"].map((pose) => dreamyAssetFor(atmosphere, pose, true));
     const small = lessonHasLegacyArt(lesson) ? assetsFor(atmosphere, "small") : glossaryTermAssets(career.careerSlug, atmosphere, "small");
     const large = lessonHasLegacyArt(lesson) ? assetsFor(atmosphere) : glossaryTermAssets(career.careerSlug, atmosphere);
@@ -3484,12 +3448,9 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         </div>
   ) : null;
   const sceneScreen = screen === "unlock" && unlockIndex >= lesson.terms.length ? "unlockComplete" : screen;
-  // A case Power Play (Levels 3 and 4) is built from question pieces, so it
-  // borrows the question frame's layout, type ramp and scenery fit.
-  const caseFinale = screen === "powerPlay" && (lesson.powerPlay.kind === "chain" || lesson.powerPlay.kind === "path");
-  const questionFrame = screen === "question" || caseFinale;
+  const questionFrame = screen === "question";
   const activeLayout: QuestionLayout = variant === "lab" ? questionLayout : "current";
-  useQuestionSceneryFit(shellRef, activeLayout, atmosphere, variant === "lab" && questionFrame, `${caseFinale ? "finale" : current?.id ?? ""}-${pendingResult ? (pendingResult.correct ? 1 : 2) : 0}`);
+  useQuestionSceneryFit(shellRef, activeLayout, atmosphere, variant === "lab" && questionFrame, `${current?.id ?? ""}-${pendingResult ? (pendingResult.correct ? 1 : 2) : 0}`);
   return (
     <AtmosphereContext.Provider value={variant === "lab" ? atmosphere : "v1"}>
     <LessonArtContext.Provider value={{ legacy: legacyArt, large: largeTermArt, small: termArt }}>
@@ -3497,8 +3458,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     <div
       ref={shellRef}
       className={`glossary-game-shell glossary-game-${variant} glossary-lab-atmosphere-${atmosphere} ${variant === "lab" ? "glossary-fit-shell" : ""} marketing-v2 themeable relative flex min-h-dvh w-full flex-col`}
-      data-screen={caseFinale ? "question" : sceneScreen}
-      data-finale={caseFinale ? "case" : undefined}
+      data-screen={sceneScreen}
       data-level={lesson.lessonNumber}
       data-qlayout={variant === "lab" ? activeLayout : undefined}
       data-question-kind={screen === "question" ? current?.kind : undefined}

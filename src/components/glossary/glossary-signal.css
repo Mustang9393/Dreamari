@@ -306,6 +306,8 @@
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-power-paragraph > span { font: inherit !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-power-blank { width: 140px !important; font: 400 26px/1.2 var(--sig-font) !important; letter-spacing: .03em; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-power-blank.is-drop-target { outline: 3px solid var(--sig-cyan); outline-offset: 2px; background: color-mix(in srgb, var(--sig-cyan) 16%, transparent) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-power-blank { border-radius: 0 !important; border-width: 2px !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-power-check,
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-power-play-screen > button { min-height: 56px; border-radius: 0 !important; font: 400 26px/1 var(--sig-font) !important; letter-spacing: .04em; text-transform: uppercase; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-power-play-screen > p:last-child { font: 500 14px/1.4 var(--sig-mono) !important; }
 
@@ -349,8 +351,8 @@ html.light .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-la
 }
 /* A waiting button stays readable: a neutral slab with dark text, not the
    gold at 40% opacity (grey on pale yellow measured under 2:1 in light). */
-html.light .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] :is(.glossary-profit-builder > button, .glossary-power-play-screen > button):disabled { opacity: 1 !important; background: #e4e9f2 !important; color: #4f586c !important; box-shadow: 0 4px 0 #c9d1e4 !important; }
-.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] :is(.glossary-profit-builder > button, .glossary-power-play-screen > button):disabled { opacity: 1 !important; background: color-mix(in srgb, var(--sig-text) 12%, var(--sig-bg)) !important; color: var(--sig-mut) !important; box-shadow: 0 4px 0 rgba(0,0,0,.35) !important; }
+html.light .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] :is(.glossary-profit-builder > button, .glossary-power-play-screen > button, .glossary-power-check):disabled { opacity: 1 !important; background: #e4e9f2 !important; color: #4f586c !important; box-shadow: 0 4px 0 #c9d1e4 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] :is(.glossary-profit-builder > button, .glossary-power-play-screen > button, .glossary-power-check):disabled { opacity: 1 !important; background: color-mix(in srgb, var(--sig-text) 12%, var(--sig-bg)) !important; color: var(--sig-mut) !important; box-shadow: 0 4px 0 rgba(0,0,0,.35) !important; }
 
 /* Signal's welcome, readable at every title length (14 Oct 2026, Chandu:
    "Signal is hard to read, the welcome screen for Investing Basics etc. ...

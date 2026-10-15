@@ -2098,8 +2098,35 @@
 /* Signal buttons are flat pixel slabs: no sheen bar. */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .dm-solid::after { display: none !important; }
 /* Power Play and the finish line fit one screen too. */
-.glossary-game-lab .glossary-power-play-screen { padding: 16px 18px !important; gap: 12px !important; }
-.glossary-game-lab .glossary-power-play-screen > div:nth-of-type(2) { padding: 14px 16px !important; }
+.glossary-game-lab .glossary-power-play-screen { padding: 22px 26px !important; gap: 18px !important; }
+.glossary-game-lab .glossary-power-play-screen > div:nth-of-type(2) { padding: 22px 26px !important; }
+/* Power Play blanks are slots, not text fields (15 Oct 2026): a dashed pill
+   that turns solid once a word tile lands in it, the verdict colours on top. */
+.glossary-game-lab .glossary-power-blank {
+  box-sizing: border-box;
+  width: 136px;
+  min-height: 40px;
+  padding: 2px 12px;
+  border: 2px dashed color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 60%, var(--glass-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 9%, transparent);
+  line-height: 32px;
+  transition: border-color .15s ease, background-color .15s ease, transform .15s ease;
+}
+.glossary-game-lab .glossary-power-blank.is-filled { border-style: solid; background: color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 20%, transparent); }
+.glossary-game-lab .glossary-power-blank.is-drop-target { border-style: solid; border-color: var(--power-accent, var(--hero-accent-purple)) !important; background: color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 32%, transparent); transform: scale(1.05); }
+.glossary-game-lab .glossary-power-blank.is-correct { border-style: solid; background: color-mix(in srgb, var(--world-food-farming-nature) 18%, transparent); }
+.glossary-game-lab .glossary-power-blank.is-wrong { border-style: solid; background: color-mix(in srgb, var(--danger, #e0483e) 14%, transparent); }
+.glossary-game-lab .glossary-power-blank:focus-visible { outline: 2px solid var(--power-accent, var(--hero-accent-purple)); outline-offset: 2px; }
+.glossary-game-lab .glossary-power-check { min-width: 240px; }
+/* Dreamy's Power Play line stacks its aside (spelling note / fix hint) under
+   the sentence, like a question's step line; outside the question frame the
+   bubble would otherwise lay them out side by side. */
+.glossary-game-lab .glossary-power-head .glossary-speech-bubble { flex-direction: column; align-items: flex-start; gap: 6px; }
+.glossary-game-lab .glossary-power-head .glossary-question-guide { grid-template-columns: 96px minmax(0, 1fr); }
+/* Signal's pixel cloud is a 3:2 actor 1.6x the slot, so give it the column
+   it needs instead of letting it ride over the bubble. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-power-head .glossary-question-guide { grid-template-columns: 150px minmax(0, 1fr); }
 .glossary-game-lab .glossary-complete-screen { padding-top: clamp(12px, calc(3dvh / var(--vz, 1)), 28px) !important; padding-bottom: clamp(12px, calc(3dvh / var(--vz, 1)), 28px) !important; gap: clamp(10px, calc(2.2dvh / var(--vz, 1)), 20px) !important; }
 .glossary-game-lab .glossary-complete-screen .glossary-dreamy-face, .glossary-game-lab .glossary-complete-screen .glossary-dreamy-sprite { width: clamp(72px, calc(11dvh / var(--vz, 1)), 120px) !important; height: clamp(72px, calc(11dvh / var(--vz, 1)), 120px) !important; }
 .glossary-game-lab .glossary-complete-screen h2 { font-size: clamp(22px, calc(3.4dvh / var(--vz, 1)), 28px) !important; line-height: 1.2 !important; }

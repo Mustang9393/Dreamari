@@ -26,6 +26,10 @@
   animation: dreamy-reaction-blink 5.6s steps(1, end) infinite;
 }
 .glossary-game-shell.glossary-game-lab .glossary-reaction[data-medium="signal"] > .glossary-reaction-canvas {
+  /* Signal's approved art already fills its square, unlike Drift's 72%
+     optical frame. Keep the canonical responsive 3:2 actor slot. */
+  width: 100%;
+  transform: translate(-50%, -50%);
   image-rendering: pixelated;
 }
 .glossary-game-shell.glossary-game-lab .glossary-reaction[data-speaking="true"] > .glossary-reaction-canvas {

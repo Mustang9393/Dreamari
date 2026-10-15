@@ -1,0 +1,115 @@
+{
+  "status": "Approved for selective integration on 15 October 2026",
+  "why": "Reuse existing success dialogue and mix canonical live reactions with the four reviewed animated poses.",
+  "method": "Built-in ImageGen facial frames, approved immutable cloud base, registered eye/mouth regions, lossless pixel-art export.",
+  "layout": {
+    "sheet": [
+      1024,
+      1024
+    ],
+    "cell": [
+      512,
+      512
+    ],
+    "order": [
+      "rest",
+      "blink",
+      "talk-a",
+      "talk-b"
+    ],
+    "actorAspect": "3:2"
+  },
+  "keepCanonical": [
+    "welcome",
+    "explain",
+    "hint",
+    "case",
+    "correct",
+    "happy",
+    "idea"
+  ],
+  "jobs": [
+    {
+      "id": "curious",
+      "source": "/Users/chandump/.codex/generated_images/01a0eca6-1b47-78b0-81e8-15443dc20743/exec-61c7e08a-0047-4efe-be51-867303fc911c.png",
+      "prompt": "Asset type: pixel art animation production sprite sheet. Edit the attached EXACT approved Dreamy pose into a tightly registered TWO BY TWO animation sheet, four equal square cells, transparent background.\nReference image is the approved pose, NOT an inspiration. Preserve it as faithfully as possible. Same body pixels, outline, lighting, crown, proportions, orientation, size, glasses frame, and lens position in every cell. ONLY eyelids and mouth change. All 4 copies must have IDENTICAL scale, position and contour relative to their own cell. No bobbing, turning, squashing, shifting glasses, props, labels, borders or text.\nCell order:\nTOP LEFT: exact resting reference expression.\nTOP RIGHT: blink frame. Both eyes gently closed, narrow smiling eyelid arcs inside the same fixed glasses. Mouth stays exactly as reference.\nBOTTOM LEFT: speaking A. Eyes as reference, change ONLY mouth to a little narrower open blue vowel shape, natural friendly speech, aligned to same mouth centre and face angle.\nBOTTOM RIGHT: speaking B. Eyes as reference, change ONLY mouth to a smaller soft blue smile/closed consonant shape, same centre and angle.\nQUALITY LOCK: reference's highly detailed finely stepped pixel clusters, navy contour/cyan rim, bright ivory-white cloud and rich blue cyan shading. No smoothing, clay, vector or low-resolution simplification. Dark navy pixel glasses stay identical across all four cells, never replacing them with eyes alone. Glass eyes retain their original star highlights except during blink. Cloud has no limbs, body or human shape. Genuine clear transparent alpha around each cloud. Each whole pose fits comfortably within its own cell with consistent margins. DO NOT redesign this character.",
+      "sheet": "/Users/chandump/.codex/generated_images/01a0eca6-1b47-78b0-81e8-15443dc20743/exec-c56811b4-98ea-4952-89de-97ab3e04acdc.png"
+    },
+    {
+      "id": "calculate",
+      "source": "/Users/chandump/.codex/generated_images/01a0eca6-1b47-78b0-81e8-15443dc20743/exec-0580f5c5-6d6e-4508-a85e-bd8ce7965606.png",
+      "prompt": "Asset type: pixel art animation production sprite sheet. Edit the attached EXACT approved Dreamy pose into a tightly registered TWO BY TWO animation sheet, four equal square cells, transparent background.\nReference image is the approved pose, NOT an inspiration. Preserve it as faithfully as possible. Same body pixels, outline, lighting, crown, proportions, orientation, size, glasses frame, and lens position in every cell. ONLY eyelids and mouth change. All 4 copies must have IDENTICAL scale, position and contour relative to their own cell. No bobbing, turning, squashing, shifting glasses, props, labels, borders or text.\nCell order:\nTOP LEFT: exact resting reference expression.\nTOP RIGHT: blink frame. Both eyes gently closed, narrow smiling eyelid arcs inside the same fixed glasses. Mouth stays exactly as reference.\nBOTTOM LEFT: speaking A. Eyes as reference, change ONLY mouth to a little narrower open blue vowel shape, natural friendly speech, aligned to same mouth centre and face angle.\nBOTTOM RIGHT: speaking B. Eyes as reference, change ONLY mouth to a smaller soft blue smile/closed consonant shape, same centre and angle.\nQUALITY LOCK: reference's highly detailed finely stepped pixel clusters, navy contour/cyan rim, bright ivory-white cloud and rich blue cyan shading. No smoothing, clay, vector or low-resolution simplification. Dark navy pixel glasses stay identical across all four cells, never replacing them with eyes alone. Glass eyes retain their original star highlights except during blink. Cloud has no limbs, body or human shape. Genuine clear transparent alpha around each cloud. Each whole pose fits comfortably within its own cell with consistent margins. DO NOT redesign this character.",
+      "sheet": "/Users/chandump/.codex/generated_images/01a0eca6-1b47-78b0-81e8-15443dc20743/exec-53d1b217-7d5b-43ba-afb4-e4f457f7eae3.png"
+    },
+    {
+      "id": "reassure",
+      "source": "/Users/chandump/.codex/generated_images/01a0eca6-1b47-78b0-81e8-15443dc20743/exec-9235b9bd-26d9-495e-a721-aedeb29ab372.png",
+      "prompt": "Asset type: pixel art animation production sprite sheet. Edit the attached EXACT approved Dreamy pose into a tightly registered TWO BY TWO animation sheet, four equal square cells, transparent background.\nReference image is the approved pose, NOT an inspiration. Preserve it as faithfully as possible. Same body pixels, outline, lighting, crown, proportions, orientation, size, glasses frame, and lens position in every cell. ONLY eyelids and mouth change. All 4 copies must have IDENTICAL scale, position and contour relative to their own cell. No bobbing, turning, squashing, shifting glasses, props, labels, borders or text.\nCell order:\nTOP LEFT: exact resting reference expression.\nTOP RIGHT: blink frame. Keep its existing wink on the left, gently close the open right eye. Mouth stays exactly as reference.\nBOTTOM LEFT: speaking A. Eyes as reference, change ONLY mouth to a little narrower open blue vowel shape, natural friendly speech, aligned to same mouth centre and face angle.\nBOTTOM RIGHT: speaking B. Eyes as reference, change ONLY mouth to a smaller soft blue smile/closed consonant shape, same centre and angle.\nQUALITY LOCK: reference's highly detailed finely stepped pixel clusters, navy contour/cyan rim, bright ivory-white cloud and rich blue cyan shading. No smoothing, clay, vector or low-resolution simplification. Dark navy pixel glasses stay identical across all four cells, never replacing them with eyes alone. Glass eyes retain their original star highlights except during blink. Cloud has no limbs, body or human shape. Genuine clear transparent alpha around each cloud. Each whole pose fits comfortably within its own cell with consistent margins. DO NOT redesign this character.",
+      "sheet": "/Users/chandump/.codex/generated_images/01a0eca6-1b47-78b0-81e8-15443dc20743/exec-c99b73fb-0838-4ffc-a7e9-ed84c60f3f5f.png"
+    },
+    {
+      "id": "celebrate",
+      "source": "/Users/chandump/.codex/generated_images/01a0eca6-1b47-78b0-81e8-15443dc20743/exec-2f7bddf9-50fb-43b5-bc1e-1b58433ccd6c.png",
+      "prompt": "Asset type: pixel art animation production sprite sheet. Edit the attached EXACT approved Dreamy pose into a tightly registered TWO BY TWO animation sheet, four equal square cells, transparent background.\nReference image is the approved pose, NOT an inspiration. Preserve it as faithfully as possible. Same body pixels, outline, lighting, crown, proportions, orientation, size, glasses frame, and lens position in every cell. ONLY eyelids and mouth change. All 4 copies must have IDENTICAL scale, position and contour relative to their own cell. No bobbing, turning, squashing, shifting glasses, props, labels, borders or text.\nCell order:\nTOP LEFT: exact resting reference expression.\nTOP RIGHT: blink frame. A warm joyful half-open squint briefly reveals its familiar jewel eye highlights, still ecstatic. Mouth stays exactly as reference.\nBOTTOM LEFT: speaking A. Eyes as reference, change ONLY mouth to a little narrower open blue vowel shape, natural friendly speech, aligned to same mouth centre and face angle.\nBOTTOM RIGHT: speaking B. Eyes as reference, change ONLY mouth to a smaller soft blue smile/closed consonant shape, same centre and angle.\nQUALITY LOCK: reference's highly detailed finely stepped pixel clusters, navy contour/cyan rim, bright ivory-white cloud and rich blue cyan shading. No smoothing, clay, vector or low-resolution simplification. Dark navy pixel glasses stay identical across all four cells, never replacing them with eyes alone. Glass eyes retain their original star highlights except during blink. Cloud has no limbs, body or human shape. Genuine clear transparent alpha around each cloud. Each whole pose fits comfortably within its own cell with consistent margins. DO NOT redesign this character.",
+      "sheet": "/Users/chandump/.codex/generated_images/01a0eca6-1b47-78b0-81e8-15443dc20743/exec-506f9d5a-a497-415f-8f71-7506690f747d.png"
+    }
+  ],
+  "assets": [
+    {
+      "file": "public/images/glossary/dreamy-signal-animated-oct15/curious-sheet.webp",
+      "bytes": 195030,
+      "sha256": "b53c886ee40f88e4a2805bed950600ae7a063b45b59c66c61ae64ad1e1a4377a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "public/images/glossary/dreamy-signal-animated-oct15/curious-320.webp",
+      "bytes": 63972,
+      "sha256": "60a8a8b494048a706080f171c23d589df560300fb83e952cb1f17a38319a0c6f",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "file": "public/images/glossary/dreamy-signal-animated-oct15/calculate-sheet.webp",
+      "bytes": 157756,
+      "sha256": "a4371c2335683786d4f4e261824a8d91351a91d12f5df9ce8d96276ddd9ff431",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "public/images/glossary/dreamy-signal-animated-oct15/calculate-320.webp",
+      "bytes": 55136,
+      "sha256": "bd98588a43e146481899ee2d7ba8072ecd6fcff7849fa7347b2577ea3acf0963",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "file": "public/images/glossary/dreamy-signal-animated-oct15/reassure-sheet.webp",
+      "bytes": 178704,
+      "sha256": "c737dfeb9f30a3453aed14bfae28e3750b01736410a1b69ab33e0a2b86772ae9",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "public/images/glossary/dreamy-signal-animated-oct15/reassure-320.webp",
+      "bytes": 62590,
+      "sha256": "e6ef36409dd27085d6997dd7d4d6f384dbe7ecd17ff2a73d6828d42da78fe561",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "file": "public/images/glossary/dreamy-signal-animated-oct15/celebrate-sheet.webp",
+      "bytes": 216118,
+      "sha256": "c97e3e0cdf6106ff1a5265caaeb24a73530ea28918355bfdeff8246dd0ee6c4b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "public/images/glossary/dreamy-signal-animated-oct15/celebrate-320.webp",
+      "bytes": 65798,
+      "sha256": "10b3706ff5f23139028ae78aaa7582e02d5372d72c2fcacd7baadc69154b0fb9",
+      "width": 320,
+      "height": 320
+    }
+  ]
+}
