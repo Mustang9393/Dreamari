@@ -11,6 +11,7 @@ import { openStudentCheckIn } from "./WeeklyCheckIn";
 import Image from "next/image";
 import { useEffect, useState, type ReactNode, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Bell, Briefcase, Calendar, FileText, MessagesSquare, Send, Sparkles, X, Zap } from "lucide-react";
 import { DreamScoreChip } from "./DreamScoreChip";
 import { Portal } from "@/components/profile/CareerReport";
@@ -22,6 +23,11 @@ import { useStage } from "@/lib/stage";
 import { MENTOR, THREAD } from "@/components/connect/mentorship/mentorshipData";
 import { messagesHref, NETWORK_STUDENT_NAME, networkingNotifications, useNetworkingStore, useNetworkingUnread } from "@/lib/networking";
 import { useConnectPov } from "@/components/connect/networking/pov";
+import { openTeamDock, useUwTeamActive } from "@/components/connect/unitedway/uwStore";
+import { TEAM_NOTIFICATIONS } from "@/components/connect/unitedway/uwTeamNotifications";
+
+// Loaded only once the United Way Team role is on, so students never pull the United Way data.
+const TeamMessagesNav = dynamic(() => import("@/components/connect/unitedway/UwTeamDock"), { ssr: false });
 
 const ICONS = { xp: Zap, resume: FileText, opportunity: Briefcase, plan: Calendar, insight: Sparkles, message: MessagesSquare } as const;
 
@@ -57,7 +63,8 @@ function useVisibleNotifications(filter: Filter = "all"): { list: Notification[]
   // a check-in the counselor sent, until it is answered (8 Oct 2026)
   const pending = pendingCheckIn(useCheckInRequests(), useWeeklyCheckIn());
   const checkIn: Notification[] = pending ? [{ id: `checkin-${pending.id}`, scope: "app", icon: "plan", who: "Your counselor", text: "sent you a weekly check-in", detail: pending.note || "Four quick taps. Only your counselor sees it.", when: "Now", href: "#checkin" }] : [];
-  const all = [...checkIn, ...networkingNotifications(netStore), ...NOTIFICATIONS];
+  const teamRole = useUwTeamActive();
+  const all = [...checkIn, ...(teamRole ? TEAM_NOTIFICATIONS : []), ...networkingNotifications(netStore), ...NOTIFICATIONS];
   const list = all
     .filter((n) => n.scope !== "mentorship" || inbox.mentorship)
     .filter((n) => !n.stage || n.stage === stage)
@@ -66,7 +73,7 @@ function useVisibleNotifications(filter: Filter = "all"): { list: Notification[]
   // they are always "new" until the specific id they were generated with
   // has been opened once, since a fresh id only ever appears for a genuinely
   // new event (a newer message, a fresh accept).
-  const isUnread = (n: Notification) => (n.id.startsWith("net-") || n.id.startsWith("checkin-") ? !inbox.read.includes(n.id) : UNREAD_BY_DEFAULT.includes(n.id) && !inbox.read.includes(n.id));
+  const isUnread = (n: Notification) => (n.id.startsWith("net-") || n.id.startsWith("checkin-") || n.id.startsWith("uwteam-") ? !inbox.read.includes(n.id) : UNREAD_BY_DEFAULT.includes(n.id) && !inbox.read.includes(n.id));
   const messageUnread = inbox.mentorship ? inbox.unread : 0;
   return { list, unread: list.filter(isUnread).length + (filter === "all" ? messageUnread : 0), isUnread };
 }
@@ -141,6 +148,9 @@ function useMessagesEntry(): { show: boolean; unread: number; href: string } {
 export function MessagesButton() {
   const entry = useMessagesEntry();
   const router = useRouter();
+  const teamActive = useUwTeamActive();
+  // United Way Team role: the staff messages, reachable from any page
+  if (teamActive) return <TeamMessagesNav />;
   if (!entry.show) return null;
   return (
     <NavIconButton label="Messages" badge={entry.unread} onClick={() => router.push(entry.href)}>
@@ -198,6 +208,7 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
     markNotificationRead(n.id);
     onClose();
     if (n.id.startsWith("checkin-")) { openStudentCheckIn(); return; }
+    if (n.teamKey) { openTeamDock(n.teamKey); return; }
     if (n.chat) openDock();
     router.push(n.href);
   };

@@ -25,6 +25,8 @@ export type Notification = {
   href: string;
   /** opens the chat dock as well as navigating */
   chat?: boolean;
+  /** United Way Team role: opens the Team messages dock on this conversation */
+  teamKey?: string;
   actions?: NotificationAction[];
   /** what the card says once an action has been taken */
   resolvedText?: Record<string, string>;

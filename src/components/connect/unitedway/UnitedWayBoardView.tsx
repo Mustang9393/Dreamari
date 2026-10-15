@@ -52,7 +52,7 @@ import type { EventBoard } from "../data";
 import * as D from "./uwData";
 import { registerUwEvent, toEventBoard, uwEventById } from "./uwEvents";
 import { useBackStep } from "@/lib/backStep";
-import { takePendingAsk, useUwPov } from "./uwStore";
+import { activateUw, takePendingAsk, useUwPov } from "./uwStore";
 import type { UwItem, UwPerson, UwQuestion } from "./uwCommunity";
 import { ItemList, ItemPage, LabelledPosts, PersonSheet, StudentComposer, StudentsSection, UwNavCtx, VolunteersSection, useBoardItems, type UwNav } from "./UwFeed";
 import { TeamWorkspace } from "./UwTeam";
@@ -1007,6 +1007,8 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const router = useRouter();
   const nav = useContext(ConnectNav);
   const [pov, setPov] = useUwPov();
+  // opening a United Way board turns the staff messages on in the top nav, app-wide
+  useEffect(() => { activateUw(); }, []);
   const sections = D.POV_SECTIONS[pov];
   const onOpenMentorship = () => (nav?.openMentorship ? nav.openMentorship(D.MENTORSHIP_PROGRAM.id) : router.push(`/connect?tab=mentorship&program=${D.MENTORSHIP_PROGRAM.id}`));
   const [sectionRaw, setSection] = useState<D.UwSection>(memo?.section ?? sectionFromFilter(initialTab) ?? "students");
