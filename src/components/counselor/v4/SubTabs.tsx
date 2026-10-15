@@ -20,7 +20,7 @@ export function SubTabs<K extends string>({ options, value, onChange, ariaLabel,
   return (
     <div role="tablist" aria-label={ariaLabel} className={`v4-subtabs ${className}`}>
       {options.map((o, i) => (
-        <button key={o.key} type="button" role="tab" aria-selected={o.key === value} tabIndex={o.key === value ? 0 : -1} onClick={() => onChange(o.key)} onKeyDown={(e) => tabKeyDown(e, i, options, onChange)}>
+        <button key={o.key} type="button" role="tab" className="dm-seg" aria-selected={o.key === value} tabIndex={o.key === value ? 0 : -1} onClick={() => onChange(o.key)} onKeyDown={(e) => tabKeyDown(e, i, options, onChange)}>
           <span>{o.label}</span>
           {o.count !== undefined && <small>({o.count})</small>}
         </button>
