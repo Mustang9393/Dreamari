@@ -2792,32 +2792,43 @@ export function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; 
   const views = signals(thread.views, thread.helpful, undefined).views;
   const quiet = "color-mix(in srgb, var(--muted-foreground) 80%, transparent)";
   const action = "dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-full px-[8px] -mx-[8px] tabular-nums";
+  // Two grid columns, the avatar's and the text's. On a phone only the
+  // author line sits beside the avatar; the question, the answer and the
+  // counts take the whole row underneath (14 Oct 2026 Connect UX review:
+  // at 390px the 44px gutter left the answer's name and role cut to
+  // "Ama..." and "Investment B..."). From sm everything stays in the text
+  // column, the Feed's shape. The row's width and padding are unchanged.
   return (
-    <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
+    <article className="group relative grid grid-cols-[44px_minmax(0,1fr)] gap-x-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-x-[14px] sm:px-[var(--space-6)]">
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer"><span className="sr-only">Open question: {thread.title}</span></button>
       <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
-      <span className="relative flex-none self-start"><Avatar name={thread.handle} size={44} /></span>
-      <div className="relative flex min-w-0 flex-1 flex-col">
-        <div className="flex min-w-0 flex-col gap-[2px]">
-          <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
-          <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-            <span className="truncate">{thread.grade}</span><span aria-hidden className="flex-none">·</span><span className="flex-none">{thread.postedAgo}</span>
-          </span>
-        </div>
-        <h3 className="mt-[12px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>“{thread.title}”</h3>
+      <span className="relative row-start-1 self-start sm:row-span-2"><Avatar name={thread.handle} size={44} /></span>
+      <div className="relative col-start-2 row-start-1 flex min-w-0 flex-col justify-center gap-[2px] sm:justify-start">
+        <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
+        <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+          <span className="truncate">{thread.grade}</span><span aria-hidden className="flex-none">·</span><span className="flex-none">{thread.postedAgo}</span>
+        </span>
+      </div>
+      <div className="relative col-span-full flex min-w-0 flex-col sm:col-span-1 sm:col-start-2">
+        {/* The whole question, no quotation marks (Maisha, 9 Oct 2026:
+           "Remove quotation marks around student questions"; the two-line
+           clamp cut questions mid-sentence on phones). */}
+        <h3 className="mt-[12px] max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>{thread.title}</h3>
         {thread.context && !pro && <ClampedExcerpt text={thread.context.replace(/\s+/g, " ").trim()} onMore={onOpen} />}
         {/* The answer as a quoted reply under the question: a straight 2px
            rule down its left, square ends (Chandu, 6 Oct 2026: the first cut
            carried a border radius, so the rule curved at both ends and "looked
            like a bug or a mistake"; "just design them better"). */}
         {pro && answer ? (
-          <div className="mt-[14px] flex flex-col gap-[10px] py-[2px] pl-[16px]" style={{ borderLeft: "2px solid color-mix(in srgb, var(--primary) 60%, transparent)" }}>
-            <span className="relative z-20 flex min-w-0 items-center gap-[8px]">
+          <div className="mt-[14px] flex flex-col gap-[10px] py-[2px] pl-[12px] sm:pl-[16px]" style={{ borderLeft: "2px solid color-mix(in srgb, var(--primary) 60%, transparent)" }}>
+            {/* On a phone the role wraps under the name, aligned past the
+               portrait, instead of both being cut short; inline from sm. */}
+            <span className="relative z-20 flex min-w-0 flex-wrap items-center gap-x-[8px] gap-y-[4px] sm:flex-nowrap">
               <ProAvatar proId={pro.id} name={pro.name} size={26} />
               <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex min-w-0 cursor-pointer items-center gap-[5px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
-                <span className="truncate">{pro.name}</span> <VerifiedBadge size={12} />
+                <span className="sm:truncate">{pro.name}</span> <VerifiedBadge size={12} />
               </button>
-              <span className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
+              <span className="basis-full pl-[34px] text-[13px] leading-[18px] sm:basis-auto sm:truncate sm:pl-0" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
             </span>
             <ClampedExcerpt text={answer.body.replace(/\s+/g, " ").trim()} onMore={onOpen} />
           </div>
@@ -2927,8 +2938,11 @@ export function FeedPostRow({
   // the headline, the excerpt as relaxed body text, Read more, the counts.
   // Follow is the same button as the rail's, always top right beside the
   // overflow menu, so it never competes with Read more as a second link.
+  // The same two-column grid as BoardThreadRow: on a phone only the author
+  // row sits beside the avatar and the post takes the whole row under it;
+  // from sm the post stays in the text column (14 Oct 2026 Connect UX review).
   return (
-    <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
+    <article className="group relative grid grid-cols-[44px_minmax(0,1fr)] gap-x-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-x-[14px] sm:px-[var(--space-6)]">
       <button type="button" onClick={openDiscussion} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {item.kind === "question" ? "answer" : "post"}: {lead}</span>
       </button>
@@ -2938,22 +2952,22 @@ export function FeedPostRow({
          ones included, wears the same author row (Chandu, 6 Oct 2026:
          "revert to the post having the pfp and username designation etc";
          "ONE VISUAL LANGUAGE for these tabs, columns and posts"). */}
-      <span className="relative z-20 flex-none self-start">
+      <span className="relative z-20 row-start-1 self-start sm:row-span-2">
         <ProAvatar proId={pro.id} name={pro.name} size={44} />
       </span>
 
-      <div className="relative flex min-w-0 flex-1 flex-col">
-        {(
-        <div className="flex items-start gap-[10px]">
+      <div className="relative col-start-2 row-start-1 flex items-start gap-[10px]">
           <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex w-fit min-w-0 cursor-pointer items-center gap-[5px] text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>
               <span className="truncate">{pro.name}</span> <VerifiedBadge size={13} />
               {isNew && <span className="ml-[4px] flex-none rounded-full px-[7px] py-[1px] text-[10px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>New</span>}
             </button>
             {/* On a phone this line wraps (role, then company and time) instead
-               of squeezing the role to nothing beside Follow (6 Oct 2026). */}
+               of squeezing the role to nothing beside Follow (6 Oct 2026); the
+               role itself wraps too rather than ending in "Investment Banki..."
+               (14 Oct 2026 review). */}
             <span className="flex min-w-0 flex-wrap items-center gap-x-[6px] gap-y-[2px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-              <span className="max-w-full truncate">{pro.role}</span>
+              <span className="max-w-full sm:truncate">{pro.role}</span>
               <span className="flex flex-none items-center gap-[6px]">
                 <span aria-hidden className="flex-none max-sm:hidden">·</span>
                 <CompanyMark name={pro.org} ink="var(--foreground)" className="flex-none opacity-80" />
@@ -2966,8 +2980,9 @@ export function FeedPostRow({
             {!following && <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />}
             <span className="-mr-[6px]"><MoreMenu onSeeLess={onHide} /></span>
           </span>
-        </div>
-        )}
+      </div>
+
+      <div className="relative col-span-full flex min-w-0 flex-col sm:col-span-1 sm:col-start-2">
 
         {/* No "ANSWERED IN TECH & ENGINEERING" label here any more (Joshua,
            4 Oct 2026: it was "too prominent; the eye should move directly
@@ -4405,7 +4420,7 @@ function BoardView({
          ask confirmation; the pros stay on the Pros tab and in their answers. */}
       <div className="mx-auto w-full max-w-[860px]">
       <div className="flex min-w-0 flex-col gap-[var(--space-5)]">
-      <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Posts" }, { key: "updates", label: "Updates" }, { key: "pros", label: "Pros" }, { key: "about", label: "About" }]} />
+      <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Posts" }, { key: "updates", label: "Opportunities" }, { key: "pros", label: "People" }, { key: "about", label: "About" }]} />
 
       {tab === "pros" && (
         <div className="flex flex-col gap-[var(--space-4)]">
@@ -4465,7 +4480,7 @@ function BoardView({
             joined={joined}
             onRequireJoin={onJoin}
             accent={communityAccent(community)}
-            placeholder="What do you want to ask?"
+            placeholder="Ask a question"
             onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
           />
           {/* Surface 40, 27 Sept 2026: wrapped in SurfaceState (fixed data,
@@ -4866,7 +4881,7 @@ function EventView({
           <InlineAsk
               joined
               accent={pAccent}
-              placeholder="Ask what you missed…"
+              placeholder="Ask a question"
               onPost={(text) => setPostedQs((current) => [{ id: `${event.id}-local-${current.length}`, title: text }, ...current])}
             />
           )}
