@@ -4,7 +4,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { COMMUNITIES, INSIGHTS, PROS, THREADS, type InsightGraphic, type Pro } from "./data";
+import { COMMUNITIES, LISTED_COMMUNITIES, INSIGHTS, PROS, THREADS, type InsightGraphic, type Pro } from "./data";
 import { InsightGraphicView, captionFor, publishInsight } from "./FeedBreathers";
 import { PostComposer } from "./PostComposer";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
@@ -134,7 +134,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
   const [showAnswered, setShowAnswered] = useState(false);
   useBackStep(showAnswered, () => setShowAnswered(false)); // one step on Back (8 Oct 2026)
   const posts = INSIGHTS.filter((i) => i.proId === pro.id);
-  const myCommunities = COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
+  const myCommunities = LISTED_COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
   const series = useMemo(() => demoSeries(`${pro.id}-${range}`, RANGE[range].days, RANGE[range].base), [pro.id, range]);
 
   // the month's numbers, scaled from this volunteer's totals (demo)

@@ -118,6 +118,8 @@ export type Program = {
   about?: string;
   gets: string[]; // three short facts, shown with icons
   who: string;
+  /** for adults only (small business owners, young professionals): a student never sees it (15 Oct 2026 audit) */
+  adults?: boolean;
   /** left out when the source gives no season (CapCAN, 10 Oct 2026): the
    *  facts strip drops the cell rather than guess */
   when?: string;

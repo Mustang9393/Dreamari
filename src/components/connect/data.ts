@@ -208,6 +208,8 @@ export type Community = {
   /** People-free banner art for the community card (generated, on-accent). */
   photo: string;
   joined: boolean;
+  /** kept in the data but not listed anywhere (15 Oct 2026, Chandu: hide the other United Way boards for now) */
+  hidden?: boolean;
   unreadAnswers: number;
   recommendedBecause?: string; // explicit-interest explanation (Top 3), never internal rankings
   /** A partner community's third headline number (the AT&T board counts its
@@ -404,8 +406,8 @@ export const COMMUNITIES: Community[] = [
     brandMark: "/images/connect/partners/united-way-white.svg",
     access: "private",
     topics: ["Mentoring", "Internships", "Career Days", "College Prep"],
-    students: 1240,
-    activePros: 286,
+    students: 4050,
+    activePros: 551,
     posts: 0,
     // United Way only (Chandu, 7 Oct 2026: "why is JPMorgan Chase etc being
     // shown in United Way's board card? don't do that"). The volunteers'
@@ -413,7 +415,8 @@ export const COMMUNITIES: Community[] = [
     professionalsFrom: ["United Way"],
     stat: { value: "1,100", label: "United Ways" },
     responseWindow: "Most questions answered within a day",
-    joined: true,
+    joined: false,
+    hidden: true,
     unreadAnswers: 0,
   },
   // United Way · Michigan (8 Oct 2026, Chandu: "build one with the broader
@@ -432,13 +435,14 @@ export const COMMUNITIES: Community[] = [
     brandMark: "/images/connect/partners/united-way-white.svg",
     access: "private",
     topics: ["Student United Way", "Summer Jobs", "Mentoring", "College Prep"],
-    students: 1380,
-    activePros: 212,
+    students: 1495,
+    activePros: 223,
     posts: 0,
     professionalsFrom: ["United Way"],
     stat: { value: "35", label: "United Ways" },
     responseWindow: "Most questions answered within a day",
-    joined: true,
+    joined: false,
+    hidden: true,
     unreadAnswers: 0,
   },
   // United Way of South Central Michigan (10 Oct 2026, from the 8 Oct call
@@ -465,6 +469,11 @@ export const COMMUNITIES: Community[] = [
     unreadAnswers: 0,
   },
 ];
+
+/** The boards a student can see and be offered. Hidden ones stay in COMMUNITIES
+ *  so a direct link or an old reference still resolves. */
+export const LISTED_COMMUNITIES: Community[] = COMMUNITIES.filter((c) => !c.hidden);
+export const HIDDEN_BOARD_IDS: ReadonlySet<string> = new Set(COMMUNITIES.filter((c) => c.hidden).map((c) => c.id));
 
 export const THREADS: Thread[] = [
   {

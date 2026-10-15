@@ -11,7 +11,7 @@ import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
-import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Community, type Insight, type Pro, type Thread } from "./data";
+import { COMMUNITIES, LISTED_COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Community, type Insight, type Pro, type Thread } from "./data";
 import { InsightGraphicView, captionFor } from "./FeedBreathers";
 import { CommunityCard } from "./CommunityCard";
 import { schoolsIn } from "./schoolMarks";
@@ -853,7 +853,7 @@ export function ProProfileView({
   const answers = answersBy(pro.id);
   const posts = postsBy(pro.id);
   // the boards they answer in: their world's board plus the shared one
-  const communities = COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
+  const communities = LISTED_COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
   const [allAnswers, setAllAnswers] = useState(false);
   const [allPosts, setAllPosts] = useState(false);
   // Two tabs, not one long page (direct instruction, 13 Sept 2026, the

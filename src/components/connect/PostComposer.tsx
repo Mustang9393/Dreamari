@@ -38,7 +38,7 @@ ImageIcon, Lightbulb, Redo2, Shuffle, Sparkles, Stamp, Type, Undo2, X,
 import { IconTip } from "@/components/app/IconTip";
 import { Listbox } from "@/components/app/Listbox";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { COMMUNITIES, type Insight, type InsightGraphic, type Pro } from "./data";
+import { LISTED_COMMUNITIES, type Insight, type InsightGraphic, type Pro } from "./data";
 import { EFFECTS, FONTS, GROUPS, GraphicGround, InsightGraphicView, TEMPLATES, boardForPro, resolvePlacement, templateById, type Template } from "./FeedBreathers";
 
 const firstSentence = (s: string, max = 140): string => {
@@ -314,7 +314,7 @@ function Writing({ title, setTitle, body, setBody, prompts, rows, autoFocus = fa
 
 /** Share to: one row, opens the communities (Instagram's Add location). */
 function ShareTo({ portalContainer, boardId, setBoardId, ready, title, body, graphic = false, boards }: { portalContainer: HTMLElement | null; boardId: string; setBoardId: (id: string) => void; ready: boolean; title: string; body: string; graphic?: boolean; boards?: { id: string; name: string }[] }) {
-  const list = boards ?? COMMUNITIES;
+  const list = boards ?? LISTED_COMMUNITIES;
   const board = list.find((c) => c.id === boardId) ?? list[0];
   return (
     <div className="flex-none border-t" style={{ borderColor: "var(--glass-border)" }}>

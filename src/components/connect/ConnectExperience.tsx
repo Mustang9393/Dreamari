@@ -68,6 +68,8 @@ const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: 
 import { AdminDashboardView } from "./AdminDashboard";
 import {
   COMMUNITIES,
+  HIDDEN_BOARD_IDS,
+  LISTED_COMMUNITIES,
   EVENTS,
   EVENT_THREADS,
   INSIGHTS,
@@ -2390,7 +2392,7 @@ function AskForm({
             </button>
             {choosing && (
               <div className="mt-[8px] flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Community">
-                {COMMUNITIES.map((c) => (
+                {LISTED_COMMUNITIES.map((c) => (
                   <button key={c.id} type="button" role="radio" aria-checked={c.id === boardId} onClick={() => { setPicked(c.id); setChoosing(false); }} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={c.id === boardId ? { borderColor: `color-mix(in srgb, ${communityAccent(c)} 60%, var(--glass-border))`, background: `color-mix(in srgb, ${communityAccent(c)} 18%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{c.name}</button>
                 ))}
               </div>
@@ -2483,7 +2485,7 @@ function AskForm({
       </span>
       {choosing && (
       <div className="flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Community">
-        {COMMUNITIES.map((c) => {
+        {LISTED_COMMUNITIES.map((c) => {
           const on = c.id === boardId;
           const a = communityAccent(c);
           return (
@@ -3462,7 +3464,7 @@ function FeedTab({
   const unhideItem = (key: string) => setHiddenKeys((s) => { const next = new Set(s); next.delete(key); return next; });
 
   const ranked = useMemo(
-    () => rankFeed({ pros: PROS, follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds, limit: 300 }),
+    () => rankFeed({ pros: PROS, threads: THREADS.filter((t) => !HIDDEN_BOARD_IDS.has(t.boardId)), insights: INSIGHTS.filter((i) => !HIDDEN_BOARD_IDS.has(i.boardId)), follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds, limit: 300 }),
     [follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds],
   );
   // The rhythm (feed/rankFeed.ts composeFeed, Joshua, 4 Oct 2026): regular
@@ -3595,7 +3597,7 @@ function FeedTab({
   const [dismissedBoards, setDismissedBoards] = useState<Set<string>>(new Set());
   const [dismissedEvents, setDismissedEvents] = useState<Set<string>>(new Set());
   const recommendedPros = useMemo(() => withNewProsFirst(PROS, worlds).filter((p) => !follows[p.id] && !dismissedPros.has(p.id)), [worlds, follows, dismissedPros]);
-  const suggestedBoards = COMMUNITIES.filter((c) => !joined[c.id] && !dismissedBoards.has(c.id)).slice(0, 4);
+  const suggestedBoards = LISTED_COMMUNITIES.filter((c) => !joined[c.id] && !dismissedBoards.has(c.id)).slice(0, 4);
   const suggestedEvents = EVENTS.filter((e) => !dismissedEvents.has(e.id)).slice(0, 3);
   const add = (set: Set<string>, id: string) => new Set(set).add(id);
 
@@ -3820,7 +3822,7 @@ function HomeView({
   // tabs at the top: Public Communities | Private Communities"). Private ones
   // are partner programs and cohorts (Community.access).
   const [access, setAccess] = useState<"public" | "private">("public");
-  const searchedAll = COMMUNITIES.filter((c) => hit(c.name, c.world, c.purpose, c.topics, c.professionalsFrom));
+  const searchedAll = LISTED_COMMUNITIES.filter((c) => hit(c.name, c.world, c.purpose, c.topics, c.professionalsFrom));
     const searched = searchedAll.filter((c) => (access === "private") === (c.access === "private"));
   const searchedEvents = EVENTS.filter((e) => hit(e.name, e.host, e.location, e.topics, e.orgs));
 
@@ -3945,7 +3947,7 @@ function HomeView({
                 : "Only for students in a partner's program or cohort. Partners share internships, scholarships, events and announcements with their own students here."}
             </p>
             <span className="text-[13px] leading-[18px] font-semibold whitespace-nowrap tabular-nums" style={{ color: "var(--muted-foreground)" }}>
-              {COMMUNITIES.filter((c) => (access === "private") === (c.access === "private") && joined[c.id]).length} joined
+              {LISTED_COMMUNITIES.filter((c) => (access === "private") === (c.access === "private") && joined[c.id]).length} joined
             </span>
           </div>
           {/* Symmetric grid, every tile equal weight: three across, two

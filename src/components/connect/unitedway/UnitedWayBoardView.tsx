@@ -1100,9 +1100,17 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const tabOptions = sections.map((k) => ({ key: k, label: pov === "volunteer" && k === "impact" ? "My Impact" : D.SECTION_LABEL[k] }));
   // phones: as many tabs as fit 390px (Team is short; Opportunities is not)
   const phoneTabs = sections[2] === "team" ? 3 : 2;
-  const heroStats = pov === "team"
-    ? [{ value: String(board.chapters.length), label: board.chapters.length === 1 ? board.staff.unit : /[^aeiou]y$/.test(board.staff.unit) ? `${board.staff.unit.slice(0, -1)}ies` : `${board.staff.unit}s` }, { value: String(board.events.length), label: "events" }]
-    : pov === "student" ? board.stats : [{ value: board.myImpact.tiles[0].value, label: "hours given" }];
+  // The hero leads with the board's real scale (the same chapter totals the
+  // Impact maps add up to), not small counts like "4 communities" or "8
+  // events" (Chandu, 15 Oct 2026: "don't show small numbers, this will make
+  // it feel unimpressive"). Every POV sees the same three, so a card, the
+  // hero and the Impact tab can never disagree.
+  const sum = (k: "students" | "volunteers" | "hours") => board.chapters.reduce((n, c) => n + c[k], 0);
+  const heroStats = [
+    { value: sum("students").toLocaleString("en-US"), label: "students" },
+    { value: sum("volunteers").toLocaleString("en-US"), label: "volunteers" },
+    { value: sum("hours").toLocaleString("en-US"), label: "volunteer hours" },
+  ];
   const cover = pov === "volunteer" ? board.photos.volunteers : board.photos.hero;
   const focus = pov === "volunteer" ? board.photos.volunteersFocus : board.photos.heroFocus;
   const evAnnouncements = announcements.filter((p) => (p.section ?? "events") === "events");
@@ -1178,7 +1186,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
                 : (
                   <section className="flex flex-col gap-[var(--space-4)]">
                     <SubHead>Programs</SubHead>
-                    <ProgramsGrid programs={board.programs} joined={joined} open={openProgram} onPost={pov === "team" ? () => setPosting(true) : undefined} stats={pov === "team" ? board.partnerPrograms : undefined} />
+                    <ProgramsGrid programs={pov === "student" ? board.programs.filter((p) => !p.adults) : board.programs} joined={joined} open={openProgram} onPost={pov === "team" ? () => setPosting(true) : undefined} stats={pov === "team" ? board.partnerPrograms : undefined} />
                   </section>
                 )}
               <LabelledPosts items={items} label="opportunity" title="From volunteers" />

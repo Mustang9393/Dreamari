@@ -64,7 +64,7 @@ const PROGRAMS: Program[] = [
     id: "sc-young-leaders", title: "Young Leaders United", kind: "lead", photo: MI.team, focus: "50% 40%",
     line: "For young pros who want to give back.",
     gets: ["Meet leaders in nonprofits and government", "Serve as a group", "Meetups across the region"],
-    who: "College and young professionals", when: "All year", where: "All four communities", by: "United Way of South Central Michigan", status: "open",
+    adults: true, who: "College and young professionals", when: "All year", where: "All four communities", by: "United Way of South Central Michigan", status: "open",
     chapter: null,
   },
   {
@@ -124,7 +124,7 @@ const PROGRAMS: Program[] = [
     line: "Grants and loans for small businesses in Kalamazoo.",
     about: "Both are paused right now. A new round is posted on their social media.",
     gets: ["Micro-enterprise grants up to $5,000", "A small business loan fund", "For businesses in the City of Kalamazoo"],
-    who: "Small business owners", where: "City of Kalamazoo", by: "United Way of South Central Michigan", status: "closed",
+    adults: true, who: "Small business owners", where: "City of Kalamazoo", by: "United Way of South Central Michigan", status: "closed",
     chapter: "kzoo",
     url: "https://unitedforscmi.org/battle-creek-kalamazoo/kalamazoo-micro-enterprise-grants/",
   },
@@ -202,6 +202,7 @@ const EVENTS: UwEvent[] = [
   { id: "sc-e-kickoff", kind: "Info Night", title: "Student United Kickoff", where: "Kalamazoo", virtual: false, about: "Meet your chapter. Pick your first project.", who: "High school and college", date: { month: "Nov", day: 5, time: "5:30 PM", year: 2026 }, going: 58, chapter: "kzoo" },
   { id: "sc-e-convening", kind: "Regional Convening", title: "South Central Convening", where: "Battle Creek", virtual: false, about: "All four towns meet. Students, nonprofits and colleges.", who: "Students and young pros", date: { month: "Nov", day: 14, time: "10:00 AM", year: 2026 }, going: 186, chapter: null },
   { id: "sc-e-capitol", kind: "Visit", title: "Public Service Day in Lansing", where: "Lansing", virtual: false, about: "See how state jobs work. Meet staff who started as interns.", who: "Juniors and seniors", date: { month: "Dec", day: 4, time: "9:00 AM", year: 2026 }, going: 64, chapter: "lan" },
+  { id: "sc-e-nurse", kind: "Job Shadow", title: "Public Health Nurse Shadow Day", where: "Battle Creek", virtual: false, about: "Spend a day with public health nurses. Visit a school and a clinic.", who: "Juniors and seniors", date: { month: "Dec", day: 10, time: "8:30 AM", year: 2026 }, going: 72, chapter: "bc" },
   { id: "sc-e-ylu", kind: "Meetup", title: "Young Leaders United Meetup", where: "Jackson", virtual: false, about: "Meet young pros who work for the public good.", who: "College and young pros", date: { month: "Jan", day: 22, time: "6:00 PM", year: 2027 }, going: 47, chapter: "jx" },
   { id: "sc-e-resume", kind: "Workshop", title: "Résumé Check for Internships", where: "Online", virtual: true, about: "Bring the résumé you built here. Get notes the same night.", who: "Any student", date: { month: "Feb", day: 9, time: "5:00 PM", year: 2027 }, going: 121, chapter: null },
 ];
@@ -261,7 +262,7 @@ const LOCAL_STAFF: StaffPost[] = [
   { id: "sc-s-kz-grant-night", kind: "update", channel: "youth", author: KZ_IMPACT, postedAgo: "1h ago", title: "Grant night room is booked", body: "Youth United Way grant night is Mar 12 at the library. I booked the big room. Chris, can you bring the score sheets?", replies: [{ author: KZ_YOUTH, body: "Yes. I'll print 40.", postedAgo: "45m ago" }] },
   { id: "sc-s-kz-kickoff", kind: "ask", channel: "events", author: KZ_YOUTH, postedAgo: "6h ago", title: "Who can greet families at the kickoff?", body: "Student United kickoff is Nov 5 at 5:30. I need two people at the door for 30 minutes.", replies: [{ author: KZ_IMPACT, body: "I can do it. I'll bring name tags.", postedAgo: "5h ago" }] },
   // Battle Creek
-  { id: "sc-s-bc-chairs", kind: "update", channel: "events", author: BC_IMPACT, postedAgo: "2h ago", pinned: true, title: "Convening setup: 20 more chairs", body: "The room holds 180. We have 160 chairs. The school next door is lending us 20 more.", tasks: [{ office: "Battle Creek", owner: "Alex", task: "Pick up chairs Friday", done: false }, { office: "Battle Creek", owner: "Dana", task: "Confirm lunch count", done: true }], replies: [{ author: BC_VOL, body: "I can pick them up Friday after lunch.", postedAgo: "1h ago" }] },
+  { id: "sc-s-bc-chairs", kind: "update", channel: "events", author: BC_IMPACT, postedAgo: "2h ago", pinned: true, title: "Convening setup: 40 more chairs", body: "The room holds 220. We have 180 chairs. The school next door is lending us 40 more.", tasks: [{ office: "Battle Creek", owner: "Alex", task: "Pick up chairs Friday", done: false }, { office: "Battle Creek", owner: "Dana", task: "Confirm lunch count", done: true }], replies: [{ author: BC_VOL, body: "I can pick them up Friday after lunch.", postedAgo: "1h ago" }] },
   { id: "sc-s-bc-doc", kind: "idea", channel: "volunteer", author: BC_VOL, postedAgo: "1d ago", title: "Let teens pick the Day of Caring projects?", body: "Last year staff picked every project. This year a teen team could pick three. They know what their friends will show up for.", replies: [{ author: BC_IMPACT, body: "Love it. Let's ask Student United at the next meeting.", postedAgo: "20h ago" }] },
   // Lansing
   { id: "sc-s-lan-capcan", kind: "idea", channel: "partners", author: LAN_YOUTH, postedAgo: "4h ago", title: "A FAFSA night with CapCAN?", body: "CapCAN helps families with the FAFSA. Could we host one night with them at our office in January?", replies: [{ author: LAN_EVENTS, body: "Yes. I can book the room and the snacks.", postedAgo: "3h ago" }] },
@@ -388,7 +389,7 @@ export const SOUTH_CENTRAL: UwBoard = {
   volunteerIds: ["pro-doyle", "pro-wong", "pro-reyes", "pro-brooks", "pro-whitfield", "pro-tanaka", "pro-okafor", "pro-ortega"],
   // DEMO-ONLY: the volunteer's day
   today: {
-    since: ["4 new questions from Lansing and Jackson students", "12 students found your post helpful", "The regional convening needs 6 more volunteers"],
+    since: ["4 new questions from Lansing and Jackson students", "12 students found your post helpful", "The regional convening needs 20 more volunteer table hosts"],
     requests: [
       { id: "sc-r1", kind: "Speak", minutes: 45, title: "Join the Oct 28 panel on jobs that help your town" },
       { id: "sc-r2", kind: "Review", minutes: 15, title: "Check Maya's résumé for a city internship" },
@@ -482,7 +483,7 @@ export const SOUTH_CENTRAL: UwBoard = {
     { pro: "pro-wong", checks: "done", hours: 15 },
     { pro: "pro-reyes", checks: "done", hours: 12 },
     { pro: "pro-whitfield", checks: "done", hours: 9 },
-    { pro: "pro-brooks", checks: "training", hours: 3 },
-    { pro: "pro-tanaka", checks: "pending", hours: 0 },
+    { pro: "pro-brooks", checks: "done", hours: 11 },
+    { pro: "pro-tanaka", checks: "done", hours: 9 },
   ],
 };

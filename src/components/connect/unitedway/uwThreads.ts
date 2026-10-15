@@ -45,7 +45,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Andre", grade: "Senior", place: "Midlands", postedAgo: "3d ago", state: "answered",
     routedScope: "Internships", expectedWindow: "within 1 day", helpful: 58, followers: 9, comments: 7,
     responses: [
-      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "3d ago", body: "That's what these programs are for. Young Men United and Ignite both pay. Apply on Programs." },
+      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "3d ago", body: "That's what these programs are for. Young Men United and Ignite both pay. Apply in Opportunities." },
       { kind: "followup", body: "Do I need a résumé before I raise my hand?", postedAgo: "2d ago" },
       { kind: "answer", proId: "pro-whitfield", postedAgo: "2d ago", body: "No. Raise your hand first. Build the résumé while you wait." },
     ],
@@ -172,7 +172,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Andre", grade: "Senior", place: "Lansing", postedAgo: "3d ago", state: "answered",
     routedScope: "Government jobs", expectedWindow: "within 1 day", helpful: 47, followers: 8, comments: 4,
     responses: [
-      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "3d ago", body: "Start with a summer internship. Lansing has lots of state offices. Look at Programs for the public service internships." },
+      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "3d ago", body: "Start with a summer internship. Lansing has lots of state offices. Look in Opportunities for the public service internships." },
     ],
   },
   {
@@ -205,7 +205,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Sam", grade: "Senior", place: "Lansing", postedAgo: "3d ago", state: "answered",
     routedScope: "CapCAN", expectedWindow: "within 1 day", helpful: 29, followers: 7, comments: 2,
     responses: [
-      { kind: "answer", proId: "pro-wong", primary: true, postedAgo: "3d ago", body: "Try CapCAN. They help with the FAFSA and scholarships. Find it in Programs." },
+      { kind: "answer", proId: "pro-wong", primary: true, postedAgo: "3d ago", body: "Try CapCAN. They help with the FAFSA and scholarships. Find it in Opportunities." },
     ],
   },
   {
@@ -322,7 +322,7 @@ export const UW_INSIGHTS: Insight[] = [
   {
     id: "uwi-sc-bc-nurse", boardId: SC, type: "insight", proId: "pro-reyes", place: "Battle Creek",
     title: "Shadow a Public Health Nurse on Dec 10",
-    body: "Spend a day with our public health nurses in Battle Creek on Dec 10. You will visit a school and a clinic. Open to juniors and seniors. Sign up in Programs.",
+    body: "Spend a day with our public health nurses in Battle Creek on Dec 10. You will visit a school and a clinic. Open to juniors and seniors. Sign up in Events.",
     postedAgo: "1d ago", helpful: 52,
     replies: [{ handle: "Nia", grade: "Junior", place: "Battle Creek", body: "Signed up for the shadow day!", postedAgo: "20h ago", likes: 11 }],
   },
@@ -596,7 +596,7 @@ export const UW_STAFF_ANSWERS: Record<string, [name: string, body: string, ago: 
   "mi-t-suw": [["Pat", "Yes. You lead real projects, and colleges like that. Your group's adult lead can write you a letter.", "3d ago"]],
   "mi-t-age": [["Kim", "Yes. Many spots start at 14. Look for service hours in Opportunities.", "4d ago"]],
   "sc-t-student-united": [["Chris", "Yes. Many colleges have a chapter. After college, Young Leaders United is next.", "4d ago"]],
-  "sc-t-fafsa": [["Maya", "CapCAN helps with the FAFSA in Lansing. Find it in Opportunities. We also host a FAFSA night in January.", "3d ago"]],
+  "sc-t-fafsa": [["Maya", "CapCAN helps with the FAFSA in Lansing. Find it in Opportunities. Ask your school counselor about a FAFSA night too.", "3d ago"]],
   "sc-t-hours-swap": [["Tess", "Yes. Hours count in all four towns. Check in when you get there.", "2h ago"]],
   "sc-q-kz-yuw-join": [["Chris", "Yes. Freshmen are welcome. Come to the kickoff on Nov 5 to meet the group.", "6h ago"]],
   "sc-q-across-van": [["Rob", "Yes, if there are seats. Ask your Student United lead by Nov 10.", "40m ago"]],

@@ -4,7 +4,7 @@ import { useContext, useMemo, useState } from "react";
 import { ChevronLeft, Building2, CheckCircle2, Flag, GraduationCap, MessagesSquare, School, ShieldCheck, Trash2, Users, XCircle } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { COMMUNITIES, PROS, THREADS } from "./data";
+import { COMMUNITIES, LISTED_COMMUNITIES, PROS, THREADS } from "./data";
 import { Avatar, CompanyChip, ConnectNav, PrimaryCta, ProAvatar, QuietCta, VerifiedBadge, formatCount } from "./primitives";
 import { Panel, PanelRow, RULE } from "./ProProfile";
 import { AreaChart, Meter, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
@@ -129,7 +129,7 @@ export function AdminDashboardView({ onBack, backLabel = "Back" }: { onBack: () 
 
           <Panel id="communities-title" title="Communities">
             <ul className="-mt-[var(--space-2)] flex flex-col">
-              {COMMUNITIES.map((c) => {
+              {LISTED_COMMUNITIES.map((c) => {
                 const accent = WORLD_COLORS[c.world] ?? ACCENT;
                 const asked = THREADS.filter((t) => t.boardId === c.id).length;
                 return (

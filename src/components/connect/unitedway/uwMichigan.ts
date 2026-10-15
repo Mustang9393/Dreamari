@@ -51,7 +51,7 @@ const CHAPTERS: Chapter[] = [
   { id: "gen", name: "United Way of Genesee County", short: "Genesee", place: "Flint · 2 counties", lon: -83.69, lat: 43.01, students: 96, volunteers: 15, hours: 80, url: "https://www.unitedwaygenesee.org" },
   { id: "bay", name: "United Way of Bay County", short: "Bay County", place: "Bay City · 3 counties", lon: -83.89, lat: 43.59, students: 54, volunteers: 9, hours: 60, url: "https://www.unitedwaybaycounty.org" },
   { id: "mid", name: "United Way of Midland County", short: "Midland", place: "Midland · 1 county", lon: -84.25, lat: 43.62, students: 41, volunteers: 6, hours: 40, url: "https://unitedwaymidland.org" },
-  { id: "mqt", name: "United Way of Marquette County", short: "Marquette", place: "Marquette · 1 county", lon: -87.4, lat: 46.54, students: 38, volunteers: 8, hours: 50, url: "https://www.uwmqt.org" },
+  { id: "mqt", name: "United Way of Marquette County", short: "Marquette", place: "Marquette · 1 county", lon: -87.4, lat: 46.54, students: 96, volunteers: 14, hours: 130, url: "https://www.uwmqt.org" },
 ];
 
 const PROGRAMS: Program[] = [
@@ -173,7 +173,7 @@ const EVENTS: UwEvent[] = [
   },
   { id: "mi-e-fafsa", kind: "Workshop", title: "FAFSA Night", where: "Online", virtual: true, about: "Fill out the FAFSA with help. Michigan grants need it.", who: "Seniors and families", date: { month: "Oct", day: 27, time: "6:30 PM", year: 2026 }, going: 164, chapter: null },
   { id: "mi-e-trades", kind: "Online Panel", title: "Skilled Trades in Michigan", where: "Online", virtual: true, about: "An electrician, a welder and a lineworker. Paid training, no debt.", who: "Any student", date: { month: "Nov", day: 5, time: "6:00 PM", year: 2026 }, going: 231, world: "Tech & Engineering", chapter: null },
-  { id: "mi-e-mcq", kind: "Career Day", title: "MiCareerQuest", where: "West Michigan", virtual: false, about: "Try real tools from real jobs. Health, trades, tech and more.", who: "9th and 10th grade", date: { month: "Nov", day: 18, time: "8:30 AM", year: 2026 }, going: 412, chapter: "lake" },
+  { id: "mi-e-mcq", kind: "Career Day", title: "MiCareerQuest", where: "West Michigan", virtual: false, about: "Try real tools from real jobs. Health, trades, tech and more.", who: "9th and 10th grade", date: { month: "Nov", day: 18, time: "8:30 AM", year: 2026 }, going: 412, chapter: null },
   { id: "mi-e-health", kind: "Online Panel", title: "Health Jobs Without Med School", where: "Online", virtual: true, about: "A nurse, a pharmacist and a therapist. Two years of school or less to start.", who: "Any student", date: { month: "Dec", day: 3, time: "6:00 PM", year: 2026 }, going: 198, world: "Health & Medicine", chapter: null },
   { id: "mi-e-suw", kind: "Info Night", title: "Student United Way Info Night", where: "Wyoming High School", virtual: false, about: "See what the committees do. Bring a friend.", who: "Grades 9 to 12", date: { month: "Jan", day: 21, time: "5:30 PM", year: 2027 }, going: 58, chapter: "hwm" },
   { id: "mi-e-resume", kind: "Workshop", title: "Résumé Check for Summer Jobs", where: "Online", virtual: true, about: "Bring the résumé you built here. Get notes the same night.", who: "Any student", date: { month: "Feb", day: 10, time: "5:00 PM", year: 2027 }, going: 187, chapter: null },

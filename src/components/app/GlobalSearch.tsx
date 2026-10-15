@@ -8,7 +8,7 @@ import { ChevronRight, Briefcase, Building2, GraduationCap, MessagesSquare, Sear
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { careerSlug } from "@/components/career/slug";
 import { COLLEGES, money } from "@/components/colleges/data";
-import { COMMUNITIES, EVENTS, PROS } from "@/components/connect/data";
+import { LISTED_COMMUNITIES, EVENTS, PROS } from "@/components/connect/data";
 import { Avatar, CompanyChip } from "@/components/connect/primitives";
 import { IconTip } from "@/components/app/IconTip";
 import { SurfaceState } from "@/components/app/SurfaceState";
@@ -49,7 +49,7 @@ function search(q: string) {
     return { key: o, href: `/connect?pro=${pros[0].id}`, title: o, sub: pros.length === 1 ? `${pros[0].name} answers here` : `${pros.length} pros answer here`, media: <span className="flex size-[36px] items-center justify-center"><CompanyChip name={o} tone="surface" size="sm" /></span> };
   });
   const communities: Hit[] = [
-    ...COMMUNITIES.filter((c) => hit(`${c.name} ${c.world}`, words)).map((c) => ({ key: c.id, href: `/connect?board=${c.id}`, title: c.name, sub: `Community · ${c.world}` })),
+    ...LISTED_COMMUNITIES.filter((c) => hit(`${c.name} ${c.world}`, words)).map((c) => ({ key: c.id, href: `/connect?board=${c.id}`, title: c.name, sub: `Community · ${c.world}` })),
     ...EVENTS.filter((e) => hit(`${e.name} ${e.host} ${e.location}`, words)).map((e) => ({ key: e.id, href: `/connect?event=${e.id}`, title: e.name, sub: `Event · ${e.location}` })),
   ];
   return { careers, colleges, people, companies, communities };
