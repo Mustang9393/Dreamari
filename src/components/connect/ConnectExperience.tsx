@@ -38,7 +38,8 @@ import { NETWORK, UW_ID, staffPhoto } from "./unitedway/uwData";
 import { MICHIGAN, UW_MI_ID } from "./unitedway/uwMichigan";
 import { SOUTH_CENTRAL, UW_SC_ID } from "./unitedway/uwSouthCentral";
 import { UnitedWayBoardView } from "./unitedway/UnitedWayBoardView";
-import { UW_EVENT_BOARDS, uwEventById } from "./unitedway/uwEvents";
+import { UW_EVENT_BOARDS, uwEventById, uwEventSource } from "./unitedway/uwEvents";
+import { UwEventBoard } from "./unitedway/UwEventBoard";
 import { toggleEventReminder, useEventReminders } from "@/lib/eventReminders";
 import { downloadCalendarFile, parseEventDate } from "@/lib/calendarFile";
 import { replyAs, setReplyAs } from "@/lib/replyAs";
@@ -1911,6 +1912,24 @@ export function ConnectExperience() {
             // a partner board's upcoming event has its own page before the
             // day (details, going, Remind me); Connect's own upcoming events
             // carry no `going` and keep the line below (12 Oct 2026)
+            // a United Way event after the day opens on United Way's own
+            // board (15 Oct 2026, Maisha's review): Questions, Recap,
+            // Photos, People, About
+            const uwSource = uwEventSource(event.id);
+            if (uwSource?.event.followUp && eventJoined[event.id]) {
+              return (
+                <UwEventBoard
+                  event={uwSource.event}
+                  board={uwSource.board}
+                  ev={event}
+                  filter={view.filter}
+                  onFilter={(filter) => setView({ kind: "event", id: event.id, filter })}
+                  onBack={goBack}
+                  backLabel={backLabel}
+                  onOpenBoard={(id, filter) => setView({ kind: "board", id, filter: filter ?? "questions" })}
+                />
+              );
+            }
             if (eventJoined[event.id] || (event.lifecycle === "Upcoming" && event.going !== undefined && !event.code)) {
               return (
                 <EventView

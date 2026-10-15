@@ -249,7 +249,7 @@ export function ItemRow({ item }: { item: UwItem }) {
           <div className="mt-[12px] flex gap-[10px] rounded-[var(--radius-md)] px-[12px] py-[10px]" style={{ background: "var(--glass-surface-1)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
             <PersonButton who={first.who} size={26} />
             <div className="flex min-w-0 flex-col">
-              <span className="flex min-w-0 items-center gap-[6px] text-[13px] leading-[18px]"><NameButton who={first.who} size={13} /><span className="truncate" style={{ color: MUTED }}>{first.who.kind === "student" ? "" : personLine(first.who).split(" · ")[0]}</span></span>
+              <span className="flex min-w-0 items-center gap-[6px] text-[13px] leading-[18px]"><NameButton who={first.who} size={13} /><span className="hidden truncate sm:inline" style={{ color: MUTED }}>{first.who.kind === "student" ? "" : personLine(first.who).split(" · ")[0]}</span></span>
               <p className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{first.body}</p>
             </div>
           </div>
@@ -478,7 +478,8 @@ function ComposerBar({ line, action, onOpen }: { line: string; action: string; o
   return (
     <button type="button" onClick={onOpen} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-lg)] border py-[8px] pr-[8px] pl-[10px] text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
       <PersonAvatar who={nav.me} size={36} />
-      <span className="min-w-0 flex-1 truncate text-[15px]" style={{ color: MUTED }}>{line}</span>
+      <span className="hidden min-w-0 flex-1 truncate text-[15px] sm:block" style={{ color: MUTED }}>{line}</span>
+      <span aria-hidden className="flex-1 sm:hidden" />
       <span className="flex flex-none items-center gap-[6px] rounded-full px-[14px] py-[8px] text-[13px] font-bold" style={SOLID}><PenLine className="h-3.5 w-3.5" aria-hidden /> {action}</span>
     </button>
   );
@@ -528,7 +529,7 @@ export function VolunteersSection({ items, label, setLabel, place, setPlace }: {
     .sort(newestFirst);
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      {nav.pov === "volunteer" && <ComposerBar line="Share an insight, an opportunity or an event update" action="Post" onOpen={() => setComposing(true)} />}
+      {nav.pov === "volunteer" && <ComposerBar line="Share an insight, an opportunity or an event update" action="Share a post" onOpen={() => setComposing(true)} />}
       {composing && <VolunteerComposer onClose={() => setComposing(false)} />}
       <FilterRow count={list.length} noun="from volunteers">
         <PillSelect ariaLabel="Label" value={label} onChange={setLabel} options={[{ value: "all", label: "All posts" }, { value: "insight", label: "Insights" }, { value: "opportunity", label: "Opportunities" }, { value: "event", label: "Event Updates" }]} />

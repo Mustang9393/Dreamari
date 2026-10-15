@@ -137,13 +137,13 @@ export function PersonChip({ who }: { who: UwPerson }) {
  *  board's version chip), so it reads as a setting, not a tab row. */
 export function PovSwitch({ pov, onChange }: { pov: D.UwPov; onChange: (p: D.UwPov) => void }) {
   return (
-    <div className="flex min-w-0 items-center gap-[8px]">
+    <div className="flex w-full min-w-0 flex-col gap-[6px] sm:w-auto sm:flex-row sm:items-center sm:gap-[8px]">
       <span className="flex-none text-[11px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: MUTED }}>Viewing as</span>
-      <div role="radiogroup" aria-label="Viewing as" className="flow-scroll flex min-w-0 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+      <div role="radiogroup" aria-label="Viewing as" className="flex min-w-0 gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
         {D.POVS.map((o) => {
           const on = o.key === pov;
           return (
-            <button key={o.key} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.key)} className="dm-quiet flex min-h-[30px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap"
+            <button key={o.key} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.key)} className="dm-quiet flex min-h-[32px] flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap sm:flex-none"
               style={on ? { background: o.key === "team" ? D.BRAND.yellow : BLUE, color: o.key === "team" ? "#1a1300" : "#fff" } : { color: MUTED }}>
               {o.label}
             </button>
