@@ -2633,3 +2633,9 @@
    shell owns that. Let it overflow. */
 .glossary-game-shell.glossary-game-lab .glossary-engine-main { overflow: visible !important; }
 .glossary-game-shell.glossary-game-lab :is(.glossary-question-guide, .glossary-question-dreamy, .glossary-dreamy-stage, .glossary-power-head) { overflow: visible !important; }
+
+/* Belt and braces for the crop (15 Oct 2026, Chandu: "Dreamy getting
+   cropped", the sort pose's prop sits in the atlas margin): inset the guide
+   by that margin, about a fifth of the slot, so even where the column meets
+   the shell's clipping edge (phones) his art never crosses it. */
+.glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-guide { padding-left: clamp(14px, 2.2vw, 32px) !important; }
