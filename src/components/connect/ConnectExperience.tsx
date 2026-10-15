@@ -1,5 +1,6 @@
 "use client";
 
+import { canGoBack } from "@/lib/backStep";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -8,7 +9,7 @@ import { BorderBeam } from "border-beam";
 import { motion } from "framer-motion";
 
 import Image from "next/image";
-import { Children, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Children, createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { type LucideIcon as ResourceIcon, Handshake, UserRound, Rss } from "lucide-react";
@@ -1596,12 +1597,21 @@ export function ConnectExperience() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  /** Real "back": one step, the same as the browser's. On a fresh load with
-   *  nothing to step back to, Connect's landing. */
+  /** Real "back": one step, the same as the browser's. When Connect's own
+   *  stack is empty (the board was the first Connect screen in this tab:
+   *  opened from Home, a notification, a share link, or reloaded), the
+   *  browser still holds the screen before it, so step through that too.
+   *  Only a cold open with nothing behind it falls back, and then to the
+   *  screen's parent (Communities for a board), never the People tab
+   *  (15 Oct 2026, Chandu: "when I hit back from an open community board,
+   *  don't take me back to the Connect home with People tab. Take me to
+   *  the immediate previous screen I was on, always"). */
   const goBack = useCallback(() => {
-    if (stackRef.current.length === 0) {
-      setViewState({ kind: "home", tab: "people" });
-      window.history.replaceState(window.history.state, "", "/connect");
+    if (stackRef.current.length === 0 && !canGoBack()) {
+      const cur = viewRef.current;
+      const parent: View = cur.kind === "board" || cur.kind === "event" ? { kind: "home", tab: cur.kind === "board" ? "communities" : "events" } : cur.kind === "pro" ? { kind: "home", tab: "people" } : { kind: "home", tab: "feed" };
+      setViewState(parent);
+      window.history.replaceState(window.history.state, "", viewToQuery(parent) ? "/connect" + viewToQuery(parent) : "/connect");
       window.scrollTo(0, 0);
       return;
     }
@@ -2814,7 +2824,7 @@ export function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; 
            "Remove quotation marks around student questions"; the two-line
            clamp cut questions mid-sentence on phones). */}
         <h3 className="mt-[12px] max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>{thread.title}</h3>
-        {thread.context && !pro && <ClampedExcerpt text={thread.context.replace(/\s+/g, " ").trim()} onMore={onOpen} />}
+        {thread.context && !pro && <ClampedExcerpt text={thread.context.replace(/\s+/g, " ").trim()} />}
         {/* The answer as a quoted reply under the question: a straight 2px
            rule down its left, square ends (Chandu, 6 Oct 2026: the first cut
            carried a border radius, so the rule curved at both ends and "looked
@@ -2830,7 +2840,7 @@ export function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; 
               </button>
               <span className="basis-full pl-[34px] text-[13px] leading-[18px] sm:basis-auto sm:truncate sm:pl-0" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
             </span>
-            <ClampedExcerpt text={answer.body.replace(/\s+/g, " ").trim()} onMore={onOpen} />
+            <ClampedExcerpt text={answer.body.replace(/\s+/g, " ").trim()} />
           </div>
         ) : (
           <span className="mt-[10px]"><StatusChip state={thread.state} /></span>
@@ -2886,7 +2896,9 @@ export function FeedPostRow({
   const following = !!nav?.isFollowing(pro.id);
   const boardId = item.kind === "question" ? item.thread.boardId : item.insight.boardId;
   const community = COMMUNITIES.find((c) => c.id === boardId);
-  const worldLabel = community?.world ?? "Connect";
+  // The board's own name, not its world: a General Professional Development
+  // post was labelled "Teaching & Education" (14 Oct 2026 review).
+  const worldLabel = community?.name.replace(/ Careers$/, "") ?? "Connect";
   const postedAgo = item.kind === "question" ? item.thread.postedAgo : item.insight.postedAgo;
   const helpfulTotal = (item.kind === "question" ? item.thread.helpful : item.insight.helpful) + (cardProps.helpful ? 1 : 0);
   const comments = item.kind === "question" ? (item.thread.comments ?? item.thread.responses.length) : item.insight.replies.length;
@@ -2990,15 +3002,19 @@ export function FeedPostRow({
            board now sits at the very bottom, small: see the end of the row. */}
 
         {/* the headline: the question answered, or the post's title */}
+        {/* The whole question or title, no quotation marks (Maisha, 9 Oct
+           2026: "Remove quotation marks around student questions"; the
+           two-line clamp cut questions mid-sentence on phones). */}
         {!visual && (
-        <h3 className="mt-[12px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>
-          {item.kind === "question" ? `“${lead}”` : lead}
+        <h3 className="mt-[12px] max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>
+          {lead}
         </h3>
         )}
 
-        {/* the excerpt: two lines at most (direct ask: "keep truncating to
-           only 2 lines"); Read more opens the thread. A pro's graphic post
-           shows its graphic instead, the Feed's one kind of visual post. */}
+        {/* the excerpt: three lines at most, Read more opens it in place
+           (Show less folds it back); the title and the comment count still
+           open the thread. A pro's graphic post shows its graphic instead,
+           the Feed's one kind of visual post. */}
         {/* The picture at a card's size, never the column's full width (Chandu,
            6 Oct 2026: "the posts got too big to be full width ... you should
            see the image without scrolling, even smaller actually"), with the
@@ -3012,8 +3028,8 @@ export function FeedPostRow({
            about as tall as its neighbours; phones keep it full width with the
            caption under it. */}
         {item.kind === "insight" && item.insight.graphic
-          ? <GraphicPostBody insight={item.insight} caption={caption} onMore={openDiscussion} />
-          : body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} onMore={openDiscussion} />}
+          ? <GraphicPostBody insight={item.insight} caption={caption} />
+          : body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} />}
 
         {/* counts, spread like Twitter's; save and share at the far right.
            "Ask a follow-up" is gone (Joshua: comments cover it). */}
@@ -3071,27 +3087,34 @@ export function FeedPostRow({
   );
 }
 
-/** Two lines of excerpt, and a Read more under them only when the text
+/** Three lines of excerpt, and a Read more under them only when the text
  *  really runs longer (measured, not guessed from a character count, so it
- *  holds at every column width). Twitter's "Show more" sits the same way,
- *  on its own line, because a link at the end of a clipped line gets cut. */
-function ClampedExcerpt({ text, onMore }: { text: string; onMore: () => void }) {
+ *  holds at every column width). Read more opens the rest in place and
+ *  turns into Show less (14 Oct 2026 Connect UX review: it used to open
+ *  the thread, which the title and the comment count already do). Twitter's
+ *  "Show more" sits the same way, on its own line, because a link at the
+ *  end of a clipped line gets cut. */
+function ClampedExcerpt({ text }: { text: string }) {
   const ref = useRef<HTMLParagraphElement | null>(null);
+  const id = useId();
   const [clipped, setClipped] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || expanded) return;
     const check = () => setClipped(el.scrollHeight - el.clientHeight > 2);
     check();
     const observer = new ResizeObserver(check);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [text]);
+  }, [text, expanded]);
   return (
     <>
-      <p ref={ref} className="mt-[8px] line-clamp-2 max-w-[66ch] text-[15px] leading-[25px]" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{text}</p>
-      {clipped && (
-        <button type="button" onClick={onMore} className="dm-link relative z-20 mt-[2px] w-fit cursor-pointer text-[14px] leading-[22px] font-semibold" style={{ color: "var(--accent-subtle)" }}>Read more</button>
+      <p id={id} ref={ref} className={`mt-[8px] max-w-[66ch] text-[15px] leading-[25px] ${expanded ? "" : "line-clamp-3"}`} style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{text}</p>
+      {(clipped || expanded) && (
+        <button type="button" aria-expanded={expanded} aria-controls={id} onClick={() => setExpanded((v) => !v)} className="dm-link relative z-20 mt-[2px] w-fit cursor-pointer text-[14px] leading-[22px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
+          {expanded ? "Show less" : "Read more"}
+        </button>
       )}
     </>
   );
@@ -3135,7 +3158,7 @@ function AskComposerCard({ onAsk, compact = false, flush = false }: { onAsk: () 
   return (
     <button type="button" onClick={open} className={compact ? "dm-quiet flex min-h-[48px] w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border py-[6px] pr-[6px] pl-[12px] text-left" : `dm-quiet flex min-h-[64px] w-full cursor-pointer items-center gap-[12px] py-[var(--space-4)] text-left ${flush ? "-mx-[8px] w-[calc(100%+16px)] rounded-[var(--radius-md)] px-[8px]" : "px-[var(--space-4)] sm:px-[var(--space-5)]"}`} style={compact ? { borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 40%, transparent)" } : undefined}>
       {!compact && <Avatar name="Jordan Rivera" size={40} />}
-      <span className={`min-w-0 flex-1 truncate ${compact ? "text-[14px] leading-[20px]" : "text-[16px] leading-[22px]"} ${nudge ? "dm-text-nudge" : ""}`} style={{ color: "var(--muted-foreground)" }}>{compact ? "Type your question…" : "Ask professionals a question"}</span>
+      <span className={`min-w-0 flex-1 truncate ${compact ? "text-[14px] leading-[20px]" : "text-[16px] leading-[22px]"} ${nudge ? "dm-text-nudge" : ""}`} style={{ color: "var(--muted-foreground)" }}>{compact ? "Type your question…" : "Ask a question"}</span>
       <span className={`flex flex-none items-center gap-[5px] rounded-full px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold ${nudge ? "motion-safe:animate-[next-step-cta-pulse_2.6s_ease-out_infinite]" : ""}`} style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" }}>
         Ask <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
       </span>
@@ -4625,8 +4648,8 @@ function OpportunityUpdateCard({ item }: { item: RelevantItem }) {
  *  feed image's width (300 to 340px) beside the column on wide screens,
  *  full width on a phone, the caption above it. The Framed and Wide
  *  layouts, the small size and the A/B switch are gone. */
-function GraphicPostBody({ insight, caption, onMore }: { insight: Insight; caption: string; onMore: () => void }) {
-  const cap = caption ? <div className="mt-[8px] max-w-[60ch]"><ClampedExcerpt text={caption} onMore={onMore} /></div> : null;
+function GraphicPostBody({ insight, caption }: { insight: Insight; caption: string }) {
+  const cap = caption ? <div className="mt-[8px] max-w-[60ch]"><ClampedExcerpt text={caption} /></div> : null;
   return (
     <>
       {cap}
