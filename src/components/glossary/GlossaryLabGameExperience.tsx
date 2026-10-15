@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createContext, Fragment, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Activity, ArrowLeftRight, Banknote, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Coins, Database, Flame, HandCoins, HeartPulse, Landmark, LineChart, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Percent, PieChart, PiggyBank, Play, Plug, Receipt, ScrollText, Siren, Sparkles, Stethoscope, TrendingDown, TrendingUp, TriangleAlert, UserRound, Users, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
+import { Activity, ArrowLeftRight, Banknote, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Coins, Database, Flame, HandCoins, HeartPulse, Landmark, LineChart, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Percent, PieChart, PiggyBank, Play, Plug, Receipt, ScrollText, Siren, SkipForward, Sparkles, Stethoscope, TrendingDown, TrendingUp, TriangleAlert, UserRound, Users, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
 import { goBackOr, QuickLinksMenu } from "@/components/app/chrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -425,7 +425,7 @@ function MuteToggle() {
   );
 }
 
-function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestart, hud }: { onBack: () => void; /** Signal: the progress HUD rides in the middle of this one bar (6 Oct 2026) */ hud?: React.ReactNode; onOpenLevels?: () => void; atmosphere?: LabAtmosphere; onAtmosphereChange?: (next: LabAtmosphere) => void; onRestart?: () => void }) {
+function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestart, onSkip, hud }: { onBack: () => void; /** DEMO-ONLY: fast-forward with a winning outcome (16 Oct 2026) */ onSkip?: () => void; /** Signal: the progress HUD rides in the middle of this one bar (6 Oct 2026) */ hud?: React.ReactNode; onOpenLevels?: () => void; atmosphere?: LabAtmosphere; onAtmosphereChange?: (next: LabAtmosphere) => void; onRestart?: () => void }) {
   const { playSelect } = useMaterialSounds();
   const [themesOpen, setThemesOpen] = useState(false);
   useEffect(() => {
@@ -459,6 +459,10 @@ function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestar
           </div>
         ) : null}
         {onRestart ? <button type="button" className="glossary-topbar-action glossary-restart-action dm-quiet" onClick={onRestart} aria-label="Restart game"><RotateCw className="h-[16px] w-[16px]" aria-hidden /><span>Restart</span></button> : null}
+        {/* DEMO-ONLY: Skip. Every press moves to the next screen with a winning
+           result (16 Oct 2026, Chandu: "a skip button with always positive
+           consequences so i can speed through it for demos"). */}
+        {onSkip ? <button type="button" className="glossary-topbar-action glossary-skip-action dm-quiet" onClick={onSkip} aria-label="Skip ahead (demo)"><SkipForward className="h-[16px] w-[16px]" aria-hidden /><span>Skip</span></button> : null}
         <MuteToggle />
         <QuickLinksMenu />
       </div>
@@ -3435,6 +3439,28 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     window.setTimeout(playSceneChange, 0);
   }
 
+  // DEMO-ONLY: Skip (16 Oct 2026, Chandu: "a skip button with always
+  // positive consequences so i can speed through it for demos"). Each press
+  // is a win: flashcards jump to the unlock finale, a question is committed
+  // as right with every term of the lesson credited (so mastery and the
+  // streak only climb), the Power Play is passed, the results open, and
+  // from the results the next level starts.
+  function demoSkip() {
+    if (screen === "intro") { setMusicStarted(true); goTo("unlock"); return; }
+    if (screen === "unlock") { if (unlockIndex >= lesson.terms.length) goTo("question"); else setUnlockIndex(lesson.terms.length); return; }
+    if (screen === "question") {
+      if (!current) return;
+      const win: AnswerResult = { correct: true, creditedTermIds: lesson.terms.map((term) => term.id) };
+      setFeedbackTyping(false);
+      advanceQuestion(win);
+      return;
+    }
+    if (screen === "powerPlayIntro") { goTo("powerPlay"); return; }
+    if (screen === "powerPlay") { goTo("masteryLoading"); return; }
+    if (screen === "masteryLoading") { setScreen("complete"); return; }
+    if (screen === "complete" && nextLesson) playLesson(nextLesson.lessonNumber);
+  }
+
   function exitToCareer() {
     router.push(`/career/${career.careerSlug}`);
   }
@@ -3452,16 +3478,16 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     setPendingResult(result);
   }
 
-  function advanceQuestion() {
+  function advanceQuestion(result: AnswerResult | null = pendingResult) {
     // Learning checkpoint, not a failed certification: edits remain free,
     // and only a recovered answer commits mastery and advances the sequence.
-    if (!pendingResult?.correct) return;
+    if (!result?.correct) return;
     const nextMastery = { ...mastery };
     // One credit per term per question: a Level 3 sort tags all five items
     // Cash Flow, which must count once, not five times.
-    for (const id of new Set(pendingResult.creditedTermIds)) nextMastery[id] = (nextMastery[id] ?? 0) + 1;
+    for (const id of new Set(result.creditedTermIds)) nextMastery[id] = (nextMastery[id] ?? 0) + 1;
     setMastery(nextMastery);
-    if (pendingResult.correct) {
+    if (result.correct) {
       const nextStreak = streak + 1;
       setStreak(nextStreak);
       if (nextStreak > 0 && nextStreak % 5 === 0) setShowStreak(nextStreak);
@@ -3596,6 +3622,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         atmosphere={variant === "lab" && screen !== "intro" ? atmosphere : undefined}
         onAtmosphereChange={variant === "lab" && screen !== "intro" ? setAtmosphere : undefined}
         onRestart={variant === "lab" && screen !== "intro" ? restartGame : undefined}
+        onSkip={variant === "lab" && !(screen === "complete" && !nextLesson) ? demoSkip : undefined}
         hud={signalBar ? hudNode : undefined}
       />
 

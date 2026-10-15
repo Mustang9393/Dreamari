@@ -57,6 +57,13 @@
 - **Hidden boards:** `Community.hidden` on the network (Student Success) and Michigan boards, `joined: false`. They stay in the data and a direct link still opens them, but the directory, search, suggestions, post picker, admin list, pro profile boards and the Feed (rankFeed gets the filtered threads and insights) no longer show them. Mentorship's e-Mentorship tab still opens the network board; not changed.
 - **Not fixed from the audit:** cross-board numbers for the same program (Bigs in Schools 172 on Michigan vs 112 on South Central), Michigan's and South Central's company hour standings exceeding board totals, event follow-up "posts" and "pros" counts, `Thread.comments` inflation (about 50 questions), duplicate student identities across towns, past-dated network items (a mentor shift on Oct 14 and its e-Mentorship meeting), and the thin Volunteers feeds on the hidden boards. Michigan and network are hidden, so most of these are parked.
 - **Verified:** own dev server (port 3013): South Central hero shows the three chips; the Private tab lists only AT&T and South Central; `tsc` clean.
+## 2026-10-16: Glossary Games: DEMO-ONLY Skip in the top bar
+
+**Why (Chandu):** "can you add a skip button with always positive consequences so i can speed through it for demos?"
+
+- A `Skip` action beside Restart (every screen but a finished last level). Each press moves on with a winning result: intro to the flashcards, flashcards to the unlock finale, finale to practice, a question committed as right with every term of the lesson credited (`advanceQuestion` now takes the result it commits, defaulting to the pending one), Power Play intro to the board, board to the mastery count, count to the results, results to the next level. Mastery and the streak only climb, so a skipped run ends at Mastered 100%.
+- Tagged `DEMO-ONLY` in `TopBar` and `demoSkip`; the button is part of the demo chrome and should not ship to students.
+- Checked: a full Drift Level 1 skip-through on :3012 (14 presses from intro to Level 2's intro).
 
 ## 2026-10-15 (late night): Glossary Games: Power Play chips, words-card composition, Dreamy faces the card, Complete screen as a payoff
 
