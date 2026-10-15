@@ -474,3 +474,16 @@
    (the cloud is wider than its column, so it sat left of centre) */
 .glossary-game-lab .glossary-unlock-gallery-dreamy { place-content: center; }
 
+
+/* Welcome screens, Levels 2+ (15 Oct 2026, Chandu: "so much copy on the
+   welcome screens for each level ... reduce that dramatically and make sure
+   the main content is larger"): the line and the value ticker are gone, one
+   goal line stays, and the headline runs bigger. */
+.glossary-game-lab .glossary-welcome-goal { display: block; margin: 4px 0 26px; font: 800 clamp(18px, calc(1.7vw / var(--vz, 1)), 24px)/1.25 var(--font-display); color: var(--glossary-accent); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-goal { font: 700 clamp(22px, calc(2vw / var(--vz, 1)), 30px)/1.2 var(--sig-font); letter-spacing: .02em; text-transform: uppercase; text-shadow: 2px 2px 0 #04101f; }
+.glossary-game-shell.glossary-game-lab .glossary-welcome-scene.is-story .glossary-welcome-copy h1.glossary-welcome-story { font-size: clamp(44px, calc(6vw / var(--vz, 1)), 84px) !important; line-height: 1 !important; }
+.glossary-game-shell.glossary-game-lab .glossary-welcome-scene.is-story .glossary-welcome-copy h1.glossary-welcome-story em { max-width: 12ch !important; }
+.glossary-game-lab .glossary-welcome-copy .glossary-welcome-kicker { font-size: 12px; }
+@media (max-width: 640px) {
+  .glossary-game-shell.glossary-game-lab .glossary-welcome-scene.is-story .glossary-welcome-copy h1.glossary-welcome-story { font-size: 44px !important; }
+}

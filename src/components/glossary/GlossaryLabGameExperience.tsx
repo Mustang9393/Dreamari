@@ -523,8 +523,11 @@ function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1" }:
              intro headline and line) and the value the level reaches. Level
              1 keeps "Meet Dream Sneakers". */}
           {story ? <h1 className="glossary-welcome-story" data-length={story.headline.length > 22 ? "long" : "short"}><em>{story.headline}</em></h1> : <h1><span>Meet</span><em>{lesson.exampleCompany}</em></h1>}
-          <p>{story ? story.line : "Learn business by playing it."}</p>
-          {story ? <ValuationTicker from={lesson.previousCompanyValue ?? 0} to={lesson.companyValue} milestone={lesson.milestone} mode="goal" /> : null}
+          {/* One line, not a paragraph and a value ticker (Chandu, 15 Oct: "so much
+             copy on the welcome screens for each level, reduce that dramatically
+             and make sure the main content is larger"): the headline and the
+             goal, and the level's art does the rest. */}
+          {story ? <span className="glossary-welcome-goal">Goal: {lesson.milestone}</span> : <p>Learn business by playing it.</p>}
           <button type="button" onClick={onNext} className="dm-solid glossary-welcome-cta flex cursor-pointer items-center justify-center gap-[8px] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold" style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}>
             Start <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
