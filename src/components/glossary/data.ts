@@ -11,6 +11,8 @@
 // split the rest of the app already uses (career/data.ts's "Coming soon").
 
 import { FIN_LESSON_2, FIN_LESSON_3, FIN_LESSON_4 } from "./data-finance-l2-4";
+import { buildGlossaryCareer } from "./generate";
+import { REGISTERED_NURSE_GLOSSARY } from "./blueprints/registered-nurse";
 
 export type GlossaryTerm = {
   id: string;
@@ -212,6 +214,8 @@ export type GlossaryCareer = {
   careerSlug: string;
   careerTitle: string;
   world: string;
+  /** The subject word in the game's own copy: "finance", "nursing". */
+  subject: string;
   lessons: GlossaryLesson[];
   levels: GlossaryLevel[];
   chapters: GlossaryChapter[];
@@ -426,6 +430,7 @@ const GLOSSARY_CAREERS: Record<string, GlossaryCareer> = {
     careerSlug: "investment-banking",
     careerTitle: "Investment Banking",
     world: "Business & Finance",
+    subject: "finance",
     // Levels 2 to 4 from Joshua's Replit (13 Oct 2026), data-finance-l2-4.ts.
     lessons: [FIN_LESSON_1, FIN_LESSON_2, FIN_LESSON_3, FIN_LESSON_4],
     levels: IB_LEVELS,
@@ -438,6 +443,10 @@ const GLOSSARY_CAREERS: Record<string, GlossaryCareer> = {
       { number: 3, name: "The Big Leagues", tier: "Advanced" },
     ],
   },
+  // Generated from a blueprint (16 Oct 2026): the proof that any career's
+  // term list becomes levels and games. See generate.ts and
+  // docs/handoff/specs/glossary-system.md.
+  "registered-nurse": buildGlossaryCareer(REGISTERED_NURSE_GLOSSARY),
 };
 
 export function hasGlossary(slug: string): boolean {

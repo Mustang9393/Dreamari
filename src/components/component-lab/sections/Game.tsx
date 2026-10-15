@@ -17,6 +17,7 @@ import { BespokePiecesGroup, ProceduralCelebrations } from "./game/BespokePieces
 import { CinematicPiecesGroup } from "./game/CinematicPieces";
 import { GameThemesGroup } from "./game/GameThemes";
 import { GlossaryLevelsGroup } from "./game/GlossaryLevels";
+import { GlossaryLiveGroup } from "./game/GlossaryLive";
 import { GlossaryScreensGroup } from "./game/GlossaryScreens";
 import { PlayHubCardsGroup } from "./game/PlayHubCards";
 import { PlayInteractionsGroup } from "./game/PlayInteractions";
@@ -69,7 +70,11 @@ export function GameSection() {
         <PlayHubCardsGroup />
       </Group>
 
-      <Group title="Glossary game" has={["core"]}>
+      <Group title="Glossary game, live engine (Drift and Signal)" has={["core"]}>
+        <GlossaryLiveGroup />
+      </Group>
+
+      <Group title="Glossary game (retired engine, unrouted)" has={["core"]}>
         <GlossaryScreensGroup />
       </Group>
 

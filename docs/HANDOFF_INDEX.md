@@ -19,6 +19,10 @@ DEMO-ONLY: `?v=2` on `/play/registered-nurse` opts into the 18 selected full-sce
 6a. When a screen needs an empty, loading, error, or edge-case treatment and no locked spec says otherwise, use `docs/COMPONENT_STATES_PLAYBOOK.md`'s default instead of inventing one or waiting on a design pass.
 7. Before treating anything below as still true, grep for it (`DEMO-ONLY` in code, the flag name, the file). This section decays; the code is the source of truth for whether a flag still exists.
 
+## Glossary Games as a system (16 October 2026)
+
+- `docs/handoff/specs/glossary-system.md`: any career's five-terms-per-level blueprint becomes its levels, questions, review set and Power Play through `src/components/glossary/generate.ts`. Investment Banking stays authored; Registered Nurse is the generated proof. Every live piece is in the Component Lab under "Glossary game, live engine".
+
 ## Counselor Dashboard v2 (read these before touching `src/components/counselor/v2/`)
 
 - `docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md`: every content, data and structure change from the Replit reference, with the alternative it beat.

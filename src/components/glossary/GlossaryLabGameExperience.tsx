@@ -109,6 +109,13 @@ const SIGNAL_CLOUD_SPEAKING = "/images/glossary/signal/cloud-speaking.webp";
 /** The playing theme, so every component (term art, mascot, bubble) can
  *  swap its skin without a prop threaded through forty call sites. */
 const AtmosphereContext = createContext<LabAtmosphere>("v1");
+/** Component Lab only (16 Oct 2026): render live glossary pieces under a
+ *  theme without the whole experience. Pair it with the shell classes the
+ *  stylesheets key on (see GlossaryLive.tsx in the lab). */
+export function GlossaryLabAtmosphere({ atmosphere, children }: { atmosphere: "v1" | "v2"; children: React.ReactNode }) {
+  return <AtmosphereContext.Provider value={atmosphere}>{children}</AtmosphereContext.Provider>;
+}
+export type GlossaryLabTheme = "v1" | "v2";
 function useAtmosphere(): LabAtmosphere {
   return useContext(AtmosphereContext);
 }
@@ -277,7 +284,7 @@ function termAssetFor(label: string, assets: Record<string, string> = TERM_ASSET
 
 /** Complete faces share one optical frame. Facial frames are in a single
  * atlas, so blinking/talking never swaps image URLs or changes layout. */
-function AnimatedDreamy({ pose, size, talking, signal, reward = false }: { pose: DreamyPose; size: number; talking?: boolean; /** Signal's reviewed pixel reactions (four poses); without it, Drift's atlas */ signal?: SignalReaction; /** play the reward pluses behind him once, on mount */ reward?: boolean }) {
+export function AnimatedDreamy({ pose, size, talking, signal, reward = false }: { pose: DreamyPose; size: number; talking?: boolean; /** Signal's reviewed pixel reactions (four poses); without it, Drift's atlas */ signal?: SignalReaction; /** play the reward pluses behind him once, on mount */ reward?: boolean }) {
   const reduced = useReducedMotion();
   const reaction = dreamyReaction(pose);
   const [autoTalking, setAutoTalking] = useState(true);
@@ -340,7 +347,7 @@ function SignalCloud({ pose, size, talking }: { pose: string; size: number; /** 
   );
 }
 
-function DreamyFace({ pose, size = 96, talking, reward }: { pose: DreamyPose; size?: number; talking?: boolean; reward?: boolean }) {
+export function DreamyFace({ pose, size = 96, talking, reward }: { pose: DreamyPose; size?: number; talking?: boolean; reward?: boolean }) {
   const atmosphere = useAtmosphere();
   if (atmosphere === "v2") {
     // Signal mixes Codex's four reviewed pixel reactions (curious, calculate,
@@ -376,7 +383,7 @@ function dreamyAssetFor(atmosphere: LabAtmosphere, pose: string, small = false) 
   return `/images/dreamy/v2/dreamy-${pose}.webp`;
 }
 
-function SpeechBubble({ children, tone = "neutral", aside }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong"; /** a small line under Dreamy's words, inside the bubble (the activity's live hint) */ aside?: React.ReactNode }) {
+export function SpeechBubble({ children, tone = "neutral", aside }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong"; /** a small line under Dreamy's words, inside the bubble (the activity's live hint) */ aside?: React.ReactNode }) {
   const atmosphere = useAtmosphere();
   const bg = tone === "correct" ? "color-mix(in srgb, var(--success, #1f9d55) 14%, var(--card))" : tone === "wrong" ? "color-mix(in srgb, var(--danger, #e0483e) 12%, var(--card))" : "var(--glass-surface-1)";
   if (atmosphere === "v2") {
@@ -425,7 +432,7 @@ function MuteToggle() {
   );
 }
 
-function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestart, onSkip, hud }: { onBack: () => void; /** DEMO-ONLY: fast-forward with a winning outcome (16 Oct 2026) */ onSkip?: () => void; /** Signal: the progress HUD rides in the middle of this one bar (6 Oct 2026) */ hud?: React.ReactNode; onOpenLevels?: () => void; atmosphere?: LabAtmosphere; onAtmosphereChange?: (next: LabAtmosphere) => void; onRestart?: () => void }) {
+export function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestart, onSkip, hud }: { onBack: () => void; /** DEMO-ONLY: fast-forward with a winning outcome (16 Oct 2026) */ onSkip?: () => void; /** Signal: the progress HUD rides in the middle of this one bar (6 Oct 2026) */ hud?: React.ReactNode; onOpenLevels?: () => void; atmosphere?: LabAtmosphere; onAtmosphereChange?: (next: LabAtmosphere) => void; onRestart?: () => void }) {
   const { playSelect } = useMaterialSounds();
   const [themesOpen, setThemesOpen] = useState(false);
   useEffect(() => {
@@ -484,7 +491,7 @@ function shortMoney(value: number): string {
  *  ($10K to $30B on Joshua's ladder). On the results screen it counts up
  *  from the value before the lesson; on an intro it shows the next goal.
  *  A game value, not money the student earns (the Replit says so too). */
-function ValuationTicker({ from, to, milestone, mode }: { from: number; to: number; milestone: string; mode: "goal" | "reached" }) {
+export function ValuationTicker({ from, to, milestone, mode, company = "Dream Sneakers" }: { from: number; to: number; milestone: string; mode: "goal" | "reached"; /** the career's example company */ company?: string }) {
   const reduced = useReducedMotion();
   const animate = mode === "reached" && !reduced && from !== to;
   const [shown, setShown] = useState(animate ? from : to);
@@ -503,8 +510,8 @@ function ValuationTicker({ from, to, milestone, mode }: { from: number; to: numb
   }, [animate, from, to]);
   const pct = mode === "reached" ? 100 : Math.max(6, Math.round((from / Math.max(to, 1)) * 100));
   return (
-    <div className={`glossary-valuation is-${mode}`} aria-label={mode === "reached" ? `Dream Sneakers is now worth $${to.toLocaleString()}. ${milestone}.` : `Dream Sneakers is worth $${from.toLocaleString()}. Finish this level to reach $${to.toLocaleString()}: ${milestone}.`}>
-      <span className="glossary-valuation-kicker"><Building2 aria-hidden /> Dream Sneakers value</span>
+    <div className={`glossary-valuation is-${mode}`} aria-label={mode === "reached" ? `${company} is now worth $${to.toLocaleString()}. ${milestone}.` : `${company} is worth $${from.toLocaleString()}. Finish this level to reach $${to.toLocaleString()}: ${milestone}.`}>
+      <span className="glossary-valuation-kicker"><Building2 aria-hidden /> {company} value</span>
       <b className="glossary-valuation-value">${(mode === "reached" ? shown : from).toLocaleString()}</b>
       <span className="glossary-valuation-track" aria-hidden><i style={{ width: `${pct}%` }} /></span>
       <span className="glossary-valuation-next">
@@ -515,7 +522,7 @@ function ValuationTicker({ from, to, milestone, mode }: { from: number; to: numb
   );
 }
 
-function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1" }: { lesson: GlossaryLesson; onNext: () => void; variant?: ExperienceVariant; atmosphere?: LabAtmosphere }) {
+export function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1", subject = "finance", hero = true }: { lesson: GlossaryLesson; onNext: () => void; variant?: ExperienceVariant; atmosphere?: LabAtmosphere; /** the career's subject word ("finance", "nursing") */ subject?: string; /** the welcome illustration is Dream Sneakers' shop; a generated career has none and gets Dreamy alone (16 Oct 2026) */ hero?: boolean }) {
   const { theme } = useGlobalTheme();
   if (variant === "lab") {
     const story = lesson.intro;
@@ -531,14 +538,16 @@ function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1" }:
              copy on the welcome screens for each level, reduce that dramatically
              and make sure the main content is larger"): the headline and the
              goal, and the level's art does the rest. */}
-          {story ? <span className="glossary-welcome-goal">Goal: {lesson.milestone}</span> : <p>Learn business by playing it.</p>}
+          {story ? <span className="glossary-welcome-goal">Goal: {lesson.milestone}</span> : <p>Learn {subject} by playing it.</p>}
           <button type="button" onClick={onNext} className="dm-solid glossary-welcome-cta flex cursor-pointer items-center justify-center gap-[8px] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold" style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}>
             Start <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
         </div>
 
         <div className="glossary-welcome-world" aria-hidden>
-          {atmosphere === "v2"
+          {!hero
+            ? <span className="glossary-welcome-cloud is-alone"><DreamyFace pose={story ? "explain" : "welcome"} size={220} /></span>
+            : atmosphere === "v2"
             ? <Image src={SIGNAL_ASSETS.Customer} alt="" width={960} height={540} priority unoptimized className="glossary-welcome-hero glossary-signal-hero" />
             : <>
                 <Image src={assetsFor(atmosphere).Company} alt="" width={768} height={768} priority unoptimized className="glossary-welcome-hero glossary-welcome-shop" />
@@ -557,7 +566,7 @@ function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1" }:
           Meet {lesson.exampleCompany}
         </h1>
         <p className="text-[15px] leading-[21px]" style={{ color: "var(--foreground)" }}>
-          You&apos;ll learn finance words using {lesson.exampleCompany} as your example.
+          You&apos;ll learn {subject} words using {lesson.exampleCompany} as your example.
         </p>
       </div>
       <button
@@ -662,7 +671,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
  *  filter, so the clean vector strokes read as pencil on paper. Ruled
  *  lines and a hand-placed tilt finish the sketchbook feel without a
  *  single new image asset. */
-function SketchFace({ term, definition, icon, artSrc, style, concept = false, formula, words = false }: { term: string; definition?: string; icon: string; artSrc?: string; style?: React.CSSProperties; /** a lab card for a term with no art */ concept?: boolean; formula?: string; /** Levels 2+: words only, no picture and no icon (Chandu, 15 Oct 2026: "NO icons at all") */ words?: boolean }) {
+export function SketchFace({ term, definition, icon, artSrc, style, concept = false, formula, words = false }: { term: string; definition?: string; icon: string; artSrc?: string; style?: React.CSSProperties; /** a lab card for a term with no art */ concept?: boolean; formula?: string; /** Levels 2+: words only, no picture and no icon (Chandu, 15 Oct 2026: "NO icons at all") */ words?: boolean }) {
   return (
     <span
       className={`glossary-flashcard-front absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,calc(2dvh/var(--vz,1)),18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden] ${artSrc || concept || words ? "glossary-lab-card-face" : ""} ${concept ? "glossary-concept-face" : ""} ${words ? "glossary-words-face" : ""}`}
@@ -731,7 +740,7 @@ function SketchFace({ term, definition, icon, artSrc, style, concept = false, fo
 
 const CONCEPT_POSES = ["explain", "hint", "explain", "case", "explain"] as const;
 
-function UnlockScreen({
+export function UnlockScreen({
   lesson,
   index,
   onUnlock,
@@ -754,7 +763,7 @@ function UnlockScreen({
   // experience"). Dreamy leans in and the worked line carries the maths.
   // Level 1 keeps its five pictures. The small tokens (HUD, relics, match
   // cards) keep their art everywhere: those are collectibles, not lessons.
-  const wordsOnly = variant === "lab" && lesson.lessonNumber > 1;
+  const wordsOnly = variant === "lab" && (lesson.lessonNumber > 1 || Object.keys(assets).length === 0);
   const termArt = wordsOnly ? undefined : assets[term.id];
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
@@ -931,7 +940,7 @@ function UnlockScreen({
   );
 }
 
-function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: { lesson: GlossaryLesson; onStartPractice: () => void; variant?: ExperienceVariant }) {
+export function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: { lesson: GlossaryLesson; onStartPractice: () => void; variant?: ExperienceVariant }) {
   const { playCorrect, playSweep } = useMaterialSounds();
   const assets = useTermAssets();
   const { theme } = useGlobalTheme();
@@ -2003,7 +2012,7 @@ function shuffleStable<T>(items: T[], seed: string): T[] {
 
 /** Plus-shaped sparks (and, in Signal, its pixel coins) rising from behind
  *  the one Dreamy on a right answer. Mount it to play once. */
-function RewardPluses() {
+export function RewardPluses() {
   const atmosphere = useAtmosphere();
   return (
     <>
@@ -2019,7 +2028,7 @@ function RewardPluses() {
   );
 }
 
-function QuestionScreen({
+export function QuestionScreen({
   question,
   onAnswer,
   onReset,
@@ -2264,7 +2273,7 @@ function useTypewriter(text: string, cps = 60) {
   return { shown: text.slice(0, n), done, finish: () => setN(text.length) };
 }
 
-function FeedbackPanel({ correct, text, onNext, isLast, inline = false, onTyping }: { correct: boolean; text: string; onNext: () => void; isLast: boolean; inline?: boolean; /** true while the line types, so the question's Dreamy can speak it */ onTyping?: (typing: boolean) => void }) {
+export function FeedbackPanel({ correct, text, onNext, isLast, inline = false, onTyping }: { correct: boolean; text: string; onNext: () => void; isLast: boolean; inline?: boolean; /** true while the line types, so the question's Dreamy can speak it */ onTyping?: (typing: boolean) => void }) {
 
   // The explanation is in the box from the start (Chandu, 6 Oct 2026: "the
   // why is too small and nobody is gonna click that. Show the feedback in
@@ -2426,7 +2435,7 @@ function FitToScreen({ children, enabled, watch, compact = false }: { children: 
   );
 }
 
-function StreakBanner({ streak, onDismiss }: { streak: number; onDismiss: () => void }) {
+export function StreakBanner({ streak, onDismiss }: { streak: number; onDismiss: () => void }) {
   const { playCorrect } = useMaterialSounds();
   useEffect(() => {
     playCorrect();
@@ -2446,7 +2455,7 @@ function StreakBanner({ streak, onDismiss }: { streak: number; onDismiss: () => 
 // ---------------------------------------------------------------------------
 // Power Play
 
-function PowerPlayIntroScreen({ onStart, line }: { onStart: () => void; /** the lesson's own challenge line ("Run the month.") */ line?: string }) {
+export function PowerPlayIntroScreen({ onStart, line }: { onStart: () => void; /** the lesson's own challenge line ("Run the month.") */ line?: string }) {
   return (
     <div className="glossary-screen glossary-power-intro-screen relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center" style={{ background: "radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 55%, transparent), transparent 65%)" }}>
       <DreamyFace pose="idea" size={112} />
@@ -2472,11 +2481,11 @@ function PowerPlayIntroScreen({ onStart, line }: { onStart: () => void; /** the 
   );
 }
 
-function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onComplete: () => void }) {
+export function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onComplete: () => void }) {
   return <PowerPlayParagraphScreen powerPlay={lesson.powerPlay} onComplete={onComplete} />;
 }
 
-function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: ParagraphPowerPlay; onComplete: () => void }) {
+export function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: ParagraphPowerPlay; onComplete: () => void }) {
   const lesson = { powerPlay };
   const { playSweep, playWrong, playSelect } = useMaterialSounds();
   const gaps = lesson.powerPlay.answers.length;
@@ -2716,7 +2725,7 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
   );
 }
 
-function MasteryLoadingScreen({ fact }: { fact: string | null }) {
+export function MasteryLoadingScreen({ fact }: { fact: string | null }) {
   return (
     <div className="glossary-screen glossary-mastery-loading-screen flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-5)] px-5 py-[var(--space-10)] text-center">
       <DreamyFace pose="idea" size={112} />
@@ -2732,7 +2741,7 @@ function MasteryLoadingScreen({ fact }: { fact: string | null }) {
   );
 }
 
-function CompleteScreen({
+export function CompleteScreen({
   lesson,
   masteredCount,
   onContinue,
@@ -2784,7 +2793,7 @@ function CompleteScreen({
 
       {/* The milestone this level unlocks: Dream Sneakers' value counts up
          from where it stood (the Replit's "$50,000 company value unlocked"). */}
-      <ValuationTicker from={lesson.previousCompanyValue ?? 0} to={lesson.companyValue} milestone={lesson.milestone} mode="reached" />
+      <ValuationTicker from={lesson.previousCompanyValue ?? 0} to={lesson.companyValue} milestone={lesson.milestone} mode="reached" company={lesson.exampleCompany} />
 
       {/* Score, XP and mastery as one row of three equal tiles, not a card
          plus two rows: the value ticker above is now the screen's hero. */}
@@ -2816,7 +2825,7 @@ function CompleteScreen({
 
 /** Signal's finish-line weather: pixel coins raining through the whole room
  *  once, the same coin as the right-answer fountain. */
-function SignalCoinRain() {
+export function SignalCoinRain() {
   const reduced = useReducedMotion();
   if (reduced || typeof document === "undefined") return null;
   // Portalled to the body: inside the screen it would sit in FitToScreen's
@@ -3537,9 +3546,11 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   const legacyArt = lessonHasLegacyArt(lesson);
   // Levels 2+ carry no term graphics at all (15 Oct 2026): the HUD reads
   // these maps directly, so they are emptied here as well as in the context.
-  const noTermArt = lesson.lessonNumber > 1;
+  // A generated career has no art at all (16 Oct 2026): same words-only path.
+  const authoredLarge = legacyArt ? assetsFor(artAtmosphere) : glossaryTermAssets(career.careerSlug, artAtmosphere);
+  const noTermArt = lesson.lessonNumber > 1 || Object.keys(authoredLarge).length === 0;
   const termArt = noTermArt ? NO_TERM_ART.small : legacyArt ? assetsFor(artAtmosphere, "small") : glossaryTermAssets(career.careerSlug, artAtmosphere, "small");
-  const largeTermArt = noTermArt ? NO_TERM_ART.large : legacyArt ? assetsFor(artAtmosphere) : glossaryTermAssets(career.careerSlug, artAtmosphere);
+  const largeTermArt = noTermArt ? NO_TERM_ART.large : authoredLarge;
 
   // The HUD stays a strip under the bar (Chandu, 6 Oct 2026, after a
   // one-row try: "the milestone circles can be under the progress bar ...
@@ -3633,7 +3644,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         {showStreak !== null && <StreakBanner streak={showStreak} onDismiss={() => setShowStreak(null)} />}
         {/* every screen fits the window, never scrolls (8 Oct 2026) */}
         <FitToScreen enabled={variant === "lab"} compact={questionFrame} watch={`${screen}-${unlockIndex}-${queueIndex}-${pendingResult ? 1 : 0}`}>
-        {screen === "intro" && <IntroScreen lesson={lesson} variant={variant} atmosphere={atmosphere} onNext={() => { setMusicStarted(true); goTo(variant === "lab" ? "unlock" : "dreamyIntro"); }} />}
+        {screen === "intro" && <IntroScreen lesson={lesson} variant={variant} atmosphere={atmosphere} subject={career.subject} hero={career.careerSlug === "investment-banking"} onNext={() => { setMusicStarted(true); goTo(variant === "lab" ? "unlock" : "dreamyIntro"); }} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => goTo("lessonIntro")} />}
         {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} onStart={() => goTo("unlock")} />}
         {screen === "unlock" &&
