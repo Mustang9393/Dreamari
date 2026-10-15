@@ -1,0 +1,52 @@
+/* Each atlas has four registered square cells: rest, blink, speak, round.
+   Keep the existing responsive actor slot, but compensate the transparent
+   72% optical frame once. No legacy eye/glasses layer is used. */
+.glossary-game-shell.glossary-game-lab .glossary-reaction {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  overflow: visible;
+  animation: none;
+}
+.glossary-game-shell.glossary-game-lab .glossary-reaction[data-medium="signal"] {
+  aspect-ratio: 3 / 2;
+}
+.glossary-game-shell.glossary-game-lab .glossary-reaction > .glossary-reaction-canvas {
+  position: absolute;
+  display: block;
+  width: 139%;
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  background-position: 0 0;
+  pointer-events: none;
+  animation: dreamy-reaction-blink 5.6s steps(1, end) infinite;
+}
+.glossary-game-shell.glossary-game-lab .glossary-reaction[data-medium="signal"] > .glossary-reaction-canvas {
+  image-rendering: pixelated;
+}
+.glossary-game-shell.glossary-game-lab .glossary-reaction[data-speaking="true"] > .glossary-reaction-canvas {
+  animation: dreamy-reaction-talk 1.6s steps(1, end) infinite;
+}
+.glossary-game-shell.glossary-game-lab .glossary-reaction > .glossary-reaction-canvas[data-still="true"] {
+  background-size: 100% 100%;
+  animation: none;
+}
+@keyframes dreamy-reaction-blink {
+  0%, 94%, 98%, 100% { background-position: 0 0; }
+  95%, 97% { background-position: 100% 0; }
+}
+@keyframes dreamy-reaction-talk {
+  0%, 26%, 57%, 84%, 100% { background-position: 0 0; }
+  9%, 39%, 70% { background-position: 0 100%; }
+  17%, 48%, 77% { background-position: 100% 100%; }
+  92% { background-position: 100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glossary-game-shell.glossary-game-lab .glossary-reaction > .glossary-reaction-canvas {
+    animation: none !important;
+  }
+}
