@@ -291,8 +291,11 @@
 @media (max-width: 640px) {
   .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, 124px); gap: 10px; }
   .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic { height: 124px; padding: 8px; }
-  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery-dreamy { grid-column: 2; height: 124px; }
-  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery-dreamy :is(.glossary-dreamy-face, .glossary-dreamy-sprite) { width: 106px !important; height: 106px !important; }
+  /* Dreamy sits in the middle of the four tiles around him: it spans rows 2 and
+     3 of the middle column, so he is centred both ways (Chandu, 15 Oct: "the
+     symmetry of this layout is off, Dreamy should be centred") */
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery-dreamy { grid-column: 2; grid-row: 2 / span 2; align-self: center; height: auto; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery-dreamy :is(.glossary-dreamy-face, .glossary-dreamy-sprite) { width: 118px !important; height: 118px !important; }
   .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(1) { grid-column: 2 !important; }
   .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(3) { grid-column: 3 !important; }
   .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(4) { grid-column: 1 !important; }

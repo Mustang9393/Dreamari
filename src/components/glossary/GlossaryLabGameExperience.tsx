@@ -964,11 +964,17 @@ function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: 
             >
               <span className="glossary-unlock-relic-number">0{index + 1}</span>
               {assets[term.id] ? (
-                <Image src={assets[term.id]} alt="" width={168} height={168} className="glossary-unlock-relic-art" unoptimized />
+                <>
+                  <Image src={assets[term.id]} alt="" width={168} height={168} className="glossary-unlock-relic-art" unoptimized />
+                  <figcaption>{term.term}</figcaption>
+                </>
               ) : (
-                <span className="glossary-unlock-relic-fallback glossary-unlock-relic-initial" aria-hidden>{term.term.charAt(0)}</span>
+                // no art (Levels 2+): the word itself, one display face and one size for the set (sized to the longest word)
+                // (15 Oct 2026, Joshua: "just have it be the word, but maybe with a
+                // cool font ... the letters are a distraction ... looks like the
+                // periodic table"; Chandu: "show the words but in stylized fonts")
+                <span className="glossary-unlock-relic-word" style={{ "--len": Math.max(...lesson.terms.map((t) => t.term.length)) } as React.CSSProperties}>{term.term}</span>
               )}
-              <figcaption>{term.term}</figcaption>
             </motion.figure>
           ))}
         </div>
@@ -3319,12 +3325,14 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     const review = Number.isFinite(q) && q > queue.length && q <= queue.length + lesson.reviewQuestions.length;
     const jump = Number.isFinite(q) && q >= 1 && q <= queue.length + (review ? lesson.reviewQuestions.length : 0) ? { index: q - 1, screen: "question" as const } : params.get("pp") === "1" ? { index: 0, screen: "powerPlay" as const }
       // DEMO-ONLY: ?pp=intro opens the Power Play intro screen for QA (15 Oct 2026).
-      : params.get("pp") === "intro" ? { index: 0, screen: "powerPlayIntro" as const } : null;
+      : params.get("pp") === "intro" ? { index: 0, screen: "powerPlayIntro" as const } : params.get("unlock") === "done" ? { index: 0, screen: "unlock" as const, unlocked: true } : null;
     if (!jump) return;
     // The URL is an external system; the jump is applied once after mount.
     const t = window.setTimeout(() => {
       if (review) setQueue((previous) => [...previous, ...lesson.reviewQuestions]);
       setQueueIndex(jump.index);
+      // DEMO-ONLY: ?unlock=done opens the "terms unlocked" screen for QA (15 Oct 2026).
+      if ("unlocked" in jump) setUnlockIndex(lesson.terms.length);
       setScreen(jump.screen);
     }, 0);
     return () => window.clearTimeout(t);

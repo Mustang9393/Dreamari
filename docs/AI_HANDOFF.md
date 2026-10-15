@@ -1,3 +1,7 @@
+## 2026-10-15 (night): Glossary Games: the unlock screen shows the words, one stylized face, Dreamy centred
+
+**Why (Joshua, pasted by Chandu; then Chandu):** "Let's not have it be letter, instead have it just be the word, but maybe with a cool font. The letters are a distraction and accomplish nothing when you have two of the same letter like two R's, also looks like the periodic table." Chandu: "Show the words but in like stylized fonts?", then "Don't use different fonts in the same set", then "The symmetry of this layout is off. Dreamy should be centred." Levels 2+ have no term art, so the "5 terms unlocked" tiles showed each term's first letter; they now show the whole word in Rozha One (already loaded site-wide), all five at one size set by the longest word (`--len`), Signal keeps its pixel face. I tried a different face per tile first; that was the wrong read, one face for the set. On phones Dreamy now spans the two lower rows of the middle column so he sits in the middle of the four tiles around him (wide layout unchanged). `?unlock=done` is a DEMO-ONLY QA jump to this screen (`/play/glossary-lab/investment-banking?lesson=2&unlock=done`). Not pushed.
+
 ## 2026-10-15 (night): Connect boards: the flush model on the rest, thread column left-aligned at 820px, less copy
 
 **Why (Chandu, 15 Oct):** "thread column: left aligned is better. Execute all other open items. Just make sure it doesn't go against Maisha's or Joshua's points." Earlier: "This should be the model for boards everywhere and feeds etc." and "reduce copy as much as possible".

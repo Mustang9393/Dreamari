@@ -444,3 +444,20 @@
 .glossary-game-lab .glossary-unlock-relic-initial { display: grid; place-items: center; width: 100%; height: 100%; font: 800 clamp(40px, 7vh, 64px) / 1 var(--font-display); color: var(--glossary-accent); }
 .glossary-game-lab .glossary-mastery-token-initial { display: grid; place-items: center; width: 100%; height: 100%; font: 800 16px / 1 var(--font-display); color: var(--foreground); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-unlock-relic-initial, .glossary-mastery-token-initial) { font-family: var(--sig-font) !important; }
+
+/* The unlock tiles show the term as a word in one stylized face (15 Oct 2026,
+   Joshua: "instead have it just be the word, but maybe with a cool font; the
+   letters are a distraction, two R's, looks like the periodic table";
+   Chandu: "show the words but in stylized fonts", then "don't use different
+   fonts in the same set"). Rozha One is already loaded site-wide
+   (marketing/fonts.ts). The word is sized to its tile (container units), so
+   "Ownership" and "Risk" both fit. Signal keeps its pixel face. The
+   :not(v2) prefix out-ranks the fit shell's `* { font-family !important }`. */
+.glossary-game-lab .glossary-unlock-relic { container-type: inline-size; }
+.glossary-game-lab .glossary-unlock-relic .glossary-unlock-relic-word {
+  display: grid; flex: 1; place-items: center; width: 100%; padding: 0 4px; text-align: center; overflow-wrap: normal; word-break: keep-all; line-height: 1;
+  font-size: clamp(15px, calc(88cqi / (var(--len, 6) * 0.6)), 40px);
+  color: var(--glossary-accent); text-shadow: 0 2px 0 rgba(0,0,0,.28), 0 0 22px color-mix(in srgb, var(--glossary-accent) 38%, transparent);
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic .glossary-unlock-relic-word { font-family: "Rozha One", Georgia, serif !important; font-weight: 400; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic .glossary-unlock-relic-word { font-family: var(--sig-font) !important; font-weight: 700; }
