@@ -76,30 +76,37 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
   const accent = "var(--accent-subtle)";
   const [tab, setTab] = useState<Tab>("profile");
   const [routed, setRouted] = useState<Record<string, RoutedState>>({});
-  const [draft, setDraft] = useState("");
+  // one draft per question, so switching questions or tabs keeps what was
+  // typed (14 Oct 2026 Connect UX review)
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [disclose, setDisclose] = useState(true);
   const [localPosts, setLocalPosts] = useState<{ id: string; title: string; body: string; graphic?: InsightGraphic }[]>([]);
   const [composerOpen, setComposerOpen] = useState(false);
 
   const openComposer = () => setComposerOpen(true);
-  // The community comes from the composer's Share to row (defaults to the
-  // pro's own world): create once, choose where it lands.
-  const publishPost = ({ title, body, graphic, boardId }: { title: string; body: string; graphic?: InsightGraphic; boardId: string }) => {
-    dispatchAuroraPulse("cta");
-    const id = `local-${pro.id}-${Date.now()}`;
-    setLocalPosts((l) => [{ id, title, body, graphic }, ...l]);
-    publishInsight({ id, boardId, type: "insight", proId: pro.id, title, body, postedAgo: "Just now", helpful: 0, replies: [], graphic });
-  };
   const [range, setRange] = useState<Range>("30d");
   // My Profile's own inner structure (direct instruction, 13 Sept 2026): not
   // one long page -- Overview (who they are) and Ask Me & Posts (what they've
   // done), the same two names Sarah Chen's Replit mockup used. The header
   // (photo, name, tier, title/company, stats, quote, Edit Profile) stays
   // visible across both; only the content below it swaps.
-  const [profileSection, setProfileSection] = useState<"overview" | "askme">("overview");
+  // The dashboard opens on Answers: the volunteer comes here to work, and
+  // students' waiting questions are the work (14 Oct 2026 Connect UX
+  // review). Overview is one tab away.
+  const [profileSection, setProfileSection] = useState<"overview" | "askme">("askme");
   const [askMeSection, setAskMeSection] = useState<"answers" | "posts">("answers");
   type Main = "overview" | "answers" | "posts" | "network" | "impact";
   const main: Main = tab !== "profile" ? tab : profileSection === "overview" ? "overview" : askMeSection;
+  // The community comes from the composer's Share to row (defaults to the
+  // pro's own world): create once, choose where it lands; the new post
+  // shows at the top of Posts right away.
+  const publishPost = ({ title, body, graphic, boardId }: { title: string; body: string; graphic?: InsightGraphic; boardId: string }) => {
+    dispatchAuroraPulse("cta");
+    const id = `local-${pro.id}-${Date.now()}`;
+    setLocalPosts((l) => [{ id, title, body, graphic }, ...l]);
+    publishInsight({ id, boardId, type: "insight", proId: pro.id, title, body, postedAgo: "Just now", helpful: 0, replies: [], graphic });
+    setTab("profile"); setProfileSection("askme"); setAskMeSection("posts");
+  };
   const goMain = (m: Main) => {
     if (m === "network" || m === "impact") { setTab(m); return; }
     setTab("profile");
@@ -116,7 +123,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
   }, []);
 
   const board = COMMUNITIES.find((c) => c.world === pro.world);
-  const boardName = board?.name ?? "the community";
+  const boardName = board?.name.replace(/ Careers$/, "") ?? "the community";
   const answeredNow = Object.values(routed).filter((s) => s === "answered").length;
   const openCount = ROUTED.filter((q) => (routed[q.id] ?? "open") === "open" || routed[q.id] === "answering").length;
   const words = ["No", "One", "Two", "Three"][openCount] ?? String(openCount);
@@ -176,7 +183,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                     </span>
                     <span className="flex flex-none items-center gap-[4px] text-[11.5px] leading-[15px] font-bold" style={{ color: "var(--world-food-farming-nature)" }}><CheckCircle2 className="h-3 w-3" aria-hidden /> Answered</span>
                   </div>
-                  <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
+                  <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{t.title}</span>
                   <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
                     <SignalRow {...s} accent={accent} />
                     <button type="button" onClick={() => nav?.openThread(t.id)} className="dm-link flex cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>View response <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
@@ -209,7 +216,9 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
          Impact sits above it, the same row shape as ProProfileView's own
          back+action row. */}
 
-      <ProfileHeaderCard pro={pro} showCoverControls onEditProfile={() => dispatchAuroraPulse("cta")} />
+      {/* The full card on Overview; a compact one (name, role, company) on
+         the working tabs so the task starts higher (14 Oct 2026 review). */}
+      <ProfileHeaderCard pro={pro} compact={main !== "overview"} showCoverControls onEditProfile={() => dispatchAuroraPulse("cta")} />
 
       {/* One level of navigation (Chandu, 2 Oct 2026: "the tabs above the
          header look the same as the tabs under it; very hard to navigate").
@@ -219,7 +228,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
          panel, not the layout. */}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <Segmented<Main> ariaLabel="Dashboard section" value={main} onChange={goMain} options={[{ key: "overview", label: "Overview" }, { key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }, { key: "network", label: "Messages" }, { key: "impact", label: "Impact" }]} />
-        <PrimaryCta className="min-h-[38px] px-[var(--space-4)] text-[14px]" onClick={openComposer}>
+        <PrimaryCta className="min-h-[44px] px-[var(--space-4)] text-[14px]" onClick={openComposer}>
           <PenLine className="h-4 w-4" aria-hidden /> Create post
         </PrimaryCta>
       </div>
@@ -242,15 +251,16 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
              routed here by scope; nobody asks this pro by name. */
           <Panel
             id="ama-routed-title"
-            title={`Waiting on ${homeBoard.name}`}
+            title={`Questions in ${homeBoard.name.replace(/ Careers$/, "")}`}
             aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{m.asked}</strong> asked · <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{pro.questionsAnswered + answeredNow}</strong> answered</span>}
           >
-            <h3 className="text-[18px] leading-[24px] font-semibold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              {openCount > 0 ? `${words} students asked about ${pro.field.toLowerCase()} on ${homeBoard.name} this week. Answer one?` : "All answered. We will route the next one from the board."}
-            </h3>
+            <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>
+              {openCount > 0 ? `${words} students are waiting for your advice.` : "All answered. We will route the next one from the board."}
+            </p>
             <ul className="-mt-[var(--space-2)] flex flex-col">
               {ROUTED.map((q) => {
                 const state = routed[q.id] ?? "open";
+                const draft = drafts[q.id] ?? "";
                 return (
                   <li key={q.id} className="flex flex-col gap-[10px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
                     <div className="flex items-center justify-between gap-[var(--space-3)]">
@@ -263,11 +273,11 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                         {state === "answered" ? "Answered" : state === "skipped" ? "Skipped" : "Waiting"}
                       </span>
                     </div>
-                    <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{q.title}&rdquo;</span>
+                    <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{q.title}</span>
                     {state === "open" && (
                       <div className="flex flex-wrap gap-[var(--space-2)]">
-                        <PrimaryCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => { dispatchAuroraPulse("select"); setRouted((r) => ({ ...r, [q.id]: "answering" })); setDraft(""); }}>Answer</PrimaryCta>
-                        <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => setRouted((r) => ({ ...r, [q.id]: "skipped" }))}>Skip</QuietCta>
+                        <PrimaryCta className="min-h-[44px] px-[var(--space-4)] text-[13px]" onClick={() => { dispatchAuroraPulse("select"); setRouted((r) => ({ ...r, [q.id]: "answering" })); }}>Answer</PrimaryCta>
+                        <QuietCta className="min-h-[44px] px-[var(--space-4)] text-[13px]" onClick={() => setRouted((r) => ({ ...r, [q.id]: "skipped" }))}>Skip</QuietCta>
                       </div>
                     )}
                     {state === "answering" && (
@@ -278,7 +288,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                           <textarea
                             autoFocus
                             value={draft}
-                            onChange={(event) => setDraft(event.target.value)}
+                            onChange={(event) => setDrafts((all) => ({ ...all, [q.id]: event.target.value }))}
                             rows={3}
                             placeholder="A few honest sentences from your own experience is plenty."
                             className="dm-beam-input w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] outline-none placeholder:text-[color:var(--muted-foreground)]"
@@ -290,8 +300,8 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                           <input type="checkbox" checked={disclose} onChange={(event) => setDisclose(event.target.checked)} className="size-4 accent-[var(--primary)]" /> Add &ldquo;Based on my own experience&rdquo;
                         </label>
                         <div className="flex flex-wrap items-center gap-[var(--space-2)]">
-                          <PrimaryCta className={`min-h-[36px] px-[var(--space-4)] text-[13px] ${draft.trim().length >= 40 ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (draft.trim().length < 40) return; dispatchAuroraPulse("cta"); setRouted((r) => ({ ...r, [q.id]: "answered" })); }}>Post answer</PrimaryCta>
-                          <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => setRouted((r) => ({ ...r, [q.id]: "open" }))}>Cancel</QuietCta>
+                          <PrimaryCta disabled={draft.trim().length < 40} className="min-h-[44px] px-[var(--space-4)] text-[13px]" onClick={() => { if (draft.trim().length < 40) return; dispatchAuroraPulse("cta"); setRouted((r) => ({ ...r, [q.id]: "answered" })); }}>Post answer</PrimaryCta>
+                          <QuietCta className="min-h-[44px] px-[var(--space-4)] text-[13px]" onClick={() => setRouted((r) => ({ ...r, [q.id]: "open" }))}>Cancel</QuietCta>
                         </div>
                       </div>
                     )}
@@ -321,7 +331,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                       </span>
                       <span className="flex flex-none items-center gap-[4px] text-[11.5px] leading-[15px] font-bold" style={{ color: "var(--world-food-farming-nature)" }}><CheckCircle2 className="h-3 w-3" aria-hidden /> Answered</span>
                     </div>
-                    <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
+                    <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{t.title}</span>
                     <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
                       <SignalRow {...s} accent={accent} />
                       <button type="button" onClick={() => nav?.openThread(t.id)} className="dm-link flex cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>View response <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
@@ -339,17 +349,11 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
               )}
 
               {askMeSection === "posts" && (
-          /* Posts stay secondary (brief). Prompts remove the blank page. */
-          <Panel
-            id="my-posts-title"
-            title="My posts"
-            aside={
-              <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={openComposer}>
-                <PenLine className="h-3.5 w-3.5" aria-hidden /> Create post
-              </QuietCta>
-            }
-          >
-            <ul className="-mt-[var(--space-2)] flex flex-col">
+          /* Posts stay secondary (brief). Prompts remove the blank page.
+             One Create post, the one in the tab row (the panel used to
+             carry a second); posts in two columns from sm (14 Oct 2026). */
+          <Panel id="my-posts-title" title="My posts">
+            <ul className="-mt-[var(--space-2)] grid grid-cols-1 gap-x-[var(--space-5)] sm:grid-cols-2">
               {localPosts.map((post) => (
                 <li key={post.id} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
                   <span className="text-[11px] leading-[15px] font-bold capitalize" style={{ color: accent }}>Pro tip · Just now</span>
@@ -357,7 +361,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                   {post.graphic
                     ? (
                       <>
-                        <span className="block w-full max-w-[260px]"><InsightGraphicView insight={{ id: post.id, boardId: "", type: "insight", proId: pro.id, title: post.title, body: post.body, postedAgo: "", helpful: 0, replies: [] }} graphic={post.graphic} /></span>
+                        <span className="block w-full max-w-[360px]"><InsightGraphicView insight={{ id: post.id, boardId: "", type: "insight", proId: pro.id, title: post.title, body: post.body, postedAgo: "", helpful: 0, replies: [] }} graphic={post.graphic} /></span>
                         {captionFor(post.body, post.graphic.text) && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{captionFor(post.body, post.graphic.text)}</span>}
                       </>
                     )
@@ -378,7 +382,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                     {post.graphic
                       ? (
                         <>
-                          <span className="block w-full max-w-[260px]"><InsightGraphicView insight={post} /></span>
+                          <span className="block w-full max-w-[360px]"><InsightGraphicView insight={post} /></span>
                           {captionFor(post.body, post.graphic.text) && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{captionFor(post.body, post.graphic.text)}</span>}
                         </>
                       )
@@ -514,7 +518,7 @@ function ImpactCard({ pro, accent, numbers }: { pro: Pro; accent: string; number
       <span aria-hidden className="absolute top-[-60px] right-[-40px] size-[220px] rounded-full opacity-40 blur-[50px]" style={{ background: accent }} />
       <div className="relative flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <h2 className="text-[22px] leading-[27px] font-extrabold">My 2026 Impact Summary</h2>
-        <PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]" style={{ background: "rgba(255,255,255,0.92)", color: "#0e0c20" }}><span className="flex items-center gap-[6px]"><Download className="h-4 w-4" aria-hidden /> Download</span></PrimaryCta>
+        <PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[44px] px-[var(--space-4)] text-[14px]" style={{ background: "rgba(255,255,255,0.92)", color: "#0e0c20" }}><span className="flex items-center gap-[6px]"><Download className="h-4 w-4" aria-hidden /> Download</span></PrimaryCta>
       </div>
       <div className="relative mt-[var(--space-6)] flex flex-col">
         <span className="font-extrabold tracking-[-0.02em] tabular-nums" style={{ fontSize: 64, lineHeight: "64px" }}>{formatCount(numbers.year)}</span>

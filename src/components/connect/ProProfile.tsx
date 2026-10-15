@@ -679,7 +679,7 @@ function CoverImage({ src }: { src: string }) {
   return <Image src={src} alt="" fill sizes="(max-width: 992px) 100vw, 992px" className="object-cover transition-opacity duration-500" style={{ objectPosition: "50% 40%" }} priority onError={() => setFailed(true)} />;
 }
 
-export function ProfileHeaderCard({ pro, following = false, showCoverControls = false, onEditProfile }: { pro: Pro; following?: boolean; showCoverControls?: boolean; /** the volunteer's own page: Edit Profile sits with Cover */ onEditProfile?: () => void }) {
+export function ProfileHeaderCard({ pro, following = false, showCoverControls = false, onEditProfile, compact = false }: { pro: Pro; following?: boolean; showCoverControls?: boolean; /** the volunteer's own page: Edit Profile sits with Cover */ onEditProfile?: () => void; /** the dashboard's working tabs: name, role and company only, a smaller portrait, no stats or quote */ compact?: boolean }) {
   const tier = volunteerTier(pro);
   const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
   const views = Math.round(pro.studentsReached * 3.8);
@@ -753,12 +753,12 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
           </div>
         </div>
       )}
-      <div className="relative flex flex-col gap-[var(--space-5)] p-[var(--space-5)] pt-[72px] sm:p-[var(--space-6)] sm:pt-[88px]">
+      <div className={`relative flex flex-col gap-[var(--space-5)] p-[var(--space-5)] ${compact ? "pt-[64px] sm:p-[var(--space-5)] sm:pt-[64px]" : "pt-[72px] sm:p-[var(--space-6)] sm:pt-[88px]"}`}>
         <div className="flex flex-wrap items-center gap-[var(--space-4)] sm:gap-[var(--space-5)]">
-          <Avatar name={pro.name} size={96} />
+          <Avatar name={pro.name} size={compact ? 64 : 96} />
           <div className="min-w-0 flex-1">
             <span className="flex items-center gap-[6px]">
-              <h1 className="text-[24px] leading-[29px] font-extrabold text-balance sm:text-[26px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", color: ink }}>{pro.name}</h1>
+              <h1 className={`font-extrabold text-balance ${compact ? "text-[24px] leading-[30px]" : "text-[24px] leading-[29px] sm:text-[26px] sm:leading-[31px]"}`} style={{ fontFamily: "var(--font-display)", color: ink }}>{pro.name}</h1>
               <VerifiedBadge size={18} />
             </span>
             <p className="mt-[6px] flex flex-wrap items-center gap-x-[8px] gap-y-[6px] text-[15px] leading-[20px] font-semibold" style={{ color: soft }}>
@@ -775,7 +775,7 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
                dividers, the reference's stat row -- ABOVE the quote
                (direct feedback, 9 Sept 2026: "move the stats up before
                the quote in the professional profiles too"). */}
-            <dl className="mt-[var(--space-4)] flex flex-wrap items-center gap-y-[var(--space-2)]">
+            {!compact && <dl className="mt-[var(--space-4)] flex flex-wrap items-center gap-y-[var(--space-2)]">
               {[
                 { value: views, label: "Views" },
                 { value: pro.followers + (following ? 1 : 0), label: "Followers" },
@@ -788,12 +788,12 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
                   </span>
                 </div>
               ))}
-            </dl>
+            </dl>}
             {/* The pull-quote belongs in the header, not buried under Ask
                Me/Posts/Communities (direct feedback, 9 Sept 2026: "this
                quote was supposed to be in the header, it was moved down,
                please move it back up"). */}
-            <p className="mt-[var(--space-4)] text-[15px] leading-[22px] italic" style={{ color: ink }}>&ldquo;{pro.story}&rdquo;</p>
+            {!compact && <p className="mt-[var(--space-4)] text-[15px] leading-[22px] italic" style={{ color: ink }}>&ldquo;{pro.story}&rdquo;</p>}
           </div>
         </div>
       </div>
