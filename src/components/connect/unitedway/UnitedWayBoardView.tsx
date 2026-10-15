@@ -253,10 +253,10 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
         ))}
       </section>
 
-      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
-        <div className="w-full sm:w-fit"><Segmented ariaLabel="Program section" value={tab} onChange={setTab} options={[...P.tabs]} grow /></div>
+      <SectionSurface flush className="flex flex-col">
+        <div className="w-full px-[var(--space-4)] py-[var(--space-4)] sm:w-fit sm:px-[var(--space-6)] sm:py-[var(--space-5)]"><Segmented ariaLabel="Program section" value={tab} onChange={setTab} options={[...P.tabs]} grow /></div>
         {tab === "about" && (
-          <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+          <div className="grid grid-cols-1 px-[var(--space-4)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)] gap-[var(--space-6)] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
             <div className="flex flex-col gap-[var(--space-5)]">
               {p.about && <p className="max-w-[60ch] text-[16px] leading-[24px]" style={{ color: "var(--foreground)" }}>{p.about}</p>}
               <div className="flex flex-col gap-[10px]"><Eyebrow tone={MUTED}>{P.gets}</Eyebrow><Gets items={p.gets} /></div>
@@ -278,8 +278,8 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
             </div>
           </div>
         )}
-        {tab === "how" && <Steps steps={p.steps ?? [U.interested, P.apply, "Start"]} at={applied || mentorshipJoined ? 1 : 0} />}
-        {tab === "ask" && <ItemList items={about} empty={P.noQuestions} />}
+        {tab === "how" && <div className="px-[var(--space-4)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]"><Steps steps={p.steps ?? [U.interested, P.apply, "Start"]} at={applied || mentorshipJoined ? 1 : 0} /></div>}
+        {tab === "ask" && <ItemList flush items={about} empty={P.noQuestions} />}
       </SectionSurface>
 
       {related.length > 0 && (
@@ -584,7 +584,7 @@ function AnnouncementPage({ p, onBack }: { p: D.StaffPost; onBack: () => void })
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: MUTED }}><ChevronLeft className="h-4 w-4" aria-hidden /> Back</button>
-      <SectionSurface className="grid grid-cols-1 gap-[var(--space-6)] md:grid-cols-[minmax(0,1fr)_300px]">
+      <SectionSurface flush padded className="grid grid-cols-1 gap-[var(--space-6)] md:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex flex-col gap-[var(--space-3)]">
           <span className="flex items-center gap-[10px]">
             <Avatar name={p.author.name} photo={D.staffPhoto(p.author)} size={40} />

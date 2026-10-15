@@ -450,9 +450,9 @@ export function StudentsSection({ items, show, setShow, place, setPlace }: { ite
   return (
     <div className="flex flex-col">
       <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-4)] sm:px-[var(--space-6)]">
-        {nav.pov === "student" && <ComposerBar line="Ask a question or share a post" action="Ask or share" onOpen={() => setComposing("ask")} />}
+        {nav.pov === "student" && <ComposerBar line="Ask a question or share a post" action="Post" onOpen={() => setComposing("ask")} />}
         {composing && <StudentComposer start={composing} onClose={() => setComposing(null)} />}
-        <FilterRow count={list.length} noun={nav.pov === "volunteer" ? "for you" : "from students"}>
+        <FilterRow count={list.length} noun={nav.pov === "volunteer" ? "for you" : "posts"}>
           <PillSelect ariaLabel="Show" value={s} onChange={(v) => setShow(v)} options={showOptions} />
           <PillSelect ariaLabel="Community" value={place} onChange={setPlace} options={placeOptions(nav.board)} />
         </FilterRow>
@@ -474,9 +474,9 @@ export function VolunteersSection({ items, label, setLabel, place, setPlace }: {
   return (
     <div className="flex flex-col">
       <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-4)] sm:px-[var(--space-6)]">
-        {nav.pov === "volunteer" && <ComposerBar line="Share an insight, an opportunity or an event update" action="Share a post" onOpen={() => setComposing(true)} />}
+        {nav.pov === "volunteer" && <ComposerBar line="Share with students" action="Post" onOpen={() => setComposing(true)} />}
         {composing && <VolunteerComposer onClose={() => setComposing(false)} />}
-        <FilterRow count={list.length} noun="from volunteers">
+        <FilterRow count={list.length} noun="posts">
           <PillSelect ariaLabel="Label" value={label} onChange={setLabel} options={[{ value: "all", label: "All posts" }, { value: "insight", label: "Insights" }, { value: "opportunity", label: "Opportunities" }, { value: "event", label: "Event Updates" }]} />
           <PillSelect ariaLabel="Community" value={place} onChange={setPlace} options={placeOptions(nav.board)} />
         </FilterRow>

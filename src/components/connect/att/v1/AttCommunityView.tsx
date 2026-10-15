@@ -1069,16 +1069,16 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
         </div>
       </section>
 
-      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
+      <SectionSurface flush className="flex flex-col gap-[var(--space-5)] pt-[var(--space-4)] pb-[var(--space-5)] sm:pt-[var(--space-5)] sm:pb-[var(--space-6)]">
         {/* the board's own tabs, the one row a student actually uses; full
            width on phones so four labels never truncate */}
-        <div className="w-full sm:w-fit">
+        <div className="w-full px-[var(--space-4)] sm:w-fit sm:px-[var(--space-6)]">
           {view === "student" && <Segmented ariaLabel="Student section" value={studentTab} onChange={setStudentTab} options={[...D.STUDENT_TABS]} grow />}
           {view === "volunteer" && <Segmented ariaLabel="Volunteer section" value={volunteerTab} onChange={setVolunteerTab} options={[...D.VOLUNTEER_TABS]} grow />}
           {view === "enterprise" && <Segmented ariaLabel="Enterprise section" value={enterpriseTab} onChange={setEnterpriseTab} options={[...D.ENTERPRISE_TABS]} grow />}
         </div>
 
-        <div className="flex flex-col gap-[var(--space-6)]">
+        <div className="flex flex-col gap-[var(--space-6)] px-[var(--space-4)] sm:px-[var(--space-6)]">
           {view === "student" && studentTab === "home" && <StudentHome onAsk={() => setStudentTab("questions")} onSeeAll={() => setStudentTab("opportunities")} saves={saves} toggleSave={toggleSave} openOpportunity={setOpportunity} />}
           {view === "student" && studentTab === "questions" && <StudentQuestions />}
           {view === "student" && studentTab === "opportunities" && <StudentOpportunities saves={saves} toggleSave={toggleSave} openOpportunity={setOpportunity} />}

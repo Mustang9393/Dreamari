@@ -4934,15 +4934,16 @@ function EventView({
          bar so they stay in reach while reading (13 Oct 2026, Chandu: "These
          pages need better navigation and designs ... Put photos under a
          tab") */}
-      <div className="sticky top-[84px] z-30 -mx-[4px] rounded-[var(--radius-lg)] px-[4px] py-[6px]" style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
-        <Segmented
+      <SectionSurface flush>
+      <div className="px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-6)] sm:py-[var(--space-5)]">
+        <FitSegmented
           ariaLabel="Event board section"
           value={tab}
           onChange={(key) => onFilter(key)}
           options={[
-            { key: "questions", label: `Questions ${threads.length + postedQs.length}` },
-            { key: "posts", label: `Posts ${(event.official ? 1 : 0) + (event.recap ? 1 : 0) + proPosts.length}` },
-            ...(event.photos ? [{ key: "photos", label: `Photos ${event.photos.count}` }] : []),
+            { key: "questions", label: "Questions", badge: threads.length + postedQs.length },
+            { key: "posts", label: "Posts", badge: (event.official ? 1 : 0) + (event.recap ? 1 : 0) + proPosts.length },
+            ...(event.photos ? [{ key: "photos", label: "Photos", badge: event.photos.count }] : []),
             { key: "people", label: "People" },
             { key: "about", label: "About" },
           ]}
@@ -4950,7 +4951,8 @@ function EventView({
       </div>
 
       {tab === "questions" && (
-        <div className="flex flex-col gap-[var(--space-4)]">
+        <div className="flex flex-col">
+          <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] pb-[var(--space-4)] sm:px-[var(--space-6)]">
           {/* asking is the student's; staff and volunteers here reply and
              post (13 Oct 2026, Chandu: "when I'm on United Way POV don't
              show me an ASK cta with a student profile") */}
@@ -4963,15 +4965,16 @@ function EventView({
             />
           )}
           {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.length > 0 && <BoardFeedList wrap={(id, row) => <div key={id}>{row}</div>} items={threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> }))} />}
+          </div>
+          {threads.length > 0 && <BoardFeedList edge wrap={(id, row) => <div key={id}>{row}</div>} items={threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> }))} />}
           {threads.length === 0 && postedQs.length === 0 && (
-            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No questions here yet. Yours could be the first.</p>
+            <p className="border-t px-[var(--space-4)] py-[var(--space-4)] text-[12.5px] sm:px-[var(--space-6)]" style={{ color: "var(--muted-foreground)", borderColor: "var(--glass-border)" }}>No questions here yet. Yours could be the first.</p>
           )}
         </div>
       )}
 
       {tab === "photos" && event.photos && (
-        <section aria-label="Event photos" className="flex flex-col gap-[var(--space-3)]">
+        <section aria-label="Event photos" className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
           <ul className="grid grid-cols-2 gap-[6px] sm:grid-cols-3 sm:gap-[8px]">
             {event.photos.images.map((src, index) => (
               <li key={src} className={`relative min-h-0 ${index === 0 ? "col-span-2 row-span-2" : ""}`} style={{ aspectRatio: index === 0 ? undefined : "4 / 3" }}>
@@ -5000,7 +5003,7 @@ function EventView({
              what worked as numbered points, what's next as one line per
              office. The byline and the way to talk it over close it. */}
           {event.debrief && postAs?.chip === "United Way" && (
-            <article aria-label="Team debrief" className="relative overflow-hidden rounded-[var(--radius-xl)] border px-[var(--space-6)] py-[var(--space-8)] sm:px-[var(--space-10)]" style={{ borderColor: `color-mix(in srgb, ${pAccent} 40%, var(--glass-border))`, background: `radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, ${pAccent} 22%, transparent), transparent 60%), var(--glass-surface-1)` }}>
+            <article aria-label="Team debrief" className="relative mx-[var(--space-4)] overflow-hidden sm:mx-[var(--space-6)] rounded-[var(--radius-xl)] border px-[var(--space-6)] py-[var(--space-8)] sm:px-[var(--space-10)]" style={{ borderColor: `color-mix(in srgb, ${pAccent} 40%, var(--glass-border))`, background: `radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, ${pAccent} 22%, transparent), transparent 60%), var(--glass-surface-1)` }}>
               <p className="flex items-center gap-[8px] text-[12px] leading-[16px] font-extrabold capitalize" style={{ color: `color-mix(in srgb, ${pAccent} 55%, var(--foreground))` }}><Pin className="h-3.5 w-3.5" aria-hidden /> Pinned · Team debrief</p>
               <h2 className="mt-[14px] max-w-[22ch] text-[30px] leading-[35px] font-extrabold text-balance sm:text-[36px] sm:leading-[42px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>What worked, and what&apos;s next</h2>
               {event.debrief.body && <p className="mt-[12px] max-w-[52ch] text-[16px] leading-[25px]" style={{ color: "var(--muted-foreground)" }}>{event.debrief.body}</p>}
@@ -5048,7 +5051,7 @@ function EventView({
              the same hairline panel as the pros' posts, in the same row
              shape, so the tab reads as one feed, not a stack of cards. */}
           {(event.official || event.recap || proPosts.length > 0) && (
-            <BoardFeedList wrap={(id, row) => <div key={id}>{row}</div>} items={[
+            <BoardFeedList edge wrap={(id, row) => <div key={id}>{row}</div>} items={[
               ...(event.official ? [{ id: "official", node: (
                 <article className="flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
                   <span className="flex h-[44px] w-[44px] flex-none items-center justify-center rounded-full" style={COMPANY_BRAND[event.official.mark ?? ""] ? { background: COMPANY_BRAND[event.official.mark!].bg } : { background: "color-mix(in srgb, var(--primary) 22%, transparent)" }}>
@@ -5089,12 +5092,14 @@ function EventView({
             ]} />
           )}
           {!event.official && !event.recap && proPosts.length === 0 && (
-            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No posts from the event account yet.</p>
+            <p className="px-[var(--space-4)] pb-[var(--space-4)] text-[12.5px] sm:px-[var(--space-6)]" style={{ color: "var(--muted-foreground)" }}>No posts from the event account yet.</p>
           )}
         </div>
       )}
 
 
+      {(tab === "about" || tab === "people") && (
+      <div className="px-[var(--space-4)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
       {tab === "about" && (
         <div className="flex flex-col gap-[var(--space-6)]">
 
@@ -5252,6 +5257,9 @@ function EventView({
           </div>
         </div>
       )}
+      </div>
+      )}
+      </SectionSurface>
       </>)}
     </>
   );
@@ -5333,7 +5341,7 @@ function ThreadView({
            out of <main>'s side padding. Re-applies that padding inside so
            the content still lines up with the title above it. */}
         <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "calc(-50vw / var(--vz, 1))", marginRight: "calc(-50vw / var(--vz, 1))", background: "var(--background)", borderColor: "var(--glass-border)" }}>
-          <div className="mx-auto flex max-w-[992px] flex-col gap-[var(--space-5)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
+          <div className="mx-auto w-full max-w-[1440px] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]"><div className="flex max-w-[820px] flex-col gap-[var(--space-5)]">
         <CommentStream>
           {(() => {
             // Every answer is its own top-level branch on the main trunk;
@@ -5422,6 +5430,7 @@ function ThreadView({
             <Flag className="h-3 w-3" aria-hidden /> Report
           </button>
         </div>
+          </div>
           </div>
         </div>
 
@@ -5863,7 +5872,7 @@ function InsightThreadView({
            its own thing above a clearly separate "comments" zone instead
            of one continuous wash. */}
         <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "calc(-50vw / var(--vz, 1))", marginRight: "calc(-50vw / var(--vz, 1))", background: "var(--background)", borderColor: "var(--glass-border)" }}>
-          <div className="mx-auto flex max-w-[992px] flex-col gap-[var(--space-4)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
+          <div className="mx-auto w-full max-w-[1440px] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]"><div className="flex max-w-[820px] flex-col gap-[var(--space-4)]">
             <h2 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Comments ({insight.replies.length + posted.length})
             </h2>
@@ -5923,6 +5932,7 @@ function InsightThreadView({
               </Card>
             )}
             <ReplyComposer as={as} onPost={(text) => setPosted((current) => [...current, { id: `${insight.id}-local-${current.length}`, body: text }])} />
+          </div>
           </div>
         </div>
       </article>

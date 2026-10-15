@@ -434,7 +434,7 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
     const people = rankPros(PROS.filter((p) => p.world === industry), worlds);
     return (
       <>
-        <SectionSurface className="flex flex-col gap-[var(--space-4)]">
+        <SectionSurface flush padded className="flex flex-col gap-[var(--space-4)]">
           <button type="button" onClick={() => setIndustry(null)} className="dm-link flex min-h-[40px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
             <ChevronLeft className="h-4 w-4" aria-hidden /> All industries
           </button>
@@ -455,13 +455,12 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
   if (showAllIndustries) {
     return (
       <>
-        <SectionSurface className="flex flex-col gap-[var(--space-4)]">
+        <SectionSurface flush padded className="flex flex-col gap-[var(--space-4)]">
           <button type="button" onClick={() => setShowAllIndustries(false)} className="dm-link flex min-h-[40px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
             <ChevronLeft className="h-4 w-4" aria-hidden /> Back
           </button>
           <div className="flex flex-col gap-[2px]">
             <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.08em]" style={{ color: "var(--accent-subtle)" }}>BROWSE BY INDUSTRY</span>
-            <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Every world Dreamari covers, whether it has professionals yet or not.</span>
           </div>
           <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
             {WORLDS.map((world) => <WorldTile key={world} world={world} count={countIn(world)} unit="professional" onOpen={() => setIndustry(world)} />)}
@@ -505,22 +504,20 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
          Connect's own first tab and default landing instead of a strip at
          the bottom of People. NewFromFollowing itself stays (Notifications
          and Your Activity still use it). */}
-      <SectionSurface className="flex flex-col gap-[var(--space-3)]" >
+      <SectionSurface flush padded className="flex flex-col gap-[var(--space-3)]">
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Active people to follow">
           <div className="flex flex-col gap-[2px]">
             <SectionHead>Active people to follow</SectionHead>
-            <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Professionals based on your career interests.</span>
           </div>
           <FollowCarousel pros={withNewProsFirst(PROS, worlds)} follows={follows} onFollow={onFollow} />
         </section>
       </SectionSurface>
 
-      <SectionSurface>
+      <SectionSurface flush padded>
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Browse by industry">
           <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
             <div className="flex flex-col gap-[2px]">
               <SectionHead>Browse by industry</SectionHead>
-              <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Explore professionals in fields that interest you.</span>
             </div>
             <button type="button" onClick={() => setShowAllIndustries(true)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>Explore all industries <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
           </div>

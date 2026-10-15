@@ -40,7 +40,7 @@ export function StreakFlame({ size = 16, className = "" }: { size?: number; clas
 }
 
 /** The Dream Score mark: a four point "dream spark" with a small twin, in the
- *  brand ramp (pale sky into brand blue into the accent violet). It replaces
+ *  brand ramp (sky blue into brand blue into the accent violet, deep enough to read on the light theme too). It replaces
  *  the lightning bolt (Chandu, 15 Oct 2026: streak and XP read as clutter, and
  *  a bolt is every app's XP icon). A spark is already this app's own motion
  *  language (SparkBar, the nudge sparkle), so the icon and the "+N XP" that
@@ -53,13 +53,13 @@ export function DreamSpark({ size = 16, className = "" }: { size?: number; class
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden className={className} style={{ filter: "drop-shadow(0 0 5px color-mix(in srgb, #7FA8FF 55%, transparent))" }}>
       <defs>
         <linearGradient id={`${id}-fill`} x1="4" y1="8" x2="17" y2="21" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#E3EDFF" />
-          <stop offset="0.5" stopColor="#7FA8FF" />
-          <stop offset="1" stopColor="#9D86FF" />
+          <stop offset="0" stopColor="#A9C4FF" />
+          <stop offset="0.5" stopColor="#5E8BFF" />
+          <stop offset="1" stopColor="#8A63FF" />
         </linearGradient>
       </defs>
       <path d={STAR} transform="translate(10 14) scale(0.72) translate(-12 -12)" fill={`url(#${id}-fill)`} />
-      <path d={STAR} transform="translate(18.2 5.8) scale(0.36) translate(-12 -12)" fill="#E3EDFF" />
+      <path d={STAR} transform="translate(18.2 5.8) scale(0.36) translate(-12 -12)" fill="#7FA3FF" />
     </svg>
   );
 }

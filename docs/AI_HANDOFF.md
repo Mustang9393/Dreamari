@@ -1,3 +1,13 @@
+## 2026-10-15 (night): Connect boards: the flush model on the rest, thread column left-aligned at 820px, less copy
+
+**Why (Chandu, 15 Oct):** "thread column: left aligned is better. Execute all other open items. Just make sure it doesn't go against Maisha's or Joshua's points." Earlier: "This should be the model for boards everywhere and feeds etc." and "reduce copy as much as possible".
+
+- **Thread and insight comments:** the black zone still bleeds edge to edge, the replies now sit left-aligned in the page column at max 820px, flush with the title above (was a centred 992px).
+- **Same panel model everywhere a board has tabs:** header zone with tabs (FitSegmented, a "More" dropdown, never clipped), then rows to the edges. Done for the AT&T v2 and v1 boards (their own tabs and cards untouched, only the outer panel is edge to edge on phone and tablet), the United Way event board (`UwEventBoard`: Questions, Recap, Photos, People, About stay exactly Maisha's five; the Recap lost its extra card border), Connect's `EventView` (Questions, Posts, Photos, People, About; rows run edge to edge), the United Way program page (`ask` tab uses the flush rows), the United Way post page, People tab, Mentorship (both). `SectionSurface` got a `padded` prop for sections of cards (flush edges, padded content).
+- **Copy:** People tab lost three descriptive sublines ("Professionals based on your career interests" and two more); the board's "36 from students" / "from volunteers" counts now read "36 posts"; the composer bars are "Post" with a shorter volunteer line ("Share with students").
+- **Not touched on purpose (Joshua's and Maisha's points):** AT&T's tab sets, Home pieces, Share tiles and Year-Round plan (Joshua's Replit, docs/reference/joshua-connect-replit-2026-09), the three roles and To: tags, LinkedIn reactions, event title case and the five event tabs (Maisha).
+- **Top nav chip:** the spark icon is a little deeper blue so it reads on the light theme. Light mode of the Team workspace checked at 1100px: frosted whites, no problems seen.
+
 ## 2026-10-15 (night): Team messages (nav icon, dock, bell rows) only inside the United Way board in Team mode
 
 **Why (Chandu, 15 Oct):** "Make sure the dms stuff only appears in the united way teams mode in that board." This narrows the earlier "accessible from anywhere" entry below: the nav Messages icon, the dock and the bell's Team rows no longer persist (the `dreamari:uw-active` localStorage flag is gone). `UnitedWayBoardView` calls `activateUw()` on mount and `deactivateUw()` on unmount (which also closes the dock), and `useUwTeamActive()` is also false in the Student and Volunteer roles. Checked: no icon on /explore, icon on the board, gone again after leaving it.

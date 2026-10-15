@@ -30,8 +30,8 @@ import { createPortal } from "react-dom";
 import { IconTip } from "@/components/app/IconTip";
 import { useBackStep } from "@/lib/backStep";
 import { CARD_TEXT_SHADOW } from "@/components/app/cardChrome";
-import { Segmented } from "../viz";
-import { CompanyChip, ConnectNav, SectionHead } from "../primitives";
+import { FitSegmented } from "../viz";
+import { CompanyChip, ConnectNav, SectionHead, SectionSurface } from "../primitives";
 import { ProProfileView, useProfilePage } from "../ProProfile";
 import type { EventBoard } from "../data";
 import * as D from "./uwData";
@@ -129,29 +129,30 @@ export function UwEventBoard({ event, board, ev, filter, onFilter, onBack, backL
         </div>
       </section>
 
-      <div className="sticky top-[84px] z-30 -mx-[4px] rounded-[var(--radius-lg)] px-[4px] py-[6px]" style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
-        <div className="flow-scroll overflow-x-auto"><div className="w-max min-w-full sm:min-w-0">
-          <Segmented ariaLabel="Event board section" value={tab} onChange={(k) => onFilter(k)} grow dense
-            options={tabs.map((k) => ({ key: k, label: k === "questions" ? `${TAB_LABEL[k]} ${questions.length}` : k === "photos" ? `${TAB_LABEL[k]} ${f.photos!.count}` : TAB_LABEL[k] }))} />
-        </div></div>
-      </div>
-
-      {tab === "questions" && (
-        <div className="flex flex-col gap-[var(--space-4)]">
-          {pov === "student" && (
+      {/* the same model as every board (Chandu, 15 Oct): one panel, a header
+         that holds the tabs and the ask bar, then full width rows */}
+      <SectionSurface flush>
+        <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-6)] sm:py-[var(--space-5)]">
+          <FitSegmented ariaLabel="Event board section" value={tab} onChange={(k) => onFilter(k)}
+            options={tabs.map((k) => ({ key: k, label: TAB_LABEL[k], badge: k === "questions" ? questions.length : k === "photos" ? f.photos!.count : undefined }))} />
+          {tab === "questions" && pov === "student" && (
             <button type="button" onClick={() => setAsking(true)} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-lg)] border py-[8px] pr-[8px] pl-[10px] text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
               <PersonAvatar who={me} size={36} />
               <span className="min-w-0 flex-1 truncate text-[15px]" style={{ color: MUTED }}>Ask about this event</span>
               <span className="flex-none rounded-full px-[14px] py-[8px] text-[13px] font-bold" style={SOLID}>Ask</span>
             </button>
           )}
-          <ItemList items={questions} empty={pov === "volunteer" ? "No questions for volunteers yet." : "No questions yet. Ask the first one."} />
         </div>
+
+      {tab === "questions" && (
+        <ItemList flush items={questions} empty={pov === "volunteer" ? "No questions for volunteers yet." : "No questions yet. Ask the first one."} />
       )}
 
+      {tab !== "questions" && (
+      <div className="px-[var(--space-4)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
       {tab === "recap" && (
         recap ? (
-          <article aria-labelledby="uw-recap-title" className="relative overflow-hidden rounded-[var(--radius-xl)] border px-[var(--space-5)] py-[var(--space-6)] sm:px-[var(--space-8)] sm:py-[var(--space-8)]" style={{ borderColor: `color-mix(in srgb, ${BLUE} 40%, var(--glass-border))`, background: `radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, ${BLUE} 16%, transparent), transparent 60%), var(--glass-surface-1)` }}>
+          <article aria-labelledby="uw-recap-title" className="relative">
             <p className="flex items-center gap-[8px] text-[12px] leading-[16px] font-extrabold" style={{ color: BLUE_TEXT }}><Pin className="h-3.5 w-3.5" aria-hidden /> Pinned by United Way</p>
             <h2 id="uw-recap-title" className="mt-[10px] text-[30px] leading-[35px] font-extrabold text-balance sm:text-[36px] sm:leading-[42px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Event Recap &amp; Next Steps</h2>
             <div className="mt-[var(--space-6)] grid grid-cols-1 gap-[var(--space-8)] md:grid-cols-2 md:gap-[var(--space-10)]">
@@ -241,6 +242,9 @@ export function UwEventBoard({ event, board, ev, filter, onFilter, onBack, backL
           <AboutCell label="Participating Companies" wide>{companies.length ? <span className="flex flex-wrap gap-[6px]">{companies.map((c) => <CompanyChip key={c} name={c} tone="surface" />)}</span> : "Coming soon"}</AboutCell>
         </dl>
       )}
+      </div>
+      )}
+      </SectionSurface>
 
       {photoOpen !== null && f.photos && typeof document !== "undefined" && createPortal(
         <div role="dialog" aria-modal="true" aria-label={`Photo ${photoOpen + 1} of ${f.photos.count}`} className="fixed inset-0 z-[95] flex flex-col items-center justify-center p-4 sm:p-8" style={{ background: "rgba(6,7,16,0.6)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}>

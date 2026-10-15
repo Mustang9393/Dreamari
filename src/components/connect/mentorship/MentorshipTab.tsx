@@ -405,7 +405,7 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
         </div>
       </section>
 
-      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
+      <SectionSurface flush padded className="flex flex-col gap-[var(--space-5)]">
         {view === "student" && <StudentView {...shared} onOpenProfile={() => openProfile("mentor")} />}
         {view === "mentor" && <MentorView {...shared} onOpenProfile={() => openProfile("mentee")} />}
         {view === "enterprise" && <EnterpriseView sub={sub} setSub={setSub} />}

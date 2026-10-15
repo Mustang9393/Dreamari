@@ -529,9 +529,9 @@ export function SectionHead({ children, id }: { children: React.ReactNode; id?: 
  *  from screen edge to screen edge (the page's gutters cancelled) instead of
  *  a boxed card inside them, so a phone or a tablet keeps its width for the
  *  words. */
-export function SectionSurface({ children, className = "", flush = false }: { children: React.ReactNode; className?: string; flush?: boolean }) {
+export function SectionSurface({ children, className = "", flush = false, padded = false }: { children: React.ReactNode; className?: string; flush?: boolean; /** with flush: the band keeps its edges but pads its own content (a section of cards, not a list of rows) */ padded?: boolean }) {
   const shape = flush
-    ? "-mx-5 border-y sm:-mx-[var(--space-14)] lg:mx-0 lg:rounded-[var(--radius-xl)] lg:border"
+    ? `-mx-5 border-y sm:-mx-[var(--space-14)] lg:mx-0 lg:rounded-[var(--radius-xl)] lg:border${padded ? " p-[var(--space-4)] sm:p-[var(--space-6)]" : ""}`
     : "rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:p-[var(--space-6)]";
   return (
     <div className={`${shape} bg-[var(--card)] border-[color:var(--glass-border)] ${className}`}>

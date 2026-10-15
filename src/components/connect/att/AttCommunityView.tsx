@@ -1639,16 +1639,16 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
         </div>
       </section>
 
-      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
+      <SectionSurface flush className="flex flex-col gap-[var(--space-5)] pt-[var(--space-4)] pb-[var(--space-5)] sm:pt-[var(--space-5)] sm:pb-[var(--space-6)]">
         {/* the board's own tabs, the one row a student actually uses; full
            width on phones so four labels never truncate */}
-        <div className="w-full sm:w-fit">
+        <div className="w-full px-[var(--space-4)] sm:w-fit sm:px-[var(--space-6)]">
           {view === "student" && <Segmented ariaLabel="Student section" value={studentTab} onChange={keep(setStudentTab)} options={[...D.STUDENT_TABS]} grow />}
           {view === "volunteer" && <Segmented ariaLabel="Volunteer section" value={volunteerTab} onChange={keep(setVolunteerTab)} options={[...D.VOLUNTEER_TABS]} grow />}
           {view === "enterprise" && <Segmented ariaLabel="Enterprise section" value={enterpriseTab} onChange={keep(setEnterpriseTab)} options={[...D.ENTERPRISE_TABS]} grow />}
         </div>
 
-        <motion.div key={`${view}-${view === "student" ? studentTab : view === "volunteer" ? volunteerTab : enterpriseTab}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)]">
+        <motion.div key={`${view}-${view === "student" ? studentTab : view === "volunteer" ? volunteerTab : enterpriseTab}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)] px-[var(--space-4)] sm:px-[var(--space-6)]">
           {view === "student" && studentTab === "home" && <StudentHome onAsk={() => setStudentTab("questions")} onSeeAll={() => setStudentTab("opportunities")} saves={saves} toggleSave={toggleSave} openOpportunity={setOpportunity} progress={progress} openModule={setModule} onToast={onToast} />}
           {view === "student" && studentTab === "learn" && <StudentLearn progress={progress} openModule={setModule} />}
           {view === "student" && studentTab === "questions" && <StudentQuestions />}

@@ -432,7 +432,7 @@ export function UnitedWayMentorship({ onBack }: { onBack: () => void }) {
         </motion.div>
       </section>
 
-      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
+      <SectionSurface flush padded className="flex flex-col gap-[var(--space-5)]">
         {view === "student" && <StudentSide stage={stage} onOpenPro={setProfile} onToast={onToast} />}
         {view === "mentor" && <MentorSide onToast={onToast} />}
         {view === "partner" && <PartnerSide />}
