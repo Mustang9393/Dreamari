@@ -224,7 +224,7 @@ export function Listbox({
             id={listboxId}
             role="listbox"
             aria-label={ariaLabel}
-            className={`dm-scroll fixed z-[121] overflow-y-auto rounded-[var(--radius-md)] border p-[4px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] ${panelClassName}`}
+            className={`dm-scroll dm-pop-in fixed z-[121] overflow-y-auto rounded-[var(--radius-md)] border p-[4px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] ${panelClassName}`}
             style={{
               top: pos.top,
               left: pos.left,
