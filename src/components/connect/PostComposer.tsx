@@ -340,7 +340,7 @@ function Chip({ on, onClick, children, label }: { on: boolean; onClick: () => vo
 }
 /** One horizontal row of choices, Instagram's filter strip. */
 function Strip({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div role="group" aria-label={label} className="-mx-[16px] flex gap-[8px] overflow-x-auto px-[16px] pb-[2px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{children}</div>;
+  return <div role="group" aria-label={label} className="-mx-[16px] flex gap-[8px] overflow-x-auto px-[16px] pb-[2px] flow-scroll">{children}</div>;
 }
 
 // The overlay strips: one or two horizontal rows over the bottom of the

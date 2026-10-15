@@ -173,8 +173,10 @@ export function AdminDashboardView({ onBack, backLabel = "Back" }: { onBack: () 
                       </span>
                     ) : (
                       <span className="flex flex-wrap gap-[var(--space-2)]">
-                        <PrimaryCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => decide(r.id, "removed")}>Remove</PrimaryCta>
-                        <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => decide(r.id, "kept")}>Keep</QuietCta>
+                        {/* Remove is not the default action of a report, so it
+                           is the same quiet button as Keep (14 Oct 2026 review). */}
+                        <QuietCta className="min-h-[44px] px-[var(--space-4)] text-[13px]" onClick={() => decide(r.id, "removed")}>Remove</QuietCta>
+                        <QuietCta className="min-h-[44px] px-[var(--space-4)] text-[13px]" onClick={() => decide(r.id, "kept")}>Keep</QuietCta>
                       </span>
                     )}
                   </li>
@@ -203,8 +205,8 @@ export function AdminDashboardView({ onBack, backLabel = "Back" }: { onBack: () 
                       </span>
                     ) : (
                       <span className="flex flex-wrap gap-[var(--space-2)]">
-                        <PrimaryCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => decide(p.id, "approved")}>Publish</PrimaryCta>
-                        <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => decide(p.id, "removed")}>Send back</QuietCta>
+                        <PrimaryCta className="min-h-[44px] px-[var(--space-4)] text-[13px]" onClick={() => decide(p.id, "approved")}>Publish</PrimaryCta>
+                        <QuietCta className="min-h-[44px] px-[var(--space-4)] text-[13px]" onClick={() => decide(p.id, "removed")}>Send back</QuietCta>
                       </span>
                     )}
                   </li>

@@ -155,7 +155,7 @@ function DemoViewSwitch({ view, onPick }: { view: D.MentorshipView; onPick: (vie
         Demo
       </button>
       {open && (
-        <div id="mentorship-demo-views" role="tablist" aria-label="Show this program as" className="flex min-w-0 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none]" style={PANEL}>
+        <div id="mentorship-demo-views" role="tablist" aria-label="Show this program as" className="flex min-w-0 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] flow-scroll" style={PANEL}>
           {D.VIEWS.map((option) => {
             const on = option.key === view;
             return (
@@ -1349,7 +1349,7 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
                Play card, the student's own resume. */}
             {/* Three cards, one row, the full width; a scroll rail only on
                phones, with room so the hover lift is never clipped. */}
-            <div className="-mx-[6px] -my-[8px] flex gap-[var(--space-4)] overflow-x-auto px-[6px] py-[8px] [scrollbar-width:none] sm:mx-0 sm:my-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:py-0">
+            <div className="-mx-[6px] -my-[8px] flex gap-[var(--space-4)] overflow-x-auto px-[6px] py-[8px] flow-scroll sm:mx-0 sm:my-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:py-0">
               {[
                 <CareerPrepCard key="career" onClick={() => router.push(D.PREP_CAREER.href)} />,
                 <PlayPrepCard key="play" onClick={() => router.push(D.PREP_PLAY.href)} />,

@@ -411,7 +411,7 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
   return (
     <section className="flex flex-col gap-[var(--space-3)]" aria-label="Professionals to Follow">
       <SectionHead>Professionals to Follow</SectionHead>
-      <ul className="-mx-5 flex gap-[var(--space-5)] overflow-x-auto px-5 pt-1 pb-2 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-[var(--space-8)] sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
+      <ul className="-mx-5 flex gap-[var(--space-5)] overflow-x-auto px-5 pt-1 pb-2 flow-scroll sm:mx-0 sm:flex-wrap sm:gap-[var(--space-8)] sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
         {ranked.map((pro) => {
           // no ring of any kind (direct feedback: a ring reads as a story)
           const following = !!follows[pro.id];

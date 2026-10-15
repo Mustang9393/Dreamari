@@ -95,7 +95,7 @@ function Mentors({ onOpen }: { onOpen: (id: string) => void }) {
   return (
     <section className="flex flex-col gap-[var(--space-3)]">
       <SectionHead>{M.mentorsTitle}</SectionHead>
-      <div className="dm-scroll -mx-[4px] flex gap-[var(--space-3)] overflow-x-auto px-[4px] pb-[4px] [scrollbar-width:none]">
+      <div className="flow-scroll -mx-[4px] flex gap-[var(--space-3)] overflow-x-auto px-[4px] pb-[4px]">
         {D.VOLUNTEER_IDS.map((id) => {
           const pro = D.VOLUNTEERS[id];
           return (

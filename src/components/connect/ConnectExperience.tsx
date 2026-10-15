@@ -1374,7 +1374,7 @@ type LucideIcon = React.ComponentType<{ className?: string; "aria-hidden"?: bool
 function FilterRow({ options, active, onPick, accent }: { options: { key: string; label: string; Icon?: LucideIcon }[]; active: string; onPick: (key: string) => void; accent?: string }) {
   return (
     <div className="relative -mx-1">
-      <div className="flex gap-[var(--space-2)] overflow-x-auto px-1 pt-1 pb-3 [scrollbar-width:none]" role="tablist" aria-label="Filter feed">
+      <div className="flex gap-[var(--space-2)] overflow-x-auto px-1 pt-1 pb-3 flow-scroll" role="tablist" aria-label="Filter feed">
         {options.map((option) => (
           <button
             key={option.key}
@@ -2073,7 +2073,7 @@ const ROLES: { key: DemoRole; title: string; who: string; line: string; Icon: Lu
 /** Demo: which volunteer we are looking at. Faces first, the name under. */
 function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: string) => void }) {
   return (
-    <div role="tablist" aria-label="Volunteer" className="-mx-5 flex gap-[var(--space-2)] overflow-x-auto px-5 pt-1 pb-2 [scrollbar-width:none]">
+    <div role="tablist" aria-label="Volunteer" className="-mx-5 flex gap-[var(--space-2)] overflow-x-auto px-5 pt-1 pb-2 flow-scroll">
       {PROS.map((p) => {
         const on = p.id === selected;
         return (
@@ -2112,17 +2112,38 @@ function RoleTabs({ role, onPick, children }: { role: DemoRole; onPick: (role: D
   // switching roles re-opens it without an effect.
   const [open, setOpen] = useState(role !== "student");
   const showTabs = open;
+  // An open panel closes on a click anywhere else or on Escape (which
+  // returns focus to the chip), like any other popover (14 Oct 2026
+  // review). Its place at the bottom centre is unchanged.
+  const demoRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const dismiss = (event: PointerEvent) => {
+      if (event.target instanceof Node && !demoRef.current?.contains(event.target)) setOpen(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      demoRef.current?.querySelector<HTMLButtonElement>('button[aria-controls="connect-demo-roles"]')?.focus();
+    };
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [open]);
   return (
     // A floating dock at the bottom right (29 Sept 2026: "too many competing
     // things in the top right... the high school/college stuff should go
     // inside the demo thing and the demo thing should be moved down"),
     // fixed rather than at the page end because the Feed scrolls forever.
     // The chip stays; everything else opens above it.
-    <div className="pointer-events-auto flex w-fit max-w-[min(760px,calc(calc(100vw/var(--vz,1))-32px))] flex-col items-center gap-[8px]">
+    <div ref={demoRef} className="pointer-events-auto flex w-fit max-w-[min(760px,calc(calc(100vw/var(--vz,1))-32px))] flex-col items-center gap-[8px]">
       {showTabs && (
       <div className="flex w-full min-w-0 flex-col items-center gap-[8px] rounded-[16px] border p-[8px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 96%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", boxShadow: "0 18px 40px -16px rgba(0,0,0,0.65)" }}>
       {children && <div className="flex w-full min-w-0 flex-col items-center gap-[6px] overflow-hidden [&>*]:max-w-full">{children}</div>}
-      <div id="connect-demo-roles" role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none]" style={{ background: "color-mix(in srgb, var(--card) 92%, transparent)", borderColor: "var(--glass-border)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.6)" }}>
+      <div id="connect-demo-roles" role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] flow-scroll" style={{ background: "color-mix(in srgb, var(--card) 92%, transparent)", borderColor: "var(--glass-border)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.6)" }}>
         {ROLES.map(({ key, title, Icon }) => {
           const on = key === role;
           return (
@@ -4154,7 +4175,7 @@ function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => 
       // touching the page's own scroll position
       if (el.scrollWidth > el.clientWidth + 1) {
         const target = active.offsetLeft - (el.clientWidth - active.offsetWidth) / 2;
-        el.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+        el.scrollTo({ left: Math.max(0, target), behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
       }
     };
     measure();
