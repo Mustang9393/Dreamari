@@ -1763,11 +1763,10 @@ export function ConnectExperience() {
         // and the dashboards use the app's one page column (1440px, px-5 then
         // 56px from sm, the same as Home, Explore and the top nav), and the
         // board's content fills it. A board's header, tabs and feed are one
-        // width, never a narrower column inside a wider page. Reading views (a
-        // thread, an insight, a profile) keep their centred 992px column.
-        className={`relative z-10 mx-auto flex w-full flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8 ${
-          view.kind === "home" || view.kind === "board" || view.kind === "event" || view.kind === "partner" || view.kind === "proDashboard" || view.kind === "admin" ? "max-w-[1440px]" : "max-w-[992px]"
-        }`}
+        // width, never a narrower column inside a wider page. Threads, posts
+        // and profiles use it too (Chandu: "threads etc should also be
+        // consistent with boards, feed etc as far as margins").
+        className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8"
       >
         {/* The demo role switcher is a utility, not part of the page: it
            shows only where it applies (the Connect landing, or while a
@@ -5323,7 +5322,7 @@ function ThreadView({
            out of <main>'s side padding. Re-applies that padding inside so
            the content still lines up with the title above it. */}
         <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "calc(-50vw / var(--vz, 1))", marginRight: "calc(-50vw / var(--vz, 1))", background: "var(--background)", borderColor: "var(--glass-border)" }}>
-          <div className="mx-auto flex max-w-[992px] flex-col gap-[var(--space-5)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
+          <div className="mx-auto flex max-w-[1440px] flex-col gap-[var(--space-5)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
         <CommentStream>
           {(() => {
             // Every answer is its own top-level branch on the main trunk;
@@ -5853,7 +5852,7 @@ function InsightThreadView({
            its own thing above a clearly separate "comments" zone instead
            of one continuous wash. */}
         <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "calc(-50vw / var(--vz, 1))", marginRight: "calc(-50vw / var(--vz, 1))", background: "var(--background)", borderColor: "var(--glass-border)" }}>
-          <div className="mx-auto flex max-w-[992px] flex-col gap-[var(--space-4)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
+          <div className="mx-auto flex max-w-[1440px] flex-col gap-[var(--space-4)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
             <h2 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Comments ({insight.replies.length + posted.length})
             </h2>
