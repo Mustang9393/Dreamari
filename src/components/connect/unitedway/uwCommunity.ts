@@ -21,9 +21,11 @@ import { EVENT_THREADS, INSIGHTS, THREADS, type Insight, type Thread } from "../
 import type { StaffMember, UwBoard, UwPov } from "./uwData";
 import { UW_STAFF_ANSWERS, UW_STUDENT_POSTS, type UwStudentPostSeed } from "./uwThreads";
 
-export type ReactionKind = "like" | "celebrate" | "support" | "love";
-export const REACTION_KINDS: ReactionKind[] = ["like", "celebrate", "support", "love"];
-export const REACTION_LABEL: Record<ReactionKind, string> = { like: "Like", celebrate: "Celebrate", support: "Support", love: "Love" };
+// The reaction kinds, labels and the seeded split are shared with the
+// rest of Connect (../reactions.tsx) since 15 Oct 2026; re-exported here
+// so the United Way files keep their imports.
+import { seedReactions, type ReactionKind } from "../reactions";
+export { REACTION_KINDS, REACTION_LABEL, reactionTotal, seedReactions, type ReactionKind } from "../reactions";
 
 export type UwPerson =
   | { kind: "student"; name: string; grade?: string; place?: string }
@@ -45,17 +47,7 @@ export type UwItem = UwQuestion | UwStudentPost | UwVolunteerPost;
 export const agoMinutes = (ago: string) => { const m = /(\d+)\s*([mhdw])/.exec(ago); return m ? Number(m[1]) * ({ m: 1, h: 60, d: 1440, w: 10080 } as const)[m[2] as "m" | "h" | "d" | "w"] : 0; };
 
 const hash = (s: string) => { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h); };
-/** DEMO-ONLY: a seeded count of likes split across the four reactions,
- *  mostly Like, the rest varying by post so the summary icons differ. */
-export function seedReactions(id: string, total: number): Record<ReactionKind, number> {
-  const h = hash(id);
-  const like = Math.round(total * (0.45 + (h % 20) / 100));
-  const rest = total - like;
-  const order: ReactionKind[] = [["celebrate", "support", "love"], ["love", "celebrate", "support"], ["support", "love", "celebrate"]][h % 3] as ReactionKind[];
-  const a = Math.round(rest * 0.55), b = Math.round(rest * 0.3);
-  return { like, [order[0]]: a, [order[1]]: b, [order[2]]: Math.max(0, rest - a - b) } as Record<ReactionKind, number>;
-}
-export const reactionTotal = (r: Record<ReactionKind, number>) => REACTION_KINDS.reduce((n, k) => n + r[k], 0);
+
 export const countReplies = (list: UwReply[]): number => list.reduce((n, r) => n + 1 + countReplies(r.replies), 0);
 
 /** Every United Way staff member on a board, by first name. */

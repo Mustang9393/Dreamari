@@ -41,6 +41,7 @@ import { SOUTH_CENTRAL, UW_SC_ID } from "./unitedway/uwSouthCentral";
 import { UnitedWayBoardView } from "./unitedway/UnitedWayBoardView";
 import { UW_EVENT_BOARDS, uwEventById, uwEventSource } from "./unitedway/uwEvents";
 import { UwEventBoard } from "./unitedway/UwEventBoard";
+import { ReactButton, ReactionSummary, seedReactions, type ReactionKind } from "./reactions";
 import { toggleEventReminder, useEventReminders } from "@/lib/eventReminders";
 import { downloadCalendarFile, parseEventDate } from "@/lib/calendarFile";
 import { replyAs, setReplyAs } from "@/lib/replyAs";
@@ -5498,42 +5499,37 @@ function FollowupBranch({ children }: { children: React.ReactNode }) {
 
 // ——— comments: one shape everywhere ———
 
-const EXTRA_REACTIONS = ["🔥", "💯"] as const;
-
-/** Deterministic seeded counts so reaction chips look lived-in without
- *  Math.random (render purity). */
+/** DEMO-ONLY: the two extra seeded counts the old 🔥 and 💯 chips carried,
+ *  kept so every comment's reaction total is exactly what it was. */
 function seededReactions(id: string): number[] {
   let h = 2166136261;
   for (let i = 0; i < id.length; i++) {
     h ^= id.charCodeAt(i);
     h = Math.imul(h, 16777619) >>> 0;
   }
-  return EXTRA_REACTIONS.map((_, i) => ((h >> (i * 5)) % 8) + 1);
+  return [0, 1].map((i) => ((h >> (i * 5)) % 8) + 1);
 }
 
-/** The like button grown up: 👍 plus tap-to-react emoji, the same
- *  vocabulary as the GIFs in the threads. One row, one shape, everywhere. */
+/** A comment's reactions: the shared LinkedIn-style control (Like,
+ *  Celebrate, Support, Love, one per person) and the summary with the top
+ *  two icons and the count, the same as the United Way boards (Maisha,
+ *  9 Oct 2026: "Replace the fire and 100 emojis with professional
+ *  LinkedIn-style reactions such as Like, Celebrate, Support, and Love";
+ *  applied to the rest of Connect 15 Oct 2026). `likes` is the seeded
+ *  like count; Like still goes through `onLike` so the thread's own count
+ *  stays in step. */
 export function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; liked: boolean; onLike: (id: string) => void }) {
-  const [mine, setMine] = useState<Record<string, boolean>>({});
+  const [mine, setMine] = useState<ReactionKind | undefined>(liked ? "like" : undefined);
   const seeds = seededReactions(id);
-  const chip = "dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[10px] text-[11.5px] leading-[15px] font-semibold transition-transform duration-150 active:scale-90";
-  const offStyle = { borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" };
-  const onStyle = { borderColor: "color-mix(in srgb, var(--accent-subtle) 55%, transparent)", background: "color-mix(in srgb, var(--accent-subtle) 14%, transparent)", color: "var(--accent-subtle)" };
+  const counts = seedReactions(id, likes + seeds[0] + seeds[1]);
+  const pick = (kind: ReactionKind | undefined) => {
+    if ((kind === "like") !== (mine === "like")) onLike(id);
+    setMine(kind);
+  };
   return (
-    <div className="mt-[6px] flex flex-wrap items-center gap-[6px]">
-      <button type="button" onClick={() => onLike(id)} aria-pressed={liked} className={chip} style={liked ? onStyle : offStyle}>
-        <ThumbsUp className="h-3 w-3" aria-hidden /> {likes + (liked ? 1 : 0)}
-      </button>
-      {EXTRA_REACTIONS.map((emoji, index) => {
-        const on = !!mine[emoji];
-        const count = seeds[index] + (on ? 1 : 0);
-        return (
-          <button key={emoji} type="button" aria-pressed={on} aria-label={`React ${emoji}`} onClick={() => setMine((m) => ({ ...m, [emoji]: !m[emoji] }))} className={chip} style={on ? onStyle : offStyle}>
-            <span aria-hidden>{emoji}</span>
-            {count > 0 && <span className="tabular-nums">{count}</span>}
-          </button>
-        );
-      })}
+    <div className="mt-[2px] -ml-[8px] flex flex-wrap items-center gap-[4px]">
+      <ReactButton compact mine={mine} onReact={pick} />
+      <ReactionSummary counts={counts} mine={mine} size={16} />
     </div>
   );
 }
