@@ -1,3 +1,11 @@
+## 2026-10-15 (late): Glossary Games: the Power Play intro's Dreamy no longer sits on the title
+
+**Why (Chandu):** production screenshot of the Power Play intro with Dreamy covering "Power Play" and its line: "Whats happening here?"
+
+- The intro, Power Play intro and Complete screens size Dreamy by width alone (`height: auto !important`, written for the old static sprite). The animated actor's only child is absolute, so its box collapsed to 0px and the 139% canvas spilled over the copy below. `.glossary-reaction[data-medium="drift"]` now has `aspect-ratio: 1 / 1`, so `height: auto` resolves to the width. Signal already had 3:2.
+- Also: `?pp=intro` (DEMO-ONLY) opens the Power Play intro for QA, beside the existing `?pp=1`.
+- Checked: Drift Power Play intro, Drift Complete screen (after a full Power Play), Signal Power Play intro.
+
 ## 2026-10-15 (night): Glossary Games: Dreamy never clipped, every pose sheet preloaded
 
 **Why (Chandu):** "Dreamy is being cropped on the side of the question in some screens"; "Dreamy is taking 1+ seconds to load on all screens and looks empty everywhere"; "Dreamy is missing from drift too" (the unlock screen; same element as Signal's, restored in 273d151b, since Drift shows the gallery Dreamy via glossary-refined.css:282 and hides the copy-block one).

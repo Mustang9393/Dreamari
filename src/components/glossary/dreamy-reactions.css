@@ -11,6 +11,14 @@
 .glossary-game-shell.glossary-game-lab .glossary-reaction[data-medium="signal"] {
   aspect-ratio: 3 / 2;
 }
+/* The actor's only child is absolute, so wherever a screen rule sets
+   `height: auto` (the intro, Power Play intro and Complete screens size the
+   old sprite by width alone) the box collapsed to 0px and the 139% canvas
+   spilled over the title under it (15 Oct 2026, Chandu: "Whats happening
+   here?"). A square keeps the box the size of the art. */
+.glossary-game-shell.glossary-game-lab .glossary-reaction[data-medium="drift"] {
+  aspect-ratio: 1 / 1;
+}
 .glossary-game-shell.glossary-game-lab .glossary-reaction > .glossary-reaction-canvas {
   position: absolute;
   display: block;

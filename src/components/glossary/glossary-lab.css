@@ -2639,3 +2639,11 @@
    by that margin, about a fifth of the slot, so even where the column meets
    the shell's clipping edge (phones) his art never crosses it. */
 .glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-guide { padding-left: clamp(14px, 2.2vw, 32px) !important; }
+
+/* Power Play chips: a placed word collapses out of the bank; the dragged
+   tile lifts and rides with the pointer (15 Oct 2026). */
+.glossary-game-shell.glossary-game-lab .glossary-power-chip { max-width: 260px; transition: max-width .32s ease, opacity .22s ease, transform .22s ease, padding .32s ease, margin .32s ease, border-color .22s ease; }
+.glossary-game-shell.glossary-game-lab .glossary-power-chip.is-used { max-width: 0 !important; padding-inline: 0 !important; margin-left: calc(-1 * var(--space-3)); border-color: transparent !important; opacity: 0 !important; transform: scale(.4) !important; box-shadow: none !important; pointer-events: none; overflow: hidden; }
+.glossary-game-shell.glossary-game-lab .glossary-power-chip.is-lifted { opacity: .28 !important; }
+.glossary-game-shell.glossary-game-lab .glossary-power-ghost { position: absolute; z-index: 30; transform: translate(-50%, -50%) scale(1.08) rotate(-2deg) !important; pointer-events: none; max-width: none; box-shadow: 0 18px 36px rgba(0,0,0,.45), 0 4px 0 rgba(0,0,0,.3) !important; transition: none; }
+@media (prefers-reduced-motion: reduce) { .glossary-game-shell.glossary-game-lab .glossary-power-chip { transition: none; } }

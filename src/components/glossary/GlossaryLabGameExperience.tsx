@@ -2477,7 +2477,7 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
   const lastBlank = useRef<number | null>(null);
   const chipDrag = useRef<{ word: string; pointerId: number; x: number; y: number; moved: boolean } | null>(null);
   const suppressChipClick = useRef(false);
-  const [tether, setTether] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const [tether, setTether] = useState<{ x1: number; y1: number; x2: number; y2: number; word: string } | null>(null);
   const [blankTarget, setBlankTarget] = useState<number | null>(null);
 
   function fill(index: number, word: string) {
@@ -2525,6 +2525,7 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
         // FitToScreen scales the board; draw in its own unscaled space.
         const scale = rect.width / board.offsetWidth || 1;
         setTether({
+          word: gesture.word,
           x1: (chip.left + chip.width / 2 - rect.left) / scale,
           y1: (chip.bottom - rect.top) / scale,
           x2: Math.max(0, Math.min(board.offsetWidth, (e.clientX - rect.left) / scale)),
@@ -2599,22 +2600,36 @@ function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay: Paragr
           <circle cx={tether.x2} cy={tether.y2} r={6} />
         </svg>
       )}
+      {/* The tile itself lifts and rides with the pointer, the wire trailing
+         it (15 Oct 2026, Chandu: "when i drag them have the tile lift and
+         come with me to place not just the wire"). */}
+      {tether && (
+        <span className="glossary-word-chip glossary-power-chip glossary-power-ghost" aria-hidden style={{ left: tether.x2, top: tether.y2 }}>{tether.word}</span>
+      )}
       <div className="glossary-power-bank flex flex-wrap justify-center gap-[var(--space-3)]">
         {[...lesson.powerPlay.answers]
           .map((a) => a.charAt(0).toUpperCase() + a.slice(1))
-          .map((word) => (
+          .map((word) => {
+            // A placed word leaves the bank (15 Oct 2026, Chandu: "if i
+            // dragged them should move off the list to its destination");
+            // it comes back if the blank is cleared or retyped.
+            const used = values.some((v) => v.trim().toLowerCase() === word.toLowerCase());
+            return (
             <button
               key={word}
               type="button"
               {...chipHandlers(word)}
               onClick={() => tapChip(word)}
               aria-label={`Put ${word} in a blank`}
-              className={`glossary-word-chip glossary-power-chip rounded-[var(--radius-sm)] border px-[var(--space-5)] py-[10px] text-[15px] font-semibold glossary-power-drag-chip cursor-grab touch-none select-none active:cursor-grabbing ${values.some((v) => v.trim().toLowerCase() === word.toLowerCase()) ? "is-used" : ""}`}
+              aria-hidden={used || undefined}
+              tabIndex={used ? -1 : undefined}
+              className={`glossary-word-chip glossary-power-chip rounded-[var(--radius-sm)] border px-[var(--space-5)] py-[10px] text-[15px] font-semibold glossary-power-drag-chip cursor-grab touch-none select-none active:cursor-grabbing ${used ? "is-used" : ""} ${tether?.word === word ? "is-lifted" : ""}`}
               style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
             >
               {word}
             </button>
-          ))}
+            );
+          })}
       </div>
 
       {/* The story reads as a board, not a form (15 Oct 2026, Chandu: "It
@@ -3267,7 +3282,9 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     // Past the main loop, ?q= reaches the held-back review questions too (the
     // longest prompt lives there), queued the way remediation would add them.
     const review = Number.isFinite(q) && q > queue.length && q <= queue.length + lesson.reviewQuestions.length;
-    const jump = Number.isFinite(q) && q >= 1 && q <= queue.length + (review ? lesson.reviewQuestions.length : 0) ? { index: q - 1, screen: "question" as const } : params.get("pp") === "1" ? { index: 0, screen: "powerPlay" as const } : null;
+    const jump = Number.isFinite(q) && q >= 1 && q <= queue.length + (review ? lesson.reviewQuestions.length : 0) ? { index: q - 1, screen: "question" as const } : params.get("pp") === "1" ? { index: 0, screen: "powerPlay" as const }
+      // DEMO-ONLY: ?pp=intro opens the Power Play intro screen for QA (15 Oct 2026).
+      : params.get("pp") === "intro" ? { index: 0, screen: "powerPlayIntro" as const } : null;
     if (!jump) return;
     // The URL is an external system; the jump is applied once after mount.
     const t = window.setTimeout(() => {
