@@ -82,19 +82,19 @@ export const UW_THREADS: Thread[] = [
     id: "uw-t-recruiting", boardId: NET, type: "question",
     title: "Is recruiting a good job if I like people but not sales?",
     handle: "Maya", grade: "Junior", place: "Palm Beach", postedAgo: "2h ago", state: "routed",
-    routedScope: "Recruiting", expectedWindow: "within 1 day", helpful: 3, followers: 2, responses: [],
+    routedScope: "Recruiting", expectedWindow: "within 1 day", helpful: 26, followers: 2, responses: [],
   },
   {
     id: "uw-t-interview", boardId: NET, type: "question",
     title: "What should I wear to my first job interview?",
     handle: "Luis", grade: "Senior", place: "Miami", postedAgo: "5h ago", state: "routed",
-    routedScope: "First jobs", expectedWindow: "within 1 day", helpful: 6, followers: 4, responses: [],
+    routedScope: "First jobs", expectedWindow: "within 1 day", helpful: 31, followers: 4, responses: [],
   },
   {
     id: "uw-t-sixteen", boardId: NET, type: "question",
     title: "Can I get an office internship at 16?",
     handle: "Ava", grade: "Sophomore", place: "Southwest Virginia", postedAgo: "1d ago", state: "routed",
-    routedScope: "Internships", expectedWindow: "within 1 day", helpful: 4, followers: 3, responses: [],
+    routedScope: "Internships", expectedWindow: "within 1 day", helpful: 24, followers: 3, responses: [],
   },
 
   // ——— Michigan ———
@@ -139,19 +139,19 @@ export const UW_THREADS: Thread[] = [
     id: "mi-t-nurse", boardId: MI, type: "question",
     title: "What do nurses at a hospital in Grand Rapids do all day?",
     handle: "Nia", grade: "Junior", place: "West Michigan", postedAgo: "1h ago", state: "routed",
-    routedScope: "Health careers", expectedWindow: "within 1 day", helpful: 2, followers: 2, responses: [],
+    routedScope: "Health careers", expectedWindow: "within 1 day", helpful: 29, followers: 2, responses: [],
   },
   {
     id: "mi-t-shadow", boardId: MI, type: "question",
     title: "How do I ask for a job shadow if I don't know anyone?",
     handle: "Marcus", grade: "Sophomore", place: "Genesee", postedAgo: "4h ago", state: "routed",
-    routedScope: "First jobs", expectedWindow: "within 1 day", helpful: 5, followers: 3, responses: [],
+    routedScope: "First jobs", expectedWindow: "within 1 day", helpful: 27, followers: 3, responses: [],
   },
   {
     id: "mi-t-apprentice", boardId: MI, type: "question",
     title: "Is an apprenticeship better than community college?",
     handle: "Eli", grade: "Senior", place: "Lakeshore", postedAgo: "1d ago", state: "routed",
-    routedScope: "Trades", expectedWindow: "within 1 day", helpful: 7, followers: 4, responses: [],
+    routedScope: "Trades", expectedWindow: "within 1 day", helpful: 33, followers: 4, responses: [],
   },
   // ——— South Central Michigan (10 Oct 2026): nonprofit and public sector
   // careers, the call's focus. DEMO-ONLY: questions, answers and counts ———
@@ -212,13 +212,13 @@ export const UW_THREADS: Thread[] = [
     id: "sc-t-planner", boardId: SC, type: "question",
     title: "Do I need a master's degree to be a city planner?",
     handle: "Leo", grade: "Sophomore", place: "Lansing", postedAgo: "2h ago", state: "routed",
-    routedScope: "Government jobs", expectedWindow: "within 1 day", helpful: 4, followers: 2, responses: [],
+    routedScope: "Government jobs", expectedWindow: "within 1 day", helpful: 22, followers: 2, responses: [],
   },
   {
     id: "sc-t-msu", boardId: SC, type: "question",
     title: "Which majors at MSU or Western lead to nonprofit work?",
     handle: "Priya", grade: "Junior", place: "Kalamazoo", postedAgo: "6h ago", state: "routed",
-    routedScope: "Nonprofit jobs", expectedWindow: "within 1 day", helpful: 6, followers: 3, responses: [],
+    routedScope: "Nonprofit jobs", expectedWindow: "within 1 day", helpful: 28, followers: 3, responses: [],
   },
   // ——— Talk across communities (12 Oct 2026). DEMO-ONLY: every post,
   // reply and count below ———
@@ -243,7 +243,7 @@ export const UW_THREADS: Thread[] = [
     title: "Who's going to the next convening in Battle Creek?",
     context: "The fall one was so fun. I want to sit with people from the other towns this time.",
     handle: "Nia", grade: "Junior", place: "Battle Creek", postedAgo: "1d ago", state: "answered",
-    routedScope: "Regional convening", expectedWindow: "within 1 day", helpful: 26, followers: 11, comments: 4,
+    routedScope: "Regional convening", expectedWindow: "within 1 day", helpful: 34, followers: 11, comments: 4,
     responses: [
       { kind: "answer", proId: "pro-reyes", primary: true, postedAgo: "1d ago", body: "I'll be at the health table again. Bring one question about health jobs." },
       { kind: "peer", handle: "Sam", grade: "Senior", place: "Lansing", body: "Lansing is bringing a van. Ask your Student United lead for a seat.", postedAgo: "20h ago", likes: 14 },
@@ -254,7 +254,7 @@ export const UW_THREADS: Thread[] = [
     id: "sc-t-hours-swap", boardId: SC, type: "question",
     title: "Can I volunteer in another town?",
     handle: "Jada", grade: "Senior", place: "Jackson", postedAgo: "3h ago", state: "routed",
-    routedScope: "Service hours", expectedWindow: "within 1 day", helpful: 5, followers: 3, responses: [],
+    routedScope: "Service hours", expectedWindow: "within 1 day", helpful: 19, followers: 3, responses: [],
   },
   {
     id: "mi-t-giving", boardId: MI, type: "question",
@@ -389,7 +389,7 @@ export const UW_EVENT_THREADS: Thread[] = [
     id: "sc-et-college-table", boardId: "sc-e-fall-convening", type: "question",
     title: "Will the next convening have a college table again?",
     handle: "Theo", grade: "Junior", place: "Kalamazoo", postedAgo: "1d ago", state: "routed",
-    routedScope: "Event volunteers", expectedWindow: "within 2 days", views: 96, helpful: 8, followers: 4, responses: [],
+    routedScope: "Event volunteers", expectedWindow: "within 2 days", views: 96, helpful: 17, followers: 4, responses: [],
   },
   {
     id: "mi-et-projects", boardId: "mi-e-suw-meetup", type: "question",
@@ -447,16 +447,16 @@ function post(id: string, place: string, proId: string, ago: string, title: stri
 
 export const UW_SC_MORE_THREADS: Thread[] = [
   // Kalamazoo
-  q("sc-q-kz-teacher", "Kalamazoo", "Mia", "Junior", "40m ago", "How did you know teaching was right for you?", [["pro-wong", "I tutored my little cousin and loved the moment it clicked for her. Try reading buddies and see how it feels.", "20m ago"]], [["Theo", "Junior", "Kalamazoo", "The reading shift is so fun. The kids are hilarious.", "10m ago", 6]], 22),
+  q("sc-q-kz-teacher", "Kalamazoo", "Mia", "Junior", "40m ago", "How did you know teaching was right for you?", [["pro-wong", "I tutored my little cousin and loved the moment it clicked for her. Try reading buddies and see how it feels.", "20m ago"]], [["Theo", "Junior", "Kalamazoo", "The reading shift is so fun. The kids are hilarious.", "10m ago", 6]], 31),
   q("sc-q-kz-wmu", "Kalamazoo", "Owen", "Senior", "3h ago", "Does Western have service work that counts for class?", [["pro-wong", "Yes. Many classes there count service hours. Ask about it on your campus visit.", "2h ago"]], [["Ava", "Junior", "Kalamazoo", "My sister did this for her teaching class. She loved it.", "1h ago", 9]], 31),
-  q("sc-q-kz-firstjob", "Kalamazoo", "Lila", "Sophomore", "5h ago", "What is a good first job at 16?", [["pro-tanaka", "Anything where you work with people: a library, a food bank, a camp. Those teach skills every job needs.", "4h ago"]], [], 18),
-  q("sc-q-kz-yuw-join", "Kalamazoo", "Sam", "Freshman", "8h ago", "Can freshmen join Youth United Way?", [], [], 7),
+  q("sc-q-kz-firstjob", "Kalamazoo", "Lila", "Sophomore", "5h ago", "What is a good first job at 16?", [["pro-tanaka", "Anything where you work with people: a library, a food bank, a camp. Those teach skills every job needs.", "4h ago"]], [], 30),
+  q("sc-q-kz-yuw-join", "Kalamazoo", "Sam", "Freshman", "8h ago", "Can freshmen join Youth United Way?", [], [], 18),
   q("sc-q-kz-resume", "Kalamazoo", "Ava", "Junior", "1d ago", "What goes on a résumé if I only have volunteer work?", [["pro-whitfield", "Volunteer work is real work. Write what you did and what changed. Food drive lead counts.", "1d ago"]], [["Mia", "Junior", "Kalamazoo", "Saving this. Thank you!", "20h ago", 4]], 44),
   // Battle Creek
   q("sc-q-bc-pharm", "Battle Creek", "Diego", "Junior", "1h ago", "How long does it take to become a pharmacy tech?", [["pro-ortega", "Most programs take under a year. Some stores even train you while you work.", "45m ago"]], [["Nia", "Junior", "Battle Creek", "Wait, they pay you while you learn? Love that.", "30m ago", 5]], 26),
-  q("sc-q-bc-pt", "Battle Creek", "Grace", "Senior", "4h ago", "What does a physical therapist do all day?", [["pro-adler", "I help people move again after they get hurt. Lots of talking, lots of cheering people on.", "3h ago"]], [], 19),
-  q("sc-q-bc-shadow", "Battle Creek", "Nia", "Junior", "9h ago", "What should I wear to the nurse shadow day?", [["pro-reyes", "Comfy shoes and plain clothes. We give you a badge. Bring one question.", "8h ago"]], [["Amaya", "Junior", "Battle Creek", "I'm going too! See you there.", "7h ago", 8]], 15),
-  q("sc-q-bc-caring", "Battle Creek", "Eli", "Sophomore", "1d ago", "Can I lead a project at Youth Day of Caring?", [], [], 9),
+  q("sc-q-bc-pt", "Battle Creek", "Grace", "Senior", "4h ago", "What does a physical therapist do all day?", [["pro-adler", "I help people move again after they get hurt. Lots of talking, lots of cheering people on.", "3h ago"]], [], 31),
+  q("sc-q-bc-shadow", "Battle Creek", "Nia", "Junior", "9h ago", "What should I wear to the nurse shadow day?", [["pro-reyes", "Comfy shoes and plain clothes. We give you a badge. Bring one question.", "8h ago"]], [["Amaya", "Junior", "Battle Creek", "I'm going too! See you there.", "7h ago", 8]], 24),
+  q("sc-q-bc-caring", "Battle Creek", "Eli", "Sophomore", "1d ago", "Can I lead a project at Youth Day of Caring?", [], [], 17),
   // Lansing
   q("sc-q-lan-city", "Lansing", "Andre", "Senior", "30m ago", "What jobs does a city office have for teens?", [["pro-doyle", "Parks, libraries and summer programs hire teens. Data and writing help too.", "15m ago"]], [["Leo", "Sophomore", "Lansing", "I'm applying to the parks one!", "5m ago", 3]], 21),
   q("sc-q-lan-data", "Lansing", "Priya", "Junior", "2h ago", "Is data science a real job at nonprofits?", [["pro-doyle", "Yes. I use data to find where help is needed most. Start with a stats class.", "1h ago"]], [], 28),
@@ -466,9 +466,9 @@ export const UW_SC_MORE_THREADS: Thread[] = [
   q("sc-q-jx-mentor", "Jackson", "Jada", "Senior", "1h ago", "What do you do with your Big each week?", [], [["Kai", "Junior", "Jackson", "We do homework, then play cards. My Big helped me pick classes.", "40m ago", 9]], 20),
   q("sc-q-jx-bank", "Jackson", "Marcus", "Junior", "5h ago", "How do I open my first bank account?", [["pro-okafor", "Bring an ID and a parent if you're under 18. Ask for a student account with no fees.", "4h ago"]], [], 33),
   q("sc-q-jx-design", "Jackson", "Ruby", "Sophomore", "8h ago", "Can art be a job, not just a hobby?", [["pro-cole", "Yes! Brands, games and nonprofits all need designers. Start a folder of your best work.", "7h ago"]], [["Jada", "Senior", "Jackson", "This made my day.", "6h ago", 7]], 41),
-  q("sc-q-jx-mlk", "Jackson", "Kai", "Junior", "1d ago", "Who's coming to MLK Day of Service?", [], [["Ruby", "Sophomore", "Jackson", "Me and three friends!", "20h ago", 5], ["Marcus", "Junior", "Jackson", "Count me in.", "18h ago", 3]], 12),
+  q("sc-q-jx-mlk", "Jackson", "Kai", "Junior", "1d ago", "Who's coming to MLK Day of Service?", [], [["Ruby", "Sophomore", "Jackson", "Me and three friends!", "20h ago", 5], ["Marcus", "Junior", "Jackson", "Count me in.", "18h ago", 3]], 22),
   // shared board
-  q("sc-q-across-van", "Kalamazoo", "Owen", "Senior", "2h ago", "Can Kalamazoo students ride the Lansing van on Nov 14?", [], [["Sam", "Senior", "Lansing", "Ask your Student United lead. We had two open seats last time.", "1h ago", 6]], 10),
+  q("sc-q-across-van", "Kalamazoo", "Owen", "Senior", "2h ago", "Can Kalamazoo students ride the Lansing van on Nov 14?", [], [["Sam", "Senior", "Lansing", "Ask your Student United lead. We had two open seats last time.", "1h ago", 6]], 17),
   q("sc-q-across-club", "Jackson", "Ruby", "Sophomore", "7h ago", "Which town has the best service club? Let's swap ideas.", [["pro-wong", "Love this. Each town, post one project that worked. Then steal one!", "6h ago"]], [["Theo", "Junior", "Kalamazoo", "Kalamazoo: teen grant voting.", "5h ago", 12], ["Nia", "Junior", "Battle Creek", "Battle Creek: park clean-up with a picnic.", "5h ago", 10], ["Leo", "Sophomore", "Lansing", "Lansing: food box crew!", "4h ago", 9]], 52),
   q("sc-q-across-summer", "Battle Creek", "Grace", "Senior", "1d ago", "Summer plans: who is doing an internship?", [["pro-tanaka", "Great question to ask early. Most summer spots open in February.", "1d ago"]], [["Andre", "Senior", "Lansing", "Parks internship in Lansing, fingers crossed.", "22h ago", 8]], 34),
 ];
@@ -625,14 +625,14 @@ export const UW_STUDENT_POSTS: UwStudentPostSeed[] = [
   // South Central
   { id: "usp-sc-kz-grants", boardId: SC, handle: "Theo", grade: "Junior", place: "Kalamazoo", postedAgo: "1h ago", likes: 34, body: "Our Youth United Way team picked three nonprofits to fund this year. Grant night is in March!", replies: [["staff:Chris", "So proud of this team. See you at grant night.", "50m ago", 9], ["student:Ava:Junior:Kalamazoo", "The food bank visit was my favorite.", "40m ago", 5]] },
   { id: "usp-sc-bc-shadow", boardId: SC, handle: "Nia", grade: "Junior", place: "Battle Creek", postedAgo: "3h ago", likes: 21, body: "Signed up for the nurse shadow day on Dec 10. Who else is going?", replies: [["student:Amaya:Junior:Battle Creek", "Me! Let's sit together.", "2h ago", 6], ["pro:pro-reyes", "Can't wait to meet you both. Bring one question.", "2h ago", 11]] },
-  { id: "usp-sc-lan-resume", boardId: SC, handle: "Leo", grade: "Sophomore", place: "Lansing", postedAgo: "5h ago", likes: 18, body: "Finished my first résumé today. My food box hours are on it.", replies: [["pro:pro-whitfield", "Great start. Add how many boxes your crew packed.", "4h ago", 7]] },
+  { id: "usp-sc-lan-resume", boardId: SC, handle: "Leo", grade: "Sophomore", place: "Lansing", postedAgo: "5h ago", likes: 18, body: "Finished my first résumé today. My food box hours are on it.", replies: [["pro:pro-whitfield", "Great start. Add how many boxes your crew packed.", "4h ago", 7], ["student:Andre:Senior:Lansing", "Nice! Mine is next.", "3h ago", 3]] },
   { id: "usp-sc-jx-sketch", boardId: SC, handle: "Ruby", grade: "Sophomore", place: "Jackson", postedAgo: "8h ago", likes: 27, body: "Took photos of my ten best sketchbook pages. My first portfolio is done!", replies: [["pro:pro-cole", "This is how every designer starts. Keep adding to it.", "7h ago", 12], ["student:Jada:Senior:Jackson", "Your drawings are so good.", "6h ago", 4]] },
   { id: "usp-sc-across-nov14", boardId: SC, handle: "Jada", grade: "Senior", place: "Jackson", postedAgo: "1d ago", likes: 40, body: "The fall convening was the best day. Can't wait for Nov 14 in Battle Creek.", replies: [["student:Sam:Senior:Lansing", "Lansing van is coming. See you there!", "22h ago", 8], ["staff:Dana", "The room is ready for all of you.", "20h ago", 10]] },
-  { id: "usp-sc-kz-reading", boardId: SC, handle: "Mia", grade: "Junior", place: "Kalamazoo", postedAgo: "2d ago", likes: 15, body: "My reading buddy finished her first chapter book today. I was so happy for her.", replies: [["pro:pro-wong", "That moment is the best part. Thank you for showing up.", "2d ago", 9]] },
+  { id: "usp-sc-kz-reading", boardId: SC, handle: "Mia", grade: "Junior", place: "Kalamazoo", postedAgo: "2d ago", likes: 15, body: "My reading buddy finished her first chapter book today. I was so happy for her.", replies: [["pro:pro-wong", "That moment is the best part. Thank you for showing up.", "2d ago", 9], ["student:Theo:Junior:Kalamazoo", "That is the best feeling.", "2d ago", 4]] },
   // Michigan
-  { id: "usp-mi-backpacks", boardId: MI, handle: "Kiara", grade: "Junior", place: "Southeast Michigan", postedAgo: "4h ago", likes: 31, body: "Our Student United Way packed 120 backpacks this weekend.", replies: [["staff:Lee", "Amazing work. Every one goes to a student this week.", "3h ago", 8]] },
+  { id: "usp-mi-backpacks", boardId: MI, handle: "Kiara", grade: "Junior", place: "Southeast Michigan", postedAgo: "4h ago", likes: 31, body: "Our Student United Way packed 120 backpacks this weekend.", replies: [["staff:Lee", "Amazing work. Every one goes to a student this week.", "3h ago", 8], ["student:Ana:Junior:West Michigan", "120! Our group did 80. Next time we catch you.", "2h ago", 5]] },
   { id: "usp-mi-start", boardId: MI, handle: "Noah", grade: "Freshman", place: "Marquette", postedAgo: "1d ago", likes: 24, body: "We are starting a Student United Way at our school in January!", replies: [["student:Ana:Junior:West Michigan", "Congrats! Ask us anything about committees.", "20h ago", 6]] },
   // network
-  { id: "usp-net-mentor", boardId: NET, handle: "Sofia", grade: "Senior", place: "Orange County", postedAgo: "3h ago", likes: 26, body: "Met my e-Mentorship mentor this week. We picked two goals for the year.", replies: [["pro:pro-okafor", "Two goals is perfect. Proud of you.", "2h ago", 7]] },
+  { id: "usp-net-mentor", boardId: NET, handle: "Sofia", grade: "Senior", place: "Orange County", postedAgo: "3h ago", likes: 26, body: "Met my e-Mentorship mentor this week. We picked two goals for the year.", replies: [["pro:pro-okafor", "Two goals is perfect. Proud of you.", "2h ago", 7], ["student:Luis:Junior:Miami", "Two goals is smart. Mine is one goal a month.", "1h ago", 3]] },
   { id: "usp-net-laptop", boardId: NET, handle: "Andre", grade: "Senior", place: "Midlands", postedAgo: "1d ago", likes: 19, body: "Got my Young Men United laptop today. Internship applications start next week.", replies: [["student:Luis:Senior:Miami", "Good luck on the applications!", "20h ago", 4]] },
 ];

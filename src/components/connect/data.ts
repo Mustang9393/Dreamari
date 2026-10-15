@@ -12,7 +12,7 @@
 // verified scope ("what was verified and by whom"). No follower counts, no
 // DMs, no popularity ranking anywhere.
 
-import { addThreadVoices } from "./threadReplies";
+import { addInsightVoices, addThreadVoices } from "./threadReplies";
 import { UW_EVENT_POSTS, UW_EVENT_THREADS, UW_INSIGHTS, UW_SC_MORE_POSTS, UW_SC_MORE_THREADS, UW_THREADS } from "./unitedway/uwThreads";
 
 export type QuestionState = "awaiting" | "routed" | "answered" | "resolved";
@@ -534,7 +534,7 @@ export const THREADS: Thread[] = [
     location: "United Kingdom",
     helpful: 126,
     followers: 3,
-    comments: 43,
+    comments: 18,
     responses: [
       {
         kind: "answer",
@@ -577,7 +577,6 @@ export const THREADS: Thread[] = [
     unreadAnswer: true,
     saved: true,
     responses: [
-      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "taking notes for my future self", postedAgo: "1d ago", likes: 83, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
       {
         kind: "answer",
         proId: "pro-okafor",
@@ -586,6 +585,7 @@ export const THREADS: Thread[] = [
         body: "The first two years are the steepest learning curve of your career: live deals, real clients, and a team that teaches you fast. The rhythm follows the deal cycle, so busy stretches come and go, and time off is protected in between. What nobody tells you: you leave year two with skills most people take a decade to build.",
         disclosure: "Based on my experience as an analyst at one large bank.",
       },
+      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "taking notes for my future self", postedAgo: "1d ago", likes: 83, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
       { kind: "peer", handle: "Sam", grade: "Senior", body: "Following because I have been using the two words interchangeably in essays 💀", postedAgo: "4h ago", likes: 74 },
       { kind: "peer", handle: "Lena", grade: "Junior", body: "me choosing my major based on vibes and this thread", postedAgo: "2h ago", likes: 110, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
       { kind: "peer", handle: "Noah", grade: "Sophomore", body: "the way this is everyone's first question about banking", postedAgo: "1d ago", likes: 86 },
@@ -619,7 +619,7 @@ export const THREADS: Thread[] = [
     location: "United States",
     helpful: 89,
     followers: 5,
-    comments: 37,
+    comments: 17,
     responses: [
       {
         kind: "answer",
@@ -739,7 +739,7 @@ export const THREADS: Thread[] = [
     expectedWindow: "within 2 days",
     helpful: 149,
     followers: 7,
-    comments: 44,
+    comments: 21,
     responses: [
       {
         kind: "answer",
@@ -872,7 +872,7 @@ export const THREADS: Thread[] = [
     expectedWindow: "within 3 days",
     helpful: 112,
     followers: 6,
-    comments: 38,
+    comments: 17,
     responses: [
       {
         kind: "answer",
@@ -980,7 +980,7 @@ export const THREADS: Thread[] = [
     expectedWindow: "within 3 days",
     helpful: 75,
     followers: 2,
-    comments: 32,
+    comments: 17,
     responses: [
       {
         kind: "answer",
@@ -2683,15 +2683,15 @@ export const EVENT_THREADS: Thread[] = [
     followers: 19,
     comments: 45,
     responses: [
-      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago", likes: 122 },
-      { kind: "peer", handle: "Riley", grade: "Sophomore", body: "us walking out of that panel", postedAgo: "45m ago", likes: 146, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
-      { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "the approachability surprised me too honestly", postedAgo: "30m ago", likes: 59 },
       {
         kind: "answer",
         proId: "pro-martinez",
         postedAgo: "1h ago",
         body: "From our side of the stage: the questions in that room were better than most college career fairs I've worked. Keep that energy.",
       },
+      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago", likes: 122 },
+      { kind: "peer", handle: "Riley", grade: "Sophomore", body: "us walking out of that panel", postedAgo: "45m ago", likes: 146, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
+      { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "the approachability surprised me too honestly", postedAgo: "30m ago", likes: 59 },
     ],
   },
   {
@@ -2763,6 +2763,9 @@ export const EVENT_THREADS: Thread[] = [
 // every question has pro answers and student comments, one GIF at most
 // (threadReplies.ts, 14 Oct 2026)
 addThreadVoices([...THREADS, ...EVENT_THREADS]);
+// students outnumber professionals under every professional's post, with a
+// healthy mix (threadReplies.ts, 15 Oct 2026)
+addInsightVoices(INSIGHTS);
 
 export const UPCOMING_SESSION = {
   title: "Office hour: Investment banking Q&A",
