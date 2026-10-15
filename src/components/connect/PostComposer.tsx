@@ -33,9 +33,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   AlignCenter, AlignLeft, AlignRight, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, AlignVerticalJustifyStart,
-ChevronDown, ImageIcon, Lightbulb, Redo2, Shuffle, Sparkles, Stamp, Type, Undo2, X,
+ImageIcon, Lightbulb, Redo2, Shuffle, Sparkles, Stamp, Type, Undo2, X,
 } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
+import { Listbox } from "@/components/app/Listbox";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMMUNITIES, type Insight, type InsightGraphic, type Pro } from "./data";
 import { EFFECTS, FONTS, GROUPS, GraphicGround, InsightGraphicView, TEMPLATES, boardForPro, resolvePlacement, templateById, type Template } from "./FeedBreathers";
@@ -47,7 +48,7 @@ const firstSentence = (s: string, max = 140): string => {
 };
 
 type Tool = "bg" | "text" | "fx" | "mark";
-const BLUE = "#3b82f6";
+const BLUE = "var(--accent-subtle)";
 const STARTER: InsightGraphic = { text: "", bg: "p-peak-dawn", font: "classic" };
 
 /** Undo and redo over the graphic. Typing is one step per pause. */
@@ -97,15 +98,58 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, i
   const { g, set, reset, undo, redo, canUndo, canRedo } = useHistory();
   const [typed, setTyped] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const dialogRef = useRef<HTMLElement>(null);
+  // The options of the Share to picker mount inside this wrapper (not
+  // document.body), so they stay inside the dialog's accessibility tree.
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- the portal target exists only after mount
   useEffect(() => setMounted(true), []);
   const editing = kind === "graphic";
+  // A real modal (14 Oct 2026 Connect UX review): the page behind it does
+  // not scroll, Tab cycles inside it, and closing returns focus to the
+  // button that opened it. The opener is remembered while the composer is
+  // closed: by the time an effect runs after opening, the title field's
+  // autoFocus has already taken focus, so document.activeElement would be
+  // the dialog's own textarea (that autoFocus also fires before this
+  // listener is removed, hence the dialog check).
+  const openerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (open) return;
+    const remember = (event: FocusEvent) => {
+      if (event.target instanceof HTMLElement && !event.target.closest('[role="dialog"][aria-label="Create post"]')) openerRef.current = event.target;
+    };
+    document.addEventListener("focusin", remember);
+    return () => document.removeEventListener("focusin", remember);
+  }, [open]);
+  useEffect(() => {
+    if (!open || !mounted) return;
+    const previousFocus = openerRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const dialog = dialogRef.current;
+    (dialog?.querySelector<HTMLElement>("textarea") ?? dialog)?.focus({ preventScroll: true });
+    const onTab = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || !dialog) return;
+      const targets = Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled), textarea, [contenteditable], [tabindex="0"]')).filter((el) => el.offsetParent !== null);
+      const first = targets[0], last = targets[targets.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener("keydown", onTab);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onTab);
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    };
+  }, [open, mounted]);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { if (tool) setTool(null); else onClose(); return; }
+      // Escape closes the open Share to menu first (the Listbox handles
+      // that one itself), then a tool, then the dialog.
+      if (e.key === "Escape") { if (document.querySelector('[role="listbox"][aria-label="Post community"]')) return; if (tool) setTool(null); else onClose(); return; }
       const t = e.target as HTMLElement | null;
-      const typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA");
+      const typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
       if (editing && !typing && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); if (e.shiftKey) redo(); else undo(); }
     };
     window.addEventListener("keydown", onKey);
@@ -118,14 +162,16 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, i
   const pickKind = (k: "text" | "graphic") => {
     setKind(k);
     setTool(null);
-    if (k === "graphic" && !g) reset({ ...STARTER, text: firstSentence(body || title) || "Your best line, in a few words." });
+    // The picture starts with the draft's first sentence, or empty behind
+    // its placeholder; never with sample words that could be shared as is.
+    if (k === "graphic" && !g) reset({ ...STARTER, text: firstSentence(body || title) });
   };
   const publish = () => {
     if (!ready) return;
     // A graphic post's headline, where a screen needs one, is its own words.
     const graphic = kind === "graphic" && g && g.text.trim() ? g : undefined;
     onPublish({ title: graphic ? g!.text.trim() : title.trim(), body: body.trim(), graphic, boardId });
-    setTitle(""); setBody(""); reset(null); setKind("text"); setTool(null);
+    setTitle(""); setBody(""); reset(null); setKind("text"); setTool(null); setTyped(false);
     onClose();
   };
   const shuffle = () => {
@@ -137,14 +183,16 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, i
   const toggleTool = (k: Tool) => setTool((cur) => (cur === k ? null : k));
   const preview: Insight = { id: "preview", boardId, type: "insight", proId: pro.id, title: "", body, postedAgo: "", helpful: 0, replies: [] };
 
-  const iconBtn = "dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-35";
-  const right = <button type="button" onClick={publish} disabled={!ready} className="dm-quiet cursor-pointer text-[14.5px] font-bold disabled:cursor-default disabled:opacity-40" style={{ color: BLUE }}>Share</button>;
+  const iconBtn = "dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-35";
+  const right = <button type="button" onClick={publish} disabled={!ready} className="dm-quiet min-h-[44px] cursor-pointer rounded-full px-[12px] text-[14.5px] font-bold disabled:cursor-default disabled:opacity-40" style={{ color: BLUE }}>Share</button>;
 
   return createPortal(
-    <div className="marketing-v2 themeable" style={{ background: "transparent" }}>
+    // The dialog role sits on the wrapper so the Share to options, portalled
+    // into it, are part of the dialog; the section is what gets focus.
+    <div ref={setPortalContainer} role="dialog" aria-modal="true" aria-label="Create post" className="marketing-v2 themeable" style={{ background: "transparent" }}>
       <button type="button" aria-label="Close composer, keep draft" onClick={onClose} className="fixed inset-0 z-[94] cursor-default" style={{ background: "rgba(5,6,16,0.62)", backdropFilter: "blur(2px)" }} />
-      <section role="dialog" aria-modal="true" aria-label="Create post"
-        className={`fixed z-[95] flex flex-col overflow-hidden max-sm:inset-0 sm:top-1/2 sm:left-1/2 sm:w-[min(520px,calc(calc(100vw/var(--vz,1))-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[16px] sm:border motion-safe:animate-[fade-slide-up_0.2s_ease-out_both] ${kind === "graphic" ? "sm:h-[min(940px,calc(calc(100dvh/var(--vz,1))-32px))]" : "sm:max-h-[calc(calc(100dvh/var(--vz,1))-32px)]"}`}
+      <section ref={dialogRef} tabIndex={-1}
+        className={`fixed z-[95] flex flex-col overflow-hidden outline-none max-sm:inset-0 sm:top-1/2 sm:left-1/2 sm:w-[min(520px,calc(calc(100vw/var(--vz,1))-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[16px] sm:border motion-safe:animate-[fade-slide-up_0.2s_ease-out_both] ${kind === "graphic" ? "sm:h-[min(940px,calc(calc(100dvh/var(--vz,1))-32px))]" : "sm:max-h-[calc(calc(100dvh/var(--vz,1))-32px)]"}`}
         style={{ background: "color-mix(in srgb, var(--background) 94%, #ffffff)", borderColor: "var(--glass-border)", boxShadow: "0 24px 64px -20px rgba(0,0,0,0.8)", color: "var(--foreground)" }}>
 
         {/* header: close or back, the one choice, the next action */}
@@ -155,7 +203,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, i
           {textOnly ? <span className="text-center text-[14.5px] font-bold">New post</span> : (
             <div role="radiogroup" aria-label="Post type" className="mx-auto flex rounded-full p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
               {([["text", "Text post"], ["graphic", "Graphic post"]] as const).map(([k, label]) => (
-                <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => pickKind(k)} className="dm-quiet h-[30px] cursor-pointer rounded-full px-[14px] text-[13px] font-bold whitespace-nowrap" style={kind === k ? { background: "color-mix(in srgb, var(--foreground) 16%, transparent)", color: "var(--foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
+                <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => pickKind(k)} className="dm-quiet min-h-[38px] cursor-pointer rounded-full px-[14px] text-[13px] font-bold whitespace-nowrap" style={kind === k ? { background: "color-mix(in srgb, var(--foreground) 16%, transparent)", color: "var(--foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
               ))}
             </div>
           )}
@@ -166,7 +214,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, i
         {kind === "text" && (
           <>
             <Writing title={title} setTitle={setTitle} body={body} setBody={setBody} prompts={prompts} rows={7} autoFocus />
-            <ShareTo boardId={boardId} setBoardId={setBoardId} ready={ready} title={title} body={body} boards={boards} />
+            <ShareTo portalContainer={portalContainer} boardId={boardId} setBoardId={setBoardId} ready={ready} title={title} body={body} boards={boards} />
           </>
         )}
 
@@ -183,7 +231,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, i
                 })}
               </div>
               {!typed && !tool && <span className="pointer-events-none absolute top-[14px] left-[14px] z-[4] rounded-full px-[12px] py-[6px] text-[12.5px] font-bold motion-safe:animate-pulse" style={{ background: "rgba(10,10,18,0.66)", color: "#fff" }}>Tap the words to edit</span>}
-              <span className="absolute top-[12px] right-[12px] z-[4] flex gap-[6px]">
+              <span className="absolute top-[8px] right-[8px] z-[4] flex gap-[6px]">
                 {[
                   { label: "Undo", Icon: Undo2, on: undo, disabled: !canUndo },
                   { label: "Redo", Icon: Redo2, on: redo, disabled: !canRedo },
@@ -216,7 +264,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, i
             </div>
             {/* the caption, always there, optional */}
             <div className="flex flex-none items-start gap-[10px] border-t px-[18px] py-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-              <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={1} maxLength={300} placeholder="Add a caption (optional)" aria-label="Caption" className="min-h-[24px] flex-1 resize-none bg-transparent text-[14.5px] leading-[22px] placeholder:text-[color:var(--muted-foreground)] [field-sizing:content]" style={{ outline: "none" }} />
+              <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={1} maxLength={300} placeholder="Add a caption (optional)" aria-label="Caption" className="dm-scroll max-h-[88px] min-h-[44px] flex-1 overflow-y-auto resize-none bg-transparent text-[14.5px] leading-[22px] placeholder:text-[color:var(--muted-foreground)] [field-sizing:content]" style={{ outline: "none" }} />
               {body.length > 0 && <span className="pt-[3px] text-[12px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{body.length}/300</span>}
             </div>
             {/* the tabs */}
@@ -233,7 +281,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, i
                 </button>
               ))}
             </nav>
-            <ShareTo boardId={boardId} setBoardId={setBoardId} ready={ready} title={title} body={body} graphic boards={boards} />
+            <ShareTo portalContainer={portalContainer} boardId={boardId} setBoardId={setBoardId} ready={ready} title={title} body={body} graphic boards={boards} />
           </>
         )}
       </section>
@@ -265,23 +313,23 @@ function Writing({ title, setTitle, body, setBody, prompts, rows, autoFocus = fa
 }
 
 /** Share to: one row, opens the communities (Instagram's Add location). */
-function ShareTo({ boardId, setBoardId, ready, title, body, graphic = false, boards }: { boardId: string; setBoardId: (id: string) => void; ready: boolean; title: string; body: string; graphic?: boolean; boards?: { id: string; name: string }[] }) {
-  const [open, setOpen] = useState(false);
+function ShareTo({ portalContainer, boardId, setBoardId, ready, title, body, graphic = false, boards }: { portalContainer: HTMLElement | null; boardId: string; setBoardId: (id: string) => void; ready: boolean; title: string; body: string; graphic?: boolean; boards?: { id: string; name: string }[] }) {
   const list = boards ?? COMMUNITIES;
   const board = list.find((c) => c.id === boardId) ?? list[0];
   return (
     <div className="flex-none border-t" style={{ borderColor: "var(--glass-border)" }}>
-      <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[10px] px-[18px] py-[12px] text-left">
-        <span className="text-[14px]">Share to</span>
-        <span className="flex min-w-0 items-center gap-[6px] text-[14px] font-bold"><span className="truncate">{board.name}</span><ChevronDown className="h-4 w-4 flex-none transition-transform" aria-hidden style={{ transform: open ? "rotate(180deg)" : "none" }} /></span>
-      </button>
-      {open && (
-        <ul role="listbox" aria-label="Community" className="dm-scroll max-h-[180px] overflow-y-auto border-t py-[4px]" style={{ borderColor: "var(--glass-border)" }}>
-          {list.map((c) => <li key={c.id}><button type="button" role="option" aria-selected={c.id === boardId} onClick={() => { setBoardId(c.id); setOpen(false); }} className="dm-quiet flex w-full cursor-pointer items-center justify-between px-[18px] py-[9px] text-left text-[14px]" style={{ fontWeight: c.id === boardId ? 700 : 500 }}>{c.name}{c.id === boardId && <span aria-hidden style={{ color: BLUE }}>✓</span>}</button></li>)}
-        </ul>
-      )}
+      {/* The shared Listbox (keyboard, viewport clamping, one look on every
+         platform) in place of a hand-rolled list; " Careers" is dropped from
+         the names since every option here is a career board. */}
+      <div className="flex min-h-[48px] items-center gap-[12px] px-[18px]">
+        <span className="flex-none text-[14px]">Share to</span>
+        <Listbox portalContainer={portalContainer} ariaLabel="Post community" value={boardId} onChange={setBoardId}
+          options={list.map((c) => ({ value: c.id, label: c.name.replace(/ Careers$/, "") }))}
+          className="dm-quiet min-h-[44px] min-w-0 flex-1 rounded-[var(--radius-sm)] px-[8px] text-[14px] font-bold"
+          panelStyle={{ background: "var(--card)", color: "var(--foreground)" }} />
+      </div>
       <p className="px-[18px] pb-[12px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
-        {ready ? (boards ? `Shows on the ${board.name} board.` : `Shows in ${board.name} and in students' Feeds.`) : graphic ? "Type your words on the picture to share." : !title.trim() ? "Add a title to share." : `${Math.max(0, 40 - body.trim().length)} more characters to share.`}
+        {ready ? (boards ? `Shows on the ${board.name} board.` : `Shows in ${board.name.replace(/ Careers$/, "")} and in students' feeds.`) : graphic ? "Type your words on the picture to share." : !title.trim() ? "Add a title to share." : `${Math.max(0, 40 - body.trim().length)} more characters to share.`}
       </p>
     </div>
   );

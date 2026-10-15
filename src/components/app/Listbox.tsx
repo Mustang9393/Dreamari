@@ -35,6 +35,7 @@ export function Listbox({
   disabled = false,
   panelClassName = "",
   panelStyle,
+  portalContainer,
 }: {
   id?: string;
   value: string;
@@ -49,10 +50,20 @@ export function Listbox({
   /** Override the option panel's surface -- defaults to the app's own card/border tokens. */
   panelClassName?: string;
   panelStyle?: CSSProperties;
+  /** Mount the option panel inside this element instead of document.body,
+   *  so a picker inside a modal dialog stays inside that dialog's
+   *  accessibility tree. The element must not be transformed. */
+  portalContainer?: HTMLElement | null;
 }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0, maxHeight: 320, openUp: false });
   const [activeIndex, setActiveIndex] = useState(-1);
+  // The keydown listener reads the highlight through a ref, so Enter can
+  // commit without calling onChange inside a state updater (which ran the
+  // parent's update during Listbox's render) and without re-binding the
+  // listener on every arrow press.
+  const activeIndexRef = useRef(activeIndex);
+  useEffect(() => { activeIndexRef.current = activeIndex; }, [activeIndex]);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const listboxId = useId();
@@ -146,10 +157,7 @@ export function Listbox({
         setActiveIndex((i) => Math.max(0, i - 1));
       } else if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        setActiveIndex((i) => {
-          commit(i);
-          return i;
-        });
+        commit(activeIndexRef.current);
       } else if (e.key === "Home") {
         e.preventDefault();
         setActiveIndex(0);
@@ -196,6 +204,7 @@ export function Listbox({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
+        aria-activedescendant={open && activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined}
         aria-label={ariaLabel}
         disabled={disabled}
         onClick={() => (open ? close() : openMenu())}
@@ -208,7 +217,7 @@ export function Listbox({
         <ChevronDown className="h-4 w-4 flex-none transition-transform" style={{ transform: open ? "rotate(180deg)" : "none" }} aria-hidden />
       </button>
       {open && (
-        <Portal>
+        <Portal container={portalContainer}>
           <button type="button" aria-label="Close" className="fixed inset-0 z-[120] cursor-default" onClick={close} />
           <ul
             ref={listRef}
@@ -231,6 +240,7 @@ export function Listbox({
             {options.map((opt, i) => (
               <li
                 key={opt.value}
+                id={`${listboxId}-option-${i}`}
                 role="option"
                 aria-selected={opt.value === value}
                 aria-disabled={opt.disabled || undefined}

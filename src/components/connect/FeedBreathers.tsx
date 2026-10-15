@@ -656,10 +656,26 @@ function EditableWords({ value, onChange, style, autoFocus }: { value: string; o
     const sel = window.getSelection(); sel?.removeAllRanges(); sel?.addRange(r);
   }, [autoFocus]);
   return (
-    <span ref={ref} role="textbox" aria-label="Words on the picture" aria-multiline="true" contentEditable suppressContentEditableWarning
-      onInput={(e) => onChange((e.currentTarget.innerText || "").slice(0, 140))}
+    // Starts empty with a placeholder drawn by CSS (so the prompt can never
+    // be published as the words), plain text only, and the 140-character
+    // limit holds in the editable DOM too, including a paste past the limit
+    // (14 Oct 2026 Connect UX review).
+    <span ref={ref} role="textbox" aria-label="Words on the picture" aria-multiline="false" aria-placeholder="Write your advice" contentEditable="plaintext-only" suppressContentEditableWarning
+      onInput={(e) => {
+        const el = e.currentTarget;
+        const text = (el.innerText || "").slice(0, 140);
+        if (el.innerText !== text) {
+          el.innerText = text;
+          const range = document.createRange();
+          range.selectNodeContents(el); range.collapse(false);
+          const selection = window.getSelection();
+          selection?.removeAllRanges(); selection?.addRange(range);
+        }
+        onChange(text);
+      }}
       onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
-      className="block min-w-[1ch] cursor-text outline-none" style={{ ...style, caretColor: "currentColor" }} />
+      data-placeholder="Write your advice"
+      className="block min-h-[1.2em] min-w-[1ch] cursor-text rounded-[4px] outline-none empty:before:pointer-events-none empty:before:opacity-60 empty:before:content-[attr(data-placeholder)] focus-visible:outline-2 focus-visible:outline-offset-[6px] focus-visible:outline-current" style={{ ...style, caretColor: "currentColor" }} />
   );
 }
 
@@ -695,7 +711,7 @@ export function InsightGraphicView({ insight, compact = false, graphic, editable
   const size = (n <= 40 ? 9.6 : n <= 70 ? 8.4 : n <= 100 ? 7.3 : 6.4) * font.scale;
   const items = align === "center" ? "items-center text-center" : align === "right" ? "items-end text-right" : "items-start text-left";
   return (
-    <span aria-hidden data-graphic className={`relative block ${wide ? "aspect-[16/9]" : "aspect-[4/5]"} w-full overflow-hidden rounded-[12px] border ${compact ? "mt-[10px] max-w-[440px]" : ""}`} style={{ borderColor: "rgba(255,255,255,0.1)", background: INK, containerType: "inline-size" }}>
+    <span aria-hidden={editable ? undefined : true} data-graphic className={`relative block ${wide ? "aspect-[16/9]" : "aspect-[4/5]"} w-full overflow-hidden rounded-[12px] border ${compact ? "mt-[10px] max-w-[440px]" : ""}`} style={{ borderColor: "rgba(255,255,255,0.1)", background: INK, containerType: "inline-size" }}>
       <GraphicGround t={t} color={color} sizes={wide ? "(max-width: 640px) 100vw, 860px" : compact ? "(max-width: 640px) 100vw, 440px" : "(max-width: 640px) 100vw, 560px"} />
       <GraphicEffects effects={g.effects} light={light} color={color} />
       {editable?.dim && <span aria-hidden className="absolute inset-0 z-[1]" style={{ background: "rgba(5,6,16,0.45)" }} />}

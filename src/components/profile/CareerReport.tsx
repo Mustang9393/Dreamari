@@ -83,7 +83,7 @@ export const REPORT_SECTIONS = [
 // via getBoundingClientRect() must mount through this same Portal (or
 // replicate this exact reciprocal) rather than inventing a new
 // document.body.appendChild -- that is exactly how this bug happens.
-function Portal({ children }: { children: React.ReactNode }) {
+function Portal({ children, container }: { children: React.ReactNode; /** mount inside this element instead of document.body: keeps a popup inside its modal's accessibility tree (the element must not be transformed, or the fixed position breaks) */ container?: HTMLElement | null }) {
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const host = useMemo(() => {
     if (typeof document === "undefined") return null;
@@ -94,9 +94,9 @@ function Portal({ children }: { children: React.ReactNode }) {
   }, []);
   useEffect(() => {
     if (!host) return;
-    document.body.appendChild(host);
+    (container ?? document.body).appendChild(host);
     return () => host.remove();
-  }, [host]);
+  }, [host, container]);
   if (!mounted || !host) return null;
   return createPortal(children, host);
 }
