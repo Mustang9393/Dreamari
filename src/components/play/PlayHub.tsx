@@ -16,7 +16,7 @@ import { HeaderActions } from "@/components/app/Inbox";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
-import { hasGlossary } from "@/components/glossary/data";
+import { glossaryFor, hasGlossary } from "@/components/glossary/data";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import { FEATURED_ROW_SOON_IDS, GLOSSARY_GAMES, SIMULATIONS, SOON, worldForCareer } from "./games";
 import { TrailerFlow } from "./TrailerFlow";
@@ -233,7 +233,7 @@ export function PlayHub() {
                 title: game.title,
                 cover: game.cover,
                 sub: game.sub,
-                world: worldForCareer(game.careerSlug),
+                world: worldForCareer(game.careerSlug) ?? glossaryFor(game.careerSlug)?.world,
                 href: playable ? `/play/glossary/${game.careerSlug}` : undefined,
                 locked: !playable,
               };

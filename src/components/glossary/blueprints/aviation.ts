@@ -1,0 +1,91 @@
+// DEMO-ONLY content: the Flight Operations glossary, under the Driving,
+// Flying & Shipping world (16 Oct 2026). Written to the "Dreamari Glossary
+// Game Master Scaling Plan" SOP, world #33: a scenario thread. The student
+// flies for Skyline Air every level, but each level is a different flight
+// or a different phase of one; nothing from one flight has to be remembered
+// for the next. Three playable levels (recognize, apply, analyze) and three
+// on the roadmap. Eighth-grade copy, no dashes, numbers spelled out (flight
+// words do not need figures), every example names Skyline Air.
+
+import type { GlossaryBlueprint } from "../generate";
+
+export const AVIATION_GLOSSARY: GlossaryBlueprint = {
+  industry: { slug: "aviation", title: "Flight Terms", subject: "flight", world: "Driving, Flying & Shipping" },
+  mode: "scenario_thread",
+  studentRole: "pilot",
+  exampleCareerSlug: "airline-pilot",
+  company: "Skyline Air",
+  idPrefix: "AV",
+  chapters: [
+    { number: 1, name: "First Flight", tier: "Beginner" },
+    { number: 2, name: "Cross Country", tier: "Intermediate" },
+    { number: 3, name: "The Left Seat", tier: "Advanced" },
+  ],
+  levels: [
+    {
+      number: 1,
+      title: "Before Takeoff",
+      tier: "Beginner",
+      goal: "Get the plane off the ground.",
+      unlocks: "$10K",
+      milestone: "First takeoff",
+      nextMilestone: "Fly the long middle",
+      companyValue: 10000,
+      nextCompanyValue: 50000,
+      terms: [
+        { term: "Cockpit", definition: "The front part of a plane where the pilots sit and fly it.", example: "A Skyline Air pilot checks every switch in the cockpit before a flight.", cue: "Where the pilots sit", icon: "gauge" },
+        { term: "Runway", definition: "The long strip a plane speeds down to leave the ground or land.", example: "The Skyline Air jet lined up on the runway and waited for the go.", cue: "The long strip for takeoff", icon: "route" },
+        { term: "Preflight", definition: "The full check of a plane and its plan before it moves.", example: "Every Skyline Air flight starts with a preflight.", cue: "The full check before moving", icon: "clipboard-check" },
+        { term: "Taxi", definition: "Driving a plane slowly on the ground between the gate and the strip.", example: "After pushback the Skyline Air jet began to taxi.", cue: "Driving slowly on the ground", icon: "move" },
+        { term: "Takeoff", definition: "The moment a plane speeds up and lifts off the ground.", example: "Skyline Air passengers felt the push of takeoff.", cue: "Lifting off the ground", icon: "plane-takeoff" },
+      ],
+      facts: [
+        "Pilots read a checklist out loud before every flight, even after thousands of flights.",
+        "A plane on the ground follows painted lines and lights, like a car follows a road.",
+      ],
+    },
+    {
+      number: 2,
+      title: "In the Air",
+      tier: "Beginner",
+      goal: "Fly the long middle of a flight.",
+      unlocks: "$50K",
+      milestone: "Fly the long middle",
+      nextMilestone: "Read the weather",
+      companyValue: 50000,
+      nextCompanyValue: 120000,
+      intro: { headline: "A New Flight, A Clear Sky", line: "You are climbing out of Chicago with a full cabin.", hook: "Learn the words pilots use once the wheels are up." },
+      terms: [
+        { term: "Altitude", definition: "How high a plane is above sea level.", example: "The Skyline Air captain climbed to a higher altitude to find smooth air.", cue: "How high the plane is", situation: "The captain says we are now thirty five thousand feet up.", icon: "arrow-up" },
+        { term: "Cruise", definition: "The long, level part of a flight after the climb and before the descent.", example: "Most of a Skyline Air flight is spent in cruise.", cue: "The long level middle", situation: "The climb is done. The plane flies flat and steady for hours.", icon: "minus" },
+        { term: "Turbulence", definition: "Rough, bumpy air that shakes the plane.", example: "The Skyline Air crew paused drink service during turbulence.", cue: "Bumpy, shaking air", situation: "The seat belt sign comes on as the plane starts to bounce.", icon: "waves" },
+        { term: "Autopilot", definition: "A system that flies the plane on a set path while the pilots watch it.", example: "The Skyline Air captain switched on autopilot after the climb.", cue: "The system that flies the path", situation: "The captain sets the path. The plane holds it by itself.", icon: "cpu" },
+        { term: "Air Traffic Control", definition: "The people on the ground who direct planes so they stay apart.", example: "Skyline Air pilots talk to Air Traffic Control on every flight.", cue: "The ground team directing planes", situation: "A voice on the radio tells the pilot which way to turn.", icon: "radio-tower" },
+      ],
+      facts: ["Jets fly high because the thin air up there lets them go faster on less fuel."],
+    },
+    {
+      number: 3,
+      title: "Weather and Routes",
+      tier: "Intermediate",
+      goal: "Read the weather and change the plan.",
+      unlocks: "$120K",
+      milestone: "Read the weather",
+      nextMilestone: "Land it smoothly",
+      companyValue: 120000,
+      nextCompanyValue: 250000,
+      intro: { headline: "Storms Ahead", line: "A different day, a different flight, and the weather is not cooperating.", hook: "Learn the words for wind, fog and a change of plan." },
+      terms: [
+        { term: "Headwind", definition: "Wind blowing against the plane, which slows it down.", example: "A strong headwind made the Skyline Air flight land late.", cue: "Wind against the plane", situation: "The plane is pushing into the wind and arrives late.", confusion: "Tailwind", icon: "wind" },
+        { term: "Tailwind", definition: "Wind blowing from behind the plane, which speeds it up.", example: "A tailwind got the Skyline Air flight in early.", cue: "Wind pushing from behind", situation: "The wind is behind the plane and it lands early.", confusion: "Headwind", icon: "fast-forward" },
+        { term: "Visibility", definition: "How far a pilot can see through the air.", example: "Low visibility in fog slowed Skyline Air landings all morning.", cue: "How far you can see", situation: "Fog is so thick the pilot cannot see the ground.", confusion: "Headwind", icon: "eye" },
+        { term: "Diversion", definition: "Landing at a different airport than planned.", example: "A storm forced a Skyline Air diversion to Denver.", cue: "Landing somewhere else", situation: "The home airport is closed, so the plane lands in another city.", confusion: "Holding Pattern", icon: "corner-up-right" },
+        { term: "Holding Pattern", definition: "Flying in circles near the airport while waiting to land.", example: "Skyline Air flight twelve flew a holding pattern for twenty minutes.", cue: "Circling while waiting to land", situation: "The plane loops in the sky because the runway is busy.", confusion: "Diversion", icon: "refresh-cw" },
+      ],
+      facts: ["Pilots get a weather report for the whole route before they leave the gate."],
+    },
+    { number: 4, title: "Landing", tier: "Intermediate", goal: "Land it smoothly.", unlocks: "$250K", milestone: "Land it smoothly", nextMilestone: "Lead the crew", companyValue: 250000, nextCompanyValue: 500000, words: ["Approach", "Descent", "Flaps", "Touchdown", "Go Around"] },
+    { number: 5, title: "The Crew", tier: "Advanced", goal: "Lead the whole crew.", unlocks: "$500K", milestone: "Lead the crew", nextMilestone: "Handle an emergency", companyValue: 500000, nextCompanyValue: 1000000, words: ["Captain", "First Officer", "Flight Attendant", "Dispatcher", "Checklist"] },
+    { number: 6, title: "Emergencies", tier: "Advanced", goal: "Stay calm when it counts.", unlocks: "$1M", milestone: "Handle an emergency", nextMilestone: "Keep flying", companyValue: 1000000, nextCompanyValue: 1000000, words: ["Mayday", "Emergency Descent", "Evacuation", "Squawk", "Alternate"] },
+  ],
+};

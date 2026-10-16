@@ -13,6 +13,9 @@
 import { FIN_LESSON_2, FIN_LESSON_3, FIN_LESSON_4 } from "./data-finance-l2-4";
 import { buildGlossaryCareer } from "./generate";
 import { NURSING_GLOSSARY } from "./blueprints/health";
+import { SOFTWARE_GLOSSARY } from "./blueprints/software";
+import { AVIATION_GLOSSARY } from "./blueprints/aviation";
+import { CULINARY_GLOSSARY } from "./blueprints/culinary";
 import { CAREER_INDUSTRY } from "./industries";
 import { worldForCareer } from "@/components/play/games";
 
@@ -456,6 +459,11 @@ const GLOSSARY_INDUSTRIES: Record<string, GlossaryCareer> = {
   // term list becomes levels and games. See generate.ts and
   // docs/handoff/specs/glossary-system.md.
   nursing: buildGlossaryCareer(NURSING_GLOSSARY),
+  // Written to the Master Scaling Plan SOP (16 Oct 2026), one per world
+  // mode: a continuous story, a scenario thread, a practice world.
+  software: buildGlossaryCareer(SOFTWARE_GLOSSARY),
+  aviation: buildGlossaryCareer(AVIATION_GLOSSARY),
+  culinary: buildGlossaryCareer(CULINARY_GLOSSARY),
 };
 
 /** The glossary for an industry slug ("finance", "nursing") or for a career

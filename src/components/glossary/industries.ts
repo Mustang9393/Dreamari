@@ -49,6 +49,7 @@ export const WORLD_SYSTEMS: WorldSystem[] = [
   system("Driving, Flying & Shipping", "var(--font-poster-sekuya)", 400, "'Inter', sans-serif"),
   system("Factories & Making Things", "var(--font-poster-science)", 700, "'Inter', sans-serif"),
   system("Fixing Machines & Engines", "'Heebo', sans-serif", 700, "'Inter', sans-serif"),
+  system("Personal Care & Community Services", "'Zain', sans-serif", 900, "'Nunito', sans-serif"),
 ];
 
 export function worldSystem(world: string): WorldSystem | null {
@@ -74,6 +75,8 @@ export const CAREER_INDUSTRY: Record<string, string> = {
   "asset-manager": "finance",
   "accountant": "finance",
   "registered-nurse": "nursing",
+  "software-engineer": "software",
+  "airline-pilot": "aviation",
 };
 
 /** The CSS variables the game shell sets for a world. The stylesheet maps

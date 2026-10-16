@@ -11,6 +11,10 @@ import type { GlossaryBlueprint } from "../generate";
 
 export const NURSING_GLOSSARY: GlossaryBlueprint = {
   industry: { slug: "nursing", title: "Medical Terms", subject: "nursing", world: "Health & Medicine" },
+  // A scenario thread (SOP #19): the same clinic every level, a new shift or
+  // patient each time; nothing from Level 1's patients carries over.
+  mode: "scenario_thread",
+  studentRole: "nurse",
   exampleCareerSlug: "registered-nurse",
   company: "Riverside Clinic",
   idPrefix: "RN",
@@ -30,6 +34,8 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
       nextMilestone: "Run the floor",
       companyValue: 10000,
       nextCompanyValue: 50000,
+      // Dose is arithmetic by nature, so this level's words carry numbers.
+      math: true,
       terms: [
         { term: "Patient", definition: "A person getting care from a nurse or doctor.", example: "Every person who comes to Riverside Clinic for care is a patient.", cue: "The person getting care", icon: "users" },
         { term: "Vital Signs", definition: "The body's basic numbers: heart rate, breathing, temperature and blood pressure.", example: "A Riverside Clinic nurse checks vital signs at the start of every visit.", cue: "Heart rate and temperature", icon: "heart-pulse" },
@@ -54,11 +60,11 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
       nextCompanyValue: 120000,
       intro: { headline: "Riverside Clinic Gets Busy", line: "More patients. One team.", hook: "Learn the words that keep a floor running." },
       terms: [
-        { term: "Shift", definition: "The hours a nurse works in one stretch.", example: "A Riverside Clinic shift lasts twelve hours.", cue: "Twelve hours of work", icon: "activity" },
-        { term: "Charge Nurse", definition: "The nurse who runs the floor for a shift.", example: "The charge nurse at Riverside Clinic decides which nurse cares for each patient.", cue: "The nurse who runs the floor", icon: "user-round" },
-        { term: "Handoff", definition: "Passing a patient's care to the next nurse.", example: "At the end of a shift, Riverside Clinic nurses do a handoff for every patient.", cue: "Passing care to the next nurse", icon: "arrow-left-right" },
-        { term: "Allergy", definition: "A bad reaction the body has to a food or a medicine.", example: "A Riverside Clinic chart lists every allergy before any medicine is given.", cue: "A bad reaction to a medicine", icon: "triangle-alert" },
-        { term: "Discharge", definition: "When a patient is well enough to leave.", example: "Riverside Clinic plans each discharge so the patient knows how to care for themselves at home.", cue: "Going home well", icon: "arrow-up-circle" },
+        { term: "Shift", definition: "The hours a nurse works in one stretch.", example: "A Riverside Clinic shift lasts twelve hours.", cue: "Twelve hours of work", situation: "Ana clocks in at seven and clocks out at seven.", icon: "activity" },
+        { term: "Charge Nurse", definition: "The nurse who runs the floor for a shift.", example: "The charge nurse at Riverside Clinic decides which nurse cares for each patient.", cue: "The nurse who runs the floor", situation: "One nurse assigns every patient on the floor to a nurse.", icon: "user-round" },
+        { term: "Handoff", definition: "Passing a patient's care to the next nurse.", example: "At the end of a shift, Riverside Clinic nurses do a handoff for every patient.", cue: "Passing care to the next nurse", situation: "Ana tells the night nurse everything about room four before leaving.", icon: "arrow-left-right" },
+        { term: "Allergy", definition: "A bad reaction the body has to a food or a medicine.", example: "A Riverside Clinic chart lists every allergy before any medicine is given.", cue: "A bad reaction to a medicine", situation: "A patient breaks out in hives minutes after a new pill.", icon: "triangle-alert" },
+        { term: "Discharge", definition: "When a patient is well enough to leave.", example: "Riverside Clinic plans each discharge so the patient knows how to care for themselves at home.", cue: "Going home well", situation: "The doctor signs the papers and the patient packs to go home.", icon: "arrow-up-circle" },
       ],
       facts: ["Many hospital nurses work three twelve-hour shifts a week."],
     },
