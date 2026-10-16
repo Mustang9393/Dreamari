@@ -1,3 +1,12 @@
+## 2026-10-16 (late night, 6): per-world backdrops: a Signal panorama registry, Drift painted from the world accent
+
+**Why (Chandu):** "we need to be able to generate reliably and scale different backgrounds in signal mode for each world. Can that be done? What can we do for drift?"
+
+- **Unit is the career world,** never the industry or level: fifteen images at most per theme, and every industry under a world inherits the backdrop when the file is registered. `src/components/glossary/worldBackdrops.ts`: `SIGNAL_WORLD_BACKDROPS` (world to a 1200 by 800 pixel panorama; the engine tiles it in mirrored pairs, so edges never have to match, crops the three parallax bands and slices the same image for the Levels map plates via `--signal-backdrop`), `DRIFT_WORLD_SILHOUETTES` (optional horizon strip drawn behind the cloud banks). Both empty today; every world keeps its current look.
+- **Drift needs no image:** the two orbs and the cloud crests and rims now mix in `--glossary-accent`, so each world's sky already reads as its own (Health green, Tech blue, Food amber). Finance shifts slightly toward its world's accent; checked that it still reads as the same scene.
+- SOP Part 3.3 (handover HTML) carries the formats, the Signal panorama prompt and the order of work (worlds with a glossary first). Spec updated. Google Doc to be republished with the next doc change.
+- Checked: tsc; Nursing and Software in Drift (orb and cloud tint differs by world), Nursing Levels map in Signal (plates still slice the panorama). Not pushed.
+
 ## 2026-10-16 (late night, 5): Glossary QA page in the hamburger menu; generated games off the hub until released
 
 **Why (Chandu):** "can we push them to a separate link in the hamburger menu on main so i can qa in browser?"

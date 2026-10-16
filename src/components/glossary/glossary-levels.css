@@ -614,7 +614,7 @@
    plate is wider than that), and leaves 60% of horizontal play for the
    per-level slice. Sizing by height alone left the right third empty on a
    wide open card (Chandu, 16 Oct 2026). */
-.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate-sky { display: block !important; inset: 0; background: var(--plate-image, url("/images/glossary/signal/bg.webp")) no-repeat; background-size: 160% auto; background-position: calc(var(--plate-seed, 0) * 17%) 64%; image-rendering: pixelated; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate-sky { display: block !important; inset: 0; background: var(--plate-image, var(--signal-backdrop, url("/images/glossary/signal/bg.webp"))) no-repeat; background-size: 160% auto; background-position: calc(var(--plate-seed, 0) * 17%) 64%; image-rendering: pixelated; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate-sky::after { display: none; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate-horizon { display: block !important; inset: auto 0 0; height: 40%; background: linear-gradient(180deg, transparent, rgba(5, 7, 15, .75)); mask-image: none; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-rung.is-complete .glossary-map-plate::after { background: linear-gradient(180deg, transparent 50%, color-mix(in srgb, var(--sig-gold) 40%, transparent)); }
@@ -686,3 +686,18 @@
 .glossary-game-shell.glossary-game-lab .glossary-map-plate.has-image .glossary-map-plate-sky::after,
 .glossary-game-shell.glossary-game-lab .glossary-map-plate.has-image .glossary-map-plate-cloud { display: none; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate.has-image .glossary-map-plate-sky { background-size: 160% auto; background-position: calc(var(--plate-seed, 0) * 17%) 64%; }
+
+/* ===========================================================================
+   WORLD BACKDROPS (16 Oct 2026). Drift is painted, so it takes the world's
+   accent: the two orbs, the cloud crests and rims and the horizon glow mix it
+   in, and every world reads as itself with no image. A registered silhouette
+   strip (worldBackdrops.ts) sits on the horizon behind the cloud banks.
+   Signal swaps its panorama per world in the engine; see worldBackdrops.ts.
+   Finance keeps its launch sky exactly (SOP Executive Rule 1): worldTheme()
+   sets its tints to 0%.
+   =========================================================================== */
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-world-orb-a { --orb-color: color-mix(in srgb, var(--glossary-accent) var(--glossary-orb-tint, 70%), #2f7cff); }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-world-orb-b { --orb-color: color-mix(in srgb, var(--glossary-accent) calc(var(--glossary-orb-tint, 70%) / 2), #9b5dff); }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-cloud-bank { --cloud-crest: color-mix(in srgb, var(--glossary-accent) var(--glossary-sky-tint, 42%), var(--color-accent-purple)); --cloud-rim: color-mix(in srgb, var(--glossary-accent) calc(var(--glossary-sky-tint, 42%) * 1.4), var(--color-decorative-pink-glow)); }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-cloud-bank:nth-child(2) { --cloud-crest: color-mix(in srgb, var(--glossary-accent) calc(var(--glossary-sky-tint, 42%) * .8), var(--color-accent-deep)); --cloud-rim: color-mix(in srgb, var(--glossary-accent) var(--glossary-sky-tint, 42%), var(--color-accent-purple)); }
+.glossary-game-shell.glossary-game-lab .glossary-drift-silhouette { position: absolute; left: -4%; right: -4%; bottom: 18%; height: 26%; background-repeat: repeat-x; background-size: auto 100%; background-position: center bottom; opacity: .55; mask-image: linear-gradient(transparent, #000 30%); pointer-events: none; }

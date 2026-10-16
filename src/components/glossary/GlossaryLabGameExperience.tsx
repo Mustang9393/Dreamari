@@ -29,6 +29,7 @@ import {
 } from "./progress";
 import type { ChainStep, GlossaryCareer, GlossaryLesson, GlossaryQuestion, ParagraphPowerPlay, SceneCard } from "./data";
 import { plateImage } from "./levelPlates";
+import { driftSilhouette, signalBackdrop } from "./worldBackdrops";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { glossaryTermAssets } from "./termArt";
 import { DREAMY_FACING, dreamyReaction, dreamyReactionAsset, questionReaction, type DreamyPose } from "./dreamyReactions";
@@ -103,7 +104,6 @@ const SIGNAL_ASSETS_SMALL: Record<string, string> = {
   Customer: "/images/glossary/signal/cloud-sale-sneaker-320.webp",
   Profit: "/images/glossary/signal/coins-320.webp",
 };
-const SIGNAL_BG = "/images/glossary/signal/bg.webp";
 const SIGNAL_CLOUD = "/images/glossary/signal/cloud-320.webp";
 const SIGNAL_CLOUD_LARGE = "/images/glossary/signal/cloud.webp";
 const SIGNAL_CLOUD_SPEAKING = "/images/glossary/signal/cloud-speaking.webp";
@@ -2883,13 +2883,15 @@ const LAB_ATMOSPHERES: Array<{ id: LabAtmosphere; label: string; detail: string 
   { id: "v2", label: "Signal", detail: "Focus grid" },
 ];
 
-function LabMaterialScenery({ atmosphere }: { atmosphere: LabAtmosphere }) {
+function LabMaterialScenery({ atmosphere, world = "" }: { atmosphere: LabAtmosphere; /** the career world, for a registered Drift silhouette (worldBackdrops.ts) */ world?: string }) {
   const cloudId = useId();
+  const silhouette = atmosphere === "v1" ? driftSilhouette(world) : null;
   // Bounded vector/CSS layers, not generated backgrounds or a per-frame
   // canvas. Each world uses the same material vocabulary as its objects.
   if (atmosphere === "v2") return null;
   return (
     <div className={`glossary-material-scenery scenery-${atmosphere}`} aria-hidden>
+      {silhouette ? <span className="glossary-drift-silhouette" style={{ backgroundImage: `url("${silhouette}")` }} /> : null}
       {atmosphere === "v3" && <div className="glossary-paper-field">
         {Array.from({ length: 48 }, (_, index) => <span key={index} style={{ "--paper-x": `${(index % 8) * 15 - 5}%`, "--paper-y": `${Math.floor(index / 8) * 20 - 5}%`, "--paper-turn": `${(index % 5) * 9 - 18}deg`, "--paper-depth": 1 + (index % 3), "--paper-delay": `${(index % 11) * -1.3}s` } as React.CSSProperties} />)}
       </div>}
@@ -2977,7 +2979,7 @@ function LabThemeMusic({ atmosphere, enabled }: { atmosphere: LabAtmosphere; ena
   return null;
 }
 
-function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebrationKey, interactionScope }: { atmosphere: LabAtmosphere; screen: Screen; celebrating: boolean; repairing: boolean; celebrationKey: string; interactionScope: string }) {
+function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebrationKey, interactionScope, world = "" }: { atmosphere: LabAtmosphere; screen: Screen; celebrating: boolean; repairing: boolean; celebrationKey: string; /** the career world: picks the Signal panorama and any Drift silhouette (worldBackdrops.ts) */ world?: string; interactionScope: string }) {
   const milestone = screen === "unlockComplete" || screen === "complete";
   const worldRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
@@ -3038,13 +3040,13 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebr
                 Two complete pairs repeat without a snap at the loop seam. */}
             {["city", "sky", "shore"].map((layer) => <span key={layer} className={`glossary-signal-parallax glossary-signal-parallax-${layer}`}>
               <span className="glossary-signal-track">
-                {[0, 1, 2, 3].map((tile) => <span key={tile} className="glossary-signal-tile" style={{ backgroundImage: `url(${SIGNAL_BG})`, transform: tile % 2 ? "scaleX(-1)" : undefined }} />)}
+                {[0, 1, 2, 3].map((tile) => <span key={tile} className="glossary-signal-tile" style={{ backgroundImage: `url(${signalBackdrop(world)})`, transform: tile % 2 ? "scaleX(-1)" : undefined }} />)}
               </span>
             </span>)}
           </span>
         </>
       ) : null}
-      <LabMaterialScenery atmosphere={atmosphere} />
+      <LabMaterialScenery atmosphere={atmosphere} world={world} />
       <span className="glossary-world-orb glossary-world-orb-a" />
       <span className="glossary-world-orb glossary-world-orb-b" />
       <span className="glossary-world-stars" />
@@ -3663,6 +3665,8 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         // the faces (glossary-lab.css); Signal keeps its pixel faces and
         // takes the accent only.
         ...worldTheme(career.world),
+        // the world's Signal panorama, so the Levels map plates slice the same sky
+        "--signal-backdrop": `url("${signalBackdrop(career.world)}")`,
         "--glossary-accent": accent,
         "--glossary-visible-height": visibleHeight !== null ? `${visibleHeight}px` : undefined,
         background: variant === "lab" ? "transparent" : "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 16%, transparent), transparent 65%), var(--background)",
@@ -3670,7 +3674,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         fontFamily: "var(--font-body)",
       } as React.CSSProperties}
     >
-      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={sceneScreen} celebrating={pendingResult?.correct === true} repairing={pendingResult?.correct === false} interactionScope={`${sceneScreen}-${current?.id ?? "finale"}`} celebrationKey={`${sceneScreen}-${current?.id ?? "finale"}-${current ? attempts[current.id] ?? 0 : 0}`} /> : null}
+      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={sceneScreen} celebrating={pendingResult?.correct === true} repairing={pendingResult?.correct === false} interactionScope={`${sceneScreen}-${current?.id ?? "finale"}`} celebrationKey={`${sceneScreen}-${current?.id ?? "finale"}-${current ? attempts[current.id] ?? 0 : 0}`} world={career.world} /> : null}
       <TopBar
         onBack={() => goBackOr(router, "/play")}
         onOpenLevels={variant === "lab" ? () => setShowLevels(true) : undefined}

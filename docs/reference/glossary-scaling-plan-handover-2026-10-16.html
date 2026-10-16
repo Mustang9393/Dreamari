@@ -386,5 +386,21 @@ Keep the reference's palette and material identity. Readable as a strip at 90 by
 <h3>3.2 Level 1 term art</h3>
 <p>Only Level 1 of an industry may have pictures, and only when the team decides they clearly help (Executive Rule 3). The prompt, the two style locks and the registration steps are in 2.6 and 2.7. Codex delivers the WebP files in the folder named there and the CAREER_TERM_ART entry; Claude does not generate images.</p>
 
+<h3>3.3 World backdrops (the game's sky)</h3>
+<p>The game behind the questions can look different per <b>career world</b>. The unit is the world, never the industry or the level: fifteen worlds, so fifteen images at most per theme, and every industry under a world inherits its backdrop the moment the file is registered. Nothing is required; an unregistered world keeps today's look.</p>
+<table>
+<tr><th>Theme</th><th>What Codex delivers</th><th>Format</th><th>Register</th></tr>
+<tr><td>Signal</td><td>One pixel-art panorama per world: a hospital campus for Health &amp; Medicine, an airfield and tower for Driving, Flying &amp; Shipping, a kitchen alley for Food &amp; Cooking, and so on. The engine tiles it in mirrored pairs (edges never have to match), crops three parallax bands from it (sky, skyline, shore) and slices the same image for the Levels map plates.</td><td>1200 by 800 WebP, opaque. Horizon in the lower third. A readable skyline silhouette across the middle band, a dark quiet lower band, nothing important within ten percent of the left and right edges. No text, no Dreamy. Style lock: the Signal Level 1 art (2.6).</td><td>public/images/glossary/backdrops/signal/&lt;world-slug&gt;.webp, listed in SIGNAL_WORLD_BACKDROPS in src/components/glossary/worldBackdrops.ts.</td></tr>
+<tr><td>Drift</td><td>Nothing, by default. Drift is painted: its sky, orbs and cloud banks take the world's accent colour automatically, so every world already reads as itself. Optional: one horizon silhouette strip per world (a clinic roofline, a runway and tower, a kitchen pass) drawn behind the clouds.</td><td>SVG preferred, or transparent WebP, 1600 by 300, a single flat dark silhouette with no interior detail, repeatable left to right. No text, no Dreamy.</td><td>public/images/glossary/backdrops/drift/&lt;world-slug&gt;.svg, listed in DRIFT_WORLD_SILHOUETTES in the same file.</td></tr>
+</table>
+<p><b>Signal panorama prompt.</b> Attach the three Signal Level 1 references and the current panorama (public/images/glossary/signal/bg.webp) as references, then send:</p>
+<pre>Use case: game backdrop.
+Asset type: one wide Dreamari pixel-art panorama for the Signal glossary game, used as a scrolling parallax background and cropped into strips.
+Scene: {{WORLD SCENE, e.g. "a hospital campus at dusk: a low clinic with lit windows, an ambulance bay, a water tower, trees"}}
+Composition: 1200 by 800, horizon in the lower third, a continuous readable skyline silhouette across the middle band, a dark quiet lower band (water, road or ground), even detail across the width, nothing important within 10% of the left and right edges. No text, letters, numbers, logos or UI. No character, no Dreamy. Opaque.
+STYLE: {{Signal STYLE lock from 2.6}}
+Match the attached panorama's palette, pixel density and night-to-dusk mood exactly; only the place changes.</pre>
+<p>Order of work, if the team wants per-world backdrops: start with the worlds that have a glossary (Tech &amp; Engineering, Driving, Flying &amp; Shipping, Health &amp; Medicine, Food &amp; Cooking), then the rest of the fifteen as their first glossary lands.</p>
+
 </body>
 </html>

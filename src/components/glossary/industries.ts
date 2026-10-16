@@ -88,5 +88,10 @@ export function worldTheme(world: string): CSSProperties {
     "--glossary-display": entry?.display ?? "var(--font-display)",
     "--glossary-display-weight": String(entry?.displayWeight ?? 800),
     "--glossary-body": entry?.body ?? "var(--font-body)",
+    // Drift's sky, orbs and clouds mix in the accent (worldBackdrops.ts).
+    // Finance keeps the sky it launched with: "Finance stays exactly as it
+    // is" (Master Scaling Plan, Executive Rule 1).
+    "--glossary-sky-tint": world === "Business & Finance" ? "0%" : "42%",
+    "--glossary-orb-tint": world === "Business & Finance" ? "0%" : "70%",
   } as CSSProperties;
 }
