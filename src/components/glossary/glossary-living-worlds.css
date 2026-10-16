@@ -69,6 +69,7 @@
    the button, kicker and room still carry that world's accent. */
 .glossary-game-lab.glossary-lab-atmosphere-v1[data-living-world] .glossary-welcome-copy h1 em { color: var(--foreground) !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"][data-map-compact] .glossary-level-map-scroll { grid-template-rows: auto auto !important; align-content: center; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"][data-map-compact] .glossary-map-rung:not(.is-inspected) { grid-column: 1 / -1 !important; }
 html.light .glossary-lab-atmosphere-v1 .glossary-world[data-scene-phase] { --scene-top: var(--color-brand-300); --scene-mid: var(--color-brand-200); --scene-air: var(--color-brand-100); }
 html.light .glossary-lab-atmosphere-v1 .glossary-world[data-scene-phase] .glossary-cloud-bank { --cloud-crest: var(--color-brand-100); --cloud-mid: var(--color-brand-200); --cloud-base: var(--color-brand-300); }
 @keyframes glossary-scene-glint { 0%,100% { opacity: .08; transform: translateY(0) scale(.7); } 50% { opacity: .45; transform: translateY(-22px) scale(1); } }
