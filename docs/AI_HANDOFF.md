@@ -34,6 +34,36 @@
 - The phone check found the existing selected map row's Play action below the visible list. Non-Finance maps now page two levels on narrow/short viewports. The chapter derives from selection, so resizing does not hide the active level. Desktop page sizes and Finance stay unchanged. One media-query subscription exists only while the map is mounted; no per-frame layout work. No question interaction changes.
 - Added the grammar and asset formats to Part 3 of the existing handover HTML, plus `docs/reference/glossary-living-worlds-review-2026-10-16.md`. Rejected bespoke per-industry raster backgrounds and added no new asset kind. The separate requested Level 1 art packs follow in one commit per industry.
 - Checks: TypeScript, dreamy reactions, all blueprint contracts, scene determinism/performance contracts and tokens are green. ESLint has no errors; three pre-existing warnings remain in the engine (`_icon`, `gaps`, page font link). Browser checks cover laptop and phone question/map states, direct wrong-to-right correction and the compact map action with zero internal overflow in the checked Nursing Signal case. Final screenshot coverage is recorded in the review document after art integration. Windows/Chromebook GPU timings are not measured on this Mac.
+## 2026-10-17: shorter copy everywhere, 8th-grade checks, Power Play sized by level
+
+**Why (Chandu):** "make sure every piece of copy including success explanations etc are shorter and 8th grade comprehension level" and "make sure the power play isnt so complex and long and a lot to read for level 1 etc."
+
+**What the numbers showed.** Measured first: every level already scored grade 2 to 6 on Flesch-Kincaid, so the problem was length, not vocabulary. Sentences ran to 29 words, authored feedback to 168 characters, and Level 1 Power Plays to 354 characters (Aviation) when Finance's Level 1 is 169.
+
+**What changed.**
+- Generated feedback: every right and wrong line is now one or two short sentences built from the cue ("Yes. Dice means small even cubes." / "It is Blanch: a quick boil, then ice water. Poach is gentle heat in still water."), never the full definition or example. The second clause is dropped when the line would pass 90 characters. Median now 39 characters, longest 89. Build-time assertion.
+- Validator: every sentence 14 words at most across definitions, examples, moments, case steps, prompts, intros, facts, the Power Play and feedback; authored feedback 90 characters and two sentences; a Flesch-Kincaid grade of 8 or below per level with the level's own words not counted; Power Play size by level (Level 1: 200 characters, five sentences, one blank each; Level 2: 240, one blank each; Levels 3 and 4: 290; Levels 5+: 330). Definition cap 120 to 110, example 150 to 120, case step 90 to 80.
+- Blueprints trimmed to pass: Culinary by hand, Nursing, Software and Aviation by three parallel agents, each on its own file.
+- QA script asserts the same reading rules on every built lesson and prints the feedback median and the longest Power Play per level.
+- SOP (HTML, markdown, Google Doc) and spec updated: two new rule rows, Prompt A's field rules, Appendix A's reading row is now machine-checked.
+
+**Not changed:** Finance (Executive Rule 1). Its Power Plays are 169, 142, 291 and 226 characters for Levels 1 to 4, so the new sizes follow Finance rather than depart from it.
+
+## 2026-10-17: generator rebuilt to the Finance style; moments, concept sorts, cases, written Power Plays
+
+**Why (Chandu):** "I feel like the games are repeating the same questions again and again for mastery instead of having any variety, please refer the finance glossary games and redo questions according to its style so it scaleable." And: "dont make the power play so linear, the answers were in the same order as the terms in the playthrough."
+
+**What was wrong.** The first generator built every screen of a level from the same three strings per term (definition, example, cue). The definition was the Definition options, the Which Word prompt, the Type prompt and three feedback lines; the example was the Fill sentence and the Power Play; the cue was the match card, the sort token and the quick-check pair. So a level read as one question asked five ways, and the review (Reverse Recall of the same definition) felt like a sixth. Finance never does that: every Finance screen carries its own fresh line, sorts put concrete things into concept buckets ("Store rent" into "Money out"), Levels 3 and 4 run short stepped cases, and the Power Play is a written paragraph.
+
+**What changed.**
+- `generate.ts`: each term now carries three `moments` (short real situations that show the word without saying it); each moment is shown on at most one screen, enforced by a `used` set that throws at build time. The definition is shown on the teach card and in the review only (plus Level 1's one Definition screen). A level may carry authored Finance-style pieces: `sort` (concept buckets), `selectAll` (concrete items), `cases` (up to two, a scene and two to four steps) and `powerPlay` (a written paragraph). The recipe uses authored pieces where it has a slot and adds the rest as extra screens, so a level runs seven to ten scored screens. Build-time assertions: no line twice, every term credited twice, no three of one screen shape in a row (shape = what the student sees: story card, fill-in sentence, compare card, 2x2, match, sort, select, case, type).
+- Power Play: the validator refuses a paragraph whose blanks run 1 to 5; the fallback paragraph uses a rotating non-sequential order; the engine's word bank is shuffled per lesson (`bankOrder`) so it never mirrors the blanks. This is the one engine change and it applies to Finance's bank too; Finance's content is untouched.
+- `culinary.ts` is the model blueprint (four levels, every authored piece in use). `health.ts`, `software.ts`, `aviation.ts` converted to the same shape.
+- QA script tightened to the new promises; Component Lab specimens point at the new screen kinds and gained an authored case and a concept sort cell; spec, SOP (HTML and markdown) and Prompt A rewritten around moments and the authored pieces.
+
+**Checked:** tsc clean; the blueprint QA script passes for all four industries (190 scored screens across 22 levels: 31 cases, 13 sorts, 18 select-alls; no line shown twice in any lesson; no Power Play in teaching order); Dreamy reactions QA passes. In the browser: Culinary Level 3 (compare card, wet/dry heat sort, three-step case, Select All of moments, Power Play with a shuffled bank) in Drift; Software Level 5 case and concept sort in Signal; Nursing Level 3's seven-item sort and Aviation Level 4's Power Play at 375px. Mid-word hyphenation on the Power Play paragraph and sort tokens at phone width fixed the same way as the speech bubble. Not done: a full no-Skip playthrough with wrong answers to see the review draw (the review form is unchanged); light mode.
+
+**Flagged by the conversion for a later pass:** Nursing Level 1's Definition screen for "Patient" shows the Chart and Dose definitions as distractors and both contain the word "patient", a weak hint; Software Level 5's second case uses bare term names as options on both steps (Finance does the same in Level 4).
 
 ## 2026-10-17: Explore gets a Skip college switch
 

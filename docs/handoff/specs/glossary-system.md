@@ -33,15 +33,16 @@ Every world already has a row in `WORLD_SYSTEMS` (15, Personal Care & Community 
      chapters: [{ number: 1, name: "...", tier: "Beginner" }, ...],
      levels: [
        { number: 1, title, tier, goal, unlocks, milestone, nextMilestone, companyValue, nextCompanyValue,
-         terms: [ { term, definition, example, cue } x 5 ], facts?, intro? },                       // recognize
-       { number: 2, ...terms with a `situation` each... },                                          // apply
-       { number: 3, ...terms with a `situation` and a `confusion` each... },                        // analyze
-       { number: 4, ...terms with a `situation` and a `confusion` each... },                        // decide
+         terms: [ { term, definition, example, cue, moments: [a, b, c] } x 5 ],
+         powerPlay: { intro, paragraph }, facts?, intro? },                                          // recognize
+       { number: 2, ...terms as above..., cases: [one or two], powerPlay },                          // apply
+       { number: 3, ...terms with a `confusion` each..., sort, cases, powerPlay },                   // analyze
+       { number: 4, ...terms with a `confusion` each..., selectAll?, cases, powerPlay },             // decide
        { number: 5, title, tier, goal, unlocks, milestone, nextMilestone, companyValue, nextCompanyValue, words: [five words] },  // roadmap only
      ],
    };
    ```
-   Per term: `definition` (one sentence, never says the word), `example` (says the word; names the anchor unless practice world), `cue` (seven words at most: the match card, the sort token), `situation` (the SOP's context line: twelve words, shows the word in use without saying it; required from Level 2), `confusion` (the word in the same level it is mixed up with; required from Level 3), `formula` (only on a level with `math: true`). Copy rules: eighth grade, one idea per sentence, no dashes, no numbers unless the level sets `math: true`. `validateBlueprint` throws at import with every problem it can see.
+   Per term: `definition` (one sentence, never says the word; the teach card and the review question), `example` (says the word; names the anchor unless practice world; the teach card and the Power Play fallback), `cue` (seven words at most, never says the word: the match card's right side, a quick-check pair, a compare card point), `moments` (exactly three short real situations that show the word without saying it, twelve words and 72 characters each; every moment is shown on one screen only, which is what keeps a level from asking the same thing twice), `confusion` (the word in the same level it is mixed up with; required from Level 3), `formula` (only on a level with `math: true`). Per level, optional and Finance-style: `sort` (concrete items into two to four concept buckets, like "Money in / Money out"), `selectAll` (four concrete items, one to three right), `cases` (up to two: a scene and two to four steps of two or four options each), `powerPlay` (one written paragraph using {1} to {5} once each, where {n} is the nth term, in an order that is not 1 to 5). Copy rules: eighth grade, one idea per sentence, no dashes, no numbers unless the level sets `math: true`. `validateBlueprint` throws at import with every problem it can see, and `buildLesson` throws if the assembled level would show a line twice, leave a word short of mastery, or run three of one screen shape in a row.
 3. **Register it** in `GLOSSARY_INDUSTRIES` (`src/components/glossary/data.ts`): `aviation: buildGlossaryCareer(X_GLOSSARY),`.
 4. **Map its careers** in `CAREER_INDUSTRY` (`industries.ts`) if the world has more than one glossary or the career's world is not inferable; otherwise skip.
 5. **Release:** a new glossary plays by route and on `/play-tools/glossary-qa` (hamburger, "Glossary QA") at once; it reaches the Play hub only when its slug is added to `GLOSSARY_HUB_RELEASED` in `data.ts`, after Chandu's browser QA.
@@ -58,32 +59,49 @@ That is the whole job. No question is written by hand.
 | Field | Limit | Slot it must fit |
 |---|---|---|
 | term | 22 characters | the HUD token label (two lines), a word tile, a Power Play chip |
-| cue | 34 | the right side of a match card, a sort token |
-| definition | 120 | the teach card at 24px, an answer tile |
-| example | 150 | one sentence of the Power Play paragraph |
+| cue | 34 | the right side of a match card, a quick-check pair, a compare point |
+| definition | 110 | the teach card at 24px, an answer tile |
+| example | 120 | the teach card |
 | formula | 28 | the worked line under the definition |
-| situation | 72, and 12 words | the scene card's one line |
+| moment | 72, and 12 words | the scene card's one line, a fill-in sentence, a Select All line, a Type prompt |
+| sort item | 34 | a sort token |
+| sort bucket | 34 | a bucket label |
+| Select All line | 44 | one line of the select list |
+| case step prompt | 80 | Dreamy's bubble for one step |
+| case option | 34 | a two-up or 2x2 tile |
+| Power Play paragraph | Level 1: 200 and five sentences, one blank each; Level 2: 240, five, one blank each; Levels 3 and 4: 290, six; Levels 5+: 330, six | the board; Level 1 must read as five plain lines |
+| feedback (authored or generated) | 90, and two sentences | the feedback panel at phone width |
+| any sentence | 14 words | everything a student reads |
 | cue (words) | 7 words | an answer tile (SOP: answer choices usually 7 words) |
 | level title | 30 | the HUD and the Levels map |
 | level goal | 48 | the welcome line |
+
+Reading rules (17 Oct 2026, Chandu: "make sure every piece of copy including success explanations etc are shorter and 8th grade comprehension level" and "make sure the power play isnt so complex and long and a lot to read for level 1"): every sentence is 14 words at most; feedback is two short sentences built from the cue, never the full definition, and the generator drops the "other word" clause when a line would pass 90 characters; each level's copy must score grade 8 or below on Flesch-Kincaid with its own five words and the anchor counted as one syllable (`readingGrade` in `generate.ts`); the Power Play's size grows with the level (`powerPlayLimit`).
 
 Inside those limits the engine's own rules hold: a long term scales down on the teach card instead of overflowing (`--term-chars`), HUD labels and relic captions wrap to two lines and never cut mid-glyph, tiles, chips and bubbles break long words, a Power Play slot grows to the length of its answer, and every card clips at its edge. Dreamy is never clipped by a column (the main column overflows; the Drift slot is inset by the atlas margin). Screens never scroll: FitToScreen scales a screen to its room.
 
 ## What the generator produces per level
 
-The level's cognitive focus picks the recipe (SOP section 3: recognize, then apply, then compare and classify, then decide; "a Level 4 question should not simply be a longer Level 1 question"). Default by level number, override with `focus` on the level. Every recipe is seven scored questions plus one Power Play (SOP: 7 to 10), never three of the same mechanic in a row, every term credited at least twice so mastery (two credits) is reachable in the main loop.
+The level's cognitive focus picks the recipe (SOP section 3: recognize, then apply, then compare and classify, then decide; "a Level 4 question should not simply be a longer Level 1 question"). Default by level number, override with `focus` on the level. Every recipe is seven derived screens, plus the level's authored cases (and an authored sort or Select All where the recipe has no slot for one) as extra screens, so a level runs seven to ten scored screens plus one Power Play (SOP: 7 to 10). The rules the builder asserts at import: no line of copy shown twice in a lesson, every term credited at least twice in the main loop (one credit per term per screen), never three of the same screen shape in a row (a story card, a fill-in sentence, a compare card and a plain 2x2 are four shapes, as in Finance Level 2), at least four shapes per level.
+
+Why this shape (17 Oct 2026, Chandu: "the games are repeating the same questions again and again for mastery instead of having any variety, please refer the finance glossary games"): the first generator built every screen from the same three strings per term, so the definition appeared as the Definition options, the Which Word prompt, the Type prompt and three feedback lines. Finance never does that; every Finance screen carries its own fresh line, and the sort is concrete things into concept buckets, not cues into words. The moments, the authored pieces and the no-repeat assertion are that style, made scalable.
+
+The numbers in brackets are which term the screen credits; m0, m1, m2 are which of its three moments it shows.
 
 | # | Level 1 recognize | Level 2 apply | Level 3 analyze | Level 4+ decide |
 |---|---|---|---|---|
-| 1 | Definition (term 1) | Situation, "Which word is this?" (1) | Compare card, term 1 vs its confusion | Situation, "Which option fits?" (1) |
-| 2 | Match It Up, word to cue (all) | Match It Up (all) | Select All about term 2: its cue and situation vs the confusion's cue and another situation | Compare card, term 2 vs its confusion |
-| 3 | Fill in the Blank (5) | Fill in the Blank (5) | Reverse Recall (3) | Match It Up, "Use it when" (all) |
-| 4 | Reverse Recall (3) | Reverse Recall (3) | Sort the Buckets (1 to 4) | Situation, "Which option fits?" (3) |
-| 5 | Sort the Buckets (1 to 4) | Sort the Buckets (1 to 4) | Catch the Misuse, term 4 wearing its confusion's cue | Select All about term 4 |
-| 6 | Catch the Misuse (4) | Situation (4) | Situation (5) | Catch the Misuse (5) |
-| 7 | Type the Term (2) | Type the Term from a situation (2) | Type the Term from a situation (5) | Type the Term from a situation (4) |
+| 1 | Definition: the five definitions as options (1) | Story card m0, "Which word is this?" (1) | Compare card, term 1 vs its confusion, m0 decides (1) | Story card m0, "Which option fits?" (1) |
+| 2 | Match It Up, word to meaning (all) | Fill in the blank: m1 then "That is ___." (2) | Story card m0 (3) | Compare card, term 2 vs its confusion (2) |
+| 3 | Fill in the blank, m1 (5) | Story card m0 (3) | Sort: the level's authored concept sort, else m1 of terms 2 to 5 into the words | Match It Up, "Use it when" (all) |
+| 4 | Story card m0 (3) | Select All: authored, else two moments of term 4 against the confusion's and another's (4) | Select All about term 2 (authored or derived) | Fill in the blank, m1 (3) |
+| 5 | Sort: authored, else m1 of terms 1 to 4 into the words | Match It Up (all) | Fill in the blank, m1 (1) | Select All about term 4 (authored or derived) |
+| 6 | Catch the Misuse, term 4 wearing another word's cue (4) | Catch the Misuse (5) | Catch the Misuse against the confusion (4) | Catch the Misuse (5) |
+| 7 | Type the Term from m2 (2) | Type the Term from m2 (1) | Type the Term from m2 (5) | Type the Term from m2 (1) |
+| extra | an authored Select All or case, if written | cases (one or two), after screens 3 and 5 | cases | cases, and an authored sort |
 
-Review: one Reverse Recall per term, drawn only for terms still short of mastery. Power Play: the five examples with their words blanked, as one paragraph (one Power Play, one paragraph, all five words). The right answer's position rotates by level. Feedback is built from each term's own copy, and when the term has a `confusion` the wrong-answer line names it ("Not Tailwind: that is wind pushing from behind"), which is the SOP's "identify exactly what was wrong". Live proof of all four recipes: `/play/glossary/software?lesson=1` to `lesson=4`; `&q=N` jumps to question N.
+Review: one Reverse Recall per term (the definition read aloud), drawn only for terms still short of mastery; Reverse Recall never appears in the main loop, so the review is always a form the student has not seen. Power Play: the level's written paragraph (recommended), else the five examples with their words blanked in a rotating non-sequential order; either way the blanks never run 1 to 5, and the engine shuffles the word bank so it never mirrors the blanks (17 Oct 2026, Chandu: "dont make the power play so linear"). The right answer's position rotates by level and screen. Feedback is built from each term's own copy, and when the term has a `confusion` the wrong-answer line names it ("Not Tailwind: that is wind pushing from behind").
+
+Live proof of all four recipes with authored pieces: `/play/glossary/culinary?lesson=1` to `lesson=4` (the model blueprint, `blueprints/culinary.ts`).
 
 ## Presentation the generator relies on
 
@@ -134,12 +152,12 @@ Joshua's "Dreamari Glossary Game Master Scaling Plan" (PDF, 22 pages) was read a
 |---|---|
 | Three architectures (continuous story, scenario thread, practice world) | `mode` on the blueprint. A practice world's examples need not name the anchor. |
 | Difficulty progresses recognize, apply, analyze, decide | the four recipes above, by level number or `focus` |
-| Context line about 12 words, answers usually 7 | `situation` 12 words and 72 characters, `cue` 7 words, validated |
-| No answer leakage | a definition may not say its own word (Reverse Recall reads it aloud); a situation may not say its word |
+| Context line about 12 words, answers usually 7 | each `moment` 12 words and 72 characters, `cue` 7 words, validated |
+| No answer leakage | a definition may not say its own word (Reverse Recall reads it aloud); a cue, a moment, a Select All line and a case step may not say the word they ask for |
 | Wrong-answer feedback names exactly what was wrong | `confusion` per term; the misuse distractor and the correction use it |
 | No forced math | numbers in copy fail validation unless the level sets `math: true` (the team's decision, in the file) |
 | No forced images | unchanged: Level 1 art only, registered by hand in `termArt.ts`; everything else is words |
-| Interaction diversity, 7 to 10 interactions, every term introduced then applied | asserted by `scripts/qa/glossary-blueprints.test.mjs` on every registered blueprint |
+| Interaction diversity, 7 to 10 interactions, every term introduced then applied | asserted at build and by `scripts/qa/glossary-blueprints.test.mjs` on every registered blueprint |
 | Section 8 fields (world_mode, world_anchor, student_role, level_goal, student_definition, common_confusion, applied_example, visual_useful, power_play) | `mode`, `company`, `studentRole`, `goal`, `definition`, `confusion`, `example`, the `termArt.ts` registration, the generated paragraph. `question_type`, `question_term_ids`, `feedback_*` and `story_state` are not stored per lesson: the recipe is the stored structure, reviewed once in code, and `intro` per level carries the story. |
 
 Where this system deliberately differs from the SOP: the PDF calls each of its 50 industries a "Glossary World"; here those are **industries** under the 15 career worlds, which own the look. The SOP's "the Dreamari team decides" for images and math is a flag in the blueprint file (`termArt.ts` registration, `math: true`), so the decision is visible in review and not left to a generator.
@@ -161,7 +179,7 @@ Numbers are the SOP's. Built ones are linked. "Mode" is the SOP's recommended ar
 | 7 | Human Resources & People Operations | scenario_thread | Business & Finance |
 | 8 | Supply Chain & Logistics | continuous_story | Driving, Flying & Shipping |
 | 9 | Law & Legal Services | scenario_thread | Law, Safety & Justice |
-| 10 | Software Engineering (built, `/play/glossary/software`, 4 levels) | continuous_story | Tech & Engineering |
+| 10 | Software Engineering (built, `/play/glossary/software`, 6 levels) | continuous_story | Tech & Engineering |
 | 11 | Cybersecurity | scenario_thread | Tech & Engineering |
 | 12 | Data Science & Analytics | continuous_story | Tech & Engineering |
 | 13 | Artificial Intelligence & Machine Learning | continuous_story | Tech & Engineering |
@@ -170,7 +188,7 @@ Numbers are the SOP's. Built ones are linked. "Mode" is the SOP's recommended ar
 | 16 | Mechanical Engineering | scenario_thread | Tech & Engineering |
 | 17 | Civil Engineering & Construction Management | continuous_story | Building & Construction |
 | 18 | Architecture | continuous_story | Building & Construction |
-| 19 | Registered Nursing (built, `/play/glossary/nursing`, 2 levels) | scenario_thread | Health & Medicine |
+| 19 | Registered Nursing (built, `/play/glossary/nursing`, 6 levels) | scenario_thread | Health & Medicine |
 | 20 | Medicine / Physician | scenario_thread | Health & Medicine |
 | 21 | Surgery & Operating Room | scenario_thread | Health & Medicine |
 | 22 | Pharmacy | practice_world | Health & Medicine |
@@ -184,7 +202,7 @@ Numbers are the SOP's. Built ones are linked. "Mode" is the SOP's recommended ar
 | 30 | Food Science | continuous_story | Farming, Animals & Nature |
 | 31 | Consumer Packaged Goods | continuous_story | Business & Finance |
 | 32 | Aerospace Engineering | continuous_story | Tech & Engineering |
-| 33 | Airline Pilot & Flight Operations (built, `/play/glossary/aviation`, 3 levels) | scenario_thread | Driving, Flying & Shipping |
+| 33 | Airline Pilot & Flight Operations (built, `/play/glossary/aviation`, 6 levels) | scenario_thread | Driving, Flying & Shipping |
 | 34 | Electrician | scenario_thread | Building & Construction |
 | 35 | HVAC & Refrigeration | scenario_thread | Fixing Machines & Engines |
 | 36 | Plumbing & Pipefitting | scenario_thread | Building & Construction |
