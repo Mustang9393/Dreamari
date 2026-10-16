@@ -504,6 +504,39 @@ function shortMoney(value: number): string {
  *  ($10K to $30B on Joshua's ladder). On the results screen it counts up
  *  from the value before the lesson; on an intro it shows the next goal.
  *  A game value, not money the student earns (the Replit says so too). */
+/** The progress strip over every question: the level's title and question
+ *  count, the SparkBar, and mastery as a count with five anonymous segments
+ *  (16 Oct 2026, Chandu: "remove the mastery dots/circles... that also hints
+ *  at which term comes next"). The segments are sorted by progress, so they
+ *  fill left to right in whatever order the words are mastered; nothing
+ *  points at a term, and no term needs a picture or a letter. */
+export function MasteryHud({ title, current, total, percent, terms, mastery }: { title: string; current: number; total: number; percent: number; terms: Array<{ id: string }>; mastery: Record<string, number> }) {
+  const progressList = terms.map((t) => Math.min(mastery[t.id] ?? 0, MASTERY_TARGET)).sort((a, b) => b - a);
+  const masteredCount = progressList.filter((p) => p >= MASTERY_TARGET).length;
+  return (
+    <div className="glossary-mastery-hud relative z-10 mx-auto flex w-full max-w-[640px] flex-col gap-[var(--space-2)] px-5 pt-[var(--space-3)] md:px-8">
+      <div className="flex items-center justify-between text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <span>{title}</span>
+        <span>{current}/{total} · {percent}%</span>
+      </div>
+      {/* Sparks on every correct answer that moves it (SparkBar), same as Build. */}
+      <SparkBar percent={percent} min={4} height={6} track="var(--glass-surface-2)" fill="var(--glossary-accent)" glow="var(--glossary-accent)" />
+      <div className="glossary-mastery-foot flex items-center justify-between">
+        <div className="glossary-mastery-segments" role="img" aria-label={`${masteredCount} of ${terms.length} words mastered`}>
+          {progressList.map((progress, index) => (
+            <span key={index} className={`glossary-mastery-segment ${progress >= MASTERY_TARGET ? "is-mastered" : progress > 0 ? "is-started" : ""}`}>
+              <i style={{ width: `${(progress / MASTERY_TARGET) * 100}%` }} />
+            </span>
+          ))}
+        </div>
+        <span className="glossary-mastered-count text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <span>Mastered </span>{masteredCount}/{terms.length}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export type MilestoneProgress = { level: number; total: number };
 
 /** A continuous story keeps its dollar meter; every other mode shows where
@@ -1183,7 +1216,7 @@ function DocumentOptionList({ options, correctIndex, picked, revealed, missed = 
 
 /** The money drawn as a small diagram above a question, in the same card
  *  material as Level 1's sells-for / costs / left scene. */
-function SceneCardView({ scene, answered = false }: { scene: SceneCard; /** the right answer is in: shares light up, the result line shows */ answered?: boolean }) {
+export function SceneCardView({ scene, answered = false }: { scene: SceneCard; /** the right answer is in: shares light up, the result line shows */ answered?: boolean }) {
   const cls = `glossary-question-profit-scene glossary-scene glossary-scene-${scene.kind}`;
   if (scene.kind === "story") {
     return <div className={cls}><p className="glossary-scene-line">{scene.text}</p>{scene.note ? <p className="glossary-scene-note">{scene.note}</p> : null}</div>;
@@ -1251,7 +1284,7 @@ function SceneCardView({ scene, answered = false }: { scene: SceneCard; /** the 
 }
 
 /** A one-blank sentence; the picked answer drops into the gap. */
-function SentenceCard({ sentence, filled, state }: { sentence: string; filled: string | null; state: "idle" | "correct" | "wrong" }) {
+export function SentenceCard({ sentence, filled, state }: { sentence: string; filled: string | null; state: "idle" | "correct" | "wrong" }) {
   const [before, after = ""] = sentence.split("___");
   return (
     <p className="glossary-sentence-card" aria-live="polite">
@@ -3086,7 +3119,7 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebr
 // production set false: a level then opens once the one before is complete.
 const DEMO_UNLOCK_AUTHORED_LEVELS = true;
 
-function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: GlossaryCareer; lesson: GlossaryLesson; atmosphere: LabAtmosphere; onClose: () => void; /** open another authored level (13 Oct 2026) */ onPlay: (lessonNumber: number) => void }) {
+export function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: GlossaryCareer; lesson: GlossaryLesson; atmosphere: LabAtmosphere; onClose: () => void; /** open another authored level (13 Oct 2026) */ onPlay: (lessonNumber: number) => void }) {
   const levels = career.levels;
   // Real progress (9 Oct 2026; Mika's notes: "improve how the level screen
   // should show where the students are currently"). A finished lesson shows
@@ -3634,34 +3667,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   // shorter"). On Signal both rows are slim and share one panel.
   const signalBar = false;
   const hudNode = screen === "question" ? (
-        <div className="glossary-mastery-hud relative z-10 mx-auto flex w-full max-w-[640px] flex-col gap-[var(--space-2)] px-5 pt-[var(--space-3)] md:px-8">
-          <div className="flex items-center justify-between text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-            <span>{lesson.title}</span>
-            <span>
-              {currentNumber}/{Math.max(mainLoopLength, queue.length)} · {percent}%
-            </span>
-          </div>
-          {/* Sparks on every correct answer that moves it (SparkBar), same as Build. */}
-          <SparkBar percent={percent} min={4} height={6} track="var(--glass-surface-2)" fill="var(--glossary-accent)" glow="var(--glossary-accent)" />
-          <div className="glossary-mastery-foot flex items-center justify-between">
-            {/* Mastery as a count and five anonymous segments (16 Oct 2026,
-               Chandu: "remove the mastery dots/circles... that also hints at
-               which term comes next"). Segments fill left to right in the
-               order terms are mastered, so nothing points at a term, and no
-               letters or pictures are needed for abstract words or acronyms.
-               Each term's progress still shows as a partial fill. */}
-            <div className="glossary-mastery-segments" role="img" aria-label={`${masteredCount} of ${lesson.terms.length} words mastered`}>
-              {[...lesson.terms.map((t) => Math.min(mastery[t.id] ?? 0, MASTERY_TARGET))].sort((a, b) => b - a).map((progress, index) => (
-                <span key={index} className={`glossary-mastery-segment ${progress >= MASTERY_TARGET ? "is-mastered" : progress > 0 ? "is-started" : ""}`}>
-                  <i style={{ width: `${(progress / MASTERY_TARGET) * 100}%` }} />
-                </span>
-              ))}
-            </div>
-            <span className="glossary-mastered-count text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <span>Mastered </span>{masteredCount}/{lesson.terms.length}
-            </span>
-          </div>
-        </div>
+    <MasteryHud title={lesson.title} current={currentNumber} total={Math.max(mainLoopLength, queue.length)} percent={percent} terms={lesson.terms} mastery={mastery} />
   ) : null;
   const sceneScreen = screen === "unlock" && unlockIndex >= lesson.terms.length ? "unlockComplete" : screen;
   const questionFrame = screen === "question";

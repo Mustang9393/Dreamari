@@ -11,22 +11,29 @@
 // claimed. Only `export` was added to the engine's pieces plus a theme
 // provider; no behaviour, markup or styles changed.
 
+import Image from "next/image";
 import { useState, type ReactNode } from "react";
 import { glossaryFor } from "@/components/glossary/data";
 import { DREAMY_FACING } from "@/components/glossary/dreamyReactions";
 import { WORLD_SYSTEMS, worldTheme } from "@/components/glossary/industries";
-import { glossaryIndustries } from "@/components/glossary/data";
+import { GLOSSARY_HUB_RELEASED, glossaryIndustries } from "@/components/glossary/data";
+import { validateBlueprint, type GlossaryBlueprint } from "@/components/glossary/generate";
+import { NURSING_GLOSSARY } from "@/components/glossary/blueprints/health";
+import { LEVEL_DREAMY_BY_STATE } from "@/components/glossary/levelPlates";
 import {
   CompleteScreen,
   DreamyFace,
   FeedbackPanel,
   GlossaryLabAtmosphere,
   IntroScreen,
+  LabLevelMap,
+  MasteryHud,
   MasteryLoadingScreen,
   PowerPlayIntroScreen,
   PowerPlayScreen,
   QuestionScreen,
   RewardPluses,
+  SceneCardView,
   SketchFace,
   SpeechBubble,
   StreakBanner,
@@ -43,6 +50,28 @@ const RN = glossaryFor("nursing");
 const L1 = IB?.lessons[0];
 const L3 = IB?.lessons[2];
 const RN1 = RN?.lessons[0];
+const SW = glossaryFor("software");
+const SW2 = SW?.lessons[1];
+const SW3 = SW?.lessons[2];
+const SW4 = SW?.lessons[3];
+const RN4 = RN?.lessons[3];
+
+/** A deliberately broken blueprint, so the lab shows the developer-facing
+ *  error state: what validateBlueprint reports before a bad file can build. */
+function brokenBlueprint(): GlossaryBlueprint {
+  const bad = structuredClone(NURSING_GLOSSARY) as GlossaryBlueprint;
+  bad.industry = { ...bad.industry, slug: "Bad Slug", world: "Nowhere" };
+  bad.levels[0].terms![0].definition = "A patient is a patient.";
+  bad.levels[1].terms![0].situation = "Ana works a long shift today and tomorrow and the next day too ok.";
+  bad.levels[1].terms![1].cue = "one two three four five six seven eight";
+  bad.levels[0].terms![1].example = "No anchor named here with vital signs.";
+  bad.levels[2].terms![0].confusion = "Nope";
+  bad.levels[3].terms![0].example = "Code Blue costs $500.";
+  return bad;
+}
+/** A synthetic term at every limit, for the layout edge cases. */
+const EDGE_TERM = { term: "Interprofessional Care", definition: "Doctors, nurses, therapists and aides planning one patient's care together, each bringing their own training.", cue: "Many roles, one plan for the patient" };
+const ACRONYM_TERM = { term: "FIFO", definition: "Using the oldest stock first so nothing sits long enough to spoil.", cue: "Oldest stock gets used first" };
 const POSES = ["welcome", "explain", "choose", "match", "sort", "calculate", "recall", "case", "hint", "correct", "retry", "mastery"] as const;
 const FILE = "src/components/glossary/GlossaryLabGameExperience.tsx";
 
@@ -169,6 +198,9 @@ export function GlossaryLiveGroup() {
           <StateCell label="Words only (Level 3, formula)" surface="game" minH={300}><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term={L3.terms[0].term} definition={L3.terms[0].definition} icon={L3.terms[0].icon} formula={L3.terms[0].formula} words /></div></div></Stage></StateCell>
           <StateCell label="Words only (generated, Registered Nurse)" surface="game" minH={300}><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term={RN1.terms[3].term} definition={RN1.terms[3].definition} icon={RN1.terms[3].icon} formula={RN1.terms[3].formula} words /></div></div></Stage></StateCell>
           <StateCell label="Picture (Level 1 only)" surface="game" minH={300}><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term={L1.terms[0].term} definition={L1.terms[0].definition} icon={L1.terms[0].icon} artSrc="/images/glossary/themes-oct08/drift/company.webp" /></div></div></Stage></StateCell>
+          <StateCell label="Edge: 22-character term (the limit)" surface="game" minH={300} note="--term-chars shrinks the face; the underline is exactly the word's width in both themes (16 Oct)."><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term={EDGE_TERM.term} definition={EDGE_TERM.definition} icon="users" words concept /></div></div></Stage></StateCell>
+          <StateCell label="Edge: acronym" surface="game" minH={300} note="A short word: the underline is short too, and no letter or picture stands in."><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term={ACRONYM_TERM.term} definition={ACRONYM_TERM.definition} icon="layers" words concept /></div></div></Stage></StateCell>
+          <StateCell label="Edge: definition at 120 characters" surface="game" minH={300}><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term="Handoff" definition={EDGE_TERM.definition.slice(0, 120)} icon="arrow-left-right" words concept /></div></div></Stage></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -199,6 +231,14 @@ export function GlossaryLiveGroup() {
           <StateCell label="Catch the Misuse (generated)" surface="game" minH={360}><Stage theme={theme} world={world} height={350}><QuestionScreen question={misuse} onAnswer={noop} onReset={noop} /></Stage></StateCell>
           <StateCell label="Case, step by step (Level 3)" surface="game" minH={400}><Stage theme={theme} world={world} height={390}><QuestionScreen question={chain} onAnswer={noop} onReset={noop} /></Stage></StateCell>
           <StateCell label="Select all (Level 3)" surface="game" minH={400}><Stage theme={theme} world={world} height={390}><QuestionScreen question={multi} onAnswer={noop} onReset={noop} /></Stage></StateCell>
+          {SW2 ? <StateCell label="Apply: situation, which word (generated L2)" surface="game" minH={400} note="A story scene card over single-word tiles. In Signal the card is square (16 Oct)."><Stage theme={theme} world={world} height={390}><QuestionScreen question={SW2.questions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {SW3 ? <StateCell label="Analyze: compare card (generated L3)" surface="game" minH={440}><Stage theme={theme} world={world} height={430}><QuestionScreen question={SW3.questions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {SW3 ? <StateCell label="Analyze: compare card, right" surface="game" minH={440}><Stage theme={theme} world={world} height={430}><QuestionScreen question={SW3.questions[0]} onAnswer={noop} onReset={noop} answerState="correct" /></Stage></StateCell> : null}
+          {SW3 ? <StateCell label="Analyze: select all about one word (generated L3)" surface="game" minH={440}><Stage theme={theme} world={world} height={430}><QuestionScreen question={SW3.questions[1]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {SW4 ? <StateCell label="Decide: which option fits (generated L4)" surface="game" minH={400}><Stage theme={theme} world={world} height={390}><QuestionScreen question={SW4.questions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {SW4 ? <StateCell label="Decide: Type the Term from the example (generated L4)" surface="game" minH={400}><Stage theme={theme} world={world} height={390}><QuestionScreen question={SW4.questions[6]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {RN4 ? <StateCell label="Edge: two-word options fall to a list" surface="game" minH={440} note="isWordSet: single words of 14 characters or fewer tile as a 2x2 grid; anything longer, or with a space (Code Blue, Rapid Response), lists in one column."><Stage theme={theme} world={world} height={430}><QuestionScreen question={RN4.questions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          <StateCell label="Edge: Catch the Misuse, long pairs" surface="game" minH={400} note="Word = cue pairs at the 34-character cue limit; the pair wraps inside its tile."><Stage theme={theme} world={world} height={390}><QuestionScreen question={{ kind: "choice", type: "Catch the Misuse", id: "LAB-EDGE-1", termId: EDGE_TERM.term, playOrder: 1, label: "Quick check", prompt: "Which one is wrong?", options: [`${EDGE_TERM.term} = ${ACRONYM_TERM.cue}`, `${ACRONYM_TERM.term} = ${ACRONYM_TERM.cue}`, "Handoff = Passing care to the next nurse", "Triage = Who is seen first"], correctIndex: 0, feedbackCorrect: "Right.", feedbackWrong: "Not quite." }} onAnswer={noop} onReset={noop} /></Stage></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -207,6 +247,8 @@ export function GlossaryLiveGroup() {
           <StateCell label="Right" surface="game" minH={160}><Stage theme={theme} world={world} height={150}><FeedbackPanel correct text={choice.feedbackCorrect} isLast={false} onNext={noop} inline /></Stage></StateCell>
           <StateCell label="Wrong" surface="game" minH={160}><Stage theme={theme} world={world} height={150}><FeedbackPanel correct={false} text={choice.feedbackWrong} isLast={false} onNext={noop} inline /></Stage></StateCell>
           <StateCell label="Right, last question" surface="game" minH={160}><Stage theme={theme} world={world} height={150}><FeedbackPanel correct text={choice.feedbackCorrect} isLast onNext={noop} inline /></Stage></StateCell>
+          <StateCell label="Wrong, names the confusion (generated)" surface="game" minH={160} note="The generator quotes the cue of the word it was mixed up with: the SOP's &quot;say exactly what was wrong&quot;."><Stage theme={theme} world={world} height={150}><FeedbackPanel correct={false} text={SW3?.questions.find((q) => q.kind === "choice" && q.type === "Catch the Misuse")?.feedbackWrong ?? ""} isLast={false} onNext={noop} inline /></Stage></StateCell>
+          <StateCell label="Long line (edge)" surface="game" minH={200} note="Two sentences at the definition and example limits; the panel grows, nothing clips."><Stage theme={theme} world={world} height={190}><FeedbackPanel correct={false} text={`${EDGE_TERM.definition} At Riverside Clinic, interprofessional care means the whole team meets before the shift so no patient falls between two roles.`} isLast={false} onNext={noop} inline /></Stage></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -236,6 +278,8 @@ export function GlossaryLiveGroup() {
           <StateCell label="Reached (counts up)" surface="game" minH={180}><Stage theme={theme} world={world} screen="complete" height={170}><ValuationTicker from={0} to={L1.companyValue} milestone={L1.milestone} mode="reached" company={L1.exampleCompany} /></Stage></StateCell>
           <StateCell label="Goal" surface="game" minH={180}><Stage theme={theme} world={world} screen="intro" height={170}><ValuationTicker from={L3.previousCompanyValue ?? 0} to={L3.companyValue} milestone={L3.milestone} mode="goal" company={L3.exampleCompany} /></Stage></StateCell>
           <StateCell label="Milestone progress (scenario thread, Riverside Clinic)" surface="game" minH={180}><Stage theme={theme} world={world} screen="complete" height={170}><ValuationTicker from={0} to={RN1.companyValue} milestone={RN1.milestone} mode="reached" company={RN1.exampleCompany} progress={{ level: 1, total: 6 }} /></Stage></StateCell>
+          <StateCell label="Milestone progress, goal (intro)" surface="game" minH={180} note="Level 4 of 6 ahead: the track shows three done."><Stage theme={theme} world={world} screen="intro" height={170}><ValuationTicker from={0} to={RN4?.companyValue ?? 0} milestone={RN4?.milestone ?? ""} mode="goal" company={RN1.exampleCompany} progress={{ level: 4, total: 6 }} /></Stage></StateCell>
+          <StateCell label="Last level reached (6 of 6)" surface="game" minH={180}><Stage theme={theme} world={world} screen="complete" height={170}><ValuationTicker from={0} to={1} milestone="Pick a specialty" mode="reached" company={RN1.exampleCompany} progress={{ level: 6, total: 6 }} /></Stage></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -258,6 +302,7 @@ export function GlossaryLiveGroup() {
           <StateCell label="Authored Level 1" surface="game" minH={340}><Stage theme={theme} world={world} screen="intro" height={330}><IntroScreen lesson={L1} onNext={noop} variant="lab" atmosphere={theme} subject="finance" /></Stage></StateCell>
           <StateCell label="Authored Level 3" surface="game" minH={340}><Stage theme={theme} world={world} screen="intro" height={330}><IntroScreen lesson={L3} onNext={noop} variant="lab" atmosphere={theme} subject="finance" /></Stage></StateCell>
           <StateCell label="Generated (no welcome art)" surface="game" minH={340}><Stage theme={theme} world={world} screen="intro" height={330}><IntroScreen lesson={RN1} onNext={noop} variant="lab" atmosphere={theme} subject={RN.subject} hero={false} /></Stage></StateCell>
+          <StateCell label="Registered welcome art (stand-in asset)" surface="game" minH={340} note="welcomeArt.ts: WELCOME_ART[industry] or LEVEL_WELCOME_ART[lesson] per theme. Shown here with a finance asset standing in until Codex delivers."><Stage theme={theme} world={world} screen="intro" height={330}><IntroScreen lesson={RN1} onNext={noop} variant="lab" atmosphere={theme} subject={RN.subject} hero={false} heroSrc={theme === "v2" ? "/images/glossary/signal/building.webp" : "/images/glossary/themes-oct08/drift/company.webp"} /></Stage></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -265,6 +310,60 @@ export function GlossaryLiveGroup() {
         <StateGrid min={420}>
           <StateCell label="In play, with Skip (demo)" surface="game" minH={100} note="Skip and the theme switch are the demo's chrome; Skip must not ship to students."><Stage theme={theme} world={world} height={90}><TopBar onBack={noop} onOpenLevels={noop} atmosphere={theme} onAtmosphereChange={noop} onRestart={noop} onSkip={noop} /></Stage></StateCell>
           <StateCell label="Intro (no theme switch, no Skip)" surface="game" minH={100}><Stage theme={theme} world={world} screen="intro" height={90}><TopBar onBack={noop} onOpenLevels={noop} /></Stage></StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="MasteryHud" scale="core" file={FILE} purpose="The progress strip over every question: the level's title and question count, the SparkBar, and mastery as a count with five anonymous segments sorted by progress. They fill left to right in whatever order words are mastered, so nothing hints at the next term, and no term needs a picture or a letter (16 Oct 2026, Chandu: remove the dots)." when="Every question and review question.">
+        <StateGrid min={320}>
+          <StateCell label="Fresh" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><MasteryHud title={RN1.title} current={1} total={7} percent={14} terms={RN1.terms} mastery={{}} /></Stage></StateCell>
+          <StateCell label="Mid lesson: one mastered, two started" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><MasteryHud title={RN1.title} current={4} total={7} percent={57} terms={RN1.terms} mastery={{ [RN1.terms[2].id]: 2, [RN1.terms[0].id]: 1, [RN1.terms[4].id]: 1 }} /></Stage></StateCell>
+          <StateCell label="All five mastered" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><MasteryHud title={RN1.title} current={7} total={7} percent={100} terms={RN1.terms} mastery={Object.fromEntries(RN1.terms.map((t) => [t.id, 2]))} /></Stage></StateCell>
+          <StateCell label="Edge: 30-character level title" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><MasteryHud title="Public Offerings and Dilution" current={2} total={9} percent={22} terms={RN1.terms} mastery={{}} /></Stage></StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="SceneCardView" scale="core" file={FILE} purpose="The six shared scene cards a question can carry above its prompt: story (one line), compare (two words with their cues), figures, ledger, shares, split. One kit, so every industry composes the same shapes; in Signal they take the square frame (16 Oct 2026)." when="Level 2 and up: situations, compare cards; Finance's money diagrams.">
+        <StateGrid min={300}>
+          <StateCell label="Story" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><SceneCardView scene={{ kind: "story", text: SW2?.terms[0].example ?? "Dream Sneakers wants to open Store #2." }} /></Stage></StateCell>
+          <StateCell label="Story with note" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><SceneCardView scene={{ kind: "story", text: "Maya invests $25,000.", note: "Dream Sneakers has 10 equal shares." }} /></Stage></StateCell>
+          <StateCell label="Compare" surface="game" minH={200}><Stage theme={theme} world={world} height={190}><SceneCardView scene={{ kind: "compare", title: "Test or Debug?", options: [{ label: "Test", points: ["A check that it works"] }, { label: "Debug", points: ["Find and fix the cause"] }] }} /></Stage></StateCell>
+          <StateCell label="Figures" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><SceneCardView scene={{ kind: "figures", items: [{ label: "Revenue", value: "$30,000" }, { label: "Costs", value: "$40,000" }], ops: ["−"] }} /></Stage></StateCell>
+          <StateCell label="Ledger" surface="game" minH={200}><Stage theme={theme} world={world} height={190}><SceneCardView scene={{ kind: "ledger", title: "This month", rows: [{ label: "Sneaker sales", value: "$30,000", tone: "in" }, { label: "Rent", value: "$8,000", tone: "out" }, { label: "Wages", value: "$12,000", tone: "out" }] }} /></Stage></StateCell>
+          <StateCell label="Shares, before and after the answer" surface="game" minH={200}><Stage theme={theme} world={world} height={190}><div className="flex flex-col gap-2"><SceneCardView scene={{ kind: "shares", total: 10, owned: 2, label: "10 equal shares", result: "2 of 10 shares = 20%" }} /><SceneCardView scene={{ kind: "shares", total: 10, owned: 2, label: "10 equal shares", result: "2 of 10 shares = 20%" }} answered /></div></Stage></StateCell>
+          <StateCell label="Split" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><SceneCardView scene={{ kind: "split", title: "Who owns Dream Sneakers", parts: [{ label: "You", pct: 80 }, { label: "Maya", pct: 20 }] }} /></Stage></StateCell>
+          <StateCell label="Edge: story at 72 characters" surface="game" minH={150} note="The validator's situation limit; the line wraps to two at phone width and never clips."><Stage theme={theme} world={world} height={140}><SceneCardView scene={{ kind: "story", text: "Your notes appear on your laptop and your phone. Something stores them." }} /></Stage></StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="LabLevelMap (Levels)" scale="core" file={FILE} purpose="The Levels overlay. Every level is a card with a plate: registered art when there is any, otherwise the level's first term icon on the world accent (no letters, no painted sky until plate art exists). The selected card opens in place with its goal, words, time, what it unlocks and the Play button; in Drift it shows one Dreamy expression for its state, the only Dreamy on that screen. A continuous story shows the value each level unlocks; every other mode shows the milestone. Progress comes from the browser's saved lessons, so finished levels show here only after you finish them." when="The Levels button in the top bar.">
+        <StateGrid min={340}>
+          <StateCell label="Continuous story (Finance): dollar unlocks" surface="game" minH={660} note="Six of twenty levels per page; the pager at the bottom turns pages."><div style={{ position: "relative", height: 650, transform: "translateZ(0)", overflow: "hidden" }}><Stage theme={theme} world={world} screen="question" height={650}><LabLevelMap career={IB} lesson={L1} atmosphere={theme} onClose={noop} onPlay={noop} /></Stage></div></StateCell>
+          <StateCell label="Scenario thread (Nursing): milestones, playing Level 2" surface="game" minH={660} note="Level 2 open with the arrow expression; Level 1 ready with its icon; 3 to 6 locked."><div style={{ position: "relative", height: 650, transform: "translateZ(0)", overflow: "hidden" }}><Stage theme={theme} world={world} screen="question" height={650}><LabLevelMap career={RN} lesson={RN.lessons[1]} atmosphere={theme} onClose={noop} onPlay={noop} /></Stage></div></StateCell>
+          {SW ? <StateCell label="Registered plate art (stand-in on Level 1)" surface="game" minH={660} note="A level's `plate` (or PLATES by tier) replaces the icon; shown with the Signal skyline standing in."><div style={{ position: "relative", height: 650, transform: "translateZ(0)", overflow: "hidden" }}><Stage theme={theme} world={world} screen="question" height={650}><LabLevelMap career={{ ...SW, levels: SW.levels.map((lv, i) => (i === 0 ? { ...lv, plate: "/images/glossary/signal/bg.webp" } : lv)) }} lesson={SW.lessons[0]} atmosphere={theme} onClose={noop} onPlay={noop} /></Stage></div></StateCell> : null}
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="Dreamy expressions by level state" scale="core" file="src/components/glossary/levelPlates.ts" purpose="The four stills from Chandu's Dream Expressions V2 pack that the Drift Levels map uses on its open card, by state. Static on purpose; the rest of the pack waits for Codex to animate it (SOP 6.6)." when="The open card on the Drift Levels map.">
+        <StateGrid min={160}>
+          {(["open", "current", "complete", "locked"] as const).map((state) => (
+            <StateCell key={state} label={state} surface="game" minH={170}><Stage theme="v1" world={world} height={160}><span className="glossary-map-plate is-icon is-dreamy" style={{ height: 140, width: 220, display: "grid", placeItems: "center" }}><Image src={LEVEL_DREAMY_BY_STATE[state]} alt="" width={256} height={256} unoptimized style={{ height: 120, width: "auto" }} /></span></Stage></StateCell>
+          ))}
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="Blueprint validation (the error state)" scale="core" file="src/components/glossary/generate.ts" purpose="A blueprint that breaks a rule never builds: validateBlueprint returns every problem it can see and buildGlossaryCareer throws with the list, so a bad file fails in development, not in a student's hands. This is the developer-facing error state of the whole system; students never see an unfinished glossary." when="At import time, for every registered blueprint, and in scripts/qa/glossary-blueprints.test.mjs.">
+        <StateGrid min={320}>
+          <StateCell label="A deliberately broken Nursing blueprint" minH={200} note="Bad slug, unknown world, a definition that says its word, an example without the anchor, a 14-word situation, an 8-word cue, an unknown confusion, numbers without math.">
+            <ol className="flex flex-col gap-[4px] text-[12.5px]" style={{ color: "var(--foreground)" }}>
+              {validateBlueprint(brokenBlueprint()).map((problem) => <li key={problem} className="rounded-[var(--radius-sm)] border px-[8px] py-[4px]" style={{ borderColor: "color-mix(in srgb, var(--danger, #e0483e) 45%, var(--glass-border))" }}>{problem}</li>)}
+            </ol>
+          </StateCell>
+          <StateCell label="Unknown route" minH={120}><NotRendered reason="/play/glossary/<unknown> calls notFound(): the app's 404, nothing half-built." see="src/app/play/glossary/[career]/page.tsx" /></StateCell>
+          <StateCell label="Hub release state" minH={160} note="GLOSSARY_HUB_RELEASED decides which cards the Play hub sells as playable; the rest read as Coming soon and play from /play-tools/glossary-qa.">
+            <ul className="flex flex-col gap-[4px] text-[12.5px]" style={{ color: "var(--foreground)" }}>
+              {glossaryIndustries().map((g) => <li key={g.industrySlug}><b>{g.industryTitle}</b> ({g.industrySlug}): {GLOSSARY_HUB_RELEASED.includes(g.industrySlug) ? "released to the hub" : "QA only"} · {g.lessons.length} of {g.levels.length} levels playable · {g.mode.replace("_", " ")}</li>)}
+            </ul>
+          </StateCell>
         </StateGrid>
       </Specimen>
 
@@ -277,7 +376,14 @@ export function GlossaryLiveGroup() {
               <li><b>Power Play:</b> {RN1.powerPlay.paragraph}</li>
             </ol>
           </StateCell>
-          <StateCell label="Not rendered here" minH={120}><NotRendered reason="A whole level is a route: /play/glossary/registered-nurse (Skip walks it in 14 presses)." see="src/components/glossary/blueprints/registered-nurse.ts" /></StateCell>
+          {SW ? SW.lessons.slice(0, 4).map((lesson) => (
+            <StateCell key={lesson.id} label={`Software, Level ${lesson.lessonNumber} (${["recognize", "apply", "analyze", "decide"][lesson.lessonNumber - 1]})`} minH={200} note="The recipe changes by level: the same five-term shape, a harder question set.">
+              <ol className="flex flex-col gap-[4px] text-[12.5px]" style={{ color: "var(--foreground)" }}>
+                {lesson.questions.map((q) => <li key={q.id}><b>{q.playOrder}. {q.kind === "choice" || q.kind === "typeTerm" || q.kind === "matchUp" || q.kind === "sortBuckets" || q.kind === "multiSelect" ? q.type : q.kind}</b>{"termId" in q && q.termId ? ` (${q.termId})` : ""}: {q.prompt || "(no prompt)"}</li>)}
+              </ol>
+            </StateCell>
+          )) : null}
+          <StateCell label="Not rendered here" minH={120}><NotRendered reason="A whole level is a route: /play/glossary/nursing, or every level of every glossary from /play-tools/glossary-qa (Skip walks a level in about 14 presses)." see="src/components/glossary/blueprints/health.ts" /></StateCell>
         </StateGrid>
       </Specimen>
     </>

@@ -1,3 +1,12 @@
+## 2026-10-16 (late night, 13): Component Lab, glossary live group made exhaustive
+
+**Why (Chandu):** "make sure the component library is updated and exhaustive and fully detailed, edge cases, other cases, error, everything we would need."
+
+- **New specimens** in "Glossary game, live engine": MasteryHud (fresh, mid lesson, all mastered, 30-character title), SceneCardView (story, story with note, compare, figures, ledger, shares before and after the answer, split, a 72-character story), LabLevelMap (Finance with dollar unlocks, Nursing with milestones and the open card's Dreamy expression, a registered plate standing in), Dreamy expressions by level state, and the error state: a deliberately broken blueprint run through validateBlueprint with every problem listed, the unknown-route 404, and the hub release state per industry.
+- **Extended specimens:** QuestionScreen gains the higher recipes (apply situation, analyze compare idle and right, select all about one word, decide option, Type the Term from the example) and two edge cases (two-word options falling to a list, misuse pairs at the cue limit); SketchFace gains the 22-character term, an acronym and a 120-character definition; FeedbackPanel gains the confusion-naming wrong line and a long line; ValuationTicker gains milestone goal mode and 6 of 6; IntroScreen gains a registered welcome art stand-in; the generated-lesson data cell now shows all four recipes from Software.
+- **Engine:** `MasteryHud`, `SceneCardView`, `SentenceCard` and `LabLevelMap` are exported (the HUD was inline; it is now one component used by the game and the lab, no markup change). The map renders inside a transformed wrapper in the lab, so its fixed overlay stays in its cell.
+- **Checked:** tsc; the lab page renders the new specimens in both themes. Pushed to main.
+
 ## 2026-10-16 (late night, 12): the three Play tab games complete at six levels; mastery as segments and a count; master SOP; Codex prompt
 
 **Why (Chandu):** "try to make a game for each of the glossary game cards in the play tab that already exist with our new sops... give me the master glossary game sop and prompts in a single document but give me this new prompt for codex as separate." And: "I also want to remove the mastery dots/circles. lets just show a mastery score instead of telling them which circle is it because that also hints at which term comes next... We cant reliably make images for all terms because there will be vague abstract concepts or acronyms."
