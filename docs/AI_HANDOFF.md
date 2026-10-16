@@ -1,3 +1,10 @@
+## 2026-10-17: worked lines move to the back of the teach cards
+
+**Why (Chandu):** "In finance games, get rid of all the equations on the flashcards. have them when they flip for example only. check all levels."
+
+- The teach card front showed a term's worked line ("$30,000 − $25,000 = $5,000") under the definition. The front is now the word and its meaning only; the worked line sits on the back under the example it works out (GlossaryLabGameExperience.tsx). The rule is in the engine, so generated games with math: true levels follow it too.
+- Checked by flipping every card of Finance Levels 1 to 4 in Drift and Signal: no front shows an equation; Return, Ownership, Revenue, Margin, Loss and Interest show theirs on the back, and the back fits with no overflow. Component Lab specimen and SOP section 8 updated.
+
 ## 2026-10-17: "5 terms unlocked" cards no longer crop the term names
 
 **Why (Chandu):** "Terms are getting cropped" (screenshot of the live Medical Terms unlocked screen on a wide laptop: "Patient", "Vital Signs", "Chart", "Dose" and "Triage" cut in half at the card bottoms).

@@ -941,7 +941,7 @@ export function UnlockScreen({
                  so its backface-visibility participates in the button's own
                  3D context rather than being flattened by a wrapper. */}
               {(variant === "default" || !flipped) ? (
-                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? termArt : undefined} words={wordsOnly} concept={variant === "lab" && (!termArt || !!term.formula)} formula={term.formula} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
+                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? termArt : undefined} words={wordsOnly} concept={variant === "lab" && !termArt} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
               ) : null}
 
               {/* BACK: the written page, ring-bound edge and all. */}
@@ -993,6 +993,13 @@ export function UnlockScreen({
                       {term.example}
                     </span>
                   </span>
+                  {/* The worked line ("$30,000 − $25,000 = $5,000") lives on
+                     the back, beside the example it works out, never on the
+                     front (17 Oct 2026, Chandu: "get rid of all the
+                     equations on the flashcards. have them when they flip
+                     for example only"). The front is the word and its
+                     meaning. */}
+                  {term.formula ? <span className="glossary-concept-formula glossary-back-formula">{term.formula}</span> : null}
                   {variant === "lab" ? (
                     <span className="flex items-center gap-[6px] text-[11px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>
                       <RotateCw className="h-[12px] w-[12px]" aria-hidden /> Back to the definition

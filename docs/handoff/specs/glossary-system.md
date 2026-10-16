@@ -65,7 +65,7 @@ Levels 1 to 4 must be playable in every world; `validateBlueprint` refuses a blu
 | cue | 34 | the right side of a match card, a quick-check pair, a compare point |
 | definition | 110 | the teach card at 24px, an answer tile |
 | example | 120 | the teach card |
-| formula | 28 | the worked line under the definition |
+| formula | 28 | the worked line, on the back of the teach card with the example (never the front, 17 Oct 2026) |
 | moment | 72, and 12 words | the scene card's one line, a fill-in sentence, a Select All line, a Type prompt |
 | sort item | 34 | a sort token |
 | sort bucket | 34 | a bucket label |
