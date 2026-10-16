@@ -50,3 +50,21 @@ for(const bp of blueprints){
 }
 assert.deepEqual([...focuses].sort(),['analyze','apply','decide','recognize'],'all four recipes are exercised by the registered blueprints');
 console.log(`glossary blueprints ok: ${blueprints.map(b=>`${b.industry.slug} (${b.mode}, ${b.levels.filter(l=>l.terms).length} playable)`).join(', ')}`);
+
+// A situation line is asked over at most once per lesson (16 Oct 2026: the
+// first dump showed Code Review's situation on two screens in a row).
+for(const bp of blueprints){
+  const career=buildGlossaryCareer(bp);
+  for(const lesson of career.lessons){
+    const seen=new Map();
+    for(const q of lesson.questions){
+      const texts=[];
+      if(q.kind==='choice'&&q.scene?.kind==='story')texts.push(q.scene.text);
+      if(q.kind==='choice'&&q.scene?.kind==='compare')texts.push(q.prompt.replace(/ Which one is that\?$/,''));
+      if(q.kind==='typeTerm')texts.push(q.prompt.replace(/ Type the (missing )?word\.$/,''));
+      if(q.kind==='multiSelect')texts.push(...q.options);
+      for(const t of texts){ if(seen.has(t))assert.fail(`${bp.industry.slug} L${lesson.lessonNumber}: "${t}" is asked twice (${seen.get(t)} and ${q.id})`); seen.set(t,q.id); }
+    }
+  }
+}
+console.log('no situation is asked twice in any lesson');

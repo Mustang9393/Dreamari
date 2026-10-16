@@ -27,6 +27,7 @@
 //   analyze (Level 3)    a compare card (word vs the word it is mixed up
 //                        with), Select All about one word, Recall, Sort,
 //                        Misuse against the confusion, a situation, Type
+//                        from the example (no situation is asked twice)
 //   decide (Level 4+)    "which option fits" situations, a compare card,
 //                        Match, Select All, Misuse, Type from a situation
 //
@@ -200,7 +201,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
   const conf = (s: TermSeed): TermSeed => (s.confusion && byName.get(s.confusion)) || others(seeds, indexOf(s), 1)[0];
   const q = (k: number) => `${id}-Q${k}`;
   const wordOptions = (s: TermSeed, slot: number) => place(s.term, others(seeds, indexOf(s), 3).map((o) => o.term), slot);
-  const notThe = (s: TermSeed) => (s.confusion ? ` Not ${conf(s).term}: that is ${lower(conf(s).cue)}.` : "");
+  const quote = (text: string) => `"${text}"`;
+  const notThe = (s: TermSeed) => (s.confusion ? ` Not ${conf(s).term}: that is ${quote(conf(s).cue)}.` : "");
   const story = (text: string): SceneCard => ({ kind: "story", text });
 
   return {
@@ -265,12 +267,14 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         kind: "choice", type: "Catch the Misuse", id: q(k), termId: s.term, playOrder: k, label: "Quick check",
         prompt: "Which one is wrong?",
         options: pick.options, correctIndex: pick.correctIndex,
-        feedbackCorrect: `Right: ${s.term} is ${lower(s.cue)}, not ${lower(wrongWith.cue)}.`,
-        feedbackWrong: `${s.term} is not ${lower(wrongWith.cue)}. That is ${wrongWith.term}. ${s.term} means ${lower(s.definition)}`,
+        feedbackCorrect: `Right: ${s.term} is ${quote(s.cue)}, not ${quote(wrongWith.cue)}.`,
+        feedbackWrong: `${s.term} is not ${quote(wrongWith.cue)}. That is ${wrongWith.term}. ${s.term} means ${lower(s.definition)}`,
       };
     },
-    type(s: TermSeed, k: number, fromSituation = false): GlossaryQuestion {
-      const lead = fromSituation && s.situation ? `${s.situation} Type the word.` : `Type the word: ${s.definition}`;
+    type(s: TermSeed, k: number, from: "definition" | "situation" | "example" = "definition"): GlossaryQuestion {
+      const lead = from === "situation" && s.situation ? `${s.situation} Type the word.`
+        : from === "example" ? `${blank(s.example, s.term, "___") ?? s.definition} Type the missing word.`
+        : `Type the word: ${s.definition}`;
       return {
         kind: "typeTerm", type: "Type the Term", id: q(k), termId: s.term, playOrder: k, label: "Type the term",
         prompt: lead,
@@ -304,22 +308,25 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         prompt: `${s.situation ?? s.example} Which one is that?`,
         layout: "grid",
         options: pick.options, correctIndex: pick.correctIndex,
-        feedbackCorrect: `${s.term}: ${lower(s.cue)}. ${other.term} is ${lower(other.cue)}.`,
-        feedbackWrong: `That is ${s.term}, ${lower(s.cue)}. ${other.term} would be ${lower(other.cue)}.`,
+        feedbackCorrect: `${s.term}: ${quote(s.cue)}. ${other.term}: ${quote(other.cue)}.`,
+        feedbackWrong: `That is ${s.term}: ${quote(s.cue)}. ${other.term} would be ${quote(other.cue)}.`,
       };
     },
     /** Every line about one word: its cue and its situation, against the
      *  confusion's cue and another word's situation. */
-    selectAll(s: TermSeed, k: number): GlossaryQuestion {
+    selectAll(s: TermSeed, k: number, avoid: TermSeed[] = []): GlossaryQuestion {
       const other = conf(s);
-      const another = others(seeds, indexOf(s), 4).find((o) => o !== other) ?? other;
+      const fresh = others(seeds, indexOf(s), 4).filter((o) => !avoid.includes(o));
+      const another = fresh.find((o) => o !== other) ?? fresh[0] ?? other;
       const lines = [s.cue, s.situation ?? s.example, other.cue, another.situation ?? another.example];
       return {
         kind: "multiSelect", type: "Select All", id: q(k), termId: s.term, playOrder: k, label: "Select all",
         prompt: `Select every line about ${s.term}.`,
         options: lines, correct: [0, 1],
         feedbackCorrect: `Both lines show ${s.term}: ${lower(s.definition)}`,
-        feedbackWrong: `${s.term} is ${lower(s.cue)}. "${other.cue}" is ${other.term}, and the other line is ${another.term}.`,
+        feedbackWrong: another === other
+          ? `${s.term} is ${quote(s.cue)}. The other two lines are ${other.term}.`
+          : `${s.term} is ${quote(s.cue)}. ${quote(other.cue)} is ${other.term}, and the other line is ${another.term}.`,
       };
     },
   };
@@ -333,11 +340,11 @@ function recipe(level: LevelSeed, seeds: TermSeed[], id: string): GlossaryQuesti
     case "recognize":
       return [kit.definition(t1, 1), kit.match(2, ["Word", "Example"]), kit.fill(t5, 3), kit.recall(t3, 4), kit.sort(5), kit.misuse(t4, 6), kit.type(t2, 7)];
     case "apply":
-      return [kit.situation(t1, 1, "word"), kit.match(2, ["Word", "Example"]), kit.fill(t5, 3), kit.recall(t3, 4), kit.sort(5), kit.situation(t4, 6, "word"), kit.type(t2, 7, true)];
+      return [kit.situation(t1, 1, "word"), kit.match(2, ["Word", "Example"]), kit.fill(t5, 3), kit.recall(t3, 4), kit.sort(5), kit.situation(t4, 6, "word"), kit.type(t2, 7, "situation")];
     case "analyze":
-      return [kit.compare(t1, 1), kit.selectAll(t2, 2), kit.recall(t3, 3), kit.sort(4), kit.misuse(t4, 5), kit.situation(t5, 6, "word"), kit.type(t5, 7, true)];
+      return [kit.compare(t1, 1), kit.selectAll(t2, 2, [t1, t5]), kit.recall(t3, 3), kit.sort(4), kit.misuse(t4, 5), kit.situation(t5, 6, "word"), kit.type(t5, 7, "example")];
     case "decide":
-      return [kit.situation(t1, 1, "option"), kit.compare(t2, 2), kit.match(3, ["Word", "Use it when"]), kit.situation(t3, 4, "option"), kit.selectAll(t4, 5), kit.misuse(t5, 6), kit.type(t4, 7, true)];
+      return [kit.situation(t1, 1, "option"), kit.compare(t2, 2), kit.match(3, ["Word", "Use it when"]), kit.situation(t3, 4, "option"), kit.selectAll(t4, 5, [t1, t2, t3]), kit.misuse(t5, 6), kit.type(t4, 7, "example")];
   }
 }
 

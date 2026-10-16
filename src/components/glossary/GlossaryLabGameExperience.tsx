@@ -3090,7 +3090,6 @@ function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: 
   const [page, setPage] = useState(Math.floor(playingIndex / pageSize));
   const [selected, setSelected] = useState(playingIndex);
   const pageCount = Math.ceil(levels.length / pageSize);
-  const selectedLevel = levels[selected];
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -3134,9 +3133,14 @@ function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: 
               // the whole card picks the level, not just its badge (14 Oct
               // 2026, Chandu: "the whole card should be clickable"); the badge
               // stays the keyboard button
-              <div className={`glossary-map-rung glossary-map-rung-${slot} is-${stateOf(index)} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={mapStyle} data-tier={tier} key={title} onClick={() => setSelected(index)}>
+              <div className={`glossary-map-rung glossary-map-rung-${slot} is-${stateOf(index)} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={{ ...mapStyle, "--plate-seed": index } as React.CSSProperties} data-tier={tier} key={title} onClick={() => setSelected(index)}>
                 {firstOfTier && <span className="glossary-map-phase">{phase}</span>}
                 <span className="glossary-map-connector" aria-hidden />
+                {/* The level's scene plate (16 Oct 2026, Chandu: "some sort of
+                   graphics (not icons) for the level selectors"): a slice of
+                   the theme's own sky, painted by tier and shifted per level,
+                   so no level art has to be drawn. */}
+                <span className="glossary-map-plate" aria-hidden><i className="glossary-map-plate-sky" /><i className="glossary-map-plate-cloud" /><i className="glossary-map-plate-cloud is-far" /><i className="glossary-map-plate-horizon" /></span>
                 <button type="button" onClick={() => setSelected(index)} aria-pressed={selected === index} aria-current={stateOf(index) === "current" ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${STATE_LABEL[stateOf(index)].toLowerCase()}`}>
                   {atmosphere === "v1" ? <><span className="glossary-district-badge">{stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "locked" ? <LockKeyhole aria-hidden /> : <b>{index + 1}</b>}</span><span className="glossary-district-rank">Level {index + 1}</span></> : stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "locked" ? <LockKeyhole aria-hidden /> : <b>{index + 1}</b>}
                 </button>
@@ -3145,7 +3149,23 @@ function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: 
                   {/* the level in the student's terms: what it is for, the five words, how long, what it opens (6 Oct 2026) */}
                   <span className="glossary-map-rung-goal">{goal}</span>
                   <span className="glossary-map-rung-words" aria-label="Words in this level">{words.map((w) => <i key={w}>{w}</i>)}</span>
-                  <small><span>{minutes} min</span><span><CircleDollarSign aria-hidden /> Unlocks {value}</span><span>{STATE_LABEL[stateOf(index)]}</span></small>
+                  <small><span>{minutes} min</span><span>{career.mode === "continuous_story" ? <CircleDollarSign aria-hidden /> : null} Unlocks {value}</span><span>{STATE_LABEL[stateOf(index)]}</span></small>
+                  {/* The selected level's detail and its action live in the
+                     card itself (16 Oct 2026, Chandu: the footer "that
+                     updates with what you select is too subtle and nobody
+                     notices it"). The selected card grows in place; nothing
+                     to find at the bottom. */}
+                  {selected === index ? (
+                    <span className="glossary-map-rung-actions" onClick={(event) => event.stopPropagation()}>
+                      {stateOf(index) === "current" ? (
+                        <button type="button" className="glossary-map-play dm-solid" onClick={onClose}><Play aria-hidden /> Keep playing</button>
+                      ) : stateOf(index) === "open" || (stateOf(index) === "complete" && lessonFor(levels[index].number)) ? (
+                        <button type="button" className="glossary-map-play dm-solid" onClick={() => onPlay(levels[index].number)}><Play aria-hidden /> {stateOf(index) === "complete" ? "Play again" : `Play level ${index + 1}`}</button>
+                      ) : (
+                        <strong><LockKeyhole aria-hidden /> Finish level {index} to unlock</strong>
+                      )}
+                    </span>
+                  ) : null}
                 </span>
               </div>
             );
@@ -3157,19 +3177,6 @@ function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: 
           <span>{page * pageSize + 1} to {Math.min((page + 1) * pageSize, levels.length)} of {levels.length}</span>
           <button type="button" disabled={page + 1 === pageCount} aria-label="Next levels" onClick={() => { setPage(page + 1); setSelected((page + 1) * pageSize); }}><ChevronRight aria-hidden /></button>
         </nav>
-        <footer>
-          <span className="glossary-map-current-number">{selected + 1}</span>
-          <div><b>{selectedLevel.title || lesson.title}</b><span>{selectedLevel.words.map((word) => <small key={word}>{word}</small>)}</span><small>{selectedLevel.minutes} min · {selectedLevel.unlocks}</small></div>
-          {/* The selected level plays from here (the Replit's lesson list
-             opens a lesson on tap). The playing level just closes the map. */}
-          {stateOf(selected) === "current" ? (
-            <button type="button" className="glossary-map-play dm-solid" onClick={onClose}><Play aria-hidden /> Keep playing</button>
-          ) : stateOf(selected) === "open" || (stateOf(selected) === "complete" && lessonFor(selectedLevel.number)) ? (
-            <button type="button" className="glossary-map-play dm-solid" onClick={() => onPlay(selectedLevel.number)}><Play aria-hidden /> {stateOf(selected) === "complete" ? "Play again" : `Play level ${selected + 1}`}</button>
-          ) : (
-            <strong>{STATE_LABEL[stateOf(selected)]}</strong>
-          )}
-        </footer>
       </section>
     </div>
   );
