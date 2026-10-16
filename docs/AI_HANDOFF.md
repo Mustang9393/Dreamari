@@ -1,10 +1,6 @@
-## 2026-10-16 (late night, 7): Drift clouds with depth; weather effects left to Codex
+## 2026-10-16 (late night, 8): Drift clouds reverted to the launch banks
 
-**Why (Chandu):** "can we have better clouds for drift? more detailed shapes etc so we can have better effects", then: "Dont do weathers yourself. Remove that. I'll try with codex later."
-
-- **Clouds:** the three banks were one silhouette copied three times; each now has its own path (back, mid, front), crest puffs on a radial gradient, the depth gradient for the underside and a thin lit rim along the silhouette. Still SVG paths and gradients that move on transforms; no filter (the 9 Oct lag rule). The world accent tint from the previous entry still applies.
-- **Weather** (sun rays, rain, accent lightning per level) was built, shown and removed the same night at Chandu's request; Codex will try it. Where it would go: a sibling of the cloud banks inside `LabMaterialScenery`, between the back and mid banks for lightning, in front of all three for rain; keep to gradients and transforms, never a filter on an animated layer.
-- **Checked:** tsc; Software and Nursing in Drift. Not checked: light mode, phone.
+**Why (Chandu):** "the clouds before looked better so revert for now and push that fix while codex tries its thing." The three-silhouette banks with crest puffs and a lit rim (9f886037) are reverted in full; Drift shows the original cloud banks again, still tinted by the world accent (Finance pinned to 0%). Codex is taking the cloud and weather brief; the per-world and per-tier registries (`worldBackdrops.ts`, `levelPlates.ts`) are unchanged and still empty.
 
 ## 2026-10-16 (late night, 6): per-world backdrops: a Signal panorama registry, Drift painted from the world accent
 

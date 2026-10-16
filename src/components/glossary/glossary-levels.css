@@ -701,8 +701,3 @@
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-cloud-bank { --cloud-crest: color-mix(in srgb, var(--glossary-accent) var(--glossary-sky-tint, 42%), var(--color-accent-purple)); --cloud-rim: color-mix(in srgb, var(--glossary-accent) calc(var(--glossary-sky-tint, 42%) * 1.4), var(--color-decorative-pink-glow)); }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-cloud-bank:nth-child(2) { --cloud-crest: color-mix(in srgb, var(--glossary-accent) calc(var(--glossary-sky-tint, 42%) * .8), var(--color-accent-deep)); --cloud-rim: color-mix(in srgb, var(--glossary-accent) var(--glossary-sky-tint, 42%), var(--color-accent-purple)); }
 .glossary-game-shell.glossary-game-lab .glossary-drift-silhouette { position: absolute; left: -4%; right: -4%; bottom: 18%; height: 26%; background-repeat: repeat-x; background-size: auto 100%; background-position: center bottom; opacity: .55; mask-image: linear-gradient(transparent, #000 30%); pointer-events: none; }
-
-/* Drift clouds (16 Oct 2026): three banks with their own silhouettes, crest
-   puffs and a lit rim, drawn in the engine as SVG gradients on transforms;
-   no filter. Weather effects are Codex's to try later, not generated here. */
-.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-cloud-bank { opacity: .92; }
