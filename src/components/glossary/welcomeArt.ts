@@ -24,6 +24,7 @@ type ThemedArt = Partial<Record<PlateTheme, string>>;
 export const WELCOME_ART: Partial<Record<string, ThemedArt>> = {
   // finance keeps its authored sneaker shop (assetsFor / SIGNAL_ASSETS)
   software: { drift: "/images/glossary/software-oct17/drift/welcome.webp", signal: "/images/glossary/software-oct17/signal/welcome.webp" },
+  aviation: { drift: "/images/glossary/aviation-oct17/drift/welcome.webp", signal: "/images/glossary/aviation-oct17/signal/welcome.webp" },
 };
 
 /** Lesson id (RN-L02) to a welcome hero of its own per theme. Optional. */

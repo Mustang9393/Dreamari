@@ -1,3 +1,11 @@
+## 2026-10-16: Aviation Level 1 art pack, held for review
+
+**Why (Chandu):** Flight Terms needs the same two-theme art coverage as Finance before release, with meaning rather than labelled icons. Added `aviation-oct17`: ten term illustrations, two welcome scenes, twenty-four WebP exports, registered to `airline-pilot` and `WELCOME_ART.aviation`. No content, later-level art, Finance or release-flag changes. Not pushed.
+
+- Skyline Air briefs show the empty forward flight compartment (Cockpit), a long lit strip (Runway), a readiness checklist and inspected wheel (Preflight), wheels following a ground line by a gate (Taxi), and wheels lifting clear of the strip (Takeoff). Welcome: the regional jet, jet bridge and control tower at dusk. Exact briefs/prompts/reference paths and hash receipts are in the three `glossary-aviation-art-oct17*.json` files.
+- Rejected five unrequested-character outputs: Drift Taxi/Takeoff, Signal Preflight/Taxi/Takeoff. Generated fresh from the original three theme anchors, with an explicit object-only lock. Final assets contain no Dreamy, people, limbs or text. All source/rejected PNGs remain locally in `output/glossary-living-worlds/art/aviation/`; app uses only the validated exports.
+- Checked both final style contact sheets, alpha/margins/byte budgets and term/welcome receipts. Browser at 1280: both welcomes and first teaching cards use the new art; both Level 2 teaching cards have zero term images. Screenshot names: `after/aviation-{drift,signal}-{welcome,teach}-1280.png`. Full-branch type/reaction/blueprint checks and the complete responsive scene matrix follow the Nursing admission.
+
 ## 2026-10-16: Software Level 1 art pack, held for review
 
 **Why (Chandu):** the three built Play-tab glossaries need art consistent with Finance's two shipped styles, not a new style per career. Software now registers ten term illustrations and two welcome scenes in `software-oct17`, exported to twenty-four WebPs. Levels 2+ remain words-only. No Finance or hub-release change. Not pushed.

@@ -1,0 +1,478 @@
+{
+  "schemaVersion": 1,
+  "career": "aviation",
+  "version": "aviation-oct17",
+  "provider": "built-in image_gen",
+  "references": {
+    "drift": [
+      {
+        "path": "public/images/glossary/themes-oct08/drift/customer.webp",
+        "sha256": "ba7295fc0eb1d41338ef33cdd64dd3391f7a2543faddbfec763ff4b3c56378cf"
+      },
+      {
+        "path": "public/images/glossary/themes-oct08/drift/company.webp",
+        "sha256": "f7e468e71692003bf604a5b6054e5cf87b2ab661abc956639fc73446d48a0e15"
+      },
+      {
+        "path": "public/images/glossary/themes-oct08/drift/profit.webp",
+        "sha256": "71e13a089e0d5e1871a11e20521c2e4d55cd571957d568d4a39e238aad69606e"
+      }
+    ],
+    "signal": [
+      {
+        "path": "public/images/glossary/signal/cloud-sale-sneaker.webp",
+        "sha256": "7e95f8f200b465850fdc62c1da7cc5d05f57766d1b323bbb7fe875da18ce5656"
+      },
+      {
+        "path": "public/images/glossary/signal/building.webp",
+        "sha256": "dfb07581df4ebc8aceaa3d037a464c1ca61bd406e8342a33ace9c03a24ac6ea6"
+      },
+      {
+        "path": "public/images/glossary/signal/coins-320.webp",
+        "sha256": "54f32115db13823610ba1efdb87c786de92ef2c87fb2cba99d87c164c84c4423"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "id": "Cockpit",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "cockpit-drift.png",
+      "sourceSha256": "9408f7ab259cdebecf922ffde754990b347ae1545fd2cab11d7982c911a40509",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's regional jet has a close three-quarter cutaway of its front compartment with two empty pilot seats facing a broad navy instrument console and windshield. The twin controls and forward windows are the focal cue, no pilots, labels, digits or text.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/aviation-oct17/drift/cockpit.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 78686,
+          "sha256": "f68ed6a8de1b5b35defbc6c43ef26e1c83c32dd365d2d92928cf88d86c8441cd",
+          "alphaBounds": {
+            "left": 38,
+            "top": 79,
+            "width": 691,
+            "height": 608,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/aviation-oct17/drift/cockpit-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 18468,
+          "sha256": "caed9e2863331ca13332ddbe765438264f154b191846d5ca77c1ae43c4eb79d4",
+          "alphaBounds": {
+            "left": 13,
+            "top": 26,
+            "width": 230,
+            "height": 203,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Cockpit",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "cockpit-signal.png",
+      "sourceSha256": "d73bb5862684b926a979cbb3def4429c2522b72f31fedff70e5abfd473c1ee44",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's regional jet has a close three-quarter cutaway of its front compartment with two empty pilot seats facing a broad navy instrument console and windshield. The twin controls and forward windows are the focal cue, no pilots, labels, digits or text.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/aviation-oct17/signal/cockpit.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 23452,
+          "sha256": "c6b7e04e4d3294da1a3b45a22800047849b67e74b8d4da8cf0a6cbffe01d76d9",
+          "alphaBounds": {
+            "left": 48,
+            "top": 102,
+            "width": 672,
+            "height": 558,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/aviation-oct17/signal/cockpit-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 20610,
+          "sha256": "c0933d2757cccab8b132c236b91911f64b9c859d4c3ecac6a04401bff2419666",
+          "alphaBounds": {
+            "left": 48,
+            "top": 66,
+            "width": 224,
+            "height": 186,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Runway",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "runway-drift.png",
+      "sourceSha256": "4e6112d0728254826dc4b7f3ab3969a04e1212378d82386e118b6688d9bf7449",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's long takeoff and landing strip narrows in perspective with a clean dashed ivory centerline, edge lights and a low airborne regional jet beyond its far end. The long strip is the dominant focal shape, no lettering, numbers or ground rectangle outside the strip.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/aviation-oct17/drift/runway.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 63588,
+          "sha256": "ce25b3072d94d96a5d2d5fe692680e6275f188d711d43b2fae9acf17b2dc274b",
+          "alphaBounds": {
+            "left": 38,
+            "top": 96,
+            "width": 691,
+            "height": 575,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/aviation-oct17/drift/runway-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 14470,
+          "sha256": "fce210ec5677aa04397a7ba6a6d5af56cd5217de2d0b8fbf6ca3b88297484754",
+          "alphaBounds": {
+            "left": 13,
+            "top": 32,
+            "width": 230,
+            "height": 192,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Runway",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "runway-signal.png",
+      "sourceSha256": "a07b3be924304efae7cc4733e8db4446408659a6d7bf794fb28d893963b348b0",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's long takeoff and landing strip narrows in perspective with a clean dashed ivory centerline, edge lights and a low airborne regional jet beyond its far end. The long strip is the dominant focal shape, no lettering, numbers or ground rectangle outside the strip.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/aviation-oct17/signal/runway.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 13326,
+          "sha256": "89f8199278061fb5cf113a81f9641fa63f31228a43c4a8821327ad91c6f29b6f",
+          "alphaBounds": {
+            "left": 48,
+            "top": 102,
+            "width": 672,
+            "height": 558,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/aviation-oct17/signal/runway-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 12550,
+          "sha256": "0e533cbad65fc2d6801e75658517f22e9b93e63b4d1d34416962643bee2c601a",
+          "alphaBounds": {
+            "left": 48,
+            "top": 66,
+            "width": 224,
+            "height": 186,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Preflight",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "preflight-drift.png",
+      "sourceSha256": "9aa169e3c380611519334f94475949e901c9dfe1c6ba353c7ec63d0fa93fc224",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's parked regional jet sits beside an oversized inspection clipboard with three simple check marks, a gold inspection ring highlighting a wheel. The clipboard and checked wheel show a full readiness check before moving, no people, letters or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/aviation-oct17/drift/preflight.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 71722,
+          "sha256": "09500bccc88665004900b1efa631f5d0b6929cc09da4cc3994a87b78043e20f8",
+          "alphaBounds": {
+            "left": 38,
+            "top": 114,
+            "width": 691,
+            "height": 538,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/aviation-oct17/drift/preflight-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16564,
+          "sha256": "783f8e5096d4faef311380fe3fbae4fdf68a94ed163d915ab537794da82d4460",
+          "alphaBounds": {
+            "left": 13,
+            "top": 38,
+            "width": 230,
+            "height": 180,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Preflight",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "preflight-signal-v2.png",
+      "sourceSha256": "d1cd2f2356868b253ce137750145cdd19143e1fc42e724677339797681ae3f2a",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's parked regional jet sits beside an oversized inspection clipboard with three simple check marks, a gold inspection ring highlighting a wheel. The clipboard and checked wheel show a full readiness check before moving, no people, letters or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "preflight-signal.png",
+          "inputSha256": "4abb3294c75131609d76b3f74b32a77bc68dc7aaffc38eb560fc1f2992bfa87b",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's parked regional jet sits beside an oversized inspection clipboard with three simple check marks, a gold inspection ring highlighting a wheel. The clipboard and checked wheel show a full readiness check before moving, no people, letters or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nSTRICT CONTENT LOCK: This is an OBJECT-ONLY illustration. NO DREAMY. NO CLOUD SHAPE. NO EYES OR FACE. NO MASCOT. NO CHARACTER. Ignore the cloud subject in the reference; borrow ONLY its material or pixel rendering style. Draw only the objects explicitly named in the Subject above."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/aviation-oct17/signal/preflight.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 16698,
+          "sha256": "36e00d9ae568b891e998ffee0b467e3a316fd5553f178416f3d2dcf1aea671cd",
+          "alphaBounds": {
+            "left": 48,
+            "top": 96,
+            "width": 672,
+            "height": 576,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/aviation-oct17/signal/preflight-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 16006,
+          "sha256": "528be0544505d3bfb4619e14477d87cd4595a235d003691975c325be4a9e4f04",
+          "alphaBounds": {
+            "left": 48,
+            "top": 64,
+            "width": 224,
+            "height": 192,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Taxi",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "taxi-drift-v2.png",
+      "sourceSha256": "6378c948eaf871f73da0e073a264e243d73c638ce5ecf8c1e7405b117babe5e8",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's regional jet rolls slowly along a painted yellow ground line toward the strip, wheels down with a small gate behind it. The wheels touching the line are the focal cue for driving on the ground, not flying; no text or detached ground rectangle.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "taxi-drift.png",
+          "inputSha256": "6c9073bd5ded312ddcc57ca656846f14b68c188eb9f96d9989db6b18856f8676",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's regional jet rolls slowly along a painted yellow ground line toward the strip, wheels down with a small gate behind it. The wheels touching the line are the focal cue for driving on the ground, not flying; no text or detached ground rectangle.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nStrict subject clarification: ONLY THE AIRCRAFT AND ITS SMALL GROUND/FLIGHT CUES. No Dreamy, NO CLOUD, NO FACE, NO EYES, NO MOUTH, NO CHARACTER. Do not copy the mascot in the style anchor. The aircraft itself is the sole focus."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/aviation-oct17/drift/taxi.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 75506,
+          "sha256": "6dccc9179895d72b11023b67527dfc78cf71119452379fd7ba32d3b4f4bedc3c",
+          "alphaBounds": {
+            "left": 38,
+            "top": 109,
+            "width": 691,
+            "height": 548,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/aviation-oct17/drift/taxi-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16610,
+          "sha256": "676669fcde0ce8cf8fa85ca2667250a77fcdb888b7fd0104882402a566f8797e",
+          "alphaBounds": {
+            "left": 13,
+            "top": 36,
+            "width": 230,
+            "height": 183,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Taxi",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "taxi-signal-v2.png",
+      "sourceSha256": "30a1fad8c7de5de6816296e5d739ed69d97ccf7275e78abe7a29ab9883251041",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's regional jet rolls slowly along a painted yellow ground line toward the strip, wheels down with a small gate behind it. The wheels touching the line are the focal cue for driving on the ground, not flying; no text or detached ground rectangle.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "taxi-signal.png",
+          "inputSha256": "d8d03e27b9f3032b82f32d24bc2084c511d17e2520c1653ca594df46efc17ce8",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's regional jet rolls slowly along a painted yellow ground line toward the strip, wheels down with a small gate behind it. The wheels touching the line are the focal cue for driving on the ground, not flying; no text or detached ground rectangle.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nSTRICT CONTENT LOCK: This is an OBJECT-ONLY illustration. NO DREAMY. NO CLOUD SHAPE. NO EYES OR FACE. NO MASCOT. NO CHARACTER. Ignore the cloud subject in the reference; borrow ONLY its material or pixel rendering style. Draw only the objects explicitly named in the Subject above."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/aviation-oct17/signal/taxi.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 16226,
+          "sha256": "d47b097542d2182c857cc2d37db7ffc792bf51cd22965ba9deff5c68c1edf87c",
+          "alphaBounds": {
+            "left": 48,
+            "top": 150,
+            "width": 672,
+            "height": 468,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/aviation-oct17/signal/taxi-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 13720,
+          "sha256": "85ff31487f695c9f9a7d86f9d28b3940cc771599798604aaa2504f4d10f4b8e6",
+          "alphaBounds": {
+            "left": 48,
+            "top": 82,
+            "width": 224,
+            "height": 156,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Takeoff",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "takeoff-drift-v2.png",
+      "sourceSha256": "f94902925032ae712f921b8f4b8cba3a7052efa8a421a053e5090bc4810b01e5",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's regional jet lifts its nose above a short strip segment with the main wheels just leaving the surface and a restrained gold upward motion arc. The clearly visible gap below the wheels is the focal cue for leaving the ground, no text or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "takeoff-drift.png",
+          "inputSha256": "040771e3e5986d28ce26abf80bb5e1ac6ffc5a226681550620ff6278e5ad64d6",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's regional jet lifts its nose above a short strip segment with the main wheels just leaving the surface and a restrained gold upward motion arc. The clearly visible gap below the wheels is the focal cue for leaving the ground, no text or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nStrict subject clarification: ONLY THE AIRCRAFT AND ITS SMALL GROUND/FLIGHT CUES. No Dreamy, NO CLOUD, NO FACE, NO EYES, NO MOUTH, NO CHARACTER. Do not copy the mascot in the style anchor. The aircraft itself is the sole focus."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/aviation-oct17/drift/takeoff.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 86936,
+          "sha256": "608ac67c198a699da75a0f90c0bd1f0a2eeaebfa6308c80081a201dc37e6bd8d",
+          "alphaBounds": {
+            "left": 38,
+            "top": 115,
+            "width": 691,
+            "height": 537,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/aviation-oct17/drift/takeoff-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 19680,
+          "sha256": "d620fd36b4a5ac7cc6c0b7d9871e71b4acbdaf8d33cdc3f4048968c5790b83f8",
+          "alphaBounds": {
+            "left": 13,
+            "top": 38,
+            "width": 230,
+            "height": 180,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Takeoff",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "takeoff-signal-v2.png",
+      "sourceSha256": "04705ed5511b554be3bd517f6a0bef198ee641b75e53301315c05c8286652eca",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's regional jet lifts its nose above a short strip segment with the main wheels just leaving the surface and a restrained gold upward motion arc. The clearly visible gap below the wheels is the focal cue for leaving the ground, no text or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "takeoff-signal.png",
+          "inputSha256": "448f9378644b76511136a6273c792c40dcfc04daa3fd0a5d80a219a33b190232",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Skyline Air's regional jet lifts its nose above a short strip segment with the main wheels just leaving the surface and a restrained gold upward motion arc. The clearly visible gap below the wheels is the focal cue for leaving the ground, no text or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nSTRICT CONTENT LOCK: This is an OBJECT-ONLY illustration. NO DREAMY. NO CLOUD SHAPE. NO EYES OR FACE. NO MASCOT. NO CHARACTER. Ignore the cloud subject in the reference; borrow ONLY its material or pixel rendering style. Draw only the objects explicitly named in the Subject above."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/aviation-oct17/signal/takeoff.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 13458,
+          "sha256": "fdd1524949f07d06ba4aee7727cbf3c1ceb68b63d1a319b6a6355d250838a7b9",
+          "alphaBounds": {
+            "left": 48,
+            "top": 162,
+            "width": 672,
+            "height": 444,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/aviation-oct17/signal/takeoff-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 12024,
+          "sha256": "0b41bc9270d99b92aa0e8d14bf98e2940b9d1bfd78a96f62b9438ccd8a581c52",
+          "alphaBounds": {
+            "left": 48,
+            "top": 86,
+            "width": 224,
+            "height": 148,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    }
+  ]
+}
