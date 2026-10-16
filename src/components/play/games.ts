@@ -149,15 +149,19 @@ export function worldForCareer(slug: string): string | undefined {
 // it consistent" -- the real card's title stood out against the dummy
 // cards' own naming instead of reading as one row of the same thing).
 export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; cover?: string }[] = [
-  { careerSlug: "investment-banking", title: "Finance Terms", sub: "Learn key finance terms", cover: "/images/app/glossary-finance-thumb.png" },
+  // Covers are Chandu's 16 Oct 2026 thumbnails (landscape, 1400 by 788 WebP):
+  // Dreamy over a fan of term cards per subject. The shelf card is portrait
+  // at rest and 16:9 when it expands, so the landscape frame shows whole
+  // when the card is active and crops to Dreamy and the centre cards at rest.
+  { careerSlug: "investment-banking", title: "Finance Terms", sub: "Learn key finance terms", cover: "/images/app/glossary-finance-thumb-oct17.webp" },
   // No content authored yet (hasGlossary() gates these into a "Coming soon"
   // dummy card, not a real link -- direct feedback, 9 Sept 2026) -- listed
   // anyway so the row isn't just one lonely card next to empty space, each
   // with its own card-hand thumbnail instead of the generic Play-tab "Soon"
   // cover art.
-  { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/glossary-registered-nurse-cards.png" },
-  { careerSlug: "airline-pilot", title: "Flight Terms", sub: "Learn key aviation terms", cover: "/images/app/glossary-airline-pilot-cards.png" },
-  { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/glossary-software-engineer-cards.png" },
+  { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/glossary-medical-thumb-oct17.webp" },
+  { careerSlug: "airline-pilot", title: "Flight Terms", sub: "Learn key aviation terms", cover: "/images/app/glossary-flight-thumb-oct17.webp" },
+  { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/glossary-tech-thumb-oct17.webp" },
   // Kitchen Terms (industry slug "culinary", no catalog career) joins this
   // row when it is released (GLOSSARY_HUB_RELEASED); until then it is on
   // the Glossary QA page only. PlayHub takes a card's world from the

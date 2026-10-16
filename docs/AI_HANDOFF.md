@@ -1,3 +1,7 @@
+## 2026-10-17: Play tab glossary cards take Chandu's thumbnails
+
+**Why (Chandu):** "Lets see if we can use these thumbnails for the games in the play tab too." Four landscape thumbnails (Dreamy over a fan of term cards per subject) arrived as thumbnails.zip. They are now the covers of the four glossary cards: `public/images/app/glossary-{finance,medical,flight,tech}-thumb-oct17.webp` (1400 by 788, 77 to 121 KB each). The shelf card is portrait at rest and 16:9 when it expands, so the whole scene shows on the active card and the resting cards crop to Dreamy and the centre cards; checked on the hub at 1280. The older portrait covers stay in the folder, unreferenced.
+
 ## 2026-10-16 (late night, 13): Component Lab, glossary live group made exhaustive
 
 **Why (Chandu):** "make sure the component library is updated and exhaustive and fully detailed, edge cases, other cases, error, everything we would need."
