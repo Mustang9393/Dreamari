@@ -8,16 +8,16 @@ _17 October 2026. One document to scale the glossary games from four industries 
 |---|---|
 | Live on main | Everything in this document is on main. Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's thumbnails; Next level keeps the student's theme; Dreamy's speech bubble wraps on whole words at phone width. |
 | Type check, lint | tsc clean. ESLint: no errors in the glossary code (two pre-existing unescaped-entity errors live in src/app/gate/page.tsx). |
-| Blueprint QA script | All generated industries pass: seven to ten screens plus a Power Play per level, no three of one screen shape in a row, at least four shapes per level, every term credited twice, no answer leakage, no line of copy shown twice in a lesson, Reverse Recall only in the review, Power Play blanks never in order, all four recipes exercised. |
-| Validator negative test | A deliberately broken blueprint (bad slug, unknown world, definition saying its word, 14-word moment, two moments the same, 8-word cue, example without the anchor, unknown confusion, numbers without math) is refused with eleven specific reasons and does not build. It is also a live specimen in the Component Lab. |
+| Blueprint QA script | All generated industries pass (190 screens across 22 levels: 31 cases, 13 sorts, 18 select-alls; feedback median 42 characters, longest 90; longest Level 1 Power Play 188 characters): no sentence over 14 words, feedback short, Power Play within its level's size, seven to ten screens plus a Power Play per level, no three of one screen shape in a row, at least four shapes per level, every term credited twice, no answer leakage, no line of copy shown twice in a lesson, Reverse Recall only in the review, Power Play blanks never in order, all four recipes exercised. |
+| Validator negative test | A deliberately broken blueprint (bad slug, unknown world, definition saying its word, 14-word moment, two moments the same, 8-word cue, example without the anchor, unknown confusion, numbers without math) is refused with thirteen specific reasons and does not build. It is also a live specimen in the Component Lab. |
 | Dreamy reactions QA | Passes: twelve Drift poses, four Signal reactions, asset budget, silhouettes. |
-| Walkthroughs | Nursing Level 1 in Drift and Software Level 5 in Signal played end to end with Skip (welcome, cards, seven questions, streak, Power Play, Complete, next level) with no console errors from the game. |
-| Component Lab | "Glossary game, live engine" documents every piece in both themes with every state, the edge cases (22-character term, acronym, 120-character definition, 72-character moment, two-word options, long feedback) and the error state (a broken blueprint through the validator, the unknown-route 404, the hub release list). |
+| Walkthroughs | Nursing Level 1 in Drift and Software Level 5 in Signal played end to end with Skip (welcome, cards, questions, streak, Power Play, Complete, next level) with no console errors from the game. After the 17 Oct rewrite: Culinary Level 3 (compare card, wet and dry heat sort, three-step case, Select All, shuffled Power Play bank) in Drift, Software Level 5 case and sort in Signal, and the Level 1 Power Plays of Aviation and Nursing at phone width, each now five short lines. |
+| Component Lab | "Glossary game, live engine" documents every piece in both themes with every state, the edge cases (22-character term, acronym, 110-character definition, 72-character moment, two-word options, long feedback) and the error state (a broken blueprint through the validator, the unknown-route 404, the hub release list). |
 | Design systems | All fifteen career worlds have a design system row; a blueprint naming any world works. |
 | Routes | /play/glossary/<industry> and /play/glossary/<career> resolve; /play-tools/glossary-qa lists every registered glossary (hamburger menu, Glossary QA). Unknown slugs 404. |
 | Hub gating | Only finance is released; generated industries play by route and from the QA page. Release is one slug in GLOSSARY_HUB_RELEASED. |
 | Demo flags | Every demo-only piece is tagged DEMO-ONLY in its own comment (blueprints, QA page, release list, Skip). |
-| Built so far | Finance (Joshua's, 4 of 20 levels). The three other Play tab cards are complete at six playable levels each: Software Engineering (Tech Terms), Flight Operations (Flight Terms), Nursing (Medical Terms). Culinary Arts has four (not on the hub) and is the model blueprint. All four were rewritten on 17 Oct to the Finance style: three moments per word, concept sorts, cases, written Power Plays. |
+| Built so far | Finance (Joshua's, 4 of 20 levels). The three other Play tab cards are complete at six playable levels each: Software Engineering (Tech Terms), Flight Operations (Flight Terms), Nursing (Medical Terms). Culinary Arts has four (not on the hub) and is the model blueprint. All four were rewritten on 17 Oct to the Finance style: three moments per word, concept sorts, cases, written Power Plays, then trimmed to the reading rules. |
 | Not yet | No generated industry has its Level 1 term art or welcome illustration (Codex, section 6 and the separate prompt). No plates, panoramas or silhouettes registered (optional). Light-mode pass on generated industries. Levels 5 and 6 for Culinary. |
 
 ## 1. Who does what
@@ -41,13 +41,15 @@ _17 October 2026. One document to scale the glossary games from four industries 
 | Difficulty ladder | Level 1 recognize, 2 apply, 3 analyze (tell confusable words apart), 4 decide. | Generator recipes by level number. |
 | Five terms per level, four levels minimum | 20 terms to launch; Levels 5 and 6 can be roadmap words. | Validator. |
 | 7 to 10 interactions, one Power Play | Seven derived screens plus the level's authored cases, sort and Select All as extras, then one paragraph with five blanks. | Generator, QA script. |
-| Copy length | Definition 120 characters, example 150, cue 34 characters and 7 words, each moment 72 characters and 12 words, sort item 34, Select All line 44, case step 90, Power Play paragraph 460, term 22, title 30, goal 48. | Validator. |
+| Copy length | Definition 110 characters, example 120, cue 34 characters and 7 words, each moment 72 characters and 12 words, sort item 34, Select All line 44, case step 80, feedback 90 and two sentences, term 22, title 30, goal 48. | Validator. |
+| Short and plain (added 17 Oct) | Every sentence a student reads is 14 words at most, feedback included. A level's copy reads at grade 8 or below, not counting its own five words. Chandu: "make sure every piece of copy including success explanations etc are shorter and 8th grade comprehension level." | Validator (sentences, feedback, a Flesch-Kincaid grade per level) and the builder (generated feedback). |
+| Power Play grows with the level (added 17 Oct) | Level 1: 200 characters, five sentences, one blank each. Level 2: 240, five sentences, one blank each. Levels 3 and 4: 290, six sentences. Levels 5 and up: 330, six sentences. Chandu: "make sure the power play isnt so complex and long and a lot to read for level 1." | Validator. |
 | Answer leakage | A definition never says its word; neither does a cue, a moment, a Select All line, a case step or the Power Play paragraph. | Validator. |
 | No screen repeats a line (added 17 Oct) | Every word carries three moments and each is shown once. The definition is seen on the teach card and in the review only. Sorts put concrete things into concept buckets, not cues into words. Chandu: "the games are repeating the same questions again and again for mastery instead of having any variety, please refer the finance glossary games." | Validator (no duplicate lines in a level) and the builder (no line shown twice in a lesson). |
 | Power Play is not linear (added 17 Oct) | The paragraph's blanks never run in teaching order, and the word bank is shuffled so it never mirrors the blanks. | Validator refuses 1 to 5; the engine shuffles the bank. |
 | Review is a new form | Reverse Recall (the definition read aloud) appears only in the review, for words still short of mastery, so the student never sees the same screen twice. | Generator. |
 | Wrong-answer feedback names what was wrong | Each term names the word it is confused with. | Generator uses confusion. |
-| Eighth grade, no dashes | Short words, one idea per sentence, two sentences instead of a dash. | Dashes: validator. Grade: author. |
+| Eighth grade, no dashes | Short words, one idea per sentence, two sentences instead of a dash. | Validator: dashes, 14-word sentences and a grade 8 cap per level. |
 | One Dreamy per screen, the cloud itself | Never draw Dreamy, limbs or people into any image. | Engine; image brief. |
 | Every example names the anchor | In a continuous story or scenario thread, each example sentence names the company or place. Not required in a practice world. | Validator. |
 
@@ -77,16 +79,18 @@ STEP 2. Write src/components/glossary/blueprints/.ts by copying the model bluepr
 WHAT EACH FIELD IS FOR (so the copy lands on the right screen)
 - definition: the teach card, and the review question that reads it aloud. Never says the word.
 - example: the teach card. Says the word once, names the anchor (not required in a practice world).
-- cue: a label of 7 words and 34 characters, never says the word. The match card's right side, a "word = cue" quick-check pair, a compare card point.
+- cue: a label of 7 words and 34 characters, never says the word. The match card's right side, a "word = cue" quick-check pair, a compare card point, and the line every feedback is built from ("Dice means small even cubes.").
 - moments: three different real situations, 12 words and 72 characters each, that show the word WITHOUT saying it. Each one is shown on exactly one screen: a story card ("Which word is this?"), a fill-in sentence (the moment then "That is ___."), a Select All line, a sort token, a Type the Term prompt or a compare card. Write three that differ in setting, not three rewordings.
-- confusion: the exact term string of another word in the same level. Drives the compare card, the quick-check distractor and the "Not X: that is..." correction.
+- confusion: the exact term string of another word in the same level. Drives the compare card, the quick-check distractor and the "Poach is gentle heat in still water." correction.
 - sort: a prompt, 2 to 4 concept buckets (think Finance's "Money in / Money out", "Stock / Bond"; for a kitchen "Wet heat / Dry heat"), 4 to 7 concrete items of 34 characters with the bucket and the term each credits. Items never say a bucket name.
 - selectAll: the term, a prompt, exactly 4 concrete items of 44 characters that never say the term, 1 to 3 correct indexes (Finance: "Select every cost." over Materials, Rent, Wages, Sales).
-- cases: up to two per level. A scene line (72 characters), 2 to 4 steps, each a prompt of 90 characters with 2 or 4 options of 34 characters; a step never says its own answer; terms lists the words it credits (Finance: "Which helps Dream Sneakers keep more money?" then "What could improve?").
-- powerPlay: intro (one short line) and one paragraph of 460 characters at most that uses {1} to {5} exactly once each, where {n} is the nth term in teaching order. The blanks must NOT appear in the order 1, 2, 3, 4, 5. The paragraph never says any of the five words. Name the anchor once. It reads as one connected scene, not five sentences stapled together.
+- cases: up to two per level. A scene line (72 characters), 2 to 4 steps, each a prompt of 80 characters with 2 or 4 options of 34 characters; a step never says its own answer; terms lists the words it credits (Finance: "Which helps Dream Sneakers keep more money?" then "What could improve?").
+- powerPlay: intro (one short line) and one short paragraph that uses {1} to {5} exactly once each, where {n} is the nth term in teaching order. The blanks must NOT appear in the order 1, 2, 3, 4, 5. The paragraph never says any of the five words. Name the anchor once. It reads as one connected scene, not five sentences stapled together. Size by level: Level 1 is 200 characters and five sentences with one blank each (five plain lines a 12-year-old gets on first read); Level 2 is 240, five sentences, one blank each; Levels 3 and 4 are 290, six sentences; Levels 5 and 6 are 330, six sentences. The anchor may be left out of Level 1 to save room.
+- feedback (on a case, a sort or a Select All): 90 characters and two sentences at most, about 60 is right. One sentence that says what is right, and at most one that says why. Never list every item.
 
 COPY RULES (the validator refuses a file that breaks the measurable ones)
 - Eighth grade or lower. Short words. One idea per sentence. Say each fact once. No dashes of any kind.
+- Every sentence is 14 words at most: definitions, examples, moments, case steps, intros, facts, the Power Play and every feedback line. The validator also scores each level's copy and refuses anything above grade 8.
 - No digits, $ or % anywhere in a level's copy unless that level sets math: true, and only when the job's words naturally use numbers. Spell small numbers out.
 - No line of copy may appear twice in a level: every moment, cue, sort item, Select All line, case scene and case step is a different line.
 - icon: a lucide icon slug (lowercase, dashes). It is only used on the Levels map until plate art exists; it is never shown on a flashcard or in the mastery bar.
@@ -237,7 +241,7 @@ Rules that have shipped real bugs: one image per call; never chain off the last 
 1. Open the hamburger menu, Glossary QA. The new industry is listed with its playable levels.
 2. Play Level 1 in Drift with Skip, then Level 1 in Signal. Watch for clipped words, odd line breaks, a Dreamy facing away, a dollar meter where a milestone should be, and that the mastery segments fill without pointing at a word.
 3. Open Level 3 and Level 4 in Drift and step through every screen with Skip: no two screens may show the same line, the sort must be concrete things into concept buckets, and each case must read as a real call. Then play one level without Skip, miss two answers on purpose, and check the review screens feel new.
-4. Read the Power Play paragraph of each level once as a student would.
+4. Read the Power Play paragraph of each level once as a student would. Level 1 should be five short lines.
 5. Confirm Codex's Level 1 pictures and the welcome illustration are in place and on style.
 6. Release with Prompt C.
 
@@ -306,7 +310,7 @@ Rules that have shipped real bugs: one image per call; never chain off the last 
 | docs/reference/glossary-scaling-plan-handover-2026-10-16.html | Joshua's plan in full with our mapping, and the image brief in detail. |
 | docs/handoff/play-sop/12-glossary-art-pipeline.md, scripts/glossary-art.mjs | The term art pipeline: manifest in, prompts out, packaging, validation, preview. |
 | docs/reference/glossary-finance-art-oct13.json | The model manifest with the finance briefs. |
-| src/components/glossary/generate.ts | Blueprint types (terms with moments; sort, selectAll, cases, powerPlay per level), the four recipes, the validator, the build-time assertions. |
+| src/components/glossary/generate.ts | Blueprint types (terms with moments; sort, selectAll, cases, powerPlay per level), the four recipes, the validator with the reading rules, the build-time assertions. |
 | src/components/glossary/blueprints/ | culinary.ts (the model: every authored piece in use, four levels), health.ts, software.ts, aviation.ts (six levels each). |
 | src/components/glossary/data.ts | GLOSSARY_INDUSTRIES, GLOSSARY_HUB_RELEASED, Finance's hand-authored levels. |
 | src/components/glossary/industries.ts | The fifteen world design systems, CAREER_INDUSTRY. |
@@ -347,16 +351,16 @@ A scenario thread is still a world. Nursing keeps the student inside one clinic,
 | Vocabulary | 5 new core terms per level. 20 across Levels 1 to 4. | Validated: exactly five terms per playable level. |
 | Lesson length | 7 to 10 scored interactions, including the final Power Play. | Seven derived screens plus the level's authored extras, seven to ten in all, plus 1 Power Play. Asserted by the QA script. |
 | Term coverage | Every new term is introduced clearly, then used in applied context before the lesson ends. | Teach cards first; every term is credited at least twice in the main loop (asserted). |
-| Power Play | Always one integrated final challenge. Never five screens for five terms. | One written paragraph with five blanks, never in teaching order. The type allows nothing else. |
+| Power Play | Always one integrated final challenge. Never five screens for five terms. | One written paragraph with five blanks, never in teaching order, sized by level (Level 1 is five short lines, one blank each). The type allows nothing else. |
 | Question clarity | Every screen asks an explicit question or action. Never "Complete the activity." | Every generated prompt is a question or an instruction. |
-| Copy length | Context line about 12 words. Question about 18 words. Answer choices usually 7 words. | Each moment 12 words and 72 characters, cue 7 words and 34 characters, case step 90 characters, validated. |
-| Reading difficulty | Roughly 8th grade. Difficulty comes from the concept, not the writing. | Author rule. Not machine-checked. |
+| Copy length | Context line about 12 words. Question about 18 words. Answer choices usually 7 words. | Each moment 12 words and 72 characters, cue 7 words and 34 characters, case step 80 characters, every sentence 14 words, feedback 90 characters, validated. |
+| Reading difficulty | Roughly 8th grade. Difficulty comes from the concept, not the writing. | Validated since 17 Oct: a Flesch-Kincaid grade of 8 or below per level, with the level's own five words not counted, and no sentence over 14 words. |
 | Answer leakage | Never put the answer inside the question, visual, heading, labels or setup. | Validated: a definition may not say its own word, a cue, a moment, a Select All line and a case step may not say the word they ask for. |
 | Distractors | The right answer is not systematically the longest or most professional-sounding. | Distractors are the other terms of the same level, so lengths vary naturally. Answer position rotates by level. |
 | Interaction diversity | No more than two consecutive screens with the same mechanic. | Asserted at build and in the QA script, by the shape the student sees (story card, fill-in sentence, compare card, 2x2, match, sort, select, case, type). |
 | Multiple choice | Useful, but mixed with matching, sorting, fill-in-the-blank, error identification, comparison, sequencing, decisions. | Each recipe mixes story cards, fill-in sentences, compare cards, match, sort, select-all, cases and type. |
 | Multi-part questions | About 2 to 3 judgments per screen. Never seven items at once. | Match has five pairs, Sort four to seven items, Select All four lines, a case two to four steps. |
-| Wrong-answer feedback | Say exactly what was wrong. | Each term can name the word it is confused with; the correction says "Not X: that is ...". |
+| Wrong-answer feedback | Say exactly what was wrong. | Feedback is one or two short lines from the cue, and names the word it is mixed up with when it fits ("It is Blanch: a quick boil, then ice water. Poach is gentle heat in still water."). |
 | Nested counters | No "Step 1 of 2" when the lesson already has a progress system. | None in generated levels. |
 | Dreamy | Exactly one Dreamy per screen. The cloud itself: no arms, hands, legs or body. Expressions react to the situation. | One actor per screen, twelve Drift poses and four Signal reactions, always facing the content. |
 | Intro cards | Skippable; students who know a term move quickly into practice. | Teach cards advance on tap. |
@@ -387,7 +391,7 @@ In the system each level has a **focus**: recognize, apply, analyze or decide. I
 | 6 | Catch the Misuse (4) | Catch the Misuse (5) | Catch the Misuse against the confusion (4) | Catch the Misuse (5) |
 | 7 | Type the Term from m2 (2) | Type the Term from m2 (1) | Type the Term from m2 (5) | Type the Term from m2 (1) |
 | extra | An authored Select All or case, if written | Cases (one or two) | Cases | Cases, and an authored sort |
-| finale | Power Play: the level's written paragraph, all five words, blanks never in teaching order, word bank shuffled. |  |  |  |
+| finale | Power Play: the level's written paragraph, all five words, blanks never in teaching order, word bank shuffled, size by level. |  |  |  |
 
 The review (one Reverse Recall per word, the definition read aloud) is drawn only for words still short of mastery and never appears in the main loop. Live proof of all four recipes with every authored piece: /play/glossary/culinary?lesson=1 through lesson=4, the model blueprint.
 
@@ -476,11 +480,11 @@ Dreamy is part of the interaction system, not an illustration beside every piece
 
 | Ask | Question | Automated? |
 |---|---|---|
-| Clarity | Can a student understand exactly what they are asked within about three seconds? | Author review. |
+| Clarity | Can a student understand exactly what they are asked within about three seconds? | Sentences of 14 words at most and a grade 8 cap are automated; the rest is review. |
 | Learning | Does answering require understanding the vocabulary, or can the student guess from wording or visuals? | Leakage checks are automated; the rest is review. |
 | Purpose | Did the screen teach or test something meaningful? | Author review. |
 | Copy | Is anything repeated that could be removed? | No line of copy is shown twice in a lesson (automated); the rest is review. |
-| Feedback | If the student is wrong, will they understand exactly what was wrong and why? | Generated from the term's own copy and its confusion. |
+| Feedback | If the student is wrong, will they understand exactly what was wrong and why? | Generated from the term's own cue and its confusion, two short sentences at most. |
 | Imagery | Has the team decided the image honestly helps? If not, remove it. | Registration is the decision. |
 | Math | Has the team decided math belongs? If not, do not use it. | math: true is the decision; numbers without it fail. |
 | Story | Would removing the story hurt understanding? If not, reduce it. | Author review. |

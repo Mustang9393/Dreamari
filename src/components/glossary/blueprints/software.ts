@@ -69,11 +69,11 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
       ],
       powerPlay: {
         intro: "Build the very first Nova Notes.",
-        paragraph: "Jo has an idea: Nova Notes, a small {1} for saving quick notes. She writes the {4} that makes the save button work. The first {2} is her little brother, who types a note before school. He taps save and the note vanishes, so Jo hunts down the {5}. Then she adds one more {3}: a way to pin a note to the top.",
+        paragraph: "Jo wants a small {1} for quick notes. She types the {4} that makes save work. Her little brother is the first {2}. His note vanishes, so Jo finds the {5}. Then she adds a {3} to pin notes.",
       },
       facts: [
         "Most apps start as one person's small idea and a single screen.",
-        "The word bug for a computer mistake goes back to a real moth found inside an early computer.",
+        "The word bug comes from a real moth found inside an old computer.",
       ],
     },
     {
@@ -114,8 +114,8 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
         prompt: "Select every line that says what Nova Notes must do.",
         options: ["Notes must never be lost", "Search must find any word", "Jo likes the color blue", "The team meets on Tuesdays"],
         correct: [0, 1],
-        feedbackCorrect: "Must never be lost and must find any word are rules the app has to meet. The rest are not.",
-        feedbackWrong: "A rule says what the app must do. Jo's favorite color and the meeting day are not rules for the app.",
+        feedbackCorrect: "Never losing notes and finding any word are musts. The rest are not.",
+        feedbackWrong: "A rule says what the app must do. A favorite color is not a rule.",
       },
       cases: [
         {
@@ -126,8 +126,8 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Next they plan how every screen will look and flow. What is that plan called?", options: ["Design", "Commit"], correctIndex: 0 },
             { prompt: "Before building the real thing, what do they build to try the idea?", options: ["A rough early version", "The finished app"], correctIndex: 0 },
           ],
-          feedbackCorrect: "First what it must do, then how it looks, then a rough version to try.",
-          feedbackWrong: "Write what it must do, plan how it looks, then build a rough version to try the idea.",
+          feedbackCorrect: "Right. First what it must do, then the look, then a rough try.",
+          feedbackWrong: "Start with what it must do. Then plan the look and build a rough try.",
         },
         {
           terms: ["Repository", "Commit"],
@@ -137,14 +137,14 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Jo saves her change. What should go with it?", options: ["A note saying what changed", "Nothing, just save"], correctIndex: 0 },
           ],
           feedbackCorrect: "Shared code lives in one place, and every saved change carries a note.",
-          feedbackWrong: "Code lives in one shared place. Every saved change gets a note so the team knows what changed.",
+          feedbackWrong: "Code lives in one shared place. Each saved change gets a short note.",
         },
       ],
       powerPlay: {
         intro: "Plan the first version of Nova Notes.",
-        paragraph: "Jo built a rough {3} in a day to see if students liked it. They did. So the team wrote down the first {1}: notes must save with no internet. Maya drew the {2}, with the new note button at the bottom. Every file now lives in one shared {4}, and each change Sam saves is a {5} with a note that says what changed and why. Nova Notes is on its way.",
+        paragraph: "Jo builds a rough {3} in one day. Students like it, so the team writes the first {1}. Maya draws the {2} with a big new note button. All the files live in one shared {4}. Each change Sam saves is a {5} with a short note.",
       },
-      facts: ["Teams often write the requirements as short sentences that start with the words a user can."],
+      facts: ["Teams often start each requirement with the words a user can."],
     },
     {
       number: 3,
@@ -191,16 +191,16 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
           { text: "A note with an empty title", bucket: "Is a problem", term: "Edge Case" },
           { text: "Tap save, the app shuts itself", bucket: "Is a problem", term: "Crash" },
         ],
-        feedbackCorrect: "Checks and reviews catch problems. Tracing the cause fixes them. The rest are the problems.",
-        feedbackWrong: "Ask of each one: does it find trouble, fix trouble, or is it the trouble?",
+        feedbackCorrect: "Checks catch problems and tracing fixes them. The rest are the problems.",
+        feedbackWrong: "Ask: does it find trouble, fix it, or is it the trouble?",
       },
       selectAll: {
         term: "Debug",
         prompt: "Select every step that is part of finding and fixing the cause.",
         options: ["Read the error message", "Trace where the note gets lost", "Pick a new app icon", "Try the fix and run it again"],
         correct: [0, 1, 3],
-        feedbackCorrect: "Reading the error, tracing the loss and trying the fix all find and fix the cause. A new icon does not.",
-        feedbackWrong: "Finding and fixing the cause means reading the error, tracing it and trying the fix. A new icon fixes nothing.",
+        feedbackCorrect: "Reading, tracing and trying the fix all get to the cause. A new icon does not.",
+        feedbackWrong: "Read the error, trace it, then try the fix. A new icon fixes nothing.",
       },
       cases: [
         {
@@ -211,8 +211,8 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Jo finds the bad line and fixes it. What runs next, before release?", options: ["A check that save still works", "Nothing, ship it now"], correctIndex: 0 },
             { prompt: "Who reads Jo's change before it goes in?", options: ["A teammate", "Nobody"], correctIndex: 0 },
           ],
-          feedbackCorrect: "Find the cause, check the fix works, then a teammate reads it. That is how changes go in.",
-          feedbackWrong: "Trace the cause first, then run a check, then let a teammate read the change before it ships.",
+          feedbackCorrect: "Find the cause, check the fix, then a teammate reads it.",
+          feedbackWrong: "Find the cause, run a check, then a teammate reads the change.",
         },
         {
           terms: ["Crash", "Edge Case"],
@@ -222,14 +222,14 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
             { prompt: "She adds a huge photo and the app closes on its own. What was that?", options: ["Just an odd input", "The app stopped and shut down"], correctIndex: 1 },
           ],
           feedbackCorrect: "An odd input is an edge case to handle. The app closing on its own is a crash.",
-          feedbackWrong: "A strange input the app must handle is an edge case. The app shutting down on its own is a crash.",
+          feedbackWrong: "An odd input the app must handle is an edge case. Shutting down is a crash.",
         },
       ],
       powerPlay: {
         intro: "Make Nova Notes work every time.",
-        paragraph: "The first students break Nova Notes in an hour. Add a photo and the whole app closes: a {3}. Jo has to {2}, reading line by line until she finds the cause. Then Maya saves a note with no title at all, an {4} nobody thought of. Before any fix ships, Sam does a {5} and leaves two comments. Last, a {1} on the save button runs every time, so it never breaks the same way twice.",
+        paragraph: "Students break Nova Notes in an hour. Add a photo and the app closes: a {3}. Jo has to {2}, line by line, until she finds the cause. Then Maya saves a note with no title, an {4} nobody saw coming. Sam does a {5} before any fix ships. Now a {1} checks the save button every time.",
       },
-      facts: ["Many teams will not let a change in until at least one other person has read it."],
+      facts: ["Many teams let no change in until another person has read it."],
     },
     {
       number: 4,
@@ -269,8 +269,8 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
         prompt: "Select everything the Nova Notes server does.",
         options: ["Stores every saved note", "Answers requests from many phones", "Draws the app icon", "Runs all night in a data center"],
         correct: [0, 1, 3],
-        feedbackCorrect: "It stores the notes, answers every phone and never sleeps. Drawing the icon is the app's job.",
-        feedbackWrong: "The server stores notes, answers requests and runs all night. The icon is drawn by the app itself.",
+        feedbackCorrect: "It stores notes, answers every phone and never sleeps. The app draws its icon.",
+        feedbackWrong: "The server stores notes and answers phones all night. It draws no icons.",
       },
       cases: [
         {
@@ -281,7 +281,7 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
             { prompt: "The fix is ready and passed every check. What now?", options: ["Put the new build out again", "Wait a month to be safe"], correctIndex: 0 },
           ],
           feedbackCorrect: "Roll back first, fix second, then deploy again once the checks pass.",
-          feedbackWrong: "When a release hurts students, roll back to the last good build first. Fix it, check it, then deploy again.",
+          feedbackWrong: "Roll back to the last good build first. Then fix it and deploy again.",
         },
         {
           terms: ["Server", "Outage"],
@@ -291,14 +291,14 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Which part of Nova Notes needs fixing?", options: ["The machine that stores notes", "The app icon", "The color of the save button", "The release notes"], correctIndex: 0 },
           ],
           feedbackCorrect: "When the server stops, it is an outage: everyone is down at once.",
-          feedbackWrong: "One stopped server takes the notes down for every student. That is an outage, not one person's problem.",
+          feedbackWrong: "One stopped server takes notes down for everyone. That is an outage.",
         },
       ],
       powerPlay: {
         intro: "Put Nova Notes in students' hands.",
-        paragraph: "Every Nova Notes note lands on one {4} in a far away building. When that machine stopped for an hour last spring, no student could save a thing: the team's first {5}. Friday morning Jo hits {1} and the new build goes live. By noon notes are vanishing, so Sam does a {2} to last week's build. Monday, with the fix checked, {3} two ships for real, folders and all.",
+        paragraph: "Every Nova Notes note lands on one {4} far away. When it stopped last spring, the team had its first {5}. Friday morning, Jo hits {1} and the new build goes live. By noon notes vanish, so Sam does a {2} to last week's build. Monday, with the fix checked, {3} two ships with folders.",
       },
-      facts: ["Big teams often release to a small group of users first, so a bad build reaches few people."],
+      facts: ["Big teams often release to a few users first. A bad build then hurts few."],
     },
     {
       number: 5,
@@ -345,16 +345,16 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
           { text: "Counting saves per day", bucket: "Comes from users", term: "Analytics" },
           { text: "Ship, learn, ship again", bucket: "How the team works", term: "Iteration" },
         ],
-        feedbackCorrect: "Charts and messages come from users. Lists, goals and rounds are how the team works.",
-        feedbackWrong: "Ask of each one: did a user give us this, or is it the team's way of working?",
+        feedbackCorrect: "Charts and messages come from users. The rest is how the team works.",
+        feedbackWrong: "Ask: did users give us this, or is it how the team works?",
       },
       selectAll: {
         term: "Backlog",
         prompt: "Select everything that belongs on the Nova Notes backlog.",
         options: ["Add folders", "Fix the photo button", "Yesterday's lunch order", "Make dark mode darker"],
         correct: [0, 1, 3],
-        feedbackCorrect: "Folders, the photo fix and darker dark mode are all work still to do. Lunch is not.",
-        feedbackWrong: "The backlog holds work still to do: folders, the photo fix, darker dark mode. Lunch does not belong.",
+        feedbackCorrect: "Folders and both fixes are work still to do. Lunch is not.",
+        feedbackWrong: "The backlog is work still to do. Yesterday's lunch does not belong.",
       },
       cases: [
         {
@@ -365,8 +365,8 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
             { prompt: "A teacher writes in asking for bigger text. What is that?", options: ["A user's opinion", "A number from a chart"], correctIndex: 0 },
             { prompt: "Both point to the same thing: folders are hard to find. What now?", options: ["Add it to the list of work", "Ignore it"], correctIndex: 0 },
           ],
-          feedbackCorrect: "Analytics show what students do. Feedback shows what they want. Both feed the backlog.",
-          feedbackWrong: "Charts tell you what students do. Messages tell you what they want. Then the work goes on the backlog.",
+          feedbackCorrect: "Analytics show what students do. Feedback shows what they want.",
+          feedbackWrong: "Charts show what students do. Messages say what they want.",
         },
         {
           terms: ["Sprint", "Iteration"],
@@ -375,13 +375,13 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
             { prompt: "They set one goal for two weeks: ship folders. What is that stretch of work?", options: ["Sprint", "Iteration"], correctIndex: 0 },
             { prompt: "Folders ship, students react, the team fixes them and ships again. What is that?", options: ["Sprint", "Iteration"], correctIndex: 1 },
           ],
-          feedbackCorrect: "A sprint is the fixed two weeks with one goal. An iteration is each round of ship, learn, improve.",
-          feedbackWrong: "Two weeks with one goal is a sprint. Shipping, learning and shipping again is an iteration.",
+          feedbackCorrect: "A sprint is two weeks with one goal. An iteration is ship, learn, improve.",
+          feedbackWrong: "Two weeks, one goal is a sprint. Ship, learn, ship again is an iteration.",
         },
       ],
       powerPlay: {
         intro: "Learn from real Nova Notes users.",
-        paragraph: "Thousands of students now open Nova Notes every day. The {1} show most of them never find the folders tab. A teacher sends {2} saying the same thing. So folders move to the top of the {4}. The team plans one {5} around it: two weeks, one goal. Folders ship, students react, and the next {3} makes them better. Then the team does it all again.",
+        paragraph: "Thousands of students open Nova Notes each day. The {1} show most never find folders. A teacher sends {2} saying the same thing. So folders move to the top of the {4}. The team plans one {5} around it: two weeks, one goal. Folders ship, students react, and the next {3} makes them better.",
       },
       facts: ["Most apps change a little every week, not a lot once a year."],
     },
@@ -420,7 +420,7 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
       ],
       sort: {
         label: "Block, ask or restore",
-        prompt: "Does each one stop a break in, ask the user first, or fix and restore?",
+        prompt: "Does each one stop a break in, ask first, or fix and restore?",
         buckets: ["Stops a break in", "Asks the user first", "Fixes or restores"],
         items: [
           { text: "A long secret phrase", bucket: "Stops a break in", term: "Password" },
@@ -430,16 +430,16 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
           { text: "A new build that fixes the crash", bucket: "Fixes or restores", term: "Update" },
           { text: "Yes or no to the microphone", bucket: "Asks the user first", term: "Permission" },
         ],
-        feedbackCorrect: "Secrets and scrambling stop a break in. Pop ups ask first. Copies and new builds fix and restore.",
-        feedbackWrong: "Ask of each one: does it block a stranger, ask you first, or put things right?",
+        feedbackCorrect: "Secrets and scrambling stop a break in. Copies and new builds put things right.",
+        feedbackWrong: "Ask: does it block a stranger, ask you first, or fix things?",
       },
       selectAll: {
         term: "Backup",
         prompt: "Select every case where a saved copy saves the day.",
         options: ["Phone lost, notes back by morning", "Laptop dies, notes still online", "Jo forgets her secret phrase", "The app asks to use the camera"],
         correct: [0, 1],
-        feedbackCorrect: "A lost phone and a dead laptop are fixed by the saved copy. The other two are different problems.",
-        feedbackWrong: "A saved copy brings notes back after a lost phone or a dead laptop. It cannot help with a forgotten secret or a camera pop up.",
+        feedbackCorrect: "A saved copy fixes a lost phone or a dead laptop. The other two it cannot.",
+        feedbackWrong: "A saved copy brings lost notes back. It cannot fix a forgotten secret.",
       },
       cases: [
         {
@@ -450,7 +450,7 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
             { prompt: "The stranger grabs the note file anyway. What makes it useless?", options: ["The notes are scrambled", "The notes are in English"], correctIndex: 0 },
             { prompt: "What should the team tell every student to do tonight?", options: ["Pick a longer secret phrase", "Delete the app"], correctIndex: 0 },
           ],
-          feedbackCorrect: "A strong password keeps them out. Encryption makes anything they grab worthless.",
+          feedbackCorrect: "A strong password keeps them out. Encryption makes stolen files useless.",
           feedbackWrong: "The password blocks the login. Encryption means a stolen file is just nonsense.",
         },
         {
@@ -466,9 +466,9 @@ export const SOFTWARE_GLOSSARY: GlossaryBlueprint = {
       ],
       powerPlay: {
         intro: "Keep every Nova Notes note safe.",
-        paragraph: "Late one night a strange login shows up in the Nova Notes logs. The stranger never gets past the {1}, and even the file they grab is useless thanks to {2}: just random letters. The next morning the team ships an {5} that makes every secret phrase longer. Every note still gets a {4} each night, so nothing is ever lost. And the app asks for {3} before it so much as looks at a photo.",
+        paragraph: "Late one night, a strange login shows up in the Nova Notes logs. The stranger never gets past the {1}. Even the file they grab is useless, thanks to {2}. By morning, an {5} makes every secret phrase longer. Every note still gets a {4} each night. And the app asks for {3} before it looks at a photo.",
       },
-      facts: ["Most break-ins start with a weak or reused password, not a clever hack."],
+      facts: ["Most hacks start with a weak or reused password, not a clever trick."],
     },
   ],
 };

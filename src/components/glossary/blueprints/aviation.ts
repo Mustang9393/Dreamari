@@ -67,11 +67,11 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
       ],
       powerPlay: {
         intro: "Get one Skyline Air jet into the sky.",
-        paragraph: "Every Skyline Air flight starts with a {3}: the pilot walks around the plane and checks each wing and tire. Then the crew climbs into the {1} and tests every switch. With the doors closed, the jet starts to {4} along the yellow line toward the long strip. It lines up on the {2} and waits for the go. Engines roar, and {5} pushes you back into your seat.",
+        paragraph: "First, the pilot does a {3} of the plane. Then the crew sits in the {1}. The jet starts to {4} along the yellow line. It lines up on the {2} and waits. Engines roar, and {5} lifts you up.",
       },
       facts: [
-        "Pilots read a checklist out loud before every flight, even after thousands of flights.",
-        "A plane on the ground follows painted lines and lights, like a car follows a road.",
+        "Pilots read a checklist out loud before every flight, even after years of flying.",
+        "On the ground, a plane follows painted lines, like a car on a road.",
       ],
     },
     {
@@ -98,7 +98,7 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
           moments: ["The seat belt sign comes on as the plane starts to bounce.", "Drinks slosh and the cabin shakes for a few long seconds.", "Rough air rattles the carts as the crew holds the rails."],
         },
         {
-          term: "Autopilot", definition: "A system that flies the plane on a set path while the pilots watch it.", example: "The Skyline Air captain switched on autopilot after the climb.", cue: "The system that flies the path", icon: "cpu",
+          term: "Autopilot", definition: "A system that flies the plane on a set path while the pilots watch.", example: "The Skyline Air captain switched on autopilot after the climb.", cue: "The system that flies the path", icon: "cpu",
           moments: ["The captain sets the path. The plane holds it by itself.", "The pilots watch the screens while the jet steers itself.", "Hands off the controls, the plane still holds its heading and height."],
         },
         {
@@ -111,8 +111,8 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
         prompt: "Select every sign of rough air.",
         options: ["Drinks shake and spill on the tray", "A sudden jolt rattles the overhead bins", "The ride is smooth enough to pour coffee", "Carts get locked down as the cabin shakes"],
         correct: [0, 1, 3],
-        feedbackCorrect: "Shaking, bumps and carts locked down all mean rough air. A smooth ride is the opposite.",
-        feedbackWrong: "Rough air shakes drinks, bumps the plane and locks the carts down. A smooth ride is not it.",
+        feedbackCorrect: "Right. Shaking, jolts and locked carts all mean rough air.",
+        feedbackWrong: "Rough air shakes and jolts the plane. A smooth ride is not it.",
       },
       cases: [
         {
@@ -124,24 +124,24 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
             { prompt: "You get the OK to climb. What changes?", options: ["How high the plane flies", "How many seats are full"], correctIndex: 0 },
           ],
           feedbackCorrect: "Belts first. Then ask the ground team, then change height.",
-          feedbackWrong: "Rough air means belts on first. Only the ground team can clear a climb to smoother air.",
+          feedbackWrong: "Belts on first in rough air. Then the ground team clears your climb.",
         },
         {
           terms: ["Cruise", "Autopilot"],
           scene: "The climb is over and the plane levels off for the long middle.",
           steps: [
-            { prompt: "The plane is flat and steady and will stay that way for hours. Which part is this?", options: ["Cruise", "Descent", "Taxi", "Boarding"], correctIndex: 0 },
+            { prompt: "The plane will fly flat and steady for hours. Which part is this?", options: ["Cruise", "Descent", "Taxi", "Boarding"], correctIndex: 0 },
             { prompt: "You want to rest your hands but keep the path exact. What do you use?", options: ["Autopilot", "The seat belt sign", "The radio", "The brakes"], correctIndex: 0 },
           ],
-          feedbackCorrect: "The long level middle is where the system holds the path and the pilots watch.",
-          feedbackWrong: "After the climb comes the long level middle. A system can hold the path while you watch it.",
+          feedbackCorrect: "In the long level middle, the system holds the path.",
+          feedbackWrong: "After the climb comes the long middle. A system can hold the path for you.",
         },
       ],
       powerPlay: {
         intro: "Fly one Skyline Air flight from climb to cruise.",
-        paragraph: "Climbing out of Chicago, the Skyline Air crew hears from {5}: turn left and keep climbing. The plane levels off at its planned {1}, high above the clouds. The captain sets the path and lets the {4} hold it while both pilots watch the screens. Hours of smooth, level {2} follow. Then the ride gets bumpy, the seat belt sign comes on, and the crew waits out the {3}.",
+        paragraph: "After takeoff, {5} says to turn left and climb. The Skyline Air jet levels off at its planned {1}. The captain lets the {4} hold the path. Hours of smooth {2} follow. Then the ride gets bumpy, and the crew waits out the {3}.",
       },
-      facts: ["Jets fly high because the thin air up there lets them go faster on less fuel."],
+      facts: ["Jets fly high because thin air lets them go faster on less fuel."],
     },
     {
       number: 3,
@@ -152,7 +152,7 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
       nextMilestone: "Land it smoothly",
       companyValue: 120000,
       nextCompanyValue: 250000,
-      intro: { headline: "Storms Ahead", line: "A different day, a different flight, and the weather is not cooperating.", hook: "Learn the words for wind, fog and a change of plan." },
+      intro: { headline: "Storms Ahead", line: "A new day, a new flight, and bad weather.", hook: "Learn the words for wind, fog and a change of plan." },
       terms: [
         {
           term: "Headwind", definition: "Wind blowing against the plane, which slows it down.", example: "A strong headwind made the Skyline Air flight land late.", cue: "Wind against the plane", confusion: "Tailwind", icon: "wind",
@@ -188,16 +188,16 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
           { text: "A push from behind, fuel to spare", bucket: "Early", term: "Tailwind" },
           { text: "A new city, not the one planned", bucket: "Somewhere new", term: "Diversion" },
         ],
-        feedbackCorrect: "Wind from behind saves time. Wind, fog and circling cost it. A closed airport means a new one.",
-        feedbackWrong: "Ask of each one: does it save time, cost time, or send the plane to a different airport?",
+        feedbackCorrect: "Wind from behind saves time. Bad weather costs time or sends you elsewhere.",
+        feedbackWrong: "Ask: does it save time, cost time, or send you somewhere new?",
       },
       selectAll: {
         term: "Visibility",
         prompt: "Select everything that cuts how far the pilot can see.",
         options: ["Thick fog on the ground", "Heavy snow in the air", "A strong wind from behind", "Smoke from a forest fire"],
         correct: [0, 1, 3],
-        feedbackCorrect: "Fog, snow and smoke all block the view. Wind changes speed, not sight.",
-        feedbackWrong: "Fog, snow and smoke block what the pilot can see. Wind only changes how fast the plane goes.",
+        feedbackCorrect: "Right. Fog, snow and smoke all block the view.",
+        feedbackWrong: "Wind changes how fast you fly, not how far you see.",
       },
       cases: [
         {
@@ -208,8 +208,8 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Fuel is now too low to keep waiting. What is the call?", options: ["Keep circling", "Land at Providence instead"], correctIndex: 1 },
             { prompt: "The wind is behind you on the way to Providence. What does that do?", options: ["Gets you there sooner", "Slows you down", "Hides the airport", "Makes you circle"], correctIndex: 0 },
           ],
-          feedbackCorrect: "Wait while you can, go elsewhere when fuel says so, and wind from behind gets you there fast.",
-          feedbackWrong: "Circle while fuel allows. When it runs low, pick a new airport. Wind from behind helps you get there.",
+          feedbackCorrect: "Yes. You waited, left in time, and the wind helped.",
+          feedbackWrong: "Circle while fuel lasts, then go elsewhere. Wind from behind speeds you up.",
         },
         {
           terms: ["Visibility", "Headwind"],
@@ -219,12 +219,12 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
             { prompt: "The wind fights you the whole way. What does it cost?", options: ["Time and fuel", "Seats", "Luggage space", "Cabin lights"], correctIndex: 0 },
           ],
           feedbackCorrect: "Snow cuts what you can see. Wind on the nose costs time and fuel.",
-          feedbackWrong: "Snow hides the strip, so the crew cannot see far. Wind against the plane makes it late and thirsty.",
+          feedbackWrong: "Snow hides the strip. Wind against you makes you late and burns fuel.",
         },
       ],
       powerPlay: {
         intro: "Fly one Skyline Air trip through bad weather.",
-        paragraph: "Fog drops the {3} at Boston to almost nothing, so the Skyline Air jet flies a {5}, looping over the same lake while the tower waits for a break. Fuel runs low, and the captain calls a {4} to Providence. A strong {2} pushes the plane there in record time. On the trip back west, a {1} on the nose makes the flight late.",
+        paragraph: "Fog cuts the {3} at Boston to almost nothing. The Skyline Air jet flies a {5} over the same lake. Fuel runs low, so the captain calls a {4} to Providence. A strong {2} gets the plane there fast. On the trip back west, a {1} makes the flight late.",
       },
       facts: ["Pilots get a weather report for the whole route before they leave the gate."],
     },
@@ -240,7 +240,7 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
       intro: { headline: "Final Approach", line: "A new flight is coming into a rainy Boston.", hook: "Learn the words for bringing a plane down." },
       terms: [
         {
-          term: "Approach", definition: "The last stretch of a flight, lined up with the runway and coming down to land.", example: "The Skyline Air crew began the approach ten miles out.", cue: "Lined up to land", confusion: "Descent", icon: "corner-right-down",
+          term: "Approach", definition: "The last stretch of a flight, lined up with the runway to land.", example: "The Skyline Air crew began the approach ten miles out.", cue: "Lined up to land", confusion: "Descent", icon: "corner-right-down",
           moments: ["The runway lights are dead ahead and getting closer.", "The jet is lined up with the strip, a few miles out.", "Gear down, the plane glides straight at the runway."],
         },
         {
@@ -248,7 +248,7 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
           moments: ["The seat belt sign is on and the ground is slowly rising.", "Ears pop as the plane starts down from cruising height.", "The nose dips and the jet leaves its high, level path."],
         },
         {
-          term: "Flaps", definition: "Panels on the back of the wings that extend to add lift at slow speeds.", example: "The Skyline Air pilot set the flaps before landing.", cue: "Wing panels for slow flight", confusion: "Descent", icon: "layers",
+          term: "Flaps", definition: "Wing panels that slide out to add lift at slow speeds.", example: "The Skyline Air pilot set the flaps before landing.", cue: "Wing panels for slow flight", confusion: "Descent", icon: "layers",
           moments: ["Parts of the wing slide out and tilt down as it slows.", "A whir from the wings, and the back edges drop lower.", "Panels slide out so the plane can fly slow without falling."],
         },
         {
@@ -265,8 +265,8 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
         prompt: "Select every reason to break off a landing and climb away.",
         options: ["Too high and too fast on final", "Another plane still on the strip", "A smooth, steady path to the strip", "Strong gusts right above the ground"],
         correct: [0, 1, 3],
-        feedbackCorrect: "Too fast, a blocked strip or wild gusts: climb away. A steady path means keep landing.",
-        feedbackWrong: "Climb away when the plane is too fast, the strip is blocked or the gusts are wild. A steady path is a good landing.",
+        feedbackCorrect: "Right. Speed, a blocked strip and gusts all mean climb away.",
+        feedbackWrong: "A steady path is a good landing. The other three mean climb away.",
       },
       cases: [
         {
@@ -277,8 +277,8 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
             { prompt: "The plane must fly slower without dropping. What do you set?", options: ["Flaps", "Brakes", "Seat belt sign", "Radio"], correctIndex: 0 },
             { prompt: "Wheels meet the wet strip. What just happened?", options: ["Touchdown", "Go Around"], correctIndex: 0 },
           ],
-          feedbackCorrect: "Line up, set the wing panels for slow flight, then the wheels meet the strip.",
-          feedbackWrong: "The last stretch is lined up with the strip. Wing panels slow the plane. Wheels on the strip ends it.",
+          feedbackCorrect: "Line up, slow down with the wing panels, then put the wheels down.",
+          feedbackWrong: "First you line up. Then wing panels slow you, and the wheels meet the strip.",
         },
         {
           terms: ["Go Around", "Descent"],
@@ -287,13 +287,13 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Something is on the strip. What is your call?", options: ["Power up and climb away", "Land short of the truck", "Shut the engines down", "Brake hard in the air"], correctIndex: 0 },
             { prompt: "Safe height reached. The tower clears you to come down again. What starts over?", options: ["Descent", "Boarding", "Pushback", "Fueling"], correctIndex: 0 },
           ],
-          feedbackCorrect: "Never land on a blocked strip. Climb away, then come down again from a safe height.",
-          feedbackWrong: "A blocked strip means power up and climb. Then the plane comes down again from a safe height.",
+          feedbackCorrect: "Never land on a blocked strip. Climb away, then come down again.",
+          feedbackWrong: "A blocked strip means climb away. Then you come down again from a safe height.",
         },
       ],
       powerPlay: {
         intro: "Bring one Skyline Air jet down in the rain.",
-        paragraph: "An hour from Boston the Skyline Air jet begins its {2}, and ears pop as the ground slowly rises. Closer in, the crew sets the {3} so the plane can fly slow and steady. Lined up with the wet strip, the jet is on its final {1}. A truck rolls onto the strip, so the captain calls a {5}, climbs away and circles back. On the second try, a soft {4} earns applause from the cabin.",
+        paragraph: "An hour from Boston, the Skyline Air jet begins its {2}. Closer in, the crew sets the {3} to fly slow. Lined up with the wet strip, the jet is on its final {1}. A truck rolls onto the strip, so the captain calls a {5}. On the second try, a soft {4} gets a cheer.",
       },
       facts: ["Pilots aim for a touchdown zone, not the very start of the runway."],
     },
@@ -321,7 +321,7 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
           moments: ["Someone walks the aisle checking belts and closing bins.", "Someone in uniform points out the exits before the flight.", "In rough air, one person makes sure every tray is up."],
         },
         {
-          term: "Dispatcher", definition: "The person on the ground who plans the route and fuel and tracks the flight.", example: "A Skyline Air dispatcher planned the route around the storm.", cue: "Plans the flight from the ground", confusion: "Flight Attendant", icon: "radio-tower",
+          term: "Dispatcher", definition: "The ground planner who picks the route and fuel and tracks the flight.", example: "A Skyline Air dispatcher planned the route around the storm.", cue: "Plans the flight from the ground", confusion: "Flight Attendant", icon: "radio-tower",
           moments: ["Someone at a desk picks the route and the fuel.", "Far from the plane, one person tracks the flight on a map.", "A message arrives: the route is changed to miss a storm."],
         },
         {
@@ -342,16 +342,16 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
           { text: "Calms a nervous flyer", bucket: "In the cabin", term: "Flight Attendant" },
           { text: "Tracks the flight from a desk", bucket: "On the ground", term: "Dispatcher" },
         ],
-        feedbackCorrect: "Pilots and their list live up front. Belts and bins are the cabin. Routes and fuel are planned on the ground.",
-        feedbackWrong: "Ask of each one: is it done up front, back in the cabin, or at a desk on the ground?",
+        feedbackCorrect: "Pilots work up front, the crew in back, and planners on the ground.",
+        feedbackWrong: "Ask: up front, in the cabin, or at a desk on the ground?",
       },
       selectAll: {
         term: "Flight Attendant",
         prompt: "Select everything the cabin crew member does.",
         options: ["Checks each seat belt before takeoff", "Demonstrates the oxygen masks", "Plans the fuel for the trip", "Serves drinks and answers call lights"],
         correct: [0, 1, 3],
-        feedbackCorrect: "Belts, masks and service are cabin work. Fuel is planned on the ground.",
-        feedbackWrong: "Belts, masks, drinks and call lights are cabin work. Fuel planning happens at a desk on the ground.",
+        feedbackCorrect: "Right. Belts, masks and drinks are all cabin work.",
+        feedbackWrong: "Fuel is planned at a desk on the ground, not in the cabin.",
       },
       cases: [
         {
@@ -362,13 +362,13 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
             { prompt: "The new route is in. Who makes the final call to accept it?", options: ["Captain", "First Officer"], correctIndex: 0 },
             { prompt: "Before engines start, what do both pilots go through line by line?", options: ["Checklist", "Weather report", "Passenger list", "Fuel bill"], correctIndex: 0 },
           ],
-          feedbackCorrect: "The ground plans it, the pilot in charge accepts it, and the list makes sure nothing is missed.",
-          feedbackWrong: "Routes come from a desk on the ground. The pilot in charge says yes or no. Then both pilots read the list.",
+          feedbackCorrect: "The ground plans it, the pilot in charge says yes, the list checks it.",
+          feedbackWrong: "A desk on the ground plans the route. The pilot in charge says yes.",
         },
       ],
       powerPlay: {
         intro: "Get one Skyline Air crew from the gate to Denver.",
-        paragraph: "Hours before the flight, a Skyline Air {4} at a desk in Dallas plans the route around a storm and adds extra fuel. In the cockpit, the two pilots read the {5} line by line, one asking and one answering. Today the {2} in the right seat will fly the landing, but the {1} in the left seat has the final say. Back in the cabin, a {3} checks every belt and closes the last bin.",
+        paragraph: "A Skyline Air {4} at a desk plans a route around a storm. In the cockpit, both pilots read the {5} line by line. Today the {2} in the right seat flies the landing. But the {1} in the left seat has the final say. Back in the cabin, a {3} checks every belt.",
       },
       facts: ["Captains and first officers take turns flying, leg by leg."],
     },
@@ -396,7 +396,7 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
           moments: ["Slides pop open and people leave their bags behind.", "Leave everything! The crew shouts as the doors swing open.", "Smoke in the cabin, and everyone is out in ninety seconds."],
         },
         {
-          term: "Squawk", definition: "A four digit code the pilot sets so controllers know who and what the plane is.", example: "Skyline Air pilots set a special squawk for a radio failure.", cue: "The code set for controllers", confusion: "Mayday", icon: "radio-tower",
+          term: "Squawk", definition: "A four digit code that tells controllers who and what the plane is.", example: "Skyline Air pilots set a special squawk for a radio failure.", cue: "The code set for controllers", confusion: "Mayday", icon: "radio-tower",
           moments: ["The pilot sets a code that tells the ground what is wrong.", "Four digits on a panel tell the tower the radios have failed.", "A new code, and the plane blinks red on the tower's screen."],
         },
         {
@@ -409,8 +409,8 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
         prompt: "Select every moment that deserves the top emergency call.",
         options: ["Both engines have quit", "Fire in the cargo hold", "The coffee maker is broken", "Smoke filling the cockpit"],
         correct: [0, 1, 3],
-        feedbackCorrect: "Dead engines, fire and smoke put lives at risk. A broken coffee maker does not.",
-        feedbackWrong: "The top call is only for danger to life: dead engines, fire, smoke. Not a broken coffee maker.",
+        feedbackCorrect: "Right. Dead engines, fire and smoke all put lives at risk.",
+        feedbackWrong: "The top call is only for danger to life. A broken coffee maker is not.",
       },
       cases: [
         {
@@ -418,11 +418,11 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
           scene: "At cruise, a loud bang and the cabin air turns thin and cold.",
           steps: [
             { prompt: "You cannot breathe this air for long. What is your first move?", options: ["Dive to thicker air", "Climb above the weather", "Serve the drinks", "Open the doors"], correctIndex: 0 },
-            { prompt: "Every controller must know lives are at risk right now. What do you say on the radio?", options: ["Mayday", "Squawk"], correctIndex: 0 },
+            { prompt: "Every controller must know lives are at risk. What do you say on the radio?", options: ["Mayday", "Squawk"], correctIndex: 0 },
             { prompt: "You also set a code so the ground sees the trouble on radar. What is that?", options: ["Squawk", "Alternate"], correctIndex: 0 },
           ],
-          feedbackCorrect: "Down to thicker air first, then the top radio call, then the code so radar shows it.",
-          feedbackWrong: "Thin air means dive first. Then make the top radio call and set the code so the ground sees it.",
+          feedbackCorrect: "Dive to thicker air, make the top call, then set the code.",
+          feedbackWrong: "Thin air means dive first. Then make the top call and set the radar code.",
         },
         {
           terms: ["Alternate", "Evacuation"],
@@ -431,15 +431,15 @@ export const AVIATION_GLOSSARY: GlossaryBlueprint = {
             { prompt: "The home airport is shut. Where does the plan already say to go?", options: ["The field named before takeoff", "The nearest big city", "Back where you started", "Wherever the fog is thinner"], correctIndex: 0 },
             { prompt: "You land safely, then smoke fills the cabin. What is the call?", options: ["Everyone out now, bags behind", "Taxi to the gate first"], correctIndex: 0 },
           ],
-          feedbackCorrect: "The backup was chosen before takeoff. Smoke after landing means everyone out, now.",
-          feedbackWrong: "Every plan names a backup airport before takeoff. Smoke in the cabin means get everyone out at once.",
+          feedbackCorrect: "The backup was picked before takeoff. Smoke means everyone out, now.",
+          feedbackWrong: "The plan names a backup before takeoff. Smoke in the cabin means get out now.",
         },
       ],
       powerPlay: {
         intro: "Keep one Skyline Air flight safe when it all goes wrong.",
-        paragraph: "Before takeoff, the Skyline Air plan already names an {5} in case Denver closes. At cruise a loud bang shakes the jet and the masks drop. The crew starts an {2} toward thicker air and sets a new {4} so every radar screen shows the trouble. The captain calls {1} three times, and the radio goes quiet for them. On the ground, smoke fills the cabin, so the crew orders an {3}: slides out, bags left behind.",
+        paragraph: "The Skyline Air plan names an {5} in case Denver closes. At cruise, a loud bang shakes the jet. The crew starts an {2} toward thicker air. They set a new {4} so radar shows the trouble. The captain calls {1} three times. On the ground, smoke fills the cabin, so the crew orders an {3}.",
       },
-      facts: ["Crews rehearse emergencies in simulators so often that the real thing feels like practice."],
+      facts: ["Crews practice emergencies in simulators until the real thing feels like a drill."],
     },
   ],
 };

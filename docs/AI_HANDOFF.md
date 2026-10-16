@@ -1,3 +1,18 @@
+## 2026-10-17: shorter copy everywhere, 8th-grade checks, Power Play sized by level
+
+**Why (Chandu):** "make sure every piece of copy including success explanations etc are shorter and 8th grade comprehension level" and "make sure the power play isnt so complex and long and a lot to read for level 1 etc."
+
+**What the numbers showed.** Measured first: every level already scored grade 2 to 6 on Flesch-Kincaid, so the problem was length, not vocabulary. Sentences ran to 29 words, authored feedback to 168 characters, and Level 1 Power Plays to 354 characters (Aviation) when Finance's Level 1 is 169.
+
+**What changed.**
+- Generated feedback: every right and wrong line is now one or two short sentences built from the cue ("Yes. Dice means small even cubes." / "It is Blanch: a quick boil, then ice water. Poach is gentle heat in still water."), never the full definition or example. The second clause is dropped when the line would pass 90 characters. Median now 39 characters, longest 89. Build-time assertion.
+- Validator: every sentence 14 words at most across definitions, examples, moments, case steps, prompts, intros, facts, the Power Play and feedback; authored feedback 90 characters and two sentences; a Flesch-Kincaid grade of 8 or below per level with the level's own words not counted; Power Play size by level (Level 1: 200 characters, five sentences, one blank each; Level 2: 240, one blank each; Levels 3 and 4: 290; Levels 5+: 330). Definition cap 120 to 110, example 150 to 120, case step 90 to 80.
+- Blueprints trimmed to pass: Culinary by hand, Nursing, Software and Aviation by three parallel agents, each on its own file.
+- QA script asserts the same reading rules on every built lesson and prints the feedback median and the longest Power Play per level.
+- SOP (HTML, markdown, Google Doc) and spec updated: two new rule rows, Prompt A's field rules, Appendix A's reading row is now machine-checked.
+
+**Not changed:** Finance (Executive Rule 1). Its Power Plays are 169, 142, 291 and 226 characters for Levels 1 to 4, so the new sizes follow Finance rather than depart from it.
+
 ## 2026-10-17: generator rebuilt to the Finance style; moments, concept sorts, cases, written Power Plays
 
 **Why (Chandu):** "I feel like the games are repeating the same questions again and again for mastery instead of having any variety, please refer the finance glossary games and redo questions according to its style so it scaleable." And: "dont make the power play so linear, the answers were in the same order as the terms in the playthrough."

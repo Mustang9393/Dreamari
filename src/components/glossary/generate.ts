@@ -200,7 +200,24 @@ const MINUTES: Record<GlossaryLevel["tier"], number> = { Beginner: 4, Intermedia
  *  1280px: HUD token label (two lines of 9px), word tile, match card right
  *  side, teach card definition at 24px, one Power Play sentence, the scene
  *  card's one line, a sort token, a Select All line, a case step's prompt. */
-export const LIMITS = { term: 22, cue: 34, definition: 120, example: 150, formula: 28, moment: 72, sortItem: 34, selectLine: 44, caseStep: 90, caseOption: 34, powerPlay: 460 } as const;
+export const LIMITS = { term: 22, cue: 34, definition: 110, example: 120, formula: 28, moment: 72, sortItem: 34, selectLine: 44, caseStep: 80, caseOption: 34, feedback: 90 } as const;
+/** Reading rules for every student-facing line (17 Oct 2026, Chandu: "make
+ *  sure every piece of copy including success explanations etc are shorter
+ *  and 8th grade comprehension level"). A sentence is 14 words at most;
+ *  authored feedback is two sentences and 90 characters at most; a level's
+ *  copy, with its own five words and the anchor left out, reads at grade 8
+ *  or below (Flesch-Kincaid). */
+export const READING = { sentenceWords: 14, feedbackSentences: 2, grade: 8 } as const;
+/** The Power Play grows with the level (17 Oct 2026, Chandu: "make sure the
+ *  power play isnt so complex and long and a lot to read for level 1"). In
+ *  Levels 1 and 2 each sentence holds one blank, so the student reads one
+ *  short line per word. */
+export function powerPlayLimit(levelNumber: number): { chars: number; sentences: number; blanksPerSentence: number } {
+  if (levelNumber <= 1) return { chars: 200, sentences: 5, blanksPerSentence: 1 };
+  if (levelNumber === 2) return { chars: 240, sentences: 5, blanksPerSentence: 1 };
+  if (levelNumber <= 4) return { chars: 290, sentences: 6, blanksPerSentence: 2 };
+  return { chars: 330, sentences: 6, blanksPerSentence: 2 };
+}
 /** Word limits from the SOP: a context line about 12 words, an answer choice
  *  usually 7. */
 export const WORD_LIMITS = { moment: 12, cue: 7 } as const;
@@ -255,6 +272,39 @@ function words(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
+/** Sentences of a line of copy (split after . ! or ?). */
+export function sentencesOf(text: string): string[] {
+  // "Mrs. Lee" and "Dr. Kim" are not sentence ends.
+  return text.split(/(?<!\b(?:Mr|Mrs|Ms|Dr|St)\.)(?<=[.!?])\s+/).map((t) => t.trim()).filter(Boolean);
+}
+
+function syllables(word: string): number {
+  let w = word.toLowerCase().replace(/[^a-z]/g, "");
+  if (!w) return 0;
+  if (w.length <= 3) return 1;
+  w = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, "").replace(/^y/, "");
+  const groups = w.match(/[aeiouy]{1,2}/g);
+  return Math.max(1, groups ? groups.length : 1);
+}
+
+/** Flesch-Kincaid grade of a set of lines. Words in `skip` (the level's own
+ *  terms, the anchor) count as one syllable: the student is there to learn
+ *  them, so they should not push the grade up. */
+export function readingGrade(lines: string[], skip: Set<string>): number {
+  const sents = lines.flatMap(sentencesOf);
+  if (!sents.length) return 0;
+  let wordCount = 0;
+  let syllableCount = 0;
+  for (const sentence of sents) {
+    for (const raw of sentence.replace(/\{\d\}/g, "word").split(/\s+/).filter(Boolean)) {
+      wordCount += 1;
+      const bare = raw.toLowerCase().replace(/[^a-z]/g, "");
+      syllableCount += skip.has(bare) ? 1 : syllables(raw);
+    }
+  }
+  return 0.39 * (wordCount / sents.length) + 11.8 * (syllableCount / wordCount) - 15.59;
+}
+
 /** The order the five Power Play blanks appear in when the generator writes
  *  the paragraph itself: never 1 to 5, and different from level to level so
  *  two fallback paragraphs in a row do not share a pattern. */
@@ -274,8 +324,14 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
   const conf = (s: TermSeed): TermSeed => (s.confusion && byName.get(s.confusion)) || others(seeds, indexOf(s), 1)[0];
   const q = (k: number) => `${id}-Q${k}`;
   const wordOptions = (s: TermSeed, slot: number) => place(s.term, others(seeds, indexOf(s), 3).map((o) => o.term), slot);
-  const quote = (text: string) => `"${text}"`;
-  const notThe = (s: TermSeed) => (s.confusion ? ` Not ${conf(s).term}: that is ${quote(lower(conf(s).cue))}.` : "");
+  // Feedback is one or two short sentences built from the cue, never the
+  // full definition (17 Oct 2026, Chandu: "make sure every piece of copy
+  // including success explanations etc are shorter and 8th grade").
+  const notThe = (s: TermSeed) => (s.confusion ? ` ${conf(s).term} is ${lower(conf(s).cue)}.` : "");
+  const means = (s: TermSeed) => `${s.term} means ${lower(s.cue)}.`;
+  /** The main line, plus the extra clause only if both fit the feedback
+   *  limit: two long terms in one line read as a wall of text. */
+  const fit = (main: string, extra: string) => (extra && (main + extra).length <= LIMITS.feedback ? main + extra : main);
   const story = (text: string): SceneCard => ({ kind: "story", text });
   const used = new Set<string>();
   const show = (text: string): string => {
@@ -308,8 +364,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         kind: "choice", type: "Definition", id: q(k), termId: s.term, playOrder: k, label: "Definition",
         prompt: `What does "${s.term}" mean?`,
         options: pick.options, correctIndex: pick.correctIndex,
-        feedbackCorrect: `${s.term}: ${lower(s.cue)}. ${s.example}`,
-        feedbackWrong: `${s.term} means ${lower(s.definition)}${notThe(s)}`,
+        feedbackCorrect: `Yes. ${means(s)}`,
+        feedbackWrong: means(s),
       };
     },
     match(k: number, headers: [string, string]): GlossaryQuestion {
@@ -317,8 +373,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         kind: "matchUp", type: "Match It Up", id: q(k), playOrder: k, label: "Match the terms", prompt: headers[1] === "Use it when" ? "Match each word to when you use it." : "Match each word to its meaning.",
         headers,
         pairs: seeds.map((s, i) => ({ order: i + 1, left: s.term, right: show(s.cue), termId: s.term, icon: s.icon })),
-        feedbackCorrect: `All five matched: ${names.join(", ")}.`,
-        feedbackWrong: "Say each pair out loud, then try the ones that felt wrong.",
+        feedbackCorrect: "All five matched.",
+        feedbackWrong: "Say each pair out loud. Then try again.",
       };
     },
     /** A moment as a sentence with the word missing at the end. */
@@ -330,8 +386,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         sentence: `${moment(s, 1)} That is ___.`,
         layout: "grid",
         options: pick.options, correctIndex: pick.correctIndex,
-        feedbackCorrect: `${s.term}: ${lower(s.cue)}.`,
-        feedbackWrong: `${s.definition} So the word is ${s.term}.${notThe(s)}`,
+        feedbackCorrect: `Yes. That is ${s.term}.`,
+        feedbackWrong: fit(`It is ${s.term}: ${lower(s.cue)}.`, notThe(s)),
       };
     },
     /** A moment on a story card, then which word it shows. */
@@ -343,8 +399,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         prompt: WHICH_PROMPTS[k % WHICH_PROMPTS.length],
         layout: "grid",
         options: pick.options, correctIndex: pick.correctIndex,
-        feedbackCorrect: `${s.term}: ${lower(s.definition)}`,
-        feedbackWrong: `This is ${s.term}: ${lower(s.definition)}${notThe(s)}`,
+        feedbackCorrect: `Yes. ${means(s)}`,
+        feedbackWrong: fit(`It is ${s.term}: ${lower(s.cue)}.`, notThe(s)),
       };
     },
     /** Decide: the same shape, asked as a call the student makes. */
@@ -356,8 +412,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         prompt: "Which option fits?",
         layout: "grid",
         options: pick.options, correctIndex: pick.correctIndex,
-        feedbackCorrect: `${s.term}. ${s.cue}.`,
-        feedbackWrong: `The call is ${s.term}: ${lower(s.definition)}${notThe(s)}`,
+        feedbackCorrect: `Good call. That is ${s.term}.`,
+        feedbackWrong: fit(`The call is ${s.term}: ${lower(s.cue)}.`, notThe(s)),
       };
     },
     /** Four words' moments sorted into the words themselves, when the level
@@ -367,8 +423,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         kind: "sortBuckets", type: "Sort the Buckets", id: q(k), playOrder: k, label: "Sort the buckets", prompt: "Which word does each one show?",
         buckets: four.map((s) => s.term),
         items: [four[2], four[0], four[3], four[1]].map((s, i) => ({ order: i + 1, text: moment(s, 1), bucket: s.term, termId: s.term, icon: s.icon })),
-        feedbackCorrect: "Every moment sorted into its word.",
-        feedbackWrong: "Read each moment again and ask which word it shows.",
+        feedbackCorrect: "All sorted.",
+        feedbackWrong: "Ask which word each one shows.",
       };
     },
     sortAuthored(seed: SortSeed, k: number): GlossaryQuestion {
@@ -376,8 +432,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         kind: "sortBuckets", type: "Sort the Buckets", id: q(k), playOrder: k, label: seed.label ?? "Sort the buckets", prompt: seed.prompt,
         buckets: seed.buckets,
         items: seed.items.map((it, i) => ({ order: i + 1, text: show(it.text), bucket: it.bucket, termId: byTerm(it.term).term })),
-        feedbackCorrect: seed.feedbackCorrect ?? "Every one sorted.",
-        feedbackWrong: seed.feedbackWrong ?? "Ask of each one which bucket it belongs in, then try again.",
+        feedbackCorrect: seed.feedbackCorrect ?? "All sorted.",
+        feedbackWrong: seed.feedbackWrong ?? "Ask where each one belongs. Then try again.",
       };
     },
     /** Three true "word = cue" pairs and one wrong, where the wrong pair gives
@@ -390,8 +446,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         kind: "choice", type: "Catch the Misuse", id: q(k), termId: s.term, playOrder: k, label: "Quick check",
         prompt: "Which one is wrong?",
         options: pick.options, correctIndex: pick.correctIndex,
-        feedbackCorrect: `Right: ${s.term} is ${quote(lower(s.cue))}, not ${quote(lower(wrongWith.cue))}.`,
-        feedbackWrong: `${s.term} is not ${quote(lower(wrongWith.cue))}. That is ${wrongWith.term}. ${s.term} means ${lower(s.definition)}`,
+        feedbackCorrect: `Right. ${s.term} is not ${lower(wrongWith.cue)}.`,
+        feedbackWrong: fit(means(s), ` ${wrongWith.term} is ${lower(wrongWith.cue)}.`),
       };
     },
     type(s: TermSeed, k: number): GlossaryQuestion {
@@ -399,8 +455,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         kind: "typeTerm", type: "Type the Term", id: q(k), termId: s.term, playOrder: k, label: "Type the term",
         prompt: `${moment(s, 2)} Type the word.`,
         wordBank: names, answer: s.term,
-        feedbackCorrect: `${s.term}: ${lower(s.cue)}.`,
-        feedbackWrong: `The word is ${s.term}: ${lower(s.definition)}`,
+        feedbackCorrect: `Yes. That is ${s.term}.`,
+        feedbackWrong: `The word is ${s.term}: ${lower(s.cue)}.`,
       };
     },
     /** The word beside the word it is mixed up with, each with its cue; a
@@ -416,8 +472,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         prompt: `${moment(s, 0)} Which one is that?`,
         layout: "grid",
         options, correctIndex: pick.correctIndex,
-        feedbackCorrect: `${s.term}: ${quote(lower(s.cue))}. ${other.term}: ${quote(lower(other.cue))}.`,
-        feedbackWrong: `That is ${s.term}: ${quote(lower(s.cue))}. ${other.term} would be ${quote(lower(other.cue))}.`,
+        feedbackCorrect: `Yes. ${means(s)}`,
+        feedbackWrong: fit(`It is ${s.term}: ${lower(s.cue)}.`, ` ${other.term} is ${lower(other.cue)}.`),
       };
     },
     /** Two of the word's moments against the confusion's and another word's,
@@ -433,10 +489,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         kind: "multiSelect", type: "Select All", id: q(k), termId: s.term, playOrder: k, label: "Select all",
         prompt: `Select every moment that shows ${s.term}.`,
         options, correct,
-        feedbackCorrect: `Both show ${s.term}: ${lower(s.definition)}`,
-        feedbackWrong: another === other
-          ? `${s.term} is ${quote(lower(s.cue))}. The other two lines are ${other.term}.`
-          : `${s.term} is ${quote(lower(s.cue))}. One other line is ${other.term}, the last is ${another.term}.`,
+        feedbackCorrect: `Yes. Both show ${s.term}.`,
+        feedbackWrong: `Look for ${lower(s.cue)}. That is ${s.term}.`,
       };
     },
     selectAllAuthored(seed: SelectAllSeed, k: number): GlossaryQuestion {
@@ -445,8 +499,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         kind: "multiSelect", type: "Select All", id: q(k), termId: s.term, playOrder: k, label: "Select all",
         prompt: seed.prompt,
         options: seed.options.map(show), correct: seed.correct,
-        feedbackCorrect: seed.feedbackCorrect ?? `Right. Every one of those is ${s.term}.`,
-        feedbackWrong: seed.feedbackWrong ?? `${s.term} means ${lower(s.definition)}`,
+        feedbackCorrect: seed.feedbackCorrect ?? `Yes. Those all fit ${s.term}.`,
+        feedbackWrong: seed.feedbackWrong ?? means(s),
       };
     },
     caseAuthored(seed: CaseSeed, k: number): GlossaryQuestion {
@@ -470,8 +524,8 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
         kind: "choice", type: "Reverse Recall", id: q(k), termId: s.term, playOrder: k, label: "Review",
         prompt: `${s.definition} That word is...`,
         options: pick.options, correctIndex: pick.correctIndex,
-        feedbackCorrect: `Right, that is ${s.term}.`,
-        feedbackWrong: `That describes ${s.term}. ${s.example}`,
+        feedbackCorrect: `Yes. That is ${s.term}.`,
+        feedbackWrong: `That is ${s.term}: ${lower(s.cue)}.`,
       };
     },
   };
@@ -566,6 +620,9 @@ export function buildLesson(bp: GlossaryBlueprint, level: LevelSeed, previousVal
   // authored pieces fails at import, not in a student's hands.
   const count = credits({ questions, terms });
   for (const [t, n] of Object.entries(count)) if (n < 2) throw new Error(`${id}: "${t}" is credited ${n} time(s) in the main loop; mastery needs 2. Move the Select All or a case to it.`);
+  for (const q of [...questions, ...reviewQuestions]) for (const line of [q.feedbackCorrect, q.feedbackWrong]) {
+    if (line.length > LIMITS.feedback + 10) throw new Error(`${id}: ${q.id} feedback is ${line.length} characters ("${line}"); shorten the cue`);
+  }
   const kinds = questions.map(mechanic);
   for (let i = 2; i < kinds.length; i += 1) if (kinds[i] === kinds[i - 1] && kinds[i - 1] === kinds[i - 2]) throw new Error(`${id}: three ${kinds[i]} screens in a row (questions ${i - 1} to ${i + 1})`);
 
@@ -760,11 +817,55 @@ export function validateBlueprint(bp: GlossaryBlueprint): string[] {
       const found = [...p.matchAll(/\{(\d)\}/g)].map((m) => Number(m[1]));
       for (let i = 1; i <= 5; i += 1) if (found.filter((n) => n === i).length !== 1) problems.push(`${where}: the Power Play paragraph must use {${i}} exactly once`);
       if (found.length === 5 && found.every((n, i) => n === i + 1)) problems.push(`${where}: the Power Play blanks run 1 to 5 in teaching order; reorder the sentences so the student has to think about which word goes where`);
-      if (p.length > LIMITS.powerPlay) problems.push(`${where}: the Power Play paragraph is ${p.length} characters; ${LIMITS.powerPlay} at most`);
+      const cap = powerPlayLimit(level.number);
+      if (p.length > cap.chars) problems.push(`${where}: the Power Play paragraph is ${p.length} characters; Level ${level.number} holds ${cap.chars}. Cut words, not blanks`);
+      const ppSentences = sentencesOf(p);
+      if (ppSentences.length > cap.sentences) problems.push(`${where}: the Power Play paragraph has ${ppSentences.length} sentences; Level ${level.number} holds ${cap.sentences}`);
+      for (const sentence of ppSentences) {
+        const blanks = (sentence.match(/\{\d\}/g) ?? []).length;
+        if (blanks > cap.blanksPerSentence) problems.push(`${where}: Power Play sentence "${sentence}" has ${blanks} blanks; Level ${level.number} puts ${cap.blanksPerSentence} in a sentence`);
+      }
       for (const n of names) if (mentions(p, n)) problems.push(`${where}: the Power Play paragraph says "${n}", one of its own answers`);
       if (!level.powerPlay.intro.trim()) problems.push(`${where}: the Power Play needs an intro line`);
       numberCheck(p, "the Power Play paragraph");
     }
+    // Reading rules: every sentence the student reads is short, authored
+    // feedback is short, and the level reads at grade 8 or below.
+    const readable: { text: string; what: string }[] = [];
+    for (const t of level.terms) {
+      readable.push({ text: t.definition, what: `the definition of "${t.term}"` }, { text: t.example, what: `the example for "${t.term}"` });
+      (t.moments ?? []).forEach((m, i) => readable.push({ text: m, what: `moment ${i + 1} for "${t.term}"` }));
+    }
+    const feedbackLines: { text: string; what: string }[] = [];
+    if (level.sort) {
+      readable.push({ text: level.sort.prompt, what: "the sort prompt" });
+      if (level.sort.feedbackCorrect) feedbackLines.push({ text: level.sort.feedbackCorrect, what: "the sort's right-answer line" });
+      if (level.sort.feedbackWrong) feedbackLines.push({ text: level.sort.feedbackWrong, what: "the sort's wrong-answer line" });
+    }
+    if (level.selectAll) {
+      readable.push({ text: level.selectAll.prompt, what: "the Select All prompt" });
+      if (level.selectAll.feedbackCorrect) feedbackLines.push({ text: level.selectAll.feedbackCorrect, what: "the Select All right-answer line" });
+      if (level.selectAll.feedbackWrong) feedbackLines.push({ text: level.selectAll.feedbackWrong, what: "the Select All wrong-answer line" });
+    }
+    (level.cases ?? []).forEach((c, ci) => {
+      if (c.scene) readable.push({ text: c.scene, what: `case ${ci + 1} scene` });
+      c.steps.forEach((step, si) => readable.push({ text: step.prompt, what: `case ${ci + 1} step ${si + 1}` }));
+      feedbackLines.push({ text: c.feedbackCorrect, what: `case ${ci + 1} right-answer line` }, { text: c.feedbackWrong, what: `case ${ci + 1} wrong-answer line` });
+    });
+    if (level.intro) for (const key of ["headline", "line", "hook"] as const) readable.push({ text: level.intro[key], what: `the intro ${key}` });
+    (level.facts ?? []).forEach((f, i) => readable.push({ text: f, what: `fact ${i + 1}` }));
+    if (level.powerPlay) readable.push({ text: level.powerPlay.paragraph.replace(/\{\d\}/g, "word"), what: "the Power Play paragraph" }, { text: level.powerPlay.intro, what: "the Power Play intro" });
+    for (const f of feedbackLines) {
+      if (f.text.length > LIMITS.feedback) problems.push(`${where}: ${f.what} is ${f.text.length} characters; feedback holds ${LIMITS.feedback}`);
+      if (sentencesOf(f.text).length > READING.feedbackSentences) problems.push(`${where}: ${f.what} has ${sentencesOf(f.text).length} sentences; feedback is ${READING.feedbackSentences} at most`);
+      numberCheck(f.text, f.what);
+    }
+    for (const r of [...readable, ...feedbackLines]) {
+      for (const sentence of sentencesOf(r.text)) if (words(sentence) > READING.sentenceWords) problems.push(`${where}: ${r.what} has a ${words(sentence)}-word sentence ("${sentence}"); ${READING.sentenceWords} at most`);
+    }
+    const skip = new Set([...names, bp.company].flatMap((n) => n.toLowerCase().split(/\s+/)).map((w) => w.replace(/[^a-z]/g, "")));
+    const grade = readingGrade([...readable, ...feedbackLines].map((r) => r.text), skip);
+    if (grade > READING.grade) problems.push(`${where}: the level's copy reads at grade ${grade.toFixed(1)}; ${READING.grade} at most. Use shorter words and sentences`);
     // No line of copy twice within a level, across every authored piece.
     const seen = new Map<string, number>();
     for (const line of levelCopy) seen.set(line.toLowerCase(), (seen.get(line.toLowerCase()) ?? 0) + 1);

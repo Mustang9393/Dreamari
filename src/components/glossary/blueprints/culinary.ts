@@ -61,7 +61,7 @@ export const CULINARY_GLOSSARY: GlossaryBlueprint = {
       ],
       powerPlay: {
         intro: "Prep the whole order.",
-        paragraph: "{5} the tomato into thin flat rounds. {2} the garlic until it is almost paste. For the salad, {3} the carrot into matchsticks. {1} the onion into even cubes for the soup. Last, {4} the parsley rough and toss it in.",
+        paragraph: "{5} the tomato into flat rounds. {2} the garlic into a paste. {3} the carrot into thin sticks. {1} the onion into small cubes. Last, {4} the parsley rough.",
       },
       facts: [
         "A sharp knife is safer than a dull one. A dull blade slips.",
@@ -109,7 +109,7 @@ export const CULINARY_GLOSSARY: GlossaryBlueprint = {
             { prompt: "The sauce must cook gently for an hour. Which heat?", options: ["High heat", "Low heat"], correctIndex: 1 },
           ],
           feedbackCorrect: "High heat browns fast. Low heat cooks gently.",
-          feedbackWrong: "A crust needs high heat. A long gentle cook needs low heat.",
+          feedbackWrong: "A crust needs high heat. A slow sauce needs low heat.",
         },
       ],
       powerPlay: {
@@ -162,8 +162,8 @@ export const CULINARY_GLOSSARY: GlossaryBlueprint = {
           { text: "Potatoes crisping in the oven", bucket: "Dry heat", term: "Roast" },
           { text: "Sauce boiling down to glaze", bucket: "Wet heat", term: "Reduce" },
         ],
-        feedbackCorrect: "Liquid in the pot means wet heat. An open oven means dry heat.",
-        feedbackWrong: "Ask of each one: is the food sitting in liquid, or in open oven air?",
+        feedbackCorrect: "Liquid in the pot is wet heat. An open oven is dry heat.",
+        feedbackWrong: "Is the food in liquid, or in open oven air?",
       },
       cases: [
         {
@@ -175,7 +175,7 @@ export const CULINARY_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Does the pot need a lid?", options: ["Yes, covered", "No, open"], correctIndex: 0 },
           ],
           feedbackCorrect: "Tough meat needs time, liquid and a lid. That is a braise.",
-          feedbackWrong: "Roasting is dry and open. Tough meat wants a covered pot, low and slow.",
+          feedbackWrong: "Roasting is dry and open. Tough meat needs a lid, low and slow.",
         },
       ],
       powerPlay: {
@@ -222,7 +222,7 @@ export const CULINARY_GLOSSARY: GlossaryBlueprint = {
         options: ["Peanut sauce", "Shrimp in the broth", "Plain boiled rice", "Eggs in the dressing"],
         correct: [0, 1, 3],
         feedbackCorrect: "Peanuts, shellfish and eggs are common ones. Plain rice is safe.",
-        feedbackWrong: "Peanuts, shellfish and eggs can make some guests very sick. Plain rice cannot.",
+        feedbackWrong: "Peanuts, shellfish and eggs can make guests sick. Plain rice cannot.",
       },
       cases: [
         {
@@ -232,8 +232,8 @@ export const CULINARY_GLOSSARY: GlossaryBlueprint = {
             { prompt: "What happens if lettuce goes on that board now?", options: ["Germs move to the lettuce", "Nothing, lettuce is safe"], correctIndex: 0 },
             { prompt: "What must happen to the board first?", options: ["Wipe it with a dry towel", "Clean it, then kill the germs"], correctIndex: 1 },
           ],
-          feedbackCorrect: "Germs travel from raw meat to anything that touches the board. Clean it, then kill what is left.",
-          feedbackWrong: "Raw chicken leaves germs behind. A dry wipe moves them around. Clean, then spray.",
+          feedbackCorrect: "Germs move from raw meat to the board. Clean it, then kill the germs.",
+          feedbackWrong: "A dry wipe just moves germs around. Clean it, then spray it.",
         },
       ],
       powerPlay: {

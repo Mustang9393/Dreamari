@@ -60,19 +60,23 @@ That is the whole job. No question is written by hand.
 |---|---|---|
 | term | 22 characters | the HUD token label (two lines), a word tile, a Power Play chip |
 | cue | 34 | the right side of a match card, a quick-check pair, a compare point |
-| definition | 120 | the teach card at 24px, an answer tile |
-| example | 150 | one sentence of the Power Play paragraph |
+| definition | 110 | the teach card at 24px, an answer tile |
+| example | 120 | the teach card |
 | formula | 28 | the worked line under the definition |
 | moment | 72, and 12 words | the scene card's one line, a fill-in sentence, a Select All line, a Type prompt |
 | sort item | 34 | a sort token |
 | sort bucket | 34 | a bucket label |
 | Select All line | 44 | one line of the select list |
-| case step prompt | 90 | Dreamy's bubble for one step |
+| case step prompt | 80 | Dreamy's bubble for one step |
 | case option | 34 | a two-up or 2x2 tile |
-| Power Play paragraph | 460 | the board at phone width |
+| Power Play paragraph | Level 1: 200 and five sentences, one blank each; Level 2: 240, five, one blank each; Levels 3 and 4: 290, six; Levels 5+: 330, six | the board; Level 1 must read as five plain lines |
+| feedback (authored or generated) | 90, and two sentences | the feedback panel at phone width |
+| any sentence | 14 words | everything a student reads |
 | cue (words) | 7 words | an answer tile (SOP: answer choices usually 7 words) |
 | level title | 30 | the HUD and the Levels map |
 | level goal | 48 | the welcome line |
+
+Reading rules (17 Oct 2026, Chandu: "make sure every piece of copy including success explanations etc are shorter and 8th grade comprehension level" and "make sure the power play isnt so complex and long and a lot to read for level 1"): every sentence is 14 words at most; feedback is two short sentences built from the cue, never the full definition, and the generator drops the "other word" clause when a line would pass 90 characters; each level's copy must score grade 8 or below on Flesch-Kincaid with its own five words and the anchor counted as one syllable (`readingGrade` in `generate.ts`); the Power Play's size grows with the level (`powerPlayLimit`).
 
 Inside those limits the engine's own rules hold: a long term scales down on the teach card instead of overflowing (`--term-chars`), HUD labels and relic captions wrap to two lines and never cut mid-glyph, tiles, chips and bubbles break long words, a Power Play slot grows to the length of its answer, and every card clips at its edge. Dreamy is never clipped by a column (the main column overflows; the Drift slot is inset by the atlas margin). Screens never scroll: FitToScreen scales a screen to its room.
 

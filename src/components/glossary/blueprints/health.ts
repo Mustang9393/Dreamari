@@ -67,7 +67,7 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
       ],
       powerPlay: {
         intro: "Open the clinic for the morning.",
-        paragraph: "A busy morning at Riverside Clinic. The nurse uses {5} to decide who is seen first: the chest pain goes ahead of the sore throat. Each {1} gets a quick check of pulse, breathing and temperature, the {2}. Everything is written in the {3} so the next nurse can read it. Before any pill is handed over, the nurse checks the {4} twice.",
+        paragraph: "The nurse uses {5} to pick who goes first. A {1} sits down in room two. The nurse checks her {2}. All of it goes in her {3}. Before any pill, the nurse checks the {4} twice.",
       },
       facts: [
         "Nurses are the largest group of health care workers in the United States.",
@@ -94,7 +94,7 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
           moments: ["One nurse assigns every patient on the floor to a nurse.", "The nurse at the desk who decides who cares for whom.", "When a problem comes up, the whole floor goes to one nurse."],
         },
         {
-          term: "Handoff", definition: "Passing a patient's care to the next nurse.", example: "At the end of a shift, Riverside Clinic nurses do a handoff for every patient.", cue: "Passing care to the next nurse", icon: "arrow-left-right",
+          term: "Handoff", definition: "Passing a patient's care to the next nurse.", example: "Riverside Clinic nurses do a handoff for each patient before they go home.", cue: "Passing care to the next nurse", icon: "arrow-left-right",
           moments: ["Ana tells the night nurse everything about room four before leaving.", "Two nurses stand at the bedside and go over every detail.", "The day nurse passes each room's details to the night nurse."],
         },
         {
@@ -102,7 +102,7 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
           moments: ["A patient breaks out in hives minutes after a new pill.", "A red band on the wrist warns about a medicine to avoid.", "The man says penicillin makes his throat swell."],
         },
         {
-          term: "Discharge", definition: "When a patient is well enough to leave.", example: "Riverside Clinic plans each discharge so the patient knows how to care for themselves at home.", cue: "Going home well", icon: "arrow-up-circle",
+          term: "Discharge", definition: "When a patient is well enough to leave.", example: "Riverside Clinic plans each discharge so patients know how to heal at home.", cue: "Going home well", icon: "arrow-up-circle",
           moments: ["The doctor signs the papers and the patient packs to go home.", "The nurse explains the home instructions and wheels her to the door.", "The bed is empty and clean. Its last patient left this morning."],
         },
       ],
@@ -111,8 +111,8 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
         prompt: "Select every sign of a bad reaction to a medicine.",
         options: ["A rash spreading after a new pill", "A throat that swells after a shot", "Feeling sleepy after a long day", "Lips puffing up after a peanut"],
         correct: [0, 1, 3],
-        feedbackCorrect: "A rash, a swelling throat and puffy lips are all warning signs. Being tired after a long day is not.",
-        feedbackWrong: "Watch for rash, swelling and puffy lips. Tiredness after work is not a reaction to a medicine.",
+        feedbackCorrect: "A rash, a swollen throat and puffy lips are warning signs. Being tired is not.",
+        feedbackWrong: "Look for a rash, swelling or puffy lips. Being tired is not a reaction.",
       },
       cases: [
         {
@@ -123,13 +123,13 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Who decides which nurse takes room four tonight?", options: ["The patient in room four", "The nurse who runs the floor"], correctIndex: 1 },
             { prompt: "Room four is well enough to leave tomorrow. Who signs off?", options: ["The doctor signs the papers", "The patient just walks out"], correctIndex: 0 },
           ],
-          feedbackCorrect: "Pass the care on, let the floor lead assign the room, and the doctor signs the release.",
-          feedbackWrong: "Care is passed nurse to nurse, the floor lead assigns rooms, and only the doctor sends someone home.",
+          feedbackCorrect: "Tell the next nurse first. The floor lead picks rooms, and the doctor signs off.",
+          feedbackWrong: "Care passes from nurse to nurse. Only the doctor can send someone home.",
         },
       ],
       powerPlay: {
         intro: "Finish Ana's day on the floor.",
-        paragraph: "Ana's twelve hours at Riverside Clinic are almost done. The {2} stops by to say room four is hers until the night nurse arrives. The man in room four has a penicillin {4}, so Ana checks every pill twice. His {5} is planned for tomorrow, and the papers are ready. Ana gives the night nurse a full {3} on him. Then she clocks out, and her {1} is over.",
+        paragraph: "Ana's {1} at Riverside Clinic is almost over. The {2} gives her room four for now. The man in room four has a penicillin {4}. His {5} is set for tomorrow. Ana gives the night nurse a full {3} on him.",
       },
       facts: ["Many hospital nurses work three twelve-hour shifts a week."],
     },
@@ -153,7 +153,7 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
           moments: ["The pill eases the pain but makes the patient sleepy too.", "The new medicine works, but now her stomach is upset.", "His cough is gone. His mouth is dry all day."],
         },
         {
-          term: "IV", definition: "A thin tube in a vein that gives fluid or medicine straight into the blood.", example: "At Riverside Clinic, an IV gives fluids fast to a dehydrated patient.", cue: "Medicine straight into a vein", confusion: "Prescription", icon: "droplets",
+          term: "IV", definition: "A thin tube that puts fluid or medicine right into a vein.", example: "At Riverside Clinic, an IV gives fluids fast to a dehydrated patient.", cue: "Medicine straight into a vein", confusion: "Prescription", icon: "droplets",
           moments: ["A clear bag drips through a tube into a hand.", "Fluids flow through a thin tube right into his vein.", "A pole on wheels holds the bag that drips into her arm."],
         },
         {
@@ -178,16 +178,16 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
           { text: "Dry mouth from the cough syrup", bucket: "What it does", term: "Side Effect" },
           { text: "The new pill cancels the old one", bucket: "What it does", term: "Interaction" },
         ],
-        feedbackCorrect: "Orders, bottles and tubes get medicine in. Sleepiness, dry mouth and clashes are what it does once inside.",
-        feedbackWrong: "Ask of each one: is this how the medicine arrives, or what happens once it is in the body?",
+        feedbackCorrect: "Orders, bottles and tubes get medicine in. The rest is what it does inside.",
+        feedbackWrong: "Ask: is this how the medicine gets in, or what it does inside?",
       },
       selectAll: {
         term: "Side Effect",
         prompt: "Select every line that is an unwanted extra from a medicine.",
         options: ["Feeling dizzy after the blood pressure pill", "The fever dropping after the medicine", "An itchy rash from the antibiotic", "The doctor's slip for one more refill"],
         correct: [0, 2],
-        feedbackCorrect: "Dizziness and a rash are extras the medicine was not meant to cause. A fever dropping is the job it was meant to do.",
-        feedbackWrong: "An unwanted extra is something the medicine does beyond its job. A fever dropping is the job. A slip is just paper.",
+        feedbackCorrect: "Dizziness and a rash are unwanted extras. The fever dropping is the job.",
+        feedbackWrong: "Pick what the medicine was not meant to do. A fever dropping is its job.",
       },
       cases: [
         {
@@ -198,8 +198,8 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Where does that order go to be filled?", options: ["To the front desk", "To the counter with the bottles"], correctIndex: 1 },
             { prompt: "The order is filled. What does the nurse check before handing it over?", options: ["Right name and right medicine", "That the bottle looks nice"], correctIndex: 0 },
           ],
-          feedbackCorrect: "Order first, then it is filled, then the nurse checks the name and the medicine before handing it over.",
-          feedbackWrong: "The doctor writes it, the counter fills it, and the nurse checks name and medicine before it goes out.",
+          feedbackCorrect: "The doctor writes it, the counter fills it, and the nurse checks it.",
+          feedbackWrong: "First the order, then the filling. The nurse checks name and medicine last.",
         },
         {
           terms: ["Interaction", "Side Effect"],
@@ -209,15 +209,15 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
             { prompt: "A day later Mr. Diaz feels sleepy from the new pill. What is that?", options: ["The pill working as planned", "An unwanted extra effect"], correctIndex: 1 },
             { prompt: "What does the nurse do about the sleepiness?", options: ["Tell the doctor and write it down", "Stop all his medicines at once"], correctIndex: 0 },
           ],
-          feedbackCorrect: "Check the clash first. A new unwanted effect gets reported and written down, never ignored.",
-          feedbackWrong: "Two pills can change each other, so check that first. Sleepiness is an extra to report, not a reason to stop everything.",
+          feedbackCorrect: "Check for a clash first. Report a new unwanted effect and write it down.",
+          feedbackWrong: "Check for a clash first. Then report the sleepiness, but do not stop everything.",
         },
       ],
       powerPlay: {
         intro: "Get Mrs. Lee's medicine right.",
-        paragraph: "Mrs. Lee arrives at Riverside Clinic too weak to drink. A nurse starts an {3} so fluids reach her blood right away. The doctor writes a {1} for a new heart medicine. Before it is filled, the {4} checks for an {5} with the pill she already takes. The nurse warns her that a dry mouth may be a {2}, and to call if it bothers her.",
+        paragraph: "Mrs. Lee comes to Riverside Clinic too weak to drink. A nurse starts an {3} so fluids reach her blood fast. The doctor writes a {1} for a new heart pill. The {4} checks it for an {5} with her old pill. The nurse warns her a dry mouth may be a {2}.",
       },
-      facts: ["Nurses check the right patient, right medicine, right dose, right time and right route before giving anything."],
+      facts: ["Before giving medicine, nurses check the right patient, drug, dose, time and route."],
     },
     {
       number: 4,
@@ -247,7 +247,7 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
           moments: ["Pulse back, breathing even. Now keep it that way before transport.", "The numbers settle. The patient is out of danger for now.", "Before the move upstairs, the team makes sure nothing will slip."],
         },
         {
-          term: "Rapid Response", definition: "A team called when a patient is getting worse fast, before the heart stops.", example: "A Riverside Clinic nurse called a Rapid Response when the fever climbed and would not stop.", cue: "The team called before a crisis", confusion: "Code Blue", icon: "users",
+          term: "Rapid Response", definition: "A team called when a patient is getting worse fast, before the heart stops.", example: "A Riverside Clinic nurse called a Rapid Response as the fever kept climbing.", cue: "The team called before a crisis", confusion: "Code Blue", icon: "users",
           moments: ["The patient is sliding downhill fast but still breathing.", "Fever climbing, pulse racing. The nurse calls for help early.", "He is getting worse by the minute, but his heart still beats."],
         },
       ],
@@ -263,16 +263,16 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
           { text: "Keeping the pulse steady", bucket: "Hands on the patient", term: "Stabilize" },
           { text: "Fever and pulse climbing fast", bucket: "Call for help", term: "Rapid Response" },
         ],
-        feedbackCorrect: "Alarms and pages bring the team running. Pressing, tilting and holding steady are done with your hands.",
-        feedbackWrong: "Ask of each one: does this bring people running, or is it something you do at the bedside?",
+        feedbackCorrect: "Alarms and pages bring help. Pressing, tilting and steadying are hands on.",
+        feedbackWrong: "Ask: does this bring people running, or is it done at the bed?",
       },
       selectAll: {
         term: "Stabilize",
         prompt: "Select every sign the patient is steady and out of danger.",
         options: ["Pulse back and even", "Breathing slow and regular", "No pulse at all", "Color back in the face"],
         correct: [0, 1, 3],
-        feedbackCorrect: "An even pulse, regular breathing and color in the face mean steady. No pulse means the fight is still on.",
-        feedbackWrong: "Steady looks like an even pulse, regular breaths and color in the face. No pulse is the opposite.",
+        feedbackCorrect: "An even pulse, regular breaths and color in the face mean steady.",
+        feedbackWrong: "Look for an even pulse, regular breaths and color. No pulse is not steady.",
       },
       cases: [
         {
@@ -283,7 +283,7 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Minutes later his heart stops. Now which call?", options: ["The full crash team, now", "Keep watching for a minute"], correctIndex: 0 },
           ],
           feedbackCorrect: "Call early while he still breathes. If the heart stops, the call changes.",
-          feedbackWrong: "Getting worse but breathing means call the early team. A stopped heart means the full crash call.",
+          feedbackWrong: "Worse but breathing means the early team. A stopped heart means the crash call.",
         },
         {
           terms: ["Airway", "CPR", "Stabilize"],
@@ -294,12 +294,12 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
             { prompt: "Her pulse returns. What now?", options: ["Keep her steady before moving her", "Rush her upstairs right away"], correctIndex: 0 },
           ],
           feedbackCorrect: "Open path first, then presses, then keep her steady before she moves.",
-          feedbackWrong: "Air path first. No pulse means chest presses. Once the pulse is back, steady her before moving.",
+          feedbackWrong: "Air first, then presses. Once her pulse is back, steady her before moving.",
         },
       ],
       powerPlay: {
         intro: "Get room six through the night.",
-        paragraph: "The night is quiet at Riverside Clinic until room six turns. His fever climbs and his pulse races, so the nurse calls a {5} while he is still breathing. Then the monitor goes flat and the call becomes a {1}. The first nurse in checks that air can reach his lungs, the {3}. Another starts {2}, pressing hard and fast. When his pulse returns, the team works to {4} him before the move upstairs.",
+        paragraph: "At Riverside Clinic, room six gets worse. His fever climbs, so the nurse calls a {5} while he still breathes. Then his heart stops, and it becomes a {1}. A nurse checks his {3} so air gets in. Another starts {2}, pushing hard and fast. When his pulse is back, the team works to {4} him.",
       },
       facts: ["Chest presses should go about two per second, the beat of many pop songs."],
     },
@@ -347,16 +347,16 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
           { text: "Nurse asks for more pain relief", bucket: "Inside the team", term: "Advocate" },
           { text: "Skin doctor takes over her care", bucket: "Outside help", term: "Referral" },
         ],
-        feedbackCorrect: "Visits, written goals and speaking up all happen inside the team. Experts and specialists are outside help.",
-        feedbackWrong: "Ask of each one: does this bring in someone from outside the floor, or is it just the team here?",
+        feedbackCorrect: "Visits, written goals and speaking up stay inside. Experts are outside help.",
+        feedbackWrong: "Ask: does this bring in someone from outside, or is it just the team?",
       },
       selectAll: {
         term: "Consult",
         prompt: "Select every time the team asks an expert but keeps the patient.",
         options: ["A phone call to a kidney doctor for advice", "Sending her to a heart doctor for good", "A quick question to the skin expert", "The whole team walking bed to bed"],
         correct: [0, 2],
-        feedbackCorrect: "Asking for advice keeps the patient here. Sending her away for good is a different word, and a walk is just a walk.",
-        feedbackWrong: "Pick the ones where an expert is asked and the patient stays put. Sending her away is a different word.",
+        feedbackCorrect: "Asking for advice keeps the patient here. Sending her away is a different word.",
+        feedbackWrong: "Pick the ones where an expert is asked and the patient stays put.",
       },
       cases: [
         {
@@ -366,7 +366,7 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
             { prompt: "The doctor wants a kidney expert's opinion but will keep Mr. Park. Which?", options: ["Ask for advice", "Send him on"], correctIndex: 0 },
             { prompt: "The expert says Mr. Park needs care only a kidney center can give. Now which?", options: ["Ask for advice", "Send him on"], correctIndex: 1 },
           ],
-          feedbackCorrect: "Advice first, with him staying here. When he needs care we cannot give, he is sent on.",
+          feedbackCorrect: "Ask for advice while he stays. Send him on when he needs more.",
           feedbackWrong: "Keeping the patient and asking is one word. Handing the patient over is the other.",
         },
         {
@@ -376,13 +376,13 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
             { prompt: "What does the nurse do?", options: ["Tell the doctor the pain is worse", "Respect her wish and stay quiet"], correctIndex: 0 },
             { prompt: "The doctor changes her pain goal. Where does the new goal get written?", options: ["On a sticky note", "In her written steps for care"], correctIndex: 1 },
           ],
-          feedbackCorrect: "Speak up for her, then put the new goal where the whole team can read it.",
-          feedbackWrong: "A scared patient still needs a voice. New goals go in the written plan the whole team reads.",
+          feedbackCorrect: "Speak up for her. Then write the new goal where the team can read it.",
+          feedbackWrong: "A scared patient still needs a voice. New goals go in the written plan.",
         },
       ],
       powerPlay: {
         intro: "Run the floor for one morning.",
-        paragraph: "Morning at Riverside Clinic begins with {2}, the team moving bed to bed. At Mrs. Cole's door, the nurse chooses to {5} for her, saying the pain is worse even though Mrs. Cole would not. The doctor updates her {1} with a new pain goal. For Mr. Park, the doctor asks a kidney expert for a {4} and keeps him here. When the expert says he needs a kidney center, the doctor writes a {3}.",
+        paragraph: "Morning at Riverside Clinic starts with {2}, as the team goes bed to bed. One woman is scared to say her pain is worse. Her nurse chooses to {5} for her. The doctor adds a new pain goal to her {1}. For another patient, the doctor asks a kidney expert for a {4}. When he needs a kidney center, the doctor writes a {3}.",
       },
       facts: ["Nurses spend more time with patients than any other member of the care team."],
     },
@@ -423,8 +423,8 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
         prompt: "Select every patient who belongs on the unit where babies arrive.",
         options: ["A mother whose water just broke", "A newborn minutes old", "A man with chest pain", "A teen with a broken arm"],
         correct: [0, 1],
-        feedbackCorrect: "Mothers about to deliver and brand new babies. Chest pain and broken arms go elsewhere.",
-        feedbackWrong: "Only the mother about to deliver and her newborn belong there. The others go to other units.",
+        feedbackCorrect: "Mothers in labor and newborns belong here. The others go elsewhere.",
+        feedbackWrong: "Only the mother giving birth and her newborn belong there.",
       },
       cases: [
         {
@@ -434,7 +434,7 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
             { prompt: "A six year old with an ear infection. Which unit?", options: ["The unit for kids", "The unit for the sickest"], correctIndex: 0 },
             { prompt: "A man whose heart stopped twice today. Which unit?", options: ["The unit for kids", "The unit for the sickest"], correctIndex: 1 },
           ],
-          feedbackCorrect: "Kids go to the kids' unit. A patient who needs watching every minute goes to the sickest unit.",
+          feedbackCorrect: "Kids go to the kids' unit. The sickest go where they are watched every minute.",
           feedbackWrong: "Age picks the first unit. How sick he is picks the second.",
         },
         {
@@ -444,13 +444,13 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
             { prompt: "A patient needs a test ordered tonight. Who can do it?", options: ["The nurse with extra training", "No one until morning"], correctIndex: 0 },
             { prompt: "She is here for her weekly cancer treatment. Which nurse takes her?", options: ["The baby unit nurse", "The cancer care nurse"], correctIndex: 1 },
           ],
-          feedbackCorrect: "A nurse with extra training can order tests and prescribe. Cancer care has its own nurses.",
-          feedbackWrong: "Extra training means she can order and prescribe. Weekly cancer treatment belongs with cancer care.",
+          feedbackCorrect: "A nurse with extra training can order tests. Cancer care has its own nurses.",
+          feedbackWrong: "Extra training lets her order and prescribe. Cancer care takes weekly treatment.",
         },
       ],
       powerPlay: {
         intro: "Take the tour of every unit.",
-        paragraph: "A tour of Riverside Clinic. Upstairs, a first cry comes from {4}. Down the hall in {2}, a nurse hands a sticker to a brave little girl. In {3}, a woman settles in for her weekly treatment and the nurse greets her by name. The {1} is quiet and bright with monitors, one nurse for every two beds. In the evening clinic, a {5} checks a rash and writes the prescription herself.",
+        paragraph: "A tour of Riverside Clinic. Upstairs, a first cry comes from {4}. In {2}, a nurse hands a sticker to a brave little girl. In {3}, the nurse greets a woman by name at her weekly treatment. The {1} is quiet and full of monitors. At night, a {5} checks a rash and writes the order herself.",
       },
       facts: ["Many nurses switch specialties more than once in a career."],
     },

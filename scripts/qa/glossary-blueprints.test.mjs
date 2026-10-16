@@ -9,7 +9,7 @@
 // and the review questions use a form the main loop did not.
 // Run: node --import ./scripts/qa/ts-resolve.mjs scripts/qa/glossary-blueprints.test.mjs
 import assert from 'node:assert/strict';
-import {buildGlossaryCareer, validateBlueprint, focusFor, mechanic} from '../../src/components/glossary/generate.ts';
+import {buildGlossaryCareer, validateBlueprint, focusFor, mechanic, sentencesOf, powerPlayLimit, READING, LIMITS} from '../../src/components/glossary/generate.ts';
 import {NURSING_GLOSSARY} from '../../src/components/glossary/blueprints/health.ts';
 import {SOFTWARE_GLOSSARY} from '../../src/components/glossary/blueprints/software.ts';
 import {AVIATION_GLOSSARY} from '../../src/components/glossary/blueprints/aviation.ts';
@@ -20,6 +20,7 @@ const focuses=new Set();
 const esc=(s)=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const says=(text,word)=>new RegExp(`\\b${esc(word)}s?\\b`,'i').test(text);
 let screens=0, cases=0, sorts=0, selects=0;
+const feedback=[]; const ppByLevel={};
 for(const bp of blueprints){
   const problems=validateBlueprint(bp);
   assert.deepEqual(problems,[],`${bp.industry.slug}:\n- ${problems.join('\n- ')}`);
@@ -79,6 +80,22 @@ for(const bp of blueprints){
     // Review: one Reverse Recall per word, a form the main loop never used.
     assert.equal(lesson.reviewQuestions.length,5,`${where}: five review questions`);
     assert.ok(lesson.questions.every(q=>!(q.kind==='choice'&&q.type==='Reverse Recall')),`${where}: Reverse Recall belongs to the review only`);
+    // Reading (17 Oct 2026, Chandu: "every piece of copy including success
+    // explanations etc are shorter and 8th grade"): every sentence a screen
+    // shows is 14 words at most and every feedback line is short.
+    const wc=(t)=>t.trim().split(/\s+/).filter(Boolean).length;
+    for(const q of [...lesson.questions,...lesson.reviewQuestions]){
+      const lines=[q.prompt,q.feedbackCorrect,q.feedbackWrong];
+      if(q.kind==='choice'&&q.scene?.kind==='story')lines.push(q.scene.text);
+      if(q.kind==='choice'&&q.sentence)lines.push(q.sentence);
+      if(q.kind==='multiSelect')lines.push(...q.options);
+      if(q.kind==='chain')lines.push(...q.steps.map(st=>st.prompt));
+      for(const line of lines)for(const sen of sentencesOf(line))assert.ok(wc(sen)<=READING.sentenceWords,`${where}: ${q.id} has a ${wc(sen)}-word sentence: "${sen}"`);
+      for(const f of [q.feedbackCorrect,q.feedbackWrong]){assert.ok(f.length<=LIMITS.feedback+10,`${where}: ${q.id} feedback is ${f.length} characters: "${f}"`);feedback.push(f.length);}
+    }
+    const cap=powerPlayLimit(lesson.lessonNumber);
+    assert.ok(lesson.powerPlay.paragraph.length<=cap.chars,`${where}: Power Play is ${lesson.powerPlay.paragraph.length} characters; ${cap.chars} at most`);
+    ppByLevel[lesson.lessonNumber]=Math.max(ppByLevel[lesson.lessonNumber]??0,lesson.powerPlay.paragraph.length);
     // One Power Play, one paragraph, all five words, blanks not in order.
     assert.equal(lesson.powerPlay.answers.length,5,`${where}: Power Play uses five words`);
     const order=[...lesson.powerPlay.paragraph.matchAll(/\{(\d)\}/g)].map(m=>Number(m[1]));
@@ -89,4 +106,6 @@ for(const bp of blueprints){
 }
 assert.deepEqual([...focuses].sort(),['analyze','apply','decide','recognize'],'all four recipes are exercised by the registered blueprints');
 console.log(`glossary blueprints ok: ${blueprints.map(b=>`${b.industry.slug} (${b.mode}, ${b.levels.filter(l=>l.terms).length} playable)`).join(', ')}`);
+feedback.sort((a,b)=>a-b);
+console.log(`feedback lines: median ${feedback[Math.floor(feedback.length/2)]} characters, longest ${feedback[feedback.length-1]}; longest Power Play by level: ${Object.entries(ppByLevel).map(([l,n])=>`L${l} ${n}`).join(', ')}; no sentence over ${READING.sentenceWords} words`);
 console.log(`${screens} scored screens across ${blueprints.reduce((n,b)=>n+b.levels.filter(l=>l.terms).length,0)} levels: ${cases} cases, ${sorts} sorts, ${selects} select-alls; no line is shown twice in any lesson; no Power Play runs in order`);
