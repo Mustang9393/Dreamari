@@ -1,3 +1,10 @@
+## 2026-10-16 (late night, 11): readiness check and the scaling SOP for Usman and Codex
+
+**Why (Chandu):** "check everything and see if everything is ready for usman and give me a full document sop with prompts for usman to scale including the prompts for image gen."
+
+- **Readiness:** tsc clean; ESLint no errors; both QA scripts pass; a deliberately broken blueprint is refused with eleven specific reasons; all fifteen worlds have a design system; routes and the QA page resolve; hub gating holds (finance only); Vercel built 81976505. Not yet: Codex's Level 1 art and welcome illustrations for the four generated industries, optional plates and panoramas, Levels 5 and 6, phone and light-mode passes.
+- **SOP:** `docs/reference/glossary-scaling-sop-usman-2026-10-16.html` (and a Google Doc): readiness table, roles, the rules on one page, Prompt A (create a glossary game for X, paste-ready, with the blueprint rules and checks), Prompt B (Levels 5 and 6), Prompt C (release), the image section with the term-art pipeline (`scripts/glossary-art.mjs` and its manifest), welcome, plates, panoramas, silhouettes, the expressions pack, Prompt D (Codex end to end), the QA checklist, the 50-industry table and the file map. `HANDOFF_INDEX.md` points at it.
+
 ## 2026-10-16 (late night, 10): Levels map icon plates, welcome art hooks, Dreamy expressions pack, SOP 3.4 to 3.6
 
 **Why (Chandu):** "lets not show the background for the levels picker right now until we have different ones. Use something else. No letters/monograms. Icons are fine for now but if we can get better vectors that would be great." Then: "for level 1 of all worlds we will have images for the terms. And the welcome screen. Codex has to know to generate those as well. And I would like codex to attempt generating a custom image we can use for each level in the selector only or the welcome screen only." And the "Dream Expressions V2" zip: "Only IF... maybe for the level selection we can?"

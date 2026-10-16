@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dreamari Glossary Games: Scaling SOP for Usman and Codex</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; line-height: 1.45; color: #111; }
+  h1 { font-size: 22pt; margin: 0 0 6px; }
+  h2 { font-size: 15pt; margin: 28px 0 8px; }
+  h3 { font-size: 12pt; margin: 18px 0 6px; }
+  p { margin: 6px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0 14px; font-size: 10pt; }
+  th, td { border: 1px solid #bbb; padding: 5px 7px; vertical-align: top; text-align: left; }
+  th { background: #eef1f6; }
+  pre { font-family: Menlo, Consolas, monospace; font-size: 9.5pt; background: #f4f5f7; border: 1px solid #ddd; padding: 10px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<h1>Dreamari Glossary Games: Scaling SOP for Usman and Codex</h1>
+<p><i>16 October 2026. One document to scale the glossary games from four industries to fifty: the rules (Joshua's), what is built and verified today, the prompts an agent pastes to create a game, and the prompts Codex pastes to generate every image. Repo copy: docs/reference/glossary-scaling-sop-usman-2026-10-16.html. The locked engineering spec is docs/handoff/specs/glossary-system.md; the full text of Joshua's plan with our mapping is docs/reference/glossary-scaling-plan-handover-2026-10-16.html.</i></p>
+
+<h2>0. Readiness, checked 16 October 2026</h2>
+<table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td>Live on main</td><td>Commit 81976505, Vercel build succeeded. Everything in this document is on main.</td></tr>
+<tr><td>Type check, lint</td><td>tsc clean. ESLint: no errors (three pre-existing warnings).</td></tr>
+<tr><td>Blueprint QA script</td><td>All four generated industries pass: seven questions plus a Power Play per level, no three of one mechanic in a row, every term credited twice, no answer leakage, no situation asked twice, all four recipes exercised.</td></tr>
+<tr><td>Validator negative test</td><td>A deliberately broken blueprint (bad slug, unknown world, definition saying its word, 14-word situation, 8-word cue, example without the anchor, unknown confusion, numbers without math) is refused with eleven specific reasons and does not build.</td></tr>
+<tr><td>Dreamy reactions QA</td><td>Passes: twelve Drift poses, four Signal reactions, asset budget, silhouettes.</td></tr>
+<tr><td>Design systems</td><td>All fifteen career worlds have a design system row; a blueprint naming any world works.</td></tr>
+<tr><td>Routes</td><td>/play/glossary/&lt;industry&gt; and /play/glossary/&lt;career&gt; resolve; /play-tools/glossary-qa lists every registered glossary (hamburger menu, Glossary QA).</td></tr>
+<tr><td>Hub gating</td><td>Only finance is released; generated industries play by route and from the QA page. Release is one slug in GLOSSARY_HUB_RELEASED.</td></tr>
+<tr><td>Demo flags</td><td>Every demo-only piece is tagged DEMO-ONLY in its own comment (blueprints, QA page, release list, Skip).</td></tr>
+<tr><td>Built so far</td><td>Finance (Joshua's, 4 of 20 levels), Software Engineering, Flight Operations, Nursing, Culinary Arts (4 playable levels each, Levels 5 and 6 on the roadmap).</td></tr>
+<tr><td>Not yet</td><td>No generated industry has its Level 1 term art or welcome illustration (Codex, section 6). No plates, panoramas or silhouettes registered (optional). Phone-width and light-mode passes on generated industries. Levels 5 and 6 copy.</td></tr>
+</table>
+
+<h2>1. Who does what</h2>
+<table>
+<tr><th>Role</th><th>Owns</th><th>Pastes</th></tr>
+<tr><td>Joshua</td><td>The rules: the Master Scaling Plan. Finance never changes.</td><td>Nothing; reviews.</td></tr>
+<tr><td>Usman's agent (Claude Code or Codex in the repo)</td><td>Blueprints: one file per industry, registered. Levels 5 and 6 later.</td><td>Prompt A, Prompt B.</td></tr>
+<tr><td>Codex (image generation)</td><td>Every image: Level 1 term art and the welcome illustration for each industry (required), plates, world panoramas, silhouettes (optional), Dreamy animation.</td><td>Prompt D and the section 6 prompts.</td></tr>
+<tr><td>Chandu</td><td>Browser QA on the Glossary QA page; release to the hub (Prompt C).</td><td>Prompt C.</td></tr>
+</table>
+
+<h2>2. The rules on one page</h2>
+<table>
+<tr><th>Rule</th><th>What it means for a new game</th><th>Enforced by</th></tr>
+<tr><td>Finance stays exactly as it is</td><td>Nothing here touches Finance.</td><td>Finance is hand-authored and never passes through the generator.</td></tr>
+<tr><td>No timers</td><td>No countdown, count-up or timed questions.</td><td>The engine has none.</td></tr>
+<tr><td>No forced images</td><td>Level 1 of every industry gets pictures (team decision). Levels 2 and up are words only. A card shows generated art or nothing, never an icon.</td><td>Engine.</td></tr>
+<tr><td>No forced math</td><td>Numbers only where the job's words naturally carry them.</td><td>Validator: numbers fail unless the level sets math: true.</td></tr>
+<tr><td>Three architectures</td><td>continuous_story (one company grows), scenario_thread (same workplace, new situation each level), practice_world (varied drills, no plot). Pick from the table in section 9.</td><td>Blueprint mode.</td></tr>
+<tr><td>Difficulty ladder</td><td>Level 1 recognize, 2 apply, 3 analyze (tell confusable words apart), 4 decide.</td><td>Generator recipes by level number.</td></tr>
+<tr><td>Five terms per level, four levels minimum</td><td>20 terms to launch; Levels 5 and 6 can be roadmap words.</td><td>Validator.</td></tr>
+<tr><td>7 to 10 interactions, one Power Play</td><td>Seven generated questions plus one paragraph with five blanks.</td><td>Generator, QA script.</td></tr>
+<tr><td>Copy length</td><td>Definition 120 characters, example 150, cue 34 characters and 7 words, situation 72 characters and 12 words, term 22, title 30, goal 48.</td><td>Validator.</td></tr>
+<tr><td>Answer leakage</td><td>A definition never says its word; a situation never says its word.</td><td>Validator.</td></tr>
+<tr><td>Wrong-answer feedback names what was wrong</td><td>Each term names the word it is confused with.</td><td>Generator uses confusion.</td></tr>
+<tr><td>Eighth grade, no dashes</td><td>Short words, one idea per sentence, two sentences instead of a dash.</td><td>Dashes: validator. Grade: author.</td></tr>
+<tr><td>One Dreamy per screen, the cloud itself</td><td>Never draw Dreamy, limbs or people into any image.</td><td>Engine; image brief.</td></tr>
+<tr><td>Every example names the anchor</td><td>In a continuous story or scenario thread, each example sentence names the company or place. Not required in a practice world.</td><td>Validator.</td></tr>
+</table>
+
+<h2>3. Prompt A: create a glossary game for X</h2>
+<p>Paste to an agent working in the Dreamari repo, replacing the two bracketed lines. The agent writes one file, registers one line, runs three checks and stops. It does not generate images and does not push.</p>
+<pre>You are working in the Dreamari prototype repo. Pull origin/main first. Read docs/handoff/specs/glossary-system.md before writing anything.
+
+TASK
+Create the glossary game for: [INDUSTRY, e.g. "Cybersecurity"]
+Notes from Chandu, if any: [optional]
+
+STEP 1. Look the industry up in the 50-industry table in docs/reference/glossary-scaling-sop-usman-2026-10-16.html (section 9). Take its mode (continuous_story, scenario_thread or practice_world) and its career world (an exact WORLD_COLORS key). Choose a slug: lowercase letters and dashes, it becomes the route /play/glossary/<slug>. Choose an anchor: one company, clinic, airline, shop or site that every level returns to (practice worlds may use it loosely). Choose the student's role in one word.
+
+STEP 2. Write src/components/glossary/blueprints/<slug>.ts by copying the blueprint with the same mode: software.ts (continuous story), aviation.ts (scenario thread), culinary.ts (practice world). Keep the header comment pattern (DEMO-ONLY content, why, the anchor). Author four playable levels and two roadmap levels:
+- Level 1 (recognize): five terms, each with term, definition, example, cue, icon.
+- Level 2 (apply): the same plus a situation on every term.
+- Levels 3 and 4 (analyze, decide): the same plus a confusion on every term, naming another term in the same level.
+- Levels 5 and 6: title, tier, goal, milestone, nextMilestone, companyValue, nextCompanyValue and five words only.
+- Chapters: three, Beginner, Intermediate, Advanced.
+- Tiers: Levels 1 and 2 Beginner, 3 and 4 Intermediate, 5 and 6 Advanced. Company values 10000, 50000, 120000, 250000, 500000, 1000000. In a continuous story also set unlocks ("$10K", "$50K", "$120K", "$250K", "$500K", "$1M"); other modes omit unlocks.
+- An intro on Levels 2 to 4: headline, one line, one hook. One or two facts per level.
+
+COPY RULES (the validator refuses a file that breaks the measurable ones)
+- Eighth grade or lower. Short words. One idea per sentence. Say each fact once. No dashes of any kind.
+- term: 22 characters at most. definition: one sentence, 120 characters, must NOT contain the term. example: one sentence, 150 characters, must contain the term exactly once in a form that reads well with the word removed, and must name the anchor unless the mode is practice_world. cue: a label of 7 words and 34 characters at most, unique within the level, written as a label not a clause (it is quoted in feedback). situation: one real moment, 12 words and 72 characters at most, must NOT contain the term. confusion: the exact term string of another word in the same level.
+- No digits, $ or % anywhere in a level's copy unless that level sets math: true, and only when the job's words naturally use numbers. Spell small numbers out.
+- icon: a lucide icon slug (lowercase, dashes). It is only used on the Levels map until plate art exists; it is never shown on a flashcard.
+- Level title 30 characters, goal 48.
+
+STEP 3. Register: in src/components/glossary/data.ts add `<slug>: buildGlossaryCareer(<NAME>_GLOSSARY),` to GLOSSARY_INDUSTRIES and the import. If a catalog career should open this glossary, map it in CAREER_INDUSTRY in src/components/glossary/industries.ts and set exampleCareerSlug in the blueprint. Do NOT add the slug to GLOSSARY_HUB_RELEASED; release is Chandu's step.
+
+STEP 4. Check, all three must pass:
+npx tsc --noEmit
+node --import ./scripts/qa/ts-resolve.mjs scripts/qa/glossary-blueprints.test.mjs
+node scripts/qa/dreamy-reactions.test.mjs
+Then start the dev server (npm run dev -- --webpack), open /play/glossary/<slug>?theme=drift and press the top bar's Skip through Level 1 (about 14 presses), and again with ?theme=signal. Open ?lesson=2&amp;q=1, ?lesson=3&amp;q=1, ?lesson=3&amp;q=2 and ?lesson=4&amp;q=1 in Drift: those screens exist only when the higher recipes ran. Take a screenshot of each.
+
+STEP 5. Write the art list for Codex as a short block in your final message: the slug, the anchor, and the five Level 1 terms each with its definition (Codex turns these into image briefs; see the SOP section 6).
+
+STEP 6. Add a dated entry to docs/AI_HANDOFF.md (what, why, what you checked). Commit with the why in the message. Do not push.
+
+Done looks like: the blueprint file exists and validates, the industry appears on /play-tools/glossary-qa with four playable levels, screenshots attached, the art list written, one commit, nothing pushed.</pre>
+
+<h2>4. Prompt B: add Levels 5 and 6 to an existing industry</h2>
+<pre>You are working in the Dreamari prototype repo. Pull origin/main. Read docs/handoff/specs/glossary-system.md.
+
+TASK: turn the roadmap Levels 5 and 6 of src/components/glossary/blueprints/[slug].ts into playable levels. Keep the five words each level already lists unless one cannot be written within the rules; then swap it and say why. Both levels are Advanced and use the decide recipe by default, so every term needs definition, example, cue, icon, situation and confusion. Follow the copy rules exactly as in Prompt A. Run the three checks, open ?lesson=5&amp;q=1 and ?lesson=6&amp;q=1 in both themes, screenshot, write the handoff entry, commit, do not push.</pre>
+
+<h2>5. Prompt C: release an industry to the Play hub (Chandu, after QA)</h2>
+<pre>In the Dreamari repo: add "[slug]" to GLOSSARY_HUB_RELEASED in src/components/glossary/data.ts. If the hub has no card for it, add one to GLOSSARY_GAMES in src/components/play/games.ts keyed to its example career slug (or the industry slug when no catalog career owns it) with title "[Subject] Terms" and sub "Learn key [subject] terms". Confirm Codex has registered its Level 1 term art (termArt.ts) and welcome illustration (welcomeArt.ts). Run npx tsc --noEmit, open /play and confirm the card is playable, commit with the why, push to main.</pre>
+
+<h2>6. Images (Codex)</h2>
+<p>Codex generates every image. Nothing in Usman's game-creation work waits on images: a game plays with words the moment it is registered. Required before release: 6.1 and 6.2. Optional, shared polish: 6.3 to 6.5. 6.6 is animation.</p>
+
+<h3>6.1 Level 1 term art (required: 5 terms, both themes)</h3>
+<p>The repo has a reproducible pipeline for this: docs/handoff/play-sop/12-glossary-art-pipeline.md and scripts/glossary-art.mjs. The input is a manifest JSON; the model is docs/reference/glossary-finance-art-oct13.json. The script prints the exact prompts, then packages, validates and previews the finished images. Flow:</p>
+<ol>
+<li>Write docs/reference/glossary-&lt;slug&gt;-art-&lt;mmmdd&gt;.json: version (folder name, lowercase and dashes, e.g. "nursing-oct17"), career (the slug), styleReferences (the three Drift and three Signal reference files below), promptTemplate (the prompt below), styles (the two style locks below), terms (five entries: id = the exact term, slug = lowercase file name, brief = one or two sentences that show the meaning, not the word, with the anchor written in).</li>
+<li>node scripts/glossary-art.mjs prompts &lt;manifest&gt; prints one prompt per term per theme with the reference paths. Generate ONE image per call in ChatGPT, attaching the references. Never chain off the last image; return to the references every time.</li>
+<li>Save the generated images into a review folder named &lt;term-slug&gt;-drift.png and &lt;term-slug&gt;-signal.png. node scripts/glossary-art.mjs prepare &lt;manifest&gt; &lt;review-folder&gt; writes the WebP sizes under public/images/glossary/&lt;version&gt;/{drift,signal}/. Then validate and preview with the same script.</li>
+<li>Register: add the industry's example career (or the industry slug) to CAREER_TERM_ART in src/components/glossary/termArt.ts with the version folder and the term-to-slug map. The engine shows the pictures on Level 1 and nowhere else.</li>
+</ol>
+<p>References to attach. Drift: public/images/glossary/themes-oct08/drift/customer.webp (character), company.webp (object and materials), profit.webp (currency). Signal: public/images/glossary/signal/cloud-sale-sneaker.webp, building.webp, coins-320.webp.</p>
+<p>The prompt (promptTemplate; {{SUBJECT}} is the term's brief, {{STYLE}} is the theme's lock):</p>
+<pre>Use case: stylized-concept.
+Asset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.
+Generate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.
+Subject: {{SUBJECT}}
+Composition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.
+Character lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.
+STYLE: {{STYLE}}
+No generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.</pre>
+<p>Drift style lock:</p>
+<pre>Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.</pre>
+<p>Signal style lock:</p>
+<pre>Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.</pre>
+<p>Writing a brief: show the meaning, never the word; put the anchor in; name the one thing the eye must read first. Example from Finance, Investor: "Dreamy floats beside a short curved arrow directing a single gold coin toward a miniature sneaker boutique. This shows a person committing money to a business, not buying a shoe." Example for Nursing, Triage: "Three small patient beds in a row at Riverside Clinic, one lit with a bright gold tag and pulled slightly forward, the other two dim and waiting. This shows the most urgent patient being chosen first."</p>
+
+<h3>6.2 Welcome illustration (required: 1 per theme)</h3>
+<p>One composed scene of the workplace the glossary lives in, never a person: the clinic front, the hangar and tower, the kitchen pass, the software studio. 1024 square, transparent, one readable silhouette; it shows at about 300 px beside Dreamy on the welcome screen. Use the 6.1 prompt with Asset type "one Dreamari welcome illustration: the workplace this glossary lives in, seen as a small composed scene" and Subject "{{the anchor}}: {{two sentences describing the place, no people}}", with the theme's style lock. Files: public/images/glossary/&lt;version&gt;/{drift,signal}/welcome.webp. Register in WELCOME_ART[industrySlug] in src/components/glossary/welcomeArt.ts with both theme paths.</p>
+
+<h3>6.3 Scene plates for the Levels map (optional, six strips cover everything)</h3>
+<p>Until registered, the map shows each level's first term icon on the world accent. Strips scale by tier and theme: six files cover all fifty industries. 1536 by 512 WebP, opaque, horizon in the lower third, nothing important within twelve percent of any edge, no text, no Dreamy, no single focal object; even detail across the width (the engine crops a slice per level from a phone thumbnail to the open card). Files under public/images/glossary/plates/ named drift-beginner, drift-intermediate, drift-advanced, signal-beginner, signal-intermediate, signal-advanced (.webp). Register in PLATES[theme][tier] in src/components/glossary/levelPlates.ts; two or three strips per tier add variety for free.</p>
+<table>
+<tr><th>Strip</th><th>Scene brief</th></tr>
+<tr><td>drift-beginner</td><td>Dawn. Warm low sun, long soft clouds, a calm horizon glow.</td></tr>
+<tr><td>drift-intermediate</td><td>Full day. High sun, bright sky, scattered sculpted clouds.</td></tr>
+<tr><td>drift-advanced</td><td>Night. Moon, deep navy, thin high clouds, a faint band of stars.</td></tr>
+<tr><td>signal-beginner</td><td>Pixel city at sunrise, a few windows still lit, pink and amber sky.</td></tr>
+<tr><td>signal-intermediate</td><td>Pixel city at midday, cyan sky, traffic and cranes.</td></tr>
+<tr><td>signal-advanced</td><td>Pixel city at night, lit towers, dark sky with a few stars.</td></tr>
+</table>
+<pre>Use case: environment backdrop.
+Asset type: one wide Dreamari scene plate for the Levels map, used as a cropped background strip behind level titles.
+Scene: {{SCENE BRIEF}}
+Composition: 1536 by 512 landscape, horizon in the lower third, even detail across the full width, no single focal object, nothing important within 12% of any edge. No text, letters, numbers, logos or UI. No character, no Dreamy. Opaque background, no transparency.
+STYLE: {{the theme's style lock from 6.1}}
+Keep the reference's palette and material identity. Readable as a strip at 90 by 44 pixels and attractive at 540 by 90.</pre>
+
+<h3>6.4 Signal world panoramas (optional, one per career world, fifteen at most)</h3>
+<p>The game's sky in Signal. One 1200 by 800 pixel panorama per career world, opaque, horizon in the lower third, a readable skyline across the middle band, a dark quiet lower band, nothing important within ten percent of the left and right edges, no text, no Dreamy. The engine tiles it in mirrored pairs (edges never need to match), crops three parallax bands and slices it for the Levels map plates. Files: public/images/glossary/backdrops/signal/&lt;world-slug&gt;.webp. Register in SIGNAL_WORLD_BACKDROPS in src/components/glossary/worldBackdrops.ts. Start with the worlds that have a glossary: Tech &amp; Engineering, Driving, Flying &amp; Shipping, Health &amp; Medicine, Food &amp; Cooking. Attach the three Signal references and the current panorama public/images/glossary/signal/bg.webp.</p>
+<pre>Use case: game backdrop.
+Asset type: one wide Dreamari pixel-art panorama for the Signal glossary game, used as a scrolling parallax background and cropped into strips.
+Scene: {{WORLD SCENE, e.g. "a hospital campus at dusk: a low clinic with lit windows, an ambulance bay, a water tower, trees"}}
+Composition: 1200 by 800, horizon in the lower third, a continuous readable skyline silhouette across the middle band, a dark quiet lower band (water, road or ground), even detail across the width, nothing important within 10% of the left and right edges. No text, letters, numbers, logos or UI. No character, no Dreamy. Opaque.
+STYLE: {{Signal style lock from 6.1}}
+Match the attached panorama's palette, pixel density and night-to-dusk mood exactly; only the place changes.</pre>
+
+<h3>6.5 Drift horizon silhouettes (optional)</h3>
+<p>Drift is painted and already takes each world's accent; it needs no image. Optional: one flat dark horizon silhouette per world (a clinic roofline, a runway and tower, a kitchen pass), SVG preferred or transparent WebP 1600 by 300, no interior detail, repeatable left to right, no text, no Dreamy. Files: public/images/glossary/backdrops/drift/&lt;world-slug&gt;.svg. Register in DRIFT_WORLD_SILHOUETTES in worldBackdrops.ts. Richer clouds and weather are open for Codex to explore inside the scenery layer (LabMaterialScenery in GlossaryLabGameExperience.tsx): gradients, masks and transforms only, never a filter on an animated layer, and everything must stop under prefers-reduced-motion.</p>
+
+<h3>6.6 Dreamy expressions (animation)</h3>
+<p>Chandu's "Dream Expressions V2" pack (19 Drift stills) is at public/images/dreamy/expressions-v2/01.webp to 19.webp. Four are used statically on the Drift Levels map open card: 06 (books, ready to play), 18 (arrow, playing now), 12 (graduation cap, complete), 17 (alert, locked). Animate first, because the game has a slot for each: 10 (green check) for a right answer, 09 (red X) and 14 ("hmm") for a wrong one, 16 (confetti) and 12 for mastery and the complete screen, 15 (glasses and clipboard) for review and hints, 08 (reading) for the teach cards, 18 (arrow) for Next. Deliver the four-frame WebP atlas format described in docs/reference/dreamy-drift-animated-oct15-v2.json so dreamyReactions.ts can take them without engine changes. Signal needs pixel versions drawn to the Signal Dreamy rig.</p>
+
+<h2>7. Prompt D: Codex, generate and register the art for industry X</h2>
+<pre>You are working in the Dreamari prototype repo. Pull origin/main. Read docs/handoff/play-sop/12-glossary-art-pipeline.md and section 6 of docs/reference/glossary-scaling-sop-usman-2026-10-16.html.
+
+TASK: generate and register the required art for the glossary industry [slug] (anchor: [anchor]; Level 1 terms with definitions: [paste the art list from the game-creation agent]).
+
+1. Write the manifest docs/reference/glossary-[slug]-art-[mmmdd].json modelled on docs/reference/glossary-finance-art-oct13.json: version "[slug]-[mmmdd]", career "[slug]", the six style references, the prompt template and both style locks from the SOP, and five terms with id, slug and a brief that shows the meaning without the word and names the anchor.
+2. node scripts/glossary-art.mjs prompts <manifest> and generate one image per prompt, attaching the three references for that theme every time. Save as <term-slug>-drift.png and <term-slug>-signal.png in a review folder.
+3. Also generate the welcome illustration per theme (SOP 6.2) and save as welcome-drift.png and welcome-signal.png.
+4. node scripts/glossary-art.mjs prepare <manifest> <review-folder>, then validate and preview. Convert the welcome images to public/images/glossary/[version]/{drift,signal}/welcome.webp (1024 square, transparent).
+5. Register: CAREER_TERM_ART in src/components/glossary/termArt.ts for the term art; WELCOME_ART["[slug]"] in src/components/glossary/welcomeArt.ts for the welcome.
+6. Check: npx tsc --noEmit and node scripts/qa/dreamy-reactions.test.mjs. Open /play/glossary/[slug]?theme=drift and ?theme=signal: the welcome shows the illustration beside Dreamy, Level 1 teach cards show the pictures, Level 2 cards show words only. Screenshot each.
+7. Add a dated docs/AI_HANDOFF.md entry (what, why, prompts used, what was rejected and why). Commit; do not push. Chandu reviews, then releases the industry.
+
+Rules that have shipped real bugs: one image per call; never chain off the last image; genuine transparency; no text or numbers in any image; Dreamy is a cloud with no limbs and appears only when the brief says so; Finance's art is never regenerated.</pre>
+
+<h2>8. QA and release checklist (Chandu)</h2>
+<ol>
+<li>Open the hamburger menu, Glossary QA. The new industry is listed with four playable levels.</li>
+<li>Play Level 1 in Drift with Skip, then Level 1 in Signal. Watch for clipped words, odd line breaks, a Dreamy facing away, a dollar meter where a milestone should be.</li>
+<li>Open Level 3 and Level 4, question 1 and 2, in Drift: the compare card and Select All must read as real decisions, not trivia.</li>
+<li>Read the Power Play paragraph of each level once as a student would.</li>
+<li>Confirm Codex's Level 1 pictures and the welcome illustration are in place and on style.</li>
+<li>Release with Prompt C.</li>
+</ol>
+
+<h2>9. The 50 industries: mode and career world</h2>
+<table>
+<tr><th>No.</th><th>Industry</th><th>Mode</th><th>Career world</th><th>Framing</th></tr>
+<tr><td>1</td><td>Finance &amp; Investment Banking (built, Joshua's)</td><td>continuous_story</td><td>Business &amp; Finance</td><td>Dream Sneakers. Does not change.</td></tr>
+<tr><td>2</td><td>Accounting &amp; Audit</td><td>scenario_thread</td><td>Business &amp; Finance</td><td>Month-end close, reconciliations, statements, controls, audits; same company, different situations.</td></tr>
+<tr><td>3</td><td>Entrepreneurship &amp; Venture</td><td>continuous_story</td><td>Business &amp; Finance</td><td>Idea, customers, business model, raise money, hire, grow.</td></tr>
+<tr><td>4</td><td>Management Consulting</td><td>scenario_thread</td><td>Business &amp; Finance</td><td>Different client problems: costs, growth, operations, market entry.</td></tr>
+<tr><td>5</td><td>Marketing &amp; Brand Management</td><td>scenario_thread</td><td>Business &amp; Finance</td><td>Different campaigns for one brand.</td></tr>
+<tr><td>6</td><td>Sales &amp; Business Development</td><td>scenario_thread</td><td>Business &amp; Finance</td><td>A pipeline: qualify, discovery, pitch, objection, proposal, close.</td></tr>
+<tr><td>7</td><td>Human Resources &amp; People Operations</td><td>scenario_thread</td><td>Business &amp; Finance</td><td>Recruiting, onboarding, pay, benefits, performance, retention.</td></tr>
+<tr><td>8</td><td>Supply Chain &amp; Logistics</td><td>continuous_story</td><td>Driving, Flying &amp; Shipping</td><td>One product from supplier to factory to warehouse to customer.</td></tr>
+<tr><td>9</td><td>Law &amp; Legal Services</td><td>scenario_thread</td><td>Law, Safety &amp; Justice</td><td>Rotating client matters: contracts, evidence, discovery, litigation.</td></tr>
+<tr><td>10</td><td>Software Engineering (built)</td><td>continuous_story</td><td>Tech &amp; Engineering</td><td>One app from requirements to release. Nova Notes.</td></tr>
+<tr><td>11</td><td>Cybersecurity</td><td>scenario_thread</td><td>Tech &amp; Engineering</td><td>One organization through security events: access, phishing, malware, response.</td></tr>
+<tr><td>12</td><td>Data Science &amp; Analytics</td><td>continuous_story</td><td>Tech &amp; Engineering</td><td>Question, data, cleaning, analysis, model, recommendation.</td></tr>
+<tr><td>13</td><td>Artificial Intelligence &amp; Machine Learning</td><td>continuous_story</td><td>Tech &amp; Engineering</td><td>One AI system: data, training, model, evaluation, bias, deployment.</td></tr>
+<tr><td>14</td><td>Product Management &amp; UX</td><td>continuous_story</td><td>Tech &amp; Engineering</td><td>One product: research, pain point, prototype, testing, launch.</td></tr>
+<tr><td>15</td><td>Electrical &amp; Computer Engineering</td><td>scenario_thread</td><td>Tech &amp; Engineering</td><td>Circuits, components, signals, measurement, troubleshooting.</td></tr>
+<tr><td>16</td><td>Mechanical Engineering</td><td>scenario_thread</td><td>Tech &amp; Engineering</td><td>Forces, materials, CAD, prototypes, tolerances, failures.</td></tr>
+<tr><td>17</td><td>Civil Engineering &amp; Construction Management</td><td>continuous_story</td><td>Building &amp; Construction</td><td>One project from site plan to turnover.</td></tr>
+<tr><td>18</td><td>Architecture</td><td>continuous_story</td><td>Building &amp; Construction</td><td>One client from brief to presentation.</td></tr>
+<tr><td>19</td><td>Registered Nursing (built)</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>A clinic with different patients each level. Riverside Clinic.</td></tr>
+<tr><td>20</td><td>Medicine / Physician</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>Patient encounters: history, exam, diagnostics, treatment.</td></tr>
+<tr><td>21</td><td>Surgery &amp; Operating Room</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>Different procedures: OR roles, sterile technique, anesthesia.</td></tr>
+<tr><td>22</td><td>Pharmacy</td><td>practice_world</td><td>Health &amp; Medicine</td><td>Fast prescription and medication drills.</td></tr>
+<tr><td>23</td><td>Dentistry</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>A dental clinic day.</td></tr>
+<tr><td>24</td><td>Mental &amp; Behavioral Health</td><td>scenario_thread</td><td>Counseling &amp; Social Work</td><td>Client situations: assessment, symptoms, care plans.</td></tr>
+<tr><td>25</td><td>Allied Health &amp; Diagnostics</td><td>practice_world</td><td>Health &amp; Medicine</td><td>Radiology, lab, respiratory, sonography drills.</td></tr>
+<tr><td>26</td><td>Biotechnology</td><td>continuous_story</td><td>Science &amp; Research</td><td>One research project from hypothesis to scale-up.</td></tr>
+<tr><td>27</td><td>Biomedical Engineering</td><td>continuous_story</td><td>Science &amp; Research</td><td>One medical device from need to regulatory.</td></tr>
+<tr><td>28</td><td>Public Health &amp; Epidemiology</td><td>continuous_story</td><td>Science &amp; Research</td><td>One health event: detect, measure, risk, intervene, evaluate.</td></tr>
+<tr><td>29</td><td>Veterinary Medicine</td><td>scenario_thread</td><td>Farming, Animals &amp; Nature</td><td>Different animal patients.</td></tr>
+<tr><td>30</td><td>Food Science</td><td>continuous_story</td><td>Farming, Animals &amp; Nature</td><td>One food product from formulation to production.</td></tr>
+<tr><td>31</td><td>Consumer Packaged Goods</td><td>continuous_story</td><td>Business &amp; Finance</td><td>One product from insight to shelf to growth.</td></tr>
+<tr><td>32</td><td>Aerospace Engineering</td><td>continuous_story</td><td>Tech &amp; Engineering</td><td>One component from requirements to certification.</td></tr>
+<tr><td>33</td><td>Airline Pilot &amp; Flight Operations (built)</td><td>scenario_thread</td><td>Driving, Flying &amp; Shipping</td><td>Different flights and phases. Skyline Air.</td></tr>
+<tr><td>34</td><td>Electrician</td><td>scenario_thread</td><td>Building &amp; Construction</td><td>Different jobs: circuits, panels, grounding, code, testing.</td></tr>
+<tr><td>35</td><td>HVAC &amp; Refrigeration</td><td>scenario_thread</td><td>Fixing Machines &amp; Engines</td><td>Service different systems.</td></tr>
+<tr><td>36</td><td>Plumbing &amp; Pipefitting</td><td>scenario_thread</td><td>Building &amp; Construction</td><td>Different jobsite problems.</td></tr>
+<tr><td>37</td><td>Welding &amp; Fabrication</td><td>practice_world</td><td>Factories &amp; Making Things</td><td>Fast shop drills.</td></tr>
+<tr><td>38</td><td>Automotive Technology</td><td>scenario_thread</td><td>Fixing Machines &amp; Engines</td><td>Vehicles with different symptoms: scan, diagnose, repair, verify.</td></tr>
+<tr><td>39</td><td>Diesel &amp; Heavy Equipment</td><td>scenario_thread</td><td>Fixing Machines &amp; Engines</td><td>Trucks and machinery: inspections, hydraulics, diagnostics.</td></tr>
+<tr><td>40</td><td>Aviation Maintenance Technician</td><td>scenario_thread</td><td>Fixing Machines &amp; Engines</td><td>Different maintenance events: inspection, airframe, sign-off.</td></tr>
+<tr><td>41</td><td>Avionics Technician</td><td>scenario_thread</td><td>Fixing Machines &amp; Engines</td><td>Aircraft electrical and electronic systems.</td></tr>
+<tr><td>42</td><td>Advanced Manufacturing &amp; CNC</td><td>continuous_story</td><td>Factories &amp; Making Things</td><td>One production order from blueprint to quality.</td></tr>
+<tr><td>43</td><td>Industrial Maintenance &amp; Mechatronics</td><td>scenario_thread</td><td>Factories &amp; Making Things</td><td>Keep a facility running: motors, sensors, PLCs, root cause.</td></tr>
+<tr><td>44</td><td>Robotics Technician</td><td>scenario_thread</td><td>Factories &amp; Making Things</td><td>Automation cells: programming, teach points, calibration, safety.</td></tr>
+<tr><td>45</td><td>Carpentry &amp; Construction Trades</td><td>scenario_thread</td><td>Building &amp; Construction</td><td>Layout, framing, finishing, tools, safety.</td></tr>
+<tr><td>46</td><td>Solar &amp; Renewable Energy Technician</td><td>continuous_story</td><td>Building &amp; Construction</td><td>One installation from site survey to monitoring.</td></tr>
+<tr><td>47</td><td>Culinary Arts (built)</td><td>practice_world</td><td>Food &amp; Cooking</td><td>Fast kitchen drills. Harbor Kitchen.</td></tr>
+<tr><td>48</td><td>Cosmetology &amp; Barbering</td><td>practice_world</td><td>Personal Care &amp; Community Services</td><td>Fast client and technique drills.</td></tr>
+<tr><td>49</td><td>EMT &amp; Paramedic</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>Different emergency calls from size-up to handoff.</td></tr>
+<tr><td>50</td><td>CNA &amp; Medical Assistant</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>Different patients and duties: rooming, vitals, infection control.</td></tr>
+</table>
+
+<h2>10. Where everything is</h2>
+<table>
+<tr><th>Path</th><th>What</th></tr>
+<tr><td>docs/handoff/specs/glossary-system.md</td><td>The locked spec.</td></tr>
+<tr><td>docs/reference/glossary-scaling-plan-handover-2026-10-16.html</td><td>Joshua's plan in full with our mapping, and the image brief in detail.</td></tr>
+<tr><td>docs/handoff/play-sop/12-glossary-art-pipeline.md, scripts/glossary-art.mjs</td><td>The term art pipeline: manifest in, prompts out, packaging, validation, preview.</td></tr>
+<tr><td>docs/reference/glossary-finance-art-oct13.json</td><td>The model manifest with the finance briefs.</td></tr>
+<tr><td>src/components/glossary/generate.ts</td><td>Blueprint types, the four recipes, the validator.</td></tr>
+<tr><td>src/components/glossary/blueprints/</td><td>health.ts, software.ts, aviation.ts, culinary.ts.</td></tr>
+<tr><td>src/components/glossary/data.ts</td><td>GLOSSARY_INDUSTRIES, GLOSSARY_HUB_RELEASED, Finance's hand-authored levels.</td></tr>
+<tr><td>src/components/glossary/industries.ts</td><td>The fifteen world design systems, CAREER_INDUSTRY.</td></tr>
+<tr><td>src/components/glossary/termArt.ts, welcomeArt.ts, levelPlates.ts, worldBackdrops.ts</td><td>Image registries: term art, welcome, plates and the Dreamy state expressions, panoramas and silhouettes.</td></tr>
+<tr><td>src/components/glossary/GlossaryLabGameExperience.tsx</td><td>The engine.</td></tr>
+<tr><td>scripts/qa/glossary-blueprints.test.mjs, scripts/qa/dreamy-reactions.test.mjs</td><td>The two QA scripts.</td></tr>
+<tr><td>/play-tools/glossary-qa</td><td>Every glossary, every level, both themes. Hamburger menu, Glossary QA.</td></tr>
+<tr><td>/component-lab, "Glossary game, live engine"</td><td>Every piece in both themes with a World picker.</td></tr>
+</table>
+
+</body>
+</html>
