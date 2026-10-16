@@ -39,7 +39,10 @@ import { DREAMY_FACING, dreamyReaction, dreamyReactionAsset, questionReaction, t
 import { SIGNAL_FACING, signalReaction, signalReactionAsset, type SignalReaction } from "./signalReactions";
 import { TickerTapeStorm } from "@/components/play/BagSecured";
 import { worldTheme } from "./industries";
+import { worldScene, sceneStyle, type WorldScene } from "./worldScenes";
+import { LivingWorld } from "./LivingWorld";
 import "./dreamy-reactions.css";
+import "./glossary-living-worlds.css";
 
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
 // the DreamAri_Glossary_Content_Template_v1.xlsx schema, then reskinned into
@@ -3034,7 +3037,7 @@ function LabThemeMusic({ atmosphere, enabled }: { atmosphere: LabAtmosphere; ena
   return null;
 }
 
-function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebrationKey, interactionScope, world = "" }: { atmosphere: LabAtmosphere; screen: Screen; celebrating: boolean; repairing: boolean; celebrationKey: string; /** the career world: picks the Signal panorama and any Drift silhouette (worldBackdrops.ts) */ world?: string; interactionScope: string }) {
+function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebrationKey, interactionScope, world = "", scene, mastery = 0 }: { atmosphere: LabAtmosphere; screen: Screen; celebrating: boolean; repairing: boolean; celebrationKey: string; /** the career world: picks the Signal panorama and any Drift silhouette (worldBackdrops.ts) */ world?: string; interactionScope: string; scene: WorldScene | null; mastery?: number }) {
   const milestone = screen === "unlockComplete" || screen === "complete";
   const worldRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
@@ -3082,7 +3085,7 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebr
     };
   }, [atmosphere, reduced]);
   return (
-    <div ref={worldRef} className="glossary-world" data-world-reaction={reactionKind} aria-hidden>
+    <div ref={worldRef} className="glossary-world" data-world-reaction={reactionKind} data-scene-phase={scene?.phase} style={sceneStyle(scene, mastery)} aria-hidden>
       {atmosphere === "v2" ? (
         <>
           {/* The reference's pixel-art skyline at dusk, under its dark
@@ -3102,6 +3105,7 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebr
         </>
       ) : null}
       <LabMaterialScenery atmosphere={atmosphere} world={world} />
+      {scene ? <LivingWorld scene={scene} cue={`${celebrating ? "correct" : repairing ? "repair" : milestone ? "reward" : reactionKind || (contact ? "select" : "idle")}-${celebrationKey}-${reaction.nonce}-${contact}`} /> : null}
       <span className="glossary-world-orb glossary-world-orb-a" />
       <span className="glossary-world-orb glossary-world-orb-b" />
       <span className="glossary-world-stars" />
@@ -3118,6 +3122,15 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebr
 // to 4 from the start, so the team can review them without replaying). For
 // production set false: a level then opens once the one before is complete.
 const DEMO_UNLOCK_AUTHORED_LEVELS = true;
+
+const COMPACT_MAP_QUERY = "(max-width: 600px), (max-height: 650px)";
+const compactMapSnapshot = () => window.matchMedia(COMPACT_MAP_QUERY).matches;
+const serverCompactMapSnapshot = () => false;
+function subscribeCompactMap(listener: () => void) {
+  const query = window.matchMedia(COMPACT_MAP_QUERY);
+  query.addEventListener("change", listener);
+  return () => query.removeEventListener("change", listener);
+}
 
 export function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: GlossaryCareer; lesson: GlossaryLesson; atmosphere: LabAtmosphere; onClose: () => void; /** open another authored level (13 Oct 2026) */ onPlay: (lessonNumber: number) => void }) {
   const levels = career.levels;
@@ -3141,12 +3154,16 @@ export function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { c
   const STATE_LABEL = { complete: "Complete", current: "Playing now", open: "Ready to play", locked: "Locked" } as const;
   // Drift review (9 Oct): six district boxes reduce paging without adding
   // the scrolling the student flow deliberately avoids. Other maps stay bespoke.
-  const pageSize = atmosphere === "v1" ? 6 : 4;
+  const smallViewport = useSyncExternalStore(subscribeCompactMap, compactMapSnapshot, serverCompactMapSnapshot);
+  const compact = career.industrySlug !== "finance" && smallViewport;
+  const pageSize = compact ? 2 : atmosphere === "v1" ? 6 : 4;
   // A chapter is a composed scene, not a long scrolling canvas. Paging
   // preserves every level and its locked state on phones and short laptops.
   // It opens on the chapter that holds the level being played.
-  const [page, setPage] = useState(Math.floor(playingIndex / pageSize));
   const [selected, setSelected] = useState(playingIndex);
+  // Derive the chapter from the selected level, so rotating/resizing cannot
+  // leave the current level off-page. No resize effect or synchronised state.
+  const page = Math.floor(selected / pageSize);
   const pageCount = Math.ceil(levels.length / pageSize);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -3158,7 +3175,7 @@ export function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { c
 
   return (
     <div className="glossary-level-map-overlay fixed inset-0 z-[70]" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className="glossary-level-map" data-map-concept={atmosphere} role="dialog" aria-modal="true" aria-labelledby="glossary-level-map-title">
+      <section className="glossary-level-map" data-map-concept={atmosphere} data-map-compact={compact || undefined} role="dialog" aria-modal="true" aria-labelledby="glossary-level-map-title">
         <header>
           <div><span>{career.careerTitle}</span><h2 id="glossary-level-map-title">{atmosphere === "v1" ? "Dream District" : atmosphere === "v2" ? "Mission Index" : atmosphere === "v3" ? "Skill Constellation" : "Championship Circuit"}</h2>
             {/* What this screen is, in one line (Chandu, 6 Oct 2026: the map
@@ -3175,6 +3192,7 @@ export function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { c
           {atmosphere === "v4" ? <div className="glossary-circuit-horizon"><span>START</span><b>ROAD TO {levels[levels.length - 1]?.unlocks ?? "$30B"}</b></div> : null}
           {levels.slice(page * pageSize, (page + 1) * pageSize).map(({ title, unlocks: value, tier, goal, words, minutes }, slot) => {
             const index = page * pageSize + slot;
+            const scene = worldScene(career.industrySlug, career.world, levels[index].number, tier);
             const plate = plateImage(atmosphere === "v2" ? "signal" : "drift", levels[index], index);
             const phase = tier === "Beginner" ? "Beginner · The Startup" : tier === "Intermediate" ? "Intermediate · Scaling Up" : "Advanced · The Big Leagues";
             const firstOfTier = index === 0 || levels[index - 1].tier !== tier;
@@ -3192,7 +3210,7 @@ export function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { c
               // the whole card picks the level, not just its badge (14 Oct
               // 2026, Chandu: "the whole card should be clickable"); the badge
               // stays the keyboard button
-              <div className={`glossary-map-rung glossary-map-rung-${slot} is-${stateOf(index)} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={{ ...mapStyle, "--plate-seed": index } as React.CSSProperties} data-tier={tier} key={title} onClick={() => setSelected(index)}>
+              <div className={`glossary-map-rung glossary-map-rung-${slot} is-${stateOf(index)} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={{ ...mapStyle, ...sceneStyle(scene), "--plate-seed": index } as React.CSSProperties} data-scene-phase={scene?.phase} data-tier={tier} key={title} onClick={() => setSelected(index)}>
                 {firstOfTier && <span className="glossary-map-phase">{phase}</span>}
                 <span className="glossary-map-connector" aria-hidden />
                 {/* The level's scene plate (16 Oct 2026, Chandu: "some sort of
@@ -3245,9 +3263,9 @@ export function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { c
         </div>
         </div>
         <nav className="glossary-map-pages" aria-label="Level chapters">
-          <button type="button" disabled={page === 0} aria-label="Previous levels" onClick={() => { setPage(page - 1); setSelected((page - 1) * pageSize); }}><ChevronLeft aria-hidden /></button>
+          <button type="button" disabled={page === 0} aria-label="Previous levels" onClick={() => setSelected((page - 1) * pageSize)}><ChevronLeft aria-hidden /></button>
           <span>{page * pageSize + 1} to {Math.min((page + 1) * pageSize, levels.length)} of {levels.length}</span>
-          <button type="button" disabled={page + 1 === pageCount} aria-label="Next levels" onClick={() => { setPage(page + 1); setSelected((page + 1) * pageSize); }}><ChevronRight aria-hidden /></button>
+          <button type="button" disabled={page + 1 === pageCount} aria-label="Next levels" onClick={() => setSelected((page + 1) * pageSize)}><ChevronRight aria-hidden /></button>
         </nav>
       </section>
     </div>
@@ -3678,6 +3696,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     <MasteryHud title={lesson.title} current={currentNumber} total={Math.max(mainLoopLength, queue.length)} percent={percent} terms={lesson.terms} mastery={mastery} />
   ) : null;
   const sceneScreen = screen === "unlock" && unlockIndex >= lesson.terms.length ? "unlockComplete" : screen;
+  const scene = worldScene(career.industrySlug, career.world, lesson.lessonNumber, career.levels.find((entry) => entry.number === lesson.lessonNumber)?.tier ?? "Beginner");
   const questionFrame = screen === "question";
   const activeLayout: QuestionLayout = variant === "lab" ? questionLayout : "current";
   useQuestionSceneryFit(shellRef, activeLayout, atmosphere, variant === "lab" && questionFrame, `${current?.id ?? ""}-${pendingResult ? (pendingResult.correct ? 1 : 2) : 0}`);
@@ -3689,6 +3708,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
       ref={shellRef}
       className={`glossary-game-shell glossary-game-${variant} glossary-lab-atmosphere-${atmosphere} ${variant === "lab" ? "glossary-fit-shell" : ""} marketing-v2 themeable relative flex min-h-dvh w-full flex-col`}
       data-screen={sceneScreen}
+      data-living-world={scene ? true : undefined}
       data-level={lesson.lessonNumber}
       data-qlayout={variant === "lab" ? activeLayout : undefined}
       data-question-kind={screen === "question" ? current?.kind : undefined}
@@ -3709,7 +3729,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         fontFamily: "var(--font-body)",
       } as React.CSSProperties}
     >
-      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={sceneScreen} celebrating={pendingResult?.correct === true} repairing={pendingResult?.correct === false} interactionScope={`${sceneScreen}-${current?.id ?? "finale"}`} celebrationKey={`${sceneScreen}-${current?.id ?? "finale"}-${current ? attempts[current.id] ?? 0 : 0}`} world={career.world} /> : null}
+      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={sceneScreen} celebrating={pendingResult?.correct === true} repairing={pendingResult?.correct === false} interactionScope={`${sceneScreen}-${current?.id ?? "finale"}`} celebrationKey={`${sceneScreen}-${current?.id ?? "finale"}-${current ? attempts[current.id] ?? 0 : 0}`} world={career.world} scene={scene} mastery={masteredCount / lesson.terms.length} /> : null}
       <TopBar
         onBack={() => goBackOr(router, "/play")}
         onOpenLevels={variant === "lab" ? () => setShowLevels(true) : undefined}

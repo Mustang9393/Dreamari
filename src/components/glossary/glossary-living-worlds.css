@@ -1,0 +1,84 @@
+/* Scene grammar: phase x world accent x tier x mastery. Decorative only.
+   Finance never receives data-scene-phase, so none of these rules apply. */
+.glossary-game-lab [data-scene-phase] {
+  --scene-top: var(--color-brand-950);
+  --scene-mid: color-mix(in srgb, var(--color-accent-purple) 48%, var(--color-brand-900));
+  --scene-rim: var(--color-decorative-pink-glow);
+  --scene-air: color-mix(in srgb, var(--glossary-accent) 28%, var(--color-brand-300));
+  --scene-disc: var(--world-business-money-office);
+}
+.glossary-game-lab [data-scene-phase="dawn"] {
+  --scene-top: color-mix(in srgb, var(--color-accent-purple) 50%, var(--color-brand-950));
+  --scene-mid: color-mix(in srgb, var(--color-decorative-pink-glow) 40%, var(--color-brand-900));
+  --scene-rim: color-mix(in srgb, var(--glossary-accent) 58%, var(--color-brand-200));
+}
+.glossary-game-lab [data-scene-phase="day"] {
+  --scene-top: color-mix(in srgb, var(--color-brand-400) 48%, var(--color-brand-950));
+  --scene-mid: color-mix(in srgb, var(--scene-air) 55%, var(--color-brand-900));
+  --scene-rim: var(--color-brand-100);
+  --scene-disc: var(--color-brand-100);
+}
+.glossary-game-lab [data-scene-phase="night"] {
+  --scene-top: var(--color-brand-950);
+  --scene-mid: color-mix(in srgb, var(--color-accent-purple) 26%, var(--color-brand-950));
+  --scene-rim: var(--color-brand-300);
+  --scene-disc: var(--color-brand-200);
+}
+.glossary-game-lab .glossary-world[data-scene-phase] {
+  background: radial-gradient(ellipse at 25% 40%, color-mix(in srgb, var(--color-brand-950) 75%, transparent), transparent 70%), linear-gradient(180deg, var(--scene-top), var(--scene-mid) 72%, var(--scene-top)) !important;
+  animation: none !important;
+}
+/* The old success lift animated brightness over the whole cloud bank.
+   The new opacity bloom supplies that payoff without re-filtering the sky. */
+.glossary-game-lab .glossary-world[data-scene-phase] .glossary-material-scenery { animation: none !important; }
+/* Reuse the existing three shaded SVG banks, with the same depth and motion. */
+.glossary-game-lab .glossary-world[data-scene-phase] .glossary-cloud-bank {
+  --cloud-crest: color-mix(in srgb, var(--scene-air) 55%, var(--scene-mid));
+  --cloud-mid: color-mix(in srgb, var(--scene-mid) 80%, var(--color-brand-900));
+  --cloud-base: var(--scene-top);
+  --cloud-rim: var(--scene-rim);
+}
+.glossary-game-lab .glossary-world[data-scene-phase] .glossary-cloud-bank:nth-child(2) { --cloud-crest: color-mix(in srgb, var(--scene-air) 35%, var(--scene-mid)); }
+.glossary-game-lab .glossary-world[data-scene-phase] .glossary-cloud-bank:nth-child(3) { --cloud-crest: color-mix(in srgb, var(--scene-air) 20%, var(--scene-top)); }
+.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-world[data-scene-phase]::before,
+.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-world[data-scene-phase]::after { display: none; }
+.glossary-game-lab .glossary-world[data-scene-phase] :is(.glossary-world-orb, .glossary-world-grid) { display: none; }
+.glossary-game-lab .glossary-world[data-scene-phase="day"] .glossary-world-stars { opacity: .12; }
+.glossary-living-world { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: calc(.5 + var(--scene-depth, .6) * .5); }
+.glossary-scene-light { position: absolute; inset: -8%; background: radial-gradient(ellipse at 18% 24%, color-mix(in srgb, var(--scene-rim) 20%, transparent), transparent 47%), radial-gradient(ellipse at 88% 72%, color-mix(in srgb, var(--scene-air) 26%, transparent), transparent 55%); transform: translate(calc(var(--world-pointer-x) * -14px), calc(var(--world-pointer-y) * -8px)); transition: transform 1.2s ease-out; }
+.glossary-scene-disc { position: absolute; left: var(--scene-sun-x); top: 19%; width: clamp(28px, 5vw, 72px); aspect-ratio: 1; border-radius: 50%; background: var(--scene-disc); opacity: .25; transform: translate(calc(var(--world-pointer-x) * -8px), calc(var(--world-pointer-y) * -4px)); transition: transform 1.5s ease-out; }
+[data-scene-phase="night"] .glossary-scene-disc { background: radial-gradient(circle at 72% 30%, var(--scene-top) 0 58%, transparent 60%), var(--scene-disc); opacity: .65; }
+.glossary-scene-horizon { position: absolute; inset: 54% -12% -15%; background: radial-gradient(ellipse at 50% 100%, var(--scene-rim), transparent 68%); opacity: calc(.06 + var(--scene-mastery, 0) * .18); transform: translateY(calc(var(--scene-mastery, 0) * -5%)); transition: opacity 1.4s ease-out, transform 1.4s ease-out; }
+.glossary-scene-response { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--scene-rim) 45%, transparent), transparent 72%); }
+[data-cue^="correct"] .glossary-scene-response, [data-cue^="reward"] .glossary-scene-response { animation: glossary-scene-bloom 1.6s ease-out both; }
+[data-cue^="repair"] .glossary-scene-response { background: linear-gradient(110deg, color-mix(in srgb, var(--scene-air) 24%, transparent), transparent 60%); animation: glossary-scene-reassure 1.3s ease-out both; }
+[data-cue^="select"] .glossary-scene-response { background: radial-gradient(circle at var(--world-pointer-u) var(--world-pointer-v), color-mix(in srgb, var(--scene-rim) 15%, transparent), transparent 24%); animation: glossary-scene-reassure .65s ease-out both; }
+.glossary-scene-mote { position: absolute; left: var(--mote-x); top: var(--mote-y); width: 3px; height: 3px; border-radius: 50%; background: var(--scene-rim); opacity: .3; animation: glossary-scene-glint var(--mote-duration) var(--mote-delay) ease-in-out infinite; }
+[data-weather="breeze"] .glossary-scene-mote { width: 28px; height: 1px; background: linear-gradient(90deg, transparent, var(--scene-rim), transparent); animation-name: glossary-scene-breeze; }
+[data-weather="drizzle"] .glossary-scene-mote { width: 1px; height: 16px; border-radius: 0; opacity: .2; animation-name: glossary-scene-drizzle; }
+/* Signal retains its original panorama and three mirrored parallax bands.
+   A sparse alpha wash changes the hour without filtering the moving raster. */
+.glossary-lab-atmosphere-v2 .glossary-world[data-scene-phase] .glossary-scene-light { background: linear-gradient(180deg, color-mix(in srgb, var(--scene-rim) 16%, transparent), transparent 60%, color-mix(in srgb, var(--scene-top) 28%, transparent)); }
+.glossary-lab-atmosphere-v2 .glossary-world[data-scene-phase="night"] .glossary-scene-light { background: linear-gradient(180deg, color-mix(in srgb, var(--scene-top) 60%, transparent), color-mix(in srgb, var(--scene-top) 24%, transparent)); }
+.glossary-lab-atmosphere-v2 .glossary-scene-disc { border-radius: 0; clip-path: polygon(25% 0,75% 0,75% 12%,88% 12%,88% 25%,100% 25%,100% 75%,88% 75%,88% 88%,75% 88%,75% 100%,25% 100%,25% 88%,12% 88%,12% 75%,0 75%,0 25%,12% 25%,12% 12%,25% 12%); }
+.glossary-lab-atmosphere-v2 .glossary-scene-mote { border-radius: 0; }
+/* Preserve today's icon-led map. The same phase colours sit behind its
+   icon/Dreamy; custom registered plates still take precedence. */
+.glossary-game-lab .glossary-map-rung[data-scene-phase] .glossary-map-plate:not(.has-image) { background: radial-gradient(ellipse at 80% 90%, color-mix(in srgb, var(--scene-rim) 36%, transparent), transparent 75%), linear-gradient(155deg, var(--scene-top), var(--scene-mid)) !important; }
+/* A world accent can be the same hue as dusk. Keep the hero readable;
+   the button, kicker and room still carry that world's accent. */
+.glossary-game-lab.glossary-lab-atmosphere-v1[data-living-world] .glossary-welcome-copy h1 em { color: var(--foreground) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"][data-map-compact] .glossary-level-map-scroll { grid-template-rows: auto auto !important; align-content: center; }
+html.light .glossary-lab-atmosphere-v1 .glossary-world[data-scene-phase] { --scene-top: var(--color-brand-300); --scene-mid: var(--color-brand-200); --scene-air: var(--color-brand-100); }
+html.light .glossary-lab-atmosphere-v1 .glossary-world[data-scene-phase] .glossary-cloud-bank { --cloud-crest: var(--color-brand-100); --cloud-mid: var(--color-brand-200); --cloud-base: var(--color-brand-300); }
+@keyframes glossary-scene-glint { 0%,100% { opacity: .08; transform: translateY(0) scale(.7); } 50% { opacity: .45; transform: translateY(-22px) scale(1); } }
+@keyframes glossary-scene-breeze { 0% { transform: translateX(-32px); opacity: 0; } 30%,70% { opacity: .25; } 100% { transform: translateX(72px); opacity: 0; } }
+@keyframes glossary-scene-drizzle { 0% { transform: translate(0,-50px) rotate(14deg); opacity: 0; } 25%,70% { opacity: .24; } 100% { transform: translate(-22px,100px) rotate(14deg); opacity: 0; } }
+@keyframes glossary-scene-bloom { 0% { opacity: 0; transform: translateY(10%) scale(.9); } 22% { opacity: .7; } 100% { opacity: 0; transform: translateY(-5%) scale(1.12); } }
+@keyframes glossary-scene-reassure { 0%,100% { opacity: 0; } 30% { opacity: .5; } }
+@media (max-width: 600px) { .glossary-scene-mote:nth-of-type(n+9) { display: none; } .glossary-scene-disc { top: 13%; } }
+@media (prefers-reduced-motion: reduce) {
+  .glossary-game-lab .glossary-world[data-scene-phase] *, .glossary-game-lab .glossary-world[data-scene-phase]::before, .glossary-game-lab .glossary-world[data-scene-phase]::after { animation: none !important; transition: none !important; }
+  .glossary-living-world :is(.glossary-scene-light, .glossary-scene-disc, .glossary-scene-horizon) { transform: none; }
+  .glossary-scene-response { display: none; }
+}
