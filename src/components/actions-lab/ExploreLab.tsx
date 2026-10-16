@@ -607,6 +607,11 @@ function SkipCollegeSwitch({ on, onChange }: { on: boolean; onChange: (on: boole
     setStatus({ text: next ? "No college degree needed" : "Showing every career", key: Date.now() });
     setSweep((n) => n + 1);
   };
+  // Visual rank (Chandu, after the first cut: "right now it steals all
+  // prominence and hierarchy"): no pill surface or border, a 36px switch,
+  // a 13px semibold label in the muted colour. Page title > rail titles >
+  // this control. Blue appears only on the switch track, the cap and its
+  // slash while on; everything else stays quiet.
   return (
     <div className="relative flex w-full items-center">
       <button
@@ -614,24 +619,24 @@ function SkipCollegeSwitch({ on, onChange }: { on: boolean; onChange: (on: boole
         role="switch"
         aria-checked={on}
         onClick={flip}
-        className="dm-quiet relative flex h-10 flex-none cursor-pointer items-center gap-[10px] rounded-full border pr-[6px] pl-[12px] transition-colors"
-        style={{ background: on ? "color-mix(in srgb, var(--primary) 14%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: on ? "var(--primary)" : "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+        className="dm-quiet relative -ml-[8px] flex h-8 flex-none cursor-pointer items-center gap-[8px] rounded-full px-[8px]"
+        style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-body)" }}
       >
-        <span className="relative flex size-[18px] flex-none items-center justify-center" aria-hidden>
-          <GraduationCap className="h-[18px] w-[18px]" style={{ color: on ? "var(--primary)" : "var(--foreground)" }} />
+        <span className="relative flex size-[16px] flex-none items-center justify-center" aria-hidden>
+          <GraduationCap className="h-[16px] w-[16px] transition-colors" style={{ color: on ? "var(--primary)" : "currentColor" }} />
           {/* The slash is the one-glance "no college" mark; it draws in with the flip. */}
-          <span className="absolute left-1/2 top-1/2 h-[2px] w-[22px] origin-center rounded-full transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ background: "var(--primary)", transform: `translate(-50%, -50%) rotate(-45deg) scaleX(${on ? 1 : 0})`, boxShadow: "0 0 0 1.5px var(--glass-surface-1)" }} />
+          <span className="absolute left-1/2 top-1/2 h-[1.5px] w-[19px] origin-center rounded-full transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ background: "var(--primary)", transform: `translate(-50%, -50%) rotate(-45deg) scaleX(${on ? 1 : 0})`, boxShadow: "0 0 0 1.5px var(--background)" }} />
         </span>
-        <span className="text-[13.5px] leading-[16px] font-bold whitespace-nowrap">Skip college</span>
-        <span className="relative inline-flex h-[26px] w-[46px] flex-none items-center rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "var(--glass-surface-2)", boxShadow: on ? "none" : "inset 0 0 0 1px var(--glass-border)" }}>
-          <span className="absolute size-[22px] rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(${on ? 22 : 2}px)`, boxShadow: "0 1px 2px rgba(0,0,0,.25)" }} />
+        <span className="text-[13px] leading-[16px] font-semibold whitespace-nowrap transition-colors">Skip college</span>
+        <span className="relative inline-flex h-[20px] w-[36px] flex-none items-center rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "var(--glass-surface-2)", boxShadow: on ? "none" : "inset 0 0 0 1px var(--glass-border)" }}>
+          <span className="absolute size-[16px] rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(${on ? 18 : 2}px)`, boxShadow: "0 1px 2px rgba(0,0,0,.25)" }} />
         </span>
         {sweep > 0 && <ConfirmShimmer key={sweep} active />}
       </button>
-      {/* Beside the pill where there is room (tablet, desktop); tucked into
-         the gap under it on phones. Absolute, so the rails never shift. */}
+      {/* Beside the control where there is room (tablet, desktop); tucked
+         into the gap under it on phones. Absolute, so the rails never shift. */}
       {status && (
-        <span key={status.key} role="status" className="dm-status-flash pointer-events-none absolute left-0 top-full mt-[4px] text-[13px] leading-[18px] font-semibold whitespace-nowrap sm:left-auto sm:top-auto sm:mt-0 sm:ml-[12px] sm:static" style={{ color: "var(--primary)", fontFamily: "var(--font-body)" }}>
+        <span key={status.key} role="status" className="dm-status-flash pointer-events-none absolute left-0 top-full mt-[2px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap sm:left-auto sm:top-auto sm:mt-0 sm:ml-[10px] sm:static" style={{ color: "var(--primary)", fontFamily: "var(--font-body)" }}>
           {status.text}
         </span>
       )}
