@@ -3,7 +3,7 @@
 // Plan" SOP, world #47: a practice world. Fast kitchen situations, no plot
 // to maintain; Dreamy and the world carry the game. Because it is a practice
 // world, the examples do not have to name the anchor (Harbor Kitchen), and
-// most do not. Four playable levels and two on the roadmap. Eighth-grade
+// most do not. Six playable levels (5 and 6 added 17 Oct 2026). Eighth-grade
 // copy, no dashes, no numbers. No catalog career owns this one yet, so the
 // hub card is keyed to the industry slug itself.
 //
@@ -242,7 +242,143 @@ export const CULINARY_GLOSSARY: GlossaryBlueprint = {
       },
       facts: ["Washing hands for twenty seconds is the single best way to keep food safe."],
     },
-    { number: 5, title: "The Pass", tier: "Advanced", goal: "Run the pass on a full night.", milestone: "Run the pass", nextMilestone: "Build flavor", companyValue: 500000, nextCompanyValue: 1000000, words: ["Expediter", "Ticket", "Fire", "All Day", "Eighty Six"] },
-    { number: 6, title: "Flavor", tier: "Advanced", goal: "Build flavor on purpose.", milestone: "Build flavor", nextMilestone: "Keep cooking", companyValue: 1000000, nextCompanyValue: 1000000, words: ["Season", "Acid", "Umami", "Emulsify", "Garnish"] },
+    // Levels 5 and 6 made playable on 17 Oct 2026 (Chandu: "please dont
+    // leave anything as not done yet fix everything"), so the model
+    // blueprint carries the full six levels like the other three.
+    {
+      number: 5,
+      title: "The Pass",
+      tier: "Advanced",
+      goal: "Run the pass on a full night.",
+      milestone: "Run the pass",
+      nextMilestone: "Build flavor",
+      companyValue: 500000,
+      nextCompanyValue: 1000000,
+      intro: { headline: "Friday Rush", line: "Every table is full and orders keep printing.", hook: "Learn the calls that run the pass." },
+      terms: [
+        {
+          term: "Expediter", definition: "The person at the pass who calls orders and checks every plate.", example: "The expediter checks each plate before a server takes it.", cue: "Runs the pass, checks every plate", confusion: "Fire", icon: "megaphone",
+          moments: ["One person at the pass calls orders and wipes each rim.", "She sends a cold plate back before any guest sees it.", "He stands between the cooks and the servers, timing every table."],
+        },
+        {
+          term: "Ticket", definition: "The printed order that tells the kitchen what a table wants.", example: "A new ticket prints with two steaks and a salad.", cue: "The printed order from a table", confusion: "All Day", icon: "receipt",
+          moments: ["A paper slip prints: two steaks, one salad, table nine.", "The slip says no onions, so the cook reads it twice.", "Slips line up on the rail in the order they came in."],
+        },
+        {
+          term: "Fire", definition: "The call that tells cooks to start cooking a dish right now.", example: "Fire table six, the guests just finished their soup.", cue: "Start cooking this dish now", confusion: "Expediter", icon: "flame",
+          moments: ["The guests finished their soup. Time to start their steaks now.", "The call goes out and the cook drops fish in the pan.", "Table four is ready for mains, so the grill starts their order."],
+        },
+        {
+          term: "All Day", definition: "The total count of one dish across every open order.", example: "Six burgers all day means six across every open order.", cue: "The total count on every order", confusion: "Ticket", icon: "sigma",
+          moments: ["Two steaks here, three there. Five steaks to cook in total.", "The cook asks how many fries are needed across every order.", "Four orders each want two soups. Eight bowls in total."],
+        },
+        {
+          term: "Eighty Six", definition: "The call that a dish is sold out and cannot be ordered tonight.", example: "We are out of salmon, so eighty six the salmon.", cue: "That dish is sold out", confusion: "Fire", icon: "circle-slash",
+          moments: ["The last piece of salmon just went out. No more tonight.", "Servers are told to stop selling the soup. The pot is empty.", "The chef crosses the lamb off the board for the night."],
+        },
+      ],
+      sort: {
+        label: "Which call",
+        prompt: "Which call does each moment need?",
+        buckets: ["Start it now", "Stop selling it", "Count it up"],
+        items: [
+          { text: "Guests just finished the soup", bucket: "Start it now", term: "Fire" },
+          { text: "The last steak just went out", bucket: "Stop selling it", term: "Eighty Six" },
+          { text: "How many fries across the board?", bucket: "Count it up", term: "All Day" },
+          { text: "Table two is ready for mains", bucket: "Start it now", term: "Fire" },
+          { text: "The soup pot is empty", bucket: "Stop selling it", term: "Eighty Six" },
+          { text: "Three tables each want a burger", bucket: "Count it up", term: "All Day" },
+        ],
+        feedbackCorrect: "Ready tables get cooked, empty pots stop selling, totals get counted.",
+        feedbackWrong: "Is the dish ready to cook, sold out, or a count?",
+      },
+      cases: [
+        {
+          terms: ["Expediter", "Fire"],
+          scene: "Table five just finished their salads. The mains are next.",
+          steps: [
+            { prompt: "Who tells the line to start the mains?", options: ["The person at the pass", "The guest at table five"], correctIndex: 0 },
+            { prompt: "What does that person call out?", options: ["Fire table five", "Table five all day"], correctIndex: 0 },
+          ],
+          feedbackCorrect: "The expediter calls fire, and the line starts the mains.",
+          feedbackWrong: "Fire means start cooking now. The expediter makes that call.",
+        },
+        {
+          terms: ["All Day", "Eighty Six"],
+          scene: "Only three salmon are left in the walk-in.",
+          steps: [
+            { prompt: "Two orders want two salmon, one wants one. How many in total?", options: ["Three", "Five"], correctIndex: 1 },
+            { prompt: "There are not enough. What should the pass call?", options: ["Eighty six salmon after three", "Fire every salmon now"], correctIndex: 0 },
+          ],
+          feedbackCorrect: "Five needed, three left. Sell three, then call it sold out.",
+          feedbackWrong: "Count every order first. Then stop selling what you cannot make.",
+        },
+      ],
+      powerPlay: {
+        intro: "Run the pass on Friday night.",
+        paragraph: "Friday night at Harbor Kitchen is packed. A new {2} prints for table nine. The {1} reads it and counts four steaks {4}. Table six just finished their soup, so she calls {3} on their mains. The last salmon goes out, so she calls {5} on it.",
+      },
+      facts: ["A busy restaurant kitchen can send out hundreds of plates in one night."],
+    },
+    {
+      number: 6,
+      title: "Flavor",
+      tier: "Advanced",
+      goal: "Build flavor on purpose.",
+      milestone: "Build flavor",
+      nextMilestone: "Keep cooking",
+      companyValue: 1000000,
+      nextCompanyValue: 1000000,
+      intro: { headline: "Chef's Tasting", line: "The chef tastes every dish before it goes out.", hook: "Learn the words that build flavor." },
+      terms: [
+        {
+          term: "Season", definition: "Adding salt and other flavors so a dish tastes its best.", example: "Season the soup, then taste it again.", cue: "Add salt to bring out flavor", confusion: "Garnish", icon: "salad",
+          moments: ["A pinch of salt goes in, then the cook tastes again.", "The sauce tastes flat until a little salt is stirred in.", "Salt and pepper go on the steak before it hits the pan."],
+        },
+        {
+          term: "Acid", definition: "A sour taste, like lemon or vinegar, that makes a dish taste bright.", example: "A squeeze of lemon adds acid to the rich fish.", cue: "A sour taste that brightens food", confusion: "Season", icon: "citrus",
+          moments: ["Lime juice wakes up the heavy cream sauce.", "A splash of vinegar cuts through the rich pork.", "The salad dressing needs something sour to taste bright."],
+        },
+        {
+          term: "Umami", definition: "A deep, savory taste found in foods like mushrooms, cheese and broth.", example: "Parmesan adds umami to the pasta sauce.", cue: "A deep, savory, meaty taste", confusion: "Acid", icon: "soup",
+          moments: ["Roasted mushrooms make the soup taste deep and meaty.", "A spoon of soy sauce makes the broth taste richer.", "Aged cheese gives the pasta a rich, savory bite."],
+        },
+        {
+          term: "Emulsify", definition: "Mixing oil and vinegar, which do not blend, into one smooth sauce.", example: "Whisk fast to emulsify the oil into the dressing.", cue: "Make oil and water mix smoothly", confusion: "Acid", icon: "blend",
+          moments: ["Oil is whisked into egg yolk until it turns thick and creamy.", "The dressing is shaken hard so the oil stops floating on top.", "Cold butter is swirled into the sauce until it turns glossy."],
+        },
+        {
+          term: "Garnish", definition: "A small finishing touch on top of a plate that adds color or flavor.", example: "A sprig of herbs is the garnish on the soup.", cue: "The finishing touch on top", confusion: "Season", icon: "leaf",
+          moments: ["Chopped herbs are sprinkled on top right before the plate goes out.", "A thin lemon slice sits on the edge of the fish plate.", "A few drops of bright green oil finish the soup bowl."],
+        },
+      ],
+      cases: [
+        {
+          terms: ["Acid", "Season"],
+          scene: "The cream soup tastes heavy and a little flat.",
+          steps: [
+            { prompt: "It needs brightness. What should go in?", options: ["A squeeze of lemon", "More cream"], correctIndex: 0 },
+            { prompt: "It still tastes flat after that. What is next?", options: ["A pinch of salt", "A sprig of herbs"], correctIndex: 0 },
+          ],
+          feedbackCorrect: "Sour lifts a heavy dish. Salt brings out the flavor.",
+          feedbackWrong: "Lemon adds brightness and salt fixes flat. Herbs only add color.",
+        },
+        {
+          terms: ["Emulsify", "Garnish"],
+          scene: "The oil keeps floating on top of the salad dressing.",
+          steps: [
+            { prompt: "How do you make it one smooth sauce?", options: ["Whisk it hard while pouring", "Let it sit still"], correctIndex: 0 },
+            { prompt: "The salad is plated. What goes on last?", options: ["A few fresh herbs on top", "More oil in the bowl"], correctIndex: 0 },
+          ],
+          feedbackCorrect: "Whisking makes the oil blend in. Herbs on top finish the plate.",
+          feedbackWrong: "Oil only blends in when you whisk it. The last touch goes on top.",
+        },
+      ],
+      powerPlay: {
+        intro: "Finish the chef's pasta.",
+        paragraph: "The chef at Harbor Kitchen tastes the pasta sauce. Aged cheese gives it more {3}. She whisks in cold butter to {4} it into a glossy sauce. It still tastes flat, so she stirs in salt to {1} it. A squeeze of lemon adds {2} to cut the richness. Fresh herbs on top are the {5}.",
+      },
+      facts: ["Umami is one of five basic tastes, with sweet, sour, salty and bitter."],
+    },
   ],
 };

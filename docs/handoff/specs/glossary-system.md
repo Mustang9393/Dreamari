@@ -45,8 +45,7 @@ Every world already has a row in `WORLD_SYSTEMS` (15, Personal Care & Community 
    Per term: `definition` (one sentence, never says the word; the teach card and the review question), `example` (says the word; names the anchor unless practice world; the teach card and the Power Play fallback), `cue` (seven words at most, never says the word: the match card's right side, a quick-check pair, a compare card point), `moments` (exactly three short real situations that show the word without saying it, twelve words and 72 characters each; every moment is shown on one screen only, which is what keeps a level from asking the same thing twice), `confusion` (the word in the same level it is mixed up with; required from Level 3), `formula` (only on a level with `math: true`). Per level, optional and Finance-style: `sort` (concrete items into two to four concept buckets, like "Money in / Money out"), `selectAll` (four concrete items, one to three right), `cases` (up to two: a scene and two to four steps of two or four options each), `powerPlay` (one written paragraph using {1} to {5} once each, where {n} is the nth term, in an order that is not 1 to 5). Copy rules: eighth grade, one idea per sentence, no dashes, no numbers unless the level sets `math: true`. `validateBlueprint` throws at import with every problem it can see, and `buildLesson` throws if the assembled level would show a line twice, leave a word short of mastery, or run three of one screen shape in a row.
 3. **Register it** in `GLOSSARY_INDUSTRIES` (`src/components/glossary/data.ts`): `aviation: buildGlossaryCareer(X_GLOSSARY),`.
 4. **Map its careers** in `CAREER_INDUSTRY` (`industries.ts`) if the world has more than one glossary or the career's world is not inferable; otherwise skip.
-5. **Release:** a new glossary plays by route and on `/play-tools/glossary-qa` (hamburger, "Glossary QA") at once; it reaches the Play hub only when its slug is added to `GLOSSARY_HUB_RELEASED` in `data.ts`, after Chandu's browser QA.
-5b. **Hub card:** add to `GLOSSARY_GAMES` in `src/components/play/games.ts` if not already listed (Finance, Medical, Flight and Tech are). `hasGlossary()` turns the card playable by itself.
+5. **Release:** a new glossary plays by route and on `/play-tools/glossary-qa` (hamburger, "Glossary QA") at once. It reaches the Play tab only once it has a thumbnail cover (Chandu, 17 Oct 2026: "Only use games with thumbnail art in the play tab"): then add its card to `GLOSSARY_GAMES` in `src/components/play/games.ts` and its slug to `GLOSSARY_HUB_RELEASED` in `data.ts` (SOP Prompt C). Released today: finance, nursing, aviation, software. Culinary waits on its cover (SOP section 7c).
 6. **Check:** `npx tsc --noEmit`, `node --import ./scripts/qa/ts-resolve.mjs scripts/qa/glossary-blueprints.test.mjs` (every registered blueprint: the SOP rules below, as assertions), `node scripts/qa/dreamy-reactions.test.mjs`, then open `/play/glossary/<slug>?theme=drift` and press the DEMO-ONLY Skip through Level 1 (14 presses), then the same with `?theme=signal`.
 7. **Level 1 art (optional, see below).** Without it the industry teaches with words only, which is the rule for every level after the first anyway.
 
@@ -105,7 +104,7 @@ The numbers in brackets are which term the screen credits; m0, m1, m2 are which 
 
 Review: one Reverse Recall per term (the definition read aloud), drawn only for terms still short of mastery; Reverse Recall never appears in the main loop, so the review is always a form the student has not seen. Power Play: the level's written paragraph (recommended), else the five examples with their words blanked in a rotating non-sequential order; either way the blanks never run 1 to 5, and the engine shuffles the word bank so it never mirrors the blanks (17 Oct 2026, Chandu: "dont make the power play so linear"). The right answer's position rotates by level and screen. Feedback is built from each term's own copy, and when the term has a `confusion` the wrong-answer line names it ("Not Tailwind: that is wind pushing from behind").
 
-Live proof of all four recipes with authored pieces: `/play/glossary/culinary?lesson=1` to `lesson=4` (the model blueprint, `blueprints/culinary.ts`).
+Live proof of all four recipes with authored pieces: `/play/glossary/culinary?lesson=1` to `lesson=6` (the model blueprint, `blueprints/culinary.ts`).
 
 ## Presentation the generator relies on
 
@@ -137,7 +136,7 @@ Joshua's "Dreamari Glossary Game Master Scaling Plan" (PDF, 22 pages) was read a
 
 Where this system deliberately differs from the SOP: the PDF calls each of its 50 industries a "Glossary World"; here those are **industries** under the 15 career worlds, which own the look. The SOP's "the Dreamari team decides" for images and math is a flag in the blueprint file (`termArt.ts` registration, `math: true`), so the decision is visible in review and not left to a generator.
 
-Progress: only a continuous story has a company whose value grows, so only that mode shows the dollar meter and `unlocks` on the Levels map. A scenario thread or a practice world shows the level's milestone in words with "Level n of N" (the SOP's `level_goal`), on the intro, the complete screen and the map. Open: the hub card has no cover art for an industry no catalog career owns (Kitchen Terms shows the plain card).
+Progress: only a continuous story has a company whose value grows, so only that mode shows the dollar meter and `unlocks` on the Levels map. A scenario thread or a practice world shows the level's milestone in words with "Level n of N" (the SOP's `level_goal`), on the intro, the complete screen and the map. An industry without a cover stays off the Play tab (Kitchen Terms, until SOP section 7c Part 1).
 
 ## The 50 glossary worlds of the SOP, mapped to our career worlds
 
@@ -191,7 +190,7 @@ Numbers are the SOP's. Built ones are linked. "Mode" is the SOP's recommended ar
 | 44 | Robotics Technician | scenario_thread | Factories & Making Things |
 | 45 | Carpentry & Construction Trades | scenario_thread | Building & Construction |
 | 46 | Solar & Renewable Energy Technician | continuous_story | Building & Construction |
-| 47 | Culinary Arts (built, `/play/glossary/culinary`, 2 levels) | practice_world | Food & Cooking |
+| 47 | Culinary Arts (built, `/play/glossary/culinary`, 6 levels) | practice_world | Food & Cooking |
 | 48 | Cosmetology & Barbering | practice_world | Personal Care & Community Services |
 | 49 | EMT & Paramedic | scenario_thread | Health & Medicine |
 | 50 | CNA & Medical Assistant | scenario_thread | Health & Medicine |
@@ -212,6 +211,4 @@ Component Lab, group "Glossary game, live engine (Drift and Signal)": the 14 wor
 
 - A sheet importer (xlsx to blueprint); the blueprint file is the import format.
 - Chapter names for generated industries come from the blueprint, not from the levels.
-- Light-mode pass on generated industries.
-- Levels 5 and 6 for Culinary (roadmap words are in its blueprint).
-- Level 1 term art and welcome art for the generated industries (SOP section 7b).
+- Graphics only, all in the paste-ready Codex prompt in SOP section 7c: Kitchen Terms' Level 1 art, welcome and Play tab cover; the six Levels map plates; Signal panoramas and Drift silhouettes for the four glossary worlds; the animated Dreamy reactions. (Done 17 Oct 2026: Level 1 and welcome art for Software, Aviation and Nursing; Culinary Levels 5 and 6; the light-mode pass.)

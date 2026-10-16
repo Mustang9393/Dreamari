@@ -899,3 +899,74 @@
    the living-worlds rule that made every compact row span the grid. */
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"][data-map-compact] .glossary-level-map-scroll > .glossary-map-rung.glossary-map-rung:not(.is-inspected) { grid-column: auto !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"][data-map-compact] .glossary-level-map-scroll > .glossary-map-rung.glossary-map-rung:not(.is-inspected):last-child:nth-child(even) { grid-column: 1 / -1 !important; justify-self: center !important; width: calc(50% - 4px) !important; }
+
+/* Light mode (17 Oct 2026 light-mode pass, Chandu: "dont leave anything as
+   not done yet"): the empty mastery segments were 72% white on the white HUD
+   card, so the five slots vanished. In light they sit on a faint ink track
+   and the partial fill mixes toward ink instead of toward white. */
+html.light .glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-segment { background: color-mix(in srgb, var(--foreground) 12%, transparent); }
+html.light .glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-segment > i { background: color-mix(in srgb, var(--glossary-accent) 60%, color-mix(in srgb, var(--foreground) 12%, transparent)); }
+
+/* Signal in light mode (17 Oct 2026 light-mode pass): the answer keys
+   (A to D) and the compare card's word names kept Signal's dark-mode cyan
+   (#22d3ee), which reads 1.6:1 to 1.8:1 on the near-white light cards. They
+   take the deep teal light Signal already uses for its borders and hovers
+   (#0e7490, 5.4:1 on white). */
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option-key { color: #0e7490 !important; border-color: #0e7490 !important; background: #ecfeff !important; }
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-compare-card strong { color: #0e7490 !important; }
+
+/* Signal in light mode, display text (17 Oct 2026, Chandu: "light mode
+   signal is hard to read the FIRE TICKET UNLOCKED ALL OF THOSE THINGS WITH
+   THE DROP SHADOW"). Signal's night palette (gold #fbbf24, cyan #22d3ee) and
+   its 3 to 4px navy drop shadows were kept in light mode, so gold words sat
+   on near-white cards and pale sky with a dark smear under them (1.4:1 to
+   1.8:1). In light the two accents become deep amber and deep teal, every
+   hard shadow goes, and display words keep a faint amber echo so they still
+   read as Signal's pixel type. The Start slab stays bright gold with dark
+   ink (its text had flipped to the light background colour). */
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 { --sig-gold: #a85a00; --sig-cyan: #0e7490; }
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 :is(h1, h2, h3, h4, p, span, em, strong, b, small, div, button, li, label) { text-shadow: none !important; }
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-flashcard-term, .glossary-flashcard-term *, .glossary-unlock-relic-word, .glossary-unlock-finale h2 em, .glossary-complete-screen h2, .glossary-complete-title) { color: #a85a00 !important; text-shadow: 2px 2px 0 rgba(251, 191, 36, .35) !important; }
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale h2 { color: var(--foreground) !important; }
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-cta { background: #fbbf24 !important; color: #071027 !important; }
+/* The Drift / Signal switch: in light mode its active pill is the deep green
+   (#0a6f39), and the dark label read 3:1 on it. White reads 6.4:1. */
+html.light .glossary-atmosphere-picker button.is-active { color: #ffffff; }
+
+/* The Signal welcome in light mode (17 Oct 2026, Chandu: "Welcome screen is
+   still a little harder to read the friday rush color is too muddy and the
+   level 05 pass stuff etc the green dont work well on the backgrounds"). The
+   copy sat straight on the busy daytime city, so no single colour held up.
+   It now sits on a solid light panel in Signal's frame (2px ink border, hard
+   offset shadow), the title is navy ink with a bright gold pixel shadow, and
+   the level line and goal are ink. */
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-copy { background: rgba(255, 255, 255, .92) !important; border: 2px solid color-mix(in srgb, var(--foreground) 26%, transparent) !important; box-shadow: 6px 6px 0 color-mix(in srgb, var(--foreground) 14%, transparent) !important; border-radius: 0 !important; padding: clamp(18px, 2.4vw, 28px) !important; }
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-welcome-copy h1 em, .glossary-welcome-story em) { color: #1d2539 !important; text-shadow: 3px 3px 0 #fbbf24 !important; }
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-welcome-kicker, .glossary-welcome-kicker *, .glossary-welcome-goal, .glossary-welcome-copy h1 span, .glossary-welcome-copy p) { color: #1d2539 !important; }
+html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-kicker { opacity: .82; }
+
+/* Graphics sit above surfaces (17 Oct 2026, Chandu: "make sure the graphics
+   sit above the surfaces etc."). On short or narrow screens the welcome art
+   and Dreamy overhang the copy panel below them; the panel was painted over
+   the art. The scene now stacks above the panel in every theme, and the
+   panel never takes pointer events from the art's overhang. */
+.glossary-game-shell.glossary-game-lab .glossary-welcome-scene .glossary-welcome-world { position: relative; z-index: 3; pointer-events: none; }
+.glossary-game-shell.glossary-game-lab .glossary-welcome-scene .glossary-welcome-copy { position: relative; z-index: 1; }
+/* ...and the art itself stays inside its box: on phones and narrow windows
+   Signal's scene box shrinks to about 200px but the image kept a larger size
+   and hung down over the copy's first lines. It now fits the box. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-welcome-scene .glossary-welcome-world img.glossary-welcome-hero { min-height: 0 !important; width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; object-fit: contain !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-welcome-scene .glossary-welcome-world:has(> img.glossary-welcome-hero) { grid-template-rows: minmax(0, 100%) !important; grid-template-columns: minmax(0, 100%) !important; }
+@media (max-width: 760px) {
+  /* Narrow Signal: Dreamy floats over the top of the box, so the registered
+     art takes the lower 70% and the box grows a little to hold both. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-world:has(> img.glossary-welcome-registered) { height: clamp(200px, calc(30dvh / var(--vz, 1)), 260px) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-world > img.glossary-welcome-registered { height: 86% !important; width: 78% !important; align-self: end; justify-self: end; object-position: 100% 100% !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-welcome-world:has(> img.glossary-welcome-registered) > .glossary-welcome-cloud { top: 0 !important; left: 0 !important; transform: scale(.6) !important; transform-origin: 0 0 !important; z-index: 2; }
+}
+
+/* Drift in light mode (same pass): Start is the deep green slab in light,
+   and its navy label read 2.4:1 on it; white reads 6.4:1. The unlocked
+   headline stayed white on the pale sky while the line under it is ink. */
+html.light .glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-cta { color: #ffffff !important; }
+html.light .glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-finale h2 { color: var(--foreground) !important; }

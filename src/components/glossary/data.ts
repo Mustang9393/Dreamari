@@ -491,11 +491,18 @@ export function hasGlossary(slug: string): boolean {
 }
 
 // DEMO-ONLY: which glossaries the Play hub sells as playable. Generated
-// industries stay off the hub until Chandu has QA'd them in the browser
+// industries stayed off the hub until Chandu had QA'd them in the browser
 // (16 Oct 2026: "push them to a separate link in the hamburger menu on main
-// so i can qa in browser"); they stay reachable by route and from the
-// Glossary QA page under play-tools. Add a slug here to release it.
-export const GLOSSARY_HUB_RELEASED = ["finance"];
+// so i can qa in browser"); unreleased ones stay reachable by route and
+// from the Glossary QA page under play-tools. Add a slug here to release it.
+// Every built glossary released on 17 Oct 2026 (Chandu: "I cant get to these
+// games from the play tab. Please fix. If we have games for the glossary
+// tiles in play tab open them up otherwise add them in succession to that
+// row"), then "Only use games with thumbnail art in the play tab": Medical,
+// Flight and Tech have tiles with Chandu's thumbnails and open their games.
+// Culinary has no thumbnail yet, so it stays QA-only (hamburger, Glossary
+// QA) until its cover lands (SOP 7c).
+export const GLOSSARY_HUB_RELEASED = ["finance", "nursing", "aviation", "software"];
 
 /** True when the hub may open this career's glossary as a real game. */
 export function isGlossaryReleased(slug: string): boolean {

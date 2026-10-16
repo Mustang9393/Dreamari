@@ -1653,6 +1653,11 @@ function MatchUpCard({ question, onAnswer, onReset, hintSlot, onReaction }: { qu
   }
 
   const hintTone = matched.size === question.pairs.length ? "done" : wrongFlash ? "wrong" : "go";
+  // The right column's header names what to drag to; "Use it when" is a
+  // label, not a noun, so it read "drag or tap its use it when" (17 Oct
+  // 2026 light-mode pass). It becomes "moment" in the hint.
+  const rightHeader = question.headers?.[1] ?? "example";
+  const target = rightHeader === "Use it when" ? "moment" : rightHeader.toLowerCase();
   const hintText = matched.size === question.pairs.length
     ? "Every pair is connected!"
     : wrongFlash
@@ -1660,8 +1665,8 @@ function MatchUpCard({ question, onAnswer, onReset, hintSlot, onReaction }: { qu
       : dropTarget
         ? "Let go to connect them"
         : pickedLeft
-          ? `Now tap or drag to its ${(question.headers?.[1] ?? "example").toLowerCase()}`
-          : `Press a ${(question.headers?.[0] ?? "term").toLowerCase()}, then drag or tap its ${(question.headers?.[1] ?? "example").toLowerCase()}`;
+          ? `Now tap or drag to its ${target}`
+          : `Press a ${(question.headers?.[0] ?? "term").toLowerCase()}, then drag or tap its ${target}`;
   return (
     <div className={`glossary-match-up ${matched.size === question.pairs.length ? "is-complete" : ""} relative flex w-full flex-col gap-[var(--space-3)]`}>
       {matched.size === question.pairs.length ? <LocalBurst nonce={1} /> : null}

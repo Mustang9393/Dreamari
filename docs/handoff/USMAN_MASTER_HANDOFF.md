@@ -2327,6 +2327,7 @@ _17 October 2026. One document with everything needed to scale the glossary game
 | Check | Result |
 |---|---|
 | Live on main | Everything in this document is on main. Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's thumbnails; Next level keeps the student's theme; Dreamy's speech bubble wraps on whole words at phone width. Since 17 Oct: Codex's Level 1 term art and welcome scenes for Software, Aviation and Nursing in both themes, living worlds (asset-free weather and time of day per world), and the symmetry and alignment pass. |
+| Light mode | A contrast sweep of every Culinary screen (all six levels, the welcome, teach cards, unlocked screen, Power Play and review) in Drift and Signal with the app in light mode: every line at 4.5:1 or better (3:1 large), disabled buttons excepted. Fixed on 17 Oct: Signal's gold and cyan words and their navy drop shadows, the welcome copy over the daytime city, the Start label, the A to D keys, the compare card names, the theme switch label, the empty mastery segments. |
 | Alignment audit | One screen of every shape the five games produce (30 shapes) in both themes at 1440x900 and 375x812: no row of unequal tiles, no off-centre short row, no block off the column's edges, no HUD or bubble off the column. Every screen also checked by eye for what the audit cannot see. |
 | Art QA | Three Level 1 packs, six welcomes, 72 exports with alpha and hash receipts (2.2 MB served); Finance and the words-only later levels unchanged. World scenes: deterministic, asset-free, Finance bypassed, performance contract held. |
 | Type check, lint | tsc clean. ESLint: no errors in the glossary code (two pre-existing unescaped-entity errors live in src/app/gate/page.tsx). |
@@ -2337,10 +2338,10 @@ _17 October 2026. One document with everything needed to scale the glossary game
 | Component Lab | "Glossary game, live engine" documents every piece in both themes with every state, the edge cases (22-character term, acronym, 110-character definition, 72-character moment, two-word options, long feedback) and the error state (a broken blueprint through the validator, the unknown-route 404, the hub release list). |
 | Design systems | All fifteen career worlds have a design system row; a blueprint naming any world works. |
 | Routes | /play/glossary/<industry> and /play/glossary/<career> resolve; /play-tools/glossary-qa lists every registered glossary (hamburger menu, Glossary QA). Unknown slugs 404. |
-| Hub gating | Only finance is released; generated industries play by route and from the QA page. Release is one slug in GLOSSARY_HUB_RELEASED. |
+| Hub gating | The Play tab shows only games with thumbnail art (Chandu, 17 Oct 2026). Finance, Medical (nursing), Flight (aviation) and Tech (software) are released and open from their cards. Kitchen Terms (culinary) has no cover yet, so it plays from the hamburger menu's Glossary QA link until Codex delivers Part 1 of section 7c. Release is one slug in GLOSSARY_HUB_RELEASED plus a card in GLOSSARY_GAMES. |
 | Demo flags | Every demo-only piece is tagged DEMO-ONLY in its own comment (blueprints, QA page, release list, Skip). |
-| Built so far | Finance (Joshua's, 4 of 20 levels). The three other Play tab cards are complete at six playable levels each: Software Engineering (Tech Terms), Flight Operations (Flight Terms), Nursing (Medical Terms). Culinary Arts has four (not on the hub) and is the model blueprint. Every world has the required Levels 1 to 4; Levels 5 and 6 are extras. All four were rewritten on 17 Oct to the Finance style: three moments per word, concept sorts, cases, written Power Plays, then trimmed to the reading rules. |
-| Not yet | Hub release of Software, Aviation and Nursing (their art is in; Prompt C is Chandu's step). Culinary's Level 1 art and its Levels 5 and 6. Light-mode pass on generated industries. Optional plates, panoramas and silhouettes. |
+| Built so far | Finance (Joshua's, 4 of 20 levels). The three other Play tab cards are complete at six playable levels each: Software Engineering (Tech Terms), Flight Operations (Flight Terms), Nursing (Medical Terms). Culinary Arts (Kitchen Terms) has six too and is the model blueprint; it reaches the Play tab when its cover lands. Every world has the required Levels 1 to 4; Levels 5 and 6 are extras. All four were rewritten on 17 Oct to the Finance style: three moments per word, concept sorts, cases, written Power Plays, then trimmed to the reading rules. |
+| Waiting on Codex | Only graphics remain, and section 7c is the paste-ready prompt for all of them: Kitchen Terms' Level 1 pictures, welcome scene and Play tab cover (then its release), the six Levels map plates, four Signal panoramas, four Drift silhouettes and the animated Dreamy reactions. Everything else is built: Software, Aviation and Nursing are on the Play tab, Culinary has six levels, and the light-mode pass is done. |
 
 ### 1. Who does what
 
@@ -2386,9 +2387,9 @@ TASK
 Create the glossary game for: [INDUSTRY, e.g. "Cybersecurity"]
 Notes from Chandu, if any: [optional]
 
-STEP 1. Look the industry up in the 50-industry table in docs/reference/glossary-scaling-sop-usman-2026-10-16.md (section 12). Take its mode (continuous_story, scenario_thread or practice_world) and its career world (an exact WORLD_COLORS key). Choose a slug: lowercase letters and dashes, it becomes the route /play/glossary/. Choose an anchor: one company, clinic, airline, shop or site that every level returns to (practice worlds may use it loosely). Choose the student's role in one word.
+STEP 1. Look the industry up in the 50-industry table in docs/reference/glossary-scaling-sop-usman-2026-10-16.md (section 12). Take its mode (continuous_story, scenario_thread or practice_world) and its career world (an exact WORLD_COLORS key). Choose a slug: lowercase letters and dashes, it becomes the route /play/glossary/<slug>. Choose an anchor: one company, clinic, airline, shop or site that every level returns to (practice worlds may use it loosely). Choose the student's role in one word.
 
-STEP 2. Write src/components/glossary/blueprints/.ts by copying the model blueprint culinary.ts (every authored piece in use) and the blueprint with the same mode: software.ts (continuous story), aviation.ts (scenario thread), culinary.ts (practice world). Keep the header comment pattern (DEMO-ONLY content, why, the anchor). Levels 1 to 4 must be playable; the validator refuses a file without them. Levels 5 and 6 are optional: write them as roadmap words, or make them playable if asked:
+STEP 2. Write src/components/glossary/blueprints/<slug>.ts by copying the model blueprint culinary.ts (every authored piece in use) and the blueprint with the same mode: software.ts (continuous story), aviation.ts (scenario thread), culinary.ts (practice world). Keep the header comment pattern (DEMO-ONLY content, why, the anchor). Levels 1 to 4 must be playable; the validator refuses a file without them. Levels 5 and 6 are optional: write them as roadmap words, or make them playable if asked:
 - Every playable level: five terms, each with term, definition, example, cue, icon and moments (exactly three).
 - Levels 3 and up: a confusion on every term, naming another term in the same level.
 - Every playable level: a written powerPlay (intro and paragraph).
@@ -2418,13 +2419,13 @@ COPY RULES (the validator refuses a file that breaks the measurable ones)
 - icon: a lucide icon slug (lowercase, dashes). It is only used on the Levels map until plate art exists; it is never shown on a flashcard or in the mastery bar.
 - Level title 30 characters, goal 48.
 
-STEP 3. Register: in src/components/glossary/data.ts add `: buildGlossaryCareer(_GLOSSARY),` to GLOSSARY_INDUSTRIES and the import. If a catalog career should open this glossary, map it in CAREER_INDUSTRY in src/components/glossary/industries.ts and set exampleCareerSlug in the blueprint. Do NOT add the slug to GLOSSARY_HUB_RELEASED; release is Chandu's step.
+STEP 3. Register: in src/components/glossary/data.ts add `<slug>: buildGlossaryCareer(<NAME>_GLOSSARY),` to GLOSSARY_INDUSTRIES and the import. If a catalog career should open this glossary, map it in CAREER_INDUSTRY in src/components/glossary/industries.ts and set exampleCareerSlug in the blueprint. Do NOT add the slug to GLOSSARY_HUB_RELEASED; release is Chandu's step.
 
 STEP 4. Check, all three must pass:
 npx tsc --noEmit
 node --import ./scripts/qa/ts-resolve.mjs scripts/qa/glossary-blueprints.test.mjs
 node scripts/qa/dreamy-reactions.test.mjs
-Then start the dev server (npm run dev -- --webpack), open /play/glossary/?theme=drift and press the top bar's Skip through Level 1 (about 14 presses), and again with ?theme=signal. Open ?lesson=2&q=1, ?lesson=3&q=1, ?lesson=3&q=3 (the sort) and ?lesson=4&q=1 in Drift, and the case screen of each level. Then play one level without Skip and get two answers wrong on purpose: the review screens that follow must read as new questions. Take a screenshot of each.
+Then start the dev server (npm run dev -- --webpack), open /play/glossary/<slug>?theme=drift and press the top bar's Skip through Level 1 (about 14 presses), and again with ?theme=signal. Open ?lesson=2&q=1, ?lesson=3&q=1, ?lesson=3&q=3 (the sort) and ?lesson=4&q=1 in Drift, and the case screen of each level. Then play one level without Skip and get two answers wrong on purpose: the review screens that follow must read as new questions. Take a screenshot of each.
 
 STEP 5. Write the art list for Codex as a short block in your final message: the slug, the anchor, and the five Level 1 terms each with its definition (Codex turns these into image briefs; see the SOP section 6).
 
@@ -2604,9 +2605,9 @@ You are working in the Dreamari prototype repo. Pull origin/main. Read section 6
 TASK: generate and register the required art for the glossary industry [slug] (anchor: [anchor]; Level 1 terms with definitions: [paste the art list from the game-creation agent]).
 
 1. Write the manifest docs/reference/glossary-[slug]-art-[mmmdd].json modelled on docs/reference/glossary-finance-art-oct13.json: version "[slug]-[mmmdd]", career "[slug]", the six style references, the prompt template and both style locks from the SOP, and five terms with id, slug and a brief that shows the meaning without the word and names the anchor.
-2. node scripts/glossary-art.mjs prompts  and generate one image per prompt, attaching the three references for that theme every time. Save as -drift.png and -signal.png in a review folder.
+2. node scripts/glossary-art.mjs prompts <manifest> and generate one image per prompt, attaching the three references for that theme every time. Save as <term-slug>-drift.png and <term-slug>-signal.png in a review folder.
 3. Also generate the welcome illustration per theme (SOP 6.2) and save as welcome-drift.png and welcome-signal.png.
-4. node scripts/glossary-art.mjs prepare  , then validate and preview. Convert the welcome images to public/images/glossary/[version]/{drift,signal}/welcome.webp (1024 square, transparent).
+4. node scripts/glossary-art.mjs prepare <manifest> <review-folder>, then validate and preview. Convert the welcome images to public/images/glossary/[version]/{drift,signal}/welcome.webp (1024 square, transparent).
 5. Register: CAREER_TERM_ART in src/components/glossary/termArt.ts for the term art; WELCOME_ART["[slug]"] in src/components/glossary/welcomeArt.ts for the welcome.
 6. Check: npx tsc --noEmit and node scripts/qa/dreamy-reactions.test.mjs. Open /play/glossary/[slug]?theme=drift and ?theme=signal: the welcome shows the illustration beside Dreamy, Level 1 teach cards show the pictures, Level 2 cards show words only. Screenshot each.
 7. Add a dated docs/AI_HANDOFF.md entry (what, why, prompts used, what was rejected and why). Commit; do not push. Chandu reviews, then releases the industry.
@@ -2670,6 +2671,52 @@ STEPS
 7. Run the acceptance gate in section 6.1. Add a dated docs/AI_HANDOFF.md entry: what you generated, the briefs, what you rejected and why. One commit per industry. Do not push.
 
 Done looks like: three manifests, thirty term images in both sizes, six welcome images, three CAREER_TERM_ART entries, three WELCOME_ART entries, tsc and the reaction QA green, screenshots attached, nothing pushed.
+```
+
+### 7c. Prompt for Codex: every graphic still missing (17 Oct 2026)
+
+Paste this whole block to Codex. It covers every image the glossary games still lack. Part 1 is required: until it lands, Kitchen Terms plays only from the hamburger menu's Glossary QA link, because the Play tab shows only games with thumbnail art (Chandu, 17 Oct 2026). Parts 2 to 5 are polish for every world; the games already work without them. One commit per part, no pushes; Chandu reviews and pushes.
+
+```
+You are working in the Dreamari prototype repo (Mustang9393/Dreamari). Pull origin/main first. Read section 6 of docs/reference/glossary-scaling-sop-usman-2026-10-16.md: the prompt template, both style locks, the six style references, the commands, the file contract and the acceptance gate are there. Copy the shape of docs/reference/glossary-nursing-art-oct17.json for any manifest. Dev server: npm run dev -- --webpack on a free port. One image per call, never chain off the last image, genuine transparency where the contract says so, no people, Dreamy only when a brief asks and never with limbs. Do not touch Finance.
+
+PART 1 (required): Kitchen Terms, so it can join the Play tab
+Industry slug: culinary. Anchor: Harbor Kitchen, a busy restaurant kitchen. Register under: culinary (no catalog career owns it).
+1a. Level 1 term art, both themes. Write docs/reference/glossary-culinary-art-<mmmdd>.json (version "culinary-<mmmdd>", career "culinary"). Terms and briefs (every brief is object-only):
+- Dice (Cutting food into small even cubes.): "On a Harbor Kitchen cutting board, a neat pile of small, perfectly even carrot cubes beside a chef's knife, one cube set slightly forward. This shows food cut into small even cubes, not dice for a game. No Dreamy, no cloud shape, no eyes or face, no mascot."
+- Mince (Cutting food into the tiniest pieces possible.): "A tiny heap of very finely cut garlic and parsley on a cutting board, the pieces almost like crumbs, a chef's knife resting beside it. This shows food cut as small as it can go. No Dreamy, no cloud shape, no eyes or face, no mascot."
+- Julienne (Cutting food into thin sticks the size of matchsticks.): "A tidy bundle of thin, even carrot and pepper sticks the size of matchsticks on a cutting board, a knife beside them. This shows thin matchstick cuts, not slices or cubes. No Dreamy, no cloud shape, no eyes or face, no mascot."
+- Chop (Cutting food into rough pieces that do not have to match.): "Rough, uneven chunks of onion and celery scattered on a cutting board next to a chef's knife, the pieces clearly different sizes. This shows a quick rough cut where pieces do not match. No Dreamy, no cloud shape, no eyes or face, no mascot."
+- Slice (Cutting food into thin flat pieces.): "A cucumber on a cutting board with thin, flat round slices fanned out in front of it, a knife resting beside. This shows thin flat pieces, not cubes or sticks. No Dreamy, no cloud shape, no eyes or face, no mascot."
+Run node scripts/glossary-art.mjs prompts, generate, then prepare, validate and preview. Register in CAREER_TERM_ART in src/components/glossary/termArt.ts under "culinary".
+1b. Welcome scene, both themes. Brief: "Harbor Kitchen: a compact restaurant kitchen pass with a steel counter, a heat lamp glowing over two waiting plates, a stove with a simmering pot and a rack of hanging pans. One compact coherent workplace silhouette, no text, people or Dreamy." Add it as welcome in the manifest, run node scripts/glossary-welcome-art.mjs prepare and validate, register WELCOME_ART["culinary"] in src/components/glossary/welcomeArt.ts.
+1c. Play tab cover. Attach the four existing covers as references: public/images/app/glossary-finance-thumb-oct17.webp, glossary-medical-thumb-oct17.webp, glossary-flight-thumb-oct17.webp, glossary-tech-thumb-oct17.webp. Prompt:
+"Use case: Play tab game cover. Match the four attached covers exactly in frame, camera, lighting and material: Dreamy, the soft 3D cloud with large starry navy eyes and a small open blue smile, floats at centre top behind a fan of four dark glass term cards with glowing gold rims, standing on a round lit stage; deep navy to indigo night sky with soft rolling hills, gold four-point sparkles and purple cloud banks in the bottom corners; a few subject props on each side. Subject: a restaurant kitchen. The cards read SEAR, SIMMER, DANGER ZONE and PLATE in cyan capitals, each with one simple cyan line icon (a flame, a cooking pot, a thermometer, a crossed fork and knife). Left props: a steel stove with a steaming pot. Right props: a cutting board with fresh herbs and a small rack of hanging pans. 1400 by 788 landscape. Keep Dreamy and the centre card inside the middle third. Text only on the four cards, spelled exactly; no other text, logo or watermark. Dreamy has no arms, hands or legs."
+Save as public/images/app/glossary-kitchen-thumb-<mmmdd>.webp, 1400 by 788, under 130 KB.
+1d. Release it. In src/components/play/games.ts add { careerSlug: "culinary", title: "Kitchen Terms", sub: "Learn key kitchen terms", cover: "/images/app/glossary-kitchen-thumb-<mmmdd>.webp" } to GLOSSARY_GAMES after Tech Terms, replacing the comment that reserves its place. In src/components/glossary/data.ts add "culinary" to GLOSSARY_HUB_RELEASED.
+1e. Check: npx tsc --noEmit; node scripts/qa/dreamy-reactions.test.mjs; node --import ./scripts/qa/ts-resolve.mjs scripts/qa/glossary-industry-art.test.mjs. Open /play: Kitchen Terms is the fifth glossary card and opens /play/glossary/culinary. Open /play/glossary/culinary?theme=drift and ?theme=signal: the welcome shows the kitchen beside Dreamy and the Level 1 teach cards show the pictures. Screenshot each.
+
+PART 2: Levels map plates (six strips cover all fifty worlds)
+Generate the six strips in section 6.3 with the 6.3 prompt and each theme's style lock: drift-beginner, drift-intermediate, drift-advanced, signal-beginner, signal-intermediate, signal-advanced. 1536 by 512 WebP, opaque, under 140 KB, saved to public/images/glossary/plates/. Register in PLATES in src/components/glossary/levelPlates.ts. Check the Levels map of /play/glossary/software and /play/glossary/culinary in both themes at laptop and phone width: titles stay readable over every plate.
+
+PART 3: Signal world panoramas (one per career world that has a glossary)
+Use the 6.4 prompt, attaching the three Signal references and public/images/glossary/signal/bg.webp. 1200 by 800 WebP, opaque, under 140 KB, saved to public/images/glossary/backdrops/signal/<world-slug>.webp. Scenes:
+- tech-engineering: "a tech campus at dusk: glass offices with lit windows, a low server building, a radio mast, a footbridge"
+- driving-flying-shipping: "an airport by a harbor at dusk: a control tower, a terminal with a jet bridge, port cranes beyond, runway lights"
+- health-medicine: "a hospital campus at dusk: a low clinic with lit windows, an ambulance bay, a water tower, trees"
+- food-cooking: "a harbor-front restaurant street at dusk: small restaurants with lit kitchen windows, awnings, a fish market, string lights"
+Register each in SIGNAL_WORLD_BACKDROPS in src/components/glossary/worldBackdrops.ts under its world name ("Tech & Engineering", "Driving, Flying & Shipping", "Health & Medicine", "Food & Cooking"). Check Signal play and the Signal Levels map for each of the four games: the skyline scrolls, nothing important sits under the HUD.
+
+PART 4: Drift horizon silhouettes (same four worlds)
+Write each as a hand-made SVG (no image generation needed): one flat dark horizon shape 1600 by 300, no interior detail, repeatable left to right, no text, no Dreamy. tech-engineering: office towers and a radio mast. driving-flying-shipping: a runway edge, a control tower and a parked jet. health-medicine: a clinic roofline with a water tower. food-cooking: restaurant rooftops with chimneys and an awning row. Save to public/images/glossary/backdrops/drift/<world-slug>.svg and register in DRIFT_WORLD_SILHOUETTES. Check that the living world scenery (section 6.8) still animates and stops under reduced motion.
+
+PART 5: Dreamy expressions in motion
+Follow section 6.6. Animate the Drift stills in this order: 10 (right answer), 09 and 14 (wrong answer), 16 and 12 (mastery and complete), 15 (review and hints), 08 (teach cards), 18 (Next). Deliver each as the four-frame WebP atlas described in docs/reference/dreamy-drift-animated-oct15-v2.json so dreamyReactions.ts takes them without engine changes. Then draw the Signal pixel versions on the Signal Dreamy rig. Run node scripts/qa/dreamy-reactions.test.mjs.
+
+EVERY PART
+Run the acceptance gate in section 6.1 on what you made. Add a dated docs/AI_HANDOFF.md entry per part: what you generated, the briefs, what you rejected and why. One commit per part, the why in the message. Do not push.
+
+Done looks like: Kitchen Terms on the Play tab with its cover, pictures and welcome; six plates; four Signal panoramas; four Drift silhouettes; the Dreamy reaction atlases; all checks green; five commits; nothing pushed.
 ```
 
 ### 8. The UI and the component library
@@ -2742,7 +2789,7 @@ node --import ./scripts/qa/ts-resolve.mjs scripts/qa/glossary-world-scenes.test.
 npm run tokens:check
 ```
 
-Then in the browser: paste scripts/qa/glossary-alignment-audit.js into the console on one screen of each kind (?lesson=N&q=M) at 1440x900 and 375x812, in ?theme=drift and ?theme=signal. Its issues list must be empty. It cannot see a clipped word inside a tile or a digit sitting low in its box: look for those by eye.
+Then in the browser: paste scripts/qa/glossary-alignment-audit.js into the console on one screen of each kind (?lesson=N&q=M) at 1440x900 and 375x812, in ?theme=drift and ?theme=signal. Its issues list must be empty. Then paste scripts/qa/glossary-contrast-audit.js on the same screens with the app in light mode (and again in dark): its low list must be empty apart from disabled buttons. ?pp=1, ?pp=intro, ?unlock=done and ?q= past the main loop open the Power Play, its intro, the unlocked screen and the review questions. It cannot see a clipped word inside a tile or a digit sitting low in its box: look for those by eye.
 
 #### 10.4 Layout and alignment, held in the CSS
 
@@ -2753,6 +2800,8 @@ Then in the browser: paste scripts/qa/glossary-alignment-audit.js into the conso
 - Counters centre their digit in a fixed-height box in both themes. A long term scales down on the teach card instead of overflowing; its underline follows the word.
 - Word banks are centred. The welcome scene grows to fit a lone Dreamy.
 - Levels map: the open card is a header (number and title), then the words, then the goal, facts and Play on the full width; Drift phone cards two to a row with a square icon and a whole-word title, an odd last card centred; a phone page holds the whole chapter.
+- Graphics sit above surfaces: welcome art and Dreamy stack over the copy panel, the art always fits inside its own box so it never covers text, and on narrow Signal screens Dreamy floats top-left over the scene, as in Drift.
+- Light mode is its own palette, not dark mode on a pale sky. Signal's gold and cyan become deep amber (#a85a00) and deep teal (#0e7490); the hard navy drop shadows go and display words keep a faint gold echo; the welcome copy sits on a solid light panel with a navy title and a gold pixel shadow; the Start slab stays gold with dark ink; the empty mastery segments sit on a faint ink track. Every text line reads at 4.5:1 or better (3:1 for large type), disabled buttons excepted.
 - Read docs/CROSS_BROWSER_GUARDRAILS.md before any layout work: students are on Windows laptops and Chromebooks.
 
 #### 10.5 Engine and experience
@@ -2771,7 +2820,7 @@ Then in the browser: paste scripts/qa/glossary-alignment-audit.js into the conso
 
 #### 10.7 Process
 
-- Nothing is pushed to main without Chandu's go-ahead; nothing reaches the Play hub without Prompt C.
+- Nothing is pushed to main without Chandu's go-ahead; nothing reaches the Play hub without Prompt C. The Play tab shows only glossaries with a thumbnail cover; the rest play from the hamburger menu's Glossary QA link (Chandu, 17 Oct 2026).
 - Every demo-only piece carries a DEMO-ONLY comment. Every real change gets a dated docs/AI_HANDOFF.md entry and a commit that say why.
 - Student copy at eighth grade, no dashes; the same in these docs.
 - A new screen or state goes into the Component Lab in the same commit.
@@ -2850,11 +2899,11 @@ Then in the browser: paste scripts/qa/glossary-alignment-audit.js into the conso
 | scripts/glossary-art.mjs | The term art script: manifest in, prompts out, packaging, validation, preview (section 6.1). |
 | scripts/glossary-welcome-art.mjs, scripts/qa/glossary-art-source-preview.mjs | The welcome scene packager and the source contact sheet (6.1, 6.2). |
 | src/components/glossary/worldScenes.ts, LivingWorld.tsx, glossary-living-worlds.css | Living worlds (6.8). |
-| scripts/qa/glossary-industry-art.test.mjs, scripts/qa/glossary-world-scenes.test.mjs, scripts/qa/glossary-alignment-audit.js | Art, world scene and alignment checks (10.3). |
+| scripts/qa/glossary-industry-art.test.mjs, scripts/qa/glossary-world-scenes.test.mjs, scripts/qa/glossary-alignment-audit.js, scripts/qa/glossary-contrast-audit.js | Art, world scene, alignment and light-mode contrast checks (10.3). |
 | docs/reference/glossary-<slug>-art-oct17*.json | The manifests and receipts of the three Play tab packs. |
 | docs/reference/glossary-finance-art-oct13.json | The model manifest with the finance briefs. |
 | src/components/glossary/generate.ts | Blueprint types (terms with moments; sort, selectAll, cases, powerPlay per level), the four recipes, the validator with the reading rules, the build-time assertions. |
-| src/components/glossary/blueprints/ | culinary.ts (the model: every authored piece in use, four levels), health.ts, software.ts, aviation.ts (six levels each). |
+| src/components/glossary/blueprints/ | culinary.ts (the model: every authored piece in use), health.ts, software.ts, aviation.ts; six levels each. |
 | src/components/glossary/data.ts | GLOSSARY_INDUSTRIES, GLOSSARY_HUB_RELEASED, Finance's hand-authored levels. |
 | src/components/glossary/industries.ts | The fifteen world design systems, CAREER_INDUSTRY. |
 | src/components/glossary/termArt.ts, welcomeArt.ts, levelPlates.ts, worldBackdrops.ts | Image registries: term art, welcome, plates and the Dreamy state expressions, panoramas and silhouettes. |
@@ -2873,7 +2922,7 @@ These override anything else in the document.
 |---|---|---|
 | Finance stays exactly as it is | Everything here applies only to new glossary worlds. Finance and Investment Banking, including Business Basics and Investing Basics, do not change. Nothing is applied retroactively. | Finance is hand-authored in data.ts and data-finance-l2-4.ts. It never passes through the generator. |
 | No timers | No countdown, no count-up, no timer in the header, no timed questions, no timer as a difficulty mechanic. Every new world, every new level. | The engine has no timer. The "4 min" on the Levels map is an estimate of length, not a clock. |
-| No forced images | The Dreamari team decides whether a term has an honest, relevant image. No AI tool or content generator makes this decision. If the team decides no, the term gets no image. Never create an image to fill a slot. If a match-to-pictures question loses its pictures, it becomes match-to-meanings. | Levels 2 and up teach with words only. The team has decided Level 1 earns pictures everywhere (3.4). A flashcard shows generated art or nothing; it never shows an icon in place of a picture. Match It Up is always word to meaning. |
+| No forced images | The Dreamari team decides whether a term has an honest, relevant image. No AI tool or content generator makes this decision. If the team decides no, the term gets no image. Never create an image to fill a slot. If a match-to-pictures question loses its pictures, it becomes match-to-meanings. | Levels 2 and up teach with words only. The team has decided Level 1 earns pictures everywhere (section 6). A flashcard shows generated art or nothing; it never shows an icon in place of a picture. Match It Up is always word to meaning. |
 | No forced math | The team decides whether math belongs in a lesson. Never invent prices, percentages or calculations because a template has a math slot. Keep the question's position; swap the mechanic (sorting, ordering, spot the mistake, decision). | Numbers in a level's copy fail validation unless the level sets math: true. The generator never writes a calculation. |
 
 #### 1.2 Three glossary world architectures
@@ -2936,7 +2985,7 @@ In the system each level has a **focus**: recognize, apply, analyze or decide. I
 | extra | An authored Select All or case, if written | Cases (one or two) | Cases | Cases, and an authored sort |
 | finale | Power Play: the level's written paragraph, all five words, blanks never in teaching order, word bank shuffled, size by level. |  |  |  |
 
-The review (one Reverse Recall per word, the definition read aloud) is drawn only for words still short of mastery and never appears in the main loop. Live proof of all four recipes with every authored piece: /play/glossary/culinary?lesson=1 through lesson=4, the model blueprint.
+The review (one Reverse Recall per word, the definition read aloud) is drawn only for words still short of mastery and never appears in the main loop. Live proof of all four recipes with every authored piece: /play/glossary/culinary?lesson=1 through lesson=6, the model blueprint.
 
 #### 1.5 The 50 glossary worlds
 
@@ -2990,7 +3039,7 @@ Joshua calls each of these a "Glossary World". In the system they are **industri
 | 44 | Robotics Technician | scenario_thread | Factories & Making Things | Automation cells: programming, teach points, calibration, safety. |
 | 45 | Carpentry & Construction Trades | scenario_thread | Building & Construction | Different stages and jobs: layout, framing, finishing, safety. |
 | 46 | Solar & Renewable Energy Technician | continuous_story | Building & Construction | One installation from site survey to monitoring. |
-| 47 | Culinary Arts (built, 4 levels) | practice_world | Food & Cooking | Fast kitchen challenges: knife skills, methods, temperatures, service. |
+| 47 | Culinary Arts (built, 6 levels) | practice_world | Food & Cooking | Fast kitchen challenges: knife skills, methods, temperatures, service. |
 | 48 | Cosmetology & Barbering | practice_world | Personal Care & Community Services | Fast client and technique exercises. |
 | 49 | EMT & Paramedic | scenario_thread | Health & Medicine | Different emergency calls from size-up to handoff. |
 | 50 | CNA & Medical Assistant | scenario_thread | Health & Medicine | Different patients and duties: rooming, vitals, infection control. |
@@ -3011,7 +3060,7 @@ Do not build a unique illustration for every term. 50 worlds times 4 levels time
 | Scenario thread | Reuse a small library of environments, equipment, documents and tools. |
 | Practice world | Rely on interactions, Dreamy reactions, motion, clouds, buttons and success states. |
 
-**In the system:** Level 1 of every industry gets pictures for its five terms and one welcome illustration (decision of 16 October, section 3.4). Every later level teaches with words: words-only teach cards, anonymous mastery segments, no pictures on match, sort or card backs. A flashcard never shows an icon in place of a picture.
+**In the system:** Level 1 of every industry gets pictures for its five terms and one welcome illustration (decision of 16 October, section 6). Every later level teaches with words: words-only teach cards, anonymous mastery segments, no pictures on match, sort or card backs. A flashcard never shows an icon in place of a picture.
 
 #### 1.8 Dreamy's role
 
@@ -3088,11 +3137,11 @@ Rule of thumb for Usman's agent: **the code is what ships today, and the prototy
 | B15 | Glossary reduced motion | With reduced motion on, burst particles and the backdrop bloom can stay stuck on screen; stars and fireworks ignore reduced motion. | Render nothing for these under `prefers-reduced-motion`. |
 | B16 | Glossary music | v1 music may not restart after leaving and re-entering in-app (module-level `started` flag), and may not start under React StrictMode in dev. | Reset the flag on stop. |
 | B17 | Glossary Type the Term | The only question kind with no sound and no backdrop pulse on answer. | Add `playCorrect` / `playWrong` and the pulse. |
-| B18 | Glossary Power Play | The word bank lists answers in blank order, which gives the answer away. | Shuffle with `shuffleStable(answers, lesson.id + "-pp")`. |
+| B18 | Glossary Power Play | The word bank lists answers in blank order, which gives the answer away. | Resolved 17 Oct 2026 in the live engine: the bank is shuffled so it never mirrors the blanks, and the validator refuses blanks in teaching order (master glossary SOP 10.1, 10.5). |
 | B19 | Glossary Sort the Buckets | A placed item cannot be moved back before checking. | Allow tap-to-unplace. |
 | B20 | Glossary tokens | `--danger` and `--success` do not exist; the literal fallbacks `#e0483e` and `#1f9d55` are what render. | Use `--destructive` and `--color-feedback-success`. |
 | B21 | Accessibility (both games) | No `aria-live` announcement of right/wrong; glossary popups are not dialogs (no role, focus move or trap); inputs lack labels; rank moves are not announced. | Add a polite live region for verdicts, dialog semantics, and labels. |
-| B22 | Contrast (light mode) | Glossary CTA (accent fill, `#05070f` text) is about 3.2:1 for finance in light mode; Power Play white text on `#cfc6f5`. | Check every world's CTA pair against 4.5:1. |
+| B22 | Contrast (light mode) | Glossary CTA (accent fill, `#05070f` text) is about 3.2:1 for finance in light mode; Power Play white text on `#cfc6f5`. | Resolved 17 Oct 2026 for the live engine (Drift and Signal): every screen passes 4.5:1 (3:1 large) in light mode, checked with `scripts/qa/glossary-contrast-audit.js`; the rules are in master glossary SOP 10.4. |
 | B23 | Content keys | Duplicate labels/terms are used as React keys in almost every list component. | Enforce uniqueness at import. |
 | B24 | Document layout | Shuffles lines, so an ordered document ("Slide 3 … Slide 7") appears out of order. | Add `ordered: true` to skip the shuffle for ordered documents. |
 | B25 | Bucket | Items are never shuffled; IB L3-12 alternates 0/1/0/1, which students can learn. | Shuffle items (seeded) or require irregular authored order. |

@@ -46,11 +46,11 @@ Rule of thumb for Usman's agent: **the code is what ships today, and the prototy
 | B15 | Glossary reduced motion | With reduced motion on, burst particles and the backdrop bloom can stay stuck on screen; stars and fireworks ignore reduced motion. | Render nothing for these under `prefers-reduced-motion`. |
 | B16 | Glossary music | v1 music may not restart after leaving and re-entering in-app (module-level `started` flag), and may not start under React StrictMode in dev. | Reset the flag on stop. |
 | B17 | Glossary Type the Term | The only question kind with no sound and no backdrop pulse on answer. | Add `playCorrect` / `playWrong` and the pulse. |
-| B18 | Glossary Power Play | The word bank lists answers in blank order, which gives the answer away. | Shuffle with `shuffleStable(answers, lesson.id + "-pp")`. |
+| B18 | Glossary Power Play | The word bank lists answers in blank order, which gives the answer away. | Resolved 17 Oct 2026 in the live engine: the bank is shuffled so it never mirrors the blanks, and the validator refuses blanks in teaching order (master glossary SOP 10.1, 10.5). |
 | B19 | Glossary Sort the Buckets | A placed item cannot be moved back before checking. | Allow tap-to-unplace. |
 | B20 | Glossary tokens | `--danger` and `--success` do not exist; the literal fallbacks `#e0483e` and `#1f9d55` are what render. | Use `--destructive` and `--color-feedback-success`. |
 | B21 | Accessibility (both games) | No `aria-live` announcement of right/wrong; glossary popups are not dialogs (no role, focus move or trap); inputs lack labels; rank moves are not announced. | Add a polite live region for verdicts, dialog semantics, and labels. |
-| B22 | Contrast (light mode) | Glossary CTA (accent fill, `#05070f` text) is about 3.2:1 for finance in light mode; Power Play white text on `#cfc6f5`. | Check every world's CTA pair against 4.5:1. |
+| B22 | Contrast (light mode) | Glossary CTA (accent fill, `#05070f` text) is about 3.2:1 for finance in light mode; Power Play white text on `#cfc6f5`. | Resolved 17 Oct 2026 for the live engine (Drift and Signal): every screen passes 4.5:1 (3:1 large) in light mode, checked with `scripts/qa/glossary-contrast-audit.js`; the rules are in master glossary SOP 10.4. |
 | B23 | Content keys | Duplicate labels/terms are used as React keys in almost every list component. | Enforce uniqueness at import. |
 | B24 | Document layout | Shuffles lines, so an ordered document ("Slide 3 … Slide 7") appears out of order. | Add `ordered: true` to skip the shuffle for ordered documents. |
 | B25 | Bucket | Items are never shuffled; IB L3-12 alternates 0/1/0/1, which students can learn. | Shuffle items (seeded) or require irregular authored order. |

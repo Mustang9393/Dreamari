@@ -154,18 +154,20 @@ export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; c
   // at rest and 16:9 when it expands, so the landscape frame shows whole
   // when the card is active and crops to Dreamy and the centre cards at rest.
   { careerSlug: "investment-banking", title: "Finance Terms", sub: "Learn key finance terms", cover: "/images/app/glossary-finance-thumb-oct17.webp" },
-  // No content authored yet (hasGlossary() gates these into a "Coming soon"
-  // dummy card, not a real link -- direct feedback, 9 Sept 2026) -- listed
-  // anyway so the row isn't just one lonely card next to empty space, each
-  // with its own card-hand thumbnail instead of the generic Play-tab "Soon"
-  // cover art.
+  // Medical, Flight and Tech were "Coming soon" dummy cards until their
+  // glossaries were built and released (17 Oct 2026); they now open their
+  // games like Finance. PlayHub locks any card whose glossary is not in
+  // GLOSSARY_HUB_RELEASED.
   { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/glossary-medical-thumb-oct17.webp" },
   { careerSlug: "airline-pilot", title: "Flight Terms", sub: "Learn key aviation terms", cover: "/images/app/glossary-flight-thumb-oct17.webp" },
   { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/glossary-tech-thumb-oct17.webp" },
-  // Kitchen Terms (industry slug "culinary", no catalog career) joins this
-  // row when it is released (GLOSSARY_HUB_RELEASED); until then it is on
-  // the Glossary QA page only. PlayHub takes a card's world from the
-  // glossary when worldForCareer has none.
+  // Only glossaries with real thumbnail art sit in this row (Chandu, 17 Oct
+  // 2026: "For everything without a thumbnail for the cards, send them to
+  // hamburger access only link. Only use games with thumbnail art in the
+  // play tab"). Kitchen Terms (industry slug "culinary") plays from the
+  // hamburger's Glossary QA link until Codex delivers its cover (SOP 7c);
+  // then add { careerSlug: "culinary", title: "Kitchen Terms", sub: "Learn
+  // key kitchen terms", cover } here and "culinary" to GLOSSARY_HUB_RELEASED.
   // Private Equity removed from this row (direct feedback, 9 Sept 2026) --
   // still gets the plain career-simulation "Soon" placeholder elsewhere.
 ];
