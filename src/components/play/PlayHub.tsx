@@ -16,7 +16,7 @@ import { HeaderActions } from "@/components/app/Inbox";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
-import { glossaryFor, hasGlossary } from "@/components/glossary/data";
+import { glossaryFor, isGlossaryReleased } from "@/components/glossary/data";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import { FEATURED_ROW_SOON_IDS, GLOSSARY_GAMES, SIMULATIONS, SOON, worldForCareer } from "./games";
 import { TrailerFlow } from "./TrailerFlow";
@@ -227,7 +227,7 @@ export function PlayHub() {
             label="Glossary Games"
             sub="Learn the language you'll hear in classes, use in job interviews, and need on the job."
             items={GLOSSARY_GAMES.map((game) => {
-              const playable = hasGlossary(game.careerSlug);
+              const playable = isGlossaryReleased(game.careerSlug);
               return {
                 id: game.careerSlug,
                 title: game.title,

@@ -1,3 +1,11 @@
+## 2026-10-16 (late night, 5): Glossary QA page in the hamburger menu; generated games off the hub until released
+
+**Why (Chandu):** "can we push them to a separate link in the hamburger menu on main so i can qa in browser?"
+
+- `GLOSSARY_HUB_RELEASED` (data.ts, DEMO-ONLY) lists the industries the Play hub sells as playable; only `finance` today. `isGlossaryReleased()` gates the hub cards, so Tech Terms, Flight Terms and Medical Terms are "Coming soon" on the hub again and the Kitchen Terms card is held back. Every glossary still plays by route.
+- `/play-tools/glossary-qa` (DEMO-ONLY, `GlossaryQa.tsx`): one section per registered glossary with its world, mode, anchor and release state, a card per playable level with Drift, Signal, Q1, Q2 and Power Play jumps, and the roadmap levels greyed. Linked from the hamburger's lab links as "Glossary QA". It reads the registry, so a new blueprint appears the moment it is registered.
+- Pushed to main at Chandu's request for browser QA; the Levels map redesign and the milestone meter are live for Finance too (Finance keeps its dollar meter).
+
 ## 2026-10-16 (late night, 4): Codex image brief in the SOP; Nursing, Culinary and Flight at four levels
 
 **Why (Chandu):** "lets add that to the SOP for codex. Codex will handle image generation. YOU create the games."

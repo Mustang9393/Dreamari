@@ -158,10 +158,10 @@ export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; c
   { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/glossary-registered-nurse-cards.png" },
   { careerSlug: "airline-pilot", title: "Flight Terms", sub: "Learn key aviation terms", cover: "/images/app/glossary-airline-pilot-cards.png" },
   { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/glossary-software-engineer-cards.png" },
-  // Keyed to the industry slug: no catalog career owns the kitchen yet
-  // (16 Oct 2026, the SOP's practice-world proof). PlayHub takes its world
-  // from the glossary when worldForCareer has none.
-  { careerSlug: "culinary", title: "Kitchen Terms", sub: "Learn key kitchen terms" },
+  // Kitchen Terms (industry slug "culinary", no catalog career) joins this
+  // row when it is released (GLOSSARY_HUB_RELEASED); until then it is on
+  // the Glossary QA page only. PlayHub takes a card's world from the
+  // glossary when worldForCareer has none.
   // Private Equity removed from this row (direct feedback, 9 Sept 2026) --
   // still gets the plain career-simulation "Soon" placeholder elsewhere.
 ];

@@ -490,6 +490,19 @@ export function hasGlossary(slug: string): boolean {
   return glossaryFor(slug) !== null;
 }
 
+// DEMO-ONLY: which glossaries the Play hub sells as playable. Generated
+// industries stay off the hub until Chandu has QA'd them in the browser
+// (16 Oct 2026: "push them to a separate link in the hamburger menu on main
+// so i can qa in browser"); they stay reachable by route and from the
+// Glossary QA page under play-tools. Add a slug here to release it.
+export const GLOSSARY_HUB_RELEASED = ["finance"];
+
+/** True when the hub may open this career's glossary as a real game. */
+export function isGlossaryReleased(slug: string): boolean {
+  const glossary = glossaryFor(slug);
+  return Boolean(glossary && GLOSSARY_HUB_RELEASED.includes(glossary.industrySlug));
+}
+
 /** Every industry with a playable glossary, in registry order. */
 export function glossaryIndustries(): GlossaryCareer[] {
   return Object.values(GLOSSARY_INDUSTRIES);
