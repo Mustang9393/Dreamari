@@ -68,6 +68,8 @@ for(const bp of blueprints){
     const note=(text,id)=>{const k=text.trim().toLowerCase();if(seen.has(k))assert.fail(`${where}: "${text}" is shown twice (${seen.get(k)} and ${id})`);seen.set(k,id);};
     for(const q of [...lesson.questions,...lesson.reviewQuestions]){
       if(q.kind==='choice'&&q.scene?.kind==='story')note(q.scene.text,q.id);
+      // Dreamy speaks the moment, then one short question (17 Oct 2026).
+      if(q.kind==='choice'&&!q.scene&&!q.sentence&&q.type==='Fill in the Blank')note(q.prompt.replace(/ [^.?!]+\?$/,''),q.id);
       if(q.kind==='choice'&&q.scene?.kind==='compare')note(q.prompt.replace(/ Which one is that\?$/,''),q.id);
       if(q.kind==='choice'&&q.sentence)note(q.sentence.replace(/ That is ___\.$/,''),q.id);
       if(q.kind==='choice'&&q.type==='Reverse Recall')note(q.prompt,q.id);
@@ -77,6 +79,9 @@ for(const bp of blueprints){
       if(q.kind==='matchUp')for(const p of q.pairs)note(p.right,q.id);
       if(q.kind==='chain'){if(q.scene?.kind==='story')note(q.scene.text,q.id);for(const s of q.steps)note(s.prompt,q.id);}
     }
+    // Dreamy asks, like Finance: no bubble is a bare stock instruction.
+    const STOCK=/^(What is this called\?|Which word fills the blank\?|Which word is this\?|Which word fits here\?|Which option fits\?|What does ".*" mean\?|Match each word to (its meaning|when you use it)\.|Which one is wrong\?|Which word does each one show\?)$/;
+    for(const q of lesson.questions)if(q.kind!=='chain')assert.ok(!STOCK.test(q.prompt),`${where}: ${q.id} Dreamy says only a stock line: "${q.prompt}"`);
     // Review: one Reverse Recall per word, a form the main loop never used.
     assert.equal(lesson.reviewQuestions.length,5,`${where}: five review questions`);
     assert.ok(lesson.questions.every(q=>!(q.kind==='choice'&&q.type==='Reverse Recall')),`${where}: Reverse Recall belongs to the review only`);

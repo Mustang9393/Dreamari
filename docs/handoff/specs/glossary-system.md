@@ -85,6 +85,8 @@ Inside those limits the engine's own rules hold: a long term scales down on the 
 
 ## What the generator produces per level
 
+Dreamy asks, like Finance (17 Oct 2026): the generator puts the moment in Dreamy's bubble followed by one short question, and voices every line without a moment from the blueprint's `company` (anchor) and `studentRole` ("You hear "Triage" at Riverside Clinic. What does it mean?"). `glossary-blueprints.test.mjs` fails a bubble that is only a stock instruction.
+
 The level's cognitive focus picks the recipe (SOP section 3: recognize, then apply, then compare and classify, then decide; "a Level 4 question should not simply be a longer Level 1 question"). Default by level number, override with `focus` on the level. Every recipe is seven derived screens, plus the level's authored cases (and an authored sort or Select All where the recipe has no slot for one) as extra screens, so a level runs seven to ten scored screens plus one Power Play (SOP: 7 to 10). The rules the builder asserts at import: no line of copy shown twice in a lesson, every term credited at least twice in the main loop (one credit per term per screen), never three of the same screen shape in a row (a story card, a fill-in sentence, a compare card and a plain 2x2 are four shapes, as in Finance Level 2), at least four shapes per level.
 
 Why this shape (17 Oct 2026, Chandu: "the games are repeating the same questions again and again for mastery instead of having any variety, please refer the finance glossary games"): the first generator built every screen from the same three strings per term, so the definition appeared as the Definition options, the Which Word prompt, the Type prompt and three feedback lines. Finance never does that; every Finance screen carries its own fresh line, and the sort is concrete things into concept buckets, not cues into words. The moments, the authored pieces and the no-repeat assertion are that style, made scalable.
@@ -93,10 +95,10 @@ The numbers in brackets are which term the screen credits; m0, m1, m2 are which 
 
 | # | Level 1 recognize | Level 2 apply | Level 3 analyze | Level 4+ decide |
 |---|---|---|---|---|
-| 1 | Definition: the five definitions as options (1) | Story card m0, "Which word is this?" (1) | Compare card, term 1 vs its confusion, m0 decides (1) | Story card m0, "Which option fits?" (1) |
-| 2 | Match It Up, word to meaning (all) | Fill in the blank: m1 then "That is ___." (2) | Story card m0 (3) | Compare card, term 2 vs its confusion (2) |
-| 3 | Fill in the blank, m1 (5) | Story card m0 (3) | Sort: the level's authored concept sort, else m1 of terms 2 to 5 into the words | Match It Up, "Use it when" (all) |
-| 4 | Story card m0 (3) | Select All: authored, else two moments of term 4 against the confusion's and another's (4) | Select All about term 2 (authored or derived) | Fill in the blank, m1 (3) |
+| 1 | Definition: the five definitions as options (1) | Dreamy asks m0: the moment, then "Which word is this?" (1) | Compare card, term 1 vs its confusion, m0 decides (1) | Dreamy asks m0, then "Which word do you need here?" (1) |
+| 2 | Match It Up, word to meaning (all) | Fill in the blank: m1 then "That is ___." (2) | Dreamy asks m0 (3) | Compare card, term 2 vs its confusion (2) |
+| 3 | Fill in the blank, m1 (5) | Dreamy asks m0 (3) | Sort: the level's authored concept sort, else m1 of terms 2 to 5 into the words | Match It Up, "Use it when" (all) |
+| 4 | Dreamy asks m0 (3) | Select All: authored, else two moments of term 4 against the confusion's and another's (4) | Select All about term 2 (authored or derived) | Fill in the blank, m1 (3) |
 | 5 | Sort: authored, else m1 of terms 1 to 4 into the words | Match It Up (all) | Fill in the blank, m1 (1) | Select All about term 4 (authored or derived) |
 | 6 | Catch the Misuse, term 4 wearing another word's cue (4) | Catch the Misuse (5) | Catch the Misuse against the confusion (4) | Catch the Misuse (5) |
 | 7 | Type the Term from m2 (2) | Type the Term from m2 (1) | Type the Term from m2 (5) | Type the Term from m2 (1) |

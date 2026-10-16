@@ -319,7 +319,7 @@ type Kit = ReturnType<typeof makeKit>;
  *  specific correction when the term has a known confusion. Every line of
  *  copy a helper shows is checked out of `used`, so a moment, a cue line or
  *  a sentence is never shown twice in one lesson. */
-function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
+function makeKit(seeds: TermSeed[], level: LevelSeed, id: string, voice: { anchor: string; role: string }) {
   const names = seeds.map((s) => s.term);
   const byName = new Map(seeds.map((s) => [s.term, s]));
   const indexOf = (s: TermSeed) => seeds.indexOf(s);
@@ -347,8 +347,18 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
     for (const i of order) if (s.moments[i] !== undefined && !used.has(s.moments[i])) return show(s.moments[i]);
     throw new Error(`${id}: "${s.term}" has no unused moment left; the recipe needs ${MOMENTS_PER_TERM}`);
   };
-  const WHICH_PROMPTS = ["Which word is this?", "What is this called?", "Which word fits here?"];
+  // Dreamy asks the situation as a question, like Finance ("Maya puts
+  // $25,000 into Dream Sneakers to help it grow. What is Maya?"), instead of
+  // a stock line over a card (17 Oct 2026, Chandu: "make Dreamy ask the
+  // situation as a question in every generated game like Finance"). The
+  // moment is spoken in the bubble, then one short question; lines that
+  // have no moment are voiced in the game's own world (its anchor and the
+  // student's role).
+  const WHICH_ASKS = ["Which word is this?", "What is this called?", "What word fits?"];
   const WHICH_LABELS = ["Real-world scenario", "In the moment", "On the job"];
+  const { anchor, role } = voice;
+  const article = (word: string) => (/^[aeiou]/i.test(word) ? "an" : "a");
+  const FILL_ASKS = [`Which word would ${article(role)} ${role} use here?`, `Finish the ${role}'s line. Which word fits?`, `Which word fills the blank at ${anchor}?`];
   const byTerm = (name: string): TermSeed => {
     const s = byName.get(name);
     if (!s) throw new Error(`${id}: "${name}" is not a word in this level`);
@@ -364,7 +374,7 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
       const pick = place(s.definition, others(seeds, indexOf(s), 3).map((o) => o.definition), level.number);
       return {
         kind: "choice", type: "Definition", id: q(k), termId: s.term, playOrder: k, label: "Definition",
-        prompt: `What does "${s.term}" mean?`,
+        prompt: `You hear "${s.term}" at ${anchor}. What does it mean?`,
         options: pick.options, correctIndex: pick.correctIndex,
         feedbackCorrect: `Yes. ${means(s)}`,
         feedbackWrong: means(s),
@@ -372,7 +382,7 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
     },
     match(k: number, headers: [string, string]): GlossaryQuestion {
       return {
-        kind: "matchUp", type: "Match It Up", id: q(k), playOrder: k, label: "Match the terms", prompt: headers[1] === "Use it when" ? "Match each word to when you use it." : "Match each word to its meaning.",
+        kind: "matchUp", type: "Match It Up", id: q(k), playOrder: k, label: "Match the terms", prompt: headers[1] === "Use it when" ? `When does ${article(role)} ${role} use each word? Match them.` : `Help ${article(role)} new ${role} learn the words. Match each to its meaning.`,
         headers,
         pairs: seeds.map((s, i) => ({ order: i + 1, left: s.term, right: show(s.cue), termId: s.term, icon: s.icon })),
         feedbackCorrect: "All five matched.",
@@ -384,7 +394,7 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
       const pick = wordOptions(s, level.number + k);
       return {
         kind: "choice", type: "Fill in the Blank", id: q(k), termId: s.term, playOrder: k, label: "Fill in the blank",
-        prompt: "Which word fills the blank?",
+        prompt: FILL_ASKS[k % FILL_ASKS.length],
         sentence: `${moment(s, 1)} That is ___.`,
         layout: "grid",
         options: pick.options, correctIndex: pick.correctIndex,
@@ -397,8 +407,7 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
       const pick = wordOptions(s, level.number + k);
       return {
         kind: "choice", type: "Fill in the Blank", id: q(k), termId: s.term, playOrder: k, label: WHICH_LABELS[k % WHICH_LABELS.length],
-        scene: story(moment(s, 0)),
-        prompt: WHICH_PROMPTS[k % WHICH_PROMPTS.length],
+        prompt: `${moment(s, 0)} ${WHICH_ASKS[k % WHICH_ASKS.length]}`,
         layout: "grid",
         options: pick.options, correctIndex: pick.correctIndex,
         feedbackCorrect: `Yes. ${means(s)}`,
@@ -410,8 +419,7 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
       const pick = wordOptions(s, level.number + k);
       return {
         kind: "choice", type: "Fill in the Blank", id: q(k), termId: s.term, playOrder: k, label: "Your call",
-        scene: story(moment(s, 0)),
-        prompt: "Which option fits?",
+        prompt: `${moment(s, 0)} Which word do you need here?`,
         layout: "grid",
         options: pick.options, correctIndex: pick.correctIndex,
         feedbackCorrect: `Good call. That is ${s.term}.`,
@@ -422,7 +430,7 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
      *  has no authored sort. */
     sortDerived(k: number, four: TermSeed[]): GlossaryQuestion {
       return {
-        kind: "sortBuckets", type: "Sort the Buckets", id: q(k), playOrder: k, label: "Sort the buckets", prompt: "Which word does each one show?",
+        kind: "sortBuckets", type: "Sort the Buckets", id: q(k), playOrder: k, label: "Sort the buckets", prompt: `All of these happened at ${anchor}. Which word does each one show?`,
         buckets: four.map((s) => s.term),
         items: [four[2], four[0], four[3], four[1]].map((s, i) => ({ order: i + 1, text: moment(s, 1), bucket: s.term, termId: s.term, icon: s.icon })),
         feedbackCorrect: "All sorted.",
@@ -446,7 +454,7 @@ function makeKit(seeds: TermSeed[], level: LevelSeed, id: string) {
       const pick = place(`${s.term} = ${lower(wrongWith.cue)}`, truePairs, level.number + k);
       return {
         kind: "choice", type: "Catch the Misuse", id: q(k), termId: s.term, playOrder: k, label: "Quick check",
-        prompt: "Which one is wrong?",
+        prompt: `${article(role) === "an" ? "An" : "A"} new ${role} wrote these notes. Which one is wrong?`,
         options: pick.options, correctIndex: pick.correctIndex,
         feedbackCorrect: `Right. ${s.term} is not ${lower(wrongWith.cue)}.`,
         feedbackWrong: fit(means(s), ` ${wrongWith.term} is ${lower(wrongWith.cue)}.`),
@@ -614,7 +622,7 @@ export function buildLesson(bp: GlossaryBlueprint, level: LevelSeed, previousVal
   const id = `${bp.idPrefix}-L${String(level.number).padStart(2, "0")}`;
   const terms = seeds.map((seed, i) => term(seed, i + 1));
   const names = seeds.map((s) => s.term);
-  const kit = makeKit(seeds, level, id);
+  const kit = makeKit(seeds, level, id, { anchor: bp.company, role: bp.studentRole.trim().toLowerCase() });
   const questions = recipe(level, seeds, kit);
   const reviewQuestions = seeds.map((s, i) => kit.recall(s, questions.length + 1 + i));
 

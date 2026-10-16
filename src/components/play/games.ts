@@ -149,18 +149,20 @@ export function worldForCareer(slug: string): string | undefined {
 // it consistent" -- the real card's title stood out against the dummy
 // cards' own naming instead of reading as one row of the same thing).
 export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; cover?: string }[] = [
-  // Covers are Chandu's 16 Oct 2026 thumbnails (landscape, 1400 by 788 WebP):
-  // Dreamy over a fan of term cards per subject. The shelf card is portrait
+  // Covers are Chandu's 17 Oct 2026 thumbnails (landscape, 1400 by 788 WebP):
+  // three glossy objects of the subject on a night cloud floor, no Dreamy and
+  // no text, replacing the 16 Oct Dreamy-over-term-cards set (Chandu: "Use
+  // these for the glossary thumbnail in play tab"). The shelf card is portrait
   // at rest and 16:9 when it expands, so the landscape frame shows whole
   // when the card is active and crops to Dreamy and the centre cards at rest.
-  { careerSlug: "investment-banking", title: "Finance Terms", sub: "Learn key finance terms", cover: "/images/app/glossary-finance-thumb-oct17.webp" },
+  { careerSlug: "investment-banking", title: "Finance Terms", sub: "Learn key finance terms", cover: "/images/app/glossary-finance-thumb-oct17b.webp" },
   // Medical, Flight and Tech were "Coming soon" dummy cards until their
   // glossaries were built and released (17 Oct 2026); they now open their
   // games like Finance. PlayHub locks any card whose glossary is not in
   // GLOSSARY_HUB_RELEASED.
-  { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/glossary-medical-thumb-oct17.webp" },
-  { careerSlug: "airline-pilot", title: "Flight Terms", sub: "Learn key aviation terms", cover: "/images/app/glossary-flight-thumb-oct17.webp" },
-  { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/glossary-tech-thumb-oct17.webp" },
+  { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/glossary-medical-thumb-oct17b.webp" },
+  { careerSlug: "airline-pilot", title: "Flight Terms", sub: "Learn key aviation terms", cover: "/images/app/glossary-flight-thumb-oct17b.webp" },
+  { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/glossary-tech-thumb-oct17b.webp" },
   // Only glossaries with real thumbnail art sit in this row (Chandu, 17 Oct
   // 2026: "For everything without a thumbnail for the cards, send them to
   // hamburger access only link. Only use games with thumbnail art in the

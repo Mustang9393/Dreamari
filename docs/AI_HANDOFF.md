@@ -1,3 +1,20 @@
+## 2026-10-17: new Play tab covers for the four glossary games
+
+**Why (Chandu):** "Use these for the glossary thumbnail in play tab." Four new covers in a new style: three glossy objects of the subject on a night cloud floor, no Dreamy and no term cards (Finance: calculator, chart, coins; Medical: stethoscope, cross, clipboard; Flight: jet, pilot's cap, tools; Tech: laptop, shield, servers).
+
+- Exported to public/images/app/glossary-{finance,medical,flight,tech}-thumb-oct17b.webp at 1400 by 788 (50 to 66 KB) and set as the covers in GLOSSARY_GAMES; the 16 Oct Dreamy-over-cards covers are removed (no reference left).
+- SOP 6.7 now describes this style and carries a paste-ready cover prompt; Prompt C and Prompt E Part 4 attach the new four as references, so new games' covers match.
+
+## 2026-10-17: Dreamy asks the situation as a question in every generated game, like Finance
+
+**Why (Chandu):** "does dreamy only say stuff fill in the blank etc or does dreamy have question dialogues like it does in the finance game?", then "Yes, make Dreamy ask the situation as a question in every generated game like Finance, and update the SOP and Prompt E so new games do it too."
+
+- **What we found:** Finance's bubble speaks the situation ("Maya puts $25,000 into Dream Sneakers to help it grow. What is Maya?"); the generated games put the moment on a card and gave Dreamy a stock line ("What is this called?"), 23 of about 52 bubbles per game.
+- **What changed (generate.ts):** the "which word" and "your call" screens now put the moment in Dreamy's bubble and end with one short question; the card that repeated it is gone. Lines with no moment are voiced from the blueprint's anchor and role: Definition ("You hear "Triage" at Riverside Clinic. What does it mean?"), Match ("Help a new nurse learn the words."), Fill in the blank ("Which word would a nurse use here?"), the derived sort ("All of these happened at Riverside Clinic.") and Catch the Misuse ("A new nurse wrote these notes. Which one is wrong?"). No blueprint changes: every line comes from fields that already exist, so new games get it for free.
+- **Guardrail:** glossary-blueprints.test.mjs now fails any bubble that is only a stock line, and still checks each moment is shown once.
+- **Checked:** tsc; the blueprint QA on all 24 levels; the new lines read for grammar; Drift and Signal at 1280 and 375; the alignment and contrast audits clean.
+- SOP: a new rule row ("Dreamy asks, like Finance"), the recipe tables, the moments field note, 10.2 and Prompt E's Part 1. Spec and Component Lab label updated.
+
 ## 2026-10-17: weather removed; SOP Prompt E (one prompt per world), Prompt F (Signal backgrounds), Prompt G (shared polish)
 
 **Why (Chandu):** "why are we still doing weather? ... I decided to drop it", and "dont be so specific about kitchen terms, that was just an example we tried ... He will generate the final ones. We need the SOP and prompt to help him generate the games, levels, graphics etc everything in one. Also add the prompt for the signal backgrounds."

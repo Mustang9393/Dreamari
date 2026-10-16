@@ -2326,7 +2326,7 @@ _17 October 2026. One document with everything needed to scale the glossary game
 
 | Check | Result |
 |---|---|
-| Live on main | Everything in this document is on main. Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's thumbnails; Next level keeps the student's theme; Dreamy's speech bubble wraps on whole words at phone width. Since 17 Oct: Codex's Level 1 term art and welcome scenes for Software, Aviation and Nursing in both themes, living worlds (asset-free time of day per world; weather removed on 17 Oct, Chandu's decision), the symmetry and alignment pass, and the light-mode pass. |
+| Live on main | Everything in this document is on main. Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's 17 Oct covers (three objects on a night cloud floor, no Dreamy); Next level keeps the student's theme; Dreamy's speech bubble wraps on whole words at phone width. Since 17 Oct: Codex's Level 1 term art and welcome scenes for Software, Aviation and Nursing in both themes, living worlds (asset-free time of day per world; weather removed on 17 Oct, Chandu's decision), the symmetry and alignment pass, and the light-mode pass. |
 | Light mode | A contrast sweep of every Culinary screen (all six levels, the welcome, teach cards, unlocked screen, Power Play and review) in Drift and Signal with the app in light mode: every line at 4.5:1 or better (3:1 large), disabled buttons excepted. Fixed on 17 Oct: Signal's gold and cyan words and their navy drop shadows, the welcome copy over the daytime city, the Start label, the A to D keys, the compare card names, the theme switch label, the empty mastery segments. |
 | Alignment audit | One screen of every shape the five games produce (30 shapes) in both themes at 1440x900 and 375x812: no row of unequal tiles, no off-centre short row, no block off the column's edges, no HUD or bubble off the column. Every screen also checked by eye for what the audit cannot see. The welcome screen is one centred column up to 860px. |
 | Art QA | Three Level 1 packs, six welcomes, 72 exports with alpha and hash receipts (2.2 MB served); Finance and the words-only later levels unchanged. World scenes: deterministic, asset-free, Finance bypassed, performance contract held. |
@@ -2371,6 +2371,7 @@ _17 October 2026. One document with everything needed to scale the glossary game
 | No screen repeats a line (added 17 Oct) | Every word carries three moments and each is shown once. The definition is seen on the teach card and in the review only. Sorts put concrete things into concept buckets, not cues into words. Chandu: "the games are repeating the same questions again and again for mastery instead of having any variety, please refer the finance glossary games." | Validator (no duplicate lines in a level) and the builder (no line shown twice in a lesson). |
 | Power Play is not linear (added 17 Oct) | The paragraph's blanks never run in teaching order, and the word bank is shuffled so it never mirrors the blanks. | Validator refuses 1 to 5; the engine shuffles the bank. |
 | Review is a new form | Reverse Recall (the definition read aloud) appears only in the review, for words still short of mastery, so the student never sees the same screen twice. | Generator. |
+| Dreamy asks, like Finance (added 17 Oct) | Dreamy speaks the situation as a question: the moment, then one short question ("Ana clocks in at seven and clocks out at seven. What is this called?"), the way Finance asks "Maya puts $25,000 into Dream Sneakers to help it grow. What is Maya?". Lines without a moment are voiced in the game's world from its anchor and the student's role ("You hear "Triage" at Riverside Clinic. What does it mean?", "A new nurse wrote these notes. Which one is wrong?"). Nothing to author: the generator builds every line from the moments, the anchor and the role. Chandu: "make Dreamy ask the situation as a question in every generated game like Finance." | Generator; the QA script refuses a bubble that is only a stock line. |
 | Wrong-answer feedback names what was wrong | Each term names the word it is confused with. | Generator uses confusion. |
 | Eighth grade, no dashes | Short words, one idea per sentence, two sentences instead of a dash. | Validator: dashes, 14-word sentences and a grade 8 cap per level. |
 | One Dreamy per screen, the cloud itself | Never draw Dreamy, limbs or people into any image. | Engine; image brief. |
@@ -2404,7 +2405,7 @@ WHAT EACH FIELD IS FOR (so the copy lands on the right screen)
 - definition: the teach card, and the review question that reads it aloud. Never says the word.
 - example: the teach card. Says the word once, names the anchor (not required in a practice world).
 - cue: a label of 7 words and 34 characters, never says the word. The match card's right side, a "word = cue" quick-check pair, a compare card point, and the line every feedback is built from ("Dice means small even cubes.").
-- moments: three different real situations, 12 words and 72 characters each, that show the word WITHOUT saying it. Each one is shown on exactly one screen: a story card ("Which word is this?"), a fill-in sentence (the moment then "That is ___."), a Select All line, a sort token, a Type the Term prompt or a compare card. Write three that differ in setting, not three rewordings.
+- moments: three different real situations, 12 words and 72 characters each, that show the word WITHOUT saying it. Each one is shown on exactly one screen: Dreamy's question (Dreamy says the moment, then "What is this called?"), a fill-in sentence (the moment then "That is ___."), a Select All line, a sort token, a Type the Term prompt or a compare card. Write three that differ in setting, not three rewordings.
 - confusion: the exact term string of another word in the same level. Drives the compare card, the quick-check distractor and the "Poach is gentle heat in still water." correction.
 - sort: a prompt, 2 to 4 concept buckets (think Finance's "Money in / Money out", "Stock / Bond"; for a kitchen "Wet heat / Dry heat"), 4 to 7 concrete items of 34 characters with the bucket and the term each credits. Items never say a bucket name.
 - selectAll: the term, a prompt, exactly 4 concrete items of 44 characters that never say the term, 1 to 3 correct indexes (Finance: "Select every cost." over Materials, Rent, Wages, Sales).
@@ -2446,7 +2447,7 @@ TASK: turn the roadmap Levels 5 and 6 of src/components/glossary/blueprints/[slu
 ### 5. Prompt C: release an industry to the Play hub (Chandu, after QA)
 
 ```
-Only once the industry has its Play tab cover (the Play tab shows only games with thumbnail art; until then it plays from the hamburger menu's Glossary QA link). In the Dreamari repo: add "[slug]" to GLOSSARY_HUB_RELEASED in src/components/glossary/data.ts. If the hub has no card for it, add one to GLOSSARY_GAMES in src/components/play/games.ts keyed to its example career slug (or the industry slug when no catalog career owns it) with title "[Subject] Terms", sub "Learn key [subject] terms" and a cover (a 1400 by 788 WebP thumbnail: Dreamy over a fan of the subject's term cards, matching the four on the hub). Confirm Codex has registered its Level 1 term art (termArt.ts) and welcome illustration (welcomeArt.ts). Run npx tsc --noEmit, open /play and confirm the card is playable, commit with the why, push to main.
+Only once the industry has its Play tab cover (the Play tab shows only games with thumbnail art; until then it plays from the hamburger menu's Glossary QA link). In the Dreamari repo: add "[slug]" to GLOSSARY_HUB_RELEASED in src/components/glossary/data.ts. If the hub has no card for it, add one to GLOSSARY_GAMES in src/components/play/games.ts keyed to its example career slug (or the industry slug when no catalog career owns it) with title "[Subject] Terms", sub "Learn key [subject] terms" and a cover (a 1400 by 788 WebP thumbnail: three glossy objects of the subject on a night cloud floor, matching the four on the hub; section 6.7). Confirm Codex has registered its Level 1 term art (termArt.ts) and welcome illustration (welcomeArt.ts). Run npx tsc --noEmit, open /play and confirm the card is playable, commit with the why, push to main.
 ```
 
 ### 6. Images (Codex or ChatGPT)
@@ -2579,9 +2580,20 @@ Drift is painted and already takes each world's accent; it needs no image. Optio
 
 Chandu's "Dream Expressions V2" pack (19 Drift stills) is at public/images/dreamy/expressions-v2/01.webp to 19.webp. Four are used statically on the Drift Levels map open card: 06 (books, ready to play), 18 (arrow, playing now), 12 (graduation cap, complete), 17 (alert, locked). Animate first, because the game has a slot for each: 10 (green check) for a right answer, 09 (red X) and 14 ("hmm") for a wrong one, 16 (confetti) and 12 for mastery and the complete screen, 15 (glasses and clipboard) for review and hints, 08 (reading) for the teach cards, 18 (arrow) for Next. Deliver the four-frame WebP atlas format described in docs/reference/dreamy-drift-animated-oct15-v2.json so dreamyReactions.ts can take them without engine changes. Signal needs pixel versions drawn to the Signal Dreamy rig.
 
-#### 6.7 Hub thumbnails (one per released industry)
+#### 6.7 Play tab covers (one per released industry)
 
-The Play tab's glossary cards use a landscape thumbnail: Dreamy over a fan of the subject's term cards on a dark sky, 1400 by 788 WebP, under 130 KB. The four on the hub (Finance, Medical, Flight, Tech) are Chandu's and are the reference. The shelf card is portrait at rest and 16:9 when active, so keep Dreamy and the centre card in the middle third. File: public/images/app/glossary-<subject>-thumb-<mmmdd>.webp, set as cover on the card in GLOSSARY_GAMES. No cover, no card: the game plays from the hamburger menu's Glossary QA link until its cover exists.
+Each glossary card on the Play tab has a landscape cover: three glossy 3D objects that say the subject at a glance, grouped in the centre on a night cloud floor. No Dreamy, no people, no text. 1400 by 788 WebP, under 130 KB. The four on the tab are the reference set (Chandu, 17 Oct 2026): public/images/app/glossary-finance-thumb-oct17b.webp (a calculator, a rising chart, gold coins), glossary-medical-thumb-oct17b.webp (a stethoscope, a green cross, a clipboard with a heart line), glossary-flight-thumb-oct17b.webp (a jet, a pilot's cap, a crossed wrench and screwdriver) and glossary-tech-thumb-oct17b.webp (a laptop, a padlock shield, a server stack). The card is portrait at rest and 16:9 when active, so the group stays inside the middle third. File: public/images/app/glossary-<subject>-thumb-<mmmdd>.webp, set as cover on the card in GLOSSARY_GAMES. No cover, no card: the game plays from the hamburger menu's Glossary QA link until its cover exists.
+
+```
+Use case: Play tab game cover.
+Match the four attached covers exactly in frame, camera, lighting, palette and material: a deep navy to violet night sky with small white four-point sparkles; soft rounded cloud banks in blue and violet with pink rim light at the sides and along the bottom; a smooth cloud floor with soft reflections; in the centre, three glossy 3D objects from the subject, grouped tightly and overlapping a little, lit with a cool blue glow and warm gold accents.
+Subject: {{the workplace}}.
+Objects: {{three plain objects that say the subject at a glance, e.g. a stethoscope, a green medical cross, a clipboard with a heart line}}.
+Composition: 1400 by 788 landscape (16:9). The group sits in the middle third, about 45% of the width, nothing important near the edges (the card crops to portrait at rest).
+No Dreamy, no people, no characters. No text, letters, numbers, logo or watermark; a simple symbol such as a $ on a coin is fine.
+```
+
+Package: resize the chosen source to 1400 by 788 and save as WebP under 130 KB (sharp: resize(1400, 788, { fit: "cover" }).webp({ quality: 86 })). Check it on /play at rest (portrait) and active (16:9): the three objects stay whole in both.
 
 #### 6.8 Living worlds (code only, no image to make)
 
@@ -2677,7 +2689,7 @@ Industry: [e.g. "Cybersecurity"]
 Notes from Chandu, if any: [optional]
 
 PART 1. THE GAME (section 3, Prompt A)
-Look the industry up in section 12 for its mode and career world. Choose the slug, the anchor (one company, clinic, airline, shop or site) and the student's role. Write src/components/glossary/blueprints/<slug>.ts from the model blueprint culinary.ts and the blueprint with the same mode. Make Levels 1 to 4 playable (required) and Levels 5 and 6 playable too unless the notes say otherwise; every field and copy rule in section 3 applies. Register it in GLOSSARY_INDUSTRIES (src/components/glossary/data.ts), and in CAREER_INDUSTRY (industries.ts) if a catalog career owns it. Run npx tsc --noEmit and node --import ./scripts/qa/ts-resolve.mjs scripts/qa/glossary-blueprints.test.mjs until both pass. Do not release it yet.
+Look the industry up in section 12 for its mode and career world. Choose the slug, the anchor (one company, clinic, airline, shop or site) and the student's role; Dreamy voices his lines with both, so pick a real place name and a one-word role. Write src/components/glossary/blueprints/<slug>.ts from the model blueprint culinary.ts and the blueprint with the same mode. Make Levels 1 to 4 playable (required) and Levels 5 and 6 playable too unless the notes say otherwise; every field and copy rule in section 3 applies. Register it in GLOSSARY_INDUSTRIES (src/components/glossary/data.ts), and in CAREER_INDUSTRY (industries.ts) if a catalog career owns it. Run npx tsc --noEmit and node --import ./scripts/qa/ts-resolve.mjs scripts/qa/glossary-blueprints.test.mjs until both pass. Do not release it yet.
 
 PART 2. LEVEL 1 PICTURES, BOTH THEMES (section 6.1)
 Write docs/reference/glossary-<slug>-art-<mmmdd>.json modelled on docs/reference/glossary-nursing-art-oct17.json: the six style references, the prompt template, both style locks and the five Level 1 terms, each with a brief that shows the meaning, never the word, and names the anchor. A brief without Dreamy ends "No Dreamy, no cloud shape, no eyes or face, no mascot." Run node scripts/glossary-art.mjs prompts <manifest>, generate ONE image per prompt with that theme's three references attached every time, save <term-slug>-drift.png and <term-slug>-signal.png in a review folder, then run prepare, validate and preview. Register in CAREER_TERM_ART (src/components/glossary/termArt.ts). If a term cannot be shown honestly, leave it without a picture.
@@ -2686,9 +2698,7 @@ PART 3. WELCOME SCENE, BOTH THEMES (section 6.2)
 One composed scene of the anchor's workplace, never a person. Add welcome {brief, sources, prompts} to the manifest, generate both themes, run node scripts/glossary-welcome-art.mjs prepare <manifest> and validate <manifest>, and register WELCOME_ART["<slug>"] in src/components/glossary/welcomeArt.ts.
 
 PART 4. PLAY TAB COVER (section 6.7)
-Attach the four existing covers as references: public/images/app/glossary-finance-thumb-oct17.webp, glossary-medical-thumb-oct17.webp, glossary-flight-thumb-oct17.webp, glossary-tech-thumb-oct17.webp. Prompt:
-"Use case: Play tab game cover. Match the four attached covers exactly in frame, camera, lighting and material: Dreamy, the soft 3D cloud with large starry navy eyes and a small open blue smile, floats at centre top behind a fan of four dark glass term cards with glowing gold rims, standing on a round lit stage; deep navy to indigo night sky with soft rolling hills, gold four-point sparkles and purple cloud banks in the bottom corners; a few subject props on each side. Subject: [the workplace]. The cards read [FOUR OF THE GAME'S TERMS, IN CAPITALS] in cyan capitals, each with one simple cyan line icon [one plain object per term]. Left props: [two objects from the workplace]. Right props: [two more]. 1400 by 788 landscape. Keep Dreamy and the centre card inside the middle third. Text only on the four cards, spelled exactly; no other text, logo or watermark. Dreamy has no arms, hands or legs."
-Save as public/images/app/glossary-<subject>-thumb-<mmmdd>.webp, 1400 by 788, under 130 KB. Check the spelling on every card; regenerate if any letter is wrong.
+Attach the four existing covers as references: public/images/app/glossary-finance-thumb-oct17b.webp, glossary-medical-thumb-oct17b.webp, glossary-flight-thumb-oct17b.webp, glossary-tech-thumb-oct17b.webp. Use the cover prompt in section 6.7 with the workplace and three objects that say the subject at a glance. No Dreamy, no people, no text. Save as public/images/app/glossary-<subject>-thumb-<mmmdd>.webp, 1400 by 788, under 130 KB, and check it on /play at rest and active.
 
 PART 5. THE WORLD'S SIGNAL BACKGROUND, ONLY IF IT HAS NONE
 If SIGNAL_WORLD_BACKDROPS in src/components/glossary/worldBackdrops.ts has no entry for this game's career world, run section 7d for that one world. Otherwise skip.
@@ -2788,7 +2798,7 @@ A new industry needs no new UI. Every screen below is shared by all industries a
 | IntroScreen (welcome) | Level kicker, "Meet" and the anchor in the world's display face, one line, Start. | With welcome art (the art stacks above the copy and fits its box; narrow Signal puts Dreamy top-left); Dreamy alone (the scene grows to fit him); authored and generated; per-level art; light Signal puts the copy on a solid panel. |
 | Teach cards (UnlockScreen, SketchFace) | One card per word: term, definition, the Level 1 picture, tap to flip to the example. | Picture (Level 1 only) or words only; 22-character term (scales down); acronym; definition at the limit; the underline follows the word. |
 | UnlockCompleteScreen | "All five words unlocked" before practice. | Authored, generated. |
-| QuestionScreen | One frame for every question: Dreamy, the bubble with the prompt and the live hint, the scene card, the answers, inline feedback. | Definition; fill-in sentence; story card (which word); compare card; Catch the Misuse (document list); Match It Up (word to meaning, "Use it when"); Sort (two to four buckets, four to seven items, concept or word buckets); Select All (authored items or moments); Type the Term (word bank and input); Case (two to four steps, two or four options, number steps); Finance's Profit Builder and money cards; two-word options fall to a list; long pairs. |
+| QuestionScreen | One frame for every question: Dreamy, the bubble where Dreamy asks the situation as a question with the live hint under it, the scene card when there is one, the answers, inline feedback. | Definition; fill-in sentence; story card (which word); compare card; Catch the Misuse (document list); Match It Up (word to meaning, "Use it when"); Sort (two to four buckets, four to seven items, concept or word buckets); Select All (authored items or moments); Type the Term (word bank and input); Case (two to four steps, two or four options, number steps); Finance's Profit Builder and money cards; two-word options fall to a list; long pairs. |
 | SceneCardView | The card above a prompt. | story, compare, figures, ledger, shares, split; story at 72 characters. |
 | FeedbackPanel | Right, first miss ("Keep going", change your answer), revealed. | Right; wrong; last question; names the confusion; long line. |
 | Review questions | Reverse Recall, drawn only for a word short of mastery. | Generated; authored. |
@@ -2836,7 +2846,7 @@ A game is playable the moment its blueprint is registered, before any art: Level
 
 #### 10.2 Build: the builder throws
 
-- No line of copy is shown twice in a lesson; every term is credited at least twice in the main loop; never three screens of one shape in a row; generated feedback stays under 100 characters.
+- No line of copy is shown twice in a lesson; Dreamy never says only a stock line (the QA script fails it); every term is credited at least twice in the main loop; never three screens of one shape in a row; generated feedback stays under 100 characters.
 
 #### 10.3 Checks to run before every commit
 
@@ -3013,8 +3023,8 @@ A scenario thread is still a world. Nursing keeps the student inside one clinic,
 | Reading difficulty | Roughly 8th grade. Difficulty comes from the concept, not the writing. | Validated since 17 Oct: a Flesch-Kincaid grade of 8 or below per level, with the level's own five words not counted, and no sentence over 14 words. |
 | Answer leakage | Never put the answer inside the question, visual, heading, labels or setup. | Validated: a definition may not say its own word, a cue, a moment, a Select All line and a case step may not say the word they ask for. |
 | Distractors | The right answer is not systematically the longest or most professional-sounding. | Distractors are the other terms of the same level, so lengths vary naturally. Answer position rotates by level. |
-| Interaction diversity | No more than two consecutive screens with the same mechanic. | Asserted at build and in the QA script, by the shape the student sees (story card, fill-in sentence, compare card, 2x2, match, sort, select, case, type). |
-| Multiple choice | Useful, but mixed with matching, sorting, fill-in-the-blank, error identification, comparison, sequencing, decisions. | Each recipe mixes story cards, fill-in sentences, compare cards, match, sort, select-all, cases and type. |
+| Interaction diversity | No more than two consecutive screens with the same mechanic. | Asserted at build and in the QA script, by the shape the student sees (Dreamy's question, fill-in sentence, compare card, 2x2, match, sort, select, case, type). |
+| Multiple choice | Useful, but mixed with matching, sorting, fill-in-the-blank, error identification, comparison, sequencing, decisions. | Each recipe mixes Dreamy's questions, fill-in sentences, compare cards, match, sort, select-all, cases and type. |
 | Multi-part questions | About 2 to 3 judgments per screen. Never seven items at once. | Match has five pairs, Sort four to seven items, Select All four lines, a case two to four steps. |
 | Wrong-answer feedback | Say exactly what was wrong. | Feedback is one or two short lines from the cue, and names the word it is mixed up with when it fits ("It is Blanch: a quick boil, then ice water. Poach is gentle heat in still water."). |
 | Nested counters | No "Step 1 of 2" when the lesson already has a progress system. | None in generated levels. |
@@ -3039,10 +3049,10 @@ In the system each level has a **focus**: recognize, apply, analyze or decide. I
 
 | Step | Level 1 recognize | Level 2 apply | Level 3 analyze | Level 4+ decide |
 |---|---|---|---|---|
-| 1 | Definition: the five definitions as options (1) | Story card m0, which word (1) | Compare card, term 1 beside its confusion, m0 decides (1) | Story card m0, which option fits (1) |
-| 2 | Match It Up, word to meaning (all) | Fill in the blank: m1, then "That is ___." (2) | Story card m0 (3) | Compare card, term 2 (2) |
-| 3 | Fill in the blank, m1 (5) | Story card m0 (3) | Sort: the authored concept sort, else m1 of terms 2 to 5 into the words | Match It Up, "Use it when" (all) |
-| 4 | Story card m0 (3) | Select All, authored or derived (4) | Select All about term 2 | Fill in the blank, m1 (3) |
+| 1 | Definition: the five definitions as options (1) | Dreamy asks m0, which word (1) | Compare card, term 1 beside its confusion, m0 decides (1) | Dreamy asks m0, which word you need (1) |
+| 2 | Match It Up, word to meaning (all) | Fill in the blank: m1, then "That is ___." (2) | Dreamy asks m0 (3) | Compare card, term 2 (2) |
+| 3 | Fill in the blank, m1 (5) | Dreamy asks m0 (3) | Sort: the authored concept sort, else m1 of terms 2 to 5 into the words | Match It Up, "Use it when" (all) |
+| 4 | Dreamy asks m0 (3) | Select All, authored or derived (4) | Select All about term 2 | Fill in the blank, m1 (3) |
 | 5 | Sort: authored, else m1 of terms 1 to 4 into the words | Match It Up (all) | Fill in the blank, m1 (1) | Select All about term 4 |
 | 6 | Catch the Misuse (4) | Catch the Misuse (5) | Catch the Misuse against the confusion (4) | Catch the Misuse (5) |
 | 7 | Type the Term from m2 (2) | Type the Term from m2 (1) | Type the Term from m2 (5) | Type the Term from m2 (1) |
