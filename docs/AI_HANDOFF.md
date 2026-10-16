@@ -1,3 +1,13 @@
+## 2026-10-16: Software Level 1 art pack, held for review
+
+**Why (Chandu):** the three built Play-tab glossaries need art consistent with Finance's two shipped styles, not a new style per career. Software now registers ten term illustrations and two welcome scenes in `software-oct17`, exported to twenty-four WebPs. Levels 2+ remain words-only. No Finance or hub-release change. Not pushed.
+
+- Briefs: Nova Notes as a useful phone program (App), an active workstation/selection (User), a reminder bell on a note (Feature), ordered instruction blocks producing a note (Code), a broken content line plus repair tool (Bug). The welcome is the notes studio desk. Full briefs, exact prompts and the six canonical reference paths are in `glossary-software-art-oct17.json`; term and welcome receipts hash every export and source.
+- Generated separately with built-in ImageGen, attaching the same three canonical theme references each time. Rejected the first Drift App because it read as an empty clamshell; rejected both first Feature outputs because they added an unrequested Dreamy. Fresh reference-anchored retries removed those issues. No creative raster edits. Originals and rejected PNGs remain locally under `output/glossary-living-worlds/art/software/`, not served or committed; only validated WebPs enter the app.
+- The character-free User workstation is an intentional visual metaphor, not a human/avatar: Dreamy remains the only character supplied by the engine. Signal is sampled onto the existing single 128-pixel grid; all sizes preserve proportions and transparent margins.
+- Added a reusable source-contact-sheet helper and a separate welcome packer (1024 plus 256/320, lossless alpha, provenance receipt). It does not change the existing term pipeline or its Finance exports. Future object-only briefs should explicitly repeat “No Dreamy, no cloud shape, no face” to prevent the character reference from becoming a subject.
+- Verified: term and welcome prepare/validate, side-by-side final style contact sheets, both welcome/first-teach browser views at 1280, both Level 2 teach views contain zero term images. TypeScript, reaction and blueprint checks were green before this registration; a final whole-branch sweep follows the other packs. Screenshots: `output/glossary-living-worlds/after/software-*`.
+
 ## 2026-10-16: Glossary living worlds, local review branch
 
 **Why (Chandu):** "Level 4 is a different day from Level 1" and variety must scale by a small key, not an image per industry and level. Built on latest `origin/main` (`b53591b8`) on `codex/glossary-living-worlds`. Do not push or release the hub cards without Chandu's review.

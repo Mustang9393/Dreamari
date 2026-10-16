@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 1,
+  "career": "software",
+  "version": "software-oct17",
+  "provider": "built-in image_gen",
+  "references": {
+    "drift": [
+      {
+        "path": "public/images/glossary/themes-oct08/drift/customer.webp",
+        "sha256": "ba7295fc0eb1d41338ef33cdd64dd3391f7a2543faddbfec763ff4b3c56378cf"
+      },
+      {
+        "path": "public/images/glossary/themes-oct08/drift/company.webp",
+        "sha256": "f7e468e71692003bf604a5b6054e5cf87b2ab661abc956639fc73446d48a0e15"
+      },
+      {
+        "path": "public/images/glossary/themes-oct08/drift/profit.webp",
+        "sha256": "71e13a089e0d5e1871a11e20521c2e4d55cd571957d568d4a39e238aad69606e"
+      }
+    ],
+    "signal": [
+      {
+        "path": "public/images/glossary/signal/cloud-sale-sneaker.webp",
+        "sha256": "7e95f8f200b465850fdc62c1da7cc5d05f57766d1b323bbb7fe875da18ce5656"
+      },
+      {
+        "path": "public/images/glossary/signal/building.webp",
+        "sha256": "dfb07581df4ebc8aceaa3d037a464c1ca61bd406e8342a33ace9c03a24ac6ea6"
+      },
+      {
+        "path": "public/images/glossary/signal/coins-320.webp",
+        "sha256": "54f32115db13823610ba1efdb87c786de92ef2c87fb2cba99d87c164c84c4423"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "id": "App",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "app-drift-v2.png",
+      "sourceSha256": "2d1e1070d3227145f3a49db65b12d548d1704b9533c3429d18567f70e9f0128c",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A compact phone for Nova Notes opens into one ivory note sheet with a folded corner, the sheet is the first thing the eye reads. A single gold launch arrow connects the device to its useful note, no letters or interface labels.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "app-drift.png",
+          "inputSha256": "c7560dc4eab87df2cd5c0ef930383ec1fa58c1cf9adc5f6577a2c19e6a4dabac",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A compact phone for Nova Notes opens into one ivory note sheet with a folded corner, the sheet is the first thing the eye reads. A single gold launch arrow connects the device to its useful note, no letters or interface labels.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nSubject clarification: a modern FLAT upright smartphone with a simple screen, not a hinged case, clamshell, box, printer or toy compact. An ivory digital note and gold arrow show the app doing its one job."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/software-oct17/drift/app.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 72378,
+          "sha256": "d960052ae9790f20330a12482f14fa6337d6a0bd6afbf0d2c9b68eee577b9fd4",
+          "alphaBounds": {
+            "left": 38,
+            "top": 72,
+            "width": 691,
+            "height": 622,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/software-oct17/drift/app-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 17220,
+          "sha256": "4d39ae18a1f7afdc8abe85b23a272a5a9923a4636857ec51b50bfb45dcc54d1f",
+          "alphaBounds": {
+            "left": 13,
+            "top": 24,
+            "width": 230,
+            "height": 208,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "App",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "app-signal.png",
+      "sourceSha256": "279bc9ef96cefabd1fa76900c400596d2745ed156a8f1c46069e170d2616439a",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A compact phone for Nova Notes opens into one ivory note sheet with a folded corner, the sheet is the first thing the eye reads. A single gold launch arrow connects the device to its useful note, no letters or interface labels.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/software-oct17/signal/app.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 15370,
+          "sha256": "0e2a3ae22d9f1e6075518ffe1902186e849be999fc5c177dd2340f10cf1a5c56",
+          "alphaBounds": {
+            "left": 48,
+            "top": 108,
+            "width": 672,
+            "height": 546,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/software-oct17/signal/app-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 14660,
+          "sha256": "f2b88f7ebc9159855f9fb9f82f395ebe46e5a401fc374c5d9807ba94d0d9058f",
+          "alphaBounds": {
+            "left": 48,
+            "top": 68,
+            "width": 224,
+            "height": 182,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "User",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "user-drift.png",
+      "sourceSha256": "71e91d739fd21c4c13b49fd554ec56921f4baea16c9b250db362582b7797a52a",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: An occupied-workstation cue for Nova Notes: an empty navy desk chair faces an open laptop, with a large gold pointer visibly selecting a note on the screen. The active selection is the focal cue for someone using the program; no person, cloud character, text or full interface.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/software-oct17/drift/user.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 74376,
+          "sha256": "7be5ae7efece3b56e75a45b30a175c694a8f8812829c244ed9ab82bde3cd651c",
+          "alphaBounds": {
+            "left": 38,
+            "top": 65,
+            "width": 691,
+            "height": 636,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/software-oct17/drift/user-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 17982,
+          "sha256": "2f61a32c2a956668f501b622bb6724b1bf6afab50407a1167990c633fe6a8f0d",
+          "alphaBounds": {
+            "left": 13,
+            "top": 22,
+            "width": 230,
+            "height": 212,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "User",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "user-signal.png",
+      "sourceSha256": "faf8962d407cf4aa96732024ee3413b30cd000a0355c64b19c170defe3df7477",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: An occupied-workstation cue for Nova Notes: an empty navy desk chair faces an open laptop, with a large gold pointer visibly selecting a note on the screen. The active selection is the focal cue for someone using the program; no person, cloud character, text or full interface.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/software-oct17/signal/user.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 21504,
+          "sha256": "9ad31df871a5d48fcc88c1c6cbaa3ea98c1747bdc470dda9087c7abaa27ec443",
+          "alphaBounds": {
+            "left": 48,
+            "top": 66,
+            "width": 672,
+            "height": 636,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/software-oct17/signal/user-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 18064,
+          "sha256": "4f4c10eab7f1911c7471f932b99f89b38fd941765ae38710ecdfe1104a134daa",
+          "alphaBounds": {
+            "left": 48,
+            "top": 54,
+            "width": 224,
+            "height": 212,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Feature",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "feature-drift-v2.png",
+      "sourceSha256": "dc4ff5d69b45e330fc750129d5bf7caa5f31e0cc92e5192cc3b07bd2da286ff7",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Nova Notes has one note with a large gold reminder bell attached, with a small matching note behind it. The bell on the note is the focal cue for a single useful capability of the program, no letters or interface labels.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "feature-drift.png",
+          "inputSha256": "237192f508b4f31eba074a379639671fa13c2e61c7cfabfe876a07efdc717972",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Nova Notes has one note with a large gold reminder bell attached, with a small matching note behind it. The bell on the note is the focal cue for a single useful capability of the program, no letters or interface labels.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nStrict subject clarification: ONLY TWO NOTE SHEETS AND ONE GOLD BELL. There must be NO CLOUD, NO DREAMY, NO FACE, NO EYES, NO MOUTH, NO CHARACTER. The supplied cloud is a style anchor, not part of this subject."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/software-oct17/drift/feature.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 53060,
+          "sha256": "d4709584339a289a993a1856c5c5b3f3d2c5e4e2a359ee3d572ff70518a9bd29",
+          "alphaBounds": {
+            "left": 38,
+            "top": 85,
+            "width": 691,
+            "height": 596,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/software-oct17/drift/feature-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 12894,
+          "sha256": "868bc7011a2145b2e8e593206b5aa0d6427233b2a30cd012cc20eca572eaa9cd",
+          "alphaBounds": {
+            "left": 13,
+            "top": 28,
+            "width": 230,
+            "height": 199,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Feature",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "feature-signal-v2.png",
+      "sourceSha256": "c9bc4fef3a2fbef1070389cbf3a418126cd2923a3e102358e72989140decf01a",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Nova Notes has one note with a large gold reminder bell attached, with a small matching note behind it. The bell on the note is the focal cue for a single useful capability of the program, no letters or interface labels.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "feature-signal.png",
+          "inputSha256": "ceb0a2a6f7ead566fac058aa6857c69344338c6fb2a40269cd119669bc4d16be",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Nova Notes has one note with a large gold reminder bell attached, with a small matching note behind it. The bell on the note is the focal cue for a single useful capability of the program, no letters or interface labels.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nStrict subject clarification: ONLY TWO NOTE SHEETS AND ONE GOLD BELL. There must be NO CLOUD, NO DREAMY, NO FACE, NO EYES, NO MOUTH, NO CHARACTER. The supplied cloud is a style anchor, not part of this subject."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/software-oct17/signal/feature.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 18766,
+          "sha256": "fc5638594a989c1133f13f15ecec34446db9b0abfa504b0d900771cb622a77a1",
+          "alphaBounds": {
+            "left": 48,
+            "top": 48,
+            "width": 666,
+            "height": 672,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/software-oct17/signal/feature-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 18302,
+          "sha256": "4c6982faade545e5926b0647236c716189ed76a25c063131ad4745d0258bc843",
+          "alphaBounds": {
+            "left": 48,
+            "top": 48,
+            "width": 222,
+            "height": 224,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Code",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "code-drift.png",
+      "sourceSha256": "7402f8d5c36b87469195f861197fb96cce3411a4cd5df62c0f2cd588222d6df2",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A navy laptop for Nova Notes displays three clean rows of interlocking cyan instruction blocks feeding a small ivory note sheet through a gold directional arrow. The ordered blocks are the focal cue for instructions producing the program's result, no letters, digits or punctuation.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/software-oct17/drift/code.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 63850,
+          "sha256": "a5cd0f50b25e130ee03f12f2c34e6b5c42e611056663531c511293a6a5a954f7",
+          "alphaBounds": {
+            "left": 38,
+            "top": 105,
+            "width": 691,
+            "height": 557,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/software-oct17/drift/code-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 14496,
+          "sha256": "13941994b02377adda1bb51da14881d8a573c704337fa5ef7229e8596dfc16bd",
+          "alphaBounds": {
+            "left": 13,
+            "top": 35,
+            "width": 230,
+            "height": 186,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Code",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "code-signal.png",
+      "sourceSha256": "7209dff0bc705c1090bf44a9deef1c9287a014cce463f1c08de37137c7a01f0c",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A navy laptop for Nova Notes displays three clean rows of interlocking cyan instruction blocks feeding a small ivory note sheet through a gold directional arrow. The ordered blocks are the focal cue for instructions producing the program's result, no letters, digits or punctuation.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/software-oct17/signal/code.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 20930,
+          "sha256": "c779878181d8eabc6099ac9a27cab917b43b8752696022aeb02ae6de055e5f61",
+          "alphaBounds": {
+            "left": 48,
+            "top": 96,
+            "width": 672,
+            "height": 570,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/software-oct17/signal/code-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 17270,
+          "sha256": "7d8315674fd07479870777dc9f8d99478e0a0462d19f89af43541fd3281a8030",
+          "alphaBounds": {
+            "left": 48,
+            "top": 64,
+            "width": 224,
+            "height": 190,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Bug",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "bug-drift.png",
+      "sourceSha256": "27d0828c32aea6005781e7b5ab4fdce16b1d88d876f3e16e8d9f7c87702f0131",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A small glowing notes app screen for Nova Notes on a phone has one abstract content line gone jagged and red, with a tiny gold wrench floating beside it. The broken line is the focal cue for a mistake inside the program, not an insect; no text or full interface.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/software-oct17/drift/bug.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 64998,
+          "sha256": "1bc71ee4633a3349f5ce0c8804dd0e7d5efb6e484b1c068693dbac8db6dfe034",
+          "alphaBounds": {
+            "left": 51,
+            "top": 38,
+            "width": 665,
+            "height": 691,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/software-oct17/drift/bug-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 15580,
+          "sha256": "b6f877f3e30dd78a0bc750fd71de4d9c04dad77f0569bf5574bff9da6fc4750a",
+          "alphaBounds": {
+            "left": 17,
+            "top": 13,
+            "width": 222,
+            "height": 230,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Bug",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "bug-signal.png",
+      "sourceSha256": "4db71ecbfbfa338d644b3f2e35a07cc69a61c8c0ce75c691e90f85513269cb47",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: A small glowing notes app screen for Nova Notes on a phone has one abstract content line gone jagged and red, with a tiny gold wrench floating beside it. The broken line is the focal cue for a mistake inside the program, not an insect; no text or full interface.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/software-oct17/signal/bug.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 21610,
+          "sha256": "42acecf0713cdbcae64eee05311c684fdba95fe439606d24768e4114f8eebbdd",
+          "alphaBounds": {
+            "left": 54,
+            "top": 72,
+            "width": 666,
+            "height": 624,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/software-oct17/signal/bug-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 17936,
+          "sha256": "4007d6ba8e1a72475a0e4372e1c9614981ba32bc5e26e28814f62e3a05eaed40",
+          "alphaBounds": {
+            "left": 50,
+            "top": 56,
+            "width": 222,
+            "height": 208,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    }
+  ]
+}

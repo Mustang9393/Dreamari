@@ -23,7 +23,7 @@ type ThemedArt = Partial<Record<PlateTheme, string>>;
 /** Industry slug to its welcome hero per theme. */
 export const WELCOME_ART: Partial<Record<string, ThemedArt>> = {
   // finance keeps its authored sneaker shop (assetsFor / SIGNAL_ASSETS)
-  // nursing: { drift: "/images/glossary/nursing-oct17/drift/welcome.webp", signal: "/images/glossary/nursing-oct17/signal/welcome.webp" },
+  software: { drift: "/images/glossary/software-oct17/drift/welcome.webp", signal: "/images/glossary/software-oct17/signal/welcome.webp" },
 };
 
 /** Lesson id (RN-L02) to a welcome hero of its own per theme. Optional. */

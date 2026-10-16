@@ -21,6 +21,7 @@ const FINANCE_TERM_SLUGS: Record<string, string> = {
 
 const CAREER_TERM_ART: Record<string, { version: string; terms: Record<string, string> }> = {
   "investment-banking": { version: "finance-oct13", terms: FINANCE_TERM_SLUGS },
+  "software-engineer": { version: "software-oct17", terms: { App: "app", User: "user", Feature: "feature", Code: "code", Bug: "bug" } },
 };
 
 export function glossaryTermAssets(careerSlug: string, atmosphere: string, size: "large" | "small" = "large"): Record<string, string> {

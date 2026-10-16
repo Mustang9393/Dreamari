@@ -181,3 +181,9 @@ Investment Banking Levels 2 to 4: 15 terms, two styles, 30 illustrations and
 unchanged. Contextual imagery supplements definitions; scene-card maths stays
 authoritative. The earlier no-new-term-art recommendation is superseded only
 by Chandu's explicit request for this theme-consistent asset pass.
+# Review-branch additions, 16 October 2026
+
+For object-only subjects, explicitly put “No Dreamy, no cloud shape, no eyes or face, no mascot” in the brief. The generic conditional character lock alone did not reliably stop the generator from copying the cloud style anchor. Reject those outputs rather than allowing a second character into the game. Keep the original source and record the targeted retry under `revisionPrompts`.
+
+Welcome scenes have a distinct 1024px contract. Add `welcome: {brief, sources: {drift, signal}, prompts: {drift, signal}}` to the industry's existing manifest, then run `node scripts/glossary-welcome-art.mjs prepare <manifest>` and `validate <manifest>`. It exports 1024 plus 256 Drift / 320 Signal with real alpha, safe margins, proportional sizing and a separate hash receipt. `node scripts/qa/glossary-art-source-preview.mjs <manifest> <review-directory>` makes an original-source contact sheet including welcomes before admission. Both helpers preserve source PNGs and refuse silent export overwrite. Finance remains on its existing files.
+
