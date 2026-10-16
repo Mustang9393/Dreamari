@@ -18,12 +18,12 @@
 <body>
 
 <h1>Dreamari Glossary Games: Scaling SOP for Usman and Codex</h1>
-<p><i>16 October 2026. One document to scale the glossary games from four industries to fifty: the rules (Joshua's), what is built and verified today, the prompts an agent pastes to create a game, and the prompts Codex pastes to generate every image. Repo copy: docs/reference/glossary-scaling-sop-usman-2026-10-16.html. The locked engineering spec is docs/handoff/specs/glossary-system.md; the full text of Joshua's plan with our mapping is docs/reference/glossary-scaling-plan-handover-2026-10-16.html.</i></p>
+<p><i>16 October 2026. One document to scale the glossary games from four industries to fifty: the rules (Joshua's), what is built and verified today, the prompts an agent pastes to create a game, and the prompts Codex pastes to generate every image. Repo copy: docs/reference/glossary-scaling-sop-usman-2026-10-16.html. The locked engineering spec is docs/handoff/specs/glossary-system.md. Joshua's plan in full is Appendix A of this document.</i></p>
 
 <h2>0. Readiness, checked 16 October 2026</h2>
 <table>
 <tr><th>Check</th><th>Result</th></tr>
-<tr><td>Live on main</td><td>Commit 81976505, Vercel build succeeded. Everything in this document is on main.</td></tr>
+<tr><td>Live on main</td><td>Everything in this document is on main (16 Oct 2026, evening push). Mastery shows as a count and five anonymous segments; the per-term dots are gone so nothing hints at the next word.</td></tr>
 <tr><td>Type check, lint</td><td>tsc clean. ESLint: no errors (three pre-existing warnings).</td></tr>
 <tr><td>Blueprint QA script</td><td>All four generated industries pass: seven questions plus a Power Play per level, no three of one mechanic in a row, every term credited twice, no answer leakage, no situation asked twice, all four recipes exercised.</td></tr>
 <tr><td>Validator negative test</td><td>A deliberately broken blueprint (bad slug, unknown world, definition saying its word, 14-word situation, 8-word cue, example without the anchor, unknown confusion, numbers without math) is refused with eleven specific reasons and does not build.</td></tr>
@@ -32,8 +32,8 @@
 <tr><td>Routes</td><td>/play/glossary/&lt;industry&gt; and /play/glossary/&lt;career&gt; resolve; /play-tools/glossary-qa lists every registered glossary (hamburger menu, Glossary QA).</td></tr>
 <tr><td>Hub gating</td><td>Only finance is released; generated industries play by route and from the QA page. Release is one slug in GLOSSARY_HUB_RELEASED.</td></tr>
 <tr><td>Demo flags</td><td>Every demo-only piece is tagged DEMO-ONLY in its own comment (blueprints, QA page, release list, Skip).</td></tr>
-<tr><td>Built so far</td><td>Finance (Joshua's, 4 of 20 levels), Software Engineering, Flight Operations, Nursing, Culinary Arts (4 playable levels each, Levels 5 and 6 on the roadmap).</td></tr>
-<tr><td>Not yet</td><td>No generated industry has its Level 1 term art or welcome illustration (Codex, section 6). No plates, panoramas or silhouettes registered (optional). Phone-width and light-mode passes on generated industries. Levels 5 and 6 copy.</td></tr>
+<tr><td>Built so far</td><td>Finance (Joshua's, 4 of 20 levels). The three other Play tab cards are complete at six playable levels each: Software Engineering (Tech Terms), Flight Operations (Flight Terms), Nursing (Medical Terms). Culinary Arts has four (not on the hub).</td></tr>
+<tr><td>Not yet</td><td>No generated industry has its Level 1 term art or welcome illustration (Codex, section 6). No plates, panoramas or silhouettes registered (optional). Phone-width and light-mode passes on generated industries. Levels 5 and 6 for Culinary.</td></tr>
 </table>
 
 <h2>1. Who does what</h2>
@@ -193,7 +193,7 @@ Rules that have shipped real bugs: one image per call; never chain off the last 
 <h2>8. QA and release checklist (Chandu)</h2>
 <ol>
 <li>Open the hamburger menu, Glossary QA. The new industry is listed with four playable levels.</li>
-<li>Play Level 1 in Drift with Skip, then Level 1 in Signal. Watch for clipped words, odd line breaks, a Dreamy facing away, a dollar meter where a milestone should be.</li>
+<li>Play Level 1 in Drift with Skip, then Level 1 in Signal. Watch for clipped words, odd line breaks, a Dreamy facing away, a dollar meter where a milestone should be, and that the mastery segments fill without pointing at a word.</li>
 <li>Open Level 3 and Level 4, question 1 and 2, in Drift: the compare card and Select All must read as real decisions, not trivia.</li>
 <li>Read the Power Play paragraph of each level once as a student would.</li>
 <li>Confirm Codex's Level 1 pictures and the welcome illustration are in place and on style.</li>
@@ -272,6 +272,167 @@ Rules that have shipped real bugs: one image per call; never chain off the last 
 <tr><td>/play-tools/glossary-qa</td><td>Every glossary, every level, both themes. Hamburger menu, Glossary QA.</td></tr>
 <tr><td>/component-lab, "Glossary game, live engine"</td><td>Every piece in both themes with a World picker.</td></tr>
 </table>
+
+<h2>Appendix A. Joshua's Master Scaling Plan in full, with how the system holds each rule</h2>
+
+<h3>1.1 Executive rules</h3>
+<p>These override anything else in the document.</p>
+<table>
+<tr><th style="width:28%">Rule</th><th>What it means</th><th style="width:32%">In the system</th></tr>
+<tr><td>Finance stays exactly as it is</td><td>Everything here applies only to new glossary worlds. Finance and Investment Banking, including Business Basics and Investing Basics, do not change. Nothing is applied retroactively.</td><td>Finance is hand-authored in data.ts and data-finance-l2-4.ts. It never passes through the generator.</td></tr>
+<tr><td>No timers</td><td>No countdown, no count-up, no timer in the header, no timed questions, no timer as a difficulty mechanic. Every new world, every new level.</td><td>The engine has no timer. The "4 min" on the Levels map is an estimate of length, not a clock.</td></tr>
+<tr><td>No forced images</td><td>The Dreamari team decides whether a term has an honest, relevant image. No AI tool or content generator makes this decision. If the team decides no, the term gets no image. Never create an image to fill a slot. If a match-to-pictures question loses its pictures, it becomes match-to-meanings.</td><td>Levels 2 and up teach with words only. The team has decided Level 1 earns pictures everywhere (3.4). A flashcard shows generated art or nothing; it never shows an icon in place of a picture. Match It Up is always word to meaning.</td></tr>
+<tr><td>No forced math</td><td>The team decides whether math belongs in a lesson. Never invent prices, percentages or calculations because a template has a math slot. Keep the question's position; swap the mechanic (sorting, ordering, spot the mistake, decision).</td><td>Numbers in a level's copy fail validation unless the level sets math: true. The generator never writes a calculation.</td></tr>
+</table>
+
+<h3>1.2 Three glossary world architectures</h3>
+<table>
+<tr><th style="width:16%">Mode</th><th>What it means</th><th>Use it when</th><th>Do not use it when</th></tr>
+<tr><td>Continuous Story continuous_story</td><td>One company, project, product or mission progresses across Levels 1 to 4. Later events build on earlier ones.</td><td>Vocabulary has a natural cause-and-effect progression.</td><td>You would have to invent awkward plot points just to introduce a term.</td></tr>
+<tr><td>Scenario Thread scenario_thread</td><td>The student stays in the same professional world, but each lesson is a new situation: a new shift, case, customer, patient or problem.</td><td>The workplace is consistent but the vocabulary does not need one continuous plot.</td><td>One coherent project would genuinely improve understanding.</td></tr>
+<tr><td>Practice World practice_world</td><td>Short, varied mini-situations. There is a visual world and Dreamy, but no obligation to keep a narrative.</td><td>Vocabulary is best learned through rapid identification, comparison, classification, procedures, decisions or examples.</td><td>A recurring situation would materially improve understanding.</td></tr>
+</table>
+<p>A scenario thread is still a world. Nursing keeps the student inside one clinic, but nobody has to remember Patient A from Level 1 to understand Patient B in Level 3. That is far more scalable than turning every career into a television show.</p>
+
+<h3>1.3 Master scaling rules</h3>
+<table>
+<tr><th style="width:22%">Rule</th><th>Global standard</th><th style="width:30%">How the system holds it</th></tr>
+<tr><td>World size</td><td>4 initial levels per glossary world.</td><td>Blueprint levels; roadmap levels beyond that show as locked words.</td></tr>
+<tr><td>Vocabulary</td><td>5 new core terms per level. 20 across Levels 1 to 4.</td><td>Validated: exactly five terms per playable level.</td></tr>
+<tr><td>Lesson length</td><td>7 to 10 scored interactions, including the final Power Play.</td><td>Every recipe is 7 questions plus 1 Power Play. Asserted by the QA script.</td></tr>
+<tr><td>Term coverage</td><td>Every new term is introduced clearly, then used in applied context before the lesson ends.</td><td>Teach cards first; every term is credited at least twice in the main loop (asserted).</td></tr>
+<tr><td>Power Play</td><td>Always one integrated final challenge. Never five screens for five terms.</td><td>One paragraph with five blanks, generated from the five examples. The type allows nothing else.</td></tr>
+<tr><td>Question clarity</td><td>Every screen asks an explicit question or action. Never "Complete the activity."</td><td>Every generated prompt is a question or an instruction.</td></tr>
+<tr><td>Copy length</td><td>Context line about 12 words. Question about 18 words. Answer choices usually 7 words.</td><td>Situation 12 words and 72 characters, cue 7 words and 34 characters, validated.</td></tr>
+<tr><td>Reading difficulty</td><td>Roughly 8th grade. Difficulty comes from the concept, not the writing.</td><td>Author rule. Not machine-checked.</td></tr>
+<tr><td>Answer leakage</td><td>Never put the answer inside the question, visual, heading, labels or setup.</td><td>Validated: a definition may not say its own word, a situation may not say its word.</td></tr>
+<tr><td>Distractors</td><td>The right answer is not systematically the longest or most professional-sounding.</td><td>Distractors are the other terms of the same level, so lengths vary naturally. Answer position rotates by level.</td></tr>
+<tr><td>Interaction diversity</td><td>No more than two consecutive screens with the same mechanic.</td><td>Asserted on every recipe.</td></tr>
+<tr><td>Multiple choice</td><td>Useful, but mixed with matching, sorting, fill-in-the-blank, error identification, comparison, sequencing, decisions.</td><td>Each recipe mixes choice, match, sort, type, select-all and compare.</td></tr>
+<tr><td>Multi-part questions</td><td>About 2 to 3 judgments per screen. Never seven items at once.</td><td>Match has five pairs, Sort four items, Select All four lines.</td></tr>
+<tr><td>Wrong-answer feedback</td><td>Say exactly what was wrong.</td><td>Each term can name the word it is confused with; the correction says "Not X: that is ...".</td></tr>
+<tr><td>Nested counters</td><td>No "Step 1 of 2" when the lesson already has a progress system.</td><td>None in generated levels.</td></tr>
+<tr><td>Dreamy</td><td>Exactly one Dreamy per screen. The cloud itself: no arms, hands, legs or body. Expressions react to the situation.</td><td>One actor per screen, twelve Drift poses and four Signal reactions, always facing the content.</td></tr>
+<tr><td>Intro cards</td><td>Skippable; students who know a term move quickly into practice.</td><td>Teach cards advance on tap.</td></tr>
+<tr><td>Continuity</td><td>A story recap fits one short sentence.</td><td>Each level's intro is a headline, one line and one hook.</td></tr>
+<tr><td>Mastery</td><td>Recognition first, then application, then transfer. Harder because students must think, not because screens hold more text.</td><td>The four recipes below.</td></tr>
+</table>
+
+<h3>1.4 How difficulty progresses</h3>
+<p>The learning progression stays the same across all 50 worlds even though the worlds change. A Level 4 question is not a longer Level 1 question. It requires better judgment. Math is one possible mechanic, never a required marker of difficulty.</p>
+<table>
+<tr><th style="width:14%">Level</th><th style="width:22%">Cognitive goal</th><th>Example</th></tr>
+<tr><td>Level 1</td><td>Recognize and understand</td><td>"Which term means money earned from sales?"</td></tr>
+<tr><td>Level 2</td><td>Apply</td><td>"Maya puts $25,000 into the company. What does that money become?"</td></tr>
+<tr><td>Level 3</td><td>Compare, analyze, classify</td><td>Interpret relationships, consequences, workflows; tell two confusable words apart.</td></tr>
+<tr><td>Level 4</td><td>Decide, diagnose, distinguish</td><td>"The company needs money but does not want to give up ownership. Which option fits?"</td></tr>
+<tr><td>Power Play</td><td>Integrate</td><td>One situation requiring all five terms together.</td></tr>
+</table>
+
+<p>In the system each level has a <b>focus</b>: recognize, apply, analyze or decide. It defaults by level number (1, 2, 3, 4 and later) and can be overridden. The focus picks the recipe. The numbers in brackets are which of the five terms the question credits.</p>
+<table>
+<tr><th>#</th><th>Level 1 recognize</th><th>Level 2 apply</th><th>Level 3 analyze</th><th>Level 4+ decide</th></tr>
+<tr><td>1</td><td>Definition (1)</td><td>Situation, "Which word is this?" (1)</td><td>Compare card: term 1 beside the word it is confused with, each with its cue; the situation decides</td><td>Situation, "Which option fits?" (1)</td></tr>
+<tr><td>2</td><td>Match It Up, word to cue (all)</td><td>Match It Up (all)</td><td>Select All about term 2: its cue and situation against the confusion's cue and another situation</td><td>Compare card, term 2</td></tr>
+<tr><td>3</td><td>Fill in the Blank (5)</td><td>Fill in the Blank (5)</td><td>Which Word from the definition (3)</td><td>Match It Up, "Use it when" (all)</td></tr>
+<tr><td>4</td><td>Which Word from the definition (3)</td><td>Which Word (3)</td><td>Sort the Buckets (1 to 4)</td><td>Situation, "Which option fits?" (3)</td></tr>
+<tr><td>5</td><td>Sort the Buckets (1 to 4)</td><td>Sort the Buckets (1 to 4)</td><td>Catch the Misuse: term 4 wearing its confusion's cue</td><td>Select All about term 4</td></tr>
+<tr><td>6</td><td>Catch the Misuse (4)</td><td>Situation (4)</td><td>Situation (5)</td><td>Catch the Misuse (5)</td></tr>
+<tr><td>7</td><td>Type the Term (2)</td><td>Type the Term from a situation (2)</td><td>Type the Term from a situation (5)</td><td>Type the Term from a situation (4)</td></tr>
+<tr><td>8</td><td colspan="4">Power Play: the five example sentences with their words blanked, as one paragraph.</td></tr>
+</table>
+<p>Review questions (one Which Word per term) are drawn only for terms still short of mastery. Live proof of all four recipes: <code>/play/glossary/software?lesson=1</code> through <code>lesson=4</code>; add <code>&amp;q=N</code> to jump to question N, <code>&amp;theme=signal</code> for the pixel theme.</p>
+
+<h3>1.5 The 50 glossary worlds</h3>
+<p>Joshua calls each of these a "Glossary World". In the system they are <b>industries</b>, grouped under Dreamari's 15 career worlds. The career world owns the look (accent color, display face, body face); the industry owns the levels and the story. Several industries share one world. The mode column is Joshua's recommended architecture and becomes <code>mode</code> in the blueprint.</p>
+<table>
+<tr><th>#</th><th>Industry</th><th>Mode</th><th>Career world</th><th>Recommended framing</th></tr>
+<tr><td>1</td><td>Finance &amp; Investment Banking (built)</td><td>continuous_story</td><td>Business &amp; Finance</td><td>Keep Dream Sneakers. Does not change.</td></tr>
+<tr><td>2</td><td>Accounting &amp; Audit</td><td>scenario_thread</td><td>Business &amp; Finance</td><td>Month-end close, reconciliations, statements, controls, audit requests. Same company, different situations.</td></tr>
+<tr><td>3</td><td>Entrepreneurship &amp; Venture</td><td>continuous_story</td><td>Business &amp; Finance</td><td>Idea, customers, business model, raise money, hire, grow, decide.</td></tr>
+<tr><td>4</td><td>Management Consulting</td><td>scenario_thread</td><td>Business &amp; Finance</td><td>Different client problems: costs, growth, operations, market entry.</td></tr>
+<tr><td>5</td><td>Marketing &amp; Brand Management</td><td>scenario_thread</td><td>Business &amp; Finance</td><td>Different campaigns for one brand.</td></tr>
+<tr><td>6</td><td>Sales &amp; Business Development</td><td>scenario_thread</td><td>Business &amp; Finance</td><td>A pipeline: qualify, discovery, pitch, objection, proposal, close.</td></tr>
+<tr><td>7</td><td>Human Resources &amp; People Operations</td><td>scenario_thread</td><td>Business &amp; Finance</td><td>Recruiting, onboarding, pay, benefits, performance, retention.</td></tr>
+<tr><td>8</td><td>Supply Chain &amp; Logistics</td><td>continuous_story</td><td>Driving, Flying &amp; Shipping</td><td>One product from supplier to factory to warehouse to customer.</td></tr>
+<tr><td>9</td><td>Law &amp; Legal Services</td><td>scenario_thread</td><td>Law, Safety &amp; Justice</td><td>Rotating client matters: contracts, evidence, discovery, litigation.</td></tr>
+<tr><td>10</td><td>Software Engineering (built, 4 levels)</td><td>continuous_story</td><td>Tech &amp; Engineering</td><td>Build and release one app: requirements, code, testing, deployment, bugs.</td></tr>
+<tr><td>11</td><td>Cybersecurity</td><td>scenario_thread</td><td>Tech &amp; Engineering</td><td>One organization through security events: access, phishing, malware, response.</td></tr>
+<tr><td>12</td><td>Data Science &amp; Analytics</td><td>continuous_story</td><td>Tech &amp; Engineering</td><td>Business question, data, cleaning, analysis, model, recommendation.</td></tr>
+<tr><td>13</td><td>Artificial Intelligence &amp; Machine Learning</td><td>continuous_story</td><td>Tech &amp; Engineering</td><td>One AI system: data, training, model, evaluation, bias, deployment.</td></tr>
+<tr><td>14</td><td>Product Management &amp; UX</td><td>continuous_story</td><td>Tech &amp; Engineering</td><td>One product: research, pain point, prototype, testing, launch.</td></tr>
+<tr><td>15</td><td>Electrical &amp; Computer Engineering</td><td>scenario_thread</td><td>Tech &amp; Engineering</td><td>Circuits, components, signals, measurement, troubleshooting.</td></tr>
+<tr><td>16</td><td>Mechanical Engineering</td><td>scenario_thread</td><td>Tech &amp; Engineering</td><td>Forces, materials, CAD, prototypes, tolerances, failures.</td></tr>
+<tr><td>17</td><td>Civil Engineering &amp; Construction Management</td><td>continuous_story</td><td>Building &amp; Construction</td><td>One project from site plan to turnover.</td></tr>
+<tr><td>18</td><td>Architecture</td><td>continuous_story</td><td>Building &amp; Construction</td><td>One client from brief to presentation.</td></tr>
+<tr><td>19</td><td>Registered Nursing (built, 4 levels)</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>A hospital shift world with different patients.</td></tr>
+<tr><td>20</td><td>Medicine / Physician</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>Patient encounters: history, exam, diagnostics, treatment.</td></tr>
+<tr><td>21</td><td>Surgery &amp; Operating Room</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>Different procedures: OR roles, sterile technique, anesthesia.</td></tr>
+<tr><td>22</td><td>Pharmacy</td><td>practice_world</td><td>Health &amp; Medicine</td><td>Fast prescription and medication scenarios.</td></tr>
+<tr><td>23</td><td>Dentistry</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>A dental clinic day.</td></tr>
+<tr><td>24</td><td>Mental &amp; Behavioral Health</td><td>scenario_thread</td><td>Counseling &amp; Social Work</td><td>Professional client situations: assessment, symptoms, care plans.</td></tr>
+<tr><td>25</td><td>Allied Health &amp; Diagnostics</td><td>practice_world</td><td>Health &amp; Medicine</td><td>Radiology, lab, respiratory, sonography; variety helps here.</td></tr>
+<tr><td>26</td><td>Biotechnology</td><td>continuous_story</td><td>Science &amp; Research</td><td>One research project from hypothesis to scale-up.</td></tr>
+<tr><td>27</td><td>Biomedical Engineering</td><td>continuous_story</td><td>Science &amp; Research</td><td>One medical device from need to regulatory.</td></tr>
+<tr><td>28</td><td>Public Health &amp; Epidemiology</td><td>continuous_story</td><td>Science &amp; Research</td><td>One health event: detect, measure, risk, intervene, evaluate.</td></tr>
+<tr><td>29</td><td>Veterinary Medicine</td><td>scenario_thread</td><td>Farming, Animals &amp; Nature</td><td>Different animal patients.</td></tr>
+<tr><td>30</td><td>Food Science</td><td>continuous_story</td><td>Farming, Animals &amp; Nature</td><td>One food product from formulation to production.</td></tr>
+<tr><td>31</td><td>Consumer Packaged Goods</td><td>continuous_story</td><td>Business &amp; Finance</td><td>One product from insight to shelf to growth.</td></tr>
+<tr><td>32</td><td>Aerospace Engineering</td><td>continuous_story</td><td>Tech &amp; Engineering</td><td>One component from requirements to certification.</td></tr>
+<tr><td>33</td><td>Airline Pilot &amp; Flight Operations (built, 4 levels)</td><td>scenario_thread</td><td>Driving, Flying &amp; Shipping</td><td>Different flights and phases: preflight, taxi, cruise, weather, diversions.</td></tr>
+<tr><td>34</td><td>Electrician</td><td>scenario_thread</td><td>Building &amp; Construction</td><td>Different jobs: circuits, panels, grounding, code, testing.</td></tr>
+<tr><td>35</td><td>HVAC &amp; Refrigeration</td><td>scenario_thread</td><td>Fixing Machines &amp; Engines</td><td>Service different systems.</td></tr>
+<tr><td>36</td><td>Plumbing &amp; Pipefitting</td><td>scenario_thread</td><td>Building &amp; Construction</td><td>Different jobsite problems.</td></tr>
+<tr><td>37</td><td>Welding &amp; Fabrication</td><td>practice_world</td><td>Factories &amp; Making Things</td><td>Fast shop exercises; a long narrative adds little.</td></tr>
+<tr><td>38</td><td>Automotive Technology</td><td>scenario_thread</td><td>Fixing Machines &amp; Engines</td><td>Vehicles with different symptoms: scan, diagnose, repair, verify.</td></tr>
+<tr><td>39</td><td>Diesel &amp; Heavy Equipment</td><td>scenario_thread</td><td>Fixing Machines &amp; Engines</td><td>Trucks and machinery: inspections, hydraulics, diagnostics.</td></tr>
+<tr><td>40</td><td>Aviation Maintenance Technician</td><td>scenario_thread</td><td>Fixing Machines &amp; Engines</td><td>Different maintenance events: inspection, airframe, sign-off.</td></tr>
+<tr><td>41</td><td>Avionics Technician</td><td>scenario_thread</td><td>Fixing Machines &amp; Engines</td><td>Aircraft electrical and electronic systems.</td></tr>
+<tr><td>42</td><td>Advanced Manufacturing &amp; CNC</td><td>continuous_story</td><td>Factories &amp; Making Things</td><td>One production order from blueprint to quality.</td></tr>
+<tr><td>43</td><td>Industrial Maintenance &amp; Mechatronics</td><td>scenario_thread</td><td>Factories &amp; Making Things</td><td>Keep a facility running: motors, sensors, PLCs, root cause.</td></tr>
+<tr><td>44</td><td>Robotics Technician</td><td>scenario_thread</td><td>Factories &amp; Making Things</td><td>Automation cells: programming, teach points, calibration, safety.</td></tr>
+<tr><td>45</td><td>Carpentry &amp; Construction Trades</td><td>scenario_thread</td><td>Building &amp; Construction</td><td>Different stages and jobs: layout, framing, finishing, safety.</td></tr>
+<tr><td>46</td><td>Solar &amp; Renewable Energy Technician</td><td>continuous_story</td><td>Building &amp; Construction</td><td>One installation from site survey to monitoring.</td></tr>
+<tr><td>47</td><td>Culinary Arts (built, 4 levels)</td><td>practice_world</td><td>Food &amp; Cooking</td><td>Fast kitchen challenges: knife skills, methods, temperatures, service.</td></tr>
+<tr><td>48</td><td>Cosmetology &amp; Barbering</td><td>practice_world</td><td>Personal Care &amp; Community Services</td><td>Fast client and technique exercises.</td></tr>
+<tr><td>49</td><td>EMT &amp; Paramedic</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>Different emergency calls from size-up to handoff.</td></tr>
+<tr><td>50</td><td>CNA &amp; Medical Assistant</td><td>scenario_thread</td><td>Health &amp; Medicine</td><td>Different patients and duties: rooming, vitals, infection control.</td></tr>
+</table>
+<p>Only five worlds are primarily practice worlds, because most professions are easier to understand when the vocabulary sits in a recurring workplace or project.</p>
+
+<h3>1.6 Story mode does not determine question type</h3>
+<p>A continuous story lesson still contains matching, multiple choice, sorting, drag and drop, sequencing, error detection, decisions and fill-in-the-blank, with calculations only when the team decides they are relevant. The story is the contextual spine: one context line, then the question. The story makes the information meaningful. It never becomes additional reading.</p>
+
+<h3>1.7 Artwork</h3>
+<p>Do not build a unique illustration for every term. 50 worlds times 4 levels times 5 terms is 1,000 terms; bespoke imagery for all of them is a production bottleneck and invites misleading visuals for abstract concepts. The team decides whether each term has an honest, relevant image. Candidates: sneaker, stethoscope, circuit breaker, wrench, aircraft engine, syringe, welding torch, hair clipper, CNC machine. Terms that do not need a standalone image: profit, liability, risk, margin, differential diagnosis, return, leverage, compliance, strategy.</p>
+<table>
+<tr><th style="width:20%">Mode</th><th>Visual strategy</th></tr>
+<tr><td>Continuous story</td><td>Visualize the entity progressing; reuse the same company or product assets and change their state.</td></tr>
+<tr><td>Scenario thread</td><td>Reuse a small library of environments, equipment, documents and tools.</td></tr>
+<tr><td>Practice world</td><td>Rely on interactions, Dreamy reactions, motion, clouds, buttons and success states.</td></tr>
+</table>
+<p><b>In the system:</b> Level 1 of every industry gets pictures for its five terms and one welcome illustration (decision of 16 October, section 3.4). Every later level teaches with words: words-only teach cards, initials in the mastery tokens, no pictures on match, sort or card backs. A flashcard never shows an icon in place of a picture.</p>
+
+<h3>1.8 Dreamy's role</h3>
+<p>Dreamy is part of the interaction system, not an illustration beside every piece of content. One screen, one Dreamy. Dreamy is the cloud itself: no arms, hands, legs or body. Dreamy is curious before a question, thinking during a hard one, concerned near a warning, excited after a correct answer, encouraging after a mistake, celebrating mastery, confident during the Power Play, surprised by an unexpected result. When term artwork is not appropriate, the game still comes from Dreamy's expressions, cloud movement, background animation, button reactions, correct-answer states, mastery animations, combos, unlocks, celebrations and transitions. A screen does not need a vocabulary illustration to feel like a game.</p>
+<p><b>In the system:</b> one actor per screen, twelve animated Drift poses and four Signal reactions mapped to question kinds and answer states, always facing the content, with the reward pluses on the main Dreamy when a student is right.</p>
+
+<h3>1.9 Quality gate before any lesson ships</h3>
+<table>
+<tr><th style="width:16%">Ask</th><th>Question</th><th style="width:34%">Automated?</th></tr>
+<tr><td>Clarity</td><td>Can a student understand exactly what they are asked within about three seconds?</td><td>Author review.</td></tr>
+<tr><td>Learning</td><td>Does answering require understanding the vocabulary, or can the student guess from wording or visuals?</td><td>Leakage checks are automated; the rest is review.</td></tr>
+<tr><td>Purpose</td><td>Did the screen teach or test something meaningful?</td><td>Author review.</td></tr>
+<tr><td>Copy</td><td>Is anything repeated that could be removed?</td><td>Author review.</td></tr>
+<tr><td>Feedback</td><td>If the student is wrong, will they understand exactly what was wrong and why?</td><td>Generated from the term's own copy and its confusion.</td></tr>
+<tr><td>Imagery</td><td>Has the team decided the image honestly helps? If not, remove it.</td><td>Registration is the decision.</td></tr>
+<tr><td>Math</td><td>Has the team decided math belongs? If not, do not use it.</td><td>math: true is the decision; numbers without it fail.</td></tr>
+<tr><td>Story</td><td>Would removing the story hurt understanding? If not, reduce it.</td><td>Author review.</td></tr>
+<tr><td>Timer</td><td>Is there any timer? Remove it.</td><td>None exists.</td></tr>
+</table>
+
+<div class="rule"><b>Final scaling principle (Joshua).</b> The goal is not to make vocabulary flashcards look like a game. The goal is to make students repeatedly use professional language inside increasingly realistic situations, with the speed, clarity, feedback and satisfaction of a game. Story, images, math and specific mechanics are tools, not requirements. Across 50 worlds the system stays consistent in clarity, interaction, feedback, mastery and progression, while each profession determines the most authentic way to teach its language.</div>
+
 
 </body>
 </html>

@@ -718,3 +718,36 @@
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate.is-icon > svg { max-width: 48px; max-height: 48px; }
 /* a registered welcome illustration sits where the shop would */
 .glossary-game-lab .glossary-welcome-registered { object-fit: contain; }
+
+/* ===========================================================================
+   MASTERY SEGMENTS (16 Oct 2026). Five anonymous bars, sorted by progress so
+   they fill left to right whatever order the words are mastered in; a count
+   sits beside them. Replaces the per-term tokens, which hinted at which word
+   came next and needed a letter or a picture for every term.
+   =========================================================================== */
+.glossary-game-shell.glossary-game-lab .glossary-mastery-segments { display: flex; align-items: center; gap: 5px; }
+.glossary-game-shell.glossary-game-lab .glossary-mastery-segment { position: relative; display: block; width: clamp(26px, calc(4vw / var(--vz, 1)), 44px); height: 7px; overflow: hidden; border-radius: 999px; background: var(--glass-surface-2); }
+.glossary-game-shell.glossary-game-lab .glossary-mastery-segment > i { position: absolute; inset: 0 auto 0 0; display: block; border-radius: inherit; background: color-mix(in srgb, var(--glossary-accent) 55%, var(--glass-surface-2)); transition: width 420ms cubic-bezier(.2, .7, .3, 1); }
+.glossary-game-shell.glossary-game-lab .glossary-mastery-segment.is-mastered > i { background: var(--glossary-accent); box-shadow: 0 0 10px color-mix(in srgb, var(--glossary-accent) 60%, transparent); }
+.glossary-game-shell.glossary-game-lab .glossary-mastered-count { font-size: 12px !important; font-weight: 800 !important; color: var(--foreground) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-segment { border-radius: 0; border: 1px solid #2e3650; background: var(--sig-card); height: 8px; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-segment > i { border-radius: 0; background: color-mix(in srgb, var(--sig-gold) 50%, var(--sig-card)); }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-segment.is-mastered > i { background: var(--sig-gold); box-shadow: none; }
+.glossary-game-shell.glossary-game-lab .glossary-mastered-count > span { display: inline !important; }
+
+/* ===========================================================================
+   SIGNAL SCENE CARDS (16 Oct 2026, Chandu: "the question hint in this preview
+   of signal is in the drift style... no inconsistencies like this"). The
+   story line and the compare card rode on Drift's rounded glowing frame in
+   Signal. They now take Signal's frame: square, one pixel line, hard shadow,
+   mono for lines, Jersey for titles. The audit of every question type found
+   these two as the only Drift shapes inside Signal's question screen.
+   =========================================================================== */
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene { border-radius: 0 !important; border: 1px solid var(--sig-line, #2e3650) !important; background: var(--sig-panel, #0b1024) !important; box-shadow: 3px 3px 0 var(--sig-ink, #05070f) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-line { font: 500 15px / 1.5 var(--sig-mono) !important; color: var(--sig-text) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-note { font: 500 12px / 1.5 var(--sig-mono) !important; color: var(--sig-mut) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-title { font: 700 14px / 1.3 var(--sig-font) !important; letter-spacing: .08em; text-transform: uppercase; color: var(--sig-gold) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-compare-card { border-radius: 0 !important; border: 1px solid var(--sig-line, #2e3650) !important; background: var(--sig-card) !important; box-shadow: none !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-compare-card > strong { color: var(--sig-cyan) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-compare-card li { color: var(--sig-text) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-compare-card li::marker { color: var(--sig-gold); }

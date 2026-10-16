@@ -3644,32 +3644,18 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
           {/* Sparks on every correct answer that moves it (SparkBar), same as Build. */}
           <SparkBar percent={percent} min={4} height={6} track="var(--glass-surface-2)" fill="var(--glossary-accent)" glow="var(--glossary-accent)" />
           <div className="glossary-mastery-foot flex items-center justify-between">
-            <div className={variant === "lab" ? "glossary-mastery-tokens" : "flex items-center gap-[6px]"}>
-              {lesson.terms.map((t) => {
-                const progress = Math.min(mastery[t.id] ?? 0, MASTERY_TARGET);
-                const done = progress >= MASTERY_TARGET;
-                if (variant === "lab") return (
-                  <span key={t.id} className={`glossary-mastery-token ${done ? "is-mastered" : ""}`} role="img" aria-label={`${t.term}: ${progress} of ${MASTERY_TARGET} mastery checks`}>
-                    <span className="glossary-mastery-token-ring" style={{ background: `conic-gradient(var(--glossary-accent) ${progress / MASTERY_TARGET * 100}%, var(--glass-surface-2) 0)` }}>
-                      <span className="glossary-mastery-token-core">
-                        {termArt[t.id] ? <Image src={termArt[t.id]} alt="" width={42} height={42} className="glossary-mastery-token-art" unoptimized /> : <b className="glossary-mastery-token-initial" aria-hidden>{t.term.charAt(0)}</b>}
-                      </span>
-                    </span>
-                    <span className="glossary-mastery-token-label" aria-hidden>{t.term}</span>
-                    {done ? <Check className="glossary-mastery-token-check" aria-hidden /> : null}
-                  </span>
-                );
-                return (
-                  <span
-                    key={t.id}
-                    title={t.term}
-                    className="flex size-5 items-center justify-center rounded-full"
-                    style={{ background: done ? "var(--glossary-accent)" : "var(--glass-surface-2)", color: "#05070f" }}
-                  >
-                    {done && <Check className="h-[11px] w-[11px]" aria-hidden />}
-                  </span>
-                );
-              })}
+            {/* Mastery as a count and five anonymous segments (16 Oct 2026,
+               Chandu: "remove the mastery dots/circles... that also hints at
+               which term comes next"). Segments fill left to right in the
+               order terms are mastered, so nothing points at a term, and no
+               letters or pictures are needed for abstract words or acronyms.
+               Each term's progress still shows as a partial fill. */}
+            <div className="glossary-mastery-segments" role="img" aria-label={`${masteredCount} of ${lesson.terms.length} words mastered`}>
+              {[...lesson.terms.map((t) => Math.min(mastery[t.id] ?? 0, MASTERY_TARGET))].sort((a, b) => b - a).map((progress, index) => (
+                <span key={index} className={`glossary-mastery-segment ${progress >= MASTERY_TARGET ? "is-mastered" : progress > 0 ? "is-started" : ""}`}>
+                  <i style={{ width: `${(progress / MASTERY_TARGET) * 100}%` }} />
+                </span>
+              ))}
             </div>
             <span className="glossary-mastered-count text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               <span>Mastered </span>{masteredCount}/{lesson.terms.length}

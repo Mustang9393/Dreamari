@@ -1,3 +1,12 @@
+## 2026-10-16 (late night, 12): the three Play tab games complete at six levels; mastery as segments and a count; master SOP; Codex prompt
+
+**Why (Chandu):** "try to make a game for each of the glossary game cards in the play tab that already exist with our new sops... give me the master glossary game sop and prompts in a single document but give me this new prompt for codex as separate." And: "I also want to remove the mastery dots/circles. lets just show a mastery score instead of telling them which circle is it because that also hints at which term comes next... We cant reliably make images for all terms because there will be vague abstract concepts or acronyms."
+
+- **Games:** Nursing (Teamwork, Specialties), Flight (The Crew, Emergencies) and Tech (Growing It, Keeping It Safe) are playable at Levels 5 and 6, decide recipe, situations and confusions on every term. All three Play tab glossary cards beside Finance now have six levels. Validated; the validator caught one 13-word situation twice.
+- **Mastery HUD:** the per-term tokens (letter or picture in a ring) are replaced by five anonymous segments sorted by progress, so they fill left to right in whatever order words are mastered, plus the "Mastered n/5" count. Nothing points at a term, and no term needs a picture or an initial. Both themes.
+- **Docs:** `docs/reference/glossary-scaling-sop-usman-2026-10-16.html` is now the master: readiness, roles, rules, Prompts A to D, image prompts, QA, the 50 industries, the file map, and Joshua's plan in full as Appendix A. The separate Codex prompt with every term and anchor is `docs/reference/codex-prompt-glossary-art-2026-10-16.md`. Both mirrored as Google Docs.
+- **Checked:** tsc, lint, both QA scripts; Nursing L5 compare (Drift), Tech L6 decide (Signal), the new HUD in both. Pushed to main at Chandu's request.
+
 ## 2026-10-16 (late night, 11): readiness check and the scaling SOP for Usman and Codex
 
 **Why (Chandu):** "check everything and see if everything is ready for usman and give me a full document sop with prompts for usman to scale including the prompts for image gen."
