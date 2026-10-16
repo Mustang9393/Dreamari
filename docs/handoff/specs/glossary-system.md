@@ -204,7 +204,7 @@ Required per industry since 16 Oct 2026: Level 1 term art (five per theme) and o
 
 ## Where every piece is documented
 
-The master SOP, `docs/reference/glossary-scaling-sop-usman-2026-10-16.md` (HTML twin beside it, Google Doc for sharing), is the only glossary SOP: rules, prompts for games and art, the 50 industries, Joshua's plan. The older handover, the separate art prompt, Play SOP chapters 04 and 12 and the glossary intake template were deleted on 17 Oct 2026; git history has them.
+The master SOP, `docs/reference/glossary-scaling-sop-usman-2026-10-16.md` (HTML twin beside it, Google Doc for sharing), is the only glossary SOP: rules, prompts for games and art, the UI and Component Lab map (section 8), how it scales (9), every guardrail in place (10), the 50 industries, Joshua's plan. Living worlds are its section 6.8. The older handover, the separate art prompt, Play SOP chapters 04 and 12 and the glossary intake template were deleted on 17 Oct 2026; git history has them.
 
 Component Lab, group "Glossary game, live engine (Drift and Signal)": the 14 world design systems, every live piece in both themes and all of its states, with a generated-industry specimen beside the authored one. The older group "Glossary game (retired engine, unrouted)" documents the first engine and stays for archaeology.
 

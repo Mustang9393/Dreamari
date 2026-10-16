@@ -1,3 +1,12 @@
+## 2026-10-17: Codex's Level 1 art merged; the SOP becomes the complete handover
+
+**Why (Chandu):** "codex has pushed better graphics for level 1s and also welcome screens, level graphics etc. Please use them and push" and "Update the SOP with everything usman needs including the image gen prompts and ui and scaleablitlty and every guardrail in place."
+
+- Rebased onto Codex's main (living worlds, Software, Aviation and Nursing Level 1 packs and welcome scenes). Codex had edited two docs this session deleted (Play SOP chapter 12, the 16 Oct handover); their additions now live in the master SOP: the object-only "No Dreamy" brief rule and the source contact sheet (6.1), the welcome packager contract (6.2), living worlds (6.8).
+- After the art landed: the teach card's underline took its SVG's 120px and pushed short terms right of their definition; it now follows the word. Codex's compact map paged two levels at a time on phones; phones hold the whole chapter again, short laptops keep two.
+- SOP: new section 8 (every screen and piece, what it does, its states in the Component Lab, the porting rule), 9 (what each part costs per new industry, what does not scale), 10 (every guardrail: validator, builder, the checks to run, layout and alignment, engine and experience, images, process); 7b marked done; readiness updated; later sections renumbered (QA checklist 11, the 50 industries 12, where everything is 13).
+- Checked: tsc; blueprint, Dreamy, industry-art and world-scene QA scripts; the alignment audit on a sample of screens in both themes at both sizes after the merge; welcome scenes and Level 1 cards of all three industries in both themes.
+
 ## 2026-10-17: symmetry and alignment pass; Levels map cards; Finance face; Levels 1 to 4 required; Component Lab coverage
 
 **Why (Chandu):** "Alignments are off. Lets make sure there is symmetry and proper alignment everywhere"; "The numbers in these boxes are sitting on the borders"; "the font for finance is bad, use something bolder or the same font bolder"; "in the level list ... The terms need better hierarchy position than the description under them ... number and whatever can sit in a header, and the rest can have its own space"; "1-4 should be there mandatorily"; "make sure that all ui components, ux interactions etc are covered for all levels and games so Usman can tap into our component library".
