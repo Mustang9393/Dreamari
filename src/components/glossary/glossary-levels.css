@@ -539,7 +539,9 @@
 .glossary-game-lab .glossary-words-formula { max-width: 100%; overflow-wrap: anywhere; white-space: normal; text-align: center; }
 .glossary-game-lab .glossary-mastery-token-label { max-width: 76px !important; white-space: normal !important; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.1 !important; text-overflow: clip; text-wrap: balance; }
 .glossary-game-lab .glossary-unlock-relic figcaption { overflow-wrap: anywhere; text-wrap: balance; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: clamp(11px, 1.2vw, 15px) !important; }
-.glossary-game-lab :is(.glossary-option, .glossary-document-option, .glossary-match-tile, .glossary-sort-token, .glossary-sort-bucket, .glossary-word-chip, .glossary-path-option, .glossary-speech-bubble, .glossary-feedback-text, .glossary-power-paragraph) { min-width: 0; overflow-wrap: anywhere; hyphens: auto; }
+.glossary-game-lab :is(.glossary-option, .glossary-document-option, .glossary-match-tile, .glossary-sort-token, .glossary-sort-bucket, .glossary-word-chip, .glossary-path-option, .glossary-feedback-text, .glossary-power-paragraph) { min-width: 0; overflow-wrap: anywhere; hyphens: auto; }
+/* Dreamy's speech bubble keeps whole words: a short spoken line hyphenated mid-word ("medi-cine") reads as a typo at phone width. Long words still wrap via overflow-wrap. */
+.glossary-game-lab .glossary-speech-bubble { min-width: 0; overflow-wrap: anywhere; hyphens: manual; }
 .glossary-game-lab :is(.glossary-match-tile, .glossary-sort-token) { white-space: normal; }
 .glossary-game-lab .glossary-match-tile .glossary-match-label { text-wrap: balance; }
 .glossary-game-lab .glossary-word-chip { white-space: nowrap; max-width: 100%; }

@@ -1,3 +1,7 @@
+## 2026-10-17: Dreamy's speech bubble keeps whole words on phones
+
+**Why:** found during the phone-width check of every game. The bubble shared the `hyphens: auto` rule written for long option and tile text, so a short spoken line broke mid-word at 375 px ("medi-cine"), which reads as a typo in a line Dreamy is saying. The bubble now uses manual hyphenation and still wraps long words via overflow-wrap; options, tiles, feedback and the Power Play paragraph keep auto hyphenation because their text is long and dense. Checked Nursing Level 1 questions 1 and 3 at 375 px in both themes. The master SOP Google Doc was republished the same day (readiness rows: thumbnails, Next-level theme fix, walkthroughs, Component Lab).
+
 ## 2026-10-17: check of every game; Next level keeps the theme
 
 **Why (Chandu):** "check everything" and "run checks on every game". Findings and fixes:
