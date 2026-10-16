@@ -1,22 +1,22 @@
 import type { CSSProperties } from "react";
 
 export type ScenePhase = "dawn" | "day" | "dusk" | "night";
-export type SceneWeather = "breeze" | "glints" | "drizzle";
 export type WorldScene = {
   phase: ScenePhase;
-  weather: SceneWeather;
   seed: number;
   tier: "Beginner" | "Intermediate" | "Advanced";
 };
 
 /** No asset or industry lookup: the same world key always produces the same
- * weather and phase offset. Finance's original rendering path is untouched. */
+ * phase offset. Finance's original rendering path is untouched.
+ * Weather (breeze, glints, drizzle motes) was removed on 17 Oct 2026: Chandu
+ * decided to drop it. Time of day, the mastery glow and the answer light cues
+ * stay. */
 export function worldScene(industry: string, world: string, level: number, tier: WorldScene["tier"]): WorldScene | null {
   if (industry === "finance") return null;
   const seed = Array.from(world).reduce((n, char) => (n * 31 + char.charCodeAt(0)) >>> 0, 7);
   const phases: ScenePhase[] = ["dawn", "day", "dusk", "night"];
-  const weather: SceneWeather[] = ["breeze", "glints", "drizzle"];
-  return { phase: phases[(Math.max(1, level) - 1 + seed % 4) % 4], weather: weather[seed % 3], seed, tier };
+  return { phase: phases[(Math.max(1, level) - 1 + seed % 4) % 4], seed, tier };
 }
 
 /** Shared by the room and the map thumbnail. Colours come from the existing

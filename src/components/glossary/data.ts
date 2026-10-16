@@ -500,8 +500,8 @@ export function hasGlossary(slug: string): boolean {
 // tiles in play tab open them up otherwise add them in succession to that
 // row"), then "Only use games with thumbnail art in the play tab": Medical,
 // Flight and Tech have tiles with Chandu's thumbnails and open their games.
-// Culinary has no thumbnail yet, so it stays QA-only (hamburger, Glossary
-// QA) until its cover lands (SOP 7c).
+// Culinary is the test world with no thumbnail, so it stays QA-only
+// (hamburger, Glossary QA). SOP Prompt E (7c) releases a new world here.
 export const GLOSSARY_HUB_RELEASED = ["finance", "nursing", "aviation", "software"];
 
 /** True when the hub may open this career's glossary as a real game. */

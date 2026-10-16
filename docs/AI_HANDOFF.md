@@ -1,3 +1,13 @@
+## 2026-10-17: weather removed; SOP Prompt E (one prompt per world), Prompt F (Signal backgrounds), Prompt G (shared polish)
+
+**Why (Chandu):** "why are we still doing weather? ... I decided to drop it", and "dont be so specific about kitchen terms, that was just an example we tried ... He will generate the final ones. We need the SOP and prompt to help him generate the games, levels, graphics etc everything in one. Also add the prompt for the signal backgrounds."
+
+- **Weather removed** from living worlds: the eight breeze, glint and drizzle motes, the weather field in worldScenes.ts, data-weather and the mote CSS and keyframes. Time of day, the mastery horizon glow and the answer light cues stay. The world-scenes QA passes.
+- **SOP 7c is now Prompt E:** one paste-ready prompt that takes an industry name and builds the game and its six levels, the Level 1 pictures and welcome scene in both themes, the Play tab cover, the world's Signal background if it has none, releases it and runs every check, stopping before a push. Kitchen Terms is now described only as the test world.
+- **SOP 7d is Prompt F:** the Signal world backgrounds, one per career world (fifteen cover all fifty industries), with the four references, the band layout the engine crops (sky the top 35%, city the middle, shore the bottom 24%, mirrored pairs), a scene line for every world, and the checks. New `scripts/glossary-signal-backdrop.mjs` packages a source to 1200 by 800, opaque, under 180 KB (the shipped default is 177 KB) and validates every registered file; tested on the default panorama.
+- **SOP 7e is Prompt G:** the optional shared polish (Levels map plates, Drift silhouettes for every world, Dreamy's animated reactions).
+- Spec, index and code comments now point at Prompt E instead of a Kitchen-specific to-do.
+
 ## 2026-10-17: glossary games open from the Play tab; Culinary Levels 5 and 6; light-mode pass; Codex prompt for every missing graphic
 
 **Why (Chandu):** "I cant get to these games from the play tab. Please fix. If we have games for the glossary tiles in play tab open them up otherwise add them in succession to that row", then "please dont leave anything as not done yet fix everything, if anything needs a graphic please give a prompt for me to give codex to update. Otherwise publish everything. For everything without a thumbnail for the cards, send them to hamburger access only link. Only use games with thumbnail art in the play tab."

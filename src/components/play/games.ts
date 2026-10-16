@@ -164,10 +164,9 @@ export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; c
   // Only glossaries with real thumbnail art sit in this row (Chandu, 17 Oct
   // 2026: "For everything without a thumbnail for the cards, send them to
   // hamburger access only link. Only use games with thumbnail art in the
-  // play tab"). Kitchen Terms (industry slug "culinary") plays from the
-  // hamburger's Glossary QA link until Codex delivers its cover (SOP 7c);
-  // then add { careerSlug: "culinary", title: "Kitchen Terms", sub: "Learn
-  // key kitchen terms", cover } here and "culinary" to GLOSSARY_HUB_RELEASED.
+  // play tab"). Kitchen Terms (industry slug "culinary"), the test world,
+  // has no cover and plays from the hamburger's Glossary QA link. A new world
+  // joins this row through SOP Prompt E (7c), Part 6.
   // Private Equity removed from this row (direct feedback, 9 Sept 2026) --
   // still gets the plain career-simulation "Soon" placeholder elsewhere.
 ];
