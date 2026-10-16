@@ -202,6 +202,10 @@ Numbers are the SOP's. Built ones are linked. "Mode" is the SOP's recommended ar
 | 49 | EMT & Paramedic | scenario_thread | Health & Medicine |
 | 50 | CNA & Medical Assistant | scenario_thread | Health & Medicine |
 
+## Images are Codex's; games are Claude's (16 Oct 2026)
+
+Codex generates every image, Claude writes blueprints and builds games. Two optional image kinds exist, and a game ships without either: Level 1 term art (the prompt above, registered in `termArt.ts`) and Levels map scene plates, which scale by tier and theme (six strips for the whole catalogue, 1536 by 512 WebP, horizon in the lower third, nothing within twelve percent of the edges, no text, no Dreamy) and are registered in `PLATES` in `levelPlates.ts`. The full brief with scene descriptions and the plate prompt is Part 3 of `docs/reference/glossary-scaling-plan-handover-2026-10-16.html`.
+
 ## Where every piece is documented
 
 Component Lab, group "Glossary game, live engine (Drift and Signal)": the 14 world design systems, every live piece in both themes and all of its states, with a generated-industry specimen beside the authored one. The older group "Glossary game (retired engine, unrouted)" documents the first engine and stays for archaeology.

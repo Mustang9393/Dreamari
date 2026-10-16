@@ -1,3 +1,11 @@
+## 2026-10-16 (late night, 4): Codex image brief in the SOP; Nursing, Culinary and Flight at four levels
+
+**Why (Chandu):** "lets add that to the SOP for codex. Codex will handle image generation. YOU create the games."
+
+- **SOP Part 3, Image brief (Codex)** in `docs/reference/glossary-scaling-plan-handover-2026-10-16.html` and the Google Doc: scene plates for the Levels map scale by tier and theme (six strips named in a table with a scene brief each, 1536 by 512 WebP, horizon in the lower third, nothing within twelve percent of the edges, no text, no Dreamy), the plate prompt, and where to register them (`PLATES` in `levelPlates.ts`). Level 1 term art stays in 2.6 and 2.7; Codex delivers files and registration, Claude does not generate images. The spec carries the division of labour.
+- **Games:** Nursing Levels 3 (Medicines) and 4 (Emergencies), Culinary 3 (Heat and Time) and 4 (Food Safety), Aviation 4 (Landing). Every generated industry now has the four playable levels the SOP asks for, each with situations and confusions so the analyze and decide recipes run. All DEMO-ONLY copy, eighth grade, no numbers, validated (the validator caught one 13-word situation).
+- **Checked:** tsc, both QA scripts; Nursing L4 compare card (Drift), Culinary L3 compare (Signal), Aviation L4 Select All (Drift). Not pushed.
+
 ## 2026-10-16 (late night, 3): Levels map plates fill the open card; a plate library hook
 
 **Why (Chandu):** "the background image you are using doesnt fill the width of the container when its open." The Signal skyline was sized by height (`auto 240%`), so on a 507px open card the image stopped at 302px. It is now sized to 160% of the plate's width: the skyline is 3:2 and every plate is wider than that, so 160% always covers, and the remaining 60% is the per-level horizontal slice.
