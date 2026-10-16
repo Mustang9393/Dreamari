@@ -1,3 +1,11 @@
+## 2026-10-16: Nursing Level 1 art pack, held for review
+
+**Why (Chandu):** Medical Terms needs consistent Drift/Signal art before release, while later lessons keep teaching with words. Added `nursing-oct17`: ten term illustrations, two welcome scenes, twenty-four WebPs, registered to `registered-nurse` and `WELCOME_ART.nursing`. No Finance, authored content, game logic or release-flag changes. Not pushed.
+
+- Riverside Clinic briefs: care bed and wristband (Patient), heartbeat monitor/thermometer/cuff (Vital Signs), an open care record (Chart), one measured capsule in a medicine cup (Dose), three waiting beds with the urgent one forward (Triage). The welcome is the clinic entrance, bench, blank sign and ambulance bay. Patient intentionally uses a care-place metaphor instead of drawing another character. Full prompts and source/reference/export hashes are in `glossary-nursing-art-oct17*.json`.
+- Rejected five outputs that copied Dreamy into object-only subjects: Drift Chart/Dose and Signal Vital Signs/Chart/Dose. Fresh canonical-reference retries removed the character. No people, limbs, image text or alternate mascots in the final pack. Original and rejected PNGs stay local under `output/glossary-living-worlds/art/nursing/`; only validated WebPs are served.
+- Checked both final style contact sheets; term and welcome prepare/validate pass alpha, geometry, safe margins, byte budgets and provenance. Browser at 1280: new welcome and first teaching art in both themes; Level 2 cards have zero term images in both. Screenshots: `after/nursing-{drift,signal}-{welcome,teach}-1280.png`. The final whole-branch checks and responsive scene matrix follow this admission.
+
 ## 2026-10-16: Aviation Level 1 art pack, held for review
 
 **Why (Chandu):** Flight Terms needs the same two-theme art coverage as Finance before release, with meaning rather than labelled icons. Added `aviation-oct17`: ten term illustrations, two welcome scenes, twenty-four WebP exports, registered to `airline-pilot` and `WELCOME_ART.aviation`. No content, later-level art, Finance or release-flag changes. Not pushed.

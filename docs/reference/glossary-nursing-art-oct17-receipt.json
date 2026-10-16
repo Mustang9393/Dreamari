@@ -1,0 +1,478 @@
+{
+  "schemaVersion": 1,
+  "career": "nursing",
+  "version": "nursing-oct17",
+  "provider": "built-in image_gen",
+  "references": {
+    "drift": [
+      {
+        "path": "public/images/glossary/themes-oct08/drift/customer.webp",
+        "sha256": "ba7295fc0eb1d41338ef33cdd64dd3391f7a2543faddbfec763ff4b3c56378cf"
+      },
+      {
+        "path": "public/images/glossary/themes-oct08/drift/company.webp",
+        "sha256": "f7e468e71692003bf604a5b6054e5cf87b2ab661abc956639fc73446d48a0e15"
+      },
+      {
+        "path": "public/images/glossary/themes-oct08/drift/profit.webp",
+        "sha256": "71e13a089e0d5e1871a11e20521c2e4d55cd571957d568d4a39e238aad69606e"
+      }
+    ],
+    "signal": [
+      {
+        "path": "public/images/glossary/signal/cloud-sale-sneaker.webp",
+        "sha256": "7e95f8f200b465850fdc62c1da7cc5d05f57766d1b323bbb7fe875da18ce5656"
+      },
+      {
+        "path": "public/images/glossary/signal/building.webp",
+        "sha256": "dfb07581df4ebc8aceaa3d037a464c1ca61bd406e8342a33ace9c03a24ac6ea6"
+      },
+      {
+        "path": "public/images/glossary/signal/coins-320.webp",
+        "sha256": "54f32115db13823610ba1efdb87c786de92ef2c87fb2cba99d87c164c84c4423"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "id": "Patient",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "patient-drift.png",
+      "sourceSha256": "d75531c20b408c05b566c4525feec6a12b44f535e361731630e560ecdaf2d97b",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic an empty navy examination bed has an ivory pillow and a pale blue blanket folded into a gently raised resting shape, a gold care wristband prominently beside it. The care bed and wristband show the place of the person receiving care, no person, face, cloud, text or digits.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/patient.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 69226,
+          "sha256": "35fd69884868875be95b3aa64740015ff2dbd2cb35c491f23b9c669c2db431ff",
+          "alphaBounds": {
+            "left": 38,
+            "top": 83,
+            "width": 691,
+            "height": 600,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/patient-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16644,
+          "sha256": "264ac13ccc44d8666aab5426d59fe1b9a92440ea28a818418b1751a27b607d39",
+          "alphaBounds": {
+            "left": 13,
+            "top": 28,
+            "width": 230,
+            "height": 200,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Patient",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "patient-signal.png",
+      "sourceSha256": "c154892cad72e93eaab3d2e33bc0622933fb4313ac1c228242c035a720eb5f53",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic an empty navy examination bed has an ivory pillow and a pale blue blanket folded into a gently raised resting shape, a gold care wristband prominently beside it. The care bed and wristband show the place of the person receiving care, no person, face, cloud, text or digits.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/patient.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 21822,
+          "sha256": "f3792c74958a1223bb869d25ceb346e22d65dfdd8cd411f92d870965b383396d",
+          "alphaBounds": {
+            "left": 48,
+            "top": 108,
+            "width": 672,
+            "height": 546,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/patient-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 18068,
+          "sha256": "2f345023507778cfc090cb42e49e2f445b6bd4b9b269599bce368b4eb5c8bedd",
+          "alphaBounds": {
+            "left": 48,
+            "top": 68,
+            "width": 224,
+            "height": 182,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Vital Signs",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "vital-signs-drift.png",
+      "sourceSha256": "05bbeb4e200981c5d389465672082e54e13dc2e539d8adc07bd13b6f53b98300",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic a navy bedside monitor displays one clear cyan heartbeat trace beside a compact thermometer and blood-pressure cuff. The heartbeat trace is the dominant cue for the body's basic measurements, no digits, letters or labels.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/vital-signs.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 75640,
+          "sha256": "455c8a83803cf2e9d13023b3f91cfade88d4917eae8552359423f5916c63fbf9",
+          "alphaBounds": {
+            "left": 38,
+            "top": 68,
+            "width": 691,
+            "height": 631,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/vital-signs-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 17820,
+          "sha256": "c8cd6319e1ea548b053add4282a624146763c29acbb844bf8e37f54605b7d848",
+          "alphaBounds": {
+            "left": 13,
+            "top": 23,
+            "width": 230,
+            "height": 210,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Vital Signs",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "vital-signs-signal-v2.png",
+      "sourceSha256": "960205fa55eabc2fd054cc7ac77c47f3b5d3b148ffe33a5eab7cd430d338d8e8",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic a navy bedside monitor displays one clear cyan heartbeat trace beside a compact thermometer and blood-pressure cuff. The heartbeat trace is the dominant cue for the body's basic measurements, no digits, letters or labels.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "vital-signs-signal.png",
+          "inputSha256": "a7d2764a53e9e8a2e8fb2b21c93d1a7992108e81e2a2ebd1a4ee2bf3c261386c",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic a navy bedside monitor displays one clear cyan heartbeat trace beside a compact thermometer and blood-pressure cuff. The heartbeat trace is the dominant cue for the body's basic measurements, no digits, letters or labels.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nSTRICT CONTENT LOCK: This is an OBJECT-ONLY illustration. NO DREAMY. NO CLOUD SHAPE. NO EYES OR FACE. NO MASCOT. NO CHARACTER. Ignore the cloud subject in the reference; borrow ONLY its material or pixel rendering style. Draw only the objects explicitly named in the Subject above."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/vital-signs.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 20940,
+          "sha256": "3e801567a2b3a0c812baec16f78aed294db663af4ffac9d6842993caad35f242",
+          "alphaBounds": {
+            "left": 48,
+            "top": 78,
+            "width": 672,
+            "height": 612,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/vital-signs-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 17228,
+          "sha256": "e1e56eb2706e05064b61fb875a4abcaaa2d14259e3642d1859e8ae2d05ae1815",
+          "alphaBounds": {
+            "left": 48,
+            "top": 58,
+            "width": 224,
+            "height": 204,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Chart",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "chart-drift-v2.png",
+      "sourceSha256": "023921bc2bda3c7a58e6be5e957a0e2b2057eec03b97b8a68bf2c45d28b14879",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic an open ivory medical record folder holds one neat care sheet with a cyan heartbeat trace and orderly blank ruled rows, secured by a gold clip. The open record sheet is the focal cue for recorded care, no letters, digits or readable writing.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "chart-drift.png",
+          "inputSha256": "41c5e9cdd89b3d6f89f842f7106200215a96f9f4d14098c744de5167a8a4626b",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic an open ivory medical record folder holds one neat care sheet with a cyan heartbeat trace and orderly blank ruled rows, secured by a gold clip. The open record sheet is the focal cue for recorded care, no letters, digits or readable writing.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nSTRICT CONTENT LOCK: This is an OBJECT-ONLY illustration. NO DREAMY. NO CLOUD SHAPE. NO EYES OR FACE. NO MASCOT. NO CHARACTER. Ignore the cloud subject in the reference; borrow ONLY its material or pixel rendering style. Draw only the objects explicitly named in the Subject above."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/chart.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 69662,
+          "sha256": "a6f016e05f50e078d7fe9da3acaa1c9a2175f720c6d56b43860c218694e74975",
+          "alphaBounds": {
+            "left": 38,
+            "top": 75,
+            "width": 691,
+            "height": 616,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/chart-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 16414,
+          "sha256": "8c2870057b6365d0d43c389d8218a34bd7a9bf003a795f518fbd34b5db34c50f",
+          "alphaBounds": {
+            "left": 13,
+            "top": 25,
+            "width": 230,
+            "height": 206,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Chart",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "chart-signal-v2.png",
+      "sourceSha256": "783125f72682ca0d77380cf05c71125703805d3336575e51c3fdde2cedb03e2c",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic an open ivory medical record folder holds one neat care sheet with a cyan heartbeat trace and orderly blank ruled rows, secured by a gold clip. The open record sheet is the focal cue for recorded care, no letters, digits or readable writing.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "chart-signal.png",
+          "inputSha256": "088a977488ba5ac7f68e40d02af1a3f79ec452779bba3a0413f9731b55e525b4",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic an open ivory medical record folder holds one neat care sheet with a cyan heartbeat trace and orderly blank ruled rows, secured by a gold clip. The open record sheet is the focal cue for recorded care, no letters, digits or readable writing.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nSTRICT CONTENT LOCK: This is an OBJECT-ONLY illustration. NO DREAMY. NO CLOUD SHAPE. NO EYES OR FACE. NO MASCOT. NO CHARACTER. Ignore the cloud subject in the reference; borrow ONLY its material or pixel rendering style. Draw only the objects explicitly named in the Subject above."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/chart.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 22698,
+          "sha256": "2de66842fc54eef727a2229639f74c7d94da75227397e18a52191dcad5f5026c",
+          "alphaBounds": {
+            "left": 48,
+            "top": 78,
+            "width": 672,
+            "height": 612,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/chart-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 18808,
+          "sha256": "8c8bb66955bd1dbafc14f762355a633041441b7405a00d8a3c0a72401c204695",
+          "alphaBounds": {
+            "left": 48,
+            "top": 58,
+            "width": 224,
+            "height": 204,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Dose",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "dose-drift-v2.png",
+      "sourceSha256": "42a7abdcb8e44aef0b5e46dcab9c6c90166d167b74f91c996f2674fb5cfa2d81",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic a single small medicine cup contains exactly one gold capsule beside a closed navy medicine bottle. The one measured portion in the cup is the focal cue for the amount given at one time, no labels, letters or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "dose-drift.png",
+          "inputSha256": "5bc7e22bcc355b7b3a361c562201c251be288d9b5211e155af45e3f746ca5456",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic a single small medicine cup contains exactly one gold capsule beside a closed navy medicine bottle. The one measured portion in the cup is the focal cue for the amount given at one time, no labels, letters or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nSTRICT CONTENT LOCK: This is an OBJECT-ONLY illustration. NO DREAMY. NO CLOUD SHAPE. NO EYES OR FACE. NO MASCOT. NO CHARACTER. Ignore the cloud subject in the reference; borrow ONLY its material or pixel rendering style. Draw only the objects explicitly named in the Subject above."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/dose.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 51130,
+          "sha256": "4b3f8dd04ea858b085296caa60e65790089a5067d0b1749997f37ffb26562599",
+          "alphaBounds": {
+            "left": 38,
+            "top": 45,
+            "width": 691,
+            "height": 677,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/dose-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 12502,
+          "sha256": "83215ea2d4efec1155313214c1053196339e9877f7a9253bee9b73f2425fb87c",
+          "alphaBounds": {
+            "left": 13,
+            "top": 15,
+            "width": 230,
+            "height": 226,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Dose",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "dose-signal-v2.png",
+      "sourceSha256": "c975f05c6bae2bf6df40ee88ae627cea2fd7d1517d668ac1204a9b8edd1d1b9f",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic a single small medicine cup contains exactly one gold capsule beside a closed navy medicine bottle. The one measured portion in the cup is the focal cue for the amount given at one time, no labels, letters or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [
+        {
+          "inputName": "dose-signal.png",
+          "inputSha256": "fdf607ffad0df567bad09b8f5d6bb940d12d731b70089357210febe65fcd77cf",
+          "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: At Riverside Clinic a single small medicine cup contains exactly one gold capsule beside a closed navy medicine bottle. The one measured portion in the cup is the focal cue for the amount given at one time, no labels, letters or numbers.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.\nSTRICT CONTENT LOCK: This is an OBJECT-ONLY illustration. NO DREAMY. NO CLOUD SHAPE. NO EYES OR FACE. NO MASCOT. NO CHARACTER. Ignore the cloud subject in the reference; borrow ONLY its material or pixel rendering style. Draw only the objects explicitly named in the Subject above."
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/dose.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 19984,
+          "sha256": "6a0f1158afe8dbb8b97d335d54a33f2401750740f004f8453ae1759c5c49c33d",
+          "alphaBounds": {
+            "left": 60,
+            "top": 48,
+            "width": 642,
+            "height": 672,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/dose-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 15942,
+          "sha256": "d9c1f928ef8e9922f50e147e0761b7d4e451b177ca4a18c825df2b62f94ca983",
+          "alphaBounds": {
+            "left": 52,
+            "top": 48,
+            "width": 214,
+            "height": 224,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    },
+    {
+      "id": "Triage",
+      "level": 1,
+      "theme": "drift",
+      "sourceName": "triage-drift.png",
+      "sourceSha256": "be2cd26c767322dd8c3350072c551f57455031d91b6db6888731753003eaa8c3",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Three small empty patient beds in a row at Riverside Clinic, one lit with a bright gold tag and pulled slightly forward, the other two dim and waiting. The forward highlighted bed is the focal cue for the most urgent care being chosen first, no people, cloud characters, text or digits.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/triage.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 67468,
+          "sha256": "29442cde999c6dae18d47f33b5ca8549f27de83606812ad289b4f67ce5013bbc",
+          "alphaBounds": {
+            "left": 38,
+            "top": 158,
+            "width": 691,
+            "height": 451,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/triage-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 15718,
+          "sha256": "945137e5de30ad9f40ea73f7413151d90e99a2fec1043998fddc831227548355",
+          "alphaBounds": {
+            "left": 13,
+            "top": 53,
+            "width": 230,
+            "height": 150,
+            "canvasWidth": 256,
+            "canvasHeight": 256
+          }
+        }
+      ]
+    },
+    {
+      "id": "Triage",
+      "level": 1,
+      "theme": "signal",
+      "sourceName": "triage-signal.png",
+      "sourceSha256": "49378762578d145b02ad06dd24ff0151c38cea2ebe687a03cb019fecbdfa54c6",
+      "prompt": "Use case: stylized-concept.\nAsset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Three small empty patient beds in a row at Riverside Clinic, one lit with a bright gold tag and pulled slightly forward, the other two dim and waiting. The forward highlighted bed is the focal cue for the most urgent care being chosen first, no people, cloud characters, text or digits.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "revisions": [],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/triage.webp",
+          "width": 768,
+          "height": 768,
+          "bytes": 15242,
+          "sha256": "b289a34f2e9f31c80aa9fb13cc973a08c913661e325ad86b31f6c4d8c0de3148",
+          "alphaBounds": {
+            "left": 48,
+            "top": 138,
+            "width": 672,
+            "height": 492,
+            "canvasWidth": 768,
+            "canvasHeight": 768
+          }
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/triage-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 13174,
+          "sha256": "929bb95e7622558b09a7c8410ac0890019a439c7878027c38cd9ab8570aedff0",
+          "alphaBounds": {
+            "left": 48,
+            "top": 78,
+            "width": 224,
+            "height": 164,
+            "canvasWidth": 320,
+            "canvasHeight": 320
+          }
+        }
+      ]
+    }
+  ]
+}

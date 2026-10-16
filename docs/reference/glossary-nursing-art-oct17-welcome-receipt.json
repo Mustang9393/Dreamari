@@ -1,0 +1,76 @@
+{
+  "version": "nursing-oct17",
+  "provider": "built-in image_gen",
+  "assets": [
+    {
+      "theme": "drift",
+      "sourceSha256": "107dfcdff12b975c343d77148e9730d858b32e35ec7d790eb5e6b9c978e2fc4b",
+      "prompt": "Use case: stylized-concept.\nAsset type: one Dreamari welcome illustration: the workplace this glossary lives in, seen as a small composed scene.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Riverside Clinic: the front of a low community clinic with a lit entrance, a bench, a small blank sign post and an ambulance bay to one side. One compact coherent workplace silhouette, no text, people or Dreamy.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No environmental backdrop outside the isolated composed workplace, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "references": [
+        {
+          "path": "public/images/glossary/themes-oct08/drift/customer.webp",
+          "sha256": "ba7295fc0eb1d41338ef33cdd64dd3391f7a2543faddbfec763ff4b3c56378cf"
+        },
+        {
+          "path": "public/images/glossary/themes-oct08/drift/company.webp",
+          "sha256": "f7e468e71692003bf604a5b6054e5cf87b2ab661abc956639fc73446d48a0e15"
+        },
+        {
+          "path": "public/images/glossary/themes-oct08/drift/profit.webp",
+          "sha256": "71e13a089e0d5e1871a11e20521c2e4d55cd571957d568d4a39e238aad69606e"
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/welcome.webp",
+          "width": 1024,
+          "height": 1024,
+          "bytes": 74042,
+          "sha256": "0689e72783bec1ed0626d866ecdeaaa9695b4400bfb858919afec104f7e0fd0f"
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/drift/welcome-256.webp",
+          "width": 256,
+          "height": 256,
+          "bytes": 11516,
+          "sha256": "e46285d8bb1b7d572a5eb8185e5c01f5647e7d26354753135c20619115bfc421"
+        }
+      ]
+    },
+    {
+      "theme": "signal",
+      "sourceSha256": "093ca5d9ebe9d58169b2329a5afb71502b3dcfc1bda2f091d2adb6a99205f735",
+      "prompt": "Use case: stylized-concept.\nAsset type: one Dreamari welcome illustration: the workplace this glossary lives in, seen as a small composed scene.\nGenerate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.\nSubject: Riverside Clinic: the front of a low community clinic with a lit entrance, a bench, a small blank sign post and an ambulance bay to one side. One compact coherent workplace silhouette, no text, people or Dreamy.\nComposition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No environmental backdrop outside the isolated composed workplace, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.\nCharacter lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.\nSTYLE: Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.\nNo generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.",
+      "references": [
+        {
+          "path": "public/images/glossary/signal/cloud-sale-sneaker.webp",
+          "sha256": "7e95f8f200b465850fdc62c1da7cc5d05f57766d1b323bbb7fe875da18ce5656"
+        },
+        {
+          "path": "public/images/glossary/signal/building.webp",
+          "sha256": "dfb07581df4ebc8aceaa3d037a464c1ca61bd406e8342a33ace9c03a24ac6ea6"
+        },
+        {
+          "path": "public/images/glossary/signal/coins-320.webp",
+          "sha256": "54f32115db13823610ba1efdb87c786de92ef2c87fb2cba99d87c164c84c4423"
+        }
+      ],
+      "outputs": [
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/welcome.webp",
+          "width": 1024,
+          "height": 1024,
+          "bytes": 14164,
+          "sha256": "a8ad569c3ea863b30d3f65bf3941a6f4a51a416eeb2301900f043e76e1b6680d"
+        },
+        {
+          "path": "public/images/glossary/nursing-oct17/signal/welcome-320.webp",
+          "width": 320,
+          "height": 320,
+          "bytes": 13498,
+          "sha256": "903faaa4471b2193bb97706ddefd949c23a75a61b991f57c80b19b75825999d0"
+        }
+      ]
+    }
+  ]
+}

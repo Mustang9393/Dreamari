@@ -23,6 +23,7 @@ const CAREER_TERM_ART: Record<string, { version: string; terms: Record<string, s
   "investment-banking": { version: "finance-oct13", terms: FINANCE_TERM_SLUGS },
   "software-engineer": { version: "software-oct17", terms: { App: "app", User: "user", Feature: "feature", Code: "code", Bug: "bug" } },
   "airline-pilot": { version: "aviation-oct17", terms: { Cockpit: "cockpit", Runway: "runway", Preflight: "preflight", Taxi: "taxi", Takeoff: "takeoff" } },
+  "registered-nurse": { version: "nursing-oct17", terms: { Patient: "patient", "Vital Signs": "vital-signs", Chart: "chart", Dose: "dose", Triage: "triage" } },
 };
 
 export function glossaryTermAssets(careerSlug: string, atmosphere: string, size: "large" | "small" = "large"): Record<string, string> {
