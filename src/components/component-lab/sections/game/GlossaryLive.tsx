@@ -231,11 +231,11 @@ export function GlossaryLiveGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="ValuationTicker" scale="core" file={FILE} purpose="The company's value counting up to the level's milestone. Reads the career's own company name." when="The Complete screen (reached) and the level welcome (goal).">
+      <Specimen name="ValuationTicker" scale="core" file={FILE} purpose="A continuous story's company value counting up to the level's milestone. A scenario thread or practice world has no company value, so it shows the milestone in words and Level n of N instead (the Master Scaling Plan SOP, 16 Oct 2026)." when="The Complete screen (reached) and the level welcome (goal).">
         <StateGrid min={280}>
           <StateCell label="Reached (counts up)" surface="game" minH={180}><Stage theme={theme} world={world} screen="complete" height={170}><ValuationTicker from={0} to={L1.companyValue} milestone={L1.milestone} mode="reached" company={L1.exampleCompany} /></Stage></StateCell>
           <StateCell label="Goal" surface="game" minH={180}><Stage theme={theme} world={world} screen="intro" height={170}><ValuationTicker from={L3.previousCompanyValue ?? 0} to={L3.companyValue} milestone={L3.milestone} mode="goal" company={L3.exampleCompany} /></Stage></StateCell>
-          <StateCell label="Generated (Riverside Clinic)" surface="game" minH={180}><Stage theme={theme} world={world} screen="complete" height={170}><ValuationTicker from={0} to={RN1.companyValue} milestone={RN1.milestone} mode="reached" company={RN1.exampleCompany} /></Stage></StateCell>
+          <StateCell label="Milestone progress (scenario thread, Riverside Clinic)" surface="game" minH={180}><Stage theme={theme} world={world} screen="complete" height={170}><ValuationTicker from={0} to={RN1.companyValue} milestone={RN1.milestone} mode="reached" company={RN1.exampleCompany} progress={{ level: 1, total: 6 }} /></Stage></StateCell>
         </StateGrid>
       </Specimen>
 

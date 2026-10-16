@@ -492,9 +492,18 @@ function shortMoney(value: number): string {
  *  ($10K to $30B on Joshua's ladder). On the results screen it counts up
  *  from the value before the lesson; on an intro it shows the next goal.
  *  A game value, not money the student earns (the Replit says so too). */
-export function ValuationTicker({ from, to, milestone, mode, company = "Dream Sneakers" }: { from: number; to: number; milestone: string; mode: "goal" | "reached"; /** the career's example company */ company?: string }) {
+export type MilestoneProgress = { level: number; total: number };
+
+/** A continuous story keeps its dollar meter; every other mode shows where
+ *  the level sits on the path (Finance never changes: SOP Executive Rule 1). */
+export function milestoneProgress(career: GlossaryCareer, lesson: GlossaryLesson): MilestoneProgress | undefined {
+  if (career.mode === "continuous_story") return undefined;
+  return { level: lesson.lessonNumber, total: Math.max(career.levels.length, lesson.lessonNumber) };
+}
+
+export function ValuationTicker({ from, to, milestone, mode, company = "Dream Sneakers", progress }: { from: number; to: number; milestone: string; mode: "goal" | "reached"; /** the career's example company */ company?: string; /** Scenario threads and practice worlds (the Master Scaling Plan SOP, 16 Oct 2026): the level's milestone in words and "Level n of N" in place of a dollar value, which only a continuous story's company has. */ progress?: MilestoneProgress }) {
   const reduced = useReducedMotion();
-  const animate = mode === "reached" && !reduced && from !== to;
+  const animate = mode === "reached" && !reduced && from !== to && !progress;
   const [shown, setShown] = useState(animate ? from : to);
   useEffect(() => {
     if (!animate) return;
@@ -509,6 +518,21 @@ export function ValuationTicker({ from, to, milestone, mode, company = "Dream Sn
     const delay = window.setTimeout(() => { frame = window.requestAnimationFrame(tick); }, 350);
     return () => { window.clearTimeout(delay); window.cancelAnimationFrame(frame); };
   }, [animate, from, to]);
+  if (progress) {
+    const done = mode === "reached" ? progress.level : progress.level - 1;
+    const stepPct = Math.max(6, Math.round((done / Math.max(progress.total, 1)) * 100));
+    const where = `Level ${progress.level} of ${progress.total}`;
+    return (
+      <div className={`glossary-valuation is-milestone is-${mode}`} aria-label={mode === "reached" ? `${where} complete: ${milestone}.` : `${where}. Finish it to ${milestone.charAt(0).toLowerCase()}${milestone.slice(1)}.`}>
+        <span className="glossary-valuation-kicker"><Building2 aria-hidden /> {company}</span>
+        <b className="glossary-valuation-value">{milestone}</b>
+        <span className="glossary-valuation-track" aria-hidden><i style={{ width: `${stepPct}%` }} /></span>
+        <span className="glossary-valuation-next">
+          {mode === "reached" ? <><Check aria-hidden /> {where} complete</> : <>{where}</>}
+        </span>
+      </div>
+    );
+  }
   const pct = mode === "reached" ? 100 : Math.max(6, Math.round((from / Math.max(to, 1)) * 100));
   return (
     <div className={`glossary-valuation is-${mode}`} aria-label={mode === "reached" ? `${company} is now worth $${to.toLocaleString()}. ${milestone}.` : `${company} is worth $${from.toLocaleString()}. Finish this level to reach $${to.toLocaleString()}: ${milestone}.`}>
@@ -618,20 +642,21 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
 // ---------------------------------------------------------------------------
 // Screen: Lesson intro (company value meter + word chips)
 
-function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStart: () => void }) {
+function LessonIntroScreen({ lesson, onStart, subject = "finance", progress }: { lesson: GlossaryLesson; onStart: () => void; subject?: string; progress?: MilestoneProgress }) {
   const { theme } = useGlobalTheme();
-  const pct = Math.round((lesson.companyValue / lesson.nextCompanyValue) * 100);
+  const pct = progress ? Math.round(((progress.level - 1) / Math.max(progress.total, 1)) * 100) : Math.round((lesson.companyValue / lesson.nextCompanyValue) * 100);
+  const subjectTitle = subject.charAt(0).toUpperCase() + subject.slice(1);
   return (
     <div className="glossary-screen glossary-lesson-intro-screen flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)] text-center">
       <DreamyFace pose="glasses" size={64} />
       <h1 className="text-[24px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-        Finance Language
+        {subjectTitle} Language
       </h1>
 
       <div className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 14%, var(--card))" }}>
           <span className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--glossary-accent)" }}>
-            ${lesson.companyValue.toLocaleString()}
+            {progress ? lesson.milestone : `$${lesson.companyValue.toLocaleString()}`}
           </span>
           {/* Floored (min) so the bar never opens on a literal empty track --
              a future lesson's own companyValue/nextCompanyValue numbers
@@ -639,7 +664,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
              possible here" rather than "the start of a journey." */}
           <SparkBar percent={pct} min={4} height={6} track="var(--glass-surface-2)" fill="var(--glossary-accent)" glow="var(--glossary-accent)" />
           <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            Next: ${lesson.nextCompanyValue.toLocaleString()} · {lesson.nextMilestone}
+            {progress ? `Level ${progress.level} of ${progress.total} · Next: ${lesson.nextMilestone}` : `Next: $${lesson.nextCompanyValue.toLocaleString()} · ${lesson.nextMilestone}`}
           </span>
         </div>
 
@@ -2751,6 +2776,7 @@ export function CompleteScreen({
   onNextLesson,
   onReplay,
   onLevels,
+  progress,
 }: {
   lesson: GlossaryLesson;
   masteredCount: number;
@@ -2760,6 +2786,8 @@ export function CompleteScreen({
   onNextLesson?: () => void;
   onReplay?: () => void;
   onLevels?: () => void;
+  /** milestone progress for worlds without a company value (SOP, 16 Oct 2026) */
+  progress?: MilestoneProgress;
 }) {
   // The one Dream Score, the same number the app header carries. The game
   // used to multiply its XP by 100 into a private "Dream Score" (15,000 and
@@ -2795,7 +2823,7 @@ export function CompleteScreen({
 
       {/* The milestone this level unlocks: Dream Sneakers' value counts up
          from where it stood (the Replit's "$50,000 company value unlocked"). */}
-      <ValuationTicker from={lesson.previousCompanyValue ?? 0} to={lesson.companyValue} milestone={lesson.milestone} mode="reached" company={lesson.exampleCompany} />
+      <ValuationTicker from={lesson.previousCompanyValue ?? 0} to={lesson.companyValue} milestone={lesson.milestone} mode="reached" company={lesson.exampleCompany} progress={progress} />
 
       {/* Score, XP and mastery as one row of three equal tiles, not a card
          plus two rows: the value ticker above is now the screen's hero. */}
@@ -3653,7 +3681,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         <FitToScreen enabled={variant === "lab"} compact={questionFrame} watch={`${screen}-${unlockIndex}-${queueIndex}-${pendingResult ? 1 : 0}`}>
         {screen === "intro" && <IntroScreen lesson={lesson} variant={variant} atmosphere={atmosphere} subject={career.subject} hero={career.careerSlug === "investment-banking"} onNext={() => { setMusicStarted(true); goTo(variant === "lab" ? "unlock" : "dreamyIntro"); }} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => goTo("lessonIntro")} />}
-        {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} onStart={() => goTo("unlock")} />}
+        {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} subject={career.subject} progress={milestoneProgress(career, lesson)} onStart={() => goTo("unlock")} />}
         {screen === "unlock" &&
           (unlockIndex < lesson.terms.length ? (
             <UnlockScreen lesson={lesson} index={unlockIndex} variant={variant} atmosphere={atmosphere} onUnlock={() => setUnlockIndex((i) => i + 1)} />
@@ -3738,5 +3766,5 @@ function CompleteScreenGate({
     saveLessonComplete(career.careerSlug, lesson.id, lesson.terms.map((t) => t.id), lesson.xpReward);
     awardDreamScore(`glossary:${career.careerSlug}:${lesson.id}`, lesson.xpReward);
   });
-  return <CompleteScreen lesson={lesson} masteredCount={masteredCount} onContinue={onContinue} {...actions} />;
+  return <CompleteScreen lesson={lesson} masteredCount={masteredCount} onContinue={onContinue} progress={milestoneProgress(career, lesson)} {...actions} />;
 }

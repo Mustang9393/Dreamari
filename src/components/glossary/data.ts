@@ -218,8 +218,14 @@ export type GlossaryChapter = { number: number; name: string; tier: GlossaryLeve
 /** One industry's glossary (16 Oct 2026: glossaries are per industry, not
  *  per career). `careerSlug` is the example career whose hub card, cover and
  *  Level 1 art introduce it; every career in the world plays the same game. */
+/** How an industry's levels hang together (the Master Scaling Plan SOP,
+ *  16 Oct 2026). Only a continuous story has a company whose value grows;
+ *  the other two show milestone progress instead of dollars. */
+export type GlossaryWorldMode = "continuous_story" | "scenario_thread" | "practice_world";
+
 export type GlossaryCareer = {
   industrySlug: string;
+  mode: GlossaryWorldMode;
   industryTitle: string;
   careerSlug: string;
   careerTitle: string;
@@ -438,6 +444,7 @@ const FIN_LESSON_1: GlossaryLesson = {
 const GLOSSARY_INDUSTRIES: Record<string, GlossaryCareer> = {
   finance: {
     industrySlug: "finance",
+    mode: "continuous_story",
     industryTitle: "Finance Terms",
     careerSlug: "investment-banking",
     careerTitle: "Investment Banking",

@@ -28,6 +28,7 @@ Every world already has a row in `WORLD_SYSTEMS` (15, Personal Care & Community 
      studentRole: "pilot",                    // who the student is in this world
      exampleCareerSlug: "airline-pilot",      // the hub card and cover that introduce it (omit if no catalog career owns it)
      company: "Skyline Air",                  // the anchor every example names (not required in a practice world)
+     // unlocks ("$10K") per level only in a continuous_story; other modes show the milestone on the map
      idPrefix: "AV",                          // lesson ids AV-L01, AV-L02...
      chapters: [{ number: 1, name: "...", tier: "Beginner" }, ...],
      levels: [
@@ -141,7 +142,7 @@ Joshua's "Dreamari Glossary Game Master Scaling Plan" (PDF, 22 pages) was read a
 
 Where this system deliberately differs from the SOP: the PDF calls each of its 50 industries a "Glossary World"; here those are **industries** under the 15 career worlds, which own the look. The SOP's "the Dreamari team decides" for images and math is a flag in the blueprint file (`termArt.ts` registration, `math: true`), so the decision is visible in review and not left to a generator.
 
-Open: the value meter still reads "<anchor> value" in dollars, which suits a continuous story and reads oddly for a clinic or a kitchen (the SOP's `level_goal` wants a neutral progress line). The hub card needs no cover for an industry no catalog career owns (Kitchen Terms shows the plain card).
+Progress: only a continuous story has a company whose value grows, so only that mode shows the dollar meter and `unlocks` on the Levels map. A scenario thread or a practice world shows the level's milestone in words with "Level n of N" (the SOP's `level_goal`), on the intro, the complete screen and the map. Open: the hub card has no cover art for an industry no catalog career owns (Kitchen Terms shows the plain card).
 
 ## The 50 glossary worlds of the SOP, mapped to our career worlds
 
@@ -209,5 +210,4 @@ Component Lab, group "Glossary game, live engine (Drift and Signal)": the 14 wor
 - A sheet importer (xlsx to blueprint); the blueprint file is the import format.
 - Chapter names for generated industries come from the blueprint, not from the levels.
 - Phone-width and light-mode passes on generated industries.
-- A neutral progress line for scenario threads and practice worlds in place of the dollar value meter.
 - Levels 3 and 4 copy for Nursing and Culinary, Level 4 for Aviation (roadmap words are in each blueprint).

@@ -41,7 +41,7 @@
 // bad blueprint fails at import time in development, not in a student's
 // hands.
 
-import type { GlossaryCareer, GlossaryChapter, GlossaryLesson, GlossaryLevel, GlossaryQuestion, GlossaryTerm, SceneCard } from "./data";
+import type { GlossaryCareer, GlossaryChapter, GlossaryLesson, GlossaryLevel, GlossaryQuestion, GlossaryTerm, GlossaryWorldMode, SceneCard } from "./data";
 import { type IndustryMeta, worldSystem } from "./industries";
 
 /** How the industry's levels hang together (SOP section 1).
@@ -51,7 +51,7 @@ import { type IndustryMeta, worldSystem } from "./industries";
  *    hospital shift, a different patient). Every example names the place.
  *  - practice_world: short varied situations, Dreamy and the world carry the
  *    game; no narrative to maintain. Examples need not name the anchor. */
-export type WorldMode = "continuous_story" | "scenario_thread" | "practice_world";
+export type WorldMode = GlossaryWorldMode;
 
 /** The cognitive goal of a level (SOP section 3). Defaults by level number:
  *  1 recognize, 2 apply, 3 analyze, 4 and later decide. */
@@ -91,8 +91,9 @@ export type LevelSeed = {
   tier: GlossaryLevel["tier"];
   /** The level's one-line goal on the Levels map. */
   goal: string;
-  /** The company value this level unlocks, as shown on the map ("$10K"). */
-  unlocks: string;
+  /** The company value this level unlocks, as shown on the map ("$10K").
+   *  Continuous stories only; the other modes show the milestone there. */
+  unlocks?: string;
   /** Exactly five, in teaching order. Omit on roadmap-only levels. */
   terms?: TermSeed[];
   /** The words a roadmap-only level will teach (shown locked on the map). */
@@ -401,10 +402,12 @@ export function buildGlossaryCareer(bp: GlossaryBlueprint): GlossaryCareer {
     title: level.title,
     words: level.terms ? level.terms.map((s) => s.term) : level.words ?? [],
     goal: level.goal,
-    unlocks: level.unlocks,
+    // Only a company's value is worth a dollar figure on the map; a clinic
+    // or a kitchen shows what the level unlocks in words (SOP level_goal).
+    unlocks: bp.mode === "continuous_story" ? level.unlocks ?? level.milestone : level.milestone,
     minutes: MINUTES[level.tier],
   }));
-  return { industrySlug: industry.slug, industryTitle: industry.title, careerSlug: bp.exampleCareerSlug ?? industry.slug, careerTitle: industry.title, world: industry.world, subject: industry.subject, lessons, levels, chapters: bp.chapters };
+  return { industrySlug: industry.slug, mode: bp.mode, industryTitle: industry.title, careerSlug: bp.exampleCareerSlug ?? industry.slug, careerTitle: industry.title, world: industry.world, subject: industry.subject, lessons, levels, chapters: bp.chapters };
 }
 
 const MODES: WorldMode[] = ["continuous_story", "scenario_thread", "practice_world"];
@@ -431,6 +434,7 @@ export function validateBlueprint(bp: GlossaryBlueprint): string[] {
     const focus = focusFor(level);
     if (level.title.length > 30) problems.push(`${where}: level title is ${level.title.length} characters; the HUD and map hold 30`);
     if (level.goal.length > 48) problems.push(`${where}: goal is ${level.goal.length} characters; the welcome line holds 48`);
+    if (bp.mode === "continuous_story" && !level.unlocks) problems.push(`${where}: a continuous story shows the company value each level unlocks; add unlocks ("$10K")`);
     if (level.terms.length !== 5) problems.push(`${where}: ${level.terms.length} terms, needs exactly 5`);
     const names = level.terms.map((t) => t.term.toLowerCase());
     if (new Set(names).size !== names.length) problems.push(`${where}: duplicate term names`);

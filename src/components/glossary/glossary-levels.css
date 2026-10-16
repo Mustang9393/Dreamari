@@ -287,6 +287,11 @@
 .glossary-game-lab .glossary-valuation-kicker svg { width: 14px; height: 14px; color: var(--glossary-accent); }
 .glossary-game-lab .glossary-valuation-value { font: 800 32px / 1.05 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .glossary-game-lab .glossary-valuation.is-reached .glossary-valuation-value { color: var(--glossary-accent); }
+/* Milestone progress (scenario threads and practice worlds, 16 Oct 2026): the
+   headline is the level's milestone in words, not a dollar figure. */
+.glossary-game-lab .glossary-valuation.is-milestone .glossary-valuation-value { font-size: 24px; line-height: 1.15; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.glossary-game-lab .glossary-valuation.is-milestone .glossary-valuation-next { color: var(--muted-foreground); }
+.glossary-game-lab .glossary-valuation.is-milestone.is-reached .glossary-valuation-next { color: inherit; }
 .glossary-game-lab .glossary-valuation-track { display: block; height: 6px; overflow: hidden; border-radius: 999px; background: var(--glass-surface-2); }
 .glossary-game-lab .glossary-valuation-track > i { display: block; height: 100%; border-radius: inherit; background: var(--glossary-accent); transition: width 1.4s cubic-bezier(.2, .7, .3, 1); }
 .glossary-game-lab .glossary-valuation-next { display: flex; align-items: center; gap: 6px; font: 700 14px / 1.35 var(--font-body); }
