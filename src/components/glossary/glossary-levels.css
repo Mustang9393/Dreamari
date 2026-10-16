@@ -659,3 +659,19 @@
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung:not(.is-inspected) .glossary-map-rung-copy > b { white-space: normal; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 14px; }
   .glossary-game-shell.glossary-game-lab .glossary-map-rung-actions .glossary-map-play { white-space: nowrap; }
 }
+@media (max-width: 600px) {
+  /* phone: a wrapped flex row inside a grid track under-measures its own
+     height (the open row drew 226px tall with 376px of content), so the
+     open row is a small grid instead: plate on top, badge beside the copy. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 { grid-auto-rows: auto !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected { display: grid !important; grid-template-columns: 44px minmax(0, 1fr) !important; grid-template-areas: "plate plate" "badge copy" !important; row-gap: 12px !important; column-gap: 12px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected .glossary-map-plate { grid-area: plate; width: 100%; height: 86px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected > button { grid-area: badge; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected .glossary-map-rung-copy { grid-area: copy; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected .glossary-map-connector { display: none; }
+}
+/* The ledger is a column, not a grid: a grid track under-measures a row whose
+   content wraps (chips, a wrapped plate), so the open row was drawn shorter
+   than its content on phones. A column sizes each row by what is in it. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 { display: flex !important; flex-direction: column !important; gap: 6px !important; align-items: stretch; overflow-y: auto !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung { flex: none; }
