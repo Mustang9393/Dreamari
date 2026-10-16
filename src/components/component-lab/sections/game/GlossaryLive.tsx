@@ -62,7 +62,7 @@ function brokenBlueprint(): GlossaryBlueprint {
   const bad = structuredClone(NURSING_GLOSSARY) as GlossaryBlueprint;
   bad.industry = { ...bad.industry, slug: "Bad Slug", world: "Nowhere" };
   bad.levels[0].terms![0].definition = "A patient is a patient.";
-  bad.levels[1].terms![0].situation = "Ana works a long shift today and tomorrow and the next day too ok.";
+  bad.levels[1].terms![0].moments = ["Ana works a long shift today and tomorrow and the next day too ok.", "A second moment.", "A second moment."];
   bad.levels[1].terms![1].cue = "one two three four five six seven eight";
   bad.levels[0].terms![1].example = "No anchor named here with vital signs.";
   bad.levels[2].terms![0].confusion = "Nope";
@@ -231,12 +231,14 @@ export function GlossaryLiveGroup() {
           <StateCell label="Catch the Misuse (generated)" surface="game" minH={360}><Stage theme={theme} world={world} height={350}><QuestionScreen question={misuse} onAnswer={noop} onReset={noop} /></Stage></StateCell>
           <StateCell label="Case, step by step (Level 3)" surface="game" minH={400}><Stage theme={theme} world={world} height={390}><QuestionScreen question={chain} onAnswer={noop} onReset={noop} /></Stage></StateCell>
           <StateCell label="Select all (Level 3)" surface="game" minH={400}><Stage theme={theme} world={world} height={390}><QuestionScreen question={multi} onAnswer={noop} onReset={noop} /></Stage></StateCell>
-          {SW2 ? <StateCell label="Apply: situation, which word (generated L2)" surface="game" minH={400} note="A story scene card over single-word tiles. In Signal the card is square (16 Oct)."><Stage theme={theme} world={world} height={390}><QuestionScreen question={SW2.questions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {SW2 ? <StateCell label="Apply: a moment on a story card, which word (generated L2)" surface="game" minH={400} note="A story scene card over single-word tiles. In Signal the card is square (16 Oct)."><Stage theme={theme} world={world} height={390}><QuestionScreen question={SW2.questions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
           {SW3 ? <StateCell label="Analyze: compare card (generated L3)" surface="game" minH={440}><Stage theme={theme} world={world} height={430}><QuestionScreen question={SW3.questions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
           {SW3 ? <StateCell label="Analyze: compare card, right" surface="game" minH={440}><Stage theme={theme} world={world} height={430}><QuestionScreen question={SW3.questions[0]} onAnswer={noop} onReset={noop} answerState="correct" /></Stage></StateCell> : null}
-          {SW3 ? <StateCell label="Analyze: select all about one word (generated L3)" surface="game" minH={440}><Stage theme={theme} world={world} height={430}><QuestionScreen question={SW3.questions[1]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {SW3 ? <StateCell label="Analyze: select all about one word (generated L3)" surface="game" minH={440}><Stage theme={theme} world={world} height={430}><QuestionScreen question={SW3.questions.find((q) => q.kind === "multiSelect") ?? SW3.questions[3]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
           {SW4 ? <StateCell label="Decide: which option fits (generated L4)" surface="game" minH={400}><Stage theme={theme} world={world} height={390}><QuestionScreen question={SW4.questions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
-          {SW4 ? <StateCell label="Decide: Type the Term from the example (generated L4)" surface="game" minH={400}><Stage theme={theme} world={world} height={390}><QuestionScreen question={SW4.questions[6]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {SW4 ? <StateCell label="Decide: Type the Term from a moment (generated L4)" surface="game" minH={400}><Stage theme={theme} world={world} height={390}><QuestionScreen question={SW4.questions.find((q) => q.kind === "typeTerm") ?? SW4.questions[6]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {SW3?.questions.some((q) => q.kind === "chain") ? <StateCell label="Authored case, step 1 (generated L3)" surface="game" minH={440} note="A level's authored case: a scene and two to four steps, answered one at a time, like Finance Level 3's &quot;Which helps Dream Sneakers keep more money?&quot; (17 Oct 2026)."><Stage theme={theme} world={world} height={430}><QuestionScreen question={SW3!.questions.find((q) => q.kind === "chain")!} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {SW3?.questions.some((q) => q.kind === "sortBuckets") ? <StateCell label="Authored concept sort (generated L3)" surface="game" minH={480} note="Concrete things into concept buckets, never cues into words: Finance's &quot;Money in / Money out&quot; made scalable (17 Oct 2026)."><Stage theme={theme} world={world} height={470}><QuestionScreen question={SW3!.questions.find((q) => q.kind === "sortBuckets")!} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
           {RN4 ? <StateCell label="Edge: two-word options fall to a list" surface="game" minH={440} note="isWordSet: single words of 14 characters or fewer tile as a 2x2 grid; anything longer, or with a space (Code Blue, Rapid Response), lists in one column."><Stage theme={theme} world={world} height={430}><QuestionScreen question={RN4.questions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
           <StateCell label="Edge: Catch the Misuse, long pairs" surface="game" minH={400} note="Word = cue pairs at the 34-character cue limit; the pair wraps inside its tile."><Stage theme={theme} world={world} height={390}><QuestionScreen question={{ kind: "choice", type: "Catch the Misuse", id: "LAB-EDGE-1", termId: EDGE_TERM.term, playOrder: 1, label: "Quick check", prompt: "Which one is wrong?", options: [`${EDGE_TERM.term} = ${ACRONYM_TERM.cue}`, `${ACRONYM_TERM.term} = ${ACRONYM_TERM.cue}`, "Handoff = Passing care to the next nurse", "Triage = Who is seen first"], correctIndex: 0, feedbackCorrect: "Right.", feedbackWrong: "Not quite." }} onAnswer={noop} onReset={noop} /></Stage></StateCell>
         </StateGrid>
@@ -322,7 +324,7 @@ export function GlossaryLiveGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="SceneCardView" scale="core" file={FILE} purpose="The six shared scene cards a question can carry above its prompt: story (one line), compare (two words with their cues), figures, ledger, shares, split. One kit, so every industry composes the same shapes; in Signal they take the square frame (16 Oct 2026)." when="Level 2 and up: situations, compare cards; Finance's money diagrams.">
+      <Specimen name="SceneCardView" scale="core" file={FILE} purpose="The six shared scene cards a question can carry above its prompt: story (one line), compare (two words with their cues), figures, ledger, shares, split. One kit, so every industry composes the same shapes; in Signal they take the square frame (16 Oct 2026)." when="Level 2 and up: moments on story cards, compare cards; Finance's money diagrams.">
         <StateGrid min={300}>
           <StateCell label="Story" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><SceneCardView scene={{ kind: "story", text: SW2?.terms[0].example ?? "Dream Sneakers wants to open Store #2." }} /></Stage></StateCell>
           <StateCell label="Story with note" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><SceneCardView scene={{ kind: "story", text: "Maya invests $25,000.", note: "Dream Sneakers has 10 equal shares." }} /></Stage></StateCell>
@@ -331,7 +333,7 @@ export function GlossaryLiveGroup() {
           <StateCell label="Ledger" surface="game" minH={200}><Stage theme={theme} world={world} height={190}><SceneCardView scene={{ kind: "ledger", title: "This month", rows: [{ label: "Sneaker sales", value: "$30,000", tone: "in" }, { label: "Rent", value: "$8,000", tone: "out" }, { label: "Wages", value: "$12,000", tone: "out" }] }} /></Stage></StateCell>
           <StateCell label="Shares, before and after the answer" surface="game" minH={200}><Stage theme={theme} world={world} height={190}><div className="flex flex-col gap-2"><SceneCardView scene={{ kind: "shares", total: 10, owned: 2, label: "10 equal shares", result: "2 of 10 shares = 20%" }} /><SceneCardView scene={{ kind: "shares", total: 10, owned: 2, label: "10 equal shares", result: "2 of 10 shares = 20%" }} answered /></div></Stage></StateCell>
           <StateCell label="Split" surface="game" minH={150}><Stage theme={theme} world={world} height={140}><SceneCardView scene={{ kind: "split", title: "Who owns Dream Sneakers", parts: [{ label: "You", pct: 80 }, { label: "Maya", pct: 20 }] }} /></Stage></StateCell>
-          <StateCell label="Edge: story at 72 characters" surface="game" minH={150} note="The validator's situation limit; the line wraps to two at phone width and never clips."><Stage theme={theme} world={world} height={140}><SceneCardView scene={{ kind: "story", text: "Your notes appear on your laptop and your phone. Something stores them." }} /></Stage></StateCell>
+          <StateCell label="Edge: story at 72 characters" surface="game" minH={150} note="The validator's moment limit; the line wraps to two at phone width and never clips."><Stage theme={theme} world={world} height={140}><SceneCardView scene={{ kind: "story", text: "Your notes appear on your laptop and your phone. Something stores them." }} /></Stage></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -353,7 +355,7 @@ export function GlossaryLiveGroup() {
 
       <Specimen name="Blueprint validation (the error state)" scale="core" file="src/components/glossary/generate.ts" purpose="A blueprint that breaks a rule never builds: validateBlueprint returns every problem it can see and buildGlossaryCareer throws with the list, so a bad file fails in development, not in a student's hands. This is the developer-facing error state of the whole system; students never see an unfinished glossary." when="At import time, for every registered blueprint, and in scripts/qa/glossary-blueprints.test.mjs.">
         <StateGrid min={320}>
-          <StateCell label="A deliberately broken Nursing blueprint" minH={200} note="Bad slug, unknown world, a definition that says its word, an example without the anchor, a 14-word situation, an 8-word cue, an unknown confusion, numbers without math.">
+          <StateCell label="A deliberately broken Nursing blueprint" minH={200} note="Bad slug, unknown world, a definition that says its word, an example without the anchor, a 14-word moment, two moments that are the same line, an 8-word cue, an unknown confusion, numbers without math.">
             <ol className="flex flex-col gap-[4px] text-[12.5px]" style={{ color: "var(--foreground)" }}>
               {validateBlueprint(brokenBlueprint()).map((problem) => <li key={problem} className="rounded-[var(--radius-sm)] border px-[8px] py-[4px]" style={{ borderColor: "color-mix(in srgb, var(--danger, #e0483e) 45%, var(--glass-border))" }}>{problem}</li>)}
             </ol>
@@ -367,7 +369,7 @@ export function GlossaryLiveGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Generated career, whole lesson" scale="core" file="src/components/glossary/generate.ts" purpose="What the generator makes from five terms: the seven-question loop in Level 1's order, one review question per term, the Power Play paragraph from the five examples. Shown as data so the recipe is checkable without playing." when="Every level of every career after Investment Banking.">
+      <Specimen name="Generated career, whole lesson" scale="core" file="src/components/glossary/generate.ts" purpose="What the generator makes from five terms: the seven to ten screen loop in Level 1's order (every line shown once), one review question per term, the Power Play paragraph, written per level with its blanks out of teaching order. Shown as data so the recipe is checkable without playing." when="Every level of every career after Investment Banking.">
         <StateGrid min={320}>
           <StateCell label="Registered Nurse, Level 1" minH={200}>
             <ol className="flex flex-col gap-[4px] text-[12.5px]" style={{ color: "var(--foreground)" }}>

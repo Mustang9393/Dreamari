@@ -2078,6 +2078,19 @@ function ProfitBuilderCard({ question, onAnswer, onReset, framed = false }: { qu
   );
 }
 
+/** The Power Play word bank in an order that is not the order of the blanks
+ *  (17 Oct 2026, Chandu: "dont make the power play so linear, the answers
+ *  were in the same order as the terms"). The bank used to mirror the
+ *  answers array, so reading it left to right filled the paragraph. Stable
+ *  per lesson, and never the identity for two or more words. */
+function bankOrder(answers: string[], seed: string): string[] {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const order = shuffleStable(answers, `${seed}-bank-${attempt}`);
+    if (answers.length < 2 || order.some((word, index) => word !== answers[index])) return order;
+  }
+  return [...answers.slice(1), answers[0]];
+}
+
 function shuffleStable<T>(items: T[], seed: string): T[] {
   // Deterministic (no Math.random at render, so SSR/CSR stay in sync): a
   // simple string-hash-seeded shuffle, good enough for shuffling 4-5 items.
@@ -2719,7 +2732,7 @@ export function PowerPlayParagraphScreen({ powerPlay, onComplete }: { powerPlay:
         <span className="glossary-word-chip glossary-power-chip glossary-power-ghost" aria-hidden style={{ left: tether.x2, top: tether.y2 }}>{tether.word}</span>
       )}
       <div className="glossary-power-bank flex flex-wrap justify-center gap-[var(--space-3)]">
-        {[...lesson.powerPlay.answers]
+        {bankOrder(lesson.powerPlay.answers, lesson.powerPlay.paragraph)
           .map((a) => a.charAt(0).toUpperCase() + a.slice(1))
           .map((word) => {
             // A placed word leaves the bank (15 Oct 2026, Chandu: "if i

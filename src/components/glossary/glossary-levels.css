@@ -542,6 +542,8 @@
 .glossary-game-lab :is(.glossary-option, .glossary-document-option, .glossary-match-tile, .glossary-sort-token, .glossary-sort-bucket, .glossary-word-chip, .glossary-path-option, .glossary-feedback-text, .glossary-power-paragraph) { min-width: 0; overflow-wrap: anywhere; hyphens: auto; }
 /* Dreamy's speech bubble keeps whole words: a short spoken line hyphenated mid-word ("medi-cine") reads as a typo at phone width. Long words still wrap via overflow-wrap. */
 .glossary-game-lab .glossary-speech-bubble { min-width: 0; overflow-wrap: anywhere; hyphens: manual; }
+/* Same for the Power Play paragraph and sort tokens (17 Oct 2026): "cap-tain", "ap-plause" and "boost-ing" showed up at phone width on the new written paragraphs and concept sorts. Whole words; long words still wrap via overflow-wrap. */
+.glossary-game-lab :is(.glossary-power-paragraph, .glossary-sort-token) { hyphens: manual; }
 .glossary-game-lab :is(.glossary-match-tile, .glossary-sort-token) { white-space: normal; }
 .glossary-game-lab .glossary-match-tile .glossary-match-label { text-wrap: balance; }
 .glossary-game-lab .glossary-word-chip { white-space: nowrap; max-width: 100%; }

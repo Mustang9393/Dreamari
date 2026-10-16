@@ -2,10 +2,20 @@
 // written here to prove the generator on a second industry (16 Oct 2026).
 // Glossaries are per industry, grouped under career worlds; Registered Nurse
 // is this one's example career (its hub card and cover). Riverside Clinic is this
-// career's "Dream Sneakers": the one story every example ties back to. Two
-// playable levels, four more on the roadmap. Eighth-grade copy, no dashes,
-// every example names the clinic. Replace with the content team's sheet
-// when it exists; the shape below is what the sheet must provide.
+// career's "Dream Sneakers": the one story every example ties back to. Six
+// playable levels. Eighth-grade copy, no dashes, no numbers, every example
+// names the clinic. Replace with the content team's sheet when it exists; the
+// shape below is what the sheet must provide.
+//
+// Rewritten 17 Oct 2026 to the Finance style after Chandu's note: "the games
+// are repeating the same questions again and again for mastery instead of
+// having any variety, please refer the finance glossary games and redo
+// questions according to its style." Every word now carries three moments,
+// each shown on one screen only; Levels 3, 4 and 5 sort concrete clinic
+// moves into concept buckets; Levels 2 to 6 carry one or two short cases and
+// a Select All with real items; every Power Play is a written paragraph whose
+// blanks do not run in teaching order. Level 1's math flag and the Dose
+// formula were dropped: these words do not need figures to be taught.
 
 import type { GlossaryBlueprint } from "../generate";
 
@@ -33,15 +43,32 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
       nextMilestone: "Run the floor",
       companyValue: 10000,
       nextCompanyValue: 50000,
-      // Dose is arithmetic by nature, so this level's words carry numbers.
-      math: true,
       terms: [
-        { term: "Patient", definition: "A person getting care from a nurse or doctor.", example: "Every person who comes to Riverside Clinic for care is a patient.", cue: "The person getting care", icon: "users" },
-        { term: "Vital Signs", definition: "The body's basic numbers: heart rate, breathing, temperature and blood pressure.", example: "A Riverside Clinic nurse checks vital signs at the start of every visit.", cue: "Heart rate and temperature", icon: "heart-pulse" },
-        { term: "Chart", definition: "The written record of a patient's care.", example: "Riverside Clinic nurses write every visit in the patient's chart.", cue: "The record of each visit", icon: "scroll" },
-        { term: "Dose", definition: "How much medicine a patient gets at one time.", example: "At Riverside Clinic, a nurse checks the dose before giving any medicine.", cue: "How much medicine to give", icon: "stethoscope", formula: "2 pills x 250 mg = 500 mg" },
-        { term: "Triage", definition: "Sorting patients by how urgent their needs are.", example: "Riverside Clinic uses triage so the sickest patients are seen first.", cue: "Who is seen first", icon: "siren" },
+        {
+          term: "Patient", definition: "A person getting care from a nurse or doctor.", example: "Every person who comes to Riverside Clinic for care is a patient.", cue: "The person getting care", icon: "users",
+          moments: ["A man waits in room two with a sore throat.", "The woman in the bed is here to get better.", "Someone signs in at the front desk and waits to be seen."],
+        },
+        {
+          term: "Vital Signs", definition: "The body's basic numbers: heart rate, breathing, temperature and blood pressure.", example: "A Riverside Clinic nurse checks vital signs at the start of every visit.", cue: "Heart rate and temperature", icon: "heart-pulse",
+          moments: ["The nurse counts the pulse and checks the temperature first.", "A cuff squeezes the arm while the nurse reads the numbers.", "Pulse, breathing and temperature, written down before anything else."],
+        },
+        {
+          term: "Chart", definition: "The written record of a patient's care.", example: "Riverside Clinic nurses write every visit in the patient's chart.", cue: "The record of each visit", icon: "scroll",
+          moments: ["The nurse writes the visit in the file before leaving the room.", "Every note from past visits sits in one record.", "The doctor reads the notes to see what happened last time."],
+        },
+        {
+          term: "Dose", definition: "How much medicine a patient gets at one time.", example: "At Riverside Clinic, a nurse checks the dose before giving any medicine.", cue: "How much medicine to give", icon: "stethoscope",
+          moments: ["The label says one pill, twice a day, with food.", "The nurse measures the liquid medicine to the line on the cup.", "Too much medicine can hurt, so the amount is checked twice."],
+        },
+        {
+          term: "Triage", definition: "Sorting patients by how urgent their needs are.", example: "Riverside Clinic uses triage so the sickest patients are seen first.", cue: "Who is seen first", icon: "siren",
+          moments: ["The chest pain goes in first. The sprained ankle waits.", "A nurse decides who is sickest and sends them ahead.", "The waiting room is full, so the nurse sorts who goes next."],
+        },
       ],
+      powerPlay: {
+        intro: "Open the clinic for the morning.",
+        paragraph: "A busy morning at Riverside Clinic. The nurse uses {5} to decide who is seen first: the chest pain goes ahead of the sore throat. Each {1} gets a quick check of pulse, breathing and temperature, the {2}. Everything is written in the {3} so the next nurse can read it. Before any pill is handed over, the nurse checks the {4} twice.",
+      },
       facts: [
         "Nurses are the largest group of health care workers in the United States.",
         "Checking vital signs is usually the first thing a nurse does at a visit.",
@@ -58,12 +85,52 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
       nextCompanyValue: 120000,
       intro: { headline: "Riverside Clinic Gets Busy", line: "More patients. One team.", hook: "Learn the words that keep a floor running." },
       terms: [
-        { term: "Shift", definition: "The hours a nurse works in one stretch.", example: "A Riverside Clinic shift lasts twelve hours.", cue: "Twelve hours of work", situation: "Ana clocks in at seven and clocks out at seven.", icon: "activity" },
-        { term: "Charge Nurse", definition: "The nurse who runs the floor for a shift.", example: "The charge nurse at Riverside Clinic decides which nurse cares for each patient.", cue: "The nurse who runs the floor", situation: "One nurse assigns every patient on the floor to a nurse.", icon: "user-round" },
-        { term: "Handoff", definition: "Passing a patient's care to the next nurse.", example: "At the end of a shift, Riverside Clinic nurses do a handoff for every patient.", cue: "Passing care to the next nurse", situation: "Ana tells the night nurse everything about room four before leaving.", icon: "arrow-left-right" },
-        { term: "Allergy", definition: "A bad reaction the body has to a food or a medicine.", example: "A Riverside Clinic chart lists every allergy before any medicine is given.", cue: "A bad reaction to a medicine", situation: "A patient breaks out in hives minutes after a new pill.", icon: "triangle-alert" },
-        { term: "Discharge", definition: "When a patient is well enough to leave.", example: "Riverside Clinic plans each discharge so the patient knows how to care for themselves at home.", cue: "Going home well", situation: "The doctor signs the papers and the patient packs to go home.", icon: "arrow-up-circle" },
+        {
+          term: "Shift", definition: "The hours a nurse works in one stretch.", example: "A Riverside Clinic shift lasts twelve hours.", cue: "Twelve hours of work", icon: "activity",
+          moments: ["Ana clocks in at seven and clocks out at seven.", "Twelve hours on the floor, then home to sleep.", "The night crew arrives as the day crew heads out."],
+        },
+        {
+          term: "Charge Nurse", definition: "The nurse who runs the floor for a shift.", example: "The charge nurse at Riverside Clinic decides which nurse cares for each patient.", cue: "The nurse who runs the floor", icon: "user-round",
+          moments: ["One nurse assigns every patient on the floor to a nurse.", "The nurse at the desk who decides who cares for whom.", "When a problem comes up, the whole floor goes to one nurse."],
+        },
+        {
+          term: "Handoff", definition: "Passing a patient's care to the next nurse.", example: "At the end of a shift, Riverside Clinic nurses do a handoff for every patient.", cue: "Passing care to the next nurse", icon: "arrow-left-right",
+          moments: ["Ana tells the night nurse everything about room four before leaving.", "Two nurses stand at the bedside and go over every detail.", "The day nurse passes each room's details to the night nurse."],
+        },
+        {
+          term: "Allergy", definition: "A bad reaction the body has to a food or a medicine.", example: "A Riverside Clinic chart lists every allergy before any medicine is given.", cue: "A bad reaction to a medicine", icon: "triangle-alert",
+          moments: ["A patient breaks out in hives minutes after a new pill.", "A red band on the wrist warns about a medicine to avoid.", "The man says penicillin makes his throat swell."],
+        },
+        {
+          term: "Discharge", definition: "When a patient is well enough to leave.", example: "Riverside Clinic plans each discharge so the patient knows how to care for themselves at home.", cue: "Going home well", icon: "arrow-up-circle",
+          moments: ["The doctor signs the papers and the patient packs to go home.", "The nurse explains the home instructions and wheels her to the door.", "The bed is empty and clean. Its last patient left this morning."],
+        },
       ],
+      selectAll: {
+        term: "Allergy",
+        prompt: "Select every sign of a bad reaction to a medicine.",
+        options: ["A rash spreading after a new pill", "A throat that swells after a shot", "Feeling sleepy after a long day", "Lips puffing up after a peanut"],
+        correct: [0, 1, 3],
+        feedbackCorrect: "A rash, a swelling throat and puffy lips are all warning signs. Being tired after a long day is not.",
+        feedbackWrong: "Watch for rash, swelling and puffy lips. Tiredness after work is not a reaction to a medicine.",
+      },
+      cases: [
+        {
+          terms: ["Handoff", "Charge Nurse", "Discharge"],
+          scene: "Ana's twelve hours are up and room four still needs care.",
+          steps: [
+            { prompt: "Ana is going home. What should she do about room four first?", options: ["Tell the next nurse everything", "Leave a sticky note on the door"], correctIndex: 0 },
+            { prompt: "Who decides which nurse takes room four tonight?", options: ["The patient in room four", "The nurse who runs the floor"], correctIndex: 1 },
+            { prompt: "Room four is well enough to leave tomorrow. Who signs off?", options: ["The doctor signs the papers", "The patient just walks out"], correctIndex: 0 },
+          ],
+          feedbackCorrect: "Pass the care on, let the floor lead assign the room, and the doctor signs the release.",
+          feedbackWrong: "Care is passed nurse to nurse, the floor lead assigns rooms, and only the doctor sends someone home.",
+        },
+      ],
+      powerPlay: {
+        intro: "Finish Ana's day on the floor.",
+        paragraph: "Ana's twelve hours at Riverside Clinic are almost done. The {2} stops by to say room four is hers until the night nurse arrives. The man in room four has a penicillin {4}, so Ana checks every pill twice. His {5} is planned for tomorrow, and the papers are ready. Ana gives the night nurse a full {3} on him. Then she clocks out, and her {1} is over.",
+      },
       facts: ["Many hospital nurses work three twelve-hour shifts a week."],
     },
     {
@@ -77,12 +144,79 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
       nextCompanyValue: 250000,
       intro: { headline: "The Medicine Cart", line: "A new shift. Every patient has a different order.", hook: "Learn the words that keep medicine safe." },
       terms: [
-        { term: "Prescription", definition: "A doctor's written order for a medicine.", example: "A Riverside Clinic doctor writes a prescription before any medicine goes home.", cue: "The doctor's order for medicine", situation: "The doctor signs a slip that says which medicine and how often.", confusion: "Pharmacy", icon: "scroll" },
-        { term: "Side Effect", definition: "An unwanted thing a medicine does along with its job.", example: "A Riverside Clinic nurse tells each patient what side effect to watch for.", cue: "An unwanted extra effect", situation: "The pill eases the pain but makes the patient sleepy too.", confusion: "Interaction", icon: "triangle-alert" },
-        { term: "IV", definition: "A thin tube in a vein that gives fluid or medicine straight into the blood.", example: "At Riverside Clinic, an IV gives fluids fast to a dehydrated patient.", cue: "Medicine straight into a vein", situation: "A clear bag drips through a tube into a hand.", confusion: "Prescription", icon: "droplets" },
-        { term: "Pharmacy", definition: "The place where medicines are prepared and handed out.", example: "The Riverside Clinic pharmacy fills every order the same day.", cue: "Where medicines are handed out", situation: "A counter with shelves of bottles and a line of patients waiting.", confusion: "Prescription", icon: "building" },
-        { term: "Interaction", definition: "When two medicines change how each other works.", example: "A Riverside Clinic pharmacist checks for an interaction before filling two orders.", cue: "Two medicines that clash", situation: "Taken together, the two pills make each other stronger.", confusion: "Side Effect", icon: "arrow-left-right" },
+        {
+          term: "Prescription", definition: "A doctor's written order for a medicine.", example: "A Riverside Clinic doctor writes a prescription before any medicine goes home.", cue: "The doctor's order for medicine", confusion: "Pharmacy", icon: "scroll",
+          moments: ["The doctor signs a slip that says which medicine and how often.", "A signed order for one medicine, written by the doctor.", "No pills leave the building without the doctor's written order."],
+        },
+        {
+          term: "Side Effect", definition: "An unwanted thing a medicine does along with its job.", example: "A Riverside Clinic nurse tells each patient what side effect to watch for.", cue: "An unwanted extra effect", confusion: "Interaction", icon: "triangle-alert",
+          moments: ["The pill eases the pain but makes the patient sleepy too.", "The new medicine works, but now her stomach is upset.", "His cough is gone. His mouth is dry all day."],
+        },
+        {
+          term: "IV", definition: "A thin tube in a vein that gives fluid or medicine straight into the blood.", example: "At Riverside Clinic, an IV gives fluids fast to a dehydrated patient.", cue: "Medicine straight into a vein", confusion: "Prescription", icon: "droplets",
+          moments: ["A clear bag drips through a tube into a hand.", "Fluids flow through a thin tube right into his vein.", "A pole on wheels holds the bag that drips into her arm."],
+        },
+        {
+          term: "Pharmacy", definition: "The place where medicines are prepared and handed out.", example: "The Riverside Clinic pharmacy fills every order the same day.", cue: "Where medicines are handed out", confusion: "Prescription", icon: "building",
+          moments: ["A counter with shelves of bottles and a line of patients waiting.", "The order goes downstairs to be counted into a bottle.", "Bottles are filled and labeled behind a tall counter."],
+        },
+        {
+          term: "Interaction", definition: "When two medicines change how each other works.", example: "A Riverside Clinic pharmacist checks for an interaction before filling two orders.", cue: "Two medicines that clash", confusion: "Side Effect", icon: "arrow-left-right",
+          moments: ["Taken together, the two pills make each other stronger.", "Her heart pill stops working once she starts the new one.", "Two safe medicines become risky when swallowed at the same time."],
+        },
       ],
+      sort: {
+        label: "Getting it or doing it",
+        prompt: "Is each one about getting the medicine, or what it does in the body?",
+        buckets: ["Getting the medicine", "What it does"],
+        items: [
+          { text: "The doctor's signed slip", bucket: "Getting the medicine", term: "Prescription" },
+          { text: "Sleepy after the pain pill", bucket: "What it does", term: "Side Effect" },
+          { text: "Counted into a bottle downstairs", bucket: "Getting the medicine", term: "Pharmacy" },
+          { text: "Two pills boosting each other", bucket: "What it does", term: "Interaction" },
+          { text: "A tube dripping into a vein", bucket: "Getting the medicine", term: "IV" },
+          { text: "Dry mouth from the cough syrup", bucket: "What it does", term: "Side Effect" },
+          { text: "The new pill cancels the old one", bucket: "What it does", term: "Interaction" },
+        ],
+        feedbackCorrect: "Orders, bottles and tubes get medicine in. Sleepiness, dry mouth and clashes are what it does once inside.",
+        feedbackWrong: "Ask of each one: is this how the medicine arrives, or what happens once it is in the body?",
+      },
+      selectAll: {
+        term: "Side Effect",
+        prompt: "Select every line that is an unwanted extra from a medicine.",
+        options: ["Feeling dizzy after the blood pressure pill", "The fever dropping after the medicine", "An itchy rash from the antibiotic", "The doctor's slip for one more refill"],
+        correct: [0, 2],
+        feedbackCorrect: "Dizziness and a rash are extras the medicine was not meant to cause. A fever dropping is the job it was meant to do.",
+        feedbackWrong: "An unwanted extra is something the medicine does beyond its job. A fever dropping is the job. A slip is just paper.",
+      },
+      cases: [
+        {
+          terms: ["Prescription", "Pharmacy"],
+          scene: "Mrs. Lee needs a new blood pressure medicine today.",
+          steps: [
+            { prompt: "What must the doctor do before Mrs. Lee gets any pills?", options: ["Write the order", "Hand her a sample bag"], correctIndex: 0 },
+            { prompt: "Where does that order go to be filled?", options: ["To the front desk", "To the counter with the bottles"], correctIndex: 1 },
+            { prompt: "The order is filled. What does the nurse check before handing it over?", options: ["Right name and right medicine", "That the bottle looks nice"], correctIndex: 0 },
+          ],
+          feedbackCorrect: "Order first, then it is filled, then the nurse checks the name and the medicine before handing it over.",
+          feedbackWrong: "The doctor writes it, the counter fills it, and the nurse checks name and medicine before it goes out.",
+        },
+        {
+          terms: ["Interaction", "Side Effect"],
+          scene: "Mr. Diaz takes a heart pill. The doctor adds a new one.",
+          steps: [
+            { prompt: "What should the pharmacist check first?", options: ["Whether the two pills clash", "Whether the bottle is blue"], correctIndex: 0 },
+            { prompt: "A day later Mr. Diaz feels sleepy from the new pill. What is that?", options: ["The pill working as planned", "An unwanted extra effect"], correctIndex: 1 },
+            { prompt: "What does the nurse do about the sleepiness?", options: ["Tell the doctor and write it down", "Stop all his medicines at once"], correctIndex: 0 },
+          ],
+          feedbackCorrect: "Check the clash first. A new unwanted effect gets reported and written down, never ignored.",
+          feedbackWrong: "Two pills can change each other, so check that first. Sleepiness is an extra to report, not a reason to stop everything.",
+        },
+      ],
+      powerPlay: {
+        intro: "Get Mrs. Lee's medicine right.",
+        paragraph: "Mrs. Lee arrives at Riverside Clinic too weak to drink. A nurse starts an {3} so fluids reach her blood right away. The doctor writes a {1} for a new heart medicine. Before it is filled, the {4} checks for an {5} with the pill she already takes. The nurse warns her that a dry mouth may be a {2}, and to call if it bothers her.",
+      },
       facts: ["Nurses check the right patient, right medicine, right dose, right time and right route before giving anything."],
     },
     {
@@ -96,12 +230,77 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
       nextCompanyValue: 500000,
       intro: { headline: "Room Four Is Crashing", line: "A different day. A patient takes a sudden turn.", hook: "Learn the words you will hear when seconds count." },
       terms: [
-        { term: "Code Blue", definition: "The call that goes out when a patient's heart or breathing stops.", example: "When a Riverside Clinic patient stopped breathing, the nurse called a Code Blue.", cue: "The call when a heart stops", situation: "A patient has no pulse. The whole team is needed now.", confusion: "Rapid Response", icon: "siren" },
-        { term: "CPR", definition: "Pressing hard on the chest and giving breaths to keep blood moving.", example: "Every Riverside Clinic nurse is trained in CPR.", cue: "Chest presses and breaths", situation: "Hands on the chest, pushing hard and fast, over and over.", confusion: "Airway", icon: "heart-pulse" },
-        { term: "Airway", definition: "The open path that lets air reach the lungs.", example: "A Riverside Clinic nurse checks the airway first in any emergency.", cue: "The path air takes to the lungs", situation: "Something is blocking the throat and no air is getting through.", confusion: "CPR", icon: "wind" },
-        { term: "Stabilize", definition: "To get a patient steady and out of immediate danger.", example: "Riverside Clinic nurses work to stabilize a patient before moving them.", cue: "Get the patient steady", situation: "Pulse back, breathing even. Now keep it that way before transport.", confusion: "Rapid Response", icon: "activity" },
-        { term: "Rapid Response", definition: "A team called when a patient is getting worse fast, before the heart stops.", example: "A Riverside Clinic nurse called a Rapid Response when the fever climbed and would not stop.", cue: "The team called before a crisis", situation: "The patient is sliding downhill fast but still breathing.", confusion: "Code Blue", icon: "users" },
+        {
+          term: "Code Blue", definition: "The call that goes out when a patient's heart or breathing stops.", example: "When a Riverside Clinic patient stopped breathing, the nurse called a Code Blue.", cue: "The call when a heart stops", confusion: "Rapid Response", icon: "siren",
+          moments: ["A patient has no pulse. The whole team is needed now.", "A heart has stopped. The speaker calls the whole team.", "Flat line on the monitor. The alarm goes out to everyone."],
+        },
+        {
+          term: "CPR", definition: "Pressing hard on the chest and giving breaths to keep blood moving.", example: "Every Riverside Clinic nurse is trained in CPR.", cue: "Chest presses and breaths", confusion: "Airway", icon: "heart-pulse",
+          moments: ["Hands on the chest, pushing hard and fast, over and over.", "Push the chest, give two breaths, push again. Do not stop.", "The nurse kneels over the bed, counting out loud with each press."],
+        },
+        {
+          term: "Airway", definition: "The open path that lets air reach the lungs.", example: "A Riverside Clinic nurse checks the airway first in any emergency.", cue: "The path air takes to the lungs", confusion: "CPR", icon: "wind",
+          moments: ["Something is blocking the throat and no air is getting through.", "The clear path from the mouth down to the lungs.", "The nurse tilts the head back so air can get in."],
+        },
+        {
+          term: "Stabilize", definition: "To get a patient steady and out of immediate danger.", example: "Riverside Clinic nurses work to stabilize a patient before moving them.", cue: "Get the patient steady", confusion: "Rapid Response", icon: "activity",
+          moments: ["Pulse back, breathing even. Now keep it that way before transport.", "The numbers settle. The patient is out of danger for now.", "Before the move upstairs, the team makes sure nothing will slip."],
+        },
+        {
+          term: "Rapid Response", definition: "A team called when a patient is getting worse fast, before the heart stops.", example: "A Riverside Clinic nurse called a Rapid Response when the fever climbed and would not stop.", cue: "The team called before a crisis", confusion: "Code Blue", icon: "users",
+          moments: ["The patient is sliding downhill fast but still breathing.", "Fever climbing, pulse racing. The nurse calls for help early.", "He is getting worse by the minute, but his heart still beats."],
+        },
       ],
+      sort: {
+        label: "Call or hands",
+        prompt: "Is each one a call for help, or hands on the patient?",
+        buckets: ["Call for help", "Hands on the patient"],
+        items: [
+          { text: "Alarm for a stopped heart", bucket: "Call for help", term: "Code Blue" },
+          { text: "Pressing hard on the chest", bucket: "Hands on the patient", term: "CPR" },
+          { text: "Team paged before the crash", bucket: "Call for help", term: "Rapid Response" },
+          { text: "Tilting the head back", bucket: "Hands on the patient", term: "Airway" },
+          { text: "Keeping the pulse steady", bucket: "Hands on the patient", term: "Stabilize" },
+          { text: "Fever and pulse climbing fast", bucket: "Call for help", term: "Rapid Response" },
+        ],
+        feedbackCorrect: "Alarms and pages bring the team running. Pressing, tilting and holding steady are done with your hands.",
+        feedbackWrong: "Ask of each one: does this bring people running, or is it something you do at the bedside?",
+      },
+      selectAll: {
+        term: "Stabilize",
+        prompt: "Select every sign the patient is steady and out of danger.",
+        options: ["Pulse back and even", "Breathing slow and regular", "No pulse at all", "Color back in the face"],
+        correct: [0, 1, 3],
+        feedbackCorrect: "An even pulse, regular breathing and color in the face mean steady. No pulse means the fight is still on.",
+        feedbackWrong: "Steady looks like an even pulse, regular breaths and color in the face. No pulse is the opposite.",
+      },
+      cases: [
+        {
+          terms: ["Rapid Response", "Code Blue"],
+          scene: "Room six: the fever will not drop and the pulse keeps climbing.",
+          steps: [
+            { prompt: "He is still breathing but getting worse fast. Which call?", options: ["The team for a stopped heart", "The team that comes before a crash"], correctIndex: 1 },
+            { prompt: "Minutes later his heart stops. Now which call?", options: ["The full crash team, now", "Keep watching for a minute"], correctIndex: 0 },
+          ],
+          feedbackCorrect: "Call early while he still breathes. If the heart stops, the call changes.",
+          feedbackWrong: "Getting worse but breathing means call the early team. A stopped heart means the full crash call.",
+        },
+        {
+          terms: ["Airway", "CPR", "Stabilize"],
+          scene: "A visitor collapses in the hallway and is not breathing.",
+          steps: [
+            { prompt: "What do you check first?", options: ["That air can reach the lungs", "Her name and birthday"], correctIndex: 0 },
+            { prompt: "No pulse. What do you do next?", options: ["Wait for the doctor", "Press hard and fast on the chest"], correctIndex: 1 },
+            { prompt: "Her pulse returns. What now?", options: ["Keep her steady before moving her", "Rush her upstairs right away"], correctIndex: 0 },
+          ],
+          feedbackCorrect: "Open path first, then presses, then keep her steady before she moves.",
+          feedbackWrong: "Air path first. No pulse means chest presses. Once the pulse is back, steady her before moving.",
+        },
+      ],
+      powerPlay: {
+        intro: "Get room six through the night.",
+        paragraph: "The night is quiet at Riverside Clinic until room six turns. His fever climbs and his pulse races, so the nurse calls a {5} while he is still breathing. Then the monitor goes flat and the call becomes a {1}. The first nurse in checks that air can reach his lungs, the {3}. Another starts {2}, pressing hard and fast. When his pulse returns, the team works to {4} him before the move upstairs.",
+      },
       facts: ["Chest presses should go about two per second, the beat of many pop songs."],
     },
     {
@@ -115,12 +314,76 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
       nextCompanyValue: 1000000,
       intro: { headline: "The Whole Floor Is Yours", line: "A new shift. Today you run the team, not just a room.", hook: "Learn the words a team uses to care for one patient together." },
       terms: [
-        { term: "Care Plan", definition: "The written set of goals and steps for one patient's care.", example: "Every Riverside Clinic patient has a care plan the whole team can read.", cue: "The written steps for one patient", situation: "A page lists this patient's goals and who does what today.", confusion: "Rounds", icon: "clipboard-check" },
-        { term: "Rounds", definition: "The daily walk when the team visits each patient to check in.", example: "Riverside Clinic nurses join rounds every morning.", cue: "The daily visit to each patient", situation: "The team moves bed to bed, checking on everyone.", confusion: "Care Plan", icon: "route" },
-        { term: "Referral", definition: "Sending a patient to another doctor or service for care.", example: "A Riverside Clinic doctor wrote a referral to a heart specialist.", cue: "Sending the patient on", situation: "This needs a specialist, so the patient is sent to one.", confusion: "Consult", icon: "corner-up-right" },
-        { term: "Consult", definition: "Asking another expert for advice about a patient without handing the patient over.", example: "The Riverside Clinic team asked for a consult from a kidney doctor.", cue: "Asking an expert for advice", situation: "The doctor calls a specialist for an opinion but keeps the patient.", confusion: "Referral", icon: "users" },
-        { term: "Advocate", definition: "Speaking up for what a patient needs when they cannot.", example: "A Riverside Clinic nurse will advocate for a patient who is in pain.", cue: "Speaking up for the patient", situation: "The patient is scared to ask, so the nurse asks for them.", confusion: "Consult", icon: "heart-pulse" },
+        {
+          term: "Care Plan", definition: "The written set of goals and steps for one patient's care.", example: "Every Riverside Clinic patient has a care plan the whole team can read.", cue: "The written steps for one patient", confusion: "Rounds", icon: "clipboard-check",
+          moments: ["A page lists this patient's goals and who does what today.", "The team sets three goals for her and writes down each step.", "Every nurse can read what this patient needs by Friday."],
+        },
+        {
+          term: "Rounds", definition: "The daily walk when the team visits each patient to check in.", example: "Riverside Clinic nurses join rounds every morning.", cue: "The daily visit to each patient", confusion: "Care Plan", icon: "route",
+          moments: ["The team moves bed to bed, checking on everyone.", "Every morning the doctors and nurses visit each room in turn.", "White coats stop at her door to ask how she slept."],
+        },
+        {
+          term: "Referral", definition: "Sending a patient to another doctor or service for care.", example: "A Riverside Clinic doctor wrote a referral to a heart specialist.", cue: "Sending the patient on", confusion: "Consult", icon: "corner-up-right",
+          moments: ["This needs a specialist, so the patient is sent to one.", "A note that sends her to a heart doctor across town.", "Her care moves to a skin doctor who takes it from here."],
+        },
+        {
+          term: "Consult", definition: "Asking another expert for advice about a patient without handing the patient over.", example: "The Riverside Clinic team asked for a consult from a kidney doctor.", cue: "Asking an expert for advice", confusion: "Referral", icon: "users",
+          moments: ["The doctor calls a specialist for an opinion but keeps the patient.", "A quick call to a kidney expert, then back to the bedside.", "The expert gives advice. The patient stays right where she is."],
+        },
+        {
+          term: "Advocate", definition: "Speaking up for what a patient needs when they cannot.", example: "A Riverside Clinic nurse will advocate for a patient who is in pain.", cue: "Speaking up for the patient", confusion: "Consult", icon: "heart-pulse",
+          moments: ["The patient is scared to ask, so the nurse asks for them.", "He cannot speak for himself, so the nurse speaks for him.", "The nurse insists the pain is real until the doctor listens."],
+        },
       ],
+      sort: {
+        label: "Inside or outside",
+        prompt: "Does each one stay inside the team, or reach for outside help?",
+        buckets: ["Inside the team", "Outside help"],
+        items: [
+          { text: "Phone call to a kidney expert", bucket: "Outside help", term: "Consult" },
+          { text: "Morning visit to every room", bucket: "Inside the team", term: "Rounds" },
+          { text: "Sent to a heart doctor across town", bucket: "Outside help", term: "Referral" },
+          { text: "Written goals for one patient", bucket: "Inside the team", term: "Care Plan" },
+          { text: "Nurse asks for more pain relief", bucket: "Inside the team", term: "Advocate" },
+          { text: "Skin doctor takes over her care", bucket: "Outside help", term: "Referral" },
+        ],
+        feedbackCorrect: "Visits, written goals and speaking up all happen inside the team. Experts and specialists are outside help.",
+        feedbackWrong: "Ask of each one: does this bring in someone from outside the floor, or is it just the team here?",
+      },
+      selectAll: {
+        term: "Consult",
+        prompt: "Select every time the team asks an expert but keeps the patient.",
+        options: ["A phone call to a kidney doctor for advice", "Sending her to a heart doctor for good", "A quick question to the skin expert", "The whole team walking bed to bed"],
+        correct: [0, 2],
+        feedbackCorrect: "Asking for advice keeps the patient here. Sending her away for good is a different word, and a walk is just a walk.",
+        feedbackWrong: "Pick the ones where an expert is asked and the patient stays put. Sending her away is a different word.",
+      },
+      cases: [
+        {
+          terms: ["Referral", "Consult"],
+          scene: "Mr. Park's kidney numbers are off and the team is unsure.",
+          steps: [
+            { prompt: "The doctor wants a kidney expert's opinion but will keep Mr. Park. Which?", options: ["Ask for advice", "Send him on"], correctIndex: 0 },
+            { prompt: "The expert says Mr. Park needs care only a kidney center can give. Now which?", options: ["Ask for advice", "Send him on"], correctIndex: 1 },
+          ],
+          feedbackCorrect: "Advice first, with him staying here. When he needs care we cannot give, he is sent on.",
+          feedbackWrong: "Keeping the patient and asking is one word. Handing the patient over is the other.",
+        },
+        {
+          terms: ["Advocate", "Care Plan"],
+          scene: "Mrs. Cole whispers her pain is worse but says not to bother anyone.",
+          steps: [
+            { prompt: "What does the nurse do?", options: ["Tell the doctor the pain is worse", "Respect her wish and stay quiet"], correctIndex: 0 },
+            { prompt: "The doctor changes her pain goal. Where does the new goal get written?", options: ["On a sticky note", "In her written steps for care"], correctIndex: 1 },
+          ],
+          feedbackCorrect: "Speak up for her, then put the new goal where the whole team can read it.",
+          feedbackWrong: "A scared patient still needs a voice. New goals go in the written plan the whole team reads.",
+        },
+      ],
+      powerPlay: {
+        intro: "Run the floor for one morning.",
+        paragraph: "Morning at Riverside Clinic begins with {2}, the team moving bed to bed. At Mrs. Cole's door, the nurse chooses to {5} for her, saying the pain is worse even though Mrs. Cole would not. The doctor updates her {1} with a new pain goal. For Mr. Park, the doctor asks a kidney expert for a {4} and keeps him here. When the expert says he needs a kidney center, the doctor writes a {3}.",
+      },
       facts: ["Nurses spend more time with patients than any other member of the care team."],
     },
     {
@@ -134,12 +397,61 @@ export const NURSING_GLOSSARY: GlossaryBlueprint = {
       nextCompanyValue: 1000000,
       intro: { headline: "Where Will You Work?", line: "A tour of the units at Riverside Clinic.", hook: "Learn the names of the places a nurse can build a career." },
       terms: [
-        { term: "ICU", definition: "The unit for the sickest patients, watched every minute.", example: "Riverside Clinic moves its most fragile patients to the ICU.", cue: "Where the sickest patients go", situation: "One nurse, two patients, machines beeping all night.", confusion: "Oncology", icon: "activity" },
-        { term: "Pediatrics", definition: "Care for babies, children and teens.", example: "Riverside Clinic pediatrics has small chairs and bright walls.", cue: "Care for kids", situation: "The waiting room is full of toys and tiny patients.", confusion: "Labor and Delivery", icon: "users" },
-        { term: "Oncology", definition: "Care for people with cancer.", example: "Riverside Clinic oncology nurses stay with patients through long treatments.", cue: "Care for cancer patients", situation: "A patient comes in every week for a long treatment drip.", confusion: "ICU", icon: "droplets" },
-        { term: "Labor and Delivery", definition: "The unit where babies are born.", example: "Riverside Clinic labor and delivery welcomed three babies last night.", cue: "Where babies are born", situation: "A family waits outside a room, and then a first cry.", confusion: "Pediatrics", icon: "sun" },
-        { term: "Nurse Practitioner", definition: "A nurse with extra training who can diagnose and prescribe.", example: "A Riverside Clinic nurse practitioner runs the evening clinic.", cue: "A nurse who can prescribe", situation: "She orders the test and writes the prescription herself.", confusion: "Pediatrics", icon: "stethoscope" },
+        {
+          term: "ICU", definition: "The unit for the sickest patients, watched every minute.", example: "Riverside Clinic moves its most fragile patients to the ICU.", cue: "Where the sickest patients go", confusion: "Oncology", icon: "activity",
+          moments: ["One nurse, two patients, machines beeping all night.", "The sickest patient in the building, watched every single minute.", "Monitors on every bed. No one here is close to going home."],
+        },
+        {
+          term: "Pediatrics", definition: "Care for babies, children and teens.", example: "Riverside Clinic pediatrics has small chairs and bright walls.", cue: "Care for kids", confusion: "Labor and Delivery", icon: "users",
+          moments: ["The waiting room is full of toys and tiny patients.", "The nurse puts a cartoon bandage on a crying four year old.", "A teenager and a toddler wait in chairs built for small people."],
+        },
+        {
+          term: "Oncology", definition: "Care for people with cancer.", example: "Riverside Clinic oncology nurses stay with patients through long treatments.", cue: "Care for cancer patients", confusion: "ICU", icon: "droplets",
+          moments: ["A patient comes in every week for a long treatment drip.", "Care for someone fighting cancer, one treatment at a time.", "She lost her hair to the treatment. The nurse knows her name."],
+        },
+        {
+          term: "Labor and Delivery", definition: "The unit where babies are born.", example: "Riverside Clinic labor and delivery welcomed three babies last night.", cue: "Where babies are born", confusion: "Pediatrics", icon: "sun",
+          moments: ["A family waits outside a room, and then a first cry.", "The mother's contractions are closer now. The room is ready.", "A newborn is weighed and wrapped while the father cries."],
+        },
+        {
+          term: "Nurse Practitioner", definition: "A nurse with extra training who can diagnose and prescribe.", example: "A Riverside Clinic nurse practitioner runs the evening clinic.", cue: "A nurse who can prescribe", confusion: "Pediatrics", icon: "stethoscope",
+          moments: ["She orders the test and writes the prescription herself.", "Extra years of school let this nurse diagnose on her own.", "No doctor tonight. The nurse with extra training writes the order."],
+        },
       ],
+      selectAll: {
+        term: "Labor and Delivery",
+        prompt: "Select every patient who belongs on the unit where babies arrive.",
+        options: ["A mother whose water just broke", "A newborn minutes old", "A man with chest pain", "A teen with a broken arm"],
+        correct: [0, 1],
+        feedbackCorrect: "Mothers about to deliver and brand new babies. Chest pain and broken arms go elsewhere.",
+        feedbackWrong: "Only the mother about to deliver and her newborn belong there. The others go to other units.",
+      },
+      cases: [
+        {
+          terms: ["ICU", "Pediatrics"],
+          scene: "Two new patients arrive at the same time.",
+          steps: [
+            { prompt: "A six year old with an ear infection. Which unit?", options: ["The unit for kids", "The unit for the sickest"], correctIndex: 0 },
+            { prompt: "A man whose heart stopped twice today. Which unit?", options: ["The unit for kids", "The unit for the sickest"], correctIndex: 1 },
+          ],
+          feedbackCorrect: "Kids go to the kids' unit. A patient who needs watching every minute goes to the sickest unit.",
+          feedbackWrong: "Age picks the first unit. How sick he is picks the second.",
+        },
+        {
+          terms: ["Nurse Practitioner", "Oncology"],
+          scene: "The evening clinic is open and the only doctor has gone home.",
+          steps: [
+            { prompt: "A patient needs a test ordered tonight. Who can do it?", options: ["The nurse with extra training", "No one until morning"], correctIndex: 0 },
+            { prompt: "She is here for her weekly cancer treatment. Which nurse takes her?", options: ["The baby unit nurse", "The cancer care nurse"], correctIndex: 1 },
+          ],
+          feedbackCorrect: "A nurse with extra training can order tests and prescribe. Cancer care has its own nurses.",
+          feedbackWrong: "Extra training means she can order and prescribe. Weekly cancer treatment belongs with cancer care.",
+        },
+      ],
+      powerPlay: {
+        intro: "Take the tour of every unit.",
+        paragraph: "A tour of Riverside Clinic. Upstairs, a first cry comes from {4}. Down the hall in {2}, a nurse hands a sticker to a brave little girl. In {3}, a woman settles in for her weekly treatment and the nurse greets her by name. The {1} is quiet and bright with monitors, one nurse for every two beds. In the evening clinic, a {5} checks a rash and writes the prescription herself.",
+      },
       facts: ["Many nurses switch specialties more than once in a career."],
     },
   ],
