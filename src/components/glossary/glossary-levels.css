@@ -670,6 +670,7 @@
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 { grid-auto-rows: auto !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected { display: grid !important; grid-template-columns: 44px minmax(0, 1fr) !important; grid-template-areas: "plate plate" "badge copy" !important; row-gap: 12px !important; column-gap: 12px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected .glossary-map-plate { grid-area: plate; width: 100%; height: 86px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected .glossary-map-plate.is-icon { width: 128px; height: 72px; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected > button { grid-area: badge; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected .glossary-map-rung-copy { grid-area: copy; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung.is-inspected .glossary-map-connector { display: none; }

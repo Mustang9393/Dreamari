@@ -26,7 +26,7 @@
 
 <p>This document has three parts. The first half is the plan: the rules every new glossary game follows. The second is the build guide: the one file an agent writes, the checks that run on it, and the step list that turns "create a glossary game for X" into a playable game. The third is the image brief for Codex. Read the first part once. Use the second every time. Codex owns the third.</p>
 
-<div class="note"><b>Status.</b> The system is built and runs locally. Four generated industries exist beside Finance, each with the four playable levels the plan asks for: Software Engineering, Flight Operations, Nursing, Culinary Arts. Nothing in this document is pushed to production yet. Chandu's gate: generate a few games, judge the results, then push.</div>
+<div class="note"><b>Status.</b> The system is built and on main. Four generated industries exist beside Finance, each with the four playable levels the plan asks for: Software Engineering, Flight Operations, Nursing, Culinary Arts. The generated games are not on the Play hub yet; they play from the Glossary QA page (hamburger menu) until Chandu releases them. Division of labour: Codex generates images, Claude writes blueprints and builds games.</div>
 
 <h2>Part 1. The plan</h2>
 
@@ -36,7 +36,7 @@
 <tr><th style="width:28%">Rule</th><th>What it means</th><th style="width:32%">In the system</th></tr>
 <tr><td>Finance stays exactly as it is</td><td>Everything here applies only to new glossary worlds. Finance and Investment Banking, including Business Basics and Investing Basics, do not change. Nothing is applied retroactively.</td><td>Finance is hand-authored in data.ts and data-finance-l2-4.ts. It never passes through the generator.</td></tr>
 <tr><td>No timers</td><td>No countdown, no count-up, no timer in the header, no timed questions, no timer as a difficulty mechanic. Every new world, every new level.</td><td>The engine has no timer. The "4 min" on the Levels map is an estimate of length, not a clock.</td></tr>
-<tr><td>No forced images</td><td>The Dreamari team decides whether a term has an honest, relevant image. No AI tool or content generator makes this decision. If the team decides no, the term gets no image. Never create an image to fill a slot. If a match-to-pictures question loses its pictures, it becomes match-to-meanings.</td><td>Generated games teach with words only. Level 1 pictures are optional and are registered by hand in termArt.ts; that registration is the team's decision, in the file. Match It Up is always word to meaning.</td></tr>
+<tr><td>No forced images</td><td>The Dreamari team decides whether a term has an honest, relevant image. No AI tool or content generator makes this decision. If the team decides no, the term gets no image. Never create an image to fill a slot. If a match-to-pictures question loses its pictures, it becomes match-to-meanings.</td><td>Levels 2 and up teach with words only. The team has decided Level 1 earns pictures everywhere (3.4). A flashcard shows generated art or nothing; it never shows an icon in place of a picture. Match It Up is always word to meaning.</td></tr>
 <tr><td>No forced math</td><td>The team decides whether math belongs in a lesson. Never invent prices, percentages or calculations because a template has a math slot. Keep the question's position; swap the mechanic (sorting, ordering, spot the mistake, decision).</td><td>Numbers in a level's copy fail validation unless the level sets math: true. The generator never writes a calculation.</td></tr>
 </table>
 
@@ -166,7 +166,7 @@
 <tr><td>Scenario thread</td><td>Reuse a small library of environments, equipment, documents and tools.</td></tr>
 <tr><td>Practice world</td><td>Rely on interactions, Dreamy reactions, motion, clouds, buttons and success states.</td></tr>
 </table>
-<p><b>In the system:</b> only Level 1 of an industry may have pictures, and only when they clearly help. Everything else teaches with words: words-only teach cards, initials in the mastery tokens, no pictures on match, sort or card backs. The pictures are made with ChatGPT image generation using the prompt in Part 2, then registered by hand.</p>
+<p><b>In the system:</b> Level 1 of every industry gets pictures for its five terms and one welcome illustration (decision of 16 October, section 3.4). Every later level teaches with words: words-only teach cards, initials in the mastery tokens, no pictures on match, sort or card backs. A flashcard never shows an icon in place of a picture.</p>
 
 <h3>1.8 Dreamy's role</h3>
 <p>Dreamy is part of the interaction system, not an illustration beside every piece of content. One screen, one Dreamy. Dreamy is the cloud itself: no arms, hands, legs or body. Dreamy is curious before a question, thinking during a hard one, concerned near a warning, excited after a correct answer, encouraging after a mistake, celebrating mastery, confident during the Power Play, surprised by an unexpected result. When term artwork is not appropriate, the game still comes from Dreamy's expressions, cloud movement, background animation, button reactions, correct-answer states, mastery animations, combos, unlocks, celebrations and transitions. A screen does not need a vocabulary illustration to feel like a game.</p>
@@ -383,8 +383,8 @@ Composition: 1536 by 512 landscape, horizon in the lower third, even detail acro
 STYLE: {{STYLE for the theme, from 3.2}}
 Keep the reference's palette and material identity. Readable as a strip at 90 by 44 pixels and attractive at 540 by 90.</pre>
 
-<h3>3.2 Level 1 term art</h3>
-<p>Only Level 1 of an industry may have pictures, and only when the team decides they clearly help (Executive Rule 3). The prompt, the two style locks and the registration steps are in 2.6 and 2.7. Codex delivers the WebP files in the folder named there and the CAREER_TERM_ART entry; Claude does not generate images.</p>
+<h3>3.2 Dreamy character art and the game's reactions</h3>
+<p>Dreamy's animated poses (twelve Drift, four Signal) already exist and are not part of this brief. Any new Dreamy material follows 1.8 and the character lock in 2.6, and arrives as the four-frame WebP atlas format described in docs/reference/dreamy-drift-animated-oct15-v2.json so dreamyReactions.ts can take it without engine changes. See 3.6 for the stills worth animating.</p>
 
 <h3>3.3 World backdrops (the game's sky)</h3>
 <p>The game behind the questions can look different per <b>career world</b>. The unit is the world, never the industry or the level: fifteen worlds, so fifteen images at most per theme, and every industry under a world inherits its backdrop the moment the file is registered. Nothing is required; an unregistered world keeps today's look.</p>

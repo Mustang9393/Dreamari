@@ -27,6 +27,7 @@ import {
   serverGlossaryProgressSnapshot,
   subscribeGlossaryProgress,
 } from "./progress";
+import { AlignJustify, ArrowDown, ArrowUp, Ban, Circle, ClipboardCheck, Code, CornerDownRight, CornerRightDown, CornerUpRight, Cpu, Droplets, Egg, Eye, FastForward, FlaskConical, FolderGit, Gauge, GitCommit, Grid3x3, Layers, LayoutGrid, ListChecks, MapPin, Minus, Move, PenTool, PlaneLanding, PlaneTakeoff, RadioTower, RefreshCw, Rocket, Route, Scissors, Search, Server, Smartphone, Sun, Tag, Thermometer, Undo, Waves, WifiOff, ZapOff } from "lucide-react";
 import type { ChainStep, GlossaryCareer, GlossaryLesson, GlossaryQuestion, ParagraphPowerPlay, SceneCard } from "./data";
 import { plateImage } from "./levelPlates";
 import { driftSilhouette, signalBackdrop } from "./worldBackdrops";
@@ -226,6 +227,14 @@ function SneakerIcon({ className }: { className?: string }) {
 // the product IS a sneaker, the service IS custom design (a brush, not a
 // bell), the customer is a PERSON -- not abstract finance-concept stand-ins.
 const TERM_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  // Slugs the generated blueprints use (16 Oct 2026); the Levels map plates
+  // show a level's first term icon until plate art is registered.
+  activity: Activity, "align-justify": AlignJustify, "arrow-down": ArrowDown, "arrow-up": ArrowUp, ban: Ban, circle: Circle, "clipboard-check": ClipboardCheck, code: Code,
+  "corner-down-right": CornerDownRight, "corner-right-down": CornerRightDown, "corner-up-right": CornerUpRight, cpu: Cpu, droplets: Droplets, egg: Egg, eye: Eye, "fast-forward": FastForward,
+  "flask-conical": FlaskConical, "folder-git": FolderGit, gauge: Gauge, "git-commit": GitCommit, grid: Grid3x3, layers: Layers, "layout-grid": LayoutGrid, "list-checks": ListChecks, "map-pin": MapPin,
+  minus: Minus, move: Move, "pen-tool": PenTool, "plane-landing": PlaneLanding, "plane-takeoff": PlaneTakeoff, "radio-tower": RadioTower, "refresh-cw": RefreshCw, rocket: Rocket, route: Route,
+  scissors: Scissors, search: Search, server: Server, smartphone: Smartphone, sparkles: Sparkles, sun: Sun, tag: Tag, thermometer: Thermometer, "triangle-alert": TriangleAlert, undo: Undo,
+  "user-round": UserRound, waves: Waves, "wifi-off": WifiOff, wind: Wind, "zap-off": ZapOff, flame: Flame,
   building: Building2,
   sneaker: SneakerIcon,
   palette: Paintbrush,
