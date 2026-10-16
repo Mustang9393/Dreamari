@@ -27,7 +27,7 @@ import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useWelcomeInFront } from "@/components/app/SplashVeil";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Play, Search, SlidersHorizontal, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Play, Search, SlidersHorizontal, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useSavedVideos } from "@/lib/savedVideos";
 import { Listbox } from "@/components/app/Listbox";
 import { PendingPosterCard, PendingRankedCard } from "@/components/app/PendingPosterCard";
@@ -555,7 +555,7 @@ function SearchPanel({ query, onQuery }: { query: string; onQuery: (q: string) =
   );
 }
 
-// -- Skip college switch (16 Oct 2026) ------------------------------------
+// -- Non-college switch (16-17 Oct 2026) -------------------------------
 // Chandu: "for the explore careers tab lets have a switch without
 // cluttering to show college paths and non college paths... The goal is to
 // show trade/non college careers for those that want that." Then: "lets
@@ -564,25 +564,33 @@ function SearchPanel({ query, onQuery }: { query: string; onQuery: (q: string) =
 // obviously be College vs non college, remember this is for 8th standard
 // comprehension level they may not know what trades are. please no long
 // descriptions permanently on screen. brand it better for genz please the
-// label should not be too long. Lets also think of mobile/tablet."
+// label should not be too long. Lets also think of mobile/tablet." Then,
+// on the first wording ("Skip college" with a slashed cap): "we might be
+// suggesting or incentivizing students to skip college", and "they are
+// still too long" about the first neutral rewrite.
 //
-// Shape: one glass pill, first thing in the content area, left under the
-// Careers/Schools strip, identical at every width: a graduation cap, the
-// words "Skip college", a switch. Off = Browse as it is (every career).
-// On = only careers whose typical entry is not a bachelor's, in rails built
-// for that view (browseRows). "Trades" never appears: an 8th grader knows
-// what college is. Feedback on a flip: the cap gets a slash, the track
-// and pill border go blue, a light sweeps the pill once, a four-word status
-// shows for two seconds and leaves, and the rails replay their entrance.
-// Nothing stays on screen but the pill itself.
+// Wording rule: a filter describes what it shows, it never advises. So no
+// imperative verb ("Skip"), no icon that takes a side (the slashed cap),
+// no selling copy ("No degree needed"). One short noun phrase, two
+// words at most, in the muted colour: "Non-college". An 8th grader reads
+// it with no explanation. (It also covers the 2-year-degree careers, which
+// is why a longer, more exact "No 4-year degree" was the runner-up.)
 //
-// Rejected: three chips (All / College / Trades) -- Chandu wanted one
-// switch; a banner hanging off the Careers tab's blue underline -- the app
-// already hangs coachmarks off that strip, so it would read as a hint to
-// dismiss, not a control, and it breaks the title + tabs unit locked on
-// 22 Sept; a segment in the For you / Browse all pill -- two dimensions in
-// one control; a header dropdown -- no room in the phone header, and the
-// 1 Oct 2026 rule puts a control in the same place on every device.
+// Shape: one quiet control, first in the content area, left under the
+// Careers/Schools strip, identical at every width: a label and a switch.
+// Off = Browse as it is (every career). On = only careers whose typical
+// entry is not a bachelor's, in rails built for that view (browseRows).
+// Feedback on a flip: the track goes blue, a light sweeps the control
+// once, a two-word status shows for 2 seconds and leaves, and the rails
+// replay their entrance. Nothing stays on screen but the control.
+//
+// Rejected: three chips (Chandu wanted one switch); a banner hanging off
+// the Careers tab's blue underline -- the app already hangs coachmarks off
+// that strip, so it would read as a hint to dismiss, not a control, and it
+// breaks the title + tabs unit locked on 22 Sept; a segment in the For you
+// / Browse all pill -- two dimensions in one control; a header dropdown --
+// no room in the phone header, and the 1 Oct 2026 rule puts a control in
+// the same place on every device.
 //
 // The choice lives in the URL (?path=trades) so View all's grid and the
 // browser's Back keep it, and in localStorage so a student who flipped it
@@ -591,7 +599,7 @@ const PATH_STORAGE_KEY = "dreamari.explore.path";
 const ROW_FLOOR = 3;
 const STATUS_MS = 2200;
 
-function SkipCollegeSwitch({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
+function NonCollegeSwitch({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
   // The status line is transient on purpose (no long descriptions
   // permanently on screen): it confirms the flip, then leaves.
   const [status, setStatus] = useState<{ text: string; key: number } | null>(null);
@@ -604,14 +612,14 @@ function SkipCollegeSwitch({ on, onChange }: { on: boolean; onChange: (on: boole
   const flip = () => {
     const next = !on;
     onChange(next);
-    setStatus({ text: next ? "No college degree needed" : "Showing every career", key: Date.now() });
+    setStatus({ text: next ? "Non-college careers" : "All careers", key: Date.now() });
     setSweep((n) => n + 1);
   };
   // Visual rank (Chandu, after the first cut: "right now it steals all
   // prominence and hierarchy"): no pill surface or border, a 36px switch,
   // a 13px semibold label in the muted colour. Page title > rail titles >
-  // this control. Blue appears only on the switch track, the cap and its
-  // slash while on; everything else stays quiet.
+  // this control. Blue appears only on the switch track while on;
+  // everything else stays quiet.
   return (
     <div className="relative flex w-full items-center">
       <button
@@ -619,15 +627,10 @@ function SkipCollegeSwitch({ on, onChange }: { on: boolean; onChange: (on: boole
         role="switch"
         aria-checked={on}
         onClick={flip}
-        className="dm-quiet relative -ml-[8px] flex h-8 flex-none cursor-pointer items-center gap-[8px] rounded-full px-[8px]"
+        className="dm-quiet relative -ml-[8px] flex h-8 flex-none cursor-pointer items-center gap-[10px] rounded-full px-[8px]"
         style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-body)" }}
       >
-        <span className="relative flex size-[16px] flex-none items-center justify-center" aria-hidden>
-          <GraduationCap className="h-[16px] w-[16px] transition-colors" style={{ color: on ? "var(--primary)" : "currentColor" }} />
-          {/* The slash is the one-glance "no college" mark; it draws in with the flip. */}
-          <span className="absolute left-1/2 top-1/2 h-[1.5px] w-[19px] origin-center rounded-full transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ background: "var(--primary)", transform: `translate(-50%, -50%) rotate(-45deg) scaleX(${on ? 1 : 0})`, boxShadow: "0 0 0 1.5px var(--background)" }} />
-        </span>
-        <span className="text-[13px] leading-[16px] font-semibold whitespace-nowrap transition-colors">Skip college</span>
+        <span className="text-[13px] leading-[16px] font-semibold whitespace-nowrap transition-colors">Non-college</span>
         <span className="relative inline-flex h-[20px] w-[36px] flex-none items-center rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "var(--glass-surface-2)", boxShadow: on ? "none" : "inset 0 0 0 1px var(--glass-border)" }}>
           <span className="absolute size-[16px] rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(${on ? 18 : 2}px)`, boxShadow: "0 1px 2px rgba(0,0,0,.25)" }} />
         </span>
@@ -708,7 +711,7 @@ function browseRows(path: PathChoice): BrowseRow[] {
   ];
 }
 
-function BrowseFace({ query, searchActive, onQuery, row, onRow, path, onPath }: { query: string; /** search is open: the search panel replaces every row */ searchActive: boolean; onQuery: (q: string) => void; /** a row opened as a grid (?row=), and how to open or close one */ row: string; onRow: (id: string | null) => void; /** the Skip college switch */ path: PathChoice; onPath: (next: PathChoice) => void }) {
+function BrowseFace({ query, searchActive, onQuery, row, onRow, path, onPath }: { query: string; /** search is open: the search panel replaces every row */ searchActive: boolean; onQuery: (q: string) => void; /** a row opened as a grid (?row=), and how to open or close one */ row: string; onRow: (id: string | null) => void; /** the Non-college switch */ path: PathChoice; onPath: (next: PathChoice) => void }) {
   // The rows always show their own curated order now: filters live inside
   // search (SearchPanel), and every row is hidden while search is open.
   // Every row, by id, so ?row= can open one as a grid.
@@ -725,7 +728,7 @@ function BrowseFace({ query, searchActive, onQuery, row, onRow, path, onPath }: 
 
   return (
     <>
-      <SkipCollegeSwitch on={path === "trades"} onChange={(on) => onPath(on ? "trades" : "all")} />
+      <NonCollegeSwitch on={path === "trades"} onChange={(on) => onPath(on ? "trades" : "all")} />
       {/* `contents` keeps this div out of main's flex layout (the rails
          still lay out as if they were main's own direct children) while
          giving seq-reveal something to stagger the rails' entrance from off
@@ -2020,7 +2023,7 @@ function DesktopSearchToggle({
   );
 }
 
-export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", initialPath = "all", live = false }: { initialTab: "foryou" | "browse"; initialQuery?: string; /** a Browse row opened as a grid (?row=) */ initialRow?: string; /** the Skip college switch (?path=trades) */ initialPath?: PathChoice; /** the live /explore route: no lab dock, links stay on the live routes */ live?: boolean }) {
+export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", initialPath = "all", live = false }: { initialTab: "foryou" | "browse"; initialQuery?: string; /** a Browse row opened as a grid (?row=) */ initialRow?: string; /** the Non-college switch (?path=trades) */ initialPath?: PathChoice; /** the live /explore route: no lab dock, links stay on the live routes */ live?: boolean }) {
   const router = useRouter();
   const base = live ? "/explore" : "/actions-lab/explore";
   const [path, setPath] = useState<PathChoice>(initialPath);

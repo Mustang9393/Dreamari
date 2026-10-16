@@ -23,7 +23,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   const initialTab = requested === "foryou" ? "foryou" : "browse";
   const q = Array.isArray(params.q) ? params.q[0] : params.q;
   const row = Array.isArray(params.row) ? params.row[0] : params.row;
-  // ?path=trades: the Skip college switch is on (16 Oct 2026).
+  // ?path=trades: the Non-college switch is on (16 Oct 2026).
   const pathParam = Array.isArray(params.path) ? params.path[0] : params.path;
   const path = isPathChoice(pathParam) ? pathParam : "all";
   return (

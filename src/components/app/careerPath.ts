@@ -1,4 +1,4 @@
-// Explore's Skip college switch (16 Oct 2026; Chandu: "for the explore
+// Explore's Non-college switch (16 Oct 2026; Chandu: "for the explore
 // careers tab lets have a switch without cluttering to show college paths
 // and non college paths... The goal is to show trade/non college careers
 // for those that want that", then "lets make it a toggle switch that then
@@ -136,7 +136,7 @@ export function typicalPayValue(career: CatalogCareer): number {
 
 export type PathRail = { id: string; title: string; careers: CatalogCareer[]; group: "theme" | "world" };
 
-// The Skip college view cannot reuse Browse's curated rows: those rows
+// The Non-college view cannot reuse Browse's curated rows: those rows
 // were picked around degree careers, and filtering them leaves ~20 of the
 // 186 trades careers in the catalog (Tech & Engineering and Typical Pay
 // empty out completely). So this view builds its own rails from the whole
