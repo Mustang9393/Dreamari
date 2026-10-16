@@ -18,14 +18,14 @@
 <body>
 
 <h1>Dreamari Glossary Games: Master SOP and Prompts for Usman and ChatGPT (image gen)</h1>
-<p><i>17 October 2026. One document with everything needed to scale the glossary games from four industries to fifty: the rules (Joshua's), what is built and verified, the prompts an agent pastes to create a game, the prompts for every image, the UI and its component library, how it scales, and every guardrail in place. Repo copies: docs/reference/glossary-scaling-sop-usman-2026-10-16.html and the same text as docs/reference/glossary-scaling-sop-usman-2026-10-16.md. The locked engineering spec is docs/handoff/specs/glossary-system.md. Joshua's plan in full is Appendix A of this document. This is the only glossary SOP: the filled-in art prompt for the three Play tab games is section 7b, and every older glossary SOP, handover and separate prompt was deleted on 17 Oct 2026.</i></p>
+<p><i>17 October 2026. One document with everything needed to scale the glossary games from four industries to fifty: the rules (Joshua's), what is built and verified, the prompts an agent pastes to create a game, the prompts for every image, the UI and its component library, how it scales, and every guardrail in place. Repo copies: docs/reference/glossary-scaling-sop-usman-2026-10-16.html and the same text as docs/reference/glossary-scaling-sop-usman-2026-10-16.md. The locked engineering spec is docs/handoff/specs/glossary-system.md. Joshua's plan in full is Appendix A of this document. This is the only glossary SOP: the filled-in art prompt for the three Play tab games is section 7b, the prompt for every graphic still missing is section 7c, and every older glossary SOP, handover and separate prompt was deleted on 17 Oct 2026.</i></p>
 
 <h2>0. Readiness, checked 17 October 2026</h2>
 <table>
 <tr><th>Check</th><th>Result</th></tr>
 <tr><td>Live on main</td><td>Everything in this document is on main. Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's thumbnails; Next level keeps the student's theme; Dreamy's speech bubble wraps on whole words at phone width. Since 17 Oct: Codex's Level 1 term art and welcome scenes for Software, Aviation and Nursing in both themes, living worlds (asset-free weather and time of day per world), and the symmetry and alignment pass.</td></tr>
 <tr><td>Light mode</td><td>A contrast sweep of every Culinary screen (all six levels, the welcome, teach cards, unlocked screen, Power Play and review) in Drift and Signal with the app in light mode: every line at 4.5:1 or better (3:1 large), disabled buttons excepted. Fixed on 17 Oct: Signal's gold and cyan words and their navy drop shadows, the welcome copy over the daytime city, the Start label, the A to D keys, the compare card names, the theme switch label, the empty mastery segments.</td></tr>
-<tr><td>Alignment audit</td><td>One screen of every shape the five games produce (30 shapes) in both themes at 1440x900 and 375x812: no row of unequal tiles, no off-centre short row, no block off the column's edges, no HUD or bubble off the column. Every screen also checked by eye for what the audit cannot see.</td></tr>
+<tr><td>Alignment audit</td><td>One screen of every shape the five games produce (30 shapes) in both themes at 1440x900 and 375x812: no row of unequal tiles, no off-centre short row, no block off the column's edges, no HUD or bubble off the column. Every screen also checked by eye for what the audit cannot see. The welcome screen is one centred column up to 860px.</td></tr>
 <tr><td>Art QA</td><td>Three Level 1 packs, six welcomes, 72 exports with alpha and hash receipts (2.2 MB served); Finance and the words-only later levels unchanged. World scenes: deterministic, asset-free, Finance bypassed, performance contract held.</td></tr>
 <tr><td>Type check, lint</td><td>tsc clean. ESLint: no errors in the glossary code (two pre-existing unescaped-entity errors live in src/app/gate/page.tsx).</td></tr>
 <tr><td>Blueprint QA script</td><td>All generated industries pass (209 screens across 24 levels, six per industry: 35 cases, 14 sorts, 20 select-alls; feedback median 42 characters, longest 90; longest Level 1 Power Play 188 characters, Level 5 317): no sentence over 14 words, feedback short, Power Play within its level's size, seven to ten screens plus a Power Play per level, no three of one screen shape in a row, at least four shapes per level, every term credited twice, no answer leakage, no line of copy shown twice in a lesson, Reverse Recall only in the review, Power Play blanks never in order, all four recipes exercised.</td></tr>
@@ -46,7 +46,7 @@
 <tr><th>Role</th><th>Owns</th><th>Pastes</th></tr>
 <tr><td>Joshua</td><td>The rules: the Master Scaling Plan. Finance never changes.</td><td>Nothing; reviews.</td></tr>
 <tr><td>Usman's agent (Claude Code or Codex in the repo)</td><td>Blueprints: one file per industry, registered. Levels 1 to 4 required; 5 and 6 optional.</td><td>Prompt A, Prompt B.</td></tr>
-<tr><td>Codex or ChatGPT (image generation)</td><td>Every image: Level 1 term art and the welcome illustration for each industry (required), plates, world panoramas, silhouettes (optional), Dreamy animation.</td><td>Prompt D and the section 6 prompts; for the three Play tab games, section 7b (Prompt D already filled in).</td></tr>
+<tr><td>Codex or ChatGPT (image generation)</td><td>Every image: Level 1 term art and the welcome illustration for each industry (required), plates, world panoramas, silhouettes (optional), Dreamy animation.</td><td>Prompt D and the section 6 prompts; for the three Play tab games, section 7b (Prompt D already filled in); for everything still missing, section 7c.</td></tr>
 <tr><td>Chandu</td><td>Browser QA on the Glossary QA page; release to the hub (Prompt C).</td><td>Prompt C.</td></tr>
 </table>
 
@@ -72,6 +72,7 @@
 <tr><td>Eighth grade, no dashes</td><td>Short words, one idea per sentence, two sentences instead of a dash.</td><td>Validator: dashes, 14-word sentences and a grade 8 cap per level.</td></tr>
 <tr><td>One Dreamy per screen, the cloud itself</td><td>Never draw Dreamy, limbs or people into any image.</td><td>Engine; image brief.</td></tr>
 <tr><td>Every example names the anchor</td><td>In a continuous story or scenario thread, each example sentence names the company or place. Not required in a practice world.</td><td>Validator.</td></tr>
+<tr><td>Play tab only with a cover (added 17 Oct)</td><td>A game joins the Play tab only once its thumbnail cover exists; until then it plays from the hamburger menu's Glossary QA link. Missing graphics go to Codex as a prompt (section 7c), never a stand-in. Chandu: "Only use games with thumbnail art in the play tab."</td><td>GLOSSARY_GAMES and GLOSSARY_HUB_RELEASED; Prompt C.</td></tr>
 </table>
 
 <h2>3. Prompt A: create a glossary game for X</h2>
@@ -137,7 +138,7 @@ TASK: turn the roadmap Levels 5 and 6 of src/components/glossary/blueprints/[slu
 <pre>Only once the industry has its Play tab cover (the Play tab shows only games with thumbnail art; until then it plays from the hamburger menu's Glossary QA link). In the Dreamari repo: add "[slug]" to GLOSSARY_HUB_RELEASED in src/components/glossary/data.ts. If the hub has no card for it, add one to GLOSSARY_GAMES in src/components/play/games.ts keyed to its example career slug (or the industry slug when no catalog career owns it) with title "[Subject] Terms", sub "Learn key [subject] terms" and a cover (a 1400 by 788 WebP thumbnail: Dreamy over a fan of the subject's term cards, matching the four on the hub). Confirm Codex has registered its Level 1 term art (termArt.ts) and welcome illustration (welcomeArt.ts). Run npx tsc --noEmit, open /play and confirm the card is playable, commit with the why, push to main.</pre>
 
 <h2>6. Images (Codex or ChatGPT)</h2>
-<p>Codex generates every image. Nothing in Usman's game-creation work waits on images: a game plays with words the moment it is registered. Required before release: 6.1 and 6.2. Optional, shared polish: 6.3 to 6.5. 6.6 is animation. For the three Play tab games that exist today, use section 7b, which is Prompt D with every term and anchor already filled in.</p>
+<p>Codex generates every image. Nothing in Usman's game-creation work waits on images: a game plays with words the moment it is registered. Required before release: 6.1 and 6.2. Optional, shared polish: 6.3 to 6.5. 6.6 is animation. For the three Play tab games that exist today, use section 7b, which is Prompt D with every term and anchor already filled in. For everything still missing, use section 7c.</p>
 
 <h3>6.1 Level 1 term art (required: 5 terms, both themes)</h3>
 <p>The repo has a reproducible pipeline for this: scripts/glossary-art.mjs, and everything it needs is in this section. The input is a manifest JSON; the model is docs/reference/glossary-finance-art-oct13.json. The script prints the exact prompts, then packages, validates and previews the finished images. Flow:</p>
@@ -246,7 +247,7 @@ Match the attached panorama's palette, pixel density and night-to-dusk mood exac
 <p>Chandu's "Dream Expressions V2" pack (19 Drift stills) is at public/images/dreamy/expressions-v2/01.webp to 19.webp. Four are used statically on the Drift Levels map open card: 06 (books, ready to play), 18 (arrow, playing now), 12 (graduation cap, complete), 17 (alert, locked). Animate first, because the game has a slot for each: 10 (green check) for a right answer, 09 (red X) and 14 ("hmm") for a wrong one, 16 (confetti) and 12 for mastery and the complete screen, 15 (glasses and clipboard) for review and hints, 08 (reading) for the teach cards, 18 (arrow) for Next. Deliver the four-frame WebP atlas format described in docs/reference/dreamy-drift-animated-oct15-v2.json so dreamyReactions.ts can take them without engine changes. Signal needs pixel versions drawn to the Signal Dreamy rig.</p>
 
 <h3>6.7 Hub thumbnails (one per released industry)</h3>
-<p>The Play tab's glossary cards use a landscape thumbnail: Dreamy over a fan of the subject's term cards on a dark sky, 1400 by 788 WebP, under 130 KB. The four on the hub (Finance, Medical, Flight, Tech) are Chandu's and are the reference. The shelf card is portrait at rest and 16:9 when active, so keep Dreamy and the centre card in the middle third. File: public/images/app/glossary-&lt;subject&gt;-thumb-&lt;mmmdd&gt;.webp, set as cover on the card in GLOSSARY_GAMES.</p>
+<p>The Play tab's glossary cards use a landscape thumbnail: Dreamy over a fan of the subject's term cards on a dark sky, 1400 by 788 WebP, under 130 KB. The four on the hub (Finance, Medical, Flight, Tech) are Chandu's and are the reference. The shelf card is portrait at rest and 16:9 when active, so keep Dreamy and the centre card in the middle third. File: public/images/app/glossary-&lt;subject&gt;-thumb-&lt;mmmdd&gt;.webp, set as cover on the card in GLOSSARY_GAMES. No cover, no card: the game plays from the hamburger menu's Glossary QA link until its cover exists.</p>
 
 <h3>6.8 Living worlds (code only, no image to make)</h3>
 <p>Every world except Finance gets its own atmosphere without a background image (Codex, 16 to 17 Oct 2026). src/components/glossary/worldScenes.ts turns the industry, its career world, the level number and the tier into a scene: a seed from the world name picks the weather (breeze, glints or drizzle) and where the sun sits; consecutive levels walk through dawn, day, dusk and night. The world's accent colours it; the tier deepens the atmosphere; mastered words warm the horizon; right answers, repairs and picks send brief light cues (a repair is a cool sweep, never a punishment flash). LivingWorld.tsx draws it and glossary-living-worlds.css styles it. The Levels map uses the same phase colours behind its plates.</p>
@@ -391,11 +392,11 @@ Done looks like: Kitchen Terms on the Play tab with its cover, pictures and welc
 <tr><th>Piece</th><th>What it costs per new industry</th><th>Where</th></tr>
 <tr><td>The game</td><td>One blueprint file (about 150 lines of words) and one registry line. The generator builds seven to ten screens per level from four recipes; no UI code.</td><td>src/components/glossary/blueprints/, generate.ts, data.ts</td></tr>
 <tr><td>Levels</td><td>Levels 1 to 4 required, 5 and 6 optional (playable or roadmap words), any further titles as roadmap.</td><td>REQUIRED_LEVELS in generate.ts</td></tr>
-<tr><td>Look and feel</td><td>Nothing: pick one of the fifteen career worlds; it brings the accent, the display face and weight and the body face. Both themes come free.</td><td>WORLD_SYSTEMS in industries.ts</td></tr>
+<tr><td>Look and feel</td><td>Nothing: pick one of the fifteen career worlds; it brings the accent, the display face and weight and the body face. Both themes come free, in light and dark.</td><td>WORLD_SYSTEMS in industries.ts</td></tr>
 <tr><td>Atmosphere</td><td>Nothing: living worlds give each world its weather and time of day.</td><td>worldScenes.ts</td></tr>
 <tr><td>Required art</td><td>Five Level 1 term images and one welcome scene, each in two themes (twelve images), through the manifest and the two scripts.</td><td>termArt.ts, welcomeArt.ts</td></tr>
 <tr><td>Optional art</td><td>Plates (six strips cover all fifty), a Signal panorama or a Drift silhouette per career world, a welcome per lesson.</td><td>levelPlates.ts, worldBackdrops.ts, LEVEL_WELCOME_ART</td></tr>
-<tr><td>Release</td><td>One slug in GLOSSARY_HUB_RELEASED, one card and one thumbnail.</td><td>data.ts, play/games.ts</td></tr>
+<tr><td>Release</td><td>One slug in GLOSSARY_HUB_RELEASED, one card and one thumbnail. No thumbnail, no card.</td><td>data.ts, play/games.ts</td></tr>
 <tr><td>What does not scale</td><td>Finance stays hand-authored: its own content, art, Profit Builder, money scene cards and sneaker-shop welcome. Never copy it into a blueprint and never route it through the generator.</td><td>data.ts, data-finance-l2-4.ts</td></tr>
 </table>
 <p>A game is playable the moment its blueprint is registered, before any art: Levels 2 and up are words by design, and Level 1 shows words until its pictures are registered. Art and content can ship separately.</p>
@@ -469,7 +470,7 @@ npm run tokens:check</pre>
 <li>Open Level 3 and Level 4 in Drift and step through every screen with Skip: no two screens may show the same line, the sort must be concrete things into concept buckets, and each case must read as a real call. Then play one level without Skip, miss two answers on purpose, and check the review screens feel new.</li>
 <li>Read the Power Play paragraph of each level once as a student would. Level 1 should be five short lines.</li>
 <li>Run the alignment audit (10.3) on one screen of each kind in both themes at both sizes, and the contrast audit with the app in light mode and in dark.</li>
-<li>Confirm Codex's Level 1 pictures and the welcome illustration are in place and on style.</li>
+<li>Confirm Codex's Level 1 pictures, the welcome illustration and the Play tab cover are in place and on style.</li>
 <li>Release with Prompt C.</li>
 </ol>
 
@@ -545,6 +546,7 @@ npm run tokens:check</pre>
 <tr><td>src/components/glossary/industries.ts</td><td>The fifteen world design systems, CAREER_INDUSTRY.</td></tr>
 <tr><td>src/components/glossary/termArt.ts, welcomeArt.ts, levelPlates.ts, worldBackdrops.ts</td><td>Image registries: term art, welcome, plates and the Dreamy state expressions, panoramas and silhouettes.</td></tr>
 <tr><td>src/components/glossary/GlossaryLabGameExperience.tsx</td><td>The engine.</td></tr>
+<tr><td>src/components/glossary/glossary-levels.css</td><td>The layout, alignment, light-mode and layering rules of 10.4, each with a dated why comment.</td></tr>
 <tr><td>scripts/qa/glossary-blueprints.test.mjs, scripts/qa/dreamy-reactions.test.mjs</td><td>The blueprint and Dreamy checks (10.3).</td></tr>
 <tr><td>/play-tools/glossary-qa</td><td>Every glossary, every level, both themes. Hamburger menu, Glossary QA.</td></tr>
 <tr><td>/component-lab, "Glossary game, live engine"</td><td>Every piece in both themes with a World picker.</td></tr>
