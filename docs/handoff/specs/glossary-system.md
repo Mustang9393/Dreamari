@@ -111,38 +111,9 @@ Live proof of all four recipes with authored pieces: `/play/glossary/culinary?le
 - The welcome scene's illustration (the sneaker shop) is Investment Banking's own. A glossary without welcome art gets Dreamy alone, facing the copy.
 - The value meter reads "`company` value" and the intro reads "`subject` words".
 
-## Level 1 art for X (ChatGPT prompt)
+## Level 1 art for X
 
-Only Level 1 of an industry gets pictures, and only if they clearly help (Joshua, 15 Oct 2026). The finance pictures were made with ChatGPT's image generation (Codex session, `docs/reference/glossary-finance-art-oct13.json`). Reuse that exact prompt; only the subject brief changes. Make one image per term per theme, Drift and Signal, 1024 px square, transparent.
-
-Attach three existing Level 1 images of the same theme as references (Drift: `public/images/glossary/themes-oct08/drift/company.webp`, `customer.webp`, `profit.webp`; Signal: `public/images/glossary/signal/building.webp`, `cloud-sale-sneaker.webp`, `coins-320.webp`), then send:
-
-```
-Use case: stylized-concept.
-Asset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.
-Generate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.
-Subject: {{SUBJECT}}
-Composition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.
-Character lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.
-STYLE: {{STYLE}}
-No generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.
-```
-
-`{{STYLE}}` for Drift:
-
-```
-Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.
-```
-
-`{{STYLE}}` for Signal:
-
-```
-Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.
-```
-
-`{{SUBJECT}}` is one or two sentences per term that show the meaning, not the word. The finance ones are in the JSON above; for example, Investor: "Dreamy floats beside a short curved arrow directing a single gold coin toward a miniature sneaker boutique. This shows a person committing money to a business, not buying a shoe." Write the industry's company into it the same way.
-
-Then register the finished files: export each as `<term-slug>.webp` (Drift, plus `-256`), `<term-slug>-320.webp` (Signal) under `public/images/glossary/<industry>-<date>/{drift,signal}/`, and add the industry's example career to `CAREER_TERM_ART` in `src/components/glossary/termArt.ts` with the version folder and the term-to-slug map. The engine shows the pictures on Level 1 and nowhere else.
+Only Level 1 of an industry gets pictures (Joshua, 15 Oct 2026; the team's decision of 16 Oct). The prompt template, both style locks, the references, the script commands, the file contract and the acceptance gate are in the master SOP, `docs/reference/glossary-scaling-sop-usman-2026-10-16.md`, section 6. The filled-in prompt for the three Play tab games is section 7b. They are kept in that one place on purpose (17 Oct 2026, Chandu: "It should all be in the SOP"), so this spec no longer carries its own copy.
 
 ## The Master Scaling Plan SOP, and what it changed here (16 Oct 2026)
 
@@ -223,11 +194,13 @@ Numbers are the SOP's. Built ones are linked. "Mode" is the SOP's recommended ar
 
 ## Images are Codex's; games are Claude's (16 Oct 2026)
 
-Codex generates every image, Claude writes blueprints and builds games. Two optional image kinds exist, and a game ships without either: Level 1 term art (the prompt above, registered in `termArt.ts`) and Levels map scene plates, which scale by tier and theme (six strips for the whole catalogue, 1536 by 512 WebP, horizon in the lower third, nothing within twelve percent of the edges, no text, no Dreamy) and are registered in `PLATES` in `levelPlates.ts`. World backdrops are the third kind (16 Oct 2026, Chandu: "generate reliably and scale different backgrounds in signal mode for each world"): one Signal panorama per career world (fifteen at most), registered in `SIGNAL_WORLD_BACKDROPS` in `worldBackdrops.ts`, feeds the parallax sky and the Levels map plates for every industry under that world; Drift is painted and takes the world accent for its orbs and clouds, with an optional silhouette strip per world in `DRIFT_WORLD_SILHOUETTES`. The full brief with scene descriptions and prompts is Part 3 of `docs/reference/glossary-scaling-plan-handover-2026-10-16.html`.
+Codex generates every image, Claude writes blueprints and builds games. Two optional image kinds exist, and a game ships without either: Level 1 term art (the prompt above, registered in `termArt.ts`) and Levels map scene plates, which scale by tier and theme (six strips for the whole catalogue, 1536 by 512 WebP, horizon in the lower third, nothing within twelve percent of the edges, no text, no Dreamy) and are registered in `PLATES` in `levelPlates.ts`. World backdrops are the third kind (16 Oct 2026, Chandu: "generate reliably and scale different backgrounds in signal mode for each world"): one Signal panorama per career world (fifteen at most), registered in `SIGNAL_WORLD_BACKDROPS` in `worldBackdrops.ts`, feeds the parallax sky and the Levels map plates for every industry under that world; Drift is painted and takes the world accent for its orbs and clouds, with an optional silhouette strip per world in `DRIFT_WORLD_SILHOUETTES`. The full brief with scene descriptions and prompts is section 6 of the master SOP, `docs/reference/glossary-scaling-sop-usman-2026-10-16.md`.
 
 Required per industry since 16 Oct 2026: Level 1 term art (five per theme) and one welcome illustration per theme (`WELCOME_ART` in `welcomeArt.ts`); a level may pin its own welcome (`LEVEL_WELCOME_ART`) or its own Levels map plate (`plate`). Until plate art exists the map shows the level's first term icon on the world accent, and the open Drift card shows one static Dreamy expression by state (`LEVEL_DREAMY_BY_STATE`). Handover Part 3, sections 3.4 to 3.6.
 
 ## Where every piece is documented
+
+The master SOP, `docs/reference/glossary-scaling-sop-usman-2026-10-16.md` (HTML twin beside it, Google Doc for sharing), is the only glossary SOP: rules, prompts for games and art, the 50 industries, Joshua's plan. The older handover, the separate art prompt, Play SOP chapters 04 and 12 and the glossary intake template were deleted on 17 Oct 2026; git history has them.
 
 Component Lab, group "Glossary game, live engine (Drift and Signal)": the 14 world design systems, every live piece in both themes and all of its states, with a generated-industry specimen beside the authored one. The older group "Glossary game (retired engine, unrouted)" documents the first engine and stays for archaeology.
 
@@ -235,5 +208,6 @@ Component Lab, group "Glossary game, live engine (Drift and Signal)": the 14 wor
 
 - A sheet importer (xlsx to blueprint); the blueprint file is the import format.
 - Chapter names for generated industries come from the blueprint, not from the levels.
-- Phone-width and light-mode passes on generated industries.
-- Levels 3 and 4 copy for Nursing and Culinary, Level 4 for Aviation (roadmap words are in each blueprint).
+- Light-mode pass on generated industries.
+- Levels 5 and 6 for Culinary (roadmap words are in its blueprint).
+- Level 1 term art and welcome art for the generated industries (SOP section 7b).

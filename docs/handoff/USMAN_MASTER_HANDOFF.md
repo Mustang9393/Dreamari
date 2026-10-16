@@ -25,7 +25,7 @@ You can see this split in three places: the component library at `/component-lab
 
 **Windows.** Two steps are Mac-only today: Apple Vision subject lifting (used to cut people out of scenes) and face detection for crops. Part 4, section 7.3 names the replacements (SAM 2 with a person detector, or rembg with BiRefNet, for cut-outs; MediaPipe or OpenCV YuNet for faces), the licence checks to make first, and where each plugs in. Everything else is Node and runs anywhere.
 
-**The path for one new career** (Part 2, section 7): 1 script in Joshua's 26-field dataset shape; 2 generator maps rows to beats and `bespokeIn` comes back empty; 3 scoring config (points, endings at 85/40/0, midpoint 68); 4 one entry in `games.ts` plus a Performance Plan or `noStrikes`; 5 art through the manifest and the CLI; 6 the Glossary lesson (Parts 10 and 11); 7 QA with the `?screen=<beatId>` links, a keyboard-only run, and 375 px and 1440 px. A level with no art yet is fully playable, so content and art can ship separately.
+**The path for one new career** (Part 2, section 7): 1 script in Joshua's 26-field dataset shape; 2 generator maps rows to beats and `bespokeIn` comes back empty; 3 scoring config (points, endings at 85/40/0, midpoint 68); 4 one entry in `games.ts` plus a Performance Plan or `noStrikes`; 5 art through the manifest and the CLI; 6 the Glossary Game (Part 10); 7 QA with the `?screen=<beatId>` links, a keyboard-only run, and 375 px and 1440 px. A level with no art yet is fully playable, so content and art can ship separately.
 
 **What to build next (the multiplier).** A generator that takes a SOP 3 dataset and emits the level file, running `bespokeIn` and the type-check as gates; the analytics events Joshua's SOP 3 names (none exist today beyond "played" and "finished"); the Windows replacements for the two Mac steps; and the automated QA in Part 4, section 7.5. Part 12 lists the decisions still open with Joshua (for example, how a composited sprite satisfies SOP 2's "pasted on" rule) and the demo-only shortcuts to strip for production (every one is tagged `DEMO-ONLY` in code).
 
@@ -37,7 +37,7 @@ You can see this split in three places: the component library at `/component-lab
 | Generating a career's game from a script | Part 2 (sections 2, 3, 5 and 7), Part 3, then Part 12 |
 | Producing a career's art | Part 4, then Part 5 or Part 6, with Parts 7, 8 and 9 open |
 | On Windows | Part 4, section 7.3 (the two Mac-only steps and their replacements) |
-| Building the Glossary Game for a career | Parts 10 and 11 |
+| Building the Glossary Game for a career | Part 10 |
 | Reviewing art placement | Part 4, section 6 (the Scene review tool in the hamburger menu) |
 
 ## Where things live in the repo
@@ -62,10 +62,8 @@ You can see this split in three places: the component library at `/component-lab
 - Part 7. Art direction, image slots, post-processing step by step, art QA
 - Part 8. The sprite master prompt (frozen; change only the CAST block)
 - Part 9. The art CLI, command by command
-- Part 10. The Glossary Game, end to end
-- Part 11. What a Glossary lesson must contain (content intake)
-- Part 12. Known issues, rule conflicts and decisions to take to Joshua
-- Part 13. Scale Drift and Signal glossary artwork
+- Part 10. Glossary Games: the master SOP
+- Part 11. Known issues, rule conflicts and decisions to take to Joshua
 
 
 
@@ -92,15 +90,13 @@ The prototype is the reference implementation. Layout, copy, behavior, timings a
 | [01-simulation-data-model.md](`docs/handoff/play-sop/01-simulation-data-model.md`) | Every type and field, the 15 beat kinds with real examples, scoring math, skills, Performance Plan data, progress saves, locations, expressions, the asset inventory, beat-by-beat tables of all five shipped levels, the reusable pacing template |
 | [02-simulation-player.md](`docs/handoff/play-sop/02-simulation-player.md`) | The runtime: state machine, scenes and characters, the dialogue system (typewriter, tap to finish, voice blips), HUD, feedback and correction model, error states, every animation, sound and music, trailer, Performance Plan, Connect interstitial |
 | [03-simulation-interactions.md](`docs/handoff/play-sop/03-simulation-interactions.md`) | All 19 interaction screens: data, layout, input, validation, feedback, animations, edge cases; shared primitives to reuse; how to add a new kind |
-| [04-glossary-game.md](`docs/handoff/play-sop/04-glossary-game.md`) | The Glossary Game end to end: content schema, state machine, remediation, every screen, sound and music, animations, edge states |
+| [Master glossary SOP](`docs/reference/glossary-scaling-sop-usman-2026-10-16.md`) | **Every Glossary Game rule, prompt and checklist** (17 Oct 2026). Replaces the old chapter 04, chapter 12 and the glossary intake template: build a game from a blueprint, generate its art, release it. |
 | [05-play-hub-art-and-history.md](`docs/handoff/play-sop/05-play-hub-art-and-history.md`) | The Play hub, all 18 entry points into Play, every image slot, and the dated decision log (the WHY of each decision, with quoted feedback) |
 | [07-art-direction-and-prompts.md](`docs/handoff/play-sop/07-art-direction-and-prompts.md`) | Which image goes where, how Joshua's art is separated into sprites and backgrounds, the sprite master prompt, post-processing, art QA |
 | [08-new-career-art-pipeline.md](`docs/handoff/play-sop/08-new-career-art-pipeline.md`) | **Start here for any new career's art.** The automatic pipeline (29 Sept 2026): one JSON manifest per career, `npm run art:*` commands for prompts, processing, automatic positioning, beat-to-room routing and QA, and the review page. Replaces every by-hand step in chapter 7 |
 | [09-no-codex-art-path.md](`docs/handoff/play-sop/09-no-codex-art-path.md`) | **Art without Codex** (5 Oct 2026). Generate composed scenes in any tool (ChatGPT etc.), then `npm run art:extract` sorts them on this Mac: rooms with nobody in them become plates, each separable person becomes a sprite cutout (Apple Vision subject lifting), and inseparable moments become heroes. Then chapter 8 as usual. Includes the expression and room prompts |
 | [11-core-kit-and-interactions.md](`docs/handoff/play-sop/11-core-kit-and-interactions.md`) | **Start here to build a career's game** (9 Oct 2026). The core kit (the components that scale by data) vs bespoke demo-only pieces, every component's rules and logic, Joshua's SOP 3 Screen Types and Interactions mapped to beats, the generator whitelist, `toCoreLevel` / `bespokeIn`, and corrections to chapters 01 to 03 |
-| [12-glossary-art-pipeline.md](`docs/handoff/play-sop/12-glossary-art-pipeline.md`) | **Scale Drift and Signal glossary art** (13 Oct 2026). Canonical Level 1 anchors, copy/paste prompts, semantic briefs, career-scoped registry, alpha/pixel-safe WebP preparation, provenance and visual acceptance gate |
 | [templates/simulation-content-intake.md](`docs/handoff/play-sop/templates/simulation-content-intake.md`) | Exactly what a career's simulation dataset must contain, the writing rules and the validation list |
-| [templates/glossary-content-intake.md](`docs/handoff/play-sop/templates/glossary-content-intake.md`) | The same for a Glossary lesson |
 
 **One document with everything:** `docs/handoff/USMAN_MASTER_HANDOFF.md` stitches the chapters, prompts, templates and the art CLI guide in reading order, with an executive summary. It is generated: `node scripts/handoff/build-master-handoff.mjs` after any chapter change.
 
@@ -164,15 +160,7 @@ Follow in order. Detail: ch. 1 §2.5 and ch. 2 §11.
 
 ### 4. Adding a new Glossary Game (step by step)
 
-Detail: ch. 4 §1.5.
-
-1. Author the `GlossaryCareer` in `glossary/data.ts` per `templates/glossary-content-intake.md`: 5 terms, 7 main questions, review questions, one Power Play paragraph, facts.
-2. Add any new icon slugs to `TERM_ICON_MAP` (relevant to the lesson's story; never emoji).
-3. Parameterize the three hardcoded "finance" strings (issue A11) before the second career ships.
-4. Add the hub card to `GLOSSARY_GAMES` ("<Subject> Terms", sub "Learn key <subject> terms", cover). The Career Detail "Glossary Game" button appears once `hasGlossary(slug)` is true.
-5. QA with section 7.
-
----
+Use the master glossary SOP, `docs/reference/glossary-scaling-sop-usman-2026-10-16.md`. Prompt A builds the game from one blueprint file; section 7b and Prompt D make its art; Prompt C releases it to the hub. The old steps here (hand-authoring a `GlossaryCareer` in `data.ts` from an intake sheet) were retired on 17 Oct 2026 when games became generated from blueprints.
 
 ### 5. The experience rules (why the games feel the way they do)
 
@@ -2326,909 +2314,610 @@ placement -- is automatic.
 
 ---
 
-# Part 10. The Glossary Game, end to end
+# Part 10. Glossary Games: the master SOP
 
-> Content schema, state machine, every screen, sound, animation and edge state. Source: `docs/handoff/play-sop/04-glossary-game.md`.
+> The one glossary SOP (17 Oct 2026): rules, game prompts, art prompts, the 50 industries and Joshua's plan. It replaced the old glossary chapter, intake template and art chapter. Source: `docs/reference/glossary-scaling-sop-usman-2026-10-16.md`.
 
-## Play SOP, chapter 4: Glossary Game
+## Dreamari Glossary Games: Master SOP and Prompts for Usman and ChatGPT (image gen)
 
-> Reference chapter of the Play SOP. Start at [README.md](`docs/handoff/play-sop/README.md`). This chapter was produced by a line-by-line read of the source at commit `2ff4bd5d` (26 Sept 2026); every `file:line` reference is against that commit, so re-check line numbers if the files have moved. Conventions: `UNCLEAR:` means the code alone does not settle it; `OBSERVED:` / `FINDING:` / `GAP:` / `BUG:` mark something a rebuild would get wrong by trusting comments or field names. All of them are collected, with a recommended decision, in [06-known-issues-and-decisions.md](`docs/handoff/play-sop/06-known-issues-and-decisions.md`).
+_17 October 2026. One document to scale the glossary games from four industries to fifty: the rules (Joshua's), what is built and verified, the prompts an agent pastes to create a game, and the prompts Codex pastes to generate every image. Repo copies: docs/reference/glossary-scaling-sop-usman-2026-10-16.html and the same text as docs/reference/glossary-scaling-sop-usman-2026-10-16.md. The locked engineering spec is docs/handoff/specs/glossary-system.md. Joshua's plan in full is Appendix A of this document. This is the only glossary SOP: the filled-in art prompt for the three Play tab games is section 7b, and every older glossary SOP, handover and separate prompt was deleted on 17 Oct 2026._
 
-Audience: Usman + his AI agent, recreating and scaling Glossary Games to every career.
-Convention: `file:line` refs are against HEAD. `GGE` = `src/components/glossary/GlossaryGameExperience.tsx`. `UNCLEAR:` marks things I could not settle from code alone. "Finding:" marks a bug or gap found by reading code (not verified live unless stated).
+### 0. Readiness, checked 17 October 2026
 
----
-
-### 0. Files in scope and quick facts
-
-| File | Lines | Role |
-|---|---|---|
-| `src/app/play/glossary/[career]/page.tsx` | 32 | Route. Server component. Resolves career, 404s otherwise, renders lesson 0. |
-| `src/components/glossary/data.ts` | 277 | Content schema + the only authored content (Finance Lesson 1, "Dream Sneakers"). |
-| `src/components/glossary/progress.ts` | 111 | localStorage save (`dreamari-glossary-progress`). Write-only in practice. |
-| `src/components/glossary/GlossaryGameExperience.tsx` | 2269 | The whole game: every screen, every question renderer, the state machine. |
-| `src/components/play/glossaryThemeSound.ts` | 344 | Per-background-version SFX wrapper + synthesized background music + Music mute. |
-| `src/components/play/sound.ts` | 204 | App-wide synthesized SFX + the Sound mute (`dreamari-play-muted`). v1 SFX come from here. |
-| `src/components/play/music.ts` | 195 | Simulation (`/play/[game]`) MP3 music. **Not used by the Glossary Game at all.** Documented here only because it is the other music system and has its own separate mute key. |
-
-Supporting files the game imports (read for this doc): `play/PlayBurst.tsx`, `play/PlayBackdrop.tsx`, `play/backdropPulse.ts`, `play/PlayVersionChip.tsx`, `play/useResolvedColor.ts`, `play/PlayBackdropV2Crt.tsx`, `play/PlayBackdropV3Dots.tsx`, `play/PlayBackdropV4Synthwave.tsx`, `ui/fireworks.tsx`, `ui/stars.tsx`, `flow/SparkBar.tsx`, `app/worlds.ts`, `app/theme.ts`, `app/IconTip.tsx`, `app/Inbox.tsx` (`HeaderActions`), `app/DreamScoreChip.tsx`, `lib/dreamScore.ts`, `src/app/globals.css` (keyframes + `.play-crt`), `components/marketing/tokens.css` (tokens + `[data-night-scene]`), `components/app/app.css` (`dm-*` affordances).
-
-Quick facts:
-- Only ONE career has a glossary: `investment-banking` (world "Business & Finance", accent amber `#ffb81f`). One lesson: `FIN-L01` "Business Basics". 5 terms, 7 main questions, 1 review question, 1 Power Play paragraph with 5 blanks, 2 facts.
-- No timers, no lives, no hearts, no per-question points. Score = the lesson's flat `xpReward` (20) added once to the shared Dream Score.
-- Mastery = each term needs 2 credited correct answers (`MASTERY_TARGET = 2`, GGE:87).
-- Streak modal every 5 consecutive correct answers (GGE:1900).
-- No typewriter/text-reveal animation anywhere in this game (see section 5).
-- The content authoring source is `DreamAri_Glossary_Content_Template_v1.xlsx` (data.ts:1-3). **That xlsx is NOT in the repo** (searched; not found). Its structure is only recoverable from `data.ts`'s types and comments.
-- The design reference was a Replit at `dceeai.replit.app/ib-glossary-game` (GGE:51, AI_HANDOFF.md:7190).
-
----
-
-### 1. Data contract
-
-#### 1.1 Types (data.ts)
-
-##### `GlossaryTerm` (data.ts:13-21)
-| Field | Type | Required | Used by engine? | Notes |
-|---|---|---|---|---|
-| `id` | string | yes | yes | Key for mastery (`mastery[term.id]`), React keys, `termId` references from questions. In FIN-L01 the id equals the term word (`"Company"`). |
-| `order` | number | yes | **no** | Terms render in ARRAY order, not by `order` (GGE:499, 654, 774, 2149). |
-| `term` | string | yes | yes | Card title, Unlock button label ("Unlock {term}"), chips, mastery dot `title` tooltip. |
-| `definition` | string | yes | yes | Front face of the flip card. |
-| `example` | string | yes | yes | Back face of the flip card ("{exampleCompany} Example"). |
-| `icon` | string (semantic slug) | yes | yes | Resolved via `TERM_ICON_MAP` (GGE:130-151). Unmapped slug falls back to lucide `Sparkles` (GGE:154). |
-| `memoryTip` | string? | no | **no** | Authored for 3 of 5 terms, never rendered anywhere. |
-
-##### `BaseQuestion` (data.ts:23-32), shared by all question kinds
-| Field | Type | Notes |
-|---|---|---|
-| `id` | string | Also the SHUFFLE SEED for options / match right column (see 2.4). Also dedupe key for review questions. Must be unique within a lesson. |
-| `termId` | string? | Which term a correct answer credits. Undefined only for Match It Up / Sort the Buckets (they credit per pair/item). Review questions MUST have `termId` or they are never drawn (GGE:1918). |
-| `playOrder` | number | Main queue is sorted by this ascending (GGE:1753, 1839). Review questions' `playOrder` is ignored (appended in array order). |
-| `prompt` | string | Shown in Dreamy's speech bubble (choice, typeTerm) or as a plain heading (matchUp, sortBuckets). **Not rendered for profitBuilder** (GGE:1339 excludes it; the scenario text is shown instead). |
-| `feedbackCorrect` | string | Body text of the FeedbackPanel when correct. |
-| `feedbackWrong` | string | Body text of the FeedbackPanel when wrong. This is the ONLY place the right answer is explained for typeTerm / profitBuilder / sortBuckets. |
-
-##### `ChoiceQuestion` (data.ts:34-39), `kind: "choice"`
-- `type`: `"Definition" | "Reverse Recall" | "Fill in the Blank" | "Catch the Misuse"`. Only `"Catch the Misuse"` changes the renderer (document-sheet style, `DocumentOptionList`, GGE:1362). The other three render identically (`OptionList`).
-- `options: string[]` (authored distractors; there is NO distractor generation). Rendered A, B, C, D... (`String.fromCharCode(65 + i)`, GGE:841). Option TEXT is the React key (GGE:833, 872) so options must be unique strings.
-- `correctIndex: number` (index into the AUTHORED order; display order is shuffled, the engine maps back).
-
-##### `TypeTermQuestion` (data.ts:41-46), `kind: "typeTerm"`, `type: "Type the Term"`
-- `wordBank: string[]`: tappable chips that fill the text input (they are a typing shortcut, not a separate answer path, GGE:908-911). Word text is the React key.
-- `answer: string`: compared as `value.trim().toLowerCase() === answer.toLowerCase()` (GGE:899). Note: `answer` itself is NOT trimmed, only lowercased. FIN-L01 stores `"profit"` lowercase while the word bank says `"Profit"`; comparison still matches.
-
-##### `MatchUpQuestion` (data.ts:48-53), `kind: "matchUp"`, `type: "Match It Up"`
-- `pairs: MatchPair[]`, `MatchPair = { order: number; left: string; right: string; termId: string }`.
-- Left column renders in array order; right column is shuffled with seed `question.id` (GGE:964). `order` is unused. `left` is the React key and the match identity; `right` is also a React key and is looked up with `find(p => p.right === right)` (GGE:1083), so both sides must be unique.
-- On completion credits every pair's `termId` (GGE:1009).
-
-##### `SortBucketsQuestion` (data.ts:55-61), `kind: "sortBuckets"`, `type: "Sort the Buckets"`
-- `items: BucketItem[]`, `BucketItem = { order: number; text: string; bucket: string; termId: string }`.
-- `buckets: string[]`: rendered in authored order in a 2-column grid (GGE:1170-1171).
-- Items shuffled with seed `question.id + "-items"` (GGE:1125). `order` unused. `placed` state is keyed by `item.text` (GGE:1121, 1131) so item texts must be unique; `item.bucket` must exactly equal one of `buckets`.
-- Credits the `termId` of each correctly-placed item, even if the overall answer is wrong (partial credit, GGE:1137-1141).
-
-##### `ProfitBuilderQuestion` (data.ts:63-69), `kind: "profitBuilder"`, `type: "Profit Builder"`
-- `scenario: string` (shown in an accent-tinted box).
-- `steps: ProfitStep[]`, `ProfitStep = { order: number; label: string; answer: number }`. `order` IS used here: it is the React key and the number shown in the step's circle badge (GGE:1240, 1246).
-- Each input is parsed `Number(value.replace(/[,$]/g, ""))` and compared with `=== step.answer` (GGE:1225). Commas and dollar signs are stripped; spaces are not stripped by the regex but `Number(" 100000 ")` tolerates surrounding whitespace. Decimals like `100000.0` would equal 100000. `"100k"` would be NaN (wrong).
-- All steps must be correct for `correct: true`; credit goes to the single `question.termId` only when all correct (GGE:1228).
-- This kind is finance-specific by name, but the mechanic is generic "multi-step numeric entry."
-
-##### `GlossaryQuestion` union (data.ts:71)
-`ChoiceQuestion | TypeTermQuestion | MatchUpQuestion | SortBucketsQuestion | ProfitBuilderQuestion`. The discriminant is `kind`; `type` is the content-template label.
-
-##### `PowerPlay` (data.ts:73-77)
-- `paragraph: string` with `{1} {2} ...` placeholders (1-based). Split with `/(\{\d+\})/g` (GGE:1512); each `{n}` becomes an input bound to `answers[n-1]`.
-- `answers: string[]`: case-insensitive, trimmed compare (GGE:1497, 1502, 1538). Rendered (capitalized first letter) as a non-interactive word bank IN THE SAME ORDER as the blanks (GGE:1523-1529). Words are React keys, so duplicate answers would collide.
-
-##### `GlossaryLesson` (data.ts:79-101)
-| Field | Used? | Where |
-|---|---|---|
-| `id` | yes | `key` on the component (page.tsx:29), progress save key, Dream Score milestone id `glossary:{careerSlug}:{lessonId}` (GGE:2266). |
-| `lessonNumber` | yes | "Start Lesson {n}" CTA (GGE:513). |
-| `title` | yes | Unlock screen `<h2>` (GGE:670), in-question HUD left label (GGE:2126). |
-| `subtitle` | **no** | Unused. |
-| `milestone` | yes | UnlockComplete card subline (GGE:789). |
-| `exampleCompany` | yes | Intro "Meet {x}", intro body, back of flip card "{x} Example". |
-| `difficulty` | **no** | Unused. |
-| `estimatedMinutes` | **no** | Unused. |
-| `xpReward` | yes | "+{n} XP" on Complete; the amount saved and awarded (GGE:1687, 2265-2266). |
-| `companyValue` | yes | LessonIntro big number `$10,000` and meter numerator. |
-| `nextCompanyValue` | yes | Meter denominator and "Next: $50,000". |
-| `nextMilestone` | yes | "Next: $50,000 · Meet your first investor". |
-| `terms` | yes | Unlock carousel, chips, mastery. |
-| `questions` | yes | Main queue, sorted by `playOrder`. |
-| `reviewQuestions` | yes | Remediation pool (see 2.5). |
-| `powerPlay` | yes | Power Play screen. |
-| `facts` | yes | One picked with `Math.random()` for the 1.8s "Checking Your Mastery" screen (GGE:2241). |
-
-##### `GlossaryCareer` (data.ts:103-108)
-| Field | Used? | Notes |
-|---|---|---|
-| `careerSlug` | yes | Save key, milestone id, exit route `/career/{careerSlug}` (GGE:1831). |
-| `careerTitle` | **no** | Unused in the game. |
-| `world` | yes | `WORLD_COLORS[career.world]` sets `--glossary-accent` (GGE:1933). Must exactly match a key in `src/components/app/worlds.ts:29-45`, else falls back to `var(--world-business-money-office)` (amber). |
-| `lessons` | yes | Only `lessons[0]` is ever played (page.tsx:23). |
-
-#### 1.2 The one real lesson, verbatim (data.ts:115-260)
-
-Career registry (data.ts:262-269):
-```ts
-const GLOSSARY_CAREERS: Record<string, GlossaryCareer> = {
-  "investment-banking": { careerSlug: "investment-banking", careerTitle: "Investment Banking", world: "Business & Finance", lessons: [FIN_LESSON_1] },
-};
-export function hasGlossary(slug: string): boolean { return slug in GLOSSARY_CAREERS; }
-export function glossaryFor(slug: string): GlossaryCareer | null { return GLOSSARY_CAREERS[slug] ?? null; }
-```
-
-Lesson header (data.ts:235-259): `id "FIN-L01"`, `lessonNumber 1`, `title "Business Basics"`, `subtitle "Company · Product · Service · Customer · Profit"`, `milestone "Launch Dream Sneakers"`, `exampleCompany "Dream Sneakers"`, `difficulty "Beginner"`, `estimatedMinutes 4`, `xpReward 20`, `companyValue 10000`, `nextCompanyValue 50000`, `nextMilestone "Meet your first investor"`.
-
-Terms (data.ts:115-121):
-| id | order | term | definition | example | icon | memoryTip |
-|---|---|---|---|---|---|---|
-| Company | 1 | Company | A company sells products or services to make money. | Dream Sneakers is a company that makes and sells sneakers. | building | (undefined) |
-| Product | 2 | Product | A product is something a company makes and sells. | Your sneakers are the product that customers buy. | sneaker | Product = something you can hold. |
-| Service | 3 | Service | A service is work done for a customer, not a physical item. | Custom sneaker design is a service Dream Sneakers offers. | palette | Service = someone does something for you. |
-| Customer | 4 | Customer | A customer buys what a company sells. | A person buying your sneakers is a customer. | shopping-bag | (none) |
-| Profit | 5 | Profit | Profit is money left after a company pays all its costs. | If Dream Sneakers earns $200K and spends $120K, profit is $80K. | money-bag | Profit = what is left in your pocket. |
-
-Main questions (data.ts:123-218), in `playOrder`:
-| # | id | kind / type | termId (credit) | Prompt | Answer |
-|---|---|---|---|---|---|
-| 1 | FIN-L01-Q1 | choice / Definition | Company | What is a company? | "An organization that sells products or services to make money" (idx 1 of 4) |
-| 2 | FIN-L01-Q2 | typeTerm | Profit | Dream Sneakers spends $10 to make a sneaker and sells it for $200. The $190 left over is called ______. | `profit`; wordBank = Company, Product, Service, Customer, Profit |
-| 3 | FIN-L01-Q3 | choice / Fill in the Blank | Service | Dream Sneakers lets customers design their own shoes online. That is a ______ because it is work done for the customer. | "service" (idx 3 of company/profit/product/service) |
-| 4 | FIN-L01-Q4 | matchUp | per pair: Company, Product, Customer, Profit | Match each term to its example. | Company-Dream Sneakers, Product-Sneakers, Customer-Person buying shoes, Profit-Money left after costs |
-| 5 | FIN-L01-Q5 | choice / Catch the Misuse | Customer | One sentence uses a business term incorrectly. Tap it. | "The sneaker is the customer." (idx 2) |
-| 6 | FIN-L01-Q6 | sortBuckets | per item: Product, Service, Customer, Company | Sort each item into the right bucket. | buckets Product/Service/Customer/Company; items Pair of sneakers->Product, Custom sneaker design->Service, Person buying shoes->Customer, Dream Sneakers itself->Company |
-| 7 | FIN-L01-Q7 | profitBuilder | Profit | (prompt "Profit Builder", not rendered) scenario: "Dream Sneakers sells 500 pairs at $200 each. Costs are $60,000." | step 1 "Revenue: 500 × $200 =" -> 100000; step 2 "Profit: Revenue − $60,000 =" -> 40000 |
-
-Review pool (data.ts:220-233): one question, `FIN-L01-Q8`, choice / Reverse Recall, termId Company, prompt "An organization that sells products or services to make money is called a...", options Company/Customer/Product/Service, correctIndex 0.
-
-Power Play (data.ts:251-255):
-> "Dream Sneakers is a {1} built to sell a great {2}: custom sneakers. We offer custom design as a {3} for every {4} who orders. Once costs are paid, the money left is {5}."
-answers: `company, product, service, customer, profit`.
-
-Facts (data.ts:256-259): 2 strings (sneaker industry 25 billion pairs/yr; most new companies no profit in year one).
-
-Feedback copy: every question carries its own `feedbackCorrect` / `feedbackWrong` (see data.ts). Q7's two strings are identical (data.ts:215-216). Q4's `feedbackWrong` can never display (Match It Up cannot end wrong, see 4.3).
-
-Actual displayed (shuffled) order, computed by re-running `shuffleStable` in node (deterministic, identical on server and client, identical every play):
-- Q1: A = A savings account you open at a bank | B = A school that teaches business skills | **C = An organization that sells...** | D = A government office that sets prices
-- Q3: A = profit | **B = service** | C = product | D = company
-- Q5: A = Dream Sneakers sells sneakers as its product. | **B = The sneaker is the customer.** | C = Profit is money left after costs. | D = A customer buys Dream Sneakers online.
-- Q8: A = Product | B = Service | C = Customer | **D = Company**
-- Q4 right column: Sneakers | Person buying shoes | Money left after costs | Dream Sneakers
-- Q6 item pool: Custom sneaker design | Person buying shoes | Dream Sneakers itself | Pair of sneakers
-
-Mastery arithmetic for FIN-L01 if everything is answered correctly: Company 3 (Q1, Q4, Q6), Product 2 (Q4, Q6), Service 2 (Q3, Q6), Customer 3 (Q4, Q5, Q6), Profit 3 (Q2, Q4, Q7). All five reach 2. Only Company has a review question, so remediation can only ever fire for Company in this lesson.
-
-#### 1.3 Which careers have glossaries (and every entry point)
-
-- Content: only `investment-banking` (data.ts:262-269).
-- `src/components/play/games.ts:120-128` `GLOSSARY_GAMES` (the Play hub shelf): `investment-banking` "Finance Terms" (cover `/images/app/glossary-finance-thumb.png`, playable), plus three "Coming soon" dummy cards with no content: `registered-nurse` "Medical Terms", `airline-pilot` "Flight Terms", `software-engineer` "Tech Terms" (covers `glossary-{slug}-cards.png`). Title pattern "{Subject} Terms" (games.ts:115-118, direct feedback 9 Sept 2026).
-- `PlayHub.tsx:188-205`: `playable = hasGlossary(slug)`; `href` only when playable, else `locked: true`. World font/accent via `worldForCareer(slug)` (games.ts:103-105).
-- `CareerDetailExperience.tsx:530, 621-631`: "Glossary Game" button (lucide `BookOpen`, wrapped in `BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}`) only when `hasGlossary(career.slug)`; routes `/play/glossary/{slug}`. Same in `actions-lab/CareerDetailLab.tsx:493, 611-615`.
-- `HomeExperience.tsx:427`: hardcoded Home activity card "Finance Glossary Game", `pct: 60`, `label: "6 of 10 terms mastered"`. Finding: this progress is fake (not read from glossary progress; the lesson only has 5 terms). Not tagged `DEMO-ONLY`.
-- `profile/data.ts:107`: My Plan task "Complete 3 Glossary Games for your #1 Career" -> `/play/glossary/investment-banking` (hardcoded slug).
-- `lib/studentSignals.ts:79-86` `glossaryDone()`: counts `completed` lessons across the raw `dreamari-glossary-progress` JSON (drives counselor/My Plan signals).
-- `TERM_ICON_MAP` pre-registers icon slugs for planned Aviation (Airline Pilot), Healthcare (Registered Nurse), Tech (Software Engineer) glossaries (GGE:136-150), but `data.ts` has never contained those careers (git log -S shows data.ts only ever touched in `c281ac1c` and `49a34220`).
-
-#### 1.4 Public assets referencing glossary
-
-`find public -ipath '*glossary*'` (all in `public/images/app/`):
-| File | px | Bytes | Referenced? |
-|---|---|---|---|
-| glossary-finance-thumb.png | 941x1672 (portrait) | 1,916,679 | yes: games.ts:120, HomeExperience.tsx:427 |
-| glossary-registered-nurse-cards.png | 1672x941 | 2,407,505 | yes: games.ts:126 |
-| glossary-airline-pilot-cards.png | 1672x941 | 1,986,408 | yes: games.ts:127 |
-| glossary-software-engineer-cards.png | 1672x941 | 1,931,036 | yes: games.ts:128 |
-| glossary-healthcare-thumb-v2.png | 1672x941 | 2,407,505 | no (md5-identical to registered-nurse-cards) |
-| glossary-aviation-thumb-v2.png | 1672x941 | 1,986,408 | no (md5-identical to airline-pilot-cards) |
-| glossary-tech-thumb-v2.png | 1672x941 | 1,931,036 | no (md5-identical to software-engineer-cards) |
-| glossary-healthcare-thumb.png | 1672x941 | 2,073,104 | no |
-| glossary-aviation-thumb.png | 1672x941 | 2,563,242 | no |
-| glossary-tech-thumb.png | 1672x941 | 1,955,566 | no |
-
-In-game images: only Dreamy sprites, `public/images/dreamy/v2/dreamy-{pose}.png` (GGE:182). Poses the game uses: `idea`, `happy`, `glasses`, `curious`, `party`, `puzzle`. The `DreamyFace` type also allows `nervous` and `heart` (both files exist) but no screen uses them. Rendered via `next/image` at `width/height = size * 1.5`, CSS size = `size`.
-
-Art style history: finance thumb is a user-supplied anime-style illustration (term cards on a desk, Empire State skyline, sneaker sketch) (AI_HANDOFF.md:7253). Other covers are "card-hand" thumbnails (games.ts:121-125).
-
-#### 1.5 What a NEW career must supply (checklist)
-
-A. Content in `data.ts` (or its production equivalent), one `GlossaryCareer`:
-1. `careerSlug` matching the career catalog slug (same slug the Career Detail page and Play hub use).
-2. `careerTitle` (currently unused, but supply it).
-3. `world`: an exact `WORLD_COLORS` key (worlds.ts:29-45). This single string sets the entire accent (CTAs, meter, chips, progress bar, mastery dots, flip-card sketch strokes, fireworks). Options and their dark / light values (tokens.css:43-64 and 325-340):
-   - Business & Finance `#ffb81f` / `#825900`; Tech & Engineering `#6366f1` / `#3d41fb`; Health & Medicine `#14b8a6` / `#046c61`; Driving, Flying & Shipping `#3b82f6` / `#0055df`; Arts, Media & Sport `#ff4585` / `#c20043`; Science & Research `#00c8dc` / `#006b76`; Teaching & Education `#8b5cf6` / `#6928ff`; Building & Construction `#ff9640` / `#9e4700`; Law, Safety & Justice `#e5484d` / `#c10e14`; Food & Cooking `#1fc76e` / `#0a6f39`; Farming, Animals & Nature `#1fc76e` / `#0a6f39`; Counseling & Social Work `#c05fa6` / `#a03583`; Factories & Making Things `#c2703d` / `#914e24`; Fixing Machines & Engines `#64748b` / `#526177`; Personal Care & Community Services `#d946ef` / `#b62060`.
-4. At least one `GlossaryLesson` (only index 0 plays today).
-
-B. Per lesson:
-1. Header fields: `id` (globally unique, becomes the milestone id), `lessonNumber`, `title`, `subtitle`, `milestone`, `exampleCompany` (the one story company every example ties back to), `difficulty`, `estimatedMinutes`, `xpReward`, `companyValue`, `nextCompanyValue`, `nextMilestone`.
-2. `terms`: the template uses 5 (UI is tuned for 5, see B-constraints). Each: unique `id`, `term`, `definition`, `example` (mentioning `exampleCompany`), `icon` slug, optional `memoryTip`.
-3. `questions`: the template's worked example covers all question types. Each needs unique `id`, `playOrder`, `prompt`, `feedbackCorrect`, `feedbackWrong` plus kind-specific fields. Distractors are AUTHORED (`options`), there is no generator.
-4. `reviewQuestions`: one or more per term you want remediated. Each MUST have `termId`. README rule quoted in data.ts:95-97: "if the student gets one wrong the review round needs a different question to ask".
-5. `powerPlay.paragraph` with `{1}`..`{n}` and matching `answers` (n entries, unique).
-6. `facts`: 1+ short "did you know" lines (0 is handled: nothing shown).
-
-C. Engine / UI pieces a new career needs (NOT data-driven today):
-1. Icon slugs must exist in `TERM_ICON_MAP` (GGE:130-151) or they render as `Sparkles`. Existing slugs: `building`, `sneaker` (custom SVG), `palette`, `shopping-bag`, `money-bag`, `thrust`, `lift`, `drag`, `altitude`, `stethoscope`, `heart-pulse`, `pulse`, `siren`, `plug`, `database`, `bug`, `workflow`. Rule: "Illustrations stay RELEVANT to the lesson's own story (direct feedback): the product IS a sneaker, the service IS custom design (a brush, not a bell), the customer is a PERSON" (GGE:127-129). No raw emoji ever (GGE:104-107).
-2. Hardcoded finance copy that must be parameterized for other careers:
-   - IntroScreen body: "You'll learn finance words using {exampleCompany} as your example." (GGE:403)
-   - DreamyIntroScreen CTA: "Start Learning Finance" (GGE:463)
-   - LessonIntroScreen heading: "Learn the Language of Finance" (GGE:480)
-   - Everything else is data-driven.
-   - UNCLEAR: which field should drive these (world name? careerTitle? a new `subject` field). Suggest a `subject` string ("finance", "nursing", "aviation").
-3. The company-value meter (`companyValue`/`nextCompanyValue`, "$" prefixed with `toLocaleString()`) is a finance "grow your company" metaphor. Other careers need an equivalent progress metaphor or these fields reinterpreted. UNCLEAR: no guidance exists in code.
-4. Play hub card: add to `GLOSSARY_GAMES` (games.ts:119-129) with `cover`. `worldForCareer(slug)` must resolve (career must be in `SIMULATIONS` or `SOON` for the poster font/accent on the hub card).
-5. Career Detail button appears automatically once `hasGlossary(slug)` is true.
-6. Art: a hub cover (1672x941 landscape "card-hand" style for the Coming-soon ones; finance's is 941x1672 portrait). No per-career in-game art; the in-game "art" is the term icons + Dreamy.
-7. There is NO per-career theme music; music is per background version, not per career (section 6).
-
-D. Authoring constraints implied by the engine (validate these in an importer):
-- All ids unique within the lesson; lesson id globally unique.
-- Every `termId` (question, pair, item, review) must match a `terms[].id`, otherwise credit is silently lost.
-- `choice.correctIndex` in range; option strings unique.
-- `typeTerm.answer` should also appear in `wordBank` (the word bank is the tap path). Not enforced.
-- `matchUp` left strings unique, right strings unique.
-- `sortBuckets` item texts unique; every `item.bucket` in `buckets`.
-- `profitBuilder.steps[].order` unique (it is the React key and the displayed number); `answer` a finite number.
-- `powerPlay` placeholder count == `answers.length`; placeholders 1-based and contiguous; answers unique. The paragraph may reuse a placeholder twice, but both inputs would bind to the same value.
-- Term count: UnlockComplete renders one 44px (56px at sm) circle per term in a `flex-nowrap` row (GGE:773-775) and the HUD one 20px dot per term; >6-7 terms will overflow a 320-375px phone. The "650px" height guard (GGE:2058) was measured on 5 terms' UnlockScreen; longer definitions change it. Keep 5 terms per lesson (Joshua's spec, AI_HANDOFF.md:12785: "5 terms per level").
-- Mastery needs 2 credits per term from main questions; author so each term is credited at least twice across the 7 questions, and give every term a review question if you want remediation to cover it.
-
----
-
-### 2. Game flow / state machine
-
-#### 2.1 Route and mount (page.tsx)
-- `/play/glossary/[career]`, `params` is a Promise (`await params`, page.tsx:20), per this Next.js version.
-- `glossaryFor(slug)`; `null` -> `notFound()` (page.tsx:22). No lesson -> `notFound()` (page.tsx:24).
-- Renders Google Fonts `preconnect` links (page.tsx:27-28) and `<GlossaryGameExperience key={lesson.id} career lesson />`.
-- Imports `@/components/marketing/tokens.css` and `@/components/app/app.css` (page.tsx:5-6).
-- Metadata: title "Glossary Game · Dreamari", description "Learn the words behind a career, one term at a time." (page.tsx:8-11).
-- Comment (page.tsx:13-18): "Only lesson 1 plays today; a `?lesson=` param could pick among more once a career has them." Not implemented.
-- No `loading.tsx`, no `not-found.tsx` in `src/app` (Next default 404 page).
-
-#### 2.2 State (GGE:1749-1759)
-| State | Initial | Meaning |
-|---|---|---|
-| `screen: Screen` | `"intro"` | Current screen. |
-| `unlockIndex` | 0 | Which term the Unlock carousel shows; `== terms.length` means show UnlockComplete. |
-| `queue: GlossaryQuestion[]` | `questions` sorted by `playOrder` | Main queue; review questions are appended in place. |
-| `queueIndex` | 0 | Current question. |
-| `mastery: Record<termId, number>` | `{}` | Credit counts. |
-| `pendingResult: AnswerResult \| null` | null | Non-null = FeedbackPanel open. |
-| `streak` | 0 | Consecutive correct answers. |
-| `showStreak: number \| null` | null | Non-null = StreakModal open. |
-| `dismissedReview` | false | Review pull has been evaluated and found empty. |
-| `bgVersion` | `"v1"` | DEMO-ONLY background version (from `?bg=`). |
-| `dockSpace`, `topBarSpace` | 0 | Measured px for layout math. |
-
-`Screen` union (GGE:75-85): `intro | dreamyIntro | lessonIntro | unlock | unlockComplete | question | powerPlayIntro | powerPlay | masteryLoading | complete`. `"unlockComplete"` is NEVER assigned; UnlockComplete renders as a sub-case of `"unlock"` when `unlockIndex >= terms.length` (GGE:2087-2095, 2194-2208).
-
-State is all in-memory; a reload restarts at `intro` (no mid-lesson resume, by design: progress.ts:3-6 "a glossary lesson is ~4 minutes and restartable").
-
-#### 2.3 Transitions
-```
-intro --Next--> dreamyIntro --Start Learning Finance--> lessonIntro --Start Lesson N--> unlock[0]
-unlock[i] --Unlock {term}--> unlock[i+1] ... unlock[n-1] --Unlock--> (unlock, index n) = UnlockComplete
-UnlockComplete --Start Practice--> question (if queue.length > 0) | powerPlayIntro (if 0 questions)
-question: answer -> handleAnswer -> FeedbackPanel (+ StreakModal on every 5th streak)
-FeedbackPanel --Next Question / See Results--> advanceQuestion:
-    not end of queue -> queueIndex+1
-    end of queue and !dismissedReview -> reviewPool = reviewQuestions where termId in (terms with mastery < 2) and not already in queue
-        pool non-empty -> append ALL of pool to queue, queueIndex+1 (stay on question)
-        pool empty -> dismissedReview = true, fall through
-    -> powerPlayIntro
-powerPlayIntro --Unlock & Test My Knowledge--> powerPlay
-powerPlay --Check Answers (repeat until all correct)--> --Finish Lesson--> masteryLoading
-masteryLoading --setTimeout 1800ms--> complete (awards XP + saves on mount)
-complete --Continue--> router.push(`/career/${careerSlug}`)
-TopBar Back (any screen) --> router.back()
-```
-Code: GGE:2191-2232 (screen switch), 1888-1904 (`handleAnswer`), 1906-1927 (`advanceQuestion`), 2240-2247 (mastery loading gate), 2249-2269 (complete gate), 1830-1832 (`exitToCareer`), 2107 (Back).
-
-#### 2.4 Question generation and randomization
-- No generation: questions are authored. No distractor selection logic.
-- Order: main queue sorted by `playOrder` ascending, fixed.
-- Shuffles use `shuffleStable(items, seed)` (GGE:1283-1295): string hash `h = (h*31 + charCode) >>> 0` over the seed, then a Fisher-Yates using an LCG `h = (h*1103515245 + 12345) >>> 0; j = h % (i+1)`. Deterministic by design ("no Math.random at render, so SSR/CSR stay in sync", GGE:1284-1285). Consequence: the shuffled order is the SAME for every student, every play.
-  - Choice options: seed `question.id` (GGE:1305); correct index remapped (`findIndex(s => s.i === correctIndex)`, GGE:1366).
-  - Match right column: seed `question.id` (GGE:964).
-  - Sort items: seed `question.id + "-items"` (GGE:1125).
-  - Type-term word bank: NOT shuffled (authored order).
-  - Power Play word bank: NOT shuffled and in blank order (Finding: gives away the answer order; `[...answers]` copy at GGE:1523 suggests a shuffle was intended but none is applied).
-- No-repeat: a review question is appended only if not already in the queue (`!queue.some(existing => existing.id === q.id)`, GGE:1918). Each review question can be asked at most once per session.
-- The only true randomness: which `fact` shows on the mastery-loading screen (`Math.random()` in a `useState` initializer, client-only, GGE:2241).
-
-#### 2.5 Remediation (review round) exact rule
-At the end of the queue, once: take terms whose `mastery < MASTERY_TARGET (2)`; pull every `reviewQuestion` with a `termId` among them that is not already queued; append all at once. When that extended queue ends, the rule re-runs; since pulled ones are now queued the pool is empty, so it sets `dismissedReview` and goes to Power Play. Terms still under 2 after review simply stay unmastered; there is no forced repeat and no gate. Mastery shortfall does NOT block completion.
-
-Review questions show in the HUD as extra items: denominator becomes `max(mainLoopLength, queue.length)` (GGE:1827, 2133), e.g. "8/8 · 100%".
-
-#### 2.6 Timers, lives, streaks, combos
-- Timers: none on questions. Only timers: MasteryLoading 1800 ms (GGE:2243); MatchUp line flash 350/750 ms (GGE:1004-1005); MatchUp wrong flash 400 ms (GGE:1015); music `setInterval` (section 6).
-- Lives/hearts: none.
-- Streak: `+1` on every `result.correct`, reset to 0 on any wrong (GGE:1897-1903). When `nextStreak % 5 === 0` open StreakModal with that number (GGE:1900). Streak persists across the review round; not saved; not shown anywhere else in-game.
-- The app-wide `DreamScoreChip` in the top bar shows "12" day streak, hardcoded (`DreamScoreChip.tsx:27`); unrelated to the in-game streak.
-- Combos/multipliers: none.
-
-#### 2.7 Scoring (exact)
-- Per-question score: none. Correctness only affects mastery, streak, and which feedback text shows.
-- XP: flat `lesson.xpReward` (FIN-L01: 20).
-- On mount of the Complete gate (lazy `useState` initializer, GGE:2264-2267), two writes:
-  1. `saveLessonComplete(careerSlug, lessonId, lesson.terms.map(t => t.id), lesson.xpReward)` (progress.ts:103-111): per-career `dreamScore += max(0, floor(xpReward))`, `lessons[lessonId] = { masteredTermIds, completed: true }`. **No dedupe**: every completion adds another 20 to the glossary store's own `dreamScore`. **Finding:** `masteredTermIds` saves ALL term ids, not the actually mastered ones.
-  2. `awardDreamScore("glossary:{careerSlug}:{lessonId}", xpReward)` (lib/dreamScore.ts:23-36): shared Dream Score, once per milestone id (dedupe via `dreamari:dream-score:awards`). Dispatches `dreamari:dream-score-change` so the header chip updates.
-- Complete screen shows: Dream Score = shared total (`useDreamScore()`, not the lesson gain); "+{xpReward} XP" (always shown, even on a replay that awarded nothing); "Mastery Progress" = `round(masteredCount / terms.length * 100)`% from in-session mastery (0 if no terms, GGE:1629).
-- Spec cross-refs: `docs/handoff/specs/dream-score.md` "Glossary lessons (6 Sept 2026)": 20 XP once per lesson; the old private "Dream Score x100" (15,000+ figures) is gone (also GGE:1620-1622). `docs/handoff/specs/progression-system.md:135-136` PROPOSES 30 XP per glossary lesson and 40 XP for "Pass a delayed glossary check ... at least 48 hours later" (proposal, not locked, not implemented).
-
-#### 2.8 Progress persistence (localStorage)
-| Key | Shape | Writer | Reader |
-|---|---|---|---|
-| `dreamari-glossary-progress` | `Record<careerSlug, { dreamScore: number; lessons: Record<lessonId, { masteredTermIds: string[]; completed: boolean }> }>` | `saveLessonComplete` | `glossaryProgressSnapshot()` (only internally by `saveLessonComplete`), `studentSignals.glossaryDone()` (raw JSON). `readDreamScore`/`readLesson`/`subscribeGlossaryProgress` exported but unused anywhere. |
-| `dreamari:dream-score` | number string | `awardDreamScore` | header chip, Complete screen, studentSignals |
-| `dreamari:dream-score:awards` | JSON string[] of milestone ids | `awardDreamScore` | dedupe |
-| `dreamari-play-muted` | `"1"` / `"0"` | Sound toggle (`sound.ts`) | SFX gate. Shared with the career simulations. |
-| `dreamari-glossary-music-muted` | `"1"` / `"0"` | Music toggle (`glossaryThemeSound.ts`) | Glossary loop gate. Separate from simulation music (`dreamari-play-music-muted`, music.ts:12). |
-
-Example stored value after one FIN-L01 completion:
-```json
-{"investment-banking":{"dreamScore":20,"lessons":{"FIN-L01":{"masteredTermIds":["Company","Product","Service","Customer","Profit"],"completed":true}}}}
-```
-Parse is defensive (progress.ts:24-46): non-object -> `{}`; career entries without numeric `dreamScore` or object `lessons` dropped; lesson entries need array `masteredTermIds` and boolean `completed`; ids filtered to strings; `dreamScore` floored and clamped >= 0. Snapshot cached by raw string (progress.ts:48-65). Cross-tab `storage` events notify listeners (progress.ts:71-81). `DEMO-ONLY` per dream-score spec: production stores the score server-side and awards once per milestone id (lib/dreamScore.ts:7-9).
-
-#### 2.9 Unlocks, replay, links
-- "Unlock" in this game means the per-term card reveal (UnlockScreen). There is no lesson-to-lesson unlock, no locked lessons, no gating on saved progress. Saved progress is never read back to change the game.
-- Replay: leave and re-enter the route (state is local and re-initializes); or the DEMO-ONLY "Reload from start" button (`resetGame`, GGE:1836-1846). No product "Play again" button.
-- Exits: TopBar "Back" = `router.back()` (GGE:2107) on every screen (Finding: arriving by direct URL with no history, `back()` leaves the site or no-ops). Complete "Continue" = `router.push('/career/{slug}')` (GGE:1831, 2230). Hamburger `QuickLinksMenu` and notifications bell via `HeaderActions` (GGE:347). No link to the Play hub or to the career simulation from inside the game.
-
-#### 2.10 DEMO-ONLY controls (grep `DEMO-ONLY`)
-- `DemoStepControls` (GGE:277-314): "Demo" label (9px bold, 0.08em tracking, uppercase), `Undo2` "Go back one step" (disabled on `intro`), `RotateCcw` "Reload from start". Requested 21 Sept 2026 (quote at GGE:278-280).
-- `DemoControlsDock` (GGE:353-388): fixed bottom-center (`fixed inset-x-0 bottom-4 z-20`), holds DemoStepControls + `PlayVersionChip`. Moved off the top bar 22 Sept 2026 ("it gets confused with actual UI").
-- `stepBack()` (GGE:1848-1886): moves only the screen pointer; leaves mastery/streak/queue alone. Map: dreamyIntro->intro; lessonIntro->dreamyIntro; unlock i>0 -> i-1, i==0 -> lessonIntro; question qi>0 -> qi-1, qi==0 -> unlock (Finding: lands on UnlockComplete since unlockIndex is still n); powerPlayIntro -> question at last index; powerPlay -> powerPlayIntro; masteryLoading -> powerPlay; complete -> powerPlay.
-- `PlayVersionChip` + `?bg=2|3|4` (GGE:1786-1800, 1812-1818; PlayVersionChip.tsx): v1 default ("Stars + berry backdrop"), v2 CRT, v3 Dots, v4 Synth. Written back with `history.replaceState` (v1 deletes `bg`).
-- Production: drop the dock, the chip, `?bg`, the v2-v4 backdrops and their SFX/music variants (keep v1).
-
----
-
-### 3. Screens: layout and visual design
-
-#### 3.0 Global shell (GGE:1935-2237)
-Root `<div class="marketing-v2 themeable relative flex min-h-dvh w-full flex-col [play-crt when v2]">` with inline style:
-- `--glossary-accent: WORLD_COLORS[career.world] ?? var(--world-business-money-office)`.
-- `--glossary-shell-scale` (GGE:2057-2058), exact:
-  `clamp(1, min(calc(1 + calc(max(0px, (100vw - 1440px)) / 750px) + calc(max(0px, (100dvh - 900px)) / 750px)), calc(100vw / 640px), calc((100dvh - var(--top-bar-space, 0px) - var(--demo-dock-space, 0px) - 32px) / 650px)), 2.6)`
-  - Anchor: 1440x900 (13" MacBook Air CSS viewport) = exactly 1. Floors at 1 on phones/tablets below the anchor, so every `calc(Npx*scale)` equals the original Npx on mobile.
-  - Growth: +1 per 750px beyond 1440 width PLUS +1 per 750px beyond 900 height (summed).
-  - Guards: width `100vw/640px`; height `(100dvh - topBar - dock - 32px)/650px` (650px = UnlockScreen content height at scale 1).
-  - Cap 2.6.
-  - Measured live per AI_HANDOFF.md:864-899: 375x812 -> 1; 768x1024 -> ~1.165 (main ~746px); 1440x900 -> 1 (640px); 1920x1080 -> height-guard bound, card ~894.5px; 1440x1600 -> ~1.93 (main ~1237px); 2000x1100 -> height-guard bound, card ~914px.
-  - Production note: the `--demo-dock-space` term must be dropped/zeroed when the demo dock is removed.
-- `--demo-dock-space: {dockSpace}px`, `--top-bar-space: {topBarSpace}px` (measured with `useMeasuredSpace`, a ResizeObserver + window resize hook, GGE:1713-1744; dock space = `innerHeight - dock.top`, top bar = its height). Measured values: dock 36px at 1440x900, 44.5px at 2000x1100; top bar 60px at 1440 wide, 75px at 1920/2000 wide (GGE:1770-1776, 321-326).
-- `background: transparent` (PlayBackdrop is the visible ground), `color: var(--foreground)`, `fontFamily: var(--font-body)`.
-
-Layer stack (DOM order / z):
-1. Backdrop (fixed inset-0 z-0): v1 `PlayBackdrop`, or v2/v3/v4 (section 7).
-2. Accent top glow (fixed inset-0 z-0, pointer-events-none): `radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 30%, transparent), transparent 65%)` (GGE:2102-2106).
-3. `TopBar` (relative z-10).
-4. `DemoControlsDock` (fixed z-20).
-5. HUD strip, question screen only (relative z-10).
-6. `<main>` (relative z-0): `mx-auto flex w-full max-w-[calc(640px*scale)] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 pt-[var(--space-4)] pb-[calc(var(--space-4)+var(--demo-dock-space,0px))] md:px-8` (GGE:2189). Every screen is centered vertically and horizontally.
-7. FeedbackPanel / StreakModal (fixed inset-0 z-50). StreakModal renders after `<main>` so it paints above FeedbackPanel when both are open.
-
-Fonts:
-- Display: `--font-display: "Bricolage Grotesque", sans-serif` (tokens.css:151), loaded through a Google Fonts `<link>` (marketing/fonts.ts:28, weights 400;600;700;800). All headings and CTAs set `fontFamily: var(--font-display)`.
-- Body: `--font-body: var(--font-inter), sans-serif` (tokens.css:155); Inter via `next/font` (layout.tsx:17-21, weights 400-800).
-- CRT (v2 only): `--font-display: "Press Start 2P", "Courier New", monospace` (globals.css:1148), injected `<link>` on v2 mount only (PlayBackdropV2Crt.tsx:25, 34-40).
-
-Tokens used (dark `.marketing-v2` values from tokens.css; light values from `html.light .marketing-v2.themeable`):
-| Token | Dark | Light | Used for |
-|---|---|---|---|
-| `--background` | #05070f | #f4f7ff | text on danger/foreground buttons, ring dots, badges border |
-| `--foreground` | #f4f7ff | #05070f | text; Check Answer / Keep Going / wrong-feedback button fill |
-| `--card` | #151829 | #d8dbe8 | all cards, options, inputs |
-| `--muted-foreground` | #ffffff9e | #4a4f6d | secondary text, Back |
-| `--glass-surface-1` | #ffffff08 | #00000008 | toggle buttons, buckets, demo dock |
-| `--glass-surface-2` | #ffffff17 | #00000017 | meter/progress tracks, empty mastery dots |
-| `--glass-border` | #ffffff17 | #00000017 | all borders |
-| `--hero-accent-purple` | #2e2466 | #cfc6f5 | Power Play accent |
-| `--hero-accent-teal` | #0f474d | #bfe9ee | StreakModal gradient |
-| `--amber-400` | #ffc94d | #805900 | StreakModal "N in a row!", unchecked sort-chip tint |
-| `--world-food-farming-nature` | #1fc76e | #0a6f39 | `CORRECT_COLOR` (GGE:813) |
-| `--destructive` | #ef4444 | (light block) | backdrop "wrong" bloom |
-| `--danger` | **undefined** | **undefined** | Always falls back to literal `#e0483e` |
-| `--success` | **undefined** | **undefined** | Always falls back to `#1f9d55` (SpeechBubble correct tone, never actually used with tone != neutral) |
-| `--accent` | #2f6bf2 | #1e4fcc | Sort item "picked" border (the one place blue is used, GGE:1156) |
-| `--accent-subtle` | #3894ff | #1e4fcc | `dm-*` hover border/link color and focus ring |
-| `--color-brand-500` | #2f6bf2 | | DreamyFace failed-load fallback circle |
-| `--space-1..6, 8, 10, 12, 13, 14` | 4, 8, 12, 16, 20, 24, 32, 40, 48, 52, 56 px | same | **No `--space-7`** (undefined -> padding computes to 0, a bug hit once, GGE:1330-1337) |
-| `--radius-sm / md / lg` | 8 / 12 / 16 px | same | chips / buttons+options / cards (0 under `.play-crt`) |
-
-Light mode (important): the game root has `themeable`, so in light mode every `var(--card)`/`var(--foreground)` card flips light while the backdrop stays the dark berry scene. Only the TopBar is protected by `data-night-scene` (GGE:330-333; tokens.css:255-265 pins `--foreground #f4f7ff`, `--background #05070f`, `--muted-foreground #ffffff9e`, `--border #ffffff17`, `--secondary-foreground`, `--glass-surface-1/2/3`, `--glass-border #ffffff17` inside it). The SpeechBubble is also always dark via local `--speech-bubble-bg/-fg` literals (GGE:194-209). Memory note: "Skip light mode checks" for fast iteration; the light-mode audit is paused.
-
-`primaryCtaColors(theme)` (GGE:89-102): returns `{ background: "var(--glossary-accent)", color: "#05070f" }` in BOTH themes (26 Sept 2026 light pass: the old light-mode ink button "read as a black slab on a dark scene"). `theme` is ignored (eslint-disable). Used by: Intro Next, DreamyIntro Start Learning Finance, LessonIntro Start Lesson, Unlock, UnlockComplete Start Practice, Complete Continue. Finding: in light mode the accent resolves to the darkened text-contrast values (`#825900` for finance), and near-black `#05070f` text on `#825900` is roughly 3.2:1 (my computation), below 4.5:1. Also dark text on dark accents like Tech's indigo `#6366f1` (dark) is low contrast; check per world before shipping.
-
-Shared CTA spec (6 primary buttons): `dm-solid flex w-full max-w-[min(calc(Npx*scale),560px)] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold`, display font, trailing `ChevronRight h-4 w-4`. N per screen: Intro 480, DreamyIntro 520, LessonIntro 440, Unlock 440, UnlockComplete 420, PowerPlayIntro 420, Complete 380. The 560px ceiling keeps buttons from "stretched pill" growth (GGE:409-423).
-
-#### 3.1 TopBar (GGE:316-351)
-`<header data-night-scene class="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">`.
-- Left: "Back" text button, `dm-quiet`, 14px semibold, `--muted-foreground`, `ChevronLeft h-4 w-4`, `aria-label="Back"`.
-- Right (`gap-[var(--space-2)]`): `MusicToggle`, `MuteToggle`, `HeaderActions` (DreamScoreChip: streak "12" + XP bolt; NotificationsButton; then `QuickLinksMenu` hamburger).
-- MusicToggle (GGE:259-275): 36px circle (`size-9`), glass-surface-1 fill, glass-border, lucide `Music` 16px; when off: icon opacity 0.4 and color muted. Tooltip "Turn music on/off" via `IconTip`; `aria-pressed={musicOff}`.
-- MuteToggle (GGE:237-257): same shell, `Volume2`/`VolumeX` 17px, "Turn sound on/off"; unmuting plays `playSelect()` as audible confirmation.
-
-#### 3.2 HUD strip, question screen only (GGE:2117-2178)
-Container `relative z-10 mx-auto w-full max-w-[calc(640px*scale)] flex-col gap-[6px] px-5 pt-[var(--space-2)] md:px-8`.
-- Row 1 (13px extrabold, muted): left `lesson.title`, right `"{n}/{total} · {pct}%"`. Sizes match SimulationPlayer's `Hud` (13px title, 11px secondary), 21 Sept 2026.
-- Progress bar: `SparkBar percent min=4 height=4 track=--glass-surface-2 fill=glow=--glossary-accent`, wrapped in a span carrying `--crt-glitch-glow/anim` (CRT only).
-- Row 3: mastery dots, one per term, `size-5` (20px) circles, `gap-[5px]`, filled accent with a `Check 11px` in `#05070f` when mastered, else glass-surface-2; `title={term}`; CRT glitch box-shadow on filled dots only. Right: "Mastered {x}/{n}" 11px bold muted.
-- Percent math (GGE:1822-1827): `currentNumber = min(queueIndex+1, queue.length)`; `percent = round(currentNumber / max(mainLoopLength, queue.length) * 100)`. First question reads "1/7 · 14%" (never opens at 0, matching the reference).
-
-#### 3.3 Intro, "Meet {Company}" (GGE:393-431)
-Column `items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)] text-center`.
-- `DreamyFace pose="idea" size={64}`.
-- Card `max-w-[calc(480px*scale)] gap-[var(--space-3)] rounded-lg border p-[var(--space-6)]`, bg `--card`, border `--glass-border`.
-  - `h1` "Meet {exampleCompany}" 26px / 32px line, extrabold, display font.
-  - `p` "You'll learn finance words using {exampleCompany} as your example." 15px / 21px.
-- CTA "Next".
-
-#### 3.4 DreamyIntro (GGE:436-468)
-- Wrapper `relative w-full max-w-[calc(520px*scale)] pt-8`; Dreamy `happy` 64px absolutely at `-top-8 left-5 z-10` overlapping the bubble's top-left corner (overlaps the bubble, never the text).
-- `SpeechBubble`: "Hi, I'm Dreamy! Let's get started."
-- CTA "Start Learning Finance".
-
-SpeechBubble (GGE:193-235): `flex min-w-0 flex-1 items-start rounded-lg border px-[var(--space-5)] py-[var(--space-4)]`, bg `var(--speech-bubble-bg, #151829)` (correct tone mixes 14% success, wrong 12% danger; only neutral is used), border glass-border, shadow `0 18px 40px -22px rgba(0,0,0,0.45)` (neutral). Text `crt-cursor-after`, size `clamp(calc(19px*scale), calc(2.8*scale*1dvh), calc(23px*scale))`, line-height 1.35, extrabold, display font, color `var(--speech-bubble-fg, #f4f2fa)`. At 375x812 computed 22.736px (AI_HANDOFF.md:865).
-
-#### 3.5 LessonIntro (GGE:473-517)
-- Dreamy `glasses` 64px.
-- `h1` "Learn the Language of Finance" 24px / 30px extrabold display.
-- Card `max-w-[calc(440px*scale)] gap-[var(--space-4)] rounded-lg border p-[var(--space-5)] text-left`:
-  - Value box `rounded-md p-[var(--space-4)] gap-[var(--space-2)]`, bg `color-mix(accent 14%, --card)`: "$10,000" 22px extrabold display in accent; `SparkBar percent=round(companyValue/nextCompanyValue*100)` (FIN-L01: 20) `min=4 height=6`; "Next: $50,000 · Meet your first investor" 13px semibold muted.
-  - Term chips (`flex-wrap gap-[var(--space-3)]`): `rounded-sm border px-[var(--space-4)] py-[6px] text-[13px] font-semibold`, glass-border, not interactive.
-- CTA "Start Lesson {lessonNumber}".
-
-#### 3.6 Unlock carousel (GGE:645-727) + TermFlipCard (GGE:531-643)
-Screen column: gap `clamp(calc(10px*s), calc(3.5*s*1dvh), calc(28px*s))`, py `clamp(calc(8px*s), calc(3*s*1dvh), calc(32px*s))`, `text-center`. No Dreamy here on purpose (repeats 5x, tightest screen).
-- `h2` lesson title: `clamp(calc(18px*s), calc(3.2*s*1dvh), calc(26px*s))`, lh 1.25, extrabold, display.
-- "Term {i+1} of {n}": 12px bold, 0.14em tracking, uppercase, muted.
-- Card slot `relative w-full max-w-[calc(440px*s)]`.
-- TermFlipCard face: `flex overflow-hidden rounded-lg border text-left`, bg `--card`, shadow `0 18px 40px -22px rgba(0,0,0,0.35)`, `backfaceVisibility: hidden`, back face `absolute inset-0` + `rotateY(180deg)`.
-  - Ring binding: left strip `w-9` (36px), border-r, bg `color-mix(foreground 5%, card)`, 3 punched holes `size-3` (12px) bg `--background`, border, `inset 0 1px 2px rgba(0,0,0,0.25)`, `justify-evenly py-[var(--space-6)]`.
-  - Content column: gap `clamp(6px*s, 1.8*s*dvh, 16px*s)`, padding `clamp(14px*s, 3.2*s*dvh, 24px*s)`, centered.
-  - Glyph (both faces): icon at `clamp(44px*s, 8.5*s*dvh, 72px*s)` square, `-rotate-2`, color `color-mix(accent 88%, foreground 12%)`, `filter: url(#glossary-sketch)`; 6 radiating dashes (SVG viewBox 120, lines y 4->14 at 30/90/150/210/270/330deg, stroke 2.4, round, accent) inset -20px; term name `clamp(20px*s, 4.4*s*dvh, 28px*s)` lh 1.1 extrabold display, sketch filter; hand-drawn squiggle underline SVG `M2 5 Q 20 1, 40 4 T 78 4 T 118 3`, 100x7px, stroke 2.4, accent, sketch filter.
-  - Sketch filter (GGE:626-631): `feTurbulence type=fractalNoise baseFrequency=0.045 numOctaves=2` -> `feDisplacementMap scale=3.2`. Finding: `id="glossary-sketch"` is rendered by every TermFlipCard; during the AnimatePresence cross-over two cards may coexist for a moment, producing a duplicate id (harmless in practice).
-  - Front: definition `clamp(14px*s, 2.6*s*dvh, 15px*s)` lh 1.4; "Tap for an example ›" link `dm-link` 12.5px bold accent.
-  - Back: "{exampleCompany} Example" 12px bold 0.05em uppercase accent; example text same clamp, lh 1.35 semibold; "‹ Back to the definition" 12.5px bold muted.
-- Unlock CTA (motion.button): "Unlock {term}" + the term's icon (h-4 w-4) instead of a chevron.
-
-#### 3.7 UnlockComplete (GGE:729-803)
-- Fireworks layer (absolute inset-0 z-0) behind a `relative z-10` content group. Stars are OFF on this screen.
-- `PlayBurst nonce=1 accent=--glossary-accent`.
-- Term badge row `flex-nowrap gap-2 sm:gap-[var(--space-4)]`: circles `size-11 sm:size-14` (44/56px) accent fill, icon `h-5 w-5 sm:h-6 sm:w-6` in `#05070f`; check badge `size-4 sm:size-5` top-right (-4px), accent fill, 2px `--background` border, `Check 9px/11px`.
-- Card `max-w-[calc(420px*s)] p-[var(--space-6)] gap-[var(--space-2)]`: `Trophy h-8 w-8` accent; "All {n} terms unlocked!" 19px extrabold display; `lesson.milestone` 13px muted.
-- CTA "Start Practice".
-
-#### 3.8 Question screen (GGE:1297-1385)
-Card: `relative mx-auto w-full max-w-[calc(620px*s)] flex-col gap-[var(--space-8)] rounded-lg border p-[var(--space-6)] sm:p-[var(--space-8)]`, bg `--card`, shadow `0 18px 40px -22px rgba(0,0,0,0.35)`.
-- choice / typeTerm: Dreamy `curious` 56px absolutely `-top-8 left-2 z-10` over a `relative pt-[28px]` wrapper, then SpeechBubble with the prompt.
-- matchUp / sortBuckets: plain prompt `p`, `clamp(18px*s, 2.6*s*dvh, 21px*s)`, lh 1.35 extrabold display.
-- profitBuilder: no prompt, no Dreamy; the scenario box is the header.
-
-OptionList (choice, GGE:817-853): `flex-col gap-[var(--space-4)]` (bumped 12->16px, GGE:818-822). Each option `dm-tap flex w-full items-center gap-[var(--space-4)] rounded-md border p-[var(--space-4)] text-left transition-opacity`, bg `--card`; letter circle `size-7` border 1.5px muted, 13px bold; text 15px / 20px medium.
-DocumentOptionList (Catch the Misuse, GGE:861-892): one bordered sheet (`rounded-md border overflow-hidden`, bg `--card`), rows divided by `border-b` (last none), row bg transparent or 6% foreground when picked-and-revealed. (History mentions a file icon, title bars, edit icon; the current code has none of those: the header was dropped on 25 Aug, commit `2ddfde2f`.)
-TypeTermCard (GGE:894-958): word-bank chips `dm-tap rounded-md border px-[var(--space-4)] py-[6px] text-[13px] font-semibold` (selected: accent border + `color-mix(accent 16%, card)` bg); input `w-full rounded-md border px-4 py-4 text-[15px] font-semibold`, placeholder "Or type your answer…"; "Check Answer" button `dm-solid w-full rounded-md px-5 py-4 text-[15px] font-semibold`, bg `--foreground`, text `--background`, disabled (opacity 0.4) until non-empty.
-MatchUpCard (GGE:960-1118): headers "Term" / "Example" (11px bold 0.1em uppercase muted, 2-col grid); two columns `gap-[var(--space-3)]`; tiles `dm-tap min-h-[60px] rounded-md border px-3 py-2 text-center text-[13px] sm:text-[14px] font-bold`; connector dot `size-[9px] rounded-full border-2` (right edge of left tiles, left edge of right tiles); matched: bg `color-mix(green 16%, card)`, green border/text, `Check 14px`, filled green dot; left selected: accent border; wrong flash: danger border.
-SortBucketsCard (GGE:1120-1216): pool chips `dm-tap rounded-md border px-4 py-2 text-[13px] font-semibold` (picked border `--accent` blue); hint "Tap an item, then tap its bucket" (12px semibold muted); when all placed "All placed" with a `Check` icon (13px bold accent); buckets 2-col grid `gap-[var(--space-4)]`, each `dm-tap min-h-[84px] rounded-md border p-3 text-left`, bg glass-surface-1, name 15px extrabold; placed chips `rounded-sm px-3 py-[4px] text-[12px] font-semibold`, pre-check bg `color-mix(amber-400 22%, card)`, post-check green or red tint 20%. "Check My Sorting" button accent fill, `#05070f` text.
-ProfitBuilderCard (GGE:1218-1281): scenario box `rounded-md border p-4 text-[14px] font-semibold`, bg `color-mix(accent 12%, card)`; each step row: number circle `size-6 border-[1.5px] text-[12px] font-bold` + label 14px semibold; input group `rounded-md border px-3 py-2` with "$" prefix (muted) and `w-[100px] text-right text-[15px] font-bold` input, `inputMode="numeric"`; "Check My Math" accent button, disabled until all filled.
-
-#### 3.9 FeedbackPanel (GGE:1387-1427)
-Overlay `fixed inset-0 z-50 flex items-center justify-center px-5`, bg `color-mix(in srgb, var(--background) 72%, transparent)`, `backdrop-filter: blur(28px)` (app-wide 28px modal blur floor). NOT dismissible by backdrop (required checkpoint).
-Card `max-w-[440px]` (not shell-scaled, on purpose) `gap-[var(--space-4)] rounded-lg border p-[var(--space-5)]`: correct bg `color-mix(green 14%, card)` + green border; wrong bg `color-mix(#e0483e 10%, card)` + red border.
-- Dreamy `party` (correct) / `puzzle` (wrong) 56px.
-- Title row 16px extrabold colored: 24px filled circle with `Check` (#05070f) or `X` (--background) + "Correct!" / "Not quite".
-- Body `feedbackCorrect`/`feedbackWrong` 14px / 19px.
-- Button full-width 15px semibold: correct = green fill + `#05070f`; wrong = `--foreground` fill + `--background`. Label "Next Question" or "See Results" (when `queueIndex+1 >= queue.length`; Finding: says "See Results" even when a review question will be appended next).
-
-#### 3.10 StreakModal (GGE:1429-1463)
-Same overlay, but tapping the backdrop dismisses (`onClick={onDismiss}`, card stops propagation). Card `max-w-[320px] p-[var(--space-8)] gap-[var(--space-4)] text-center rounded-lg`, bg `linear-gradient(160deg, var(--hero-accent-teal), var(--background))`, entrance `motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]`. PlayBurst; Dreamy `party` 100px; "{n} in a row!" preceded by lucide `Flame h-7 w-7` (filled) 26px extrabold display `--amber-400`; "On fire!" 15px semibold; "Keep Going ›" (`--foreground` fill, `--background` text, py-3).
-
-#### 3.11 PowerPlayIntro (GGE:1468-1490)
-Screen bg `radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 65%)`, `gap-[var(--space-6)] py-[var(--space-10)]`. Dreamy `idea` 112px; `h2` "Power Play" (preceded by a filled `Zap` icon) 26px / 32px extrabold display with `Zap h-6 w-6` purple filled; "Use everything you just learned to fill in the blanks." 14px / 20px muted, `max-w-[calc(380px*s)]`. CTA (NOT primaryCtaColors): bg `--hero-accent-purple`, text `#fff`, "[Zap] Unlock & Test My Knowledge [ChevronRight]". Finding: in light mode `--hero-accent-purple` is `#cfc6f5`, so white text on it is illegible.
-
-#### 3.12 PowerPlay (GGE:1492-1593)
-Column `gap-[var(--space-5)]`. `h2` "Power Play" (filled `Zap` icon) 22px / 28px; "Fill in all {n} blanks." 14px muted centered; word-bank chips (non-interactive spans, capitalized); paragraph card `flex flex-wrap items-baseline gap-x-[6px] gap-y-[var(--space-3)] rounded-lg border p-[var(--space-6)] text-[17px] leading-[32px]`, bg `--card`, with PlayBurst inside. Blanks: `w-[110px] border-b-2 bg-transparent text-center font-bold`, underline `--hero-accent-purple` until checked, text always `--foreground` until verdict (purple text was unreadable, 25 Aug). Success banner "Power Play Complete!" with a `Trophy` icon (green tint 14%, green border, 16px extrabold). Button: "Check Answers" + filled `Zap` (purple, white) -> after all correct "Finish Lesson ›" (green, `#05070f`); disabled until all filled. Footer "Spelling must match exactly · not case-sensitive" 11px muted.
-Finding: the paragraph is split into separate `<span>`s per text chunk inside a `flex-wrap` container, so each text run is a flex item: long runs wrap as blocks, not as flowing prose. UNCLEAR whether that is intended.
-
-#### 3.13 MasteryLoading (GGE:1595-1609)
-Dreamy `idea` 112px; "Checking Your Mastery" 19px extrabold display; fact card (if any) `mt-4 max-w-[calc(420px*s)] rounded-md border p-4 text-[13px] leading-[18px] italic`. No spinner. Auto-advance 1800ms.
-
-#### 3.14 Complete (GGE:1611-1711)
-Fireworks + no stars (as UnlockComplete). PlayBurst; Dreamy `party` 120px; "Lesson Complete!" 28px / 34px extrabold display. Score card `max-w-[calc(380px*s)] p-6 gap-[2px]`, bg `color-mix(accent 14%, card)`, border accent: "Dream Score" with `Sparkles h-4 w-4`, 15px bold accent) + total 36px extrabold display (`toLocaleString()`). Stats list `max-w-[calc(380px*s)] gap-3`: "XP Earned" (14px muted) / "+{xpReward} XP" (18px extrabold accent), divider, "Mastery Progress" / "{pct}%" (18px extrabold). CTA "Continue".
-
-#### 3.15 Responsive rules summary
-- Mobile first; the only width breakpoints used in-game: `sm:` (640px) for question card padding 24->32, match tile text 13->14, UnlockComplete badge sizes; `md:` (768px) for side padding 20->32 (`px-5 md:px-8`).
-- Everything else scales continuously via `--glossary-shell-scale` (width + height) and `clamp(min, N*scale*1dvh, max)` (height). No `@media` steps (GGE:2012).
-- CTAs cap at 560px; FeedbackPanel 440px and StreakModal 320px are fixed (not scaled).
-- Target: no page scroll at any size, including iPhone 15 Safari usable height and 375x560 (AI_HANDOFF.md:7312-7314).
-
----
-
-### 4. Interaction model and affordances
-
-#### 4.1 Inputs
-- Tap/click only. No swipe (the "carousel" is button-driven), no drag (Sort the Buckets is tap item, tap bucket; Match It Up is tap left, tap right).
-- Keyboard: no custom shortcuts, no `onKeyDown`, no Enter-to-submit (inputs are not in a `<form>`), no autofocus. Native `<button>`s work with Tab/Enter/Space. Focus ring from `dm-*` classes: `outline: 2px solid var(--accent-subtle); outline-offset: 2px` (app.css:277-283). UNCLEAR: whether the Power Play / type inputs should submit on Enter (not implemented).
-- Hover affordances (hover-capable pointers only): `dm-tap` lift 1px + `0 6px 16px -12px rgb(0 0 0/.85)` + accent-subtle border; `dm-solid` brightness 1.05 + lift 1px; `dm-quiet` glass-surface-2 wash + 1px inset ring; `dm-link` color accent-subtle, never underlined (app.css:183-275). All disabled under reduced motion (app.css:349-353).
-- Haptics: none (no `navigator.vibrate`).
-
-#### 4.2 Unlock carousel
-- One tap per term ("Unlock {term}"), 5 taps total for 5 terms (was 10 before 21 Sept; Joshua's spec).
-- Optional flip: "Tap for an example" -> back; "Back to the definition" -> front. Unlock works from either face. Each new term opens on the front (fresh state via `key={term.id}`).
-- No back navigation between terms except the DEMO step-back.
-- Unlock feedback: `playCorrect()` + `dispatchPlayPulse("correct")` + press-scale 0.97 (GGE:710-719).
-
-#### 4.3 Per question type: feedback, correction, retry
-| Type | Submit | Visual feedback | Right answer revealed? | Sound | Backdrop pulse | Retry |
-|---|---|---|---|---|---|---|
-| choice (OptionList) | single tap, locks all options | correct option: green border + `Check`; picked wrong: red border + `X`; others opacity 0.45 | yes (green) | correct / wrong | correct / wrong | none |
-| choice (Catch the Misuse) | single tap | text/letter circle color green/red, picked row 6% tint, others 0.45 | yes | same | same | none |
-| typeTerm | "Check Answer" | input border + text green or red (disabled but pinned full contrast via `WebkitTextFillColor`) | no, only via `feedbackWrong` text | **none** (no playCorrect/playWrong call in TypeTermCard) | **none** | none |
-| matchUp | each right tap | correct: pair turns green, line flashes; wrong: left tile red border 400ms, selection cleared | n/a | correct per pair / wrong per miss | correct per pair only | unlimited within the question; question always ends correct |
-| sortBuckets | "Check My Sorting" (after all placed) | each chip green or red in its bucket | no (red chip stays in the wrong bucket) | correct / wrong | correct / wrong | none; items cannot be moved back once placed (Finding: no un-place control) |
-| profitBuilder | "Check My Math" | each step's badge/input green or red | no, only via `feedbackWrong` | correct / wrong | correct / wrong | none |
-| Power Play | "Check Answers" | each blank green/red live after first check | no | sweep (all correct) / wrong | celebrate on success only | unlimited, must get all right to finish |
-
-Finding: Type the Term is the only question kind with no sound and no backdrop pulse on answer (inconsistent with every other kind).
-After every question (except Match It Up misses), the FeedbackPanel shows "Correct!"/"Not quite" + authored explanation + Dreamy party/puzzle; the only way forward is its button.
-A wrong answer never repeats the same question; remediation is a DIFFERENT review question for the same term (section 2.5).
-
-#### 4.4 Mute / music toggles
-See section 6. Both in the top bar, tooltipped (icon-only tooltip rule), `aria-pressed`.
-
----
-
-### 5. Text animation
-
-- There is NO typewriter, character reveal, word-by-word reveal, or tap-to-complete in the Glossary Game. All copy renders instantly. (The typewriter + `playVoiceBlip` idiom lives in `SimulationPlayer.tsx` / `sound.ts:144-157` for career simulations only; the glossary never imports `playVoiceBlip`.)
-- CRT (v2) only: a blinking block cursor `"\2588"` after the SpeechBubble text via `.marketing-v2.play-crt .crt-cursor-after::after` (globals.css:1177-1183): `margin-left: 4px; color: var(--glossary-accent); animation: crt-cursor-blink 1s steps(1) infinite` (keyframe 0-49% opacity 1, 50-100% 0).
-- Direct rule (GGE:217-219, 21 Sept 2026): "Do not glitch the questions and answers... slowly glitch the HUD elements not text", then "Do not glitch the text on the HUD, glitch the graphical elements only" (GGE:2159-2163). Text is never animated/glitched.
-- Text transitions that exist: the whole term card slides between terms (section 7); the flip card rotates.
-
----
-
-### 6. Sound and music
-
-#### 6.1 Architecture
-- The game imports `playCorrect/playSelect/playSweep/playWrong`, mute and music functions from `glossaryThemeSound.ts` only (GGE:23-44), never from `sound.ts` directly. The wrapper decides per background version: v1 delegates to `sound.ts` byte-for-byte; v2/v3/v4 synthesize their own (glossaryThemeSound.ts:1-13).
-- All sound is synthesized WebAudio (oscillators). No audio files. `music.ts`'s MP3s (`/audio/play/ib-main-song.mp3` etc.) belong to the simulation, not the glossary.
-- Two AudioContexts: `sound.ts` has its own (v1 SFX); `glossaryThemeSound.ts` has one shared context for v2-v4 SFX and all music (glossaryThemeSound.ts:88-124). Contexts are created lazily and `resume()`d on every use when suspended.
-- No iOS silent-switch priming: `primeAudioOnFirstGesture` is used by Build and Match only (not the glossary). UNCLEAR: whether glossary audio is silent on iOS with the ringer switch off (likely, per that helper's own reason for existing).
-
-#### 6.2 Two independent toggles (and the past bug)
-| Toggle | Key | Gates | Setter side effects |
-|---|---|---|---|
-| Sound (`MuteToggle`) | `dreamari-play-muted` (shared with career sims) | SFX only: `sound.ts` `audio()` and glossary `audio()` both check `isMuted()` | notifies listeners; unmute plays `playSelect()` |
-| Music (`MusicToggle`) | `dreamari-glossary-music-muted` | background loop only: `musicAudio()` checks `musicMuted()`; loop tick also re-checks every step | `setMusicMuted(true)` stops the loop; `false` calls `startThemeMusic(currentTheme)` |
-
-Past bug (fixed 25 Sept 2026, commit `19436be5`, AI_HANDOFF.md:140-148; comment glossaryThemeSound.ts:95-103): the loop's per-note context getter was the same function as the SFX getter, so music was gated by the SOUND toggle ("the music for glossary games is tied to the sounds button instead of the music button"). Also a v2 CRT tape-hiss noise bed kept humming under a Sound mute ("an annoying beeping sound playing constantly"); it was removed entirely per "take the static sound out completely". Fix: split `audio()` (SFX) vs `musicAudio()` (music) over one `sharedContext()`, plus a self-healing per-tick `musicMuted()` check (glossaryThemeSound.ts:319-329). Verified live by instrumenting `createOscillator`: music kept firing with Sound muted; zero oscillators within 4s of muting Music; zero `AudioBufferSource` ever.
-
-Both toggles use the `useSyncExternalStore` triad (subscribe / snapshot / server snapshot `false`) and listen to `storage` events for cross-tab sync.
-
-#### 6.3 Synthesis primitives (identical in both files)
-- `tone(ctx, freq, start, duration, peak, shape)`: oscillator at fixed `freq`; gain `0.0001` at start -> exponential ramp to `peak` at `start + 0.012` (12 ms attack) -> exponential ramp to `0.0001` at `start + duration`; `osc.stop(start + duration + 0.02)`. Connected straight to `destination` (no master gain, no filter).
-- `sweepTone` / `sweep(ctx, from, to, start, duration, peak, shape)`: frequency exponential ramp from `from` to `to` over `duration`; gain attack to `peak` at `start + duration*0.3`, decay to `0.0001` at `start + duration`.
-
-#### 6.4 SFX per version
-v1 (sound.ts, the shipped default):
-| Call | Notes (Hz, start offset s, duration s, peak, wave) |
+| Check | Result |
 |---|---|
-| `playSelect` | 660, 0, 0.06, 0.05, triangle |
-| `playCorrect` | 587.33, 0, 0.12, 0.12, sine + 880, +0.07, 0.18, 0.13, sine |
-| `playWrong` | 196, 0, 0.14, 0.10, triangle + 155, +0.10, 0.20, 0.09, triangle ("never harsh", sound.ts:104-105) |
-| `playSweep` | 523.25, 659.25, 783.99, 1046.5 at i*0.075 s, each 0.24 s, peak 0.12, sine |
+| Live on main | Everything in this document is on main. Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's thumbnails; Next level keeps the student's theme; Dreamy's speech bubble wraps on whole words at phone width. |
+| Type check, lint | tsc clean. ESLint: no errors in the glossary code (two pre-existing unescaped-entity errors live in src/app/gate/page.tsx). |
+| Blueprint QA script | All generated industries pass (190 screens across 22 levels: 31 cases, 13 sorts, 18 select-alls; feedback median 42 characters, longest 90; longest Level 1 Power Play 188 characters): no sentence over 14 words, feedback short, Power Play within its level's size, seven to ten screens plus a Power Play per level, no three of one screen shape in a row, at least four shapes per level, every term credited twice, no answer leakage, no line of copy shown twice in a lesson, Reverse Recall only in the review, Power Play blanks never in order, all four recipes exercised. |
+| Validator negative test | A deliberately broken blueprint (bad slug, unknown world, definition saying its word, 14-word moment, two moments the same, 8-word cue, example without the anchor, unknown confusion, numbers without math) is refused with thirteen specific reasons and does not build. It is also a live specimen in the Component Lab. |
+| Dreamy reactions QA | Passes: twelve Drift poses, four Signal reactions, asset budget, silhouettes. |
+| Walkthroughs | Nursing Level 1 in Drift and Software Level 5 in Signal played end to end with Skip (welcome, cards, questions, streak, Power Play, Complete, next level) with no console errors from the game. After the 17 Oct rewrite: Culinary Level 3 (compare card, wet and dry heat sort, three-step case, Select All, shuffled Power Play bank) in Drift, Software Level 5 case and sort in Signal, and the Level 1 Power Plays of Aviation and Nursing at phone width, each now five short lines. |
+| Component Lab | "Glossary game, live engine" documents every piece in both themes with every state, the edge cases (22-character term, acronym, 110-character definition, 72-character moment, two-word options, long feedback) and the error state (a broken blueprint through the validator, the unknown-route 404, the hub release list). |
+| Design systems | All fifteen career worlds have a design system row; a blueprint naming any world works. |
+| Routes | /play/glossary/<industry> and /play/glossary/<career> resolve; /play-tools/glossary-qa lists every registered glossary (hamburger menu, Glossary QA). Unknown slugs 404. |
+| Hub gating | Only finance is released; generated industries play by route and from the QA page. Release is one slug in GLOSSARY_HUB_RELEASED. |
+| Demo flags | Every demo-only piece is tagged DEMO-ONLY in its own comment (blueprints, QA page, release list, Skip). |
+| Built so far | Finance (Joshua's, 4 of 20 levels). The three other Play tab cards are complete at six playable levels each: Software Engineering (Tech Terms), Flight Operations (Flight Terms), Nursing (Medical Terms). Culinary Arts has four (not on the hub) and is the model blueprint. All four were rewritten on 17 Oct to the Finance style: three moments per word, concept sorts, cases, written Power Plays, then trimmed to the reading rules. |
+| Not yet | No generated industry has its Level 1 term art or welcome illustration (section 6, and section 7b for the three Play tab games). No plates, panoramas or silhouettes registered (optional). Light-mode pass on generated industries. Levels 5 and 6 for Culinary. |
 
-v2 CRT: select 1046.5/0.035/0.05 square; correct 987.77 (0.07, 0.11) + 1318.5 at +0.06 (0.12, 0.11) square ("8-bit coin"); wrong 147 (0.16, 0.09) + 110 at +0.10 (0.18, 0.08) square; sweep 523.25, 659.25, 783.99, 1046.5, 1318.5 at i*0.06, 0.14 s, 0.10, square.
-v3 Dots: select 740/0.09/0.035 sine; correct 523.25 (0.35, 0.09) + 783.99 at +0.05 (0.40, 0.07) sine; wrong 220 (0.30, 0.06) + 174.61 at +0.08 (0.30, 0.05) sine; sweep 261.63, 329.63, 392, 523.25 at i*0.14, 0.55 s, 0.06, sine.
-v4 Synth: select 220/0.05/0.05 sawtooth; correct sweep 220->440 (0.18, 0.12) + 440 at +0.14 (0.14, 0.10) sawtooth; wrong sweep 220->110 (0.22, 0.11) sawtooth; sweep 130.81, 196, 261.63, 329.63, 392 at i*0.08, 0.22 s, 0.10, sawtooth.
-(glossaryThemeSound.ts:160-218.)
+### 1. Who does what
 
-Where each SFX fires:
-- `playSelect`: Sort item placed in a bucket (GGE:1130); unmuting Sound (GGE:246).
-- `playCorrect`: Unlock tap (GGE:714); correct choice (1372); each correct Match pair (983); Sort all-correct (1139); Profit all-correct (1226); StreakModal mount (1434).
-- `playWrong`: wrong choice (1373); Match miss (1012); Sort wrong (1140); Profit wrong (1227); Power Play wrong check (1508).
-- `playSweep`: UnlockComplete mount (735); Power Play all-correct (1504); Complete mount (1635).
-- Not wired: `playFlip` (the flip-card page flick exists in sound.ts:134-142 but the current TermFlipCard doesn't call it; it was removed with SketchFace on 21 Sept and never re-added); `playTick`, `playVoiceBlip`, scene sounds (simulation only).
+| Role | Owns | Pastes |
+|---|---|---|
+| Joshua | The rules: the Master Scaling Plan. Finance never changes. | Nothing; reviews. |
+| Usman's agent (Claude Code or Codex in the repo) | Blueprints: one file per industry, registered. Levels 1 to 4. | Prompt A, Prompt B. |
+| Codex or ChatGPT (image generation) | Every image: Level 1 term art and the welcome illustration for each industry (required), plates, world panoramas, silhouettes (optional), Dreamy animation. | Prompt D and the section 6 prompts; for the three Play tab games, section 7b (Prompt D already filled in). |
+| Chandu | Browser QA on the Glossary QA page; release to the hub (Prompt C). | Prompt C. |
 
-#### 6.5 Background music (one loop per background VERSION, not per career/world)
-`PATTERNS` (glossaryThemeSound.ts:246-308), played by `startThemeMusic` as a plain `setInterval(stepMs)`; each tick plays `notes[step % len]` with `tone(noteLen, gain, shape)` if `freq > 0` (0 = rest):
-| Version | Wave | stepMs | gain | noteLen s | steps | rests | loop length | Form (per comments) |
-|---|---|---|---|---|---|---|---|---|
-| v1 | triangle | 260 | 0.020 | 0.40 | 45 | 8 | 11.70 s | C major "twinkle": pickup, Theme A, A' around G, Bridge in A minor, octave-down echo, reprise, long rest |
-| v2 | square | 230 | 0.024 | 0.15 | 38 | 9 | 8.74 s | NES title: fanfare pickup, Theme A, syncopated Theme B over G, "hurry-up" variation, A with octave-leap finish |
-| v3 | sine | 480 | 0.022 | 1.20 | 48 | 28 | 23.04 s | Ambient pentatonic: C pentatonic rise-fall, A minor pentatonic, sparse high coda |
-| v4 | sawtooth | 210 | 0.020 | 0.17 | 64 | 6 | 13.44 s | Outrun Am-F-G-Am arpeggio low (verse) then an octave up (chorus lift) |
-Exact note lists are at glossaryThemeSound.ts:252-305 (copy them verbatim).
-Finding: the 22 Sept comment says the rewrite makes "the loop point ... minutes apart instead of seconds" (glossaryThemeSound.ts:243-244); actual loops are 8.7-23 s.
-Lifecycle: `setGlossaryPlayTheme(bgVersion)` on mount and on version change; cleanup `stopThemeMusic()` on unmount/version change (GGE:1808-1811). `setGlossaryPlayTheme` returns early when `started && currentTheme === theme` (module-level flags, glossaryThemeSound.ts:21-36).
-Finding (code reading, not verified live): because `started`/`currentTheme` are module-level and survive client-side navigation, leaving the game (unmount stops music) and re-entering it via in-app navigation calls `setGlossaryPlayTheme("v1")` which early-returns, so v1 music does not restart until a reload, a version switch, or a Music off/on. The same early return would also swallow the second mount under React StrictMode's dev double-effect (mount, cleanup, mount), so in `next dev` v1 music may never start on first load. UNCLEAR: StrictMode is Next's App Router default; `next.config.ts` doesn't override it.
-UNCLEAR: before the first user gesture the context is suspended and `currentTime` is frozen, so every tick's note is scheduled at the same frozen time; on resume they may sound together briefly. Not verified.
+### 2. The rules on one page
 
----
+| Rule | What it means for a new game | Enforced by |
+|---|---|---|
+| Finance stays exactly as it is | Nothing here touches Finance. | Finance is hand-authored and never passes through the generator. |
+| No timers | No countdown, count-up or timed questions. | The engine has none. |
+| No forced images | Level 1 of every industry gets pictures (team decision). Levels 2 and up are words only. A card shows generated art or nothing, never an icon. | Engine. |
+| No forced math | Numbers only where the job's words naturally carry them. | Validator: numbers fail unless the level sets math: true. |
+| Three architectures | continuous_story (one company grows), scenario_thread (same workplace, new situation each level), practice_world (varied drills, no plot). Pick from the table in section 9. | Blueprint mode. |
+| Difficulty ladder | Level 1 recognize, 2 apply, 3 analyze (tell confusable words apart), 4 decide. | Generator recipes by level number. |
+| Five terms per level, four levels minimum | 20 terms to launch; Levels 5 and 6 can be roadmap words. | Validator. |
+| 7 to 10 interactions, one Power Play | Seven derived screens plus the level's authored cases, sort and Select All as extras, then one paragraph with five blanks. | Generator, QA script. |
+| Copy length | Definition 110 characters, example 120, cue 34 characters and 7 words, each moment 72 characters and 12 words, sort item 34, Select All line 44, case step 80, feedback 90 and two sentences, term 22, title 30, goal 48. | Validator. |
+| Short and plain (added 17 Oct) | Every sentence a student reads is 14 words at most, feedback included. A level's copy reads at grade 8 or below, not counting its own five words. Chandu: "make sure every piece of copy including success explanations etc are shorter and 8th grade comprehension level." | Validator (sentences, feedback, a Flesch-Kincaid grade per level) and the builder (generated feedback). |
+| Power Play grows with the level (added 17 Oct) | Level 1: 200 characters, five sentences, one blank each. Level 2: 240, five sentences, one blank each. Levels 3 and 4: 290, six sentences. Levels 5 and up: 330, six sentences. Chandu: "make sure the power play isnt so complex and long and a lot to read for level 1." | Validator. |
+| Answer leakage | A definition never says its word; neither does a cue, a moment, a Select All line, a case step or the Power Play paragraph. | Validator. |
+| No screen repeats a line (added 17 Oct) | Every word carries three moments and each is shown once. The definition is seen on the teach card and in the review only. Sorts put concrete things into concept buckets, not cues into words. Chandu: "the games are repeating the same questions again and again for mastery instead of having any variety, please refer the finance glossary games." | Validator (no duplicate lines in a level) and the builder (no line shown twice in a lesson). |
+| Power Play is not linear (added 17 Oct) | The paragraph's blanks never run in teaching order, and the word bank is shuffled so it never mirrors the blanks. | Validator refuses 1 to 5; the engine shuffles the bank. |
+| Review is a new form | Reverse Recall (the definition read aloud) appears only in the review, for words still short of mastery, so the student never sees the same screen twice. | Generator. |
+| Wrong-answer feedback names what was wrong | Each term names the word it is confused with. | Generator uses confusion. |
+| Eighth grade, no dashes | Short words, one idea per sentence, two sentences instead of a dash. | Validator: dashes, 14-word sentences and a grade 8 cap per level. |
+| One Dreamy per screen, the cloud itself | Never draw Dreamy, limbs or people into any image. | Engine; image brief. |
+| Every example names the anchor | In a continuous story or scenario thread, each example sentence names the company or place. Not required in a practice world. | Validator. |
 
-### 7. Every animation, with values
+### 3. Prompt A: create a glossary game for X
 
-| Where | What | Values | Reduced motion |
+Paste to an agent working in the Dreamari repo, replacing the two bracketed lines. The agent writes one file, registers one line, runs three checks and stops. It does not generate images and does not push.
+
+```
+You are working in the Dreamari prototype repo. Pull origin/main first. Read docs/handoff/specs/glossary-system.md before writing anything.
+
+TASK
+Create the glossary game for: [INDUSTRY, e.g. "Cybersecurity"]
+Notes from Chandu, if any: [optional]
+
+STEP 1. Look the industry up in the 50-industry table in docs/reference/glossary-scaling-sop-usman-2026-10-16.html (section 9). Take its mode (continuous_story, scenario_thread or practice_world) and its career world (an exact WORLD_COLORS key). Choose a slug: lowercase letters and dashes, it becomes the route /play/glossary/. Choose an anchor: one company, clinic, airline, shop or site that every level returns to (practice worlds may use it loosely). Choose the student's role in one word.
+
+STEP 2. Write src/components/glossary/blueprints/.ts by copying the model blueprint culinary.ts (every authored piece in use) and the blueprint with the same mode: software.ts (continuous story), aviation.ts (scenario thread), culinary.ts (practice world). Keep the header comment pattern (DEMO-ONLY content, why, the anchor). Author four playable levels and two roadmap levels, or all six if asked:
+- Every playable level: five terms, each with term, definition, example, cue, icon and moments (exactly three).
+- Levels 3 and up: a confusion on every term, naming another term in the same level.
+- Every playable level: a written powerPlay (intro and paragraph).
+- Every level 2 and up: one or two cases. Levels 3 and 5: an authored sort into concept buckets. Anywhere it is natural: an authored selectAll.
+- Roadmap levels: title, tier, goal, milestone, nextMilestone, companyValue, nextCompanyValue and five words only.
+- Chapters: three, Beginner, Intermediate, Advanced.
+- Tiers: Levels 1 and 2 Beginner, 3 and 4 Intermediate, 5 and 6 Advanced. Company values 10000, 50000, 120000, 250000, 500000, 1000000. In a continuous story also set unlocks ("$10K", "$50K", "$120K", "$250K", "$500K", "$1M"); other modes omit unlocks.
+- An intro on Levels 2 and up: headline, one line, one hook. One or two facts per level.
+
+WHAT EACH FIELD IS FOR (so the copy lands on the right screen)
+- definition: the teach card, and the review question that reads it aloud. Never says the word.
+- example: the teach card. Says the word once, names the anchor (not required in a practice world).
+- cue: a label of 7 words and 34 characters, never says the word. The match card's right side, a "word = cue" quick-check pair, a compare card point, and the line every feedback is built from ("Dice means small even cubes.").
+- moments: three different real situations, 12 words and 72 characters each, that show the word WITHOUT saying it. Each one is shown on exactly one screen: a story card ("Which word is this?"), a fill-in sentence (the moment then "That is ___."), a Select All line, a sort token, a Type the Term prompt or a compare card. Write three that differ in setting, not three rewordings.
+- confusion: the exact term string of another word in the same level. Drives the compare card, the quick-check distractor and the "Poach is gentle heat in still water." correction.
+- sort: a prompt, 2 to 4 concept buckets (think Finance's "Money in / Money out", "Stock / Bond"; for a kitchen "Wet heat / Dry heat"), 4 to 7 concrete items of 34 characters with the bucket and the term each credits. Items never say a bucket name.
+- selectAll: the term, a prompt, exactly 4 concrete items of 44 characters that never say the term, 1 to 3 correct indexes (Finance: "Select every cost." over Materials, Rent, Wages, Sales).
+- cases: up to two per level. A scene line (72 characters), 2 to 4 steps, each a prompt of 80 characters with 2 or 4 options of 34 characters; a step never says its own answer; terms lists the words it credits (Finance: "Which helps Dream Sneakers keep more money?" then "What could improve?").
+- powerPlay: intro (one short line) and one short paragraph that uses {1} to {5} exactly once each, where {n} is the nth term in teaching order. The blanks must NOT appear in the order 1, 2, 3, 4, 5. The paragraph never says any of the five words. Name the anchor once. It reads as one connected scene, not five sentences stapled together. Size by level: Level 1 is 200 characters and five sentences with one blank each (five plain lines a 12-year-old gets on first read); Level 2 is 240, five sentences, one blank each; Levels 3 and 4 are 290, six sentences; Levels 5 and 6 are 330, six sentences. The anchor may be left out of Level 1 to save room.
+- feedback (on a case, a sort or a Select All): 90 characters and two sentences at most, about 60 is right. One sentence that says what is right, and at most one that says why. Never list every item.
+
+COPY RULES (the validator refuses a file that breaks the measurable ones)
+- Eighth grade or lower. Short words. One idea per sentence. Say each fact once. No dashes of any kind.
+- Every sentence is 14 words at most: definitions, examples, moments, case steps, intros, facts, the Power Play and every feedback line. The validator also scores each level's copy and refuses anything above grade 8.
+- No digits, $ or % anywhere in a level's copy unless that level sets math: true, and only when the job's words naturally use numbers. Spell small numbers out.
+- No line of copy may appear twice in a level: every moment, cue, sort item, Select All line, case scene and case step is a different line.
+- icon: a lucide icon slug (lowercase, dashes). It is only used on the Levels map until plate art exists; it is never shown on a flashcard or in the mastery bar.
+- Level title 30 characters, goal 48.
+
+STEP 3. Register: in src/components/glossary/data.ts add `: buildGlossaryCareer(_GLOSSARY),` to GLOSSARY_INDUSTRIES and the import. If a catalog career should open this glossary, map it in CAREER_INDUSTRY in src/components/glossary/industries.ts and set exampleCareerSlug in the blueprint. Do NOT add the slug to GLOSSARY_HUB_RELEASED; release is Chandu's step.
+
+STEP 4. Check, all three must pass:
+npx tsc --noEmit
+node --import ./scripts/qa/ts-resolve.mjs scripts/qa/glossary-blueprints.test.mjs
+node scripts/qa/dreamy-reactions.test.mjs
+Then start the dev server (npm run dev -- --webpack), open /play/glossary/?theme=drift and press the top bar's Skip through Level 1 (about 14 presses), and again with ?theme=signal. Open ?lesson=2&q=1, ?lesson=3&q=1, ?lesson=3&q=3 (the sort) and ?lesson=4&q=1 in Drift, and the case screen of each level. Then play one level without Skip and get two answers wrong on purpose: the review screens that follow must read as new questions. Take a screenshot of each.
+
+STEP 5. Write the art list for Codex as a short block in your final message: the slug, the anchor, and the five Level 1 terms each with its definition (Codex turns these into image briefs; see the SOP section 6).
+
+STEP 6. Add a dated entry to docs/AI_HANDOFF.md (what, why, what you checked). Commit with the why in the message. Do not push.
+
+Done looks like: the blueprint file exists and validates, the industry appears on /play-tools/glossary-qa with its playable levels, screenshots attached, the art list written, one commit, nothing pushed.
+```
+
+### 4. Prompt B: add Levels 5 and 6 to an existing industry
+
+```
+You are working in the Dreamari prototype repo. Pull origin/main. Read docs/handoff/specs/glossary-system.md.
+
+TASK: turn the roadmap Levels 5 and 6 of src/components/glossary/blueprints/[slug].ts into playable levels. Keep the five words each level already lists unless one cannot be written within the rules; then swap it and say why. Both levels are Advanced and use the decide recipe by default, so every term needs definition, example, cue, icon, three moments and a confusion, and each level needs a written powerPlay, one or two cases and (Level 5) an authored sort. Follow the copy rules exactly as in Prompt A. Run the three checks, open ?lesson=5&q=1 and ?lesson=6&q=1 in both themes, screenshot, write the handoff entry, commit, do not push.
+```
+
+### 5. Prompt C: release an industry to the Play hub (Chandu, after QA)
+
+```
+In the Dreamari repo: add "[slug]" to GLOSSARY_HUB_RELEASED in src/components/glossary/data.ts. If the hub has no card for it, add one to GLOSSARY_GAMES in src/components/play/games.ts keyed to its example career slug (or the industry slug when no catalog career owns it) with title "[Subject] Terms", sub "Learn key [subject] terms" and a cover (a 1400 by 788 WebP thumbnail: Dreamy over a fan of the subject's term cards, matching the four on the hub). Confirm Codex has registered its Level 1 term art (termArt.ts) and welcome illustration (welcomeArt.ts). Run npx tsc --noEmit, open /play and confirm the card is playable, commit with the why, push to main.
+```
+
+### 6. Images (Codex)
+
+Codex generates every image. Nothing in Usman's game-creation work waits on images: a game plays with words the moment it is registered. Required before release: 6.1 and 6.2. Optional, shared polish: 6.3 to 6.5. 6.6 is animation. For the three Play tab games that exist today, use section 7b, which is Prompt D with every term and anchor already filled in.
+
+#### 6.1 Level 1 term art (required: 5 terms, both themes)
+
+The repo has a reproducible pipeline for this: scripts/glossary-art.mjs, and everything it needs is in this section. The input is a manifest JSON; the model is docs/reference/glossary-finance-art-oct13.json. The script prints the exact prompts, then packages, validates and previews the finished images. Flow:
+
+1. Write docs/reference/glossary-<slug>-art-<mmmdd>.json: version (folder name, lowercase and dashes, e.g. "nursing-oct17"), career (the slug), styleReferences (the three Drift and three Signal reference files below), promptTemplate (the prompt below), styles (the two style locks below), terms (five entries: id = the exact term, slug = lowercase file name, brief = one or two sentences that show the meaning, not the word, with the anchor written in).
+2. node scripts/glossary-art.mjs prompts <manifest> prints one prompt per term per theme with the reference paths. Generate ONE image per call in ChatGPT, attaching the references. Never chain off the last image; return to the references every time.
+3. Save the generated images into a review folder named <term-slug>-drift.png and <term-slug>-signal.png. node scripts/glossary-art.mjs prepare <manifest> <review-folder> writes the WebP sizes under public/images/glossary/<version>/{drift,signal}/. Then validate and preview with the same script.
+4. Register: add the industry's example career (or the industry slug) to CAREER_TERM_ART in src/components/glossary/termArt.ts with the version folder and the term-to-slug map. The engine shows the pictures on Level 1 and nowhere else.
+
+References to attach. Drift: public/images/glossary/themes-oct08/drift/customer.webp (character), company.webp (object and materials), profit.webp (currency). Signal: public/images/glossary/signal/cloud-sale-sneaker.webp, building.webp, coins-320.webp.
+
+The prompt (promptTemplate; {{SUBJECT}} is the term's brief, {{STYLE}} is the theme's lock):
+
+```
+Use case: stylized-concept.
+Asset type: one isolated Dreamari glossary illustration for flashcards, matching, buckets and mastery HUD.
+Generate a NEW subject, using the attached Level 1 images as STYLE and CHARACTER references only. Do not edit or reproduce their subjects.
+Subject: {{SUBJECT}}
+Composition: one coherent centered object cluster on genuinely transparent alpha, square 1024px canvas, occupy about 82% of canvas, 8-10% clear margin, no clipping, balanced silhouette. Readable at 48px and attractive at 200px. Main semantic cue must stay legible, limit incidental details. No background scene, no ground rectangle, no tile/card frame, no UI. No letters, words, numbers, formulas, logo, watermark or text. Labels and exact maths are rendered by the application, never in art.
+Character lock: If Dreamy is called for, use the reference's SAME floating cloud silhouette, white/cyan lobes, large deep navy glassy star eyes and small blue mouth. Never arms, hands, feet, legs, torso, humanoid body, another person/animal, or object held in a hand. Props float beside Dreamy, never become limbs. If the subject brief does not call for Dreamy, do not add a character.
+STYLE: {{STYLE}}
+No generic stock clipart, irrelevant props, photoreal people, blurry text, excessive sparkles or tiny decorative clutter. Preserve the reference's visual identity while making the specified meaning clear.
+```
+
+Drift style lock:
+
+```
+Match the supplied Drift Level 1 artwork exactly: premium sculpted 3D illustration, satin sky-blue and deep navy with ivory and restrained metallic gold, polished molded forms, soft bevels, believable depth and small clean studio highlights. Lighting soft from upper left, darker navy undersides, subtle contact shadows only between objects. Not clay/plastic toy lumps, not flat vector, not pixel art, not painterly. Three-quarter frontal view for objects, original frontal floating cloud. Gold/cyan semantic arrows must have the same tactile material as the objects.
+```
+
+Signal style lock:
+
+```
+Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.
+```
+
+Writing a brief: show the meaning, never the word; put the anchor in; name the one thing the eye must read first. Example from Finance, Investor: "Dreamy floats beside a short curved arrow directing a single gold coin toward a miniature sneaker boutique. This shows a person committing money to a business, not buying a shoe." Example for Nursing, Triage: "Three small patient beds in a row at Riverside Clinic, one lit with a bright gold tag and pulled slightly forward, the other two dim and waiting. This shows the most urgent patient being chosen first."
+
+**Before generating.**
+
+1. Read the lesson data. Reuse an existing image only when its meaning matches the term.
+2. Write one brief per term. Both themes share the meaning but not the technique: never just recolor a 3D image into pixels.
+3. Keep words students confuse apart. Revenue is all sales income; Profit is what is left after costs.
+4. If a term cannot be shown honestly, leave it without a picture. Never register a misleading image to fill a slot.
+5. Scope art to its industry. A sneaker shop must never show up in Nursing because two terms share an id.
+
+**Commands** (from the repo root; the finance manifest is the example):
+
+```
+## One prompt per image, with the references to attach.
+node scripts/glossary-art.mjs prompts docs/reference/glossary-finance-art-oct13.json
+
+## After every source image is saved: export the versioned WebPs and a receipt.
+node scripts/glossary-art.mjs prepare docs/reference/glossary-finance-art-oct13.json
+
+## Read-only check of sources, prompts and outputs against the receipt.
+node scripts/glossary-art.mjs validate docs/reference/glossary-finance-art-oct13.json
+
+## Contact sheets with the Level 1 anchors in the top row, for review.
+node scripts/glossary-art.mjs preview docs/reference/glossary-finance-art-oct13.json /absolute/path/to/review
+```
+
+For a new industry, copy the manifest, set a new version and career slug, and replace the terms, briefs and source paths. Keep the style locks and references. The script refuses missing transparency, clipped sources, name collisions, duplicate term slugs and files over budget. It does not generate images and does not judge quality. Receipts keep the hashes, the exact prompts and the sizes. Only the optimized WebPs ship; the source PNGs stay local.
+
+**File contract.**
+
+- Path: public/images/glossary/<version>/<drift|signal>/<term-slug>.webp.
+- Drift: 768 px large, 256 px small, named <term-slug>-256.webp. Signal: 768 px large, 320 px small, named <term-slug>-320.webp.
+- Square canvases with transparency kept. Trim only transparency; never stretch. The Drift subject fits within 90% of the canvas.
+- Signal is sampled once onto a 128 px grid, then enlarged with nearest neighbor, so no half pixels appear.
+- Budgets: 140 KB large, 35 KB small. Aim well under them.
+- Map each term to its file by hand in termArt.ts. Never match terms by keyword.
+
+**Acceptance gate** (every new set, before asking to push):
+
+- Review every image beside the Level 1 anchors at 200 px and at 48 px.
+- Check the meaning, not just the looks: no wrong props, no stray text, no promise of a sure gain.
+- Dreamy keeps the cloud face and has no limbs. No people stand in for Dreamy.
+- Real transparency, safe margins, aspect ratio kept, equal canvas and visual weight within a theme.
+- Signal is true pixel clusters, not a pixel filter over 3D. Drift keeps its satin depth.
+- Check the teach cards, Match It Up, the sort and the mastery bar. A sort item's picture shows the item, never its bucket, so it cannot give the answer away.
+- Phone, tablet and laptop: nothing squishes, labels wrap, no page scroll.
+- Never replace Finance's Level 1 anchors or shipped art.
+- Run npx tsc --noEmit, a scoped lint, npm run tokens:check and the script's validate step.
+- Write the handoff entry: why, the set's paths, the checks, what was rejected. Push only with Chandu's go-ahead.
+
+#### 6.2 Welcome illustration (required: 1 per theme)
+
+One composed scene of the workplace the glossary lives in, never a person: the clinic front, the hangar and tower, the kitchen pass, the software studio. 1024 square, transparent, one readable silhouette; it shows at about 300 px beside Dreamy on the welcome screen. Use the 6.1 prompt with Asset type "one Dreamari welcome illustration: the workplace this glossary lives in, seen as a small composed scene" and Subject "{{the anchor}}: {{two sentences describing the place, no people}}", with the theme's style lock. Files: public/images/glossary/<version>/{drift,signal}/welcome.webp. Register in WELCOME_ART[industrySlug] in src/components/glossary/welcomeArt.ts with both theme paths.
+
+#### 6.3 Scene plates for the Levels map (optional, six strips cover everything)
+
+Until registered, the map shows each level's first term icon on the world accent. Strips scale by tier and theme: six files cover all fifty industries. 1536 by 512 WebP, opaque, horizon in the lower third, nothing important within twelve percent of any edge, no text, no Dreamy, no single focal object; even detail across the width (the engine crops a slice per level from a phone thumbnail to the open card). Files under public/images/glossary/plates/ named drift-beginner, drift-intermediate, drift-advanced, signal-beginner, signal-intermediate, signal-advanced (.webp). Register in PLATES[theme][tier] in src/components/glossary/levelPlates.ts; two or three strips per tier add variety for free.
+
+| Strip | Scene brief |
+|---|---|
+| drift-beginner | Dawn. Warm low sun, long soft clouds, a calm horizon glow. |
+| drift-intermediate | Full day. High sun, bright sky, scattered sculpted clouds. |
+| drift-advanced | Night. Moon, deep navy, thin high clouds, a faint band of stars. |
+| signal-beginner | Pixel city at sunrise, a few windows still lit, pink and amber sky. |
+| signal-intermediate | Pixel city at midday, cyan sky, traffic and cranes. |
+| signal-advanced | Pixel city at night, lit towers, dark sky with a few stars. |
+
+```
+Use case: environment backdrop.
+Asset type: one wide Dreamari scene plate for the Levels map, used as a cropped background strip behind level titles.
+Scene: {{SCENE BRIEF}}
+Composition: 1536 by 512 landscape, horizon in the lower third, even detail across the full width, no single focal object, nothing important within 12% of any edge. No text, letters, numbers, logos or UI. No character, no Dreamy. Opaque background, no transparency.
+STYLE: {{the theme's style lock from 6.1}}
+Keep the reference's palette and material identity. Readable as a strip at 90 by 44 pixels and attractive at 540 by 90.
+```
+
+#### 6.4 Signal world panoramas (optional, one per career world, fifteen at most)
+
+The game's sky in Signal. One 1200 by 800 pixel panorama per career world, opaque, horizon in the lower third, a readable skyline across the middle band, a dark quiet lower band, nothing important within ten percent of the left and right edges, no text, no Dreamy. The engine tiles it in mirrored pairs (edges never need to match), crops three parallax bands and slices it for the Levels map plates. Files: public/images/glossary/backdrops/signal/<world-slug>.webp. Register in SIGNAL_WORLD_BACKDROPS in src/components/glossary/worldBackdrops.ts. Start with the worlds that have a glossary: Tech & Engineering, Driving, Flying & Shipping, Health & Medicine, Food & Cooking. Attach the three Signal references and the current panorama public/images/glossary/signal/bg.webp.
+
+```
+Use case: game backdrop.
+Asset type: one wide Dreamari pixel-art panorama for the Signal glossary game, used as a scrolling parallax background and cropped into strips.
+Scene: {{WORLD SCENE, e.g. "a hospital campus at dusk: a low clinic with lit windows, an ambulance bay, a water tower, trees"}}
+Composition: 1200 by 800, horizon in the lower third, a continuous readable skyline silhouette across the middle band, a dark quiet lower band (water, road or ground), even detail across the width, nothing important within 10% of the left and right edges. No text, letters, numbers, logos or UI. No character, no Dreamy. Opaque.
+STYLE: {{Signal style lock from 6.1}}
+Match the attached panorama's palette, pixel density and night-to-dusk mood exactly; only the place changes.
+```
+
+#### 6.5 Drift horizon silhouettes (optional)
+
+Drift is painted and already takes each world's accent; it needs no image. Optional: one flat dark horizon silhouette per world (a clinic roofline, a runway and tower, a kitchen pass), SVG preferred or transparent WebP 1600 by 300, no interior detail, repeatable left to right, no text, no Dreamy. Files: public/images/glossary/backdrops/drift/<world-slug>.svg. Register in DRIFT_WORLD_SILHOUETTES in worldBackdrops.ts. Richer clouds and weather are open for Codex to explore inside the scenery layer (LabMaterialScenery in GlossaryLabGameExperience.tsx): gradients, masks and transforms only, never a filter on an animated layer, and everything must stop under prefers-reduced-motion.
+
+#### 6.6 Dreamy expressions (animation)
+
+Chandu's "Dream Expressions V2" pack (19 Drift stills) is at public/images/dreamy/expressions-v2/01.webp to 19.webp. Four are used statically on the Drift Levels map open card: 06 (books, ready to play), 18 (arrow, playing now), 12 (graduation cap, complete), 17 (alert, locked). Animate first, because the game has a slot for each: 10 (green check) for a right answer, 09 (red X) and 14 ("hmm") for a wrong one, 16 (confetti) and 12 for mastery and the complete screen, 15 (glasses and clipboard) for review and hints, 08 (reading) for the teach cards, 18 (arrow) for Next. Deliver the four-frame WebP atlas format described in docs/reference/dreamy-drift-animated-oct15-v2.json so dreamyReactions.ts can take them without engine changes. Signal needs pixel versions drawn to the Signal Dreamy rig.
+
+#### 6.7 Hub thumbnails (one per released industry)
+
+The Play tab's glossary cards use a landscape thumbnail: Dreamy over a fan of the subject's term cards on a dark sky, 1400 by 788 WebP, under 130 KB. The four on the hub (Finance, Medical, Flight, Tech) are Chandu's and are the reference. The shelf card is portrait at rest and 16:9 when active, so keep Dreamy and the centre card in the middle third. File: public/images/app/glossary-<subject>-thumb-<mmmdd>.webp, set as cover on the card in GLOSSARY_GAMES.
+
+### 7. Prompt D: Codex, generate and register the art for industry X
+
+```
+You are working in the Dreamari prototype repo. Pull origin/main. Read section 6 of docs/reference/glossary-scaling-sop-usman-2026-10-16.md (the prompt template, style locks, references, commands, file contract and acceptance gate).
+
+TASK: generate and register the required art for the glossary industry [slug] (anchor: [anchor]; Level 1 terms with definitions: [paste the art list from the game-creation agent]).
+
+1. Write the manifest docs/reference/glossary-[slug]-art-[mmmdd].json modelled on docs/reference/glossary-finance-art-oct13.json: version "[slug]-[mmmdd]", career "[slug]", the six style references, the prompt template and both style locks from the SOP, and five terms with id, slug and a brief that shows the meaning without the word and names the anchor.
+2. node scripts/glossary-art.mjs prompts  and generate one image per prompt, attaching the three references for that theme every time. Save as -drift.png and -signal.png in a review folder.
+3. Also generate the welcome illustration per theme (SOP 6.2) and save as welcome-drift.png and welcome-signal.png.
+4. node scripts/glossary-art.mjs prepare  , then validate and preview. Convert the welcome images to public/images/glossary/[version]/{drift,signal}/welcome.webp (1024 square, transparent).
+5. Register: CAREER_TERM_ART in src/components/glossary/termArt.ts for the term art; WELCOME_ART["[slug]"] in src/components/glossary/welcomeArt.ts for the welcome.
+6. Check: npx tsc --noEmit and node scripts/qa/dreamy-reactions.test.mjs. Open /play/glossary/[slug]?theme=drift and ?theme=signal: the welcome shows the illustration beside Dreamy, Level 1 teach cards show the pictures, Level 2 cards show words only. Screenshot each.
+7. Add a dated docs/AI_HANDOFF.md entry (what, why, prompts used, what was rejected and why). Commit; do not push. Chandu reviews, then releases the industry.
+
+Rules that have shipped real bugs: one image per call; never chain off the last image; genuine transparency; no text or numbers in any image; Dreamy is a cloud with no limbs and appears only when the brief says so; Finance's art is never regenerated.
+```
+
+### 7b. Prompt D, filled in: the three Play tab games
+
+Software, Aviation and Nursing are built and play with words only. This is Prompt D with every blank filled in, so it can be pasted as it is. It used to be a separate document; it now lives here. Finance already has its art and is not part of it.
+
+```
+You are working in the Dreamari prototype repo (Mustang9393/Dreamari). Pull origin/main first. Read section 6 of docs/reference/glossary-scaling-sop-usman-2026-10-16.md: the prompt template, both style locks, the references, the commands, the file contract and the acceptance gate are there. Dev server: npm run dev -- --webpack on a free port.
+
+THE JOB
+Generate, package and register the Level 1 term art and the welcome illustration, in both themes (Drift and Signal), for the three glossary games below, so Chandu can review them and release the games to the Play hub. Do not make art for any other level: Levels 2 and up teach with words by design. Do not touch Finance.
+
+Industry (slug) | Hub card | Anchor (every example names it) | Student role | Register under
+software | Tech Terms | Nova Notes, a note-taking app a small team is building | developer | software-engineer
+aviation | Flight Terms | Skyline Air, a regional airline | pilot | airline-pilot
+nursing | Medical Terms | Riverside Clinic, a community clinic | nurse | registered-nurse
+
+LEVEL 1 TERMS (exact term, then its definition; a brief shows the meaning, never the word)
+software, Level 1 "App Basics"
+- App: A program people open on a phone or computer to do one job.
+- User: A person who opens and uses a program.
+- Feature: One thing a program can do for the people using it.
+- Code: The written instructions that tell a computer what to do.
+- Bug: A mistake in the instructions that makes a program act wrong.
+aviation, Level 1 "Before Takeoff"
+- Cockpit: The front part of a plane where the pilots sit and fly it.
+- Runway: The long strip a plane speeds down to leave the ground or land.
+- Preflight: The full check of a plane and its plan before it moves.
+- Taxi: Driving a plane slowly on the ground between the gate and the strip.
+- Takeoff: The moment a plane speeds up and lifts off the ground.
+nursing, Level 1 "Clinic Basics"
+- Patient: A person getting care from a nurse or doctor.
+- Vital Signs: The body's basic numbers: heart rate, breathing, temperature and blood pressure.
+- Chart: The written record of a patient's care.
+- Dose: How much medicine a patient gets at one time.
+- Triage: Sorting patients by how urgent their needs are.
+
+WELCOME SCENES (one per industry per theme; a place, never a person; shown at about 300 px beside Dreamy)
+- software: a small bright studio desk with a laptop showing a notes app, a plant, sticky notes, a mug.
+- aviation: a regional jet at a gate under a control tower at dusk, a jet bridge, runway lights beyond.
+- nursing: the front of a low community clinic with a lit entrance, a bench, a small sign post with no letters, an ambulance bay to one side.
+
+BRIEFS TO MATCH IN REGISTER
+- Finance, Investor (shipped): "Dreamy floats beside a short curved arrow directing a single gold coin toward a miniature sneaker boutique. This shows a person committing money to a business, not buying a shoe."
+- Nursing, Triage: "Three small patient beds in a row at Riverside Clinic, one lit with a bright gold tag and pulled slightly forward, the other two dim and waiting. This shows the most urgent patient being chosen first."
+- Software, Bug: "A small glowing notes app screen on a phone with one line of its content gone jagged and flickering red, a tiny gold wrench floating beside it. This shows a mistake inside the program, not an insect."
+- Aviation, Taxi: "A regional jet rolling slowly along a painted yellow ground line toward the runway, wheels down, gate behind it. This shows the plane driving on the ground, not flying."
+
+STEPS
+1. For each industry, write docs/reference/glossary-<slug>-art-oct17.json modelled on docs/reference/glossary-finance-art-oct13.json: version "<slug>-oct17", career "<slug>", the six style references, the prompt template and both style locks from section 6.1, and five terms with id (the exact term above), slug (lowercase file name, e.g. "vital-signs") and brief.
+2. node scripts/glossary-art.mjs prompts <manifest>. Generate ONE image per prompt, attaching that theme's three references every time. Never chain off the last image. Square 1024, genuinely transparent.
+3. Save as <term-slug>-drift.png and <term-slug>-signal.png in a review folder. Run prepare, then validate, then preview.
+4. Welcome: the same prompt with Asset type "one Dreamari welcome illustration: the workplace this glossary lives in, seen as a small composed scene" and Subject "<anchor>: <the scene line above>". Save to public/images/glossary/<version>/{drift,signal}/welcome.webp, 1024 square, lossless transparency.
+5. Register: CAREER_TERM_ART in src/components/glossary/termArt.ts, keyed by the "Register under" slug and following the investment-banking entry; WELCOME_ART["<slug>"] = { drift, signal } in src/components/glossary/welcomeArt.ts.
+6. Check: npx tsc --noEmit and node scripts/qa/dreamy-reactions.test.mjs. Open /play/glossary/<slug>?theme=drift and ?theme=signal: the welcome shows the illustration beside Dreamy, Level 1 teach cards show the pictures, ?lesson=2 shows words only. Screenshot each welcome and one Level 1 card per theme.
+7. Run the acceptance gate in section 6.1. Add a dated docs/AI_HANDOFF.md entry: what you generated, the briefs, what you rejected and why. One commit per industry. Do not push.
+
+Done looks like: three manifests, thirty term images in both sizes, six welcome images, three CAREER_TERM_ART entries, three WELCOME_ART entries, tsc and the reaction QA green, screenshots attached, nothing pushed.
+```
+
+### 8. QA and release checklist (Chandu)
+
+1. Open the hamburger menu, Glossary QA. The new industry is listed with its playable levels.
+2. Play Level 1 in Drift with Skip, then Level 1 in Signal. Watch for clipped words, odd line breaks, a Dreamy facing away, a dollar meter where a milestone should be, and that the mastery segments fill without pointing at a word.
+3. Open Level 3 and Level 4 in Drift and step through every screen with Skip: no two screens may show the same line, the sort must be concrete things into concept buckets, and each case must read as a real call. Then play one level without Skip, miss two answers on purpose, and check the review screens feel new.
+4. Read the Power Play paragraph of each level once as a student would. Level 1 should be five short lines.
+5. Confirm Codex's Level 1 pictures and the welcome illustration are in place and on style.
+6. Release with Prompt C.
+
+### 9. The 50 industries: mode and career world
+
+| No. | Industry | Mode | Career world | Framing |
+|---|---|---|---|---|
+| 1 | Finance & Investment Banking (built, Joshua's) | continuous_story | Business & Finance | Dream Sneakers. Does not change. |
+| 2 | Accounting & Audit | scenario_thread | Business & Finance | Month-end close, reconciliations, statements, controls, audits; same company, different situations. |
+| 3 | Entrepreneurship & Venture | continuous_story | Business & Finance | Idea, customers, business model, raise money, hire, grow. |
+| 4 | Management Consulting | scenario_thread | Business & Finance | Different client problems: costs, growth, operations, market entry. |
+| 5 | Marketing & Brand Management | scenario_thread | Business & Finance | Different campaigns for one brand. |
+| 6 | Sales & Business Development | scenario_thread | Business & Finance | A pipeline: qualify, discovery, pitch, objection, proposal, close. |
+| 7 | Human Resources & People Operations | scenario_thread | Business & Finance | Recruiting, onboarding, pay, benefits, performance, retention. |
+| 8 | Supply Chain & Logistics | continuous_story | Driving, Flying & Shipping | One product from supplier to factory to warehouse to customer. |
+| 9 | Law & Legal Services | scenario_thread | Law, Safety & Justice | Rotating client matters: contracts, evidence, discovery, litigation. |
+| 10 | Software Engineering (built) | continuous_story | Tech & Engineering | One app from requirements to release. Nova Notes. |
+| 11 | Cybersecurity | scenario_thread | Tech & Engineering | One organization through security events: access, phishing, malware, response. |
+| 12 | Data Science & Analytics | continuous_story | Tech & Engineering | Question, data, cleaning, analysis, model, recommendation. |
+| 13 | Artificial Intelligence & Machine Learning | continuous_story | Tech & Engineering | One AI system: data, training, model, evaluation, bias, deployment. |
+| 14 | Product Management & UX | continuous_story | Tech & Engineering | One product: research, pain point, prototype, testing, launch. |
+| 15 | Electrical & Computer Engineering | scenario_thread | Tech & Engineering | Circuits, components, signals, measurement, troubleshooting. |
+| 16 | Mechanical Engineering | scenario_thread | Tech & Engineering | Forces, materials, CAD, prototypes, tolerances, failures. |
+| 17 | Civil Engineering & Construction Management | continuous_story | Building & Construction | One project from site plan to turnover. |
+| 18 | Architecture | continuous_story | Building & Construction | One client from brief to presentation. |
+| 19 | Registered Nursing (built) | scenario_thread | Health & Medicine | A clinic with different patients each level. Riverside Clinic. |
+| 20 | Medicine / Physician | scenario_thread | Health & Medicine | Patient encounters: history, exam, diagnostics, treatment. |
+| 21 | Surgery & Operating Room | scenario_thread | Health & Medicine | Different procedures: OR roles, sterile technique, anesthesia. |
+| 22 | Pharmacy | practice_world | Health & Medicine | Fast prescription and medication drills. |
+| 23 | Dentistry | scenario_thread | Health & Medicine | A dental clinic day. |
+| 24 | Mental & Behavioral Health | scenario_thread | Counseling & Social Work | Client situations: assessment, symptoms, care plans. |
+| 25 | Allied Health & Diagnostics | practice_world | Health & Medicine | Radiology, lab, respiratory, sonography drills. |
+| 26 | Biotechnology | continuous_story | Science & Research | One research project from hypothesis to scale-up. |
+| 27 | Biomedical Engineering | continuous_story | Science & Research | One medical device from need to regulatory. |
+| 28 | Public Health & Epidemiology | continuous_story | Science & Research | One health event: detect, measure, risk, intervene, evaluate. |
+| 29 | Veterinary Medicine | scenario_thread | Farming, Animals & Nature | Different animal patients. |
+| 30 | Food Science | continuous_story | Farming, Animals & Nature | One food product from formulation to production. |
+| 31 | Consumer Packaged Goods | continuous_story | Business & Finance | One product from insight to shelf to growth. |
+| 32 | Aerospace Engineering | continuous_story | Tech & Engineering | One component from requirements to certification. |
+| 33 | Airline Pilot & Flight Operations (built) | scenario_thread | Driving, Flying & Shipping | Different flights and phases. Skyline Air. |
+| 34 | Electrician | scenario_thread | Building & Construction | Different jobs: circuits, panels, grounding, code, testing. |
+| 35 | HVAC & Refrigeration | scenario_thread | Fixing Machines & Engines | Service different systems. |
+| 36 | Plumbing & Pipefitting | scenario_thread | Building & Construction | Different jobsite problems. |
+| 37 | Welding & Fabrication | practice_world | Factories & Making Things | Fast shop drills. |
+| 38 | Automotive Technology | scenario_thread | Fixing Machines & Engines | Vehicles with different symptoms: scan, diagnose, repair, verify. |
+| 39 | Diesel & Heavy Equipment | scenario_thread | Fixing Machines & Engines | Trucks and machinery: inspections, hydraulics, diagnostics. |
+| 40 | Aviation Maintenance Technician | scenario_thread | Fixing Machines & Engines | Different maintenance events: inspection, airframe, sign-off. |
+| 41 | Avionics Technician | scenario_thread | Fixing Machines & Engines | Aircraft electrical and electronic systems. |
+| 42 | Advanced Manufacturing & CNC | continuous_story | Factories & Making Things | One production order from blueprint to quality. |
+| 43 | Industrial Maintenance & Mechatronics | scenario_thread | Factories & Making Things | Keep a facility running: motors, sensors, PLCs, root cause. |
+| 44 | Robotics Technician | scenario_thread | Factories & Making Things | Automation cells: programming, teach points, calibration, safety. |
+| 45 | Carpentry & Construction Trades | scenario_thread | Building & Construction | Layout, framing, finishing, tools, safety. |
+| 46 | Solar & Renewable Energy Technician | continuous_story | Building & Construction | One installation from site survey to monitoring. |
+| 47 | Culinary Arts (built) | practice_world | Food & Cooking | Fast kitchen drills. Harbor Kitchen. |
+| 48 | Cosmetology & Barbering | practice_world | Personal Care & Community Services | Fast client and technique drills. |
+| 49 | EMT & Paramedic | scenario_thread | Health & Medicine | Different emergency calls from size-up to handoff. |
+| 50 | CNA & Medical Assistant | scenario_thread | Health & Medicine | Different patients and duties: rooming, vitals, infection control. |
+
+### 10. Where everything is
+
+| Path | What |
+|---|---|
+| docs/handoff/specs/glossary-system.md | The locked spec. |
+| docs/reference/glossary-scaling-sop-usman-2026-10-16.html, .md | This document, HTML and markdown. The only glossary SOP. |
+| scripts/glossary-art.mjs | The term art script: manifest in, prompts out, packaging, validation, preview (section 6.1). |
+| docs/reference/glossary-finance-art-oct13.json | The model manifest with the finance briefs. |
+| src/components/glossary/generate.ts | Blueprint types (terms with moments; sort, selectAll, cases, powerPlay per level), the four recipes, the validator with the reading rules, the build-time assertions. |
+| src/components/glossary/blueprints/ | culinary.ts (the model: every authored piece in use, four levels), health.ts, software.ts, aviation.ts (six levels each). |
+| src/components/glossary/data.ts | GLOSSARY_INDUSTRIES, GLOSSARY_HUB_RELEASED, Finance's hand-authored levels. |
+| src/components/glossary/industries.ts | The fifteen world design systems, CAREER_INDUSTRY. |
+| src/components/glossary/termArt.ts, welcomeArt.ts, levelPlates.ts, worldBackdrops.ts | Image registries: term art, welcome, plates and the Dreamy state expressions, panoramas and silhouettes. |
+| src/components/glossary/GlossaryLabGameExperience.tsx | The engine. |
+| scripts/qa/glossary-blueprints.test.mjs, scripts/qa/dreamy-reactions.test.mjs | The two QA scripts. |
+| /play-tools/glossary-qa | Every glossary, every level, both themes. Hamburger menu, Glossary QA. |
+| /component-lab, "Glossary game, live engine" | Every piece in both themes with a World picker. |
+
+### Appendix A. Joshua's Master Scaling Plan in full, with how the system holds each rule
+
+#### 1.1 Executive rules
+
+These override anything else in the document.
+
+| Rule | What it means | In the system |
+|---|---|---|
+| Finance stays exactly as it is | Everything here applies only to new glossary worlds. Finance and Investment Banking, including Business Basics and Investing Basics, do not change. Nothing is applied retroactively. | Finance is hand-authored in data.ts and data-finance-l2-4.ts. It never passes through the generator. |
+| No timers | No countdown, no count-up, no timer in the header, no timed questions, no timer as a difficulty mechanic. Every new world, every new level. | The engine has no timer. The "4 min" on the Levels map is an estimate of length, not a clock. |
+| No forced images | The Dreamari team decides whether a term has an honest, relevant image. No AI tool or content generator makes this decision. If the team decides no, the term gets no image. Never create an image to fill a slot. If a match-to-pictures question loses its pictures, it becomes match-to-meanings. | Levels 2 and up teach with words only. The team has decided Level 1 earns pictures everywhere (3.4). A flashcard shows generated art or nothing; it never shows an icon in place of a picture. Match It Up is always word to meaning. |
+| No forced math | The team decides whether math belongs in a lesson. Never invent prices, percentages or calculations because a template has a math slot. Keep the question's position; swap the mechanic (sorting, ordering, spot the mistake, decision). | Numbers in a level's copy fail validation unless the level sets math: true. The generator never writes a calculation. |
+
+#### 1.2 Three glossary world architectures
+
+| Mode | What it means | Use it when | Do not use it when |
 |---|---|---|---|
-| TermFlipCard (GGE:632-637) | 3D flip | framer `rotateY 0 <-> 180`, `duration 0.5`, `ease [0.4, 0, 0.2, 1]`; wrapper `perspective: 1200`; `transformStyle: preserve-3d`; faces `backfaceVisibility: hidden` | duration 0 (instant) |
-| UnlockScreen term change (GGE:695-705) | page slide | `AnimatePresence mode="wait" initial={false}`; enter `{opacity 0, x 24}` -> `{opacity 1, x 0}`; exit `{opacity 0, x -24}`; `duration 0.26`, ease `[0.4,0,0.2,1]` | opacity only, 0.12 s |
-| Unlock button (GGE:718-719) | press | `whileTap scale 0.97`, `duration 0.12` | none |
-| MatchUp line (GGE:966-1005, 1030-1043) | confirm line between the pair's dots | SVG line, `stroke CORRECT_COLOR`, width 2; visible at 0, `fading` at 350 ms (CSS `transition-opacity duration-300` to 0), removed at 750 ms | no special handling |
-| MatchUp wrong (GGE:1013-1015) | red border flash | 400 ms | n/a |
-| OptionList dim | `transition-opacity` (Tailwind default 150 ms) to 0.45 | | |
-| StreakModal (GGE:1440) | pop in | `dreamy-pop 0.45s cubic-bezier(0.34,1.56,0.64,1)`: 0% scale 0.72 opacity 0.4; 60% scale 1.08 opacity 1; 100% scale 1 (globals.css:540-544) | `motion-safe:` so none |
-| PlayBurst (PlayBurst.tsx) | confetti burst | 22 particles (default); shapes cycle dot/diamond/4-point spark; `angle = (i/count)*2π + (i%3)*0.35`; distance `54 + ((i*37) % 46)` px; size `4 + ((i*13) % 6)` px (spark drawn at 1.8x); colors cycle `[accent, #ffd166, #ffffff, accent]`; end offset `(cos*d, sin*d - 10)`; rotation `260deg` even / `-220deg` odd; delay `(i%6)*0.028 s`; duration `0.65 + (i%4)*0.09 s`; easing `cubic-bezier(0.16,1,0.3,1)`, fill forwards; origin `top-1/3 left-1/2`. Keyframe `play-burst`: 0% opacity 0 scale 0.3; 15% opacity 1, 25%/20% of the offset, scale 1.25, 20% rotation; 100% opacity 0, full offset, scale 0.4, full rotation (globals.css:1062-1066). Flash: 40px circle radial `color-mix(accent 70%, white)`, `play-burst-flash 0.5s ease-out forwards` 0.9 opacity scale 0.4 -> 0 opacity scale 2.2. Re-keyed by `nonce` (0 renders nothing). | `motion-safe:` only (see 8.4 Finding) |
-| PlayBurst usage | UnlockComplete (nonce 1), StreakModal (1), Power Play success (increments), Complete (1) | | |
-| Backdrop bloom (PlayBackdrop.tsx:79-95, all versions) | full-screen radial flash on `play:pulse` | 140vmax circle, `radial-gradient(closest-side, color-mix(color 55%, transparent), transparent 68%)`; color accent, or `var(--destructive)` for wrong; `--bloom-peak` 0.5 correct / 0.32 wrong / 0.7 celebrate; `backdrop-bloom 900ms ease-out forwards`: 0% opacity 0 scale 0.7; 30% opacity peak scale 1; 100% opacity 0 scale 1.35 (globals.css:1052-1056). `forwards` is load-bearing (stuck blob bug). | `motion-safe:` only (see 8.4) |
-| Pulse dispatch sites | `dispatchPlayPulse` kinds | correct: Unlock, correct choice, Match pair, Sort, Profit; wrong: choice, Sort, Profit; celebrate: UnlockComplete, StreakModal, Power Play success. Complete screen does NOT pulse. | |
-| SparkBar (flow/SparkBar.tsx) | HUD bar + LessonIntro meter | width transition 700 ms `cubic-bezier(0.33,1,0.68,1)`; on growth a `ProgressSpark` particle comet sweeps the new span and the fill flickers (WAAPI, 700 ms ease-out, brightness up to 1.25 / saturate 1.4, glow `0 0 24px 4px`); idle flicker every 10-18 s when the user has been idle >= 10 s (shared cooldown) | transition none; flicker/idle skipped |
-| Stars (v1, ui/stars.tsx + PlayBackdrop) | 3 box-shadow star layers drifting up | 1000 stars @1px, 400 @2px, 200 @3px; `y: 0 -> -2000px` linear infinite over `speed`, `speed*2`, `speed*3` with `speed = 140` (140/280/420 s); white stars; seeded PRNG positions. Pointer parallax (factor 0.05, spring stiffness 50 damping 20) is effectively INERT because PlayBackdrop's root is `pointer-events-none` (Finding) | framer default: animates anyway (no `MotionConfig reducedMotion`) |
-| Fireworks (ui/fireworks.tsx) on UnlockComplete + Complete | canvas | `population 0.7` -> launch every `rand(300,800)/0.7` ms (~429-1143 ms); rockets from bottom, x in 10-90% width, burst at 10-40% height; `fireworkSpeed 3-6`, `fireworkSize 2-5` (default), trail 10-25 points, gravity 0.02; 50-150 particles per burst, `particleSpeed 1.5-5`, `particleSize 1-5` (default), gravity 0.05, friction 0.98, alpha decay 0.005-0.02/frame; colors `[resolved accent, #ff5f7e, #ff3d9a, #ffd93d, #ffffff]`. Canvas width = `window.innerWidth`. Click-to-launch is inert (wrapper `pointer-events-none`). | no handling (Finding) |
-| v2 CRT backdrop | scanlines `crt-scanline-roll 0.4s linear infinite` (bg-position-y 0 -> 4px) over an 8px band `linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.65) 51%)`; SVG noise (`feTurbulence fractalNoise 0.85, 2 octaves`, desaturated, `mix-blend-screen`) `crt-noise-flicker 6s ease-in-out infinite` opacity 0.2 <-> 0.4; vignette `radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(0,0,0,0.85) 100%)`; base `#050308` + magenta `rgba(255,0,170,.22)` at 18% 12% + cyan `rgba(0,231,255,.18)` at 85% 88% | `motion-safe:` |
-| v2 CRT HUD glitch | mastery dots + progress bar box-shadow | `crt-rgb-glow 3.5s ease-in-out infinite alternate` cycling magenta 2px ring + cyan glow (globals.css:1103-1108) | none (inline `animation`) |
-| v3 Dots | Vanta.DOTS (three.js r134 + vanta@latest from CDN) | `backgroundColor 0x0b0b0c`, `color = color2 = resolved accent`, `size 3`, `spacing 35`, `showLines: false`, mouse/touch controls on, `minHeight/minWidth 200`, `scale 1` | none |
-| v4 Synth | grid floor | `perspective 340px`, origin 50% 0%, floor `rotateX(78deg)`, 60px gold grid `oklch(0.78 0.18 75 / 0.4)` 1px lines on `#0d0a14`, `synth-grid-scroll 4s linear infinite` (bg-position 0 -> 60px); sky `linear-gradient(180deg, oklch(0.1 0.05 292) 0%, oklch(0.72 0.18 75) 100%)`; 5 static star dots in top 45% | `motion-safe:` |
-| dm-* | hover/press | 140-160 ms transitions (app.css) | disabled |
+| Continuous Story continuous_story | One company, project, product or mission progresses across Levels 1 to 4. Later events build on earlier ones. | Vocabulary has a natural cause-and-effect progression. | You would have to invent awkward plot points just to introduce a term. |
+| Scenario Thread scenario_thread | The student stays in the same professional world, but each lesson is a new situation: a new shift, case, customer, patient or problem. | The workplace is consistent but the vocabulary does not need one continuous plot. | One coherent project would genuinely improve understanding. |
+| Practice World practice_world | Short, varied mini-situations. There is a visual world and Dreamy, but no obligation to keep a narrative. | Vocabulary is best learned through rapid identification, comparison, classification, procedures, decisions or examples. | A recurring situation would materially improve understanding. |
 
-v1 backdrop colors (PlayBackdrop.tsx:51-55), "berry": `radial-gradient(115% 95% at 15% -10%, rgba(219,39,119,0.55) 0%, transparent 68%), radial-gradient(105% 90% at 100% 105%, rgba(157,23,77,0.5) 0%, transparent 65%), linear-gradient(160deg, #2a0a1f 0%, #170a14 45%, #3a0f2c 100%)`. Fixed (NOT accent-derived) on purpose. Stars hidden on UnlockComplete and Complete (`showStars` false, GGE:2097).
+A scenario thread is still a world. Nursing keeps the student inside one clinic, but nobody has to remember Patient A from Level 1 to understand Patient B in Level 3. That is far more scalable than turning every career into a television show.
 
-Not animated: Dreamy (the float/bob keyframes were removed 25 Aug to save vertical space); screen-to-screen transitions (screens swap instantly, no AnimatePresence on `screen`); the Complete score (no count-up).
+#### 1.3 Master scaling rules
 
----
-
-### 8. Error and edge states
-
-#### 8.1 Content / routing
-- Unknown career slug: `notFound()` -> Next's default 404 (no custom `not-found.tsx`). Entry points never link to non-content careers (`hasGlossary` gate; hub shows locked "Coming soon" card, Career Detail hides the button).
-- Career with zero lessons: `notFound()`.
-- Zero terms: Unlock skips straight to UnlockComplete ("All 0 terms unlocked!"); mastery % guarded to 0 (GGE:1624-1629, 22 Sept).
-- Zero questions: UnlockComplete's Start Practice jumps to Power Play instead of a stuck blank question screen (GGE:2198-2207, 22 Sept).
-- Zero facts: MasteryLoading shows no fact card (`?? null`, GGE:2241).
-- Too few terms/options for distractors: not applicable (options authored). A choice question with 1 option would work trivially. Power Play with 0 answers: `allFilled` is vacuously true and `every` is true, so "Check Answers" immediately succeeds (edge; UNCLEAR if anyone would author that).
-- Malformed references (bad `termId`): credit silently lost; mastery can't reach 2; no error.
-- Duplicate strings in options/pairs/items/answers: React key collisions and wrong match lookups (section 1.5 D).
-- `WORLD_COLORS` miss: accent falls back to amber.
-- Icon slug miss: `Sparkles`.
-- Dreamy image fails to load: `DreamyFace` swaps to a circle `color-mix(brand-500 18%, card)` with a muted `Sparkles` at 50% size (GGE:158-191, 22 Sept). Re-keyed per pose.
-
-#### 8.2 Storage failures
-- `progress.ts`: read failures return `{}`; write failures are swallowed ("Private browsing or a full quota: the round still works, it just won't persist", progress.ts:88); listeners still fire.
-- Mute keys: reads default to not-muted; writes swallowed ("the toggle still works for this session") -- note it actually does NOT: the snapshot re-reads localStorage, so if the write throws the toggle visually snaps back. UNCLEAR/Finding by reading sound.ts:36-43 and glossaryThemeSound.ts:53-62.
-- `awardDreamScore`: any exception returns `{ total: 0, awarded: false }`.
-- Server render: all snapshots return defaults (`{}`, not muted, 0 XP) and correct on hydration.
-
-#### 8.3 Audio
-- No AudioContext support: every play function no-ops (context getter returns null).
-- Autoplay blocked: contexts are `resume()`d on every use; no gesture-retry logic (unlike `music.ts`'s `armGestureRetry`). The first Next tap on Intro is the first gesture.
-- Music loop self-heals if muted from another tab (per-tick check).
-- Leaving mid-lesson stops the loop (unmount cleanup).
-
-#### 8.4 Reduced motion
-- Honored: flip (instant), term slide (opacity 0.12 s), StreakModal pop, PlayBurst and bloom keyframes (`motion-safe:`), v2/v4 backdrop keyframes, SparkBar, `dm-*`.
-- Not honored: Stars drift (framer default), Fireworks canvas, Vanta dots, CRT glitch glow, MatchUp line.
-- Finding (by reading, not verified live): PlayBurst particles and the backdrop bloom span are only hidden by their keyframes. Under `prefers-reduced-motion: reduce` the `motion-safe:` animation class does not apply, so the particles would sit visible (opacity 1) in a pile at the burst origin, and the 140vmax bloom circle would sit at full opacity permanently after the first pulse, which is the "stuck blob" bug in reduced-motion form. Production should render nothing (or a static fade) for these when reduced motion is on.
-
-#### 8.5 Accessibility
-- Present: native buttons everywhere; `aria-label` on Back and icon-only toggles; `aria-pressed` on toggles; IconTip tooltips on hover and keyboard focus; `aria-hidden` on decorative icons/Dreamy (`alt=""`) and backdrops; focus-visible outlines; disabled inputs pinned to full contrast; `PlayVersionChip` is `role="tablist"` with `aria-selected`.
-- Missing: no `aria-live` for "Correct!/Not quite" (FeedbackPanel/StreakModal are not `role="dialog"`, no focus move/trap, no Escape handling); no labels on text inputs (placeholder only on Type the Term; none on Profit Builder and Power Play blanks); Match It Up and Sort the Buckets convey state by color + check icon only (wrong-placed chips are red with no icon); mastery dots use `title` only; HUD percent not announced; the answer letter circles are the only non-color cue in OptionList (plus Check/X icons after reveal).
-- Contrast risks: light-mode CTA (accent fill, dark text) ~3.2:1 for finance; Power Play white-on-`#cfc6f5` in light mode; muted-foreground 62% white on berry.
-
-#### 8.6 Layout
-- Horizontal overflow guarded by `100vw/640px`; vertical by the 650px height guard. Measured: no page scroll at 375x560 up to 2000x1100.
-- Long terms/definitions: the 650px guard assumes FIN-L01 content; longer content can reintroduce vertical overflow on short phones.
-- Very long `term` in the Unlock CTA ("Unlock {term}") has no truncation.
-
-#### 8.7 React/runtime nuances
-- Complete gate writes progress and awards XP inside a `useState` lazy initializer (GGE:2260-2267). Under StrictMode dev, initializers run twice: `saveLessonComplete` (no dedupe) would add 2x XP to the glossary store in dev; `awardDreamScore` dedupes. Writing and dispatching events during render may also log React's "cannot update a component while rendering a different component" warning. UNCLEAR: not verified live.
-- MasteryLoadingScreenGate's `onDone` is a fresh arrow each parent render; any parent re-render within the 1.8 s (e.g. a resize changing `dockSpace`) restarts the timer.
-- `showStreak` and `pendingResult` open at the same time on a 5th-in-a-row answer; the streak modal stacks on top of the feedback panel.
-
----
-
-### 9. Design-decision comments, verbatim essence with file:line (grouped)
-
-Quotes are the user's/stakeholders' own words as recorded in the comments.
-
-#### 9.1 Origin, content, schema
-- data.ts:1-11: content "authored from DreamAri_Glossary_Content_Template_v1.xlsx... (Usman imports it)"; only Finance Lesson 1 ("Dream Sneakers") is real, "transcribed verbatim... rather than paraphrased, since the wording is already tuned to eighth-grade level and ties every example back to the one company"; other careers "intentionally absent, not stubbed"; `hasGlossary()` separates "no game yet" from "game with no content."
-- data.ts:25-26: `termId` undefined only for Match It Up / Sort the Buckets, which credit per pair/item.
-- data.ts:93-98: `questions` "Played in order, first"; `reviewQuestions` "Held back as remediation... README: 'if the student gets one wrong the review round needs a different question to ask'".
-- data.ts:110-114: icon is a semantic slug from the xlsx's plain-word Icon column, resolved in the UI; "Content authors pick the slug; the app owns what it looks like."
-- page.tsx:13-18: only authored careers resolve, everything else 404s; entry points already gate on `hasGlossary()`; "a `?lesson=` param could pick among more once a career has them."
-- progress.ts:1-6: same shape as play/progress.ts via `useSyncExternalStore` ("the repo lints the useState-in-an-effect version as an error"); "Deliberately lighter than the simulation's beat-by-beat resume: a glossary lesson is ~4 minutes and restartable."
-- progress.ts:101-102: `saveLessonComplete` "Called once, when a lesson's Lesson Complete screen resolves."
-- GGE:51-66: built from the Replit reference + xlsx schema, "reskinned into Dreamari's own tokens rather than the reference's teal/violet palette"; accent per career world; Power Play uses `--hero-accent-purple`; revert quote: "Keep the yellow for CTAs. The career world accents can stay, its the background that we need to work on."
-- GGE:68-73: Dreamy reuses the flat pose-swap sprites (Build's DreamyGuide), not SimulationPlayer's SceneCharacter system ("pure overhead for a floating cloud").
-- games.ts:107-118 / 121-125 / 129-130: "{Subject} Terms" naming ("Finance Glossary Game and everything Terms is not good, make it consistent", 9 Sept); Coming-soon dummy cards "they dont have to work or lead anywhere" (9 Sept); Private Equity removed from the row (9 Sept).
-
-#### 9.2 Color, CTA, theme
-- GGE:89-102: `primaryCtaColors`: accent fill reads muddy in light mode (token calibrated for text contrast); earlier light-mode swap to ink; 26 Sept 2026: accent in both themes because "the light theme's ink button read as a black slab on a dark scene."
-- GGE:330-332: `data-night-scene` on the top bar, "the game's ground is always the dark starfield" (Back, streak and XP had turned dark grey).
-- GGE:808-813: `CORRECT_COLOR = var(--world-food-farming-nature)`: amber is the "active/selected" accent, so correct needed its own color; wrong stays `--danger`.
-- GGE:1929-1932: every color reads `--glossary-accent`, set once on the root.
-- GGE:194-208: SpeechBubble solid local `--speech-bubble-bg/-fg` with always-dark fallbacks: 21 Sept "needs more solid surface, it gets lost in the background now"; "lose the white background it doesnt work for the darkmode UI"; Play is its own immersive world, not a themed page.
-- GGE:1549-1553: Power Play input text stays foreground ("direct report of not being able to read their own input"); purple only on the underline.
-- GGE:936-940: pin `color` + `WebkitTextFillColor` on disabled inputs (Safari dims them).
-
-#### 9.3 Layout, sizing, centering
-- GGE:409-423: CTA growth cap 560px, 22 Sept 2026: "THE CTA Buttons dont need to stretch past a respectable amount, just the MODALS and their internal elements... need to scale proportionately... not just extending to the side."
-- GGE:440-445 and 1340-1346: Dreamy overlaps from above with no side padding (side padding shifted the bubble off-center on mobile); explicit 28px because `--space-7` doesn't exist.
-- GGE:452-455: DreamyIntro CTA wrapper carries the 560px cap.
-- GGE:488-491: meter floored at 4% ("reads as 'no progress possible here'").
-- GGE:659-668: no Dreamy on Unlock (repeats 5x, tightest screen); every size is `clamp(min, Ndvh, max)`; "guarantees no scroll even on an old, small phone"; iPhone 15 Safari lands inside the range.
-- GGE:673-676: icon-node progress row removed ("saying the same thing twice"); a quiet count instead.
-- GGE:818-822: option gap 12 -> 16px, 21 Sept: "dont have any padding and clash with eachothers borders".
-- GGE:1307-1337: question card history: 11 Sept "no enclosing card" (boxes inside boxes) superseded 21 Sept: "centre the content always including the questions and answers... make sure they are in containers with surface tokens"; "lets scale up the question+answer content... responsive on all devices and screen sizes proportionately" (560 -> 620px, clamp text); `--space-7` undefined zeroed padding ("the card containing the question+ the answers has no padding...").
-- GGE:1387-1394: FeedbackPanel is a fixed modal (inline feedback pushed Continue below the fold); not backdrop-dismissible because it is the required checkpoint.
-- GGE:1713-1744 and 1760-1785: `useMeasuredSpace`; DemoControlsDock is fixed so `<main>` centered too low; 22 Sept: "the actual game content and questions and answers seem like theys it too low... The flipcard/card/surface should be central"; measured 37px low bias at 2000x1100; dock 36 vs 44.5px, top bar 60 vs 75px, so measured not hardcoded.
-- GGE:321-326: top bar measured 60px at 1440 wide vs 75px at 1920/2000.
-- GGE:1940-2056: the full `--glossary-shell-scale` derivation (anchor 1440x900 "keep the macbook air screen (ours as a benchmark) and scale up from there proportionately"; ratio version rejected "theres so much space that the modals can use"; additive 750px per axis; `min()`-coupled version rejected (froze 1440x1600 at 1.0); width guard 100vw/640px; floor 1 = mobile byte-identical; cap 2.2 -> 2.6; max -> sum "can scale vertically a bit more too... so much space left blank"; height guard 650px from measured UnlockScreen height).
-- GGE:2059-2071: `--demo-dock-space` and `--top-bar-space` purposes.
-- GGE:2180-2188: every screen centers both axes, 21 Sept: "the question block is still not centred in the screen... centred vertically and horizontally" (supersedes pinning question screens high).
-- GGE:2117-2123: HUD size history: "make the progress bar info smaller / less dominant" superseded 21 Sept by "the HUD text size can be bigger, match it to the career simulation HUD sizes" (13px / 11px).
-- GGE:2144-2146: mastery as filled skill dots, Duolingo's visualization.
-
-#### 9.4 Interaction
-- GGE:522-530 and 681-693: TermFlipCard: example optional behind a real flip, 21 Sept, "matching Instagram's own carousel logic"; walkthrough quote: "you shouldn't be mandated to go through both cards... you should have the option to click example... I have the liberty to swipe through if I find it intriguing, but I'm not forced to"; "still have the tap to flip functionality".
-- GGE:587-588: "Optional, small, never required -- pressing Unlock below works identically".
-- GGE:545-553: hand-drawn illustrations restored, 21 Sept: "why have we lost the hand-drawn illustrations on the cards? Please bring that back".
-- GGE:623-625: one shared sketch filter per card.
-- GGE:711-713: Unlock uses the correct chime (it had the same soft tick as any tap).
-- GGE:908-911: word-bank chips are real buttons (they looked tappable, so they must be), a typing shortcut.
-- GGE:966-973: Match It Up line is a brief flash, not permanent ("awkward" crossing lines); right side shuffled on purpose.
-- GGE:855-860: Catch the Misuse as a document sheet ("spot the wrong sentence"), no interaction change.
-- GGE:1283-1285: deterministic shuffle for SSR/CSR sync.
-- GGE:1822-1825: progress is 1-indexed ("a progress bar should never open at zero").
-- GGE:1913-1915: remediation rule from the content template.
-- GGE:277-282, 1834-1835, 1848-1851: DEMO-ONLY reload/step-back, 21 Sept: "add a reload button as demo (clearly marked for usman so ican reload the game from start, and also a back button at each step so i can go back 1 step whenever i want)"; step-back rewinds position, not answers.
-- GGE:337-343 and 353-359: demo chip/controls moved to a bottom dock, 22 Sept: "it gets confused with actual UI".
-
-#### 9.5 Celebration, background, motion
-- GGE:731-737: UnlockComplete gets the sweep + burst (was silent and static).
-- GGE:738-742: 21 Sept: "use this [Fireworks Background] on success screens, color match to UI"; resolved rgb via `useResolvedColor`; paired with warm white.
-- GGE:746-755 / 1642-1651: dedicated positioning wrapper (className merge collapsed FireworksBackground to 0 height).
-- GGE:765-770 / 1661-1664: content in its own `relative z-10` ("make sure the fireworks happen behind the content UI").
-- GGE:1430-1432: StreakModal gets correct chime + burst.
-- GGE:1631-1633: Complete gets `playSweep` (had no sound).
-- GGE:1637-1638: Complete is the other fireworks success screen.
-- GGE:2087-2095: stars off on the two celebration screens, 21 Sept: "do not combine the fireworks with the star background use only the fireworks"; `"unlockComplete"` Screen literal is never assigned.
-- GGE:2072-2081: Play's own background, not AppBackdrop, "when playing a game it should feel like we are entering a new world".
-- GGE:2136-2140: SparkBar sparks on every advance; wrapped for CRT glitch ("progress bar master dots etc can glitch").
-- GGE:2159-2163: CRT glitch on graphical HUD only, 21 Sept: "Do not glitch the text on the HUD, glitch the graphical elements only".
-- GGE:215-226: no glitch on prompt text; CRT cursor after the last word ("The cursor shouldnt be up in the HUD, it should be in the messages or after the questions"); text sized by clamp.
-- PlayBackdrop.tsx:7-50: Joshua (Slack, 21 Sept): "it shouldn't have a similar background color as the Explore/my profile etc, it'll feel redundant... when playing a game it should feel like we are entering a new world"; "Dont change the background of the PLAY TAB... ONLY CHANGE THE BACKGROUND OF THE IN GAME BACKGROUND"; gold duotone rejected ("WHY HAVE YOU USED A GOLDEN BACKGROUND FOR THE GLOSSARY GAME... IT JUST HAS TO PLAY WELL WITH THE GAME UI NOT MATCH IT"); jade rejected ("still feels black dominated... try a different combo than green/yellow"); berry chosen; Vortex parked in `ui/vortex.tsx`; stars recolored, white stars "not blend into it so i cant see it"; speed 50 -> 140 ("Slow the movement of the stars upward"); bloom keeps the career accent.
-- PlayBackdrop.tsx:83-91: `forwards` fill mode ("the sharp round blob that appears after right answer is bad... no color blobs accumulating").
-- PlayBurst.tsx:3-10: 21 Sept "not flat basic confetti, ever"; LocalBurst untouched for Build.
-- backdropPulse.ts:1-11: event bus so the background reacts ("interactive feedback animations that also reflect in the background"); deliberately lighter than Build's aurora.
-- useResolvedColor.ts:5-24: canvas can't read `var()`; probe must live inside `.marketing-v2` (a body probe resolved near-white).
-- PlayVersionChip.tsx:3-7: demo-only, like Connect's AT&T chip; v1 shipped default.
-- PlayBackdropV2Crt.tsx:6-24, 30-33, 49-55, 63-85; globals.css:1070-1090, 1098-1101, 1124-1183: CRT built from codepen.io/creme/pen/aPJwEz, kept black ("instead of a blue screen lets keep it black"), "like an OLD TV", noise below scanlines, 8px bands at 0.65, "The pulsing glow can be slowed down and more subtle", pixel font "a more pixelated-pixel looking font", square corners "Go more Retro blocky pixelated with the UI on CRT", compound selector for cascade.
-- PlayBackdropV3Dots.tsx:7-15, 91-101, 105-107, 119-124: real Vanta.DOTS ("you got the dots worng"), `showLines: false` ("remove ONLY that"), CDN failure falls back to dark div, reverted masking attempts.
-- PlayBackdropV4Synthwave.tsx:6-25, 32-36, 58-69: reference-exact synthwave, sun removed, gold not magenta, dark floor with gold lines, 4s scroll, 1px lines.
-
-#### 9.6 Sound / music
-- GGE:23-28: import from glossaryThemeSound so every call site picks up per-version sound.
-- GGE:1801-1807: per-version SFX + loop, 21 Sept: "add sounds that fit the CRT version, the synth version etc... add a background track to each that fit each ones vibe"; "v1 also could use a good tune"; stopped on unmount.
-- glossaryThemeSound.ts:1-13: wrapper, not an edit of sound.ts.
-- glossaryThemeSound.ts:22-28: `started` flag (v1 track never started because `currentTheme` defaulted to v1).
-- glossaryThemeSound.ts:38-41: dedicated music toggle ("and a button to toggle music on off").
-- glossaryThemeSound.ts:88-103: private context; one context, two gates; 25 Sept bug quote.
-- glossaryThemeSound.ts:220-245: patterns rewritten twice: 21 Sept "Please have a more catchy tune for the CRT version, And every version please. Not too distracting, just something that sits in the back"; 22 Sept "the music for the glossary games are too short of loops being repeated and causes fatigue we need full songs that vary... things like mario, pokemon etc have per city etc." (sectioned Intro/A/B/Bridge/Return).
-- glossaryThemeSound.ts:320-325: per-tick self-healing mute check, 25 Sept "verify every game and fix so it never breaks".
-- sound.ts:1-7: synthesized, no assets; "a game that cannot be silenced instantly is a game they will not open at school."
-- sound.ts:104-105: wrong is "Low and short, never harsh: getting it wrong is part of learning".
-- music.ts:7-10: simulation music has its own mute separate from SFX ("mute it [the music] and only hear sound effects").
-
-#### 9.7 Edge cases (22 Sept 2026 "custom-designed edge case" series)
-- GGE:158-165: DreamyFace `onError` (widest-blast-radius unguarded image in Play).
-- GGE:1624-1628: zero-term NaN% guard.
-- GGE:2198-2206: zero-question stuck screen -> skip to Power Play.
-- GGE:1620-1622: one Dream Score (the private x100 score produced 15k figures, Chandu, 6 Sept 2026).
-- GGE:2260-2263: lazy initializer so the award runs once at mount; store ignores repeats.
-- GGE:1792-1794 and useResolvedColor.ts:28-29: rAF defer to satisfy `react-hooks/set-state-in-effect`.
-
----
-
-### 10. Discrepancies, gaps and recommendations for the production rebuild
-
-1. `memoryTip`, `subtitle`, `difficulty`, `estimatedMinutes`, `careerTitle`, term/pair/item `order` are authored but unused. Decide: render (memoryTip on the flip card back is the obvious slot) or drop.
-2. Three finance-hardcoded strings (GGE:403, 463, 480) block multi-career. Add a subject field.
-3. `saveLessonComplete` stores all term ids as mastered and adds XP to the glossary store on every replay (no dedupe). Store real `masteredTermIds`; award once server-side.
-4. Glossary progress is never read back: no "completed" badge, no lesson 2 unlock, no resume. Home card progress "6 of 10 terms mastered" is fake.
-5. Power Play word bank is in answer order (hint); consider shuffling with `shuffleStable(answers, lesson.id + "-pp")`.
-6. Type the Term plays no sound/pulse on check (all other kinds do).
-7. Sort the Buckets has no way to undo a placement before checking.
-8. "See Results" label shows before an appended review question.
-9. Music restart bug after in-app re-entry / StrictMode (section 6.5).
-10. Reduced-motion leaves burst particles and bloom visible (8.4); Stars/Fireworks ignore reduced motion.
-11. Light-mode contrast of CTAs (accent + `#05070f`) and Power Play (white on light purple); in-game cards flip light over a dark scene.
-12. Accessibility: dialogs lack role/focus management/aria-live; inputs lack labels.
-13. `--danger` and `--success` tokens don't exist; literals `#e0483e` / `#1f9d55` are what render.
-14. Progression spec proposes 30 XP per lesson + 40 XP delayed check (48h+); code awards 20. Confirm with Joshua.
-15. Production should delete the DEMO-ONLY dock, version chip, `?bg`, v2-v4 backdrops/SFX/music, and the `--demo-dock-space` term in the scale formula (grep `DEMO-ONLY`).
-16. The xlsx authoring template is not in the repo; get it from Usman/content team to confirm column names and the "README" rule text referenced in data.ts:96.
-
-
----
-
-# Part 11. What a Glossary lesson must contain (content intake)
-
-> Source: `docs/handoff/play-sop/templates/glossary-content-intake.md`.
-
-## Glossary Game content intake: what a career's lesson must contain
-
-Reverse-engineered from `src/components/glossary/data.ts` (the real authoring sheet, `DreamAri_Glossary_Content_Template_v1.xlsx`, is not in the repo; confirm column names against it). Field meanings and runtime behavior: [04-glossary-game.md](`docs/handoff/play-sop/04-glossary-game.md`) §1.
-
-### Career (one row)
-
-| Column | Field | Rules |
+| Rule | Global standard | How the system holds it |
 |---|---|---|
-| Career slug | `careerSlug` | The catalogue slug (same as Career Detail and the Play hub). |
-| Career title | `careerTitle` | Supply it (unused today). |
-| World | `world` | Exact `WORLD_COLORS` key; sets the whole accent. |
-| Subject word | (new field, see issue A11) | "finance", "nursing", "aviation". Needed to replace the three hardcoded "finance" strings. |
+| World size | 4 initial levels per glossary world. | Blueprint levels; roadmap levels beyond that show as locked words. |
+| Vocabulary | 5 new core terms per level. 20 across Levels 1 to 4. | Validated: exactly five terms per playable level. |
+| Lesson length | 7 to 10 scored interactions, including the final Power Play. | Seven derived screens plus the level's authored extras, seven to ten in all, plus 1 Power Play. Asserted by the QA script. |
+| Term coverage | Every new term is introduced clearly, then used in applied context before the lesson ends. | Teach cards first; every term is credited at least twice in the main loop (asserted). |
+| Power Play | Always one integrated final challenge. Never five screens for five terms. | One written paragraph with five blanks, never in teaching order, sized by level (Level 1 is five short lines, one blank each). The type allows nothing else. |
+| Question clarity | Every screen asks an explicit question or action. Never "Complete the activity." | Every generated prompt is a question or an instruction. |
+| Copy length | Context line about 12 words. Question about 18 words. Answer choices usually 7 words. | Each moment 12 words and 72 characters, cue 7 words and 34 characters, case step 80 characters, every sentence 14 words, feedback 90 characters, validated. |
+| Reading difficulty | Roughly 8th grade. Difficulty comes from the concept, not the writing. | Validated since 17 Oct: a Flesch-Kincaid grade of 8 or below per level, with the level's own five words not counted, and no sentence over 14 words. |
+| Answer leakage | Never put the answer inside the question, visual, heading, labels or setup. | Validated: a definition may not say its own word, a cue, a moment, a Select All line and a case step may not say the word they ask for. |
+| Distractors | The right answer is not systematically the longest or most professional-sounding. | Distractors are the other terms of the same level, so lengths vary naturally. Answer position rotates by level. |
+| Interaction diversity | No more than two consecutive screens with the same mechanic. | Asserted at build and in the QA script, by the shape the student sees (story card, fill-in sentence, compare card, 2x2, match, sort, select, case, type). |
+| Multiple choice | Useful, but mixed with matching, sorting, fill-in-the-blank, error identification, comparison, sequencing, decisions. | Each recipe mixes story cards, fill-in sentences, compare cards, match, sort, select-all, cases and type. |
+| Multi-part questions | About 2 to 3 judgments per screen. Never seven items at once. | Match has five pairs, Sort four to seven items, Select All four lines, a case two to four steps. |
+| Wrong-answer feedback | Say exactly what was wrong. | Feedback is one or two short lines from the cue, and names the word it is mixed up with when it fits ("It is Blanch: a quick boil, then ice water. Poach is gentle heat in still water."). |
+| Nested counters | No "Step 1 of 2" when the lesson already has a progress system. | None in generated levels. |
+| Dreamy | Exactly one Dreamy per screen. The cloud itself: no arms, hands, legs or body. Expressions react to the situation. | One actor per screen, twelve Drift poses and four Signal reactions, always facing the content. |
+| Intro cards | Skippable; students who know a term move quickly into practice. | Teach cards advance on tap. |
+| Continuity | A story recap fits one short sentence. | Each level's intro is a headline, one line and one hook. |
+| Mastery | Recognition first, then application, then transfer. Harder because students must think, not because screens hold more text. | The four recipes below. |
 
-### Lesson (one row per lesson; only lesson 1 plays today)
+#### 1.4 How difficulty progresses
 
-`id` (globally unique, becomes the XP milestone id, e.g. `RN-L01`), `lessonNumber`, `title`, `subtitle`, `milestone` (shown on "All 5 terms unlocked!"), `exampleCompany` (the one story every example ties back to), `difficulty`, `estimatedMinutes`, `xpReward` (20), `companyValue`, `nextCompanyValue`, `nextMilestone` (the finance meter; decide the equivalent per career, A11).
+The learning progression stays the same across all 50 worlds even though the worlds change. A Level 4 question is not a longer Level 1 question. It requires better judgment. Math is one possible mechanic, never a required marker of difficulty.
 
-### Terms (exactly 5 per lesson)
-
-`id` (unique), `order`, `term`, `definition` (eighth-grade level), `example` (must mention `exampleCompany`), `icon` (a semantic slug from `TERM_ICON_MAP`, or request a new one: illustrations stay relevant to the lesson's own story, never emoji), optional `memoryTip`.
-
-### Questions (7 main, played by `playOrder`)
-
-Common: `id` (unique), `termId` (which term a right answer credits; omit only for Match It Up and Sort the Buckets), `playOrder`, `prompt`, `feedbackCorrect`, `feedbackWrong` (the only place the right answer is explained for typed, sort and numeric questions).
-
-| Kind | `type` label | Extra fields |
+| Level | Cognitive goal | Example |
 |---|---|---|
-| `choice` | Definition / Reverse Recall / Fill in the Blank / Catch the Misuse | `options` (4 unique strings, authored distractors), `correctIndex` |
-| `typeTerm` | Type the Term | `wordBank` (the answer must be in it), `answer` |
-| `matchUp` | Match It Up | `pairs` (left, right, termId; both sides unique) |
-| `sortBuckets` | Sort the Buckets | `buckets`, `items` (text, bucket, termId; texts unique; every bucket name exact) |
-| `profitBuilder` | Profit Builder (multi-step numeric) | `scenario`, `steps` (order, label, numeric answer) |
+| Level 1 | Recognize and understand | "Which term means money earned from sales?" |
+| Level 2 | Apply | "Maya puts $25,000 into the company. What does that money become?" |
+| Level 3 | Compare, analyze, classify | Interpret relationships, consequences, workflows; tell two confusable words apart. |
+| Level 4 | Decide, diagnose, distinguish | "The company needs money but does not want to give up ownership. Which option fits?" |
+| Power Play | Integrate | One situation requiring all five terms together. |
 
-The shipped lesson uses one of each kind plus two extra choice types, in this order: Definition, Type the Term, Fill in the Blank, Match It Up, Catch the Misuse, Sort the Buckets, numeric builder.
+In the system each level has a **focus**: recognize, apply, analyze or decide. It defaults by level number (1, 2, 3, 4 and later) and can be overridden. The focus picks the recipe: seven derived screens, plus the level's authored cases (and an authored sort or Select All where the recipe has no slot) as extra screens, seven to ten in all. The numbers in brackets are which of the five terms the screen credits; m0, m1 and m2 are which of that word's three moments it shows. Every moment is shown once per lesson.
 
-### Review questions (remediation)
+| Step | Level 1 recognize | Level 2 apply | Level 3 analyze | Level 4+ decide |
+|---|---|---|---|---|
+| 1 | Definition: the five definitions as options (1) | Story card m0, which word (1) | Compare card, term 1 beside its confusion, m0 decides (1) | Story card m0, which option fits (1) |
+| 2 | Match It Up, word to meaning (all) | Fill in the blank: m1, then "That is ___." (2) | Story card m0 (3) | Compare card, term 2 (2) |
+| 3 | Fill in the blank, m1 (5) | Story card m0 (3) | Sort: the authored concept sort, else m1 of terms 2 to 5 into the words | Match It Up, "Use it when" (all) |
+| 4 | Story card m0 (3) | Select All, authored or derived (4) | Select All about term 2 | Fill in the blank, m1 (3) |
+| 5 | Sort: authored, else m1 of terms 1 to 4 into the words | Match It Up (all) | Fill in the blank, m1 (1) | Select All about term 4 |
+| 6 | Catch the Misuse (4) | Catch the Misuse (5) | Catch the Misuse against the confusion (4) | Catch the Misuse (5) |
+| 7 | Type the Term from m2 (2) | Type the Term from m2 (1) | Type the Term from m2 (5) | Type the Term from m2 (1) |
+| extra | An authored Select All or case, if written | Cases (one or two) | Cases | Cases, and an authored sort |
+| finale | Power Play: the level's written paragraph, all five words, blanks never in teaching order, word bank shuffled, size by level. |  |  |  |
 
-At least one per term you want remediated; each MUST have `termId`. After the main queue, any term with fewer than 2 credited answers pulls its review questions once.
+The review (one Reverse Recall per word, the definition read aloud) is drawn only for words still short of mastery and never appears in the main loop. Live proof of all four recipes with every authored piece: /play/glossary/culinary?lesson=1 through lesson=4, the model blueprint.
 
-### Power Play (1 paragraph)
+#### 1.5 The 50 glossary worlds
 
-`paragraph` with `{1}` … `{n}` placeholders (1-based, contiguous) and `answers` (n unique words). Retried until all correct.
+Joshua calls each of these a "Glossary World". In the system they are **industries**, grouped under Dreamari's 15 career worlds. The career world owns the look (accent color, display face, body face); the industry owns the levels and the story. Several industries share one world. The mode column is Joshua's recommended architecture and becomes mode in the blueprint.
 
-### Facts
+| # | Industry | Mode | Career world | Recommended framing |
+|---|---|---|---|---|
+| 1 | Finance & Investment Banking (built) | continuous_story | Business & Finance | Keep Dream Sneakers. Does not change. |
+| 2 | Accounting & Audit | scenario_thread | Business & Finance | Month-end close, reconciliations, statements, controls, audit requests. Same company, different situations. |
+| 3 | Entrepreneurship & Venture | continuous_story | Business & Finance | Idea, customers, business model, raise money, hire, grow, decide. |
+| 4 | Management Consulting | scenario_thread | Business & Finance | Different client problems: costs, growth, operations, market entry. |
+| 5 | Marketing & Brand Management | scenario_thread | Business & Finance | Different campaigns for one brand. |
+| 6 | Sales & Business Development | scenario_thread | Business & Finance | A pipeline: qualify, discovery, pitch, objection, proposal, close. |
+| 7 | Human Resources & People Operations | scenario_thread | Business & Finance | Recruiting, onboarding, pay, benefits, performance, retention. |
+| 8 | Supply Chain & Logistics | continuous_story | Driving, Flying & Shipping | One product from supplier to factory to warehouse to customer. |
+| 9 | Law & Legal Services | scenario_thread | Law, Safety & Justice | Rotating client matters: contracts, evidence, discovery, litigation. |
+| 10 | Software Engineering (built, 6 levels) | continuous_story | Tech & Engineering | Build and release one app: requirements, code, testing, deployment, bugs. |
+| 11 | Cybersecurity | scenario_thread | Tech & Engineering | One organization through security events: access, phishing, malware, response. |
+| 12 | Data Science & Analytics | continuous_story | Tech & Engineering | Business question, data, cleaning, analysis, model, recommendation. |
+| 13 | Artificial Intelligence & Machine Learning | continuous_story | Tech & Engineering | One AI system: data, training, model, evaluation, bias, deployment. |
+| 14 | Product Management & UX | continuous_story | Tech & Engineering | One product: research, pain point, prototype, testing, launch. |
+| 15 | Electrical & Computer Engineering | scenario_thread | Tech & Engineering | Circuits, components, signals, measurement, troubleshooting. |
+| 16 | Mechanical Engineering | scenario_thread | Tech & Engineering | Forces, materials, CAD, prototypes, tolerances, failures. |
+| 17 | Civil Engineering & Construction Management | continuous_story | Building & Construction | One project from site plan to turnover. |
+| 18 | Architecture | continuous_story | Building & Construction | One client from brief to presentation. |
+| 19 | Registered Nursing (built, 6 levels) | scenario_thread | Health & Medicine | A hospital shift world with different patients. |
+| 20 | Medicine / Physician | scenario_thread | Health & Medicine | Patient encounters: history, exam, diagnostics, treatment. |
+| 21 | Surgery & Operating Room | scenario_thread | Health & Medicine | Different procedures: OR roles, sterile technique, anesthesia. |
+| 22 | Pharmacy | practice_world | Health & Medicine | Fast prescription and medication scenarios. |
+| 23 | Dentistry | scenario_thread | Health & Medicine | A dental clinic day. |
+| 24 | Mental & Behavioral Health | scenario_thread | Counseling & Social Work | Professional client situations: assessment, symptoms, care plans. |
+| 25 | Allied Health & Diagnostics | practice_world | Health & Medicine | Radiology, lab, respiratory, sonography; variety helps here. |
+| 26 | Biotechnology | continuous_story | Science & Research | One research project from hypothesis to scale-up. |
+| 27 | Biomedical Engineering | continuous_story | Science & Research | One medical device from need to regulatory. |
+| 28 | Public Health & Epidemiology | continuous_story | Science & Research | One health event: detect, measure, risk, intervene, evaluate. |
+| 29 | Veterinary Medicine | scenario_thread | Farming, Animals & Nature | Different animal patients. |
+| 30 | Food Science | continuous_story | Farming, Animals & Nature | One food product from formulation to production. |
+| 31 | Consumer Packaged Goods | continuous_story | Business & Finance | One product from insight to shelf to growth. |
+| 32 | Aerospace Engineering | continuous_story | Tech & Engineering | One component from requirements to certification. |
+| 33 | Airline Pilot & Flight Operations (built, 6 levels) | scenario_thread | Driving, Flying & Shipping | Different flights and phases: preflight, taxi, cruise, weather, diversions. |
+| 34 | Electrician | scenario_thread | Building & Construction | Different jobs: circuits, panels, grounding, code, testing. |
+| 35 | HVAC & Refrigeration | scenario_thread | Fixing Machines & Engines | Service different systems. |
+| 36 | Plumbing & Pipefitting | scenario_thread | Building & Construction | Different jobsite problems. |
+| 37 | Welding & Fabrication | practice_world | Factories & Making Things | Fast shop exercises; a long narrative adds little. |
+| 38 | Automotive Technology | scenario_thread | Fixing Machines & Engines | Vehicles with different symptoms: scan, diagnose, repair, verify. |
+| 39 | Diesel & Heavy Equipment | scenario_thread | Fixing Machines & Engines | Trucks and machinery: inspections, hydraulics, diagnostics. |
+| 40 | Aviation Maintenance Technician | scenario_thread | Fixing Machines & Engines | Different maintenance events: inspection, airframe, sign-off. |
+| 41 | Avionics Technician | scenario_thread | Fixing Machines & Engines | Aircraft electrical and electronic systems. |
+| 42 | Advanced Manufacturing & CNC | continuous_story | Factories & Making Things | One production order from blueprint to quality. |
+| 43 | Industrial Maintenance & Mechatronics | scenario_thread | Factories & Making Things | Keep a facility running: motors, sensors, PLCs, root cause. |
+| 44 | Robotics Technician | scenario_thread | Factories & Making Things | Automation cells: programming, teach points, calibration, safety. |
+| 45 | Carpentry & Construction Trades | scenario_thread | Building & Construction | Different stages and jobs: layout, framing, finishing, safety. |
+| 46 | Solar & Renewable Energy Technician | continuous_story | Building & Construction | One installation from site survey to monitoring. |
+| 47 | Culinary Arts (built, 4 levels) | practice_world | Food & Cooking | Fast kitchen challenges: knife skills, methods, temperatures, service. |
+| 48 | Cosmetology & Barbering | practice_world | Personal Care & Community Services | Fast client and technique exercises. |
+| 49 | EMT & Paramedic | scenario_thread | Health & Medicine | Different emergency calls from size-up to handoff. |
+| 50 | CNA & Medical Assistant | scenario_thread | Health & Medicine | Different patients and duties: rooming, vitals, infection control. |
 
-1+ short "did you know" lines (one shows on the 1.8s mastery screen). No unsourced numbers.
+Only five worlds are primarily practice worlds, because most professions are easier to understand when the vocabulary sits in a recurring workplace or project.
 
-### Validation list
+#### 1.6 Story mode does not determine question type
 
-- [ ] Exactly 5 terms; every `termId` everywhere matches a term id.
-- [ ] Each term is credited at least twice across the main questions (mastery needs 2).
-- [ ] All ids unique; lesson id globally unique.
-- [ ] Options, pair sides, item texts, word-bank words and Power Play answers unique within their list.
-- [ ] `correctIndex` in range; `typeTerm.answer` in `wordBank`; every `item.bucket` in `buckets`; numeric answers are plain numbers.
-- [ ] Placeholder count equals `answers.length`.
-- [ ] Every icon slug exists in `TERM_ICON_MAP` (or a new icon is requested).
-- [ ] Copy at eighth-grade level, no em dashes, every example tied to `exampleCompany`.
-- [ ] Hub entry: `GLOSSARY_GAMES` card titled "<Subject> Terms", sub "Learn key <subject> terms", cover (chapter 7).
+A continuous story lesson still contains matching, multiple choice, sorting, drag and drop, sequencing, error detection, decisions and fill-in-the-blank, with calculations only when the team decides they are relevant. The story is the contextual spine: one context line, then the question. The story makes the information meaningful. It never becomes additional reading.
+
+#### 1.7 Artwork
+
+Do not build a unique illustration for every term. 50 worlds times 4 levels times 5 terms is 1,000 terms; bespoke imagery for all of them is a production bottleneck and invites misleading visuals for abstract concepts. The team decides whether each term has an honest, relevant image. Candidates: sneaker, stethoscope, circuit breaker, wrench, aircraft engine, syringe, welding torch, hair clipper, CNC machine. Terms that do not need a standalone image: profit, liability, risk, margin, differential diagnosis, return, leverage, compliance, strategy.
+
+| Mode | Visual strategy |
+|---|---|
+| Continuous story | Visualize the entity progressing; reuse the same company or product assets and change their state. |
+| Scenario thread | Reuse a small library of environments, equipment, documents and tools. |
+| Practice world | Rely on interactions, Dreamy reactions, motion, clouds, buttons and success states. |
+
+**In the system:** Level 1 of every industry gets pictures for its five terms and one welcome illustration (decision of 16 October, section 3.4). Every later level teaches with words: words-only teach cards, anonymous mastery segments, no pictures on match, sort or card backs. A flashcard never shows an icon in place of a picture.
+
+#### 1.8 Dreamy's role
+
+Dreamy is part of the interaction system, not an illustration beside every piece of content. One screen, one Dreamy. Dreamy is the cloud itself: no arms, hands, legs or body. Dreamy is curious before a question, thinking during a hard one, concerned near a warning, excited after a correct answer, encouraging after a mistake, celebrating mastery, confident during the Power Play, surprised by an unexpected result. When term artwork is not appropriate, the game still comes from Dreamy's expressions, cloud movement, background animation, button reactions, correct-answer states, mastery animations, combos, unlocks, celebrations and transitions. A screen does not need a vocabulary illustration to feel like a game.
+
+**In the system:** one actor per screen, twelve animated Drift poses and four Signal reactions mapped to question kinds and answer states, always facing the content, with the reward pluses on the main Dreamy when a student is right.
+
+#### 1.9 Quality gate before any lesson ships
+
+| Ask | Question | Automated? |
+|---|---|---|
+| Clarity | Can a student understand exactly what they are asked within about three seconds? | Sentences of 14 words at most and a grade 8 cap are automated; the rest is review. |
+| Learning | Does answering require understanding the vocabulary, or can the student guess from wording or visuals? | Leakage checks are automated; the rest is review. |
+| Purpose | Did the screen teach or test something meaningful? | Author review. |
+| Copy | Is anything repeated that could be removed? | No line of copy is shown twice in a lesson (automated); the rest is review. |
+| Feedback | If the student is wrong, will they understand exactly what was wrong and why? | Generated from the term's own cue and its confusion, two short sentences at most. |
+| Imagery | Has the team decided the image honestly helps? If not, remove it. | Registration is the decision. |
+| Math | Has the team decided math belongs? If not, do not use it. | math: true is the decision; numbers without it fail. |
+| Story | Would removing the story hurt understanding? If not, reduce it. | Author review. |
+| Timer | Is there any timer? Remove it. | None exists. |
 
 
 ---
 
-# Part 12. Known issues, rule conflicts and decisions to take to Joshua
+# Part 11. Known issues, rule conflicts and decisions to take to Joshua
 
 > Read before writing production code. Source: `docs/handoff/play-sop/06-known-issues-and-decisions.md`.
 
@@ -3317,7 +3006,7 @@ Production recommendation: move all of these into the per-career content record 
 2. **The placeholder-cover prompt template lives outside git** (`~/Documents/Dreamari/Play tab/prompts-and-crops.json`), used only for careers with no pack from Joshua yet. Its crop hints (`landscapePosition: 50% 20%`) are not wired in code (every hub cover is centered).
 3. **No post-processing scripts in the repo** for chroma-keying green-screen sprites, alpha-bounding-box crops, matting cleanup or face-chip crops. Chapter 7 §4 specifies each step so it can be scripted.
 4. **Face chips differ per career** (IB 512 webp, RN 420-460 jpg). Standardize on 512x512 webp.
-5. **The glossary authoring spreadsheet** (`DreamAri_Glossary_Content_Template_v1.xlsx`) is not in the repo. The intake template in `templates/glossary-content-intake.md` is reverse-engineered from `data.ts`; confirm column names against the real sheet.
+5. **The glossary authoring spreadsheet** (`DreamAri_Glossary_Content_Template_v1.xlsx`) is not in the repo. Resolved 17 Oct 2026: games are now generated from a blueprint file, which is the import format (master glossary SOP, `docs/reference/glossary-scaling-sop-usman-2026-10-16.md`); the old intake template was deleted.
 6. **The simulation handoff zips** (`background-library.json`, `scene.json`, the character bible) are not in the repo.
 7. **`art-ratios.ts` is dead code** (imported nowhere, stale values). Delete it.
 8. **Orphaned files**: `ib/l1-07.webp`, `ib/l3-01.webp`, `ib/l3-07.webp`, `rn/{rosa,denise,tyler,yvonne}.jpg`, `app/soon-registered-nurse.png`, six `app/glossary-*-thumb*.png`. Prune.
@@ -3344,194 +3033,3 @@ Production recommendation: move all of these into the per-career content record 
 - `SimulationPlayer.tsx:733-747` describes three masked hero layers on phones; the code is one cover layer.
 - `PlayHub.tsx:353` says main is capped at 1200px; it is 1440px.
 - `rn-level-1.ts:15-17` says "no alpha cutouts yet"; RN sprites ship.
-
-
----
-
-# Part 13. Scale Drift and Signal glossary artwork
-
-> Canonical style anchors, reusable prompts, semantic QA, WebP processing and career-scoped registry. Source: `docs/handoff/play-sop/12-glossary-art-pipeline.md`.
-
-## 12. Scale glossary artwork: Drift and Signal
-
-### Why this is separate from lesson content
-
-Chandu asked for Levels 2 to 4 to match Level 1, and for a prompt that can
-scale to future careers. Art is a supporting visual, not an alternative to
-the lesson's explanation or a place to bake in the correct answer.
-Keep authored words, definitions, examples, questions, answer options, types,
-sequence, numbers and scoring unchanged. Preserve the live scene-card diagrams.
-
-Only Drift and Signal are active. Do not generate Orbit/Horizon sets.
-Do not generate game backgrounds, cards, UI, text, numbers or formulas.
-Dreamy is always a floating cloud, never a person with limbs.
-
-### Required style anchors
-
-Always attach the shipped reference bytes, not only a written style name.
-Use these as style/character references, not edit targets:
-
-| Theme | Character | Object / materials | Currency |
-| --- | --- | --- | --- |
-| Drift | `public/images/glossary/themes-oct08/drift/customer.webp` | `public/images/glossary/themes-oct08/drift/company.webp` | `public/images/glossary/themes-oct08/drift/profit.webp` |
-| Signal | `public/images/glossary/signal/cloud-sale-sneaker.webp` | `public/images/glossary/signal/building.webp` | `public/images/glossary/signal/coins-320.webp` |
-
-For new careers, change the subject props, not the theme's technique or
-Dreamy's identity. Add a same-theme prop reference when the subject needs one.
-Do not use another theme as an anchor. Never chain only off the last generated
-image: return to the canonical Level 1 anchors to prevent cumulative drift.
-
-### Copy/paste production prompt
-
-Replace the bracketed fields and attach the three theme references above.
-Generate ONE asset per call. A sheet of five pictures is not a production asset.
-
-```text
-Use case: stylized-concept
-Asset type: one isolated Dreamari glossary illustration
-Career: [CAREER]
-Term: [EXACT TERM ID]
-Meaning: [EXACT AUTHORED DEFINITION]
-Example context: [EXACT AUTHORED EXAMPLE, for meaning only; never render text]
-Subject: [ONE CLEAR VISUAL METAPHOR OR CONCRETE PROP]
-
-Generate a new subject. Attached images are canonical STYLE and CHARACTER
-references only. Do not copy their subject when this term needs another one.
-
-Composition: one compact centered object cluster on genuine transparent alpha.
-Square 1024px source, roughly 82% subject coverage and 8-10% clear safe margin.
-Clear silhouette at 48px, attractive at 200px. Maximum one main subject and
-two supporting cues. Use a broad arrow only if direction teaches the meaning.
-No clipping or ground rectangle. No background scene, UI, card, frame, words,
-letters, numbers, formulas, percentage, branded logo or watermark. The app
-renders all text and exact maths. Avoid clutter, generic stock clipart and
-irrelevant decoration. Do not depict a numerical answer or guarantee a result.
-
-Character lock: if the subject needs a person, use Dreamy, not a human.
-Keep the reference's floating cloud silhouette, white/cyan lobes, large deep
-navy star eyes and small blue mouth. No arms, hands, feet, legs, human torso,
-other people or animals. Props sit or float beside Dreamy. Dreamy holds nothing.
-Expression: [happy / interested / thoughtful / gently concerned]. Not scary.
-Do not add Dreamy when a simple object teaches this term more clearly.
-
-Style: [INSERT ONE THEME LOCK BELOW]
-```
-
-#### Drift style lock
-
-```text
-Match the attached Drift Level 1 artwork. Premium sculpted 3D illustration,
-satin sky-blue and deep navy, ivory, restrained metallic gold. Polished molded
-forms, soft bevels, believable depth, clean small studio highlights. Soft
-upper-left lighting, navy undersides, contact shadows only between objects.
-Objects use a three-quarter frontal view; Dreamy keeps the reference's face.
-Arrows use the same tactile material. No pixel art, flat vector, painterly
-brushwork, fuzzy clay, inflated toy blobs, neon or photographic people.
-```
-
-#### Signal style lock
-
-```text
-Match the attached Signal Level 1 artwork. Carefully drawn 2D pixel-art game
-sprite, dark navy stepped outlines, visible square pixel clusters and clean
-three/four-tone cel shading. Cyan, white, blue and gold, restrained amber
-accents. Build on a coherent logical grid around 128x128, enlarged with
-nearest-neighbor. No antialiasing, smooth curves, blur, 3D rendering, soft
-gradients, painterly textures or photographic shine. Dreamy's silhouette,
-star eyes, expression and props must use the SAME pixel grid.
-```
-
-### Subject planning, before generation
-
-1. Read the actual lesson data. Inventory unique term IDs across all levels.
-2. Reuse an existing asset only when its meaning and example context match.
-3. Write one concrete semantic brief per term. The two themes share meaning
-   but change illustration technique. Do not merely recolor a 3D image.
-4. Separate confusable concepts. Revenue is all sales income, Profit is what
-   remains after costs, Margin is the portion kept, Cash Flow has both directions.
-   Stock is ownership; Bond is repayable borrowing; Interest is extra repayment.
-5. If the term cannot be represented honestly, keep the glyph/diagram fallback.
-   Do not register a misleading picture simply to reach full coverage.
-6. For story-specific assets, scope the registry to the career. A sneaker shop
-   must never silently appear in Nursing or Aviation because an ID is shared.
-
-### Production manifest and repeatable commands
-
-Example: `docs/reference/glossary-finance-art-oct13.json`. It stores the exact
-template, style locks, anchors, semantic briefs, level/term IDs and generation
-source paths. Built-in ImageGen is the generation method; no external provider
-account or paid CLI is implied. Keep original PNG sources untouched.
-
-```sh
-## One JSONL prompt per asset, with the required references.
-node scripts/glossary-art.mjs prompts docs/reference/glossary-finance-art-oct13.json
-
-## After every source is filled in, export a new versioned set and receipt.
-node scripts/glossary-art.mjs prepare docs/reference/glossary-finance-art-oct13.json
-
-## Read-only file verification. Requires the original local sources.
-node scripts/glossary-art.mjs validate docs/reference/glossary-finance-art-oct13.json
-
-## Contact sheets with unchanged Level 1 anchors in the top row.
-node scripts/glossary-art.mjs preview docs/reference/glossary-finance-art-oct13.json /absolute/path/to/review
-```
-
-For another career, copy the manifest, set a NEW version and career slug,
-replace the terms/briefs and source paths, keep the theme locks/anchors.
-The script refuses missing alpha, clipped sources, collisions and over-budget
-outputs, including duplicate term slugs. Validation checks the current source,
-reference, prompt and output hashes against the saved receipt. It does not
-generate images or make a quality judgment.
-The preview command composes existing artwork for review, not game backgrounds.
-Original local generation sources are not required by the deployed player;
-only optimized WebPs ship. Receipts preserve source/reference SHA-256 hashes,
-generation IDs, exact final prompts, dimensions, output hashes and byte sizes.
-AI provenance is not a legal licence certification.
-
-#### File contract
-
-- Path: `public/images/glossary/<version>/<drift|signal>/<term-slug>.webp`.
-- Drift: large 768px, small 256px named `<term-slug>-256.webp`.
-- Signal: large 768px, small 320px named `<term-slug>-320.webp`.
-- Alpha-preserving square canvases. Trim only transparency; never stretch.
-- Drift subject fits within 90% of the canvas.
-- Signal is sampled once onto a 128px grid, then enlarged with nearest-neighbor.
-  Small output pads the grid before doubling so no fractional pixels appear.
-- Budgets: 140KB large, 35KB small. Aim below these, not at the ceiling.
-- Add explicit career/term ID mappings in `src/components/glossary/termArt.ts`.
-  Never use broad keyword matching for new terms.
-- Preload only the active theme's current lesson assets. Prefetch the next
-  teaching card, not every asset across careers. Never ship full source PNGs
-  to a 40px HUD or matching tile.
-
-### Acceptance gate, every new set
-
-A prompt alone cannot guarantee consistent style. Do all of these before push:
-
-- Review every image beside the canonical anchors at both 200px and 48px.
-- Check the term's actual meaning, not just whether the image is attractive.
-- No misleading guaranteed gains, gambling cues, unintended text or wrong props.
-- Dreamy has the correct cloud face and no limbs/human body; no substitute cast.
-- Genuine transparency, safe margins and preserved aspect ratio.
-- Signal uses pixel clusters, not a pixel filter over 3D. Drift retains satin depth.
-- Equal canvas dimensions and visual weight within each theme. No tiny subjects.
-- Check all three levels' teaching faces, examples, five-term reward and HUD.
-- Check the matching screen, sort screen and a numerical case. Diagrams and
-  authored copy still render unchanged. No pictures baked with answer numbers.
-- Do not decorate an unplaced conceptual sorting statement with its correct
-  bucket's picture. That reveals the answer. Bucket-header art is safe; item
-  art must represent the item's own subject, independently of its destination.
-- Phone, tablet and laptop: labels wrap cleanly, art does not squish, no page scroll.
-- Check Level 1 regression. Do not replace its anchors or shipped artwork.
-- Run TypeScript, scoped lint, `npm run tokens:check` and asset validation.
-- Update AI handoff with WHY, new set paths, checks, rejected variants and limits.
-- Push only with user authorization, then verify the exact production SHA,
-  hosted bytes and live asset rendering before calling the set live.
-
-### This set
-
-Investment Banking Levels 2 to 4: 15 terms, two styles, 30 illustrations and
-60 optimized WebP files. Existing Level 1 assets and all question data stay
-unchanged. Contextual imagery supplements definitions; scene-card maths stays
-authoritative. The earlier no-new-term-art recommendation is superseded only
-by Chandu's explicit request for this theme-consistent asset pass.

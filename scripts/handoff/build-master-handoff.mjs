@@ -22,10 +22,8 @@ const PARTS = [
   ["Part 7. Art direction, image slots, post-processing step by step, art QA", "docs/handoff/play-sop/07-art-direction-and-prompts.md", "Which image goes where, and the exact post-processing steps the scripts perform."],
   ["Part 8. The sprite master prompt (frozen; change only the CAST block)", "docs/handoff/sprite-master-prompt.md", "Paste as written. Prepend Joshua's DREAMARI VISUAL REFERENCE LOCK header (SOP 2 section 91)."],
   ["Part 9. The art CLI, command by command", "scripts/play-art/README.md", "Day-to-day usage of scripts/play-art."],
-  ["Part 10. The Glossary Game, end to end", "docs/handoff/play-sop/04-glossary-game.md", "Content schema, state machine, every screen, sound, animation and edge state."],
-  ["Part 11. What a Glossary lesson must contain (content intake)", "docs/handoff/play-sop/templates/glossary-content-intake.md", ""],
-  ["Part 12. Known issues, rule conflicts and decisions to take to Joshua", "docs/handoff/play-sop/06-known-issues-and-decisions.md", "Read before writing production code."],
-  ["Part 13. Scale Drift and Signal glossary artwork", "docs/handoff/play-sop/12-glossary-art-pipeline.md", "Canonical style anchors, reusable prompts, semantic QA, WebP processing and career-scoped registry."],
+  ["Part 10. Glossary Games: the master SOP", "docs/reference/glossary-scaling-sop-usman-2026-10-16.md", "The one glossary SOP (17 Oct 2026): rules, game prompts, art prompts, the 50 industries and Joshua's plan. It replaced the old glossary chapter, intake template and art chapter."],
+  ["Part 11. Known issues, rule conflicts and decisions to take to Joshua", "docs/handoff/play-sop/06-known-issues-and-decisions.md", "Read before writing production code."],
 ];
 
 // Demote every heading one level so each chapter sits under its Part title,
@@ -67,7 +65,7 @@ You can see this split in three places: the component library at \`/component-la
 
 **Windows.** Two steps are Mac-only today: Apple Vision subject lifting (used to cut people out of scenes) and face detection for crops. Part 4, section 7.3 names the replacements (SAM 2 with a person detector, or rembg with BiRefNet, for cut-outs; MediaPipe or OpenCV YuNet for faces), the licence checks to make first, and where each plugs in. Everything else is Node and runs anywhere.
 
-**The path for one new career** (Part 2, section 7): 1 script in Joshua's 26-field dataset shape; 2 generator maps rows to beats and \`bespokeIn\` comes back empty; 3 scoring config (points, endings at 85/40/0, midpoint 68); 4 one entry in \`games.ts\` plus a Performance Plan or \`noStrikes\`; 5 art through the manifest and the CLI; 6 the Glossary lesson (Parts 10 and 11); 7 QA with the \`?screen=<beatId>\` links, a keyboard-only run, and 375 px and 1440 px. A level with no art yet is fully playable, so content and art can ship separately.
+**The path for one new career** (Part 2, section 7): 1 script in Joshua's 26-field dataset shape; 2 generator maps rows to beats and \`bespokeIn\` comes back empty; 3 scoring config (points, endings at 85/40/0, midpoint 68); 4 one entry in \`games.ts\` plus a Performance Plan or \`noStrikes\`; 5 art through the manifest and the CLI; 6 the Glossary Game (Part 10); 7 QA with the \`?screen=<beatId>\` links, a keyboard-only run, and 375 px and 1440 px. A level with no art yet is fully playable, so content and art can ship separately.
 
 **What to build next (the multiplier).** A generator that takes a SOP 3 dataset and emits the level file, running \`bespokeIn\` and the type-check as gates; the analytics events Joshua's SOP 3 names (none exist today beyond "played" and "finished"); the Windows replacements for the two Mac steps; and the automated QA in Part 4, section 7.5. Part 12 lists the decisions still open with Joshua (for example, how a composited sprite satisfies SOP 2's "pasted on" rule) and the demo-only shortcuts to strip for production (every one is tagged \`DEMO-ONLY\` in code).
 
@@ -79,7 +77,7 @@ You can see this split in three places: the component library at \`/component-la
 | Generating a career's game from a script | Part 2 (sections 2, 3, 5 and 7), Part 3, then Part 12 |
 | Producing a career's art | Part 4, then Part 5 or Part 6, with Parts 7, 8 and 9 open |
 | On Windows | Part 4, section 7.3 (the two Mac-only steps and their replacements) |
-| Building the Glossary Game for a career | Parts 10 and 11 |
+| Building the Glossary Game for a career | Part 10 |
 | Reviewing art placement | Part 4, section 6 (the Scene review tool in the hamburger menu) |
 
 ## Where things live in the repo

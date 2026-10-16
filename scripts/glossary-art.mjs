@@ -5,7 +5,7 @@ import path from 'node:path';
 
 // Reproducible raster packaging, not image generation. Preserve the original
 // source and real alpha; never redraw, stretch or silently overwrite a set.
-// Run from repo root. See docs/handoff/play-sop/12-glossary-art-pipeline.md.
+// Run from repo root. See section 6.1 of docs/reference/glossary-scaling-sop-usman-2026-10-16.md.
 const [command, manifestPath, reviewDirectory] = process.argv.slice(2);
 if (!['prompts', 'prepare', 'validate', 'preview'].includes(command) || !manifestPath) {
   throw new Error('Usage: node scripts/glossary-art.mjs prompts|prepare|validate|preview <manifest.json> [review-directory]');

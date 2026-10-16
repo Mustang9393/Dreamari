@@ -83,7 +83,7 @@ Production recommendation: move all of these into the per-career content record 
 2. **The placeholder-cover prompt template lives outside git** (`~/Documents/Dreamari/Play tab/prompts-and-crops.json`), used only for careers with no pack from Joshua yet. Its crop hints (`landscapePosition: 50% 20%`) are not wired in code (every hub cover is centered).
 3. **No post-processing scripts in the repo** for chroma-keying green-screen sprites, alpha-bounding-box crops, matting cleanup or face-chip crops. Chapter 7 §4 specifies each step so it can be scripted.
 4. **Face chips differ per career** (IB 512 webp, RN 420-460 jpg). Standardize on 512x512 webp.
-5. **The glossary authoring spreadsheet** (`DreamAri_Glossary_Content_Template_v1.xlsx`) is not in the repo. The intake template in `templates/glossary-content-intake.md` is reverse-engineered from `data.ts`; confirm column names against the real sheet.
+5. **The glossary authoring spreadsheet** (`DreamAri_Glossary_Content_Template_v1.xlsx`) is not in the repo. Resolved 17 Oct 2026: games are now generated from a blueprint file, which is the import format (master glossary SOP, `docs/reference/glossary-scaling-sop-usman-2026-10-16.md`); the old intake template was deleted.
 6. **The simulation handoff zips** (`background-library.json`, `scene.json`, the character bible) are not in the repo.
 7. **`art-ratios.ts` is dead code** (imported nowhere, stale values). Delete it.
 8. **Orphaned files**: `ib/l1-07.webp`, `ib/l3-01.webp`, `ib/l3-07.webp`, `rn/{rosa,denise,tyler,yvonne}.jpg`, `app/soon-registered-nurse.png`, six `app/glossary-*-thumb*.png`. Prune.

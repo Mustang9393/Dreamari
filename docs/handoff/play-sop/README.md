@@ -15,15 +15,13 @@ The prototype is the reference implementation. Layout, copy, behavior, timings a
 | [01-simulation-data-model.md](01-simulation-data-model.md) | Every type and field, the 15 beat kinds with real examples, scoring math, skills, Performance Plan data, progress saves, locations, expressions, the asset inventory, beat-by-beat tables of all five shipped levels, the reusable pacing template |
 | [02-simulation-player.md](02-simulation-player.md) | The runtime: state machine, scenes and characters, the dialogue system (typewriter, tap to finish, voice blips), HUD, feedback and correction model, error states, every animation, sound and music, trailer, Performance Plan, Connect interstitial |
 | [03-simulation-interactions.md](03-simulation-interactions.md) | All 19 interaction screens: data, layout, input, validation, feedback, animations, edge cases; shared primitives to reuse; how to add a new kind |
-| [04-glossary-game.md](04-glossary-game.md) | The Glossary Game end to end: content schema, state machine, remediation, every screen, sound and music, animations, edge states |
+| [Master glossary SOP](../../reference/glossary-scaling-sop-usman-2026-10-16.md) | **Every Glossary Game rule, prompt and checklist** (17 Oct 2026). Replaces the old chapter 04, chapter 12 and the glossary intake template: build a game from a blueprint, generate its art, release it. |
 | [05-play-hub-art-and-history.md](05-play-hub-art-and-history.md) | The Play hub, all 18 entry points into Play, every image slot, and the dated decision log (the WHY of each decision, with quoted feedback) |
 | [07-art-direction-and-prompts.md](07-art-direction-and-prompts.md) | Which image goes where, how Joshua's art is separated into sprites and backgrounds, the sprite master prompt, post-processing, art QA |
 | [08-new-career-art-pipeline.md](08-new-career-art-pipeline.md) | **Start here for any new career's art.** The automatic pipeline (29 Sept 2026): one JSON manifest per career, `npm run art:*` commands for prompts, processing, automatic positioning, beat-to-room routing and QA, and the review page. Replaces every by-hand step in chapter 7 |
 | [09-no-codex-art-path.md](09-no-codex-art-path.md) | **Art without Codex** (5 Oct 2026). Generate composed scenes in any tool (ChatGPT etc.), then `npm run art:extract` sorts them on this Mac: rooms with nobody in them become plates, each separable person becomes a sprite cutout (Apple Vision subject lifting), and inseparable moments become heroes. Then chapter 8 as usual. Includes the expression and room prompts |
 | [11-core-kit-and-interactions.md](11-core-kit-and-interactions.md) | **Start here to build a career's game** (9 Oct 2026). The core kit (the components that scale by data) vs bespoke demo-only pieces, every component's rules and logic, Joshua's SOP 3 Screen Types and Interactions mapped to beats, the generator whitelist, `toCoreLevel` / `bespokeIn`, and corrections to chapters 01 to 03 |
-| [12-glossary-art-pipeline.md](12-glossary-art-pipeline.md) | **Scale Drift and Signal glossary art** (13 Oct 2026). Canonical Level 1 anchors, copy/paste prompts, semantic briefs, career-scoped registry, alpha/pixel-safe WebP preparation, provenance and visual acceptance gate |
 | [templates/simulation-content-intake.md](templates/simulation-content-intake.md) | Exactly what a career's simulation dataset must contain, the writing rules and the validation list |
-| [templates/glossary-content-intake.md](templates/glossary-content-intake.md) | The same for a Glossary lesson |
 
 **One document with everything:** `docs/handoff/USMAN_MASTER_HANDOFF.md` stitches the chapters, prompts, templates and the art CLI guide in reading order, with an executive summary. It is generated: `node scripts/handoff/build-master-handoff.mjs` after any chapter change.
 
@@ -87,15 +85,7 @@ Follow in order. Detail: ch. 1 §2.5 and ch. 2 §11.
 
 ## 4. Adding a new Glossary Game (step by step)
 
-Detail: ch. 4 §1.5.
-
-1. Author the `GlossaryCareer` in `glossary/data.ts` per `templates/glossary-content-intake.md`: 5 terms, 7 main questions, review questions, one Power Play paragraph, facts.
-2. Add any new icon slugs to `TERM_ICON_MAP` (relevant to the lesson's story; never emoji).
-3. Parameterize the three hardcoded "finance" strings (issue A11) before the second career ships.
-4. Add the hub card to `GLOSSARY_GAMES` ("<Subject> Terms", sub "Learn key <subject> terms", cover). The Career Detail "Glossary Game" button appears once `hasGlossary(slug)` is true.
-5. QA with section 7.
-
----
+Use the master glossary SOP, `docs/reference/glossary-scaling-sop-usman-2026-10-16.md`. Prompt A builds the game from one blueprint file; section 7b and Prompt D make its art; Prompt C releases it to the hub. The old steps here (hand-authoring a `GlossaryCareer` in `data.ts` from an intake sheet) were retired on 17 Oct 2026 when games became generated from blueprints.
 
 ## 5. The experience rules (why the games feel the way they do)
 

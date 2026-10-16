@@ -2,7 +2,7 @@
 
 Update, 13 Oct 2026: Chandu subsequently requested theme-consistent assets for
 Levels 2 to 4 and a scalable prompt for future careers. The new supporting
-term-art pipeline is documented in `../handoff/play-sop/12-glossary-art-pipeline.md`.
+term-art pipeline is documented in section 6.1 of `glossary-scaling-sop-usman-2026-10-16.md`.
 This supersedes only the no-new-term-art recommendation below. Exact numeric
 scene cards, authored questions, copy, types, order and scoring are unchanged.
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Dreamari Glossary Games: Master SOP and Prompts for Usman and Codex</title>
+<title>Dreamari Glossary Games: Master SOP and Prompts for Usman and ChatGPT (image gen)</title>
 <style>
   body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; line-height: 1.45; color: #111; }
   h1 { font-size: 22pt; margin: 0 0 6px; }
@@ -17,8 +17,8 @@
 </head>
 <body>
 
-<h1>Dreamari Glossary Games: Master SOP and Prompts for Usman and Codex</h1>
-<p><i>17 October 2026. One document to scale the glossary games from four industries to fifty: the rules (Joshua's), what is built and verified, the prompts an agent pastes to create a game, and the prompts Codex pastes to generate every image. Repo copies: docs/reference/glossary-scaling-sop-usman-2026-10-16.html and the same text as docs/reference/glossary-scaling-sop-usman-2026-10-16.md. The locked engineering spec is docs/handoff/specs/glossary-system.md. Joshua's plan in full is Appendix A of this document. The separate, self-contained Codex prompt for the three Play tab games is docs/reference/codex-prompt-glossary-art-2026-10-16.md and its own Google Doc.</i></p>
+<h1>Dreamari Glossary Games: Master SOP and Prompts for Usman and ChatGPT (image gen)</h1>
+<p><i>17 October 2026. One document to scale the glossary games from four industries to fifty: the rules (Joshua's), what is built and verified, the prompts an agent pastes to create a game, and the prompts Codex pastes to generate every image. Repo copies: docs/reference/glossary-scaling-sop-usman-2026-10-16.html and the same text as docs/reference/glossary-scaling-sop-usman-2026-10-16.md. The locked engineering spec is docs/handoff/specs/glossary-system.md. Joshua's plan in full is Appendix A of this document. This is the only glossary SOP: the filled-in art prompt for the three Play tab games is section 7b, and every older glossary SOP, handover and separate prompt was deleted on 17 Oct 2026.</i></p>
 
 <h2>0. Readiness, checked 17 October 2026</h2>
 <table>
@@ -35,15 +35,15 @@
 <tr><td>Hub gating</td><td>Only finance is released; generated industries play by route and from the QA page. Release is one slug in GLOSSARY_HUB_RELEASED.</td></tr>
 <tr><td>Demo flags</td><td>Every demo-only piece is tagged DEMO-ONLY in its own comment (blueprints, QA page, release list, Skip).</td></tr>
 <tr><td>Built so far</td><td>Finance (Joshua's, 4 of 20 levels). The three other Play tab cards are complete at six playable levels each: Software Engineering (Tech Terms), Flight Operations (Flight Terms), Nursing (Medical Terms). Culinary Arts has four (not on the hub) and is the model blueprint. All four were rewritten on 17 Oct to the Finance style: three moments per word, concept sorts, cases, written Power Plays, then trimmed to the reading rules.</td></tr>
-<tr><td>Not yet</td><td>No generated industry has its Level 1 term art or welcome illustration (Codex, section 6 and the separate prompt). No plates, panoramas or silhouettes registered (optional). Light-mode pass on generated industries. Levels 5 and 6 for Culinary.</td></tr>
+<tr><td>Not yet</td><td>No generated industry has its Level 1 term art or welcome illustration (section 6, and section 7b for the three Play tab games). No plates, panoramas or silhouettes registered (optional). Light-mode pass on generated industries. Levels 5 and 6 for Culinary.</td></tr>
 </table>
 
 <h2>1. Who does what</h2>
 <table>
 <tr><th>Role</th><th>Owns</th><th>Pastes</th></tr>
 <tr><td>Joshua</td><td>The rules: the Master Scaling Plan. Finance never changes.</td><td>Nothing; reviews.</td></tr>
-<tr><td>Usman's agent (Claude Code or Codex in the repo)</td><td>Blueprints: one file per industry, registered. Levels 5 and 6 later.</td><td>Prompt A, Prompt B.</td></tr>
-<tr><td>Codex (image generation)</td><td>Every image: Level 1 term art and the welcome illustration for each industry (required), plates, world panoramas, silhouettes (optional), Dreamy animation.</td><td>Prompt D and the section 6 prompts; for the three Play tab games, the separate Codex prompt document.</td></tr>
+<tr><td>Usman's agent (Claude Code or Codex in the repo)</td><td>Blueprints: one file per industry, registered. Levels 1 to 4.</td><td>Prompt A, Prompt B.</td></tr>
+<tr><td>Codex or ChatGPT (image generation)</td><td>Every image: Level 1 term art and the welcome illustration for each industry (required), plates, world panoramas, silhouettes (optional), Dreamy animation.</td><td>Prompt D and the section 6 prompts; for the three Play tab games, section 7b (Prompt D already filled in).</td></tr>
 <tr><td>Chandu</td><td>Browser QA on the Glossary QA page; release to the hub (Prompt C).</td><td>Prompt C.</td></tr>
 </table>
 
@@ -134,10 +134,10 @@ TASK: turn the roadmap Levels 5 and 6 of src/components/glossary/blueprints/[slu
 <pre>In the Dreamari repo: add "[slug]" to GLOSSARY_HUB_RELEASED in src/components/glossary/data.ts. If the hub has no card for it, add one to GLOSSARY_GAMES in src/components/play/games.ts keyed to its example career slug (or the industry slug when no catalog career owns it) with title "[Subject] Terms", sub "Learn key [subject] terms" and a cover (a 1400 by 788 WebP thumbnail: Dreamy over a fan of the subject's term cards, matching the four on the hub). Confirm Codex has registered its Level 1 term art (termArt.ts) and welcome illustration (welcomeArt.ts). Run npx tsc --noEmit, open /play and confirm the card is playable, commit with the why, push to main.</pre>
 
 <h2>6. Images (Codex)</h2>
-<p>Codex generates every image. Nothing in Usman's game-creation work waits on images: a game plays with words the moment it is registered. Required before release: 6.1 and 6.2. Optional, shared polish: 6.3 to 6.5. 6.6 is animation. For the three Play tab games that exist today, use the separate Codex prompt document, which carries every term and anchor already filled in.</p>
+<p>Codex generates every image. Nothing in Usman's game-creation work waits on images: a game plays with words the moment it is registered. Required before release: 6.1 and 6.2. Optional, shared polish: 6.3 to 6.5. 6.6 is animation. For the three Play tab games that exist today, use section 7b, which is Prompt D with every term and anchor already filled in.</p>
 
 <h3>6.1 Level 1 term art (required: 5 terms, both themes)</h3>
-<p>The repo has a reproducible pipeline for this: docs/handoff/play-sop/12-glossary-art-pipeline.md and scripts/glossary-art.mjs. The input is a manifest JSON; the model is docs/reference/glossary-finance-art-oct13.json. The script prints the exact prompts, then packages, validates and previews the finished images. Flow:</p>
+<p>The repo has a reproducible pipeline for this: scripts/glossary-art.mjs, and everything it needs is in this section. The input is a manifest JSON; the model is docs/reference/glossary-finance-art-oct13.json. The script prints the exact prompts, then packages, validates and previews the finished images. Flow:</p>
 <ol>
 <li>Write docs/reference/glossary-&lt;slug&gt;-art-&lt;mmmdd&gt;.json: version (folder name, lowercase and dashes, e.g. "nursing-oct17"), career (the slug), styleReferences (the three Drift and three Signal reference files below), promptTemplate (the prompt below), styles (the two style locks below), terms (five entries: id = the exact term, slug = lowercase file name, brief = one or two sentences that show the meaning, not the word, with the anchor written in).</li>
 <li>node scripts/glossary-art.mjs prompts &lt;manifest&gt; prints one prompt per term per theme with the reference paths. Generate ONE image per call in ChatGPT, attaching the references. Never chain off the last image; return to the references every time.</li>
@@ -159,6 +159,50 @@ No generic stock clipart, irrelevant props, photoreal people, blurry text, exces
 <p>Signal style lock:</p>
 <pre>Match the supplied Signal Level 1 artwork exactly: authentic carefully drawn 2D pixel-art game sprite, dark navy stepped pixel outlines, visible square pixel clusters, clean 3-4 tone cel shading, cyan/white/blue with gold accents and tiny amber details. Logical sprite resolution around 128x128, enlarged with nearest-neighbor; no antialiasing, no smooth curves, no blur, no 3D renderer, no gradients, no clay or photographic shine. Maintain the reference's crisp graphic construction and pixel Dreamy's cloud identity. Objects and arrows use the same pixel grid.</pre>
 <p>Writing a brief: show the meaning, never the word; put the anchor in; name the one thing the eye must read first. Example from Finance, Investor: "Dreamy floats beside a short curved arrow directing a single gold coin toward a miniature sneaker boutique. This shows a person committing money to a business, not buying a shoe." Example for Nursing, Triage: "Three small patient beds in a row at Riverside Clinic, one lit with a bright gold tag and pulled slightly forward, the other two dim and waiting. This shows the most urgent patient being chosen first."</p>
+
+<p><b>Before generating.</b></p>
+<ol>
+<li>Read the lesson data. Reuse an existing image only when its meaning matches the term.</li>
+<li>Write one brief per term. Both themes share the meaning but not the technique: never just recolor a 3D image into pixels.</li>
+<li>Keep words students confuse apart. Revenue is all sales income; Profit is what is left after costs.</li>
+<li>If a term cannot be shown honestly, leave it without a picture. Never register a misleading image to fill a slot.</li>
+<li>Scope art to its industry. A sneaker shop must never show up in Nursing because two terms share an id.</li>
+</ol>
+<p><b>Commands</b> (from the repo root; the finance manifest is the example):</p>
+<pre># One prompt per image, with the references to attach.
+node scripts/glossary-art.mjs prompts docs/reference/glossary-finance-art-oct13.json
+
+# After every source image is saved: export the versioned WebPs and a receipt.
+node scripts/glossary-art.mjs prepare docs/reference/glossary-finance-art-oct13.json
+
+# Read-only check of sources, prompts and outputs against the receipt.
+node scripts/glossary-art.mjs validate docs/reference/glossary-finance-art-oct13.json
+
+# Contact sheets with the Level 1 anchors in the top row, for review.
+node scripts/glossary-art.mjs preview docs/reference/glossary-finance-art-oct13.json /absolute/path/to/review</pre>
+<p>For a new industry, copy the manifest, set a new version and career slug, and replace the terms, briefs and source paths. Keep the style locks and references. The script refuses missing transparency, clipped sources, name collisions, duplicate term slugs and files over budget. It does not generate images and does not judge quality. Receipts keep the hashes, the exact prompts and the sizes. Only the optimized WebPs ship; the source PNGs stay local.</p>
+<p><b>File contract.</b></p>
+<ul>
+<li>Path: public/images/glossary/&lt;version&gt;/&lt;drift|signal&gt;/&lt;term-slug&gt;.webp.</li>
+<li>Drift: 768 px large, 256 px small, named &lt;term-slug&gt;-256.webp. Signal: 768 px large, 320 px small, named &lt;term-slug&gt;-320.webp.</li>
+<li>Square canvases with transparency kept. Trim only transparency; never stretch. The Drift subject fits within 90% of the canvas.</li>
+<li>Signal is sampled once onto a 128 px grid, then enlarged with nearest neighbor, so no half pixels appear.</li>
+<li>Budgets: 140 KB large, 35 KB small. Aim well under them.</li>
+<li>Map each term to its file by hand in termArt.ts. Never match terms by keyword.</li>
+</ul>
+<p><b>Acceptance gate</b> (every new set, before asking to push):</p>
+<ul>
+<li>Review every image beside the Level 1 anchors at 200 px and at 48 px.</li>
+<li>Check the meaning, not just the looks: no wrong props, no stray text, no promise of a sure gain.</li>
+<li>Dreamy keeps the cloud face and has no limbs. No people stand in for Dreamy.</li>
+<li>Real transparency, safe margins, aspect ratio kept, equal canvas and visual weight within a theme.</li>
+<li>Signal is true pixel clusters, not a pixel filter over 3D. Drift keeps its satin depth.</li>
+<li>Check the teach cards, Match It Up, the sort and the mastery bar. A sort item's picture shows the item, never its bucket, so it cannot give the answer away.</li>
+<li>Phone, tablet and laptop: nothing squishes, labels wrap, no page scroll.</li>
+<li>Never replace Finance's Level 1 anchors or shipped art.</li>
+<li>Run npx tsc --noEmit, a scoped lint, npm run tokens:check and the script's validate step.</li>
+<li>Write the handoff entry: why, the set's paths, the checks, what was rejected. Push only with Chandu's go-ahead.</li>
+</ul>
 
 <h3>6.2 Welcome illustration (required: 1 per theme)</h3>
 <p>One composed scene of the workplace the glossary lives in, never a person: the clinic front, the hangar and tower, the kitchen pass, the software studio. 1024 square, transparent, one readable silhouette; it shows at about 300 px beside Dreamy on the welcome screen. Use the 6.1 prompt with Asset type "one Dreamari welcome illustration: the workplace this glossary lives in, seen as a small composed scene" and Subject "{{the anchor}}: {{two sentences describing the place, no people}}", with the theme's style lock. Files: public/images/glossary/&lt;version&gt;/{drift,signal}/welcome.webp. Register in WELCOME_ART[industrySlug] in src/components/glossary/welcomeArt.ts with both theme paths.</p>
@@ -200,7 +244,7 @@ Match the attached panorama's palette, pixel density and night-to-dusk mood exac
 <p>The Play tab's glossary cards use a landscape thumbnail: Dreamy over a fan of the subject's term cards on a dark sky, 1400 by 788 WebP, under 130 KB. The four on the hub (Finance, Medical, Flight, Tech) are Chandu's and are the reference. The shelf card is portrait at rest and 16:9 when active, so keep Dreamy and the centre card in the middle third. File: public/images/app/glossary-&lt;subject&gt;-thumb-&lt;mmmdd&gt;.webp, set as cover on the card in GLOSSARY_GAMES.</p>
 
 <h2>7. Prompt D: Codex, generate and register the art for industry X</h2>
-<pre>You are working in the Dreamari prototype repo. Pull origin/main. Read docs/handoff/play-sop/12-glossary-art-pipeline.md and section 6 of docs/reference/glossary-scaling-sop-usman-2026-10-16.html.
+<pre>You are working in the Dreamari prototype repo. Pull origin/main. Read section 6 of docs/reference/glossary-scaling-sop-usman-2026-10-16.md (the prompt template, style locks, references, commands, file contract and acceptance gate).
 
 TASK: generate and register the required art for the glossary industry [slug] (anchor: [anchor]; Level 1 terms with definitions: [paste the art list from the game-creation agent]).
 
@@ -213,6 +257,60 @@ TASK: generate and register the required art for the glossary industry [slug] (a
 7. Add a dated docs/AI_HANDOFF.md entry (what, why, prompts used, what was rejected and why). Commit; do not push. Chandu reviews, then releases the industry.
 
 Rules that have shipped real bugs: one image per call; never chain off the last image; genuine transparency; no text or numbers in any image; Dreamy is a cloud with no limbs and appears only when the brief says so; Finance's art is never regenerated.</pre>
+
+<h2>7b. Prompt D, filled in: the three Play tab games</h2>
+<p>Software, Aviation and Nursing are built and play with words only. This is Prompt D with every blank filled in, so it can be pasted as it is. It used to be a separate document; it now lives here. Finance already has its art and is not part of it.</p>
+<pre>You are working in the Dreamari prototype repo (Mustang9393/Dreamari). Pull origin/main first. Read section 6 of docs/reference/glossary-scaling-sop-usman-2026-10-16.md: the prompt template, both style locks, the references, the commands, the file contract and the acceptance gate are there. Dev server: npm run dev -- --webpack on a free port.
+
+THE JOB
+Generate, package and register the Level 1 term art and the welcome illustration, in both themes (Drift and Signal), for the three glossary games below, so Chandu can review them and release the games to the Play hub. Do not make art for any other level: Levels 2 and up teach with words by design. Do not touch Finance.
+
+Industry (slug) | Hub card | Anchor (every example names it) | Student role | Register under
+software | Tech Terms | Nova Notes, a note-taking app a small team is building | developer | software-engineer
+aviation | Flight Terms | Skyline Air, a regional airline | pilot | airline-pilot
+nursing | Medical Terms | Riverside Clinic, a community clinic | nurse | registered-nurse
+
+LEVEL 1 TERMS (exact term, then its definition; a brief shows the meaning, never the word)
+software, Level 1 "App Basics"
+- App: A program people open on a phone or computer to do one job.
+- User: A person who opens and uses a program.
+- Feature: One thing a program can do for the people using it.
+- Code: The written instructions that tell a computer what to do.
+- Bug: A mistake in the instructions that makes a program act wrong.
+aviation, Level 1 "Before Takeoff"
+- Cockpit: The front part of a plane where the pilots sit and fly it.
+- Runway: The long strip a plane speeds down to leave the ground or land.
+- Preflight: The full check of a plane and its plan before it moves.
+- Taxi: Driving a plane slowly on the ground between the gate and the strip.
+- Takeoff: The moment a plane speeds up and lifts off the ground.
+nursing, Level 1 "Clinic Basics"
+- Patient: A person getting care from a nurse or doctor.
+- Vital Signs: The body's basic numbers: heart rate, breathing, temperature and blood pressure.
+- Chart: The written record of a patient's care.
+- Dose: How much medicine a patient gets at one time.
+- Triage: Sorting patients by how urgent their needs are.
+
+WELCOME SCENES (one per industry per theme; a place, never a person; shown at about 300 px beside Dreamy)
+- software: a small bright studio desk with a laptop showing a notes app, a plant, sticky notes, a mug.
+- aviation: a regional jet at a gate under a control tower at dusk, a jet bridge, runway lights beyond.
+- nursing: the front of a low community clinic with a lit entrance, a bench, a small sign post with no letters, an ambulance bay to one side.
+
+BRIEFS TO MATCH IN REGISTER
+- Finance, Investor (shipped): "Dreamy floats beside a short curved arrow directing a single gold coin toward a miniature sneaker boutique. This shows a person committing money to a business, not buying a shoe."
+- Nursing, Triage: "Three small patient beds in a row at Riverside Clinic, one lit with a bright gold tag and pulled slightly forward, the other two dim and waiting. This shows the most urgent patient being chosen first."
+- Software, Bug: "A small glowing notes app screen on a phone with one line of its content gone jagged and flickering red, a tiny gold wrench floating beside it. This shows a mistake inside the program, not an insect."
+- Aviation, Taxi: "A regional jet rolling slowly along a painted yellow ground line toward the runway, wheels down, gate behind it. This shows the plane driving on the ground, not flying."
+
+STEPS
+1. For each industry, write docs/reference/glossary-&lt;slug&gt;-art-oct17.json modelled on docs/reference/glossary-finance-art-oct13.json: version "&lt;slug&gt;-oct17", career "&lt;slug&gt;", the six style references, the prompt template and both style locks from section 6.1, and five terms with id (the exact term above), slug (lowercase file name, e.g. "vital-signs") and brief.
+2. node scripts/glossary-art.mjs prompts &lt;manifest&gt;. Generate ONE image per prompt, attaching that theme's three references every time. Never chain off the last image. Square 1024, genuinely transparent.
+3. Save as &lt;term-slug&gt;-drift.png and &lt;term-slug&gt;-signal.png in a review folder. Run prepare, then validate, then preview.
+4. Welcome: the same prompt with Asset type "one Dreamari welcome illustration: the workplace this glossary lives in, seen as a small composed scene" and Subject "&lt;anchor&gt;: &lt;the scene line above&gt;". Save to public/images/glossary/&lt;version&gt;/{drift,signal}/welcome.webp, 1024 square, lossless transparency.
+5. Register: CAREER_TERM_ART in src/components/glossary/termArt.ts, keyed by the "Register under" slug and following the investment-banking entry; WELCOME_ART["&lt;slug&gt;"] = { drift, signal } in src/components/glossary/welcomeArt.ts.
+6. Check: npx tsc --noEmit and node scripts/qa/dreamy-reactions.test.mjs. Open /play/glossary/&lt;slug&gt;?theme=drift and ?theme=signal: the welcome shows the illustration beside Dreamy, Level 1 teach cards show the pictures, ?lesson=2 shows words only. Screenshot each welcome and one Level 1 card per theme.
+7. Run the acceptance gate in section 6.1. Add a dated docs/AI_HANDOFF.md entry: what you generated, the briefs, what you rejected and why. One commit per industry. Do not push.
+
+Done looks like: three manifests, thirty term images in both sizes, six welcome images, three CAREER_TERM_ART entries, three WELCOME_ART entries, tsc and the reaction QA green, screenshots attached, nothing pushed.</pre>
 
 <h2>8. QA and release checklist (Chandu)</h2>
 <ol>
@@ -283,10 +381,8 @@ Rules that have shipped real bugs: one image per call; never chain off the last 
 <table>
 <tr><th>Path</th><th>What</th></tr>
 <tr><td>docs/handoff/specs/glossary-system.md</td><td>The locked spec.</td></tr>
-<tr><td>docs/reference/glossary-scaling-sop-usman-2026-10-16.html, .md</td><td>This document, HTML and markdown.</td></tr>
-<tr><td>docs/reference/codex-prompt-glossary-art-2026-10-16.md</td><td>The separate Codex prompt for the three Play tab games, every term and anchor filled in.</td></tr>
-<tr><td>docs/reference/glossary-scaling-plan-handover-2026-10-16.html</td><td>Joshua's plan in full with our mapping, and the image brief in detail.</td></tr>
-<tr><td>docs/handoff/play-sop/12-glossary-art-pipeline.md, scripts/glossary-art.mjs</td><td>The term art pipeline: manifest in, prompts out, packaging, validation, preview.</td></tr>
+<tr><td>docs/reference/glossary-scaling-sop-usman-2026-10-16.html, .md</td><td>This document, HTML and markdown. The only glossary SOP.</td></tr>
+<tr><td>scripts/glossary-art.mjs</td><td>The term art script: manifest in, prompts out, packaging, validation, preview (section 6.1).</td></tr>
 <tr><td>docs/reference/glossary-finance-art-oct13.json</td><td>The model manifest with the finance briefs.</td></tr>
 <tr><td>src/components/glossary/generate.ts</td><td>Blueprint types (terms with moments; sort, selectAll, cases, powerPlay per level), the four recipes, the validator with the reading rules, the build-time assertions.</td></tr>
 <tr><td>src/components/glossary/blueprints/</td><td>culinary.ts (the model: every authored piece in use, four levels), health.ts, software.ts, aviation.ts (six levels each).</td></tr>

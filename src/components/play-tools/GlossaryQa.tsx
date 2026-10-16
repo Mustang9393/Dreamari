@@ -74,7 +74,7 @@ export function GlossaryQa() {
       </div>
 
       <p className="mt-8 text-[13px] text-[var(--muted-foreground)]">
-        Also: <Link className="font-bold" href="/component-lab">Component library</Link> (group &quot;Glossary game, live engine&quot;, every piece in both themes with a World picker). The spec is docs/handoff/specs/glossary-system.md; the handover for Usman is docs/reference/glossary-scaling-plan-handover-2026-10-16.html.
+        Also: <Link className="font-bold" href="/component-lab">Component library</Link> (group &quot;Glossary game, live engine&quot;, every piece in both themes with a World picker). The spec is docs/handoff/specs/glossary-system.md; the SOP for Usman is docs/reference/glossary-scaling-sop-usman-2026-10-16.md.
       </p>
     </main>
   );

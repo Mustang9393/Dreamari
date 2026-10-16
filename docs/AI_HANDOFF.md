@@ -1,3 +1,17 @@
+## 2026-10-17: one glossary SOP; the separate art prompt folded in; older SOPs deleted
+
+**Why (Chandu):** "the seperate prompt, is it also included in the amster sop? what does it do differently? It should all be in the SOP. also delete all older SOPs for this."
+
+**What the separate prompt was.** Prompt D (the art prompt for any industry) with the blanks already filled for Software, Aviation and Nursing: their anchors, roles, Level 1 terms and definitions, welcome scenes, sample briefs and registry keys. It also leaned on Play SOP chapter 12 for the art script's commands, file sizes and acceptance checks, which the master SOP only pointed at.
+
+**What changed.**
+- Master SOP: new section 7b is that filled-in prompt; section 6.1 now holds chapter 12's working detail (planning, commands, file contract, acceptance gate). Chandu's two edits in the live Doc kept: the title now reads "for Usman and ChatGPT (image gen)", and Usman's row says Levels 1 to 4. The image role reads "Codex or ChatGPT".
+- Deleted from the repo (git history keeps them): `docs/reference/codex-prompt-glossary-art-2026-10-16.md`, `docs/reference/glossary-scaling-plan-handover-2026-10-16.html`, `docs/handoff/play-sop/04-glossary-game.md` (described the first engine and Finance Level 1 only), `docs/handoff/play-sop/12-glossary-art-pipeline.md`, `docs/handoff/play-sop/templates/glossary-content-intake.md` (the old xlsx-based intake).
+- Trashed in Drive: the older handover Doc, the separate Codex prompt Doc and the previous master Doc. Joshua's own plan Doc stays; it is his and is the source of Appendix A.
+- The spec's own copy of the art prompt is now a pointer to the SOP. Links repointed in the Play SOP index, known-issues chapter, handoff index, the art script's header, the Glossary QA page and the Levels 2 to 4 review. The compiled `USMAN_MASTER_HANDOFF.md` now includes the master SOP as Part 10 in place of the three old glossary parts.
+
+**Kept on purpose:** the locked spec (`docs/handoff/specs/glossary-system.md`; AGENTS.md requires specs), the Oct 8 and 9 design notes and audits under `docs/GLOSSARY_*.md`, and the Levels 2 to 4 review. Those are records and specs, not SOPs.
+
 ## 2026-10-16: Living worlds and three art packs, release verification and coordination
 
 **Why (Chandu):** "Push when done please. Claude is working on some stuff too" supersedes the earlier hold. Working only in `/Users/chandump/dreamari-glossary-oct08`, branch `codex/glossary-living-worlds`; Claude's other checkout and dirty files were inspected read-only and left untouched. No direct Claude messaging channel is exposed. Coordinate through this shared handoff and Git history: merged `origin/main` at `7e5aae21`, preserving Claude's generator, shorter copy, blueprint, spec, QA and shuffled-bank changes. The only conflict was this additive log; both sides were kept. Future edits should fetch this release before touching shared glossary files.
@@ -42,6 +56,7 @@
 - The phone check found the existing selected map row's Play action below the visible list. Non-Finance maps now page two levels on narrow/short viewports. The chapter derives from selection, so resizing does not hide the active level. Desktop page sizes and Finance stay unchanged. One media-query subscription exists only while the map is mounted; no per-frame layout work. No question interaction changes.
 - Added the grammar and asset formats to Part 3 of the existing handover HTML, plus `docs/reference/glossary-living-worlds-review-2026-10-16.md`. Rejected bespoke per-industry raster backgrounds and added no new asset kind. The separate requested Level 1 art packs follow in one commit per industry.
 - Checks: TypeScript, dreamy reactions, all blueprint contracts, scene determinism/performance contracts and tokens are green. ESLint has no errors; three pre-existing warnings remain in the engine (`_icon`, `gaps`, page font link). Browser checks cover laptop and phone question/map states, direct wrong-to-right correction and the compact map action with zero internal overflow in the checked Nursing Signal case. Final screenshot coverage is recorded in the review document after art integration. Windows/Chromebook GPU timings are not measured on this Mac.
+
 ## 2026-10-17: shorter copy everywhere, 8th-grade checks, Power Play sized by level
 
 **Why (Chandu):** "make sure every piece of copy including success explanations etc are shorter and 8th grade comprehension level" and "make sure the power play isnt so complex and long and a lot to read for level 1 etc."
