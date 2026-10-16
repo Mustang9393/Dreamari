@@ -1,3 +1,12 @@
+## 2026-10-17: check of every game; Next level keeps the theme
+
+**Why (Chandu):** "check everything" and "run checks on every game". Findings and fixes:
+
+- **Bug, fixed:** Next level from a Complete screen rebuilt the URL as `?lesson=N` only, so a student playing in Drift landed in Level 2 in whatever theme the browser last stored (Signal, in the walkthrough). The level switch now keeps every URL setting and drops only the jump params (`q`, `pp`).
+- **Walked:** Nursing Level 1 in Drift and Software Level 5 in Signal end to end with Skip (welcome, cards, seven questions, streak banner, Power Play intro, board, Complete, next level), no console errors from the game. Two transient 400s came from the hub's "soon" cover optimizer requests, not from the glossary; the same URLs return 200 when fetched directly.
+- **Automated:** tsc clean; both QA scripts pass for all five industries; ESLint has two pre-existing unescaped-entity errors in `src/app/gate/page.tsx`, outside the glossary; Vercel built 1973a187 and 1912c651.
+- **Lab in Signal:** MasteryHud, SceneCardView (story, compare, figures, ledger) checked cell by cell; square frames throughout.
+
 ## 2026-10-17: Play tab glossary cards take Chandu's thumbnails
 
 **Why (Chandu):** "Lets see if we can use these thumbnails for the games in the play tab too." Four landscape thumbnails (Dreamy over a fan of term cards per subject) arrived as thumbnails.zip. They are now the covers of the four glossary cards: `public/images/app/glossary-{finance,medical,flight,tech}-thumb-oct17.webp` (1400 by 788, 77 to 121 KB each). The shelf card is portrait at rest and 16:9 when it expands, so the whole scene shows on the active card and the resting cards crop to Dreamy and the centre cards; checked on the hub at 1280. The older portrait covers stay in the folder, unreferenced.

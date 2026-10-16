@@ -3588,7 +3588,15 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   const nextLesson = career.lessons.find((entry) => entry.lessonNumber === lesson.lessonNumber + 1) ?? null;
   function playLesson(lessonNumber: number) {
     setShowLevels(false);
-    router.push(`${window.location.pathname}?lesson=${lessonNumber}`);
+    // Keep the student's theme (and any other setting in the URL) when the
+    // level changes; drop the jump params. 17 Oct 2026: Next level from a
+    // Drift Complete screen opened Level 2 in Signal because the URL lost
+    // ?theme=drift here.
+    const params = new URLSearchParams(window.location.search);
+    params.set("lesson", String(lessonNumber));
+    params.delete("q");
+    params.delete("pp");
+    router.push(`${window.location.pathname}?${params.toString()}`);
   }
 
   function handleAnswer(result: AnswerResult) {

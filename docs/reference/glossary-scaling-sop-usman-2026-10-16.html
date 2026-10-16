@@ -23,11 +23,13 @@
 <h2>0. Readiness, checked 16 October 2026</h2>
 <table>
 <tr><th>Check</th><th>Result</th></tr>
-<tr><td>Live on main</td><td>Everything in this document is on main (16 Oct 2026, evening push). Mastery shows as a count and five anonymous segments; the per-term dots are gone so nothing hints at the next word.</td></tr>
+<tr><td>Live on main</td><td>Everything in this document is on main (17 Oct 2026). Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's thumbnails; Next level keeps the student's theme.</td></tr>
 <tr><td>Type check, lint</td><td>tsc clean. ESLint: no errors (three pre-existing warnings).</td></tr>
 <tr><td>Blueprint QA script</td><td>All four generated industries pass: seven questions plus a Power Play per level, no three of one mechanic in a row, every term credited twice, no answer leakage, no situation asked twice, all four recipes exercised.</td></tr>
 <tr><td>Validator negative test</td><td>A deliberately broken blueprint (bad slug, unknown world, definition saying its word, 14-word situation, 8-word cue, example without the anchor, unknown confusion, numbers without math) is refused with eleven specific reasons and does not build.</td></tr>
 <tr><td>Dreamy reactions QA</td><td>Passes: twelve Drift poses, four Signal reactions, asset budget, silhouettes.</td></tr>
+<tr><td>Walkthroughs</td><td>Nursing Level 1 in Drift and Software Level 5 in Signal played end to end with Skip (welcome, cards, seven questions, streak, Power Play, Complete, next level) with no console errors from the game.</td></tr>
+<tr><td>Component Lab</td><td>"Glossary game, live engine" documents every piece in both themes with every state, the edge cases (22-character term, acronym, 120-character definition, 72-character situation, two-word options, long feedback) and the error state (a broken blueprint through the validator, the unknown-route 404, the hub release list).</td></tr>
 <tr><td>Design systems</td><td>All fifteen career worlds have a design system row; a blueprint naming any world works.</td></tr>
 <tr><td>Routes</td><td>/play/glossary/&lt;industry&gt; and /play/glossary/&lt;career&gt; resolve; /play-tools/glossary-qa lists every registered glossary (hamburger menu, Glossary QA).</td></tr>
 <tr><td>Hub gating</td><td>Only finance is released; generated industries play by route and from the QA page. Release is one slug in GLOSSARY_HUB_RELEASED.</td></tr>
