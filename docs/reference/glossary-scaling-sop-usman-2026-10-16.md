@@ -553,7 +553,7 @@ These override anything else in the document.
 |---|---|---|
 | Finance stays exactly as it is | Everything here applies only to new glossary worlds. Finance and Investment Banking, including Business Basics and Investing Basics, do not change. Nothing is applied retroactively. | Finance is hand-authored in data.ts and data-finance-l2-4.ts. It never passes through the generator. |
 | No timers | No countdown, no count-up, no timer in the header, no timed questions, no timer as a difficulty mechanic. Every new world, every new level. | The engine has no timer. The "4 min" on the Levels map is an estimate of length, not a clock. |
-| No forced images | The Dreamari team decides whether a term has an honest, relevant image. No AI tool or content generator makes this decision. If the team decides no, the term gets no image. Never create an image to fill a slot. If a match-to-pictures question loses its pictures, it becomes match-to-meanings. | Levels 2 and up teach with words only. The team has decided Level 1 earns pictures everywhere (3.4). A flashcard shows generated art or nothing; it never shows an icon in place of a picture. Match It Up is always word to meaning. |
+| No forced images | The Dreamari team decides whether a term has an honest, relevant image. No AI tool or content generator makes this decision. If the team decides no, the term gets no image. Never create an image to fill a slot. If a match-to-pictures question loses its pictures, it becomes match-to-meanings. | Levels 2 and up teach with words only. The team has decided Level 1 earns pictures everywhere (section 6). A flashcard shows generated art or nothing; it never shows an icon in place of a picture. Match It Up is always word to meaning. |
 | No forced math | The team decides whether math belongs in a lesson. Never invent prices, percentages or calculations because a template has a math slot. Keep the question's position; swap the mechanic (sorting, ordering, spot the mistake, decision). | Numbers in a level's copy fail validation unless the level sets math: true. The generator never writes a calculation. |
 
 ### 1.2 Three glossary world architectures
@@ -691,7 +691,7 @@ Do not build a unique illustration for every term. 50 worlds times 4 levels time
 | Scenario thread | Reuse a small library of environments, equipment, documents and tools. |
 | Practice world | Rely on interactions, Dreamy reactions, motion, clouds, buttons and success states. |
 
-**In the system:** Level 1 of every industry gets pictures for its five terms and one welcome illustration (decision of 16 October, section 3.4). Every later level teaches with words: words-only teach cards, anonymous mastery segments, no pictures on match, sort or card backs. A flashcard never shows an icon in place of a picture.
+**In the system:** Level 1 of every industry gets pictures for its five terms and one welcome illustration (decision of 16 October, section 6). Every later level teaches with words: words-only teach cards, anonymous mastery segments, no pictures on match, sort or card backs. A flashcard never shows an icon in place of a picture.
 
 ### 1.8 Dreamy's role
 
