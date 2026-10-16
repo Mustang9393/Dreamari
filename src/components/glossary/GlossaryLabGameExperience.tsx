@@ -2883,6 +2883,15 @@ const LAB_ATMOSPHERES: Array<{ id: LabAtmosphere; label: string; detail: string 
   { id: "v2", label: "Signal", detail: "Focus grid" },
 ];
 
+// Three cloud banks, back to front, each its own silhouette so the sky
+// reads as depth rather than one shape copied three times. Crest puffs and
+// a lit rim give the detail; the depth gradient shades the underside.
+const CLOUD_BANKS = [
+  { d: "M0 200C40 150 120 140 170 185C190 110 300 95 360 150C400 90 520 85 560 150C610 100 720 95 760 160C820 110 930 110 970 175C1020 135 1110 140 1200 190V320H0Z", puffs: [[150, 165, 70, 30], [440, 120, 95, 40], [740, 135, 80, 36], [1060, 160, 90, 38]] },
+  { d: "M0 210C60 140 150 150 200 200C215 120 330 110 390 170C440 110 540 115 580 180C640 125 740 130 790 190C850 150 950 150 1000 205C1050 170 1130 170 1200 215V320H0Z", puffs: [[300, 150, 80, 34], [560, 155, 70, 30], [880, 175, 95, 40]] },
+  { d: "M0 230C70 180 160 185 210 225C230 165 330 160 380 210C440 160 530 165 575 220C620 180 720 180 770 230C830 190 940 190 990 240C1040 215 1120 215 1200 245V320H0Z", puffs: [[100, 205, 60, 26], [360, 190, 85, 36], [660, 205, 75, 32], [960, 225, 90, 38]] },
+] as const;
+
 function LabMaterialScenery({ atmosphere, world = "" }: { atmosphere: LabAtmosphere; /** the career world, for a registered Drift silhouette (worldBackdrops.ts) */ world?: string }) {
   const cloudId = useId();
   const silhouette = atmosphere === "v1" ? driftSilhouette(world) : null;
@@ -2896,23 +2905,32 @@ function LabMaterialScenery({ atmosphere, world = "" }: { atmosphere: LabAtmosph
         {Array.from({ length: 48 }, (_, index) => <span key={index} style={{ "--paper-x": `${(index % 8) * 15 - 5}%`, "--paper-y": `${Math.floor(index / 8) * 20 - 5}%`, "--paper-turn": `${(index % 5) * 9 - 18}deg`, "--paper-depth": 1 + (index % 3), "--paper-delay": `${(index % 11) * -1.3}s` } as React.CSSProperties} />)}
       </div>}
       {[0, 1, 2].map((layer) => atmosphere === "v1" ? (
-        <svg key={layer} className="glossary-cloud-bank" viewBox="0 0 1200 320" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id={`${cloudId}-depth-${layer}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="var(--cloud-crest)" />
-              <stop offset=".42" stopColor="var(--cloud-mid)" />
-              <stop offset="1" stopColor="var(--cloud-base)" />
-            </linearGradient>
-            <radialGradient id={`${cloudId}-light-${layer}`} cx=".75" cy="0" r=".85">
-              <stop offset="0" stopColor="var(--cloud-rim)" stopOpacity=".8" />
-              <stop offset=".7" stopColor="var(--cloud-rim)" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          {/* Shade the existing moving silhouette, not a raster background.
-              Day and night share geometry and the original answer reactions. */}
-          <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill={`url(#${cloudId}-depth-${layer})`} />
-          <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill={`url(#${cloudId}-light-${layer})`} />
-        </svg>
+        <Fragment key={layer}>
+          <svg className="glossary-cloud-bank" viewBox="0 0 1200 320" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id={`${cloudId}-depth-${layer}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="var(--cloud-crest)" />
+                <stop offset=".42" stopColor="var(--cloud-mid)" />
+                <stop offset="1" stopColor="var(--cloud-base)" />
+              </linearGradient>
+              <radialGradient id={`${cloudId}-light-${layer}`} cx=".75" cy="0" r=".85">
+                <stop offset="0" stopColor="var(--cloud-rim)" stopOpacity=".8" />
+                <stop offset=".7" stopColor="var(--cloud-rim)" stopOpacity="0" />
+              </radialGradient>
+              <radialGradient id={`${cloudId}-puff-${layer}`} cx=".4" cy=".3" r=".75">
+                <stop offset="0" stopColor="var(--cloud-rim)" stopOpacity=".55" />
+                <stop offset=".45" stopColor="var(--cloud-crest)" stopOpacity=".9" />
+                <stop offset="1" stopColor="var(--cloud-mid)" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            {/* Shade the moving silhouette, not a raster background. Day and
+                night share geometry and the original answer reactions. */}
+            <path d={CLOUD_BANKS[layer].d} fill={`url(#${cloudId}-depth-${layer})`} />
+            {CLOUD_BANKS[layer].puffs.map(([cx, cy, rx, ry]) => <ellipse key={`${cx}-${cy}`} cx={cx} cy={cy} rx={rx} ry={ry} fill={`url(#${cloudId}-puff-${layer})`} />)}
+            <path d={CLOUD_BANKS[layer].d} fill={`url(#${cloudId}-light-${layer})`} />
+            <path d={CLOUD_BANKS[layer].d} fill="none" stroke="var(--cloud-rim)" strokeOpacity=".32" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+          </svg>
+        </Fragment>
       ) : atmosphere === "v3" ? <span key={layer} className="glossary-paper-landscape" /> : (
         <div key={layer} className={`glossary-neon-district district-${layer}`}>
           {Array.from({ length: 12 }, (_, index) => <span key={index} style={{ "--tower-height": `${24 + ((index * 31 + layer * 17) % 72)}%`, "--tower-width": `${5 + index % 4}%`, "--tower-delay": `${index * -.8}s` } as React.CSSProperties} />)}
