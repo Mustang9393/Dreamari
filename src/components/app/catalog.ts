@@ -53,7 +53,7 @@ export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
   C("Asset Manager", "Business & Finance", "/images/app/poster-asset-manager.webp"),
   C("Private Equity", "Business & Finance", "/images/app/poster-private-equity-v2.webp"),
   C("Quant", "Business & Finance", "/images/app/poster-quant.webp"),
-  C("Accountant", "Business & Finance", "/images/app/poster-accountant.webp"),
+  C("Event Operations Manager", "Business & Finance", "/images/app/browse/event-operations-manager.webp"),
   C("Management Analyst", "Business & Finance", "/images/app/poster-management-analyst.webp"),
   C("Administrative Assistant", "Business & Finance", "/images/app/poster-administrative-assistant.webp"),
 ];
@@ -136,7 +136,7 @@ export const BROWSE_TRADES: CatalogCareer[] = [
   C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.webp"),
   C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.webp"),
   C("Forestry Technician", "Farming, Animals & Nature", "/images/app/poster-forestry-technician.webp"),
-  C("Sheet Metal Worker", "Building & Construction", "/images/app/poster-sheet-metal-worker.webp"),
+  C("Aircraft Assembler", "Factories & Making Things", "/images/app/browse/aircraft-assembler.webp"),
   C("Forklift Operator", "Driving, Flying & Shipping", "/images/app/poster-forklift-operator.webp"),
   C("Hairstylist", "Personal Care & Community Services", "/images/app/poster-hairstylist.webp"),
 ];
@@ -158,7 +158,7 @@ export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
   C("Emergency Medicine Doctor", "Health & Medicine", "/images/app/poster-emergency-medicine-doctor.webp"),
   C("Agricultural Technician", "Farming, Animals & Nature", "/images/app/poster-agricultural-technician.webp"),
   C("Drone Pilot", "Driving, Flying & Shipping", "/images/app/poster-drone-pilot.webp"),
-  C("Jewelry Designer", "Factories & Making Things", "/images/app/poster-jewelry-designer.webp"),
+  C("Welder", "Factories & Making Things", "/images/app/browse/welder.webp"),
   C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.webp"),
   C("Nurse Anesthetist", "Health & Medicine", "/images/app/poster-nurse-anesthetist.webp"),
 ];
