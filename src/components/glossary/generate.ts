@@ -101,6 +101,9 @@ export type LevelSeed = {
   words?: string[];
   /** Overrides the default focus for this level number. */
   focus?: LevelFocus;
+  /** A plate image for the Levels map, when this level has its own
+   *  (levelPlates.ts explains the library and the strip format). */
+  plate?: string;
   /** The team's decision that this level's words naturally use numbers
    *  (SOP Executive Rule 4: no forced math). Without it, any $, % or figure
    *  in the copy fails validation. */
@@ -413,6 +416,7 @@ export function buildGlossaryCareer(bp: GlossaryBlueprint): GlossaryCareer {
     // or a kitchen shows what the level unlocks in words (SOP level_goal).
     unlocks: bp.mode === "continuous_story" ? level.unlocks ?? level.milestone : level.milestone,
     minutes: MINUTES[level.tier],
+    plate: level.plate,
   }));
   return { industrySlug: industry.slug, mode: bp.mode, industryTitle: industry.title, careerSlug: bp.exampleCareerSlug ?? industry.slug, careerTitle: industry.title, world: industry.world, subject: industry.subject, lessons, levels, chapters: bp.chapters };
 }

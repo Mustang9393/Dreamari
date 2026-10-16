@@ -88,7 +88,7 @@ Review: one Reverse Recall per term, drawn only for terms still short of mastery
 
 - A generated industry has no term art. The engine treats a lesson without art like Levels 2+: words-only teach cards, initials in the HUD tokens and on the relics, no pictures on match, sort or card backs.
 - Dreamy's poses and reactions, the reward, the Power Play board and the Complete screen are shared by every industry and both themes.
-- The Levels map needs no level art: every card wears a scene plate painted from the theme's sky (Drift by tier and level, Signal a skyline slice per level), and the selected card opens in place with its goal, words and Play button.
+- The Levels map needs no level art: every card wears a scene plate painted from the theme's sky (Drift by tier and level, Signal a skyline slice per level), and the selected card opens in place with its goal, words and Play button. Painted plate variations, if the team wants them, scale by tier and theme through `PLATES` in `levelPlates.ts` (strip format in that file); a level can pin one with `plate`.
 - The welcome scene's illustration (the sneaker shop) is Investment Banking's own. A glossary without welcome art gets Dreamy alone, facing the copy.
 - The value meter reads "`company` value" and the intro reads "`subject` words".
 

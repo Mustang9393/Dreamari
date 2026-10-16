@@ -204,9 +204,11 @@ export type GlossaryLevel = {
   tier: "Beginner" | "Intermediate" | "Advanced";
   words: string[];
   goal: string;
-  /** the company value this level unlocks */
+  /** the company value this level unlocks (a continuous story), else its milestone */
   unlocks: string;
   minutes: number;
+  /** A plate image for the Levels map, pinned for this level (levelPlates.ts). */
+  plate?: string;
 };
 
 /** Levels are grouped into chapters of the example company's story; the

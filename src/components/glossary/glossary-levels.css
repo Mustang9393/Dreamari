@@ -610,7 +610,11 @@
 /* Signal ledger: a skyline slice leads each row; the selected row opens. */
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate { height: 44px; width: 92px; border-radius: 0; border: 1px solid #2e3650; background: #0b1024; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate > i { display: none; }
-.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate-sky { display: block !important; inset: 0; background: url("/images/glossary/signal/bg.webp") no-repeat; background-size: auto 240%; background-position: calc(var(--plate-seed, 0) * 17%) 64%; image-rendering: pixelated; }
+/* 160% of the plate's width always covers it (the skyline is 3:2 and every
+   plate is wider than that), and leaves 60% of horizontal play for the
+   per-level slice. Sizing by height alone left the right third empty on a
+   wide open card (Chandu, 16 Oct 2026). */
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate-sky { display: block !important; inset: 0; background: var(--plate-image, url("/images/glossary/signal/bg.webp")) no-repeat; background-size: 160% auto; background-position: calc(var(--plate-seed, 0) * 17%) 64%; image-rendering: pixelated; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate-sky::after { display: none; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate-horizon { display: block !important; inset: auto 0 0; height: 40%; background: linear-gradient(180deg, transparent, rgba(5, 7, 15, .75)); mask-image: none; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-rung.is-complete .glossary-map-plate::after { background: linear-gradient(180deg, transparent 50%, color-mix(in srgb, var(--sig-gold) 40%, transparent)); }
@@ -675,3 +679,10 @@
    than its content on phones. A column sizes each row by what is in it. */
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 { display: flex !important; flex-direction: column !important; gap: 6px !important; align-items: stretch; overflow-y: auto !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 .glossary-map-rung { flex: none; }
+
+/* A registered plate image (PLATES in levelPlates.ts, or a level's own
+   `plate`) replaces the painted sky in both themes; the horizon wash stays. */
+.glossary-game-shell.glossary-game-lab .glossary-map-plate.has-image .glossary-map-plate-sky { background: var(--plate-image) center / cover no-repeat; }
+.glossary-game-shell.glossary-game-lab .glossary-map-plate.has-image .glossary-map-plate-sky::after,
+.glossary-game-shell.glossary-game-lab .glossary-map-plate.has-image .glossary-map-plate-cloud { display: none; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate.has-image .glossary-map-plate-sky { background-size: 160% auto; background-position: calc(var(--plate-seed, 0) * 17%) 64%; }

@@ -1,3 +1,9 @@
+## 2026-10-16 (late night, 3): Levels map plates fill the open card; a plate library hook
+
+**Why (Chandu):** "the background image you are using doesnt fill the width of the container when its open." The Signal skyline was sized by height (`auto 240%`), so on a 507px open card the image stopped at 302px. It is now sized to 160% of the plate's width: the skyline is 3:2 and every plate is wider than that, so 160% always covers, and the remaining 60% is the per-level horizontal slice.
+
+Chandu also asked about painting a few background variations per level and "how do we reliably scale that". Answer recorded in `src/components/glossary/levelPlates.ts` and the spec: scale by tier and theme (six strips; ninety at most if per world), never by level and industry (six hundred). The map keeps painting plates from the theme's sky by default; `PLATES[theme][tier]` is a registry of strips that, when filled, replaces the painted sky for every industry (`levelIndex % length` picks one), and a blueprint level can pin its own with `plate`. Strip format for the art team: 1536 by 512 WebP, horizon in the lower third, nothing important within twelve percent of the edges, no text, so any crop from 2:1 to 6:1 works. Nothing registered yet; the hook is in place.
+
 ## 2026-10-16 (late night, 2): Glossary Levels map: the selected card opens in place; scene plates on every level
 
 **Why (Chandu):** "The level selector UI also needs work, the bottom bar that updates with what you select is too subtle and nobody notices it. We need to either show it in the card as a pop up or do something else." And: "lets have some sort of graphics (not icons) for the level selectors and overall better visuals for the level selectors in both drift and signal."

@@ -28,6 +28,7 @@ import {
   subscribeGlossaryProgress,
 } from "./progress";
 import type { ChainStep, GlossaryCareer, GlossaryLesson, GlossaryQuestion, ParagraphPowerPlay, SceneCard } from "./data";
+import { plateImage } from "./levelPlates";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { glossaryTermAssets } from "./termArt";
 import { DREAMY_FACING, dreamyReaction, dreamyReactionAsset, questionReaction, type DreamyPose } from "./dreamyReactions";
@@ -3117,6 +3118,7 @@ function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: 
           {atmosphere === "v4" ? <div className="glossary-circuit-horizon"><span>START</span><b>ROAD TO {levels[levels.length - 1]?.unlocks ?? "$30B"}</b></div> : null}
           {levels.slice(page * pageSize, (page + 1) * pageSize).map(({ title, unlocks: value, tier, goal, words, minutes }, slot) => {
             const index = page * pageSize + slot;
+            const plate = plateImage(atmosphere === "v2" ? "signal" : "drift", levels[index], index);
             const phase = tier === "Beginner" ? "Beginner · The Startup" : tier === "Intermediate" ? "Intermediate · Scaling Up" : "Advanced · The Big Leagues";
             const firstOfTier = index === 0 || levels[index - 1].tier !== tier;
             const orbitIndex = index === 0 ? 0 : index <= 7 ? index - 1 : index - 8;
@@ -3140,7 +3142,7 @@ function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: 
                    graphics (not icons) for the level selectors"): a slice of
                    the theme's own sky, painted by tier and shifted per level,
                    so no level art has to be drawn. */}
-                <span className="glossary-map-plate" aria-hidden><i className="glossary-map-plate-sky" /><i className="glossary-map-plate-cloud" /><i className="glossary-map-plate-cloud is-far" /><i className="glossary-map-plate-horizon" /></span>
+                <span className={`glossary-map-plate ${plate ? "has-image" : ""}`} aria-hidden style={plate ? ({ "--plate-image": `url("${plate}")` } as React.CSSProperties) : undefined}><i className="glossary-map-plate-sky" /><i className="glossary-map-plate-cloud" /><i className="glossary-map-plate-cloud is-far" /><i className="glossary-map-plate-horizon" /></span>
                 <button type="button" onClick={() => setSelected(index)} aria-pressed={selected === index} aria-current={stateOf(index) === "current" ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${STATE_LABEL[stateOf(index)].toLowerCase()}`}>
                   {atmosphere === "v1" ? <><span className="glossary-district-badge">{stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "locked" ? <LockKeyhole aria-hidden /> : <b>{index + 1}</b>}</span><span className="glossary-district-rank">Level {index + 1}</span></> : stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "locked" ? <LockKeyhole aria-hidden /> : <b>{index + 1}</b>}
                 </button>
