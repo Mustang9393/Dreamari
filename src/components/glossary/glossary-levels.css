@@ -970,3 +970,19 @@ html.light .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .gl
    headline stayed white on the pale sky while the line under it is ink. */
 html.light .glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-cta { color: #ffffff !important; }
 html.light .glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-finale h2 { color: var(--foreground) !important; }
+
+/* Welcome symmetry (17 Oct 2026, Chandu: "The alignment here is weird.
+   Some left some right. Centre please"). Stacked, the scene was one
+   centred column but the copy block was 434px wide and pinned to the left
+   of a 549px cell, so the title and Start sat 54px off the art's axis.
+   Between 641 and 860px Drift split into two cramped columns with Dreamy
+   floating apart from the art. Up to 860px both themes now use one column:
+   the art, then the copy, both centred on the same axis, the copy capped at
+   520px so lines stay readable. */
+@media (max-width: 860px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-welcome-scene.glossary-welcome-scene[data-atmosphere] { grid-template-columns: minmax(0, 1fr) !important; justify-items: center !important; gap: 8px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-welcome-scene[data-atmosphere] .glossary-welcome-world { grid-row: 1 !important; order: -1; justify-self: center !important; width: min(100%, 340px) !important; height: clamp(170px, calc(30dvh / var(--vz, 1)), 280px) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy { grid-row: 2 !important; justify-self: center !important; width: min(100%, 520px) !important; max-width: 520px !important; margin-inline: auto !important; align-items: center !important; text-align: center !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > * { margin-inline: auto; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-welcome-scene[data-atmosphere] .glossary-welcome-cta { width: 100% !important; }
+}
