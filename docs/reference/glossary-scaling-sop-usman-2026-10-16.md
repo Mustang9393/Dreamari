@@ -66,9 +66,9 @@ TASK
 Create the glossary game for: [INDUSTRY, e.g. "Cybersecurity"]
 Notes from Chandu, if any: [optional]
 
-STEP 1. Look the industry up in the 50-industry table in docs/reference/glossary-scaling-sop-usman-2026-10-16.md (section 12). Take its mode (continuous_story, scenario_thread or practice_world) and its career world (an exact WORLD_COLORS key). Choose a slug: lowercase letters and dashes, it becomes the route /play/glossary/. Choose an anchor: one company, clinic, airline, shop or site that every level returns to (practice worlds may use it loosely). Choose the student's role in one word.
+STEP 1. Look the industry up in the 50-industry table in docs/reference/glossary-scaling-sop-usman-2026-10-16.md (section 12). Take its mode (continuous_story, scenario_thread or practice_world) and its career world (an exact WORLD_COLORS key). Choose a slug: lowercase letters and dashes, it becomes the route /play/glossary/<slug>. Choose an anchor: one company, clinic, airline, shop or site that every level returns to (practice worlds may use it loosely). Choose the student's role in one word.
 
-STEP 2. Write src/components/glossary/blueprints/.ts by copying the model blueprint culinary.ts (every authored piece in use) and the blueprint with the same mode: software.ts (continuous story), aviation.ts (scenario thread), culinary.ts (practice world). Keep the header comment pattern (DEMO-ONLY content, why, the anchor). Levels 1 to 4 must be playable; the validator refuses a file without them. Levels 5 and 6 are optional: write them as roadmap words, or make them playable if asked:
+STEP 2. Write src/components/glossary/blueprints/<slug>.ts by copying the model blueprint culinary.ts (every authored piece in use) and the blueprint with the same mode: software.ts (continuous story), aviation.ts (scenario thread), culinary.ts (practice world). Keep the header comment pattern (DEMO-ONLY content, why, the anchor). Levels 1 to 4 must be playable; the validator refuses a file without them. Levels 5 and 6 are optional: write them as roadmap words, or make them playable if asked:
 - Every playable level: five terms, each with term, definition, example, cue, icon and moments (exactly three).
 - Levels 3 and up: a confusion on every term, naming another term in the same level.
 - Every playable level: a written powerPlay (intro and paragraph).
@@ -98,13 +98,13 @@ COPY RULES (the validator refuses a file that breaks the measurable ones)
 - icon: a lucide icon slug (lowercase, dashes). It is only used on the Levels map until plate art exists; it is never shown on a flashcard or in the mastery bar.
 - Level title 30 characters, goal 48.
 
-STEP 3. Register: in src/components/glossary/data.ts add `: buildGlossaryCareer(_GLOSSARY),` to GLOSSARY_INDUSTRIES and the import. If a catalog career should open this glossary, map it in CAREER_INDUSTRY in src/components/glossary/industries.ts and set exampleCareerSlug in the blueprint. Do NOT add the slug to GLOSSARY_HUB_RELEASED; release is Chandu's step.
+STEP 3. Register: in src/components/glossary/data.ts add `<slug>: buildGlossaryCareer(<NAME>_GLOSSARY),` to GLOSSARY_INDUSTRIES and the import. If a catalog career should open this glossary, map it in CAREER_INDUSTRY in src/components/glossary/industries.ts and set exampleCareerSlug in the blueprint. Do NOT add the slug to GLOSSARY_HUB_RELEASED; release is Chandu's step.
 
 STEP 4. Check, all three must pass:
 npx tsc --noEmit
 node --import ./scripts/qa/ts-resolve.mjs scripts/qa/glossary-blueprints.test.mjs
 node scripts/qa/dreamy-reactions.test.mjs
-Then start the dev server (npm run dev -- --webpack), open /play/glossary/?theme=drift and press the top bar's Skip through Level 1 (about 14 presses), and again with ?theme=signal. Open ?lesson=2&q=1, ?lesson=3&q=1, ?lesson=3&q=3 (the sort) and ?lesson=4&q=1 in Drift, and the case screen of each level. Then play one level without Skip and get two answers wrong on purpose: the review screens that follow must read as new questions. Take a screenshot of each.
+Then start the dev server (npm run dev -- --webpack), open /play/glossary/<slug>?theme=drift and press the top bar's Skip through Level 1 (about 14 presses), and again with ?theme=signal. Open ?lesson=2&q=1, ?lesson=3&q=1, ?lesson=3&q=3 (the sort) and ?lesson=4&q=1 in Drift, and the case screen of each level. Then play one level without Skip and get two answers wrong on purpose: the review screens that follow must read as new questions. Take a screenshot of each.
 
 STEP 5. Write the art list for Codex as a short block in your final message: the slug, the anchor, and the five Level 1 terms each with its definition (Codex turns these into image briefs; see the SOP section 6).
 
@@ -284,9 +284,9 @@ You are working in the Dreamari prototype repo. Pull origin/main. Read section 6
 TASK: generate and register the required art for the glossary industry [slug] (anchor: [anchor]; Level 1 terms with definitions: [paste the art list from the game-creation agent]).
 
 1. Write the manifest docs/reference/glossary-[slug]-art-[mmmdd].json modelled on docs/reference/glossary-finance-art-oct13.json: version "[slug]-[mmmdd]", career "[slug]", the six style references, the prompt template and both style locks from the SOP, and five terms with id, slug and a brief that shows the meaning without the word and names the anchor.
-2. node scripts/glossary-art.mjs prompts  and generate one image per prompt, attaching the three references for that theme every time. Save as -drift.png and -signal.png in a review folder.
+2. node scripts/glossary-art.mjs prompts <manifest> and generate one image per prompt, attaching the three references for that theme every time. Save as <term-slug>-drift.png and <term-slug>-signal.png in a review folder.
 3. Also generate the welcome illustration per theme (SOP 6.2) and save as welcome-drift.png and welcome-signal.png.
-4. node scripts/glossary-art.mjs prepare  , then validate and preview. Convert the welcome images to public/images/glossary/[version]/{drift,signal}/welcome.webp (1024 square, transparent).
+4. node scripts/glossary-art.mjs prepare <manifest> <review-folder>, then validate and preview. Convert the welcome images to public/images/glossary/[version]/{drift,signal}/welcome.webp (1024 square, transparent).
 5. Register: CAREER_TERM_ART in src/components/glossary/termArt.ts for the term art; WELCOME_ART["[slug]"] in src/components/glossary/welcomeArt.ts for the welcome.
 6. Check: npx tsc --noEmit and node scripts/qa/dreamy-reactions.test.mjs. Open /play/glossary/[slug]?theme=drift and ?theme=signal: the welcome shows the illustration beside Dreamy, Level 1 teach cards show the pictures, Level 2 cards show words only. Screenshot each.
 7. Add a dated docs/AI_HANDOFF.md entry (what, why, prompts used, what was rejected and why). Commit; do not push. Chandu reviews, then releases the industry.

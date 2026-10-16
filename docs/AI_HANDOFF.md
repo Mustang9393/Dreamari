@@ -6,6 +6,7 @@
 - After the art landed: the teach card's underline took its SVG's 120px and pushed short terms right of their definition; it now follows the word. Codex's compact map paged two levels at a time on phones; phones hold the whole chapter again, short laptops keep two.
 - SOP: new section 8 (every screen and piece, what it does, its states in the Component Lab, the porting rule), 9 (what each part costs per new industry, what does not scale), 10 (every guardrail: validator, builder, the checks to run, layout and alignment, engine and experience, images, process); 7b marked done; readiness updated; later sections renumbered (QA checklist 11, the 50 industries 12, where everything is 13).
 - Checked: tsc; blueprint, Dreamy, industry-art and world-scene QA scripts; the alignment audit on a sample of screens in both themes at both sizes after the merge; welcome scenes and Level 1 cards of all three industries in both themes.
+- Follow-up fix: the prompt blocks in the SOP HTML held raw placeholders (<slug>, <manifest>, <term-slug>, <review-folder>, <NAME>) that a browser and the markdown converter read as tags and dropped, so the markdown copy agents paste from said "/play/glossary/?theme=drift" and "prompts  and generate". They are now escaped in the HTML; the markdown is regenerated and has all ten back.
 
 ## 2026-10-17: symmetry and alignment pass; Levels map cards; Finance face; Levels 1 to 4 required; Component Lab coverage
 
