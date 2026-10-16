@@ -1674,7 +1674,7 @@
 .glossary-game-lab .glossary-flashcard-art img { width: min(100%,330px) !important; height: min(calc(34dvh / var(--vz, 1)),330px) !important; filter: drop-shadow(0 24px 22px rgba(0,0,0,.35)); }
 .glossary-game-lab .glossary-flashcard-title { grid-column: 1; grid-row: 1; align-items: flex-start !important; padding-top: 18px; text-align: left; }
 .glossary-game-lab .glossary-flashcard-title > span { font-size: clamp(32px,calc(5.5vw / var(--vz, 1)),54px) !important; letter-spacing: -.055em; }
-.glossary-game-lab .glossary-flashcard-title svg { width: 82px; margin-left: 2px; }
+.glossary-game-lab .glossary-flashcard-title svg { width: 100%; margin-left: 0; }
 .glossary-game-lab .glossary-flashcard-definition { grid-column: 1; grid-row: 2; align-self: center; max-width: 28ch !important; padding: 0 !important; color: color-mix(in srgb,var(--foreground) 78%,transparent) !important; font-size: clamp(14px,calc(1.7vw / var(--vz, 1)),17px) !important; line-height: 1.5 !important; text-align: left !important; }
 .glossary-game-lab .glossary-flashcard-front > span:last-child { grid-column: 1; grid-row: 3; align-self: end; justify-self: start; }
 .glossary-game-lab .glossary-flashcard-back { position: absolute; isolation: isolate; background: linear-gradient(135deg,color-mix(in srgb,var(--card) 96%,white),color-mix(in srgb,var(--card) 90%,black)) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.14),0 20px 0 rgba(2,7,19,.34),0 44px 80px rgba(0,0,0,.38) !important; }
@@ -2206,8 +2206,10 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title > span,
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child { font: 700 clamp(27px, calc(1.7vw / var(--vz, 1)), 39px)/1.5 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; color: var(--sig-gold) !important; text-shadow: 3px 3px 0 var(--sig-ink); filter: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title svg { display: none; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title::after,
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child::after { content: ""; display: block; width: 96px; height: 4px; margin-top: 10px; background: var(--sig-gold); box-shadow: 3px 3px 0 var(--sig-ink); }
+/* Signal: the bar under the word is as long as the word (16 Oct 2026). */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-term::after,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child::after { content: ""; display: block; width: 100%; height: 4px; margin-top: 10px; background: var(--sig-gold); box-shadow: 3px 3px 0 var(--sig-ink); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child { width: fit-content; max-width: 100%; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-definition,
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span > span:last-child { font: 500 13px/1.7 var(--sig-mono) !important; color: var(--sig-text) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-front > span:last-child,

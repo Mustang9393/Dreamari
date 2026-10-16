@@ -402,5 +402,25 @@ STYLE: {{Signal STYLE lock from 2.6}}
 Match the attached panorama's palette, pixel density and night-to-dusk mood exactly; only the place changes.</pre>
 <p>Order of work, if the team wants per-world backdrops: start with the worlds that have a glossary (Tech &amp; Engineering, Driving, Flying &amp; Shipping, Health &amp; Medicine, Food &amp; Cooking), then the rest of the fifteen as their first glossary lands.</p>
 
+<h3>3.4 Required per industry: Level 1 term art and a welcome illustration</h3>
+<p>Decision, 16 October 2026: every industry ships with pictures for its five Level 1 terms and one welcome illustration. Later levels stay words only (Executive Rule 3 still decides individual terms; the team has decided Level 1 earns its pictures everywhere). Codex delivers both before an industry is released to the Play hub.</p>
+<table>
+<tr><th>Asset</th><th>Count per industry</th><th>Format</th><th>Register</th></tr>
+<tr><td>Level 1 term art</td><td>5 per theme (10)</td><td>As 2.6: 1024 square, transparent, one object cluster, no text, no Dreamy unless the brief calls for it. Drift sculpted, Signal pixel.</td><td>CAREER_TERM_ART in src/components/glossary/termArt.ts (2.7).</td></tr>
+<tr><td>Welcome illustration</td><td>1 per theme (2)</td><td>1024 square, transparent, one composed scene of the workplace (the clinic front, the hangar, the kitchen pass), never a person, one readable silhouette; it shows at about 300 px beside Dreamy. Same style lock as the theme's term art.</td><td>WELCOME_ART[industrySlug] in src/components/glossary/welcomeArt.ts, paths under public/images/glossary/&lt;industry&gt;-&lt;date&gt;/{drift,signal}/welcome.webp.</td></tr>
+</table>
+<p>Welcome prompt: use the 2.6 prompt with Asset type "one Dreamari welcome illustration: the workplace this glossary lives in, seen as a small composed scene" and Subject "{{the anchor}}: {{two sentences describing the place, no people}}".</p>
+
+<h3>3.5 Attempt: one custom image per level</h3>
+<p>Chandu wants to see whether a custom image per level is worth it. Make the attempt on one industry (Nursing, four levels, both themes) and stop there until he has judged. The image is used in exactly one place, chosen per level, never both:</p>
+<ul>
+<li><b>Selector only:</b> a Levels map plate for that level. Format as 3.1 (1536 by 512 strip). Register by setting plate on the level in the blueprint (src/components/glossary/blueprints/&lt;slug&gt;.ts) to the file path. The map shows it in place of the icon plate.</li>
+<li><b>Welcome only:</b> that level's welcome illustration. Format as 3.4. Register in LEVEL_WELCOME_ART[lessonId] (for example "RN-L02") in welcomeArt.ts.</li>
+</ul>
+<p>Until any art is registered, the Levels map shows an icon on the world accent for each level (the level's first term icon), and the open card in Drift shows one static Dreamy expression for the level's state. No letters or monograms on plates.</p>
+
+<h3>3.6 Dreamy expressions pack (static, for Codex to animate)</h3>
+<p>Chandu's "Dream Expressions V2" (19 Drift-style stills, now at public/images/dreamy/expressions-v2/01.webp to 19.webp, 512 px) is in the repo. Four are used statically on the Drift Levels map open card: 06 (books, ready to play), 18 (arrow, playing now), 12 (graduation cap, complete), 17 (alert, locked). The rest are unused on purpose: stills do not belong on screens that already have the animated Dreamy. The ones worth animating first, because the game already has a slot for each: 10 (green check) for a right answer, 09 (red X) and 14 ("hmm") for a wrong one, 16 (confetti) and 12 for mastery and the complete screen, 15 (glasses and clipboard) for the review and hint moments, 08 (reading) for the teach cards, 18 (arrow) for Next. Animated versions should follow the existing four-frame WebP atlas format in docs/reference/dreamy-drift-animated-oct15-v2.json so dreamyReactions.ts can take them without engine changes; Signal needs pixel versions drawn to the Signal Dreamy rig.</p>
+
 </body>
 </html>

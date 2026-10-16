@@ -421,7 +421,7 @@
 .glossary-game-lab .glossary-flashcard-front.glossary-words-face { grid-template-columns: 1fr !important; grid-template-rows: auto auto auto !important; align-content: center !important; justify-items: center; row-gap: 18px !important; padding: 40px 48px 60px !important; text-align: center; }
 .glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-title { grid-column: 1 !important; grid-row: 1 !important; justify-self: center !important; align-items: center; gap: 8px; }
 .glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-title > span { font-size: clamp(36px, calc(6.4dvh / var(--vz, 1)), 52px) !important; letter-spacing: -.01em; }
-.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-title > svg { width: 140px; height: 10px; }
+.glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-title svg { width: 100%; height: 10px; }
 .glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-flashcard-definition { grid-column: 1 !important; grid-row: 2 !important; justify-self: center !important; max-width: 520px; padding: 0; font-size: clamp(19px, calc(3dvh / var(--vz, 1)), 24px) !important; line-height: 1.4 !important; font-weight: 600; text-align: center !important; text-wrap: balance; }
 .glossary-game-lab .glossary-flashcard-front.glossary-words-face > .glossary-words-formula { grid-column: 1 !important; grid-row: 3 !important; justify-self: center; margin-top: 2px; font-size: 20px; padding: 10px 18px; }
 .glossary-game-lab .glossary-flashcard-front.glossary-words-face > span:last-child { position: absolute; left: 0; right: 0; bottom: 20px; width: auto !important; justify-content: center !important; justify-self: auto !important; text-align: center; grid-row: auto !important; grid-column: auto !important; }
@@ -701,3 +701,19 @@
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-cloud-bank { --cloud-crest: color-mix(in srgb, var(--glossary-accent) var(--glossary-sky-tint, 42%), var(--color-accent-purple)); --cloud-rim: color-mix(in srgb, var(--glossary-accent) calc(var(--glossary-sky-tint, 42%) * 1.4), var(--color-decorative-pink-glow)); }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-cloud-bank:nth-child(2) { --cloud-crest: color-mix(in srgb, var(--glossary-accent) calc(var(--glossary-sky-tint, 42%) * .8), var(--color-accent-deep)); --cloud-rim: color-mix(in srgb, var(--glossary-accent) var(--glossary-sky-tint, 42%), var(--color-accent-purple)); }
 .glossary-game-shell.glossary-game-lab .glossary-drift-silhouette { position: absolute; left: -4%; right: -4%; bottom: 18%; height: 26%; background-repeat: repeat-x; background-size: auto 100%; background-position: center bottom; opacity: .55; mask-image: linear-gradient(transparent, #000 30%); pointer-events: none; }
+
+/* Plates without registered art: an icon on the world accent, no painted
+   sky or skyline (16 Oct 2026). The open Drift card shows a Dreamy
+   expression instead; Signal keeps the icon in its pixel frame. */
+.glossary-game-shell.glossary-game-lab .glossary-map-plate.is-icon { display: grid; place-items: center; background: radial-gradient(120% 120% at 50% 0%, color-mix(in srgb, var(--glossary-accent) 34%, transparent), transparent 60%), color-mix(in srgb, var(--glossary-accent) 14%, var(--card)); color: var(--glossary-accent); }
+.glossary-game-shell.glossary-game-lab .glossary-map-plate.is-icon > svg { width: 44%; height: 44%; max-width: 40px; max-height: 40px; }
+.glossary-game-shell.glossary-game-lab .glossary-map-plate.is-icon.is-dreamy > img { width: auto; height: 86%; max-height: 150px; object-fit: contain; }
+.glossary-game-shell.glossary-game-lab .glossary-map-rung.is-locked .glossary-map-plate.is-icon { color: var(--muted-foreground); filter: none; }
+.glossary-game-shell.glossary-game-lab .glossary-map-rung.is-complete .glossary-map-plate.is-icon { color: var(--world-food-farming-nature); }
+.glossary-game-shell.glossary-game-lab .glossary-map-rung.is-complete .glossary-map-plate.is-icon::after { display: none; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung.is-inspected .glossary-map-plate.is-icon > svg { max-width: 64px; max-height: 64px; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate.is-icon { border-radius: 0; border: 1px solid #2e3650; background: var(--sig-card); color: var(--sig-cyan); }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung.is-inspected .glossary-map-plate.is-icon { color: var(--sig-gold); border-color: var(--sig-gold); }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-plate.is-icon > svg { max-width: 48px; max-height: 48px; }
+/* a registered welcome illustration sits where the shop would */
+.glossary-game-lab .glossary-welcome-registered { object-fit: contain; }

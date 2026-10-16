@@ -25,3 +25,15 @@ export function plateImage(theme: PlateTheme, level: Pick<GlossaryLevel, "tier" 
   const list = PLATES[theme][level.tier];
   return list.length ? list[index % list.length] : null;
 }
+
+/** One static Dreamy expression per level state for the open card on the
+ *  Drift Levels map (the only Dreamy on that screen). From Chandu's "Dream
+ *  Expressions V2" pack (16 Oct 2026): books for a level ready to play, the
+ *  arrow for the level being played, the graduation cap for a finished one,
+ *  the alert mark for a locked one. Static on purpose; Codex may animate. */
+export const LEVEL_DREAMY_BY_STATE: Record<"complete" | "current" | "open" | "locked", string> = {
+  open: "/images/dreamy/expressions-v2/06.webp",
+  current: "/images/dreamy/expressions-v2/18.webp",
+  complete: "/images/dreamy/expressions-v2/12.webp",
+  locked: "/images/dreamy/expressions-v2/17.webp",
+};

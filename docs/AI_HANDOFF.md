@@ -1,3 +1,21 @@
+## 2026-10-16 (late night, 10): Levels map icon plates, welcome art hooks, Dreamy expressions pack, SOP 3.4 to 3.6
+
+**Why (Chandu):** "lets not show the background for the levels picker right now until we have different ones. Use something else. No letters/monograms. Icons are fine for now but if we can get better vectors that would be great." Then: "for level 1 of all worlds we will have images for the terms. And the welcome screen. Codex has to know to generate those as well. And I would like codex to attempt generating a custom image we can use for each level in the selector only or the welcome screen only." And the "Dream Expressions V2" zip: "Only IF... maybe for the level selection we can?"
+
+- **Levels map plates:** no painted sky or skyline until plate art is registered. Each card shows the level's first term icon on the world accent (lock for roadmap levels); the open card in Drift shows one static Dreamy expression for its state (books ready, arrow playing, graduation complete, alert locked), the only Dreamy on that screen; Signal keeps the icon in its pixel frame. A registered image (`PLATES` or a level's `plate`) still replaces the icon.
+- **Welcome art hook:** `welcomeArt.ts` with `WELCOME_ART[industrySlug]` and `LEVEL_WELCOME_ART[lessonId]` per theme; `IntroScreen` takes `heroSrc` and shows it beside Dreamy where Finance shows its shop. Empty today.
+- **Expressions:** the 19 stills are in `public/images/dreamy/expressions-v2/` (trimmed 512 px WebP, 449 KB total). Four are used on the map; the SOP lists which to animate first and in what format.
+- **SOP Part 3** gained 3.4 (Level 1 term art and a welcome illustration are required per industry), 3.5 (the per-level custom image attempt, Nursing only, selector or welcome, never both) and 3.6 (the expressions pack). Google Doc republished.
+- **Flashcards never show an icon** (Chandu: "No icons in flash cards please. IF its not an image generated dont have it."): the concept medallion and the default face render generated art or nothing; the `icon` prop stays for callers and is ignored.
+- **Checked:** tsc; Levels map in Drift (Nursing) and Signal (Software); flashcard underline in the Component Lab in both themes.
+
+## 2026-10-16 (late night, 9): flashcard underline follows the word
+
+**Why (Chandu):** "the underline on the flash cards under the term, its length is inconsistent and weird. It should always be following the terms length. For both signal and drift."
+
+- The underline was a fixed-width squiggle (82px, 110px or 140px by variant) and, in Signal, a fixed 96px gold bar, so it was short under long words and long under short ones. The term and its underline now share one shrink-wrapped box (`.glossary-flashcard-term`): the squiggle is `width: 100%` with `preserveAspectRatio="none"` and a non-scaling stroke, and Signal's bar is `width: 100%` of that box. The Signal back-card term gets `width: fit-content` so its bar matches too. Font size moved onto the box and the word inherits it, so every existing `.glossary-flashcard-title > span` size rule (fit, words-face, `--term-chars` clamp) keeps working.
+- Checked: tsc; teach cards in Drift and Signal.
+
 ## 2026-10-16 (late night, 8): Drift clouds reverted to the launch banks
 
 **Why (Chandu):** "the clouds before looked better so revert for now and push that fix while codex tries its thing." The three-silhouette banks with crest puffs and a lit rim (9f886037) are reverted in full; Drift shows the original cloud banks again, still tinted by the world accent (Finance pinned to 0%). Codex is taking the cloud and weather brief; the per-world and per-tier registries (`worldBackdrops.ts`, `levelPlates.ts`) are unchanged and still empty.

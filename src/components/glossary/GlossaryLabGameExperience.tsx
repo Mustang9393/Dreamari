@@ -30,6 +30,8 @@ import {
 import type { ChainStep, GlossaryCareer, GlossaryLesson, GlossaryQuestion, ParagraphPowerPlay, SceneCard } from "./data";
 import { plateImage } from "./levelPlates";
 import { driftSilhouette, signalBackdrop } from "./worldBackdrops";
+import { welcomeArtFor } from "./welcomeArt";
+import { LEVEL_DREAMY_BY_STATE } from "./levelPlates";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { glossaryTermAssets } from "./termArt";
 import { DREAMY_FACING, dreamyReaction, dreamyReactionAsset, questionReaction, type DreamyPose } from "./dreamyReactions";
@@ -548,7 +550,7 @@ export function ValuationTicker({ from, to, milestone, mode, company = "Dream Sn
   );
 }
 
-export function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1", subject = "finance", hero = true }: { lesson: GlossaryLesson; onNext: () => void; variant?: ExperienceVariant; atmosphere?: LabAtmosphere; /** the career's subject word ("finance", "nursing") */ subject?: string; /** the welcome illustration is Dream Sneakers' shop; a generated career has none and gets Dreamy alone (16 Oct 2026) */ hero?: boolean }) {
+export function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1", subject = "finance", hero = true, heroSrc = null }: { /** a registered welcome illustration (welcomeArt.ts); shown beside Dreamy in place of the authored shop */ heroSrc?: string | null; lesson: GlossaryLesson; onNext: () => void; variant?: ExperienceVariant; atmosphere?: LabAtmosphere; /** the career's subject word ("finance", "nursing") */ subject?: string; /** the welcome illustration is Dream Sneakers' shop; a generated career has none and gets Dreamy alone (16 Oct 2026) */ hero?: boolean }) {
   const { theme } = useGlobalTheme();
   if (variant === "lab") {
     const story = lesson.intro;
@@ -571,7 +573,12 @@ export function IntroScreen({ lesson, onNext, variant = "default", atmosphere = 
         </div>
 
         <div className="glossary-welcome-world" aria-hidden>
-          {!hero
+          {heroSrc
+            ? <>
+                <Image src={heroSrc} alt="" width={768} height={768} priority unoptimized className="glossary-welcome-hero glossary-welcome-shop glossary-welcome-registered" />
+                <span className="glossary-welcome-cloud"><DreamyFace pose={story ? "glasses" : "happy"} size={180} /></span>
+              </>
+            : !hero
             ? <span className="glossary-welcome-cloud is-alone"><DreamyFace pose={story ? "explain" : "welcome"} size={220} /></span>
             : atmosphere === "v2"
             ? <Image src={SIGNAL_ASSETS.Customer} alt="" width={960} height={540} priority unoptimized className="glossary-welcome-hero glossary-signal-hero" />
@@ -698,7 +705,7 @@ function LessonIntroScreen({ lesson, onStart, subject = "finance", progress }: {
  *  filter, so the clean vector strokes read as pencil on paper. Ruled
  *  lines and a hand-placed tilt finish the sketchbook feel without a
  *  single new image asset. */
-export function SketchFace({ term, definition, icon, artSrc, style, concept = false, formula, words = false }: { term: string; definition?: string; icon: string; artSrc?: string; style?: React.CSSProperties; /** a lab card for a term with no art */ concept?: boolean; formula?: string; /** Levels 2+: words only, no picture and no icon (Chandu, 15 Oct 2026: "NO icons at all") */ words?: boolean }) {
+export function SketchFace({ term, definition, icon: _icon, artSrc, style, concept = false, formula, words = false }: { term: string; definition?: string; /** kept for callers; a card never draws an icon any more (16 Oct 2026) */ icon: string; artSrc?: string; style?: React.CSSProperties; /** a lab card for a term with no art */ concept?: boolean; formula?: string; /** Levels 2+: words only, no picture and no icon (Chandu, 15 Oct 2026: "NO icons at all") */ words?: boolean }) {
   return (
     <span
       className={`glossary-flashcard-front absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,calc(2dvh/var(--vz,1)),18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden] ${artSrc || concept || words ? "glossary-lab-card-face" : ""} ${concept ? "glossary-concept-face" : ""} ${words ? "glossary-words-face" : ""}`}
@@ -724,15 +731,16 @@ export function SketchFace({ term, definition, icon, artSrc, style, concept = fa
         // ("$30,000 − $25,000 = $5,000") in the art's slot. Same card, same
         // grid. A supporting illustration never replaces the worked maths.
         <span className="glossary-flashcard-art glossary-concept-panel" aria-hidden={!formula}>
-          <span className={`glossary-concept-medallion ${artSrc ? "has-art" : ""}`}>{artSrc ? <Image src={artSrc} alt="" width={180} height={180} className="h-full w-full object-contain" priority unoptimized /> : <TermIcon icon={icon} />}</span>
+          {/* No icon stands in for a missing picture (16 Oct 2026, Chandu:
+             "No icons in flash cards please. IF its not an image generated
+             dont have it."): a card shows generated art or nothing. */}
+          {artSrc ? <span className="glossary-concept-medallion has-art"><Image src={artSrc} alt="" width={180} height={180} className="h-full w-full object-contain" priority unoptimized /></span> : null}
           {formula ? <span className="glossary-concept-formula">{formula}</span> : null}
         </span>
       ) : <span className="glossary-flashcard-art relative -rotate-2" style={{ filter: artSrc ? undefined : "url(#glossary-sketch)", color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>
         {artSrc ? (
           <Image src={artSrc} alt="" width={360} height={360} className="h-[clamp(148px,calc(26dvh/var(--vz,1)),220px)] w-[clamp(148px,calc(26dvh/var(--vz,1)),220px)] object-contain" priority unoptimized />
-        ) : (
-          <TermIcon icon={icon} className="h-[clamp(72px,calc(16dvh/var(--vz,1)),120px)] w-[clamp(72px,calc(16dvh/var(--vz,1)),120px)]" />
-        )}
+        ) : null}
         {/* Radiating sketch dashes, the doodle around the drawing. */}
         <svg viewBox="0 0 120 120" aria-hidden className="absolute -inset-[26px] h-[calc(100%+52px)] w-[calc(100%+52px)]" style={{ color: "var(--glossary-accent)" }}>
           {[30, 90, 150, 210, 270, 330].map((deg) => (
@@ -741,13 +749,18 @@ export function SketchFace({ term, definition, icon, artSrc, style, concept = fa
         </svg>
       </span>}
       <span className="glossary-flashcard-title flex flex-col items-center gap-[3px]" style={{ "--term-chars": term.length } as React.CSSProperties}>
-        <span className="text-[clamp(26px,calc(5.8dvh/var(--vz,1)),34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc || concept || words ? undefined : "url(#glossary-sketch)" }}>
-          {term}
+        {/* The term and its underline share one shrink-wrapped box, so the
+           line is always exactly as long as the word (16 Oct 2026, Chandu:
+           "its length is inconsistent and weird. It should always be
+           following the terms length"). Font size lives on this box and the
+           word inherits it, so the theme rules keep working. */}
+        <span className="glossary-flashcard-term inline-flex flex-col items-center gap-[3px] text-[clamp(26px,calc(5.8dvh/var(--vz,1)),34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+          <span style={{ filter: artSrc || concept || words ? undefined : "url(#glossary-sketch)" }}>{term}</span>
+          {/* The hand-drawn underline squiggle, stretched to the word. */}
+          <svg viewBox="0 0 120 8" preserveAspectRatio="none" aria-hidden className="h-[8px] w-full" style={{ color: "var(--glossary-accent)", filter: concept || words ? undefined : "url(#glossary-sketch)" }}>
+            <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          </svg>
         </span>
-        {/* The hand-drawn underline squiggle. */}
-        <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[110px]" style={{ color: "var(--glossary-accent)", filter: concept || words ? undefined : "url(#glossary-sketch)" }}>
-          <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-        </svg>
       </span>
       {(artSrc || concept || words) && definition ? (
         <span className="glossary-flashcard-definition block max-w-[340px] px-4 text-center text-[clamp(13px,calc(2.2dvh/var(--vz,1)),15px)] leading-[1.4] font-semibold" style={{ color: "var(--foreground)" }}>
@@ -3144,7 +3157,20 @@ function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { career: 
                    graphics (not icons) for the level selectors"): a slice of
                    the theme's own sky, painted by tier and shifted per level,
                    so no level art has to be drawn. */}
-                <span className={`glossary-map-plate ${plate ? "has-image" : ""}`} aria-hidden style={plate ? ({ "--plate-image": `url("${plate}")` } as React.CSSProperties) : undefined}><i className="glossary-map-plate-sky" /><i className="glossary-map-plate-cloud" /><i className="glossary-map-plate-cloud is-far" /><i className="glossary-map-plate-horizon" /></span>
+                {/* Until a world has registered plate art, the plate is an
+                   icon on the world accent, not a painted sky (16 Oct 2026,
+                   Chandu: "lets not show the background for the levels picker
+                   right now until we have different ones... No
+                   letters/monograms. Icons are fine for now"). The open card
+                   in Drift shows one Dreamy expression for its state instead;
+                   the map is the only Dreamy on that screen. */}
+                {plate ? (
+                  <span className="glossary-map-plate has-image" aria-hidden style={{ "--plate-image": `url("${plate}")` } as React.CSSProperties}><i className="glossary-map-plate-sky" /><i className="glossary-map-plate-horizon" /></span>
+                ) : selected === index && atmosphere !== "v2" ? (
+                  <span className="glossary-map-plate is-icon is-dreamy" aria-hidden><Image src={LEVEL_DREAMY_BY_STATE[stateOf(index)]} alt="" width={512} height={512} unoptimized /></span>
+                ) : (
+                  <span className="glossary-map-plate is-icon" aria-hidden>{stateOf(index) === "locked" && !lessonFor(levels[index].number) ? <LockKeyhole /> : <TermIcon icon={lessonFor(levels[index].number)?.terms[0]?.icon ?? "circle"} />}</span>
+                )}
                 <button type="button" onClick={() => setSelected(index)} aria-pressed={selected === index} aria-current={stateOf(index) === "current" ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${STATE_LABEL[stateOf(index)].toLowerCase()}`}>
                   {atmosphere === "v1" ? <><span className="glossary-district-badge">{stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "locked" ? <LockKeyhole aria-hidden /> : <b>{index + 1}</b>}</span><span className="glossary-district-rank">Level {index + 1}</span></> : stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "locked" ? <LockKeyhole aria-hidden /> : <b>{index + 1}</b>}
                 </button>
@@ -3692,7 +3718,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         {showStreak !== null && <StreakBanner streak={showStreak} onDismiss={() => setShowStreak(null)} />}
         {/* every screen fits the window, never scrolls (8 Oct 2026) */}
         <FitToScreen enabled={variant === "lab"} compact={questionFrame} watch={`${screen}-${unlockIndex}-${queueIndex}-${pendingResult ? 1 : 0}`}>
-        {screen === "intro" && <IntroScreen lesson={lesson} variant={variant} atmosphere={atmosphere} subject={career.subject} hero={career.careerSlug === "investment-banking"} onNext={() => { setMusicStarted(true); goTo(variant === "lab" ? "unlock" : "dreamyIntro"); }} />}
+        {screen === "intro" && <IntroScreen lesson={lesson} variant={variant} atmosphere={atmosphere} subject={career.subject} hero={career.careerSlug === "investment-banking"} heroSrc={welcomeArtFor(career.industrySlug, lesson.id, atmosphere === "v2" ? "signal" : "drift")} onNext={() => { setMusicStarted(true); goTo(variant === "lab" ? "unlock" : "dreamyIntro"); }} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => goTo("lessonIntro")} />}
         {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} subject={career.subject} progress={milestoneProgress(career, lesson)} onStart={() => goTo("unlock")} />}
         {screen === "unlock" &&
