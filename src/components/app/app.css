@@ -1247,3 +1247,16 @@ html.light { --uw-blue-text: #0B47B0; }
 @media (prefers-reduced-motion: reduce) {
   .dm-pop-in { animation: none; }
 }
+
+/* Explore's Skip college switch: a four-word status that confirms the flip
+   and leaves on its own (no long descriptions permanently on screen). */
+@keyframes dm-status-flash {
+  0% { opacity: 0; translate: -4px 0; }
+  12% { opacity: 1; translate: 0 0; }
+  78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.dm-status-flash { animation: dm-status-flash 2.2s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .dm-status-flash { animation: none; }
+}

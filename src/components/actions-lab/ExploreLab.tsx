@@ -26,7 +26,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useWelcomeInFront } from "@/components/app/SplashVeil";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Play, Search, SlidersHorizontal, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useSavedVideos } from "@/lib/savedVideos";
 import { Listbox } from "@/components/app/Listbox";
@@ -61,6 +61,8 @@ import {
   type VideoReel,
 } from "@/components/app/catalog";
 import { WORLD_LABELS } from "@/components/app/worlds";
+import { buildTradesRails, filterByPath, isPathChoice, type PathChoice } from "@/components/app/careerPath";
+import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "@/components/app/careerSearch";
 import { careerSlug } from "@/components/career/slug";
 import { simulationFor } from "@/components/play/games";
@@ -553,108 +555,187 @@ function SearchPanel({ query, onQuery }: { query: string; onQuery: (q: string) =
   );
 }
 
-function BrowseFace({ query, searchActive, onQuery, row, onRow }: { query: string; /** search is open: the search panel replaces every row */ searchActive: boolean; onQuery: (q: string) => void; /** a row opened as a grid (?row=), and how to open or close one */ row: string; onRow: (id: string | null) => void }) {
+// -- Skip college switch (16 Oct 2026) ------------------------------------
+// Chandu: "for the explore careers tab lets have a switch without
+// cluttering to show college paths and non college paths... The goal is to
+// show trade/non college careers for those that want that." Then: "lets
+// make it a toggle switch that then shows only trade/non college level
+// stuff and make sure the use and feedback is obvious", "it should very
+// obviously be College vs non college, remember this is for 8th standard
+// comprehension level they may not know what trades are. please no long
+// descriptions permanently on screen. brand it better for genz please the
+// label should not be too long. Lets also think of mobile/tablet."
+//
+// Shape: one glass pill, first thing in the content area, left under the
+// Careers/Schools strip, identical at every width: a graduation cap, the
+// words "Skip college", a switch. Off = Browse as it is (every career).
+// On = only careers whose typical entry is not a bachelor's, in rails built
+// for that view (browseRows). "Trades" never appears: an 8th grader knows
+// what college is. Feedback on a flip: the cap gets a slash, the track
+// and pill border go blue, a light sweeps the pill once, a four-word status
+// shows for two seconds and leaves, and the rails replay their entrance.
+// Nothing stays on screen but the pill itself.
+//
+// Rejected: three chips (All / College / Trades) -- Chandu wanted one
+// switch; a banner hanging off the Careers tab's blue underline -- the app
+// already hangs coachmarks off that strip, so it would read as a hint to
+// dismiss, not a control, and it breaks the title + tabs unit locked on
+// 22 Sept; a segment in the For you / Browse all pill -- two dimensions in
+// one control; a header dropdown -- no room in the phone header, and the
+// 1 Oct 2026 rule puts a control in the same place on every device.
+//
+// The choice lives in the URL (?path=trades) so View all's grid and the
+// browser's Back keep it, and in localStorage so a student who flipped it
+// lands on it next visit.
+const PATH_STORAGE_KEY = "dreamari.explore.path";
+const ROW_FLOOR = 3;
+const STATUS_MS = 2200;
+
+function SkipCollegeSwitch({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
+  // The status line is transient on purpose (no long descriptions
+  // permanently on screen): it confirms the flip, then leaves.
+  const [status, setStatus] = useState<{ text: string; key: number } | null>(null);
+  const [sweep, setSweep] = useState(0);
+  useEffect(() => {
+    if (!status) return;
+    const t = window.setTimeout(() => setStatus(null), STATUS_MS);
+    return () => window.clearTimeout(t);
+  }, [status]);
+  const flip = () => {
+    const next = !on;
+    onChange(next);
+    setStatus({ text: next ? "No college degree needed" : "Showing every career", key: Date.now() });
+    setSweep((n) => n + 1);
+  };
+  return (
+    <div className="relative flex w-full items-center">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        onClick={flip}
+        className="dm-quiet relative flex h-10 flex-none cursor-pointer items-center gap-[10px] rounded-full border pr-[6px] pl-[12px] transition-colors"
+        style={{ background: on ? "color-mix(in srgb, var(--primary) 14%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: on ? "var(--primary)" : "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+      >
+        <span className="relative flex size-[18px] flex-none items-center justify-center" aria-hidden>
+          <GraduationCap className="h-[18px] w-[18px]" style={{ color: on ? "var(--primary)" : "var(--foreground)" }} />
+          {/* The slash is the one-glance "no college" mark; it draws in with the flip. */}
+          <span className="absolute left-1/2 top-1/2 h-[2px] w-[22px] origin-center rounded-full transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ background: "var(--primary)", transform: `translate(-50%, -50%) rotate(-45deg) scaleX(${on ? 1 : 0})`, boxShadow: "0 0 0 1.5px var(--glass-surface-1)" }} />
+        </span>
+        <span className="text-[13.5px] leading-[16px] font-bold whitespace-nowrap">Skip college</span>
+        <span className="relative inline-flex h-[26px] w-[46px] flex-none items-center rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "var(--glass-surface-2)", boxShadow: on ? "none" : "inset 0 0 0 1px var(--glass-border)" }}>
+          <span className="absolute size-[22px] rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(${on ? 22 : 2}px)`, boxShadow: "0 1px 2px rgba(0,0,0,.25)" }} />
+        </span>
+        {sweep > 0 && <ConfirmShimmer key={sweep} active />}
+      </button>
+      {/* Beside the pill where there is room (tablet, desktop); tucked into
+         the gap under it on phones. Absolute, so the rails never shift. */}
+      {status && (
+        <span key={status.key} role="status" className="dm-status-flash pointer-events-none absolute left-0 top-full mt-[4px] text-[13px] leading-[18px] font-semibold whitespace-nowrap sm:left-auto sm:top-auto sm:mt-0 sm:ml-[12px] sm:static" style={{ color: "var(--primary)", fontFamily: "var(--font-body)" }}>
+          {status.text}
+        </span>
+      )}
+    </div>
+  );
+}
+
+type RankedSlot = { slot: TrendingSlot; rank: number };
+type BrowseRow =
+  | { id: string; kind: "posters"; title: string; careers: CatalogCareer[]; peek?: boolean; /** the rail shows this many; View all shows every career */ preview?: number }
+  | { id: string; kind: "trending"; title: string; careers: CatalogCareer[]; ranked: RankedSlot[] }
+  | { id: string; kind: "videos"; title: string; careers: CatalogCareer[] };
+
+const TRADES_RAILS = buildTradesRails(ALL_CATALOG_CAREERS);
+// A built rail can hold 60 careers ("Ready in 2 Years or Less"); the row
+// shows its first dozen and View all opens the lot. Curated rows are
+// untouched: their length is part of what was signed off.
+const BUILT_RAIL_PREVIEW = 12;
+
+/** Browse's rails for the switch's state, in page order. */
+function browseRows(path: PathChoice): BrowseRow[] {
+  // CEO (4 Sept 2026): real clips from inside partner companies. Moved
+  // directly above Typical Pay (Joshua, 11 Sept 2026), in the Apple TV
+  // lean-back card shape; the lead card plays muted.
+  const videos: BrowseRow = { id: "videos", kind: "videos", title: "Videos Inside Leading Companies", careers: [] };
+
+  if (path === "trades") {
+    // Browse's curated rows were picked around degree careers: filtered,
+    // they keep ~20 of the 186 no-college careers. This view builds its
+    // own rails from the whole catalog instead (buildTradesRails).
+    const themes = TRADES_RAILS.filter((r) => r.group === "theme");
+    const worlds = TRADES_RAILS.filter((r) => r.group === "world");
+    const mightNotKnow = filterByPath(BROWSE_MIGHT_NOT_KNOW, "trades");
+    return [
+      // Joshua's curated row (11 Sept 2026) leads.
+      { id: "trades", kind: "posters", title: "Skilled Trades", careers: BROWSE_TRADES, peek: true },
+      ...themes.map((r): BrowseRow => ({ id: r.id, kind: "posters", title: r.title, careers: r.careers, preview: BUILT_RAIL_PREVIEW })),
+      ...(mightNotKnow.length >= ROW_FLOOR ? [{ id: "new", kind: "posters", title: "Careers You Might Not Know", careers: mightNotKnow } as BrowseRow] : []),
+      videos,
+      ...worlds.map((r): BrowseRow => ({ id: r.id, kind: "posters", title: r.title, careers: r.careers, preview: BUILT_RAIL_PREVIEW })),
+    ];
+  }
+
+  // Rail order + content per Joshua (2026-08-21): merged recommended rail,
+  // then Tech, Top 10 trending, Might Not Know, Skilled Trades (added
+  // 11 Sept 2026), Videos, Public Service (added 21 Sept 2026), Typical
+  // Pay, Arts. Rank = the slot's place in Joshua's list, fixed (see
+  // TrendingRail).
+  const posters = (id: string, title: string, careers: CatalogCareer[], peek = false): BrowseRow => ({ id, kind: "posters", title, careers, peek });
+  return [
+    posters("liked", "Because you liked Business & Finance", BROWSE_BECAUSE_LIKED, true),
+    posters("tech", "Tech & Engineering", BROWSE_WORLD_RAIL),
+    { id: "trending", kind: "trending", title: TRENDING_TITLE, careers: [], ranked: BROWSE_TRENDING_SLOTS.map((slot, index) => ({ slot, rank: index + 1 })) },
+    posters("new", "Careers You Might Not Know", BROWSE_MIGHT_NOT_KNOW),
+    // Trades row (Slack, 11 Sept 2026): its own row, directly above Typical
+    // Pay per the user, and trades are also mixed into the rows above so
+    // they read as equal to everything else on the page.
+    posters("trades", "Skilled Trades", BROWSE_TRADES),
+    videos,
+    // Public Service (Slack, 21 Sept 2026): its own row, directly above
+    // Typical Pay, not folded into it -- these are civic/public-sector
+    // careers, not a pay tier.
+    posters("public", "Public Service Careers", BROWSE_PUBLIC_SERVICE),
+    posters("pay", "Typical Pay: $100K +", BROWSE_TYPICAL_PAY),
+    // Arts, Media & Sport: one row, at the bottom of the page only (direct
+    // feedback, 19 Sept 2026: no second appearance near the top, no "New
+    // in"). Its lead six and what it leaves out: see BROWSE_ARTS in catalog.ts.
+    posters("arts", "Arts, Media & Sport", BROWSE_ARTS),
+  ];
+}
+
+function BrowseFace({ query, searchActive, onQuery, row, onRow, path, onPath }: { query: string; /** search is open: the search panel replaces every row */ searchActive: boolean; onQuery: (q: string) => void; /** a row opened as a grid (?row=), and how to open or close one */ row: string; onRow: (id: string | null) => void; /** the Skip college switch */ path: PathChoice; onPath: (next: PathChoice) => void }) {
   // The rows always show their own curated order now: filters live inside
   // search (SearchPanel), and every row is hidden while search is open.
-  const becauseLiked = BROWSE_BECAUSE_LIKED;
-  const trades = BROWSE_TRADES;
-  // Rank = the slot's place in Joshua's list, fixed (see TrendingRail).
-  const trending = BROWSE_TRENDING_SLOTS.map((slot, index) => ({ slot, rank: index + 1 }));
-  const worldRail = BROWSE_WORLD_RAIL;
-  const mightNotKnow = BROWSE_MIGHT_NOT_KNOW;
-  const typicalPay = BROWSE_TYPICAL_PAY;
-  const publicService = BROWSE_PUBLIC_SERVICE;
-  // Arts, Media & Sport: one row, at the bottom of the page only (direct
-  // feedback, 19 Sept 2026: no second appearance near the top, no "New in").
-  // Its lead six and what it leaves out: see BROWSE_ARTS in catalog.ts.
-  const arts = BROWSE_ARTS;
   // Every row, by id, so ?row= can open one as a grid.
-  const rows: { id: string; title: string; careers: CatalogCareer[]; slots?: TrendingSlot[] }[] = [
-    { id: "liked", title: "Because you liked Business & Finance", careers: becauseLiked },
-    { id: "tech", title: "Tech & Engineering", careers: worldRail },
-    { id: "trending", title: TRENDING_TITLE, careers: [], slots: BROWSE_TRENDING_SLOTS },
-    { id: "new", title: "Careers You Might Not Know", careers: mightNotKnow },
-    { id: "trades", title: "Skilled Trades", careers: trades },
-    { id: "public", title: "Public Service Careers", careers: publicService },
-    { id: "pay", title: "Typical Pay: $100K +", careers: typicalPay },
-    { id: "arts", title: "Arts, Media & Sport", careers: arts },
-  ];
+  const rows = browseRows(path);
   const opened = rows.find((r) => r.id === row) ?? null;
 
   // data-search-zone: a click inside the search area never counts as
   // clicking away from search (see ExploreLab's outside-click close).
   if (searchActive) return <div data-search-zone className="w-full"><SearchPanel query={query} onQuery={onQuery} /></div>;
   if (opened) {
-    return <SearchResults query="" heading={opened.title} hits={opened.careers.map((career) => ({ career, score: 0 }))} slots={opened.slots} onQuery={onQuery} onBack={() => onRow(null)} />;
+    const slots = opened.kind === "trending" ? opened.ranked.map((r) => r.slot) : undefined;
+    return <SearchResults query="" heading={opened.title} hits={opened.careers.map((career) => ({ career, score: 0 }))} slots={slots} onQuery={onQuery} onBack={() => onRow(null)} />;
   }
 
   return (
     <>
-      {/* Rail order + content per Joshua (2026-08-21): merged recommended
-         rail, then Tech, Top 10 trending, Might Not Know, Skilled Trades
-         (added 11 Sept 2026), Videos, Public Service (added 21 Sept 2026),
-         Typical Pay, Arts. `contents` keeps this div out of main's flex
-         layout (the rails still lay out as if they were main's own direct
-         children) while giving seq-reveal something to stagger the rails'
-         entrance from off of. */}
-      <div className="seq-reveal contents">
-        {becauseLiked.length > 0 && (
-          <Rail title="Because you liked Business & Finance" count={becauseLiked.length} onViewAll={() => onRow("liked")} peek>
-            <PosterRail careers={becauseLiked} />
-          </Rail>
-        )}
-
-        {worldRail.length > 0 && (
-          <Rail title="Tech & Engineering" count={worldRail.length} onViewAll={() => onRow("tech")}>
-            <PosterRail careers={worldRail} />
-          </Rail>
-        )}
-
-        {trending.length > 0 && (
-          <TrendingRail slots={trending} onViewAll={() => onRow("trending")} />
-        )}
-
-        {mightNotKnow.length > 0 && (
-          <Rail title="Careers You Might Not Know" count={mightNotKnow.length} onViewAll={() => onRow("new")}>
-            <PosterRail careers={mightNotKnow} />
-          </Rail>
-        )}
-
-        {/* Trades row (Slack, 11 Sept 2026): its own row, directly above
-           Typical Pay per the user, and trades are also mixed into the rows
-           above so they read as equal to everything else on the page. */}
-        {trades.length > 0 && (
-          <Rail title="Skilled Trades" count={trades.length} onViewAll={() => onRow("trades")}>
-            <PosterRail careers={trades} />
-          </Rail>
-        )}
-
-        {/* CEO (4 Sept 2026): real clips from inside partner companies.
-           Moved directly above Typical Pay (Joshua, 11 Sept 2026), in the
-           Apple TV lean-back card shape; the lead card plays muted. */}
-        <Rail title="Videos Inside Leading Companies">
-          <CompanyVideoCards />
-        </Rail>
-
-        {/* Public Service (Slack, 21 Sept 2026): its own row, directly above
-           Typical Pay, not folded into it -- these are civic/public-sector
-           careers, not a pay tier. */}
-        {publicService.length > 0 && (
-          <Rail title="Public Service Careers" count={publicService.length} onViewAll={() => onRow("public")}>
-            <PosterRail careers={publicService} />
-          </Rail>
-        )}
-
-        {typicalPay.length > 0 && (
-          <Rail title="Typical Pay: $100K +" count={typicalPay.length} onViewAll={() => onRow("pay")}>
-            <PosterRail careers={typicalPay} />
-          </Rail>
-        )}
-        {arts.length > 0 && (
-          <Rail title="Arts, Media & Sport" count={arts.length} onViewAll={() => onRow("arts")}>
-            <PosterRail careers={arts} />
-          </Rail>
-        )}
+      <SkipCollegeSwitch on={path === "trades"} onChange={(on) => onPath(on ? "trades" : "all")} />
+      {/* `contents` keeps this div out of main's flex layout (the rails
+         still lay out as if they were main's own direct children) while
+         giving seq-reveal something to stagger the rails' entrance from off
+         of. Keyed by path so a switch replays that entrance: the page
+         visibly rebuilds instead of silently swapping posters. */}
+      <div key={path} className="seq-reveal contents">
+        {rows.map((r) => {
+          if (r.kind === "videos") return <Rail key={r.id} title={r.title}><CompanyVideoCards /></Rail>;
+          if (r.kind === "trending") return <TrendingRail key={r.id} slots={r.ranked} onViewAll={() => onRow(r.id)} />;
+          return (
+            <Rail key={r.id} title={r.title} count={r.careers.length} onViewAll={() => onRow(r.id)} peek={r.peek}>
+              <PosterRail careers={r.preview ? r.careers.slice(0, r.preview) : r.careers} />
+            </Rail>
+          );
+        })}
       </div>
     </>
   );
@@ -1934,8 +2015,32 @@ function DesktopSearchToggle({
   );
 }
 
-export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", live = false }: { initialTab: "foryou" | "browse"; initialQuery?: string; /** a Browse row opened as a grid (?row=) */ initialRow?: string; /** the live /explore route: no lab dock, links stay on the live routes */ live?: boolean }) {
+export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", initialPath = "all", live = false }: { initialTab: "foryou" | "browse"; initialQuery?: string; /** a Browse row opened as a grid (?row=) */ initialRow?: string; /** the Skip college switch (?path=trades) */ initialPath?: PathChoice; /** the live /explore route: no lab dock, links stay on the live routes */ live?: boolean }) {
   const router = useRouter();
+  const base = live ? "/explore" : "/actions-lab/explore";
+  const [path, setPath] = useState<PathChoice>(initialPath);
+  // A plain /explore visit lands on the path the student picked last time.
+  // Only then: a URL that names a path or a row is someone's exact view
+  // and must open as written. Layout effect so the stored path paints
+  // first, with no All-then-Trades flash.
+  useLayoutEffect(() => {
+    if (initialPath !== "all" || initialRow) return;
+    try {
+      // ?path=all spelled out is also an exact view (a shared link), not a plain visit.
+      if (new URLSearchParams(window.location.search).has("path")) return;
+      const stored = window.localStorage.getItem(PATH_STORAGE_KEY) ?? undefined;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time restore from localStorage, which the server render cannot read
+      if (isPathChoice(stored) && stored !== "all") setPath(stored);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
+  }, []);
+  const choosePath = useCallback((next: PathChoice) => {
+    setPath(next);
+    try { window.localStorage.setItem(PATH_STORAGE_KEY, next); } catch {}
+    // Native replaceState (Next syncs it into useSearchParams) instead of
+    // router.replace: the rails re-render in place, no server round trip.
+    window.history.replaceState(null, "", next === "all" ? base : `${base}?path=${next}`);
+  }, [base]);
   const [tab, setTab] = useState<"foryou" | "browse">(initialTab);
   // ?q= from the sitewide search lands here with the box already open
   const [searchOpen, setSearchOpen] = useState(initialQuery.length > 0);
@@ -2214,11 +2319,11 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
         {tab === "browse" && searchOpen && <SearchBar query={query} setQuery={setQuery} onClose={closeSearch} />}
 
         {tab === "browse" ? (
-          <BrowseFace query={query} searchActive={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} row={initialRow}
+          <BrowseFace query={query} searchActive={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} row={initialRow} path={path} onPath={choosePath}
             onRow={(id) => {
               // The row's grid is its own URL, so the browser's Back returns to the rows.
-              const base = live ? "/explore" : "/actions-lab/explore";
-              if (id) { router.push(`${base}?row=${id}`); window.scrollTo({ top: 0, behavior: "smooth" }); }
+              // It carries the path too, so the grid shows that path's row.
+              if (id) { router.push(`${base}?row=${id}${path === "all" ? "" : `&path=${path}`}`); window.scrollTo({ top: 0, behavior: "smooth" }); }
               else if (window.history.length > 1) router.back();
               else router.push(base);
             }} />
