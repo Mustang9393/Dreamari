@@ -887,3 +887,15 @@
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 > .glossary-map-rung:not(.is-inspected) > .glossary-map-plate { grid-area: plate !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 > .glossary-map-rung:not(.is-inspected) > button { grid-area: badge !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 > .glossary-map-rung:not(.is-inspected) > .glossary-map-rung-copy { grid-area: copy !important; display: flex !important; flex-direction: column !important; gap: 2px !important; min-width: 0; }
+/* The teach card's term underline follows the word, not its own viewBox:
+   width 0 keeps the SVG out of the wrapper's sizing, min-width 100% then
+   fills it. A short word ("App") used to sit centred inside the SVG's 120px,
+   so it started right of the definition under it (17 Oct 2026). */
+.glossary-game-lab .glossary-flashcard-term > svg { width: 0 !important; min-width: 100% !important; }
+/* Compact Drift map (phones): two small cards per row again, beside the
+   open card's full row, so a page holds every level instead of two
+   (17 Oct 2026; density first). The small card keeps its square icon and a
+   whole-word title (above), and an odd last card is centred. This outranks
+   the living-worlds rule that made every compact row span the grid. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"][data-map-compact] .glossary-level-map-scroll > .glossary-map-rung.glossary-map-rung:not(.is-inspected) { grid-column: auto !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"][data-map-compact] .glossary-level-map-scroll > .glossary-map-rung.glossary-map-rung:not(.is-inspected):last-child:nth-child(even) { grid-column: 1 / -1 !important; justify-self: center !important; width: calc(50% - 4px) !important; }

@@ -3192,7 +3192,12 @@ export function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { c
   // the scrolling the student flow deliberately avoids. Other maps stay bespoke.
   const smallViewport = useSyncExternalStore(subscribeCompactMap, compactMapSnapshot, serverCompactMapSnapshot);
   const compact = career.industrySlug !== "finance" && smallViewport;
-  const pageSize = compact ? 2 : atmosphere === "v1" ? 6 : 4;
+  // Phones keep a full chapter per page (17 Oct 2026, density first): the
+  // Drift map lays two small cards per row beside the open card's full row,
+  // and Signal's list fits four. Only a short, wide window (a laptop under
+  // 650px tall) drops to two per page so nothing scrolls.
+  const shortWideWindow = compact && typeof window !== "undefined" && !window.matchMedia("(max-width: 600px)").matches;
+  const pageSize = shortWideWindow ? 2 : atmosphere === "v1" ? 6 : 4;
   // A chapter is a composed scene, not a long scrolling canvas. Paging
   // preserves every level and its locked state on phones and short laptops.
   // It opens on the chapter that holds the level being played.
