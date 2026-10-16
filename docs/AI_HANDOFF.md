@@ -1,3 +1,11 @@
+## 2026-10-16: Living worlds and three art packs, release verification and coordination
+
+**Why (Chandu):** "Push when done please. Claude is working on some stuff too" supersedes the earlier hold. Working only in `/Users/chandump/dreamari-glossary-oct08`, branch `codex/glossary-living-worlds`; Claude's other checkout and dirty files were inspected read-only and left untouched. No direct Claude messaging channel is exposed. Coordinate through this shared handoff and Git history: merged `origin/main` at `7e5aae21`, preserving Claude's generator, shorter copy, blueprint, spec, QA and shuffled-bank changes. The only conflict was this additive log; both sides were kept. Future edits should fetch this release before touching shared glossary files.
+
+- Final merged production build, reactions, 190-screen/22-level blueprint checks, scene contracts, 72 export/hash checks and 508-token validation pass. Touched-file ESLint: zero errors, three existing engine warnings.
+- Recaptured the full 64-state laptop/phone question/map matrix after merging. All checked page and internal map overflow values are zero, with map actions visible. Fixed the compact Drift secondary row to span the grid. Twelve art captures and source/export contact sheets were reviewed. See `docs/reference/glossary-living-worlds-review-2026-10-16.md` for evidence and limitations.
+- No Finance assets, hub release flags or additional content edits in this release. Keep the original art/source PNGs and screenshots local under `output/glossary-living-worlds/`, not in Git. No force push, no changes to Claude's working files. Next: normal fast-forward push to main, then verify the matching production deployment.
+
 ## 2026-10-16: Nursing Level 1 art pack, held for review
 
 **Why (Chandu):** Medical Terms needs consistent Drift/Signal art before release, while later lessons keep teaching with words. Added `nursing-oct17`: ten term illustrations, two welcome scenes, twenty-four WebPs, registered to `registered-nurse` and `WELCOME_ART.nursing`. No Finance, authored content, game logic or release-flag changes. Not pushed.

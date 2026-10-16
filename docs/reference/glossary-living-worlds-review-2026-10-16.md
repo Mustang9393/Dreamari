@@ -1,6 +1,6 @@
 # Living worlds review
 
-Scope: the shared scenery and the Software, Aviation and Nursing Level 1 art packs. Local review branch only. Content, question mechanics, scoring, release flags and Finance art are unchanged.
+Scope: the shared scenery and the Software, Aviation and Nursing Level 1 art packs. Chandu subsequently authorized pushing. This work does not change content, question mechanics, scoring, release flags or Finance art. Claude's subsequent content changes from `7e5aae21` were merged intact before release verification.
 
 ## Evidence before changes
 
@@ -22,3 +22,9 @@ Captures are under `output/glossary-living-worlds/before/`:
 ## Verification record
 
 The final handoff records checks and screenshot coverage. Captures are local review artefacts, not served app assets. The code budget is twelve extra decorative nodes per non-Finance scene, no new event listeners, timers, raster background downloads or canvas. Real Windows/Chromebook GPU frame-time testing is not available on this Mac.
+
+- Production build: `next build --webpack`, including TypeScript and 37 static pages, passes after merging Claude's changes.
+- Reactions, 190 scored screens across 22 generated levels, scene contracts, 72 image hashes/alpha/byte budgets and all 508 tokens pass. Touched-file ESLint has zero errors and three existing engine warnings.
+- Recaptured all 64 question/map states after the merge: Software and Nursing, Levels 1–4, Drift and Signal, at 1280×800 and 375×812. All checked page/internal map overflow values are zero; every selected map Play action is visible. Reviewed the eight layout contact sheets. The compact Drift secondary map row now spans the grid instead of squeezing its title into half a row.
+- Twelve welcome/first-teach art captures cover all three industries in both themes. Flip-to-example/back, later-level words-only cards, direct wrong-to-right correction, and the Finance bypass were also checked. Original sources and rejected generations remain local; only 2,231,694 bytes of validated WebPs are served.
+- Release scope is code and assets only. The hub release flags remain unchanged. No new per-level background assets are required.
