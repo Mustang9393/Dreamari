@@ -1,3 +1,11 @@
+## 2026-10-17: "5 terms unlocked" cards no longer crop the term names
+
+**Why (Chandu):** "Terms are getting cropped" (screenshot of the live Medical Terms unlocked screen on a wide laptop: "Patient", "Vital Signs", "Chart", "Dose" and "Triage" cut in half at the card bottoms).
+
+- The cards have a fixed height, centre their children and hide overflow, while five theme and size rules each fixed the picture's height (54 to 130px). Picture + number + name ran taller than the card, so the name was pushed out of the bottom.
+- Now one layout for every theme and size: a grid where the name always has its own row and the picture takes only what is left (glossary-levels.css). The corner number sits in a 20px top padding; the short-screen rules (4px padding, 60 and 70px cards) still win. On screens 680px or taller the cards grow to clamp(100px, 15dvh, 136px) so the pictures keep their size.
+- Checked with a per-card measurement (name inside the card, not clamped) at 1860x930, 1440x900, 1280x720, 1000x480 and 375x812 in Drift and Signal, Medical and Tech: no name cut anywhere; pictures 52 to 72px on laptops.
+
 ## 2026-10-17: new Play tab covers for the four glossary games
 
 **Why (Chandu):** "Use these for the glossary thumbnail in play tab." Four new covers in a new style: three glossy objects of the subject on a night cloud floor, no Dreamy and no term cards (Finance: calculator, chart, coins; Medical: stethoscope, cross, clipboard; Flight: jet, pilot's cap, tools; Tech: laptop, shield, servers).

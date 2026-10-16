@@ -986,3 +986,23 @@ html.light .glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > * { margin-inline: auto; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-welcome-scene[data-atmosphere] .glossary-welcome-cta { width: 100% !important; }
 }
+
+/* "5 terms unlocked" cards (17 Oct 2026, Chandu: "Terms are getting
+   cropped"). Each card has a fixed height, centres its children and hides
+   overflow, while five theme and size rules each gave the picture its own
+   fixed height (54 to 130px). Whenever picture + number + name ran taller
+   than the card, the name was pushed out of the bottom ("Patient" showed
+   only its top half on a 1860px laptop). Now one layout for every theme
+   and size: the number sits in the top padding, the name always gets its
+   own row, and the picture takes only the space that is left. */
+.glossary-game-shell.glossary-game-lab .glossary-unlock-relic.glossary-unlock-relic:has(> .glossary-unlock-relic-art) { display: grid !important; grid-template-rows: minmax(0, 1fr) auto !important; justify-items: center; align-items: center; row-gap: 3px; }
+/* Room for the corner number; the short-screen rules (4px) still win. */
+.glossary-game-lab .glossary-unlock-relic.glossary-unlock-relic { padding: 20px 8px 7px; }
+/* Where the screen is tall enough, the cards grow so the picture keeps its
+   size now that the name has a row of its own. */
+@media (min-height: 680px) and (min-width: 641px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-unlock-gallery.glossary-unlock-gallery { grid-template-rows: repeat(3, clamp(100px, calc(15dvh / var(--vz, 1)), 136px)); }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell :is(.glossary-unlock-relic, .glossary-unlock-gallery-dreamy).glossary-unlock-relic, .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-unlock-gallery-dreamy.glossary-unlock-gallery-dreamy { height: clamp(100px, calc(15dvh / var(--vz, 1)), 136px); }
+}
+.glossary-game-shell.glossary-game-lab.glossary-game-lab .glossary-unlock-relic.glossary-unlock-relic > img.glossary-unlock-relic-art.glossary-unlock-relic-art { width: 100% !important; height: 100% !important; min-height: 0 !important; max-height: none !important; object-fit: contain !important; }
+.glossary-game-shell.glossary-game-lab.glossary-game-lab .glossary-unlock-relic.glossary-unlock-relic > figcaption { align-self: end; line-height: 1.2 !important; padding-bottom: 1px; }
