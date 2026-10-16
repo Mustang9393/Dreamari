@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Dreamari Glossary Games: Scaling SOP for Usman and Codex</title>
+<title>Dreamari Glossary Games: Master SOP and Prompts for Usman and Codex</title>
 <style>
   body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; line-height: 1.45; color: #111; }
   h1 { font-size: 22pt; margin: 0 0 6px; }
@@ -17,25 +17,25 @@
 </head>
 <body>
 
-<h1>Dreamari Glossary Games: Scaling SOP for Usman and Codex</h1>
-<p><i>16 October 2026. One document to scale the glossary games from four industries to fifty: the rules (Joshua's), what is built and verified today, the prompts an agent pastes to create a game, and the prompts Codex pastes to generate every image. Repo copy: docs/reference/glossary-scaling-sop-usman-2026-10-16.html. The locked engineering spec is docs/handoff/specs/glossary-system.md. Joshua's plan in full is Appendix A of this document.</i></p>
+<h1>Dreamari Glossary Games: Master SOP and Prompts for Usman and Codex</h1>
+<p><i>17 October 2026. One document to scale the glossary games from four industries to fifty: the rules (Joshua's), what is built and verified, the prompts an agent pastes to create a game, and the prompts Codex pastes to generate every image. Repo copies: docs/reference/glossary-scaling-sop-usman-2026-10-16.html and the same text as docs/reference/glossary-scaling-sop-usman-2026-10-16.md. The locked engineering spec is docs/handoff/specs/glossary-system.md. Joshua's plan in full is Appendix A of this document. The separate, self-contained Codex prompt for the three Play tab games is docs/reference/codex-prompt-glossary-art-2026-10-16.md and its own Google Doc.</i></p>
 
-<h2>0. Readiness, checked 16 October 2026</h2>
+<h2>0. Readiness, checked 17 October 2026</h2>
 <table>
 <tr><th>Check</th><th>Result</th></tr>
-<tr><td>Live on main</td><td>Everything in this document is on main (17 Oct 2026). Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's thumbnails; Next level keeps the student's theme.</td></tr>
-<tr><td>Type check, lint</td><td>tsc clean. ESLint: no errors (three pre-existing warnings).</td></tr>
-<tr><td>Blueprint QA script</td><td>All four generated industries pass: seven questions plus a Power Play per level, no three of one mechanic in a row, every term credited twice, no answer leakage, no situation asked twice, all four recipes exercised.</td></tr>
-<tr><td>Validator negative test</td><td>A deliberately broken blueprint (bad slug, unknown world, definition saying its word, 14-word situation, 8-word cue, example without the anchor, unknown confusion, numbers without math) is refused with eleven specific reasons and does not build.</td></tr>
+<tr><td>Live on main</td><td>Everything in this document is on main (commit eb418ef7). Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's thumbnails; Next level keeps the student's theme; Dreamy's speech bubble wraps on whole words at phone width.</td></tr>
+<tr><td>Type check, lint</td><td>tsc clean. ESLint: no errors in the glossary code (two pre-existing unescaped-entity errors live in src/app/gate/page.tsx).</td></tr>
+<tr><td>Blueprint QA script</td><td>All generated industries pass: seven questions plus a Power Play per level, no three of one mechanic in a row, every term credited twice, no answer leakage, no situation asked twice, all four recipes exercised.</td></tr>
+<tr><td>Validator negative test</td><td>A deliberately broken blueprint (bad slug, unknown world, definition saying its word, 14-word situation, 8-word cue, example without the anchor, unknown confusion, numbers without math) is refused with eleven specific reasons and does not build. It is also a live specimen in the Component Lab.</td></tr>
 <tr><td>Dreamy reactions QA</td><td>Passes: twelve Drift poses, four Signal reactions, asset budget, silhouettes.</td></tr>
 <tr><td>Walkthroughs</td><td>Nursing Level 1 in Drift and Software Level 5 in Signal played end to end with Skip (welcome, cards, seven questions, streak, Power Play, Complete, next level) with no console errors from the game.</td></tr>
 <tr><td>Component Lab</td><td>"Glossary game, live engine" documents every piece in both themes with every state, the edge cases (22-character term, acronym, 120-character definition, 72-character situation, two-word options, long feedback) and the error state (a broken blueprint through the validator, the unknown-route 404, the hub release list).</td></tr>
 <tr><td>Design systems</td><td>All fifteen career worlds have a design system row; a blueprint naming any world works.</td></tr>
-<tr><td>Routes</td><td>/play/glossary/&lt;industry&gt; and /play/glossary/&lt;career&gt; resolve; /play-tools/glossary-qa lists every registered glossary (hamburger menu, Glossary QA).</td></tr>
+<tr><td>Routes</td><td>/play/glossary/&lt;industry&gt; and /play/glossary/&lt;career&gt; resolve; /play-tools/glossary-qa lists every registered glossary (hamburger menu, Glossary QA). Unknown slugs 404.</td></tr>
 <tr><td>Hub gating</td><td>Only finance is released; generated industries play by route and from the QA page. Release is one slug in GLOSSARY_HUB_RELEASED.</td></tr>
 <tr><td>Demo flags</td><td>Every demo-only piece is tagged DEMO-ONLY in its own comment (blueprints, QA page, release list, Skip).</td></tr>
 <tr><td>Built so far</td><td>Finance (Joshua's, 4 of 20 levels). The three other Play tab cards are complete at six playable levels each: Software Engineering (Tech Terms), Flight Operations (Flight Terms), Nursing (Medical Terms). Culinary Arts has four (not on the hub).</td></tr>
-<tr><td>Not yet</td><td>No generated industry has its Level 1 term art or welcome illustration (Codex, section 6). No plates, panoramas or silhouettes registered (optional). Phone-width and light-mode passes on generated industries. Levels 5 and 6 for Culinary.</td></tr>
+<tr><td>Not yet</td><td>No generated industry has its Level 1 term art or welcome illustration (Codex, section 6 and the separate prompt). No plates, panoramas or silhouettes registered (optional). Light-mode pass on generated industries. Levels 5 and 6 for Culinary.</td></tr>
 </table>
 
 <h2>1. Who does what</h2>
@@ -43,7 +43,7 @@
 <tr><th>Role</th><th>Owns</th><th>Pastes</th></tr>
 <tr><td>Joshua</td><td>The rules: the Master Scaling Plan. Finance never changes.</td><td>Nothing; reviews.</td></tr>
 <tr><td>Usman's agent (Claude Code or Codex in the repo)</td><td>Blueprints: one file per industry, registered. Levels 5 and 6 later.</td><td>Prompt A, Prompt B.</td></tr>
-<tr><td>Codex (image generation)</td><td>Every image: Level 1 term art and the welcome illustration for each industry (required), plates, world panoramas, silhouettes (optional), Dreamy animation.</td><td>Prompt D and the section 6 prompts.</td></tr>
+<tr><td>Codex (image generation)</td><td>Every image: Level 1 term art and the welcome illustration for each industry (required), plates, world panoramas, silhouettes (optional), Dreamy animation.</td><td>Prompt D and the section 6 prompts; for the three Play tab games, the separate Codex prompt document.</td></tr>
 <tr><td>Chandu</td><td>Browser QA on the Glossary QA page; release to the hub (Prompt C).</td><td>Prompt C.</td></tr>
 </table>
 
@@ -112,10 +112,10 @@ Done looks like: the blueprint file exists and validates, the industry appears o
 TASK: turn the roadmap Levels 5 and 6 of src/components/glossary/blueprints/[slug].ts into playable levels. Keep the five words each level already lists unless one cannot be written within the rules; then swap it and say why. Both levels are Advanced and use the decide recipe by default, so every term needs definition, example, cue, icon, situation and confusion. Follow the copy rules exactly as in Prompt A. Run the three checks, open ?lesson=5&amp;q=1 and ?lesson=6&amp;q=1 in both themes, screenshot, write the handoff entry, commit, do not push.</pre>
 
 <h2>5. Prompt C: release an industry to the Play hub (Chandu, after QA)</h2>
-<pre>In the Dreamari repo: add "[slug]" to GLOSSARY_HUB_RELEASED in src/components/glossary/data.ts. If the hub has no card for it, add one to GLOSSARY_GAMES in src/components/play/games.ts keyed to its example career slug (or the industry slug when no catalog career owns it) with title "[Subject] Terms" and sub "Learn key [subject] terms". Confirm Codex has registered its Level 1 term art (termArt.ts) and welcome illustration (welcomeArt.ts). Run npx tsc --noEmit, open /play and confirm the card is playable, commit with the why, push to main.</pre>
+<pre>In the Dreamari repo: add "[slug]" to GLOSSARY_HUB_RELEASED in src/components/glossary/data.ts. If the hub has no card for it, add one to GLOSSARY_GAMES in src/components/play/games.ts keyed to its example career slug (or the industry slug when no catalog career owns it) with title "[Subject] Terms", sub "Learn key [subject] terms" and a cover (a 1400 by 788 WebP thumbnail: Dreamy over a fan of the subject's term cards, matching the four on the hub). Confirm Codex has registered its Level 1 term art (termArt.ts) and welcome illustration (welcomeArt.ts). Run npx tsc --noEmit, open /play and confirm the card is playable, commit with the why, push to main.</pre>
 
 <h2>6. Images (Codex)</h2>
-<p>Codex generates every image. Nothing in Usman's game-creation work waits on images: a game plays with words the moment it is registered. Required before release: 6.1 and 6.2. Optional, shared polish: 6.3 to 6.5. 6.6 is animation.</p>
+<p>Codex generates every image. Nothing in Usman's game-creation work waits on images: a game plays with words the moment it is registered. Required before release: 6.1 and 6.2. Optional, shared polish: 6.3 to 6.5. 6.6 is animation. For the three Play tab games that exist today, use the separate Codex prompt document, which carries every term and anchor already filled in.</p>
 
 <h3>6.1 Level 1 term art (required: 5 terms, both themes)</h3>
 <p>The repo has a reproducible pipeline for this: docs/handoff/play-sop/12-glossary-art-pipeline.md and scripts/glossary-art.mjs. The input is a manifest JSON; the model is docs/reference/glossary-finance-art-oct13.json. The script prints the exact prompts, then packages, validates and previews the finished images. Flow:</p>
@@ -176,6 +176,9 @@ Match the attached panorama's palette, pixel density and night-to-dusk mood exac
 
 <h3>6.6 Dreamy expressions (animation)</h3>
 <p>Chandu's "Dream Expressions V2" pack (19 Drift stills) is at public/images/dreamy/expressions-v2/01.webp to 19.webp. Four are used statically on the Drift Levels map open card: 06 (books, ready to play), 18 (arrow, playing now), 12 (graduation cap, complete), 17 (alert, locked). Animate first, because the game has a slot for each: 10 (green check) for a right answer, 09 (red X) and 14 ("hmm") for a wrong one, 16 (confetti) and 12 for mastery and the complete screen, 15 (glasses and clipboard) for review and hints, 08 (reading) for the teach cards, 18 (arrow) for Next. Deliver the four-frame WebP atlas format described in docs/reference/dreamy-drift-animated-oct15-v2.json so dreamyReactions.ts can take them without engine changes. Signal needs pixel versions drawn to the Signal Dreamy rig.</p>
+
+<h3>6.7 Hub thumbnails (one per released industry)</h3>
+<p>The Play tab's glossary cards use a landscape thumbnail: Dreamy over a fan of the subject's term cards on a dark sky, 1400 by 788 WebP, under 130 KB. The four on the hub (Finance, Medical, Flight, Tech) are Chandu's and are the reference. The shelf card is portrait at rest and 16:9 when active, so keep Dreamy and the centre card in the middle third. File: public/images/app/glossary-&lt;subject&gt;-thumb-&lt;mmmdd&gt;.webp, set as cover on the card in GLOSSARY_GAMES.</p>
 
 <h2>7. Prompt D: Codex, generate and register the art for industry X</h2>
 <pre>You are working in the Dreamari prototype repo. Pull origin/main. Read docs/handoff/play-sop/12-glossary-art-pipeline.md and section 6 of docs/reference/glossary-scaling-sop-usman-2026-10-16.html.
@@ -261,6 +264,8 @@ Rules that have shipped real bugs: one image per call; never chain off the last 
 <table>
 <tr><th>Path</th><th>What</th></tr>
 <tr><td>docs/handoff/specs/glossary-system.md</td><td>The locked spec.</td></tr>
+<tr><td>docs/reference/glossary-scaling-sop-usman-2026-10-16.html, .md</td><td>This document, HTML and markdown.</td></tr>
+<tr><td>docs/reference/codex-prompt-glossary-art-2026-10-16.md</td><td>The separate Codex prompt for the three Play tab games, every term and anchor filled in.</td></tr>
 <tr><td>docs/reference/glossary-scaling-plan-handover-2026-10-16.html</td><td>Joshua's plan in full with our mapping, and the image brief in detail.</td></tr>
 <tr><td>docs/handoff/play-sop/12-glossary-art-pipeline.md, scripts/glossary-art.mjs</td><td>The term art pipeline: manifest in, prompts out, packaging, validation, preview.</td></tr>
 <tr><td>docs/reference/glossary-finance-art-oct13.json</td><td>The model manifest with the finance briefs.</td></tr>
