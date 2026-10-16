@@ -1435,7 +1435,8 @@ function TypeTermCard({ question, onAnswer, onReset }: { question: Extract<Gloss
   return (
     <div className="glossary-type-term flex w-full flex-col gap-[var(--space-4)]">
       <div className="flex flex-col gap-[var(--space-2)]">
-        <div className="flex flex-wrap gap-[var(--space-2)]">
+        {/* Centred like every other word bank (Power Play, sort tray), 17 Oct 2026. */}
+        <div className="glossary-type-bank flex flex-wrap justify-center gap-[var(--space-2)]">
           {/* Real buttons, not decorative pills -- they look tappable (a
              rounded, bordered chip), so they need to actually be tappable.
              Picking one just fills the same input Check Answer already
@@ -1929,7 +1930,7 @@ function SortBucketsCard({ question, onAnswer, onReset, hintSlot }: { question: 
         <span>{dragging}</span>
       </div>, document.body) : null}
       {!allPlaced && (
-        <div className="glossary-sort-tray flex flex-wrap gap-[var(--space-2)]">
+        <div className="glossary-sort-tray flex flex-wrap gap-[var(--space-2)]" data-items={items.length} style={{ ["--tray-cols" as string]: trayColumns(items.length, question.buckets.length) }}>
           {items
             .filter((item) => !placed[item.text])
             .map((item) => (
@@ -2039,14 +2040,16 @@ function ProfitBuilderCard({ question, onAnswer, onReset, framed = false }: { qu
         const wrong = checked && !correct;
         return (
           <div key={step.order} className="glossary-profit-step flex items-center justify-between gap-[var(--space-3)]">
-            <span className="flex items-center gap-[var(--space-3)] text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+            <span className="glossary-profit-label flex items-center gap-[var(--space-3)] text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
               <span
                 className="flex size-6 flex-none items-center justify-center rounded-full border-[1.5px] text-[12px] font-bold"
                 style={{ borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--muted-foreground)", color: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)" }}
               >
                 {step.order}
               </span>
-              {step.label}
+              {/* An operator never starts a line and "=" never sits alone on one
+                  (17 Oct 2026): the space before each one is non-breaking. */}
+              {step.label.replace(/ ([×−=+])/g, "\u00a0$1")}
             </span>
             <div className="glossary-profit-input flex items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--card)", borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--glass-border)" }}>
               <span style={{ color: "var(--muted-foreground)" }}>$</span>
@@ -2079,6 +2082,19 @@ function ProfitBuilderCard({ question, onAnswer, onReset, framed = false }: { qu
       )}
     </div>
   );
+}
+
+/** Columns for the sort tray, so every token has the same width and the
+ *  rows line up (17 Oct 2026, Chandu: "Alignments are off. Lets make sure
+ *  there is symmetry and proper alignment everywhere"). Prefer the bucket
+ *  count (three or four) when the items divide by it (six items over three buckets sit
+ *  exactly above them), then a count that divides the items, then the one
+ *  whose short last row is fullest; that row is centred by the CSS. Phones
+ *  override to two columns. */
+function trayColumns(items: number, buckets: number): number {
+  if (buckets >= 3 && buckets <= 4 && items % buckets === 0) return buckets;
+  for (const c of [4, 3]) if (items % c === 0) return c;
+  return [4, 3, 2].reduce((best, c) => (items % c > items % best ? c : best), 3);
 }
 
 /** The Power Play word bank in an order that is not the order of the blanks
@@ -2508,7 +2524,10 @@ function FitToScreen({ children, enabled, watch, compact = false }: { children: 
           frame.style.setProperty("--glossary-stage-width", `${Math.round(content.offsetWidth * scale)}px`);
         }
       }
-      setFit((prev) => (Math.abs(prev.scale - scale) > 0.004 || prev.pull !== pull || prev.height !== height ? { scale, pull, height } : prev));
+      // A scaled-down column is laid out wider (see the render), which makes it
+      // shorter, which nudges the next scale up; the 0.01 band stops that loop
+      // from chasing itself.
+      setFit((prev) => (Math.abs(prev.scale - scale) > (prev.scale < 1 && scale < 1 ? 0.01 : 0.004) || prev.pull !== pull || prev.height !== height ? { scale, pull, height } : prev));
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -2528,7 +2547,11 @@ function FitToScreen({ children, enabled, watch, compact = false }: { children: 
   if (!enabled) return <>{children}</>;
   return (
     <div ref={box} className="glossary-fit-box" style={compact && fit.height !== null ? { flex: "none", height: fit.height } : undefined}>
-      <div ref={inner} className="glossary-fit-inner" style={fit.scale !== 1 ? { transform: `scale(${fit.scale})`, marginBottom: compact ? 0 : -fit.pull } : undefined}>{children}</div>
+      {/* Scaled down, the column is laid out 1/scale wider first, so after the
+          scale it lands on the same edges as the HUD and the frame (17 Oct
+          2026, Chandu: "Lets make sure there is symmetry and proper alignment
+          everywhere"). Scaled up, it stays its own width (the width cap above). */}
+      <div ref={inner} className="glossary-fit-inner" style={fit.scale !== 1 ? { transform: `scale(${fit.scale})`, marginBottom: compact ? 0 : -fit.pull, ...(fit.scale < 1 ? { width: `${100 / fit.scale}%`, marginInline: `calc(50% - ${50 / fit.scale}%)` } : null) } : undefined}>{children}</div>
     </div>
   );
 }

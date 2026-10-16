@@ -543,7 +543,10 @@
 /* Dreamy's speech bubble keeps whole words: a short spoken line hyphenated mid-word ("medi-cine") reads as a typo at phone width. Long words still wrap via overflow-wrap. */
 .glossary-game-lab .glossary-speech-bubble { min-width: 0; overflow-wrap: anywhere; hyphens: manual; }
 /* Same for the Power Play paragraph and sort tokens (17 Oct 2026): "cap-tain", "ap-plause" and "boost-ing" showed up at phone width on the new written paragraphs and concept sorts. Whole words; long words still wrap via overflow-wrap. */
-.glossary-game-lab :is(.glossary-power-paragraph, .glossary-sort-token) { hyphens: manual; }
+/* No automatic hyphenation anywhere in the game (17 Oct 2026: "sneak-er",
+   "buy-ing" on phone match tiles). Words wrap whole; only a word longer than
+   its whole tile breaks, via overflow-wrap, without a hyphen. */
+.glossary-game-lab :is(.glossary-power-paragraph, .glossary-sort-token, .glossary-option, .glossary-document-option, .glossary-match-tile, .glossary-match-label, .glossary-sort-bucket, .glossary-word-chip, .glossary-path-option, .glossary-feedback-text, .glossary-scene, .glossary-profit-label) { hyphens: manual !important; }
 .glossary-game-lab :is(.glossary-match-tile, .glossary-sort-token) { white-space: normal; }
 .glossary-game-lab .glossary-match-tile .glossary-match-label { text-wrap: balance; }
 .glossary-game-lab .glossary-word-chip { white-space: nowrap; max-width: 100%; }
@@ -755,3 +758,132 @@
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-compare-card > strong { color: var(--sig-cyan) !important; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-compare-card li { color: var(--sig-text) !important; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-scene-compare-card li::marker { color: var(--sig-gold); }
+
+/* Three-bucket sorts (17 Oct 2026; the generated Software and Aviation
+   levels sort concrete items into three concept buckets). The two-column
+   grid left the third bucket alone on a row, against "keep choices even and
+   symmetric" (Chandu, 9 Oct 2026). Wide screens: three across. Narrow
+   screens: two across with the third bucket the full width under them. */
+@media (min-width: 640px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-qa .glossary-sort-grid[data-buckets="3"],
+  .glossary-game-lab.glossary-game-lab .glossary-sort-grid.glossary-sort-grid.glossary-sort-grid[data-buckets="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 639px) {
+  .glossary-game-lab .glossary-sort-grid.glossary-sort-grid[data-buckets="3"] > :last-child { grid-column: 1 / -1; }
+}
+
+/* Sort tray: equal-width tokens on the column count trayColumns() picks,
+   heights matched per row, a short last row centred (17 Oct 2026). */
+.glossary-game-lab .glossary-sort-buckets .glossary-sort-tray.glossary-sort-tray.glossary-sort-tray,
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-sort-buckets > .glossary-sort-tray.glossary-sort-tray.glossary-sort-tray:first-child { width: 100% !important; max-width: none !important; align-self: stretch !important; display: flex !important; flex-wrap: wrap !important; justify-content: center !important; align-items: stretch !important; gap: var(--space-2) !important; }
+.glossary-game-lab .glossary-sort-buckets .glossary-sort-tray.glossary-sort-tray > .glossary-sort-token.glossary-sort-token.glossary-sort-token,
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-sort-buckets .glossary-sort-tray.glossary-sort-tray > .glossary-sort-token.glossary-sort-token.glossary-sort-token { flex: 0 0 calc((100% - (var(--tray-cols, 3) - 1) * var(--space-2)) / var(--tray-cols, 3)) !important; width: auto !important; max-width: none !important; justify-content: center !important; text-align: center !important; }
+@media (max-width: 639px) {
+  .glossary-game-lab .glossary-sort-buckets .glossary-sort-tray.glossary-sort-tray.glossary-sort-tray { --tray-cols: 2 !important; }
+}
+
+/* Match It Up spans the same column as every other answer block (17 Oct
+   2026, Chandu: "Alignments are off. Lets make sure there is symmetry and
+   proper alignment everywhere"). It used to stop at 680 to 760 px so short
+   words would not stretch, which left its edges inside the bubble's and the
+   progress bar's on wide screens; every other screen (options, sort, select
+   all, cases) already fills the column. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-question-screen.glossary-question-screen:has(.glossary-match-up) { width: 100% !important; max-width: none !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-qa .glossary-match-up.glossary-match-up { max-width: none !important; }
+.glossary-game-lab .glossary-type-term .glossary-type-bank { justify-content: center !important; }
+
+/* Counter badges (sort bucket counts, option keys): the digit sits in the
+   middle of its box. Jersey 20 and the body faces carry different line
+   boxes, so a padded inline box left the digit on the bottom border
+   (17 Oct 2026, Chandu: "The numbers in these boxes are sitting on the
+   borders"). A fixed-height flex box centres the glyph whatever the face. */
+.glossary-game-shell.glossary-game-lab .glossary-sort-count.glossary-sort-count,
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-sort-count.glossary-sort-count {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+  box-sizing: border-box !important; height: 26px !important; min-width: 26px !important; padding: 0 6px !important; line-height: 1 !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-count.glossary-sort-count { padding-top: 2px !important; }
+
+/* Profit Builder steps on phones: the label gets the room, balanced over
+   two lines; the answer box is a fixed, smaller width (17 Oct 2026). */
+@media (max-width: 600px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-profit-step .glossary-profit-input.glossary-profit-input { flex: 0 0 92px !important; width: 92px !important; }
+  .glossary-game-lab .glossary-profit-label { text-wrap: balance; }
+}
+/* Phone match tiles: with whole-word wrapping a cue can need three lines in
+   a half-width tile. The terms on the left are short, so on phones the cue
+   column takes 60% of the row and its label steps down to 14px, which keeps
+   every cue to two lines inside the fixed row (17 Oct 2026). */
+@media (max-width: 600px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen][data-qlayout] .glossary-question-screen .glossary-match-board.glossary-match-board,
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-question-screen .glossary-match-board.glossary-match-board.glossary-match-board { grid-template-columns: minmax(0, .4fr) minmax(0, .6fr) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen][data-qlayout] .glossary-question-screen.glossary-qa .glossary-match-board .glossary-match-right .glossary-match-label.glossary-match-label,
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-question-screen .glossary-match-board .glossary-match-right .glossary-match-label.glossary-match-label.glossary-match-label { font-size: 14px !important; line-height: 1.2 !important; }
+}
+/* One text alignment per match column: a two-line cue is centred like a
+   one-line cue, balanced across its lines (17 Oct 2026). */
+.glossary-game-lab .glossary-match-tile .glossary-match-label { text-align: center; text-wrap: balance; }
+/* A welcome with Dreamy alone (no welcome art yet): the scene box grows to
+   the cloud instead of letting it spill onto the "Level 01" kicker under it
+   on short phone screens (17 Oct 2026). FitToScreen still scales the whole
+   screen if it then runs past the window. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-welcome-world.glossary-welcome-world:has(> .glossary-welcome-cloud.is-alone) { height: auto !important; min-height: 0 !important; }
+
+/* Levels map on phones (17 Oct 2026, Chandu: "Lets make sure there is
+   symmetry and proper alignment everywhere"). Drift: a small level card
+   stacks its plate over its title so the title has the card's full width
+   and never breaks inside a word; an odd last card is centred; the open
+   card is plate on top, then number and copy, its button inside the card.
+   Signal: the open card's plate fills the row and the button its column. */
+@media (max-width: 600px) {
+  .glossary-game-lab .glossary-map-concept-v1 > .glossary-map-rung:not(.is-inspected) { grid-template-columns: 40px minmax(0, 1fr) !important; column-gap: 10px !important; align-items: center !important; }
+  .glossary-game-lab .glossary-map-concept-v1 > .glossary-map-rung:not(.is-inspected) > .glossary-map-plate { grid-area: 1 / 1 !important; width: 40px !important; height: 40px !important; }
+  .glossary-game-lab .glossary-map-concept-v1 > .glossary-map-rung:not(.is-inspected) > .glossary-map-rung-copy { grid-area: 1 / 2 !important; min-width: 0; }
+  .glossary-game-lab .glossary-map-concept-v1 > .glossary-map-rung:not(.is-inspected) > .glossary-map-rung-copy :is(b, strong, h3) { font-size: 13.5px !important; line-height: 1.2 !important; }
+  .glossary-game-lab .glossary-map-concept-v1 > .glossary-map-rung:not(.is-inspected):last-child:nth-child(even) { grid-column: 1 / -1 !important; justify-self: center !important; width: calc(50% - 4px) !important; }
+  .glossary-game-lab .glossary-map-rung .glossary-map-rung-copy :is(b, strong, h3) { overflow-wrap: normal !important; word-break: normal !important; hyphens: manual !important; text-wrap: balance; }
+  .glossary-game-lab .glossary-map-rung.is-inspected .glossary-map-rung-actions { width: 100%; }
+  .glossary-game-shell.glossary-game-lab .glossary-map-rung.is-inspected .glossary-map-rung-actions > .glossary-map-play.glossary-map-play { flex: 1 1 100% !important; width: 100% !important; max-width: 100% !important; justify-content: center; }
+}
+
+/* The open level card, both themes, every size (17 Oct 2026, Chandu: "The
+   terms need better hierarchy position than the description under them.
+   ... number and whatever can sit in a header, and the rest can have its own
+   space"). The number and the title share a header row; below it the five
+   words come first and read as the level's content, then the one-line goal,
+   then the facts, then Play, all on the card's full width instead of
+   starting after the number's column. The copy wrapper dissolves into the
+   card's grid so each piece takes a named area. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll > .glossary-map-rung.is-inspected.is-inspected {
+  display: grid !important; align-items: start !important;
+  grid-template-columns: auto 44px minmax(0, 1fr) !important; grid-template-rows: none !important;
+  grid-template-areas: "plate badge title" "plate words words" "plate goal goal" "plate meta meta" "plate actions actions" !important;
+  column-gap: 14px !important; row-gap: 10px !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll .glossary-map-rung.is-inspected.is-inspected > .glossary-map-plate { grid-area: plate !important; align-self: stretch; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll .glossary-map-rung.is-inspected.is-inspected > button { grid-area: badge !important; align-self: center !important; margin: 0 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll .glossary-map-rung.is-inspected.is-inspected > .glossary-map-rung-copy { display: contents !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll .glossary-map-rung.is-inspected.is-inspected > .glossary-map-rung-copy > b { grid-area: title !important; align-self: center !important; margin: 0 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll .glossary-map-rung.is-inspected.is-inspected > .glossary-map-rung-copy > .glossary-map-rung-words { grid-area: words !important; display: flex !important; flex-wrap: wrap; gap: 6px !important; margin: 0 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll .glossary-map-rung.is-inspected.is-inspected > .glossary-map-rung-copy > .glossary-map-rung-words > * { font-size: 14px !important; font-weight: 700 !important; padding: 5px 10px !important; color: var(--foreground) !important; border-color: color-mix(in srgb, var(--glossary-accent, var(--accent)) 45%, var(--glass-border)) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll .glossary-map-rung.is-inspected.is-inspected > .glossary-map-rung-copy > .glossary-map-rung-goal { grid-area: goal !important; font-size: 13px !important; font-weight: 500 !important; color: var(--muted-foreground) !important; margin: 0 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll .glossary-map-rung.is-inspected.is-inspected > .glossary-map-rung-copy > small { grid-area: meta !important; margin: 0 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll .glossary-map-rung.is-inspected.is-inspected > .glossary-map-rung-copy > .glossary-map-rung-actions { grid-area: actions !important; margin: 0 !important; }
+@media (max-width: 600px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll > .glossary-map-rung.is-inspected.is-inspected {
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    grid-template-areas: "plate plate" "badge title" "words words" "goal goal" "meta meta" "actions actions" !important;
+  }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-level-map-scroll .glossary-map-rung.is-inspected.is-inspected > .glossary-map-plate { width: 100% !important; height: 120px !important; min-height: 0 !important; justify-self: stretch !important; }
+}
+/* Signal's closed level rows: plate and number on the left, the title and
+   its facts stacked beside them, top-aligned, so the title no longer floats
+   on a row of its own above the plate (17 Oct 2026). */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2.glossary-map-concept-v2 > .glossary-map-rung:not(.is-inspected) {
+  display: grid !important; grid-template-columns: auto 44px minmax(0, 1fr) !important; grid-template-rows: auto auto !important;
+  grid-template-areas: "phase phase phase" "plate badge copy" !important; align-items: center !important; column-gap: 12px !important; row-gap: 6px !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 > .glossary-map-rung:not(.is-inspected) > .glossary-map-phase { grid-area: phase !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 > .glossary-map-rung:not(.is-inspected) > .glossary-map-plate { grid-area: plate !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 > .glossary-map-rung:not(.is-inspected) > button { grid-area: badge !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map-scroll.glossary-map-concept-v2 > .glossary-map-rung:not(.is-inspected) > .glossary-map-rung-copy { grid-area: copy !important; display: flex !important; flex-direction: column !important; gap: 2px !important; min-width: 0; }

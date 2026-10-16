@@ -2337,7 +2337,7 @@ _17 October 2026. One document to scale the glossary games from four industries 
 | Routes | /play/glossary/<industry> and /play/glossary/<career> resolve; /play-tools/glossary-qa lists every registered glossary (hamburger menu, Glossary QA). Unknown slugs 404. |
 | Hub gating | Only finance is released; generated industries play by route and from the QA page. Release is one slug in GLOSSARY_HUB_RELEASED. |
 | Demo flags | Every demo-only piece is tagged DEMO-ONLY in its own comment (blueprints, QA page, release list, Skip). |
-| Built so far | Finance (Joshua's, 4 of 20 levels). The three other Play tab cards are complete at six playable levels each: Software Engineering (Tech Terms), Flight Operations (Flight Terms), Nursing (Medical Terms). Culinary Arts has four (not on the hub) and is the model blueprint. All four were rewritten on 17 Oct to the Finance style: three moments per word, concept sorts, cases, written Power Plays, then trimmed to the reading rules. |
+| Built so far | Finance (Joshua's, 4 of 20 levels). The three other Play tab cards are complete at six playable levels each: Software Engineering (Tech Terms), Flight Operations (Flight Terms), Nursing (Medical Terms). Culinary Arts has four (not on the hub) and is the model blueprint. Every world has the required Levels 1 to 4; Levels 5 and 6 are extras. All four were rewritten on 17 Oct to the Finance style: three moments per word, concept sorts, cases, written Power Plays, then trimmed to the reading rules. |
 | Not yet | No generated industry has its Level 1 term art or welcome illustration (section 6, and section 7b for the three Play tab games). No plates, panoramas or silhouettes registered (optional). Light-mode pass on generated industries. Levels 5 and 6 for Culinary. |
 
 ### 1. Who does what
@@ -2345,7 +2345,7 @@ _17 October 2026. One document to scale the glossary games from four industries 
 | Role | Owns | Pastes |
 |---|---|---|
 | Joshua | The rules: the Master Scaling Plan. Finance never changes. | Nothing; reviews. |
-| Usman's agent (Claude Code or Codex in the repo) | Blueprints: one file per industry, registered. Levels 1 to 4. | Prompt A, Prompt B. |
+| Usman's agent (Claude Code or Codex in the repo) | Blueprints: one file per industry, registered. Levels 1 to 4 required; 5 and 6 optional. | Prompt A, Prompt B. |
 | Codex or ChatGPT (image generation) | Every image: Level 1 term art and the welcome illustration for each industry (required), plates, world panoramas, silhouettes (optional), Dreamy animation. | Prompt D and the section 6 prompts; for the three Play tab games, section 7b (Prompt D already filled in). |
 | Chandu | Browser QA on the Glossary QA page; release to the hub (Prompt C). | Prompt C. |
 
@@ -2359,7 +2359,7 @@ _17 October 2026. One document to scale the glossary games from four industries 
 | No forced math | Numbers only where the job's words naturally carry them. | Validator: numbers fail unless the level sets math: true. |
 | Three architectures | continuous_story (one company grows), scenario_thread (same workplace, new situation each level), practice_world (varied drills, no plot). Pick from the table in section 9. | Blueprint mode. |
 | Difficulty ladder | Level 1 recognize, 2 apply, 3 analyze (tell confusable words apart), 4 decide. | Generator recipes by level number. |
-| Five terms per level, four levels minimum | 20 terms to launch; Levels 5 and 6 can be roadmap words. | Validator. |
+| Levels 1 to 4 required, 5 and 6 optional (added 17 Oct) | Every world ships Levels 1 to 4 playable, five terms each: Joshua's "4 initial levels per Glossary World" and "20 terms across Levels 1 to 4". Levels 5 and 6 may be playable extras or locked roadmap words. Chandu: "1-4 should be there mandatorily." | Validator: a world missing any of Levels 1 to 4, or with one of them as roadmap words only, does not build. |
 | 7 to 10 interactions, one Power Play | Seven derived screens plus the level's authored cases, sort and Select All as extras, then one paragraph with five blanks. | Generator, QA script. |
 | Copy length | Definition 110 characters, example 120, cue 34 characters and 7 words, each moment 72 characters and 12 words, sort item 34, Select All line 44, case step 80, feedback 90 and two sentences, term 22, title 30, goal 48. | Validator. |
 | Short and plain (added 17 Oct) | Every sentence a student reads is 14 words at most, feedback included. A level's copy reads at grade 8 or below, not counting its own five words. Chandu: "make sure every piece of copy including success explanations etc are shorter and 8th grade comprehension level." | Validator (sentences, feedback, a Flesch-Kincaid grade per level) and the builder (generated feedback). |
@@ -2386,7 +2386,7 @@ Notes from Chandu, if any: [optional]
 
 STEP 1. Look the industry up in the 50-industry table in docs/reference/glossary-scaling-sop-usman-2026-10-16.html (section 9). Take its mode (continuous_story, scenario_thread or practice_world) and its career world (an exact WORLD_COLORS key). Choose a slug: lowercase letters and dashes, it becomes the route /play/glossary/. Choose an anchor: one company, clinic, airline, shop or site that every level returns to (practice worlds may use it loosely). Choose the student's role in one word.
 
-STEP 2. Write src/components/glossary/blueprints/.ts by copying the model blueprint culinary.ts (every authored piece in use) and the blueprint with the same mode: software.ts (continuous story), aviation.ts (scenario thread), culinary.ts (practice world). Keep the header comment pattern (DEMO-ONLY content, why, the anchor). Author four playable levels and two roadmap levels, or all six if asked:
+STEP 2. Write src/components/glossary/blueprints/.ts by copying the model blueprint culinary.ts (every authored piece in use) and the blueprint with the same mode: software.ts (continuous story), aviation.ts (scenario thread), culinary.ts (practice world). Keep the header comment pattern (DEMO-ONLY content, why, the anchor). Levels 1 to 4 must be playable; the validator refuses a file without them. Levels 5 and 6 are optional: write them as roadmap words, or make them playable if asked:
 - Every playable level: five terms, each with term, definition, example, cue, icon and moments (exactly three).
 - Levels 3 and up: a confusion on every term, naming another term in the same level.
 - Every playable level: a written powerPlay (intro and paragraph).
@@ -2428,10 +2428,10 @@ STEP 5. Write the art list for Codex as a short block in your final message: the
 
 STEP 6. Add a dated entry to docs/AI_HANDOFF.md (what, why, what you checked). Commit with the why in the message. Do not push.
 
-Done looks like: the blueprint file exists and validates, the industry appears on /play-tools/glossary-qa with its playable levels, screenshots attached, the art list written, one commit, nothing pushed.
+Done looks like: the blueprint file exists and validates, the industry appears on /play-tools/glossary-qa with Levels 1 to 4 playable, screenshots attached, the art list written, one commit, nothing pushed.
 ```
 
-### 4. Prompt B: add Levels 5 and 6 to an existing industry
+### 4. Prompt B: add the optional Levels 5 and 6 to an existing industry
 
 ```
 You are working in the Dreamari prototype repo. Pull origin/main. Read docs/handoff/specs/glossary-system.md.
@@ -2771,7 +2771,7 @@ A scenario thread is still a world. Nursing keeps the student inside one clinic,
 
 | Rule | Global standard | How the system holds it |
 |---|---|---|
-| World size | 4 initial levels per glossary world. | Blueprint levels; roadmap levels beyond that show as locked words. |
+| World size | 4 initial levels per glossary world. | Validated: Levels 1 to 4 must be playable in every world. Levels 5 and 6 are optional, playable or locked roadmap words. Finance shows 20 level titles with 4 playable. |
 | Vocabulary | 5 new core terms per level. 20 across Levels 1 to 4. | Validated: exactly five terms per playable level. |
 | Lesson length | 7 to 10 scored interactions, including the final Power Play. | Seven derived screens plus the level's authored extras, seven to ten in all, plus 1 Power Play. Asserted by the QA script. |
 | Term coverage | Every new term is introduced clearly, then used in applied context before the lesson ends. | Teach cards first; every term is credited at least twice in the main loop (asserted). |

@@ -222,6 +222,8 @@ export function powerPlayLimit(levelNumber: number): { chars: number; sentences:
  *  usually 7. */
 export const WORD_LIMITS = { moment: 12, cue: 7 } as const;
 export const MOMENTS_PER_TERM = 3;
+/** Every world ships these levels playable; anything past them is optional. */
+export const REQUIRED_LEVELS = [1, 2, 3, 4] as const;
 const DEFAULT_FACT = "Learning the words of a job is the first step to doing it. Say each one out loud once.";
 
 export function focusFor(level: LevelSeed): LevelFocus {
@@ -700,6 +702,16 @@ export function validateBlueprint(bp: GlossaryBlueprint): string[] {
   if (!bp.studentRole?.trim()) problems.push("studentRole is empty; say who the student is (founder, nurse, pilot)");
   if (!bp.levels.length) problems.push("no levels");
   if (!bp.levels.some((l) => l.terms)) problems.push("no level has terms; nothing to play");
+  // Levels 1 to 4 are required in every world (Joshua's Master Scaling Plan:
+  // "4 initial levels per Glossary World", "20 terms across Levels 1 to 4").
+  // Levels 5 and 6 are optional extras (17 Oct 2026, Chandu: "if 5 and 6 are
+  // playable but 1-4 are also available across everything its fine. 1-4
+  // should be there mandatorily").
+  for (const n of REQUIRED_LEVELS) {
+    const level = bp.levels.find((l) => l.number === n);
+    if (!level) problems.push(`level ${n} is missing; Levels 1 to 4 are required in every world`);
+    else if (!level.terms) problems.push(`level ${n} (${level.title}) has no terms; Levels 1 to 4 must be playable, only 5 and up may be roadmap words`);
+  }
   const anchored = bp.mode !== "practice_world";
   const numbers = new Set<number>();
   for (const level of bp.levels) {

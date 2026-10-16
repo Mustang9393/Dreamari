@@ -35,7 +35,11 @@ const system = (world: string, display: string, displayWeight: number, body: str
 /** One design system per career world. Business keeps the Nunito body the
  *  finance game launched with; the rest take a readable face of their own. */
 export const WORLD_SYSTEMS: WorldSystem[] = [
-  system("Business & Finance", "var(--font-poster)", 400, "'Nunito', sans-serif"),
+  // Fraunces Bold, not Viaoda Libre (17 Oct 2026, Chandu: "the font for
+  // finance is bad, use something bolder or the same font bolder"). Viaoda
+  // ships one light weight only, so the same face cannot go bolder; Fraunces
+  // is an editorial serif in the same spirit, already loaded at 700.
+  system("Business & Finance", "'Fraunces', serif", 700, "'Nunito', sans-serif"),
   system("Tech & Engineering", "var(--font-poster-science)", 700, "'Inter', sans-serif"),
   system("Health & Medicine", "var(--font-poster-nunito)", 800, "'Inter', sans-serif"),
   system("Arts, Media & Sport", "'Rozha One', serif", 400, "'Inter', sans-serif"),

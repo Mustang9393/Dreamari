@@ -1,3 +1,24 @@
+## 2026-10-17: symmetry and alignment pass; Levels map cards; Finance face; Levels 1 to 4 required; Component Lab coverage
+
+**Why (Chandu):** "Alignments are off. Lets make sure there is symmetry and proper alignment everywhere"; "The numbers in these boxes are sitting on the borders"; "the font for finance is bad, use something bolder or the same font bolder"; "in the level list ... The terms need better hierarchy position than the description under them ... number and whatever can sit in a header, and the rest can have its own space"; "1-4 should be there mandatorily"; "make sure that all ui components, ux interactions etc are covered for all levels and games so Usman can tap into our component library".
+
+**How it was checked.** An in-page alignment audit (now `scripts/qa/glossary-alignment-audit.js`) measured one screen of every shape the five games produce (30 shapes: every question kind, sort sizes 2x5 to 3x7, case step sizes, review, three Power Plays) in both themes at 1440x900 and 375x812, then every screen was looked at by eye for what the audit cannot see.
+
+**Fixed, at the component source.**
+- Sort: tokens equal width on a column count picked from the item count (`trayColumns`), short last row centred, tray the width of the buckets; three buckets three across on wide screens, the third full width on phones; a phone grid rule that left an odd token flush left is outranked.
+- Counter badges (sort counts): fixed-height flex box, the digit centred in Jersey and in the body faces.
+- Phones: a screen FitToScreen scales down is laid out 1/scale wider first, so after the scale it shares edges with the HUD and the bubble (it used to sit about 20px inside them).
+- Match It Up fills the column like every other answer block (it stopped at 680 to 760px); on phones the cue column takes 60% at 14px so every cue fits two lines; cues centred and balanced.
+- Type the Term's word bank centred like every other bank.
+- No automatic hyphenation anywhere ("sneak-er", "buy-ing"); Profit Builder operators never start a line and "=" never sits alone; the step's answer box is narrower on phones.
+- Welcome with Dreamy alone: the scene box grows to the cloud, which used to overlap the "Level 01" line.
+- Levels map: the open card is a header (number and title), then the five words as the level's content, then the goal, facts and Play on the card's full width, in both themes and every size. Drift phone small cards keep a square icon beside a whole-word title, an odd last card centred; Signal closed rows put the title and facts beside the plate and number.
+- Finance's display face is Fraunces Bold instead of Viaoda Libre, which ships in one light weight only. This is Chandu's call and an exception to "Finance stays exactly as it is", which is about Joshua's content.
+- Levels 1 to 4 are required in every world (`REQUIRED_LEVELS`; Joshua's "4 initial levels per Glossary World"); 5 and 6 stay optional.
+- Component Lab: Profit Builder, Finance money cards, the compare-card case, three-bucket and concept sorts, Use it when matching, Select All built from moments, review questions, Power Play extremes, a second broken blueprint for the reading and level rules, and the Play hub glossary cards.
+
+**Not done:** light mode; the audit does not cover the Complete screen or the mastery loading screen.
+
 ## 2026-10-17: one glossary SOP; the separate art prompt folded in; older SOPs deleted
 
 **Why (Chandu):** "the seperate prompt, is it also included in the amster sop? what does it do differently? It should all be in the SOP. also delete all older SOPs for this."

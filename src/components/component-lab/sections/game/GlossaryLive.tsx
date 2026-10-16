@@ -13,12 +13,15 @@
 
 import Image from "next/image";
 import { useState, type ReactNode } from "react";
-import { glossaryFor } from "@/components/glossary/data";
+import { glossaryFor, type GlossaryQuestion } from "@/components/glossary/data";
 import { DREAMY_FACING } from "@/components/glossary/dreamyReactions";
 import { WORLD_SYSTEMS, worldTheme } from "@/components/glossary/industries";
 import { GLOSSARY_HUB_RELEASED, glossaryIndustries } from "@/components/glossary/data";
 import { validateBlueprint, type GlossaryBlueprint } from "@/components/glossary/generate";
 import { NURSING_GLOSSARY } from "@/components/glossary/blueprints/health";
+import { CULINARY_GLOSSARY } from "@/components/glossary/blueprints/culinary";
+import { GLOSSARY_GAMES } from "@/components/play/games";
+import { HeroShelfCard } from "@/components/play/PlayHub";
 import { LEVEL_DREAMY_BY_STATE } from "@/components/glossary/levelPlates";
 import {
   CompleteScreen,
@@ -55,6 +58,11 @@ const SW2 = SW?.lessons[1];
 const SW3 = SW?.lessons[2];
 const SW4 = SW?.lessons[3];
 const RN4 = RN?.lessons[3];
+const RN5 = RN?.lessons[4];
+const IB2 = IB?.lessons[1];
+const IB4 = IB?.lessons[3];
+const AV1 = glossaryFor("aviation")?.lessons[0];
+const CU3 = glossaryFor("culinary")?.lessons[2];
 
 /** A deliberately broken blueprint, so the lab shows the developer-facing
  *  error state: what validateBlueprint reports before a bad file can build. */
@@ -67,6 +75,17 @@ function brokenBlueprint(): GlossaryBlueprint {
   bad.levels[0].terms![1].example = "No anchor named here with vital signs.";
   bad.levels[2].terms![0].confusion = "Nope";
   bad.levels[3].terms![0].example = "Code Blue costs $500.";
+  return bad;
+}
+/** A second broken blueprint for the 17 Oct 2026 rules: reading level,
+ *  feedback length, the Power Play's size and order, required levels. */
+function brokenReadingBlueprint(): GlossaryBlueprint {
+  const bad = structuredClone(CULINARY_GLOSSARY) as GlossaryBlueprint;
+  bad.levels[0].terms![0].example = "Dice the onion into small even cubes so that every single piece cooks at the very same speed.";
+  bad.levels[0].powerPlay = { intro: "Prep.", paragraph: "{1} the onion into small even cubes for the soup. {2} the garlic until it is almost a paste, then {3} the carrot into thin sticks for the salad. {4} the parsley rough and toss it in at the very end. {5} the tomato into flat rounds for the plates." };
+  bad.levels[1].cases![0].feedbackCorrect = "High heat browns the outside of the steak fast. Low heat lets the sauce cook gently for an hour. Both matter.";
+  const l4 = bad.levels[3];
+  bad.levels[3] = { number: 4, title: l4.title, tier: l4.tier, goal: l4.goal, milestone: l4.milestone, nextMilestone: l4.nextMilestone, companyValue: l4.companyValue, nextCompanyValue: l4.nextCompanyValue, words: (l4.terms ?? []).map((t) => t.term) };
   return bad;
 }
 /** A synthetic term at every limit, for the layout edge cases. */
@@ -200,7 +219,7 @@ export function GlossaryLiveGroup() {
           <StateCell label="Picture (Level 1 only)" surface="game" minH={300}><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term={L1.terms[0].term} definition={L1.terms[0].definition} icon={L1.terms[0].icon} artSrc="/images/glossary/themes-oct08/drift/company.webp" /></div></div></Stage></StateCell>
           <StateCell label="Edge: 22-character term (the limit)" surface="game" minH={300} note="--term-chars shrinks the face; the underline is exactly the word's width in both themes (16 Oct)."><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term={EDGE_TERM.term} definition={EDGE_TERM.definition} icon="users" words concept /></div></div></Stage></StateCell>
           <StateCell label="Edge: acronym" surface="game" minH={300} note="A short word: the underline is short too, and no letter or picture stands in."><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term={ACRONYM_TERM.term} definition={ACRONYM_TERM.definition} icon="layers" words concept /></div></div></Stage></StateCell>
-          <StateCell label="Edge: definition at 120 characters" surface="game" minH={300}><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term="Handoff" definition={EDGE_TERM.definition.slice(0, 120)} icon="arrow-left-right" words concept /></div></div></Stage></StateCell>
+          <StateCell label="Edge: definition near the 110-character limit" surface="game" minH={300}><Stage theme={theme} world={world} screen="unlock" height={290}><div className="glossary-flashbook-shell relative w-full max-w-[440px]"><div className="relative h-[270px] w-full"><SketchFace term="Handoff" definition={EDGE_TERM.definition.slice(0, 120)} icon="arrow-left-right" words concept /></div></div></Stage></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -241,6 +260,35 @@ export function GlossaryLiveGroup() {
           {SW3?.questions.some((q) => q.kind === "sortBuckets") ? <StateCell label="Authored concept sort (generated L3)" surface="game" minH={480} note="Concrete things into concept buckets, never cues into words: Finance's &quot;Money in / Money out&quot; made scalable (17 Oct 2026)."><Stage theme={theme} world={world} height={470}><QuestionScreen question={SW3!.questions.find((q) => q.kind === "sortBuckets")!} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
           {RN4 ? <StateCell label="Edge: two-word options fall to a list" surface="game" minH={440} note="isWordSet: single words of 14 characters or fewer tile as a 2x2 grid; anything longer, or with a space (Code Blue, Rapid Response), lists in one column."><Stage theme={theme} world={world} height={430}><QuestionScreen question={RN4.questions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
           <StateCell label="Edge: Catch the Misuse, long pairs" surface="game" minH={400} note="Word = cue pairs at the 34-character cue limit; the pair wraps inside its tile."><Stage theme={theme} world={world} height={390}><QuestionScreen question={{ kind: "choice", type: "Catch the Misuse", id: "LAB-EDGE-1", termId: EDGE_TERM.term, playOrder: 1, label: "Quick check", prompt: "Which one is wrong?", options: [`${EDGE_TERM.term} = ${ACRONYM_TERM.cue}`, `${ACRONYM_TERM.term} = ${ACRONYM_TERM.cue}`, "Handoff = Passing care to the next nurse", "Triage = Who is seen first"], correctIndex: 0, feedbackCorrect: "Right.", feedbackWrong: "Not quite." }} onAnswer={noop} onReset={noop} /></Stage></StateCell>
+          {(() => {
+            const pick = <T,>(list: T[] | undefined, test: (q: T) => boolean) => list?.find(test);
+            const profit = pick(L1.questions, (q) => q.kind === "profitBuilder");
+            const profitVisual = pick(L1.questions, (q) => q.kind === "choice" && Boolean(q.visual));
+            const shares = pick(IB2?.questions, (q) => q.kind === "choice" && q.scene?.kind === "shares");
+            const split = pick(IB4?.questions, (q) => q.kind === "choice" && q.scene?.kind === "split");
+            const caseCompare = pick(IB4?.questions, (q) => q.kind === "chain" && q.scene?.kind === "compare");
+            const threeBuckets = pick(SW3?.questions, (q) => q.kind === "sortBuckets" && q.buckets.length === 3);
+            const useItWhen = pick(SW4?.questions, (q) => q.kind === "matchUp");
+            const derivedSelect = pick(CU3?.questions, (q) => q.kind === "multiSelect");
+            const cells: [string, GlossaryQuestion | undefined, number, string][] = [
+              ["Finance: Profit Builder (Level 1)", profit, 470, "Two typed numbers over a units x price card. Finance only: generated levels never write a calculation."],
+              ["Finance: profit card, which word (Level 1)", profitVisual, 420, "A sells / costs / left card above a 2x2 of words."],
+              ["Finance: shares card (Level 2)", shares, 470, "Scene cards carry the numbers; the art never does."],
+              ["Finance: split card (Level 4)", split, 440, ""],
+              ["Finance: case over a compare card (Level 4)", caseCompare, 470, "Two-option steps; the compare card stays while the steps change."],
+              ["Generated: concept sort, three buckets", threeBuckets, 500, "Software Level 3. Concrete items into concept buckets; three buckets lay out as a row on desktop and stack on phones."],
+              ["Generated: match, Use it when (decide levels)", useItWhen, 470, "Software Level 4. The right column is the cue, read as when to use the word."],
+              ["Generated: Select All built from moments", derivedSelect, 470, "Culinary Level 3. A level without an authored Select All gets two of the word's moments against two others."],
+            ];
+            return cells.map(([label, question, height, note]) => question ? <StateCell key={label} label={label} surface="game" minH={height + 10} note={note || undefined}><Stage theme={theme} world={world} height={height}><QuestionScreen question={question} onAnswer={noop} onReset={noop} /></Stage></StateCell> : <StateCell key={label} label={label} minH={80}><NotRendered reason="The fixture lesson no longer has this screen; pick another level in GlossaryLive.tsx." see="src/components/component-lab/sections/game/GlossaryLive.tsx" /></StateCell>);
+          })()}
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="Review questions (remediation)" scale="core" file={FILE} purpose="One Reverse Recall per word: the definition read aloud, then which word. Drawn after the main loop only for words still short of mastery (two credits), and never used in the main loop, so the student always meets a new screen." when="After the last main question, before the Power Play, if any word is short.">
+        <StateGrid min={340}>
+          {RN1.reviewQuestions[0] ? <StateCell label="Generated (Registered Nurse, Level 1)" surface="game" minH={420}><Stage theme={theme} world={world} height={410}><QuestionScreen question={RN1.reviewQuestions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
+          {IB2?.reviewQuestions[0] ? <StateCell label="Authored (Finance, Level 2)" surface="game" minH={420}><Stage theme={theme} world={world} height={410}><QuestionScreen question={IB2.reviewQuestions[0]} onAnswer={noop} onReset={noop} /></Stage></StateCell> : null}
         </StateGrid>
       </Specimen>
 
@@ -272,6 +320,8 @@ export function GlossaryLiveGroup() {
           <StateCell label="Level 1 (live)" surface="game" minH={560} note="Fill state is internal; drag, tap or type for real."><Stage theme={theme} world={world} screen="powerPlay" height={550}><PowerPlayScreen lesson={L1} onComplete={noop} /></Stage></StateCell>
           <StateCell label="Level 3 (live)" surface="game" minH={560}><Stage theme={theme} world={world} screen="powerPlay" height={550}><PowerPlayScreen lesson={L3} onComplete={noop} /></Stage></StateCell>
           <StateCell label="Generated (Registered Nurse)" surface="game" minH={560}><Stage theme={theme} world={world} screen="powerPlay" height={550}><PowerPlayScreen lesson={RN1} onComplete={noop} /></Stage></StateCell>
+          {AV1 ? <StateCell label="Generated Level 1: five short lines" surface="game" minH={560} note="Level 1 caps: 200 characters, five sentences, one blank each. The word bank is shuffled so it never runs in the blanks' order (17 Oct 2026)."><Stage theme={theme} world={world} screen="powerPlay" height={550}><PowerPlayScreen lesson={AV1} onComplete={noop} /></Stage></StateCell> : null}
+          {RN5 ? <StateCell label="Edge: the longest generated paragraph (Level 5)" surface="game" minH={640} note="Levels 5 and up hold 330 characters and six sentences; this one is the longest the QA script reports."><Stage theme={theme} world={world} screen="powerPlay" height={630}><PowerPlayScreen lesson={RN5} onComplete={noop} /></Stage></StateCell> : null}
         </StateGrid>
       </Specimen>
 
@@ -360,12 +410,28 @@ export function GlossaryLiveGroup() {
               {validateBlueprint(brokenBlueprint()).map((problem) => <li key={problem} className="rounded-[var(--radius-sm)] border px-[8px] py-[4px]" style={{ borderColor: "color-mix(in srgb, var(--danger, #e0483e) 45%, var(--glass-border))" }}>{problem}</li>)}
             </ol>
           </StateCell>
+          <StateCell label="Broken against the reading and level rules" minH={200} note="17 Oct 2026: an 18-word sentence, a three-sentence feedback line over 90 characters, a Level 1 Power Play over 200 characters with two blanks in one sentence and its blanks in teaching order, and Level 4 left as roadmap words.">
+            <ol className="flex flex-col gap-[4px] text-[12.5px]" style={{ color: "var(--foreground)" }}>
+              {validateBlueprint(brokenReadingBlueprint()).map((problem) => <li key={problem} className="rounded-[var(--radius-sm)] border px-[8px] py-[4px]" style={{ borderColor: "color-mix(in srgb, var(--danger, #e0483e) 45%, var(--glass-border))" }}>{problem}</li>)}
+            </ol>
+          </StateCell>
           <StateCell label="Unknown route" minH={120}><NotRendered reason="/play/glossary/<unknown> calls notFound(): the app's 404, nothing half-built." see="src/app/play/glossary/[career]/page.tsx" /></StateCell>
           <StateCell label="Hub release state" minH={160} note="GLOSSARY_HUB_RELEASED decides which cards the Play hub sells as playable; the rest read as Coming soon and play from /play-tools/glossary-qa.">
             <ul className="flex flex-col gap-[4px] text-[12.5px]" style={{ color: "var(--foreground)" }}>
               {glossaryIndustries().map((g) => <li key={g.industrySlug}><b>{g.industryTitle}</b> ({g.industrySlug}): {GLOSSARY_HUB_RELEASED.includes(g.industrySlug) ? "released to the hub" : "QA only"} · {g.lessons.length} of {g.levels.length} levels playable · {g.mode.replace("_", " ")}</li>)}
             </ul>
           </StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="Play hub glossary cards" scale="core" file="src/components/play/PlayHub.tsx" purpose="The Play tab's glossary row: one card per GLOSSARY_GAMES entry with its 1400 by 788 thumbnail. A released industry opens its game; the rest show the lock until their slug joins GLOSSARY_HUB_RELEASED (Prompt C in the SOP)." when="The Play hub, Glossary Games row.">
+        <StateGrid min={240}>
+          {GLOSSARY_GAMES.map((game) => {
+            const g = glossaryFor(game.careerSlug);
+            const released = Boolean(g && GLOSSARY_HUB_RELEASED.includes(g.industrySlug));
+            return <StateCell key={game.careerSlug} label={`${game.title}: ${released ? "released" : "locked"}`} minH={300}><HeroShelfCard item={{ id: game.careerSlug, title: game.title, cover: game.cover, world: g?.world, sub: game.sub, href: `/play/glossary/${game.careerSlug}`, locked: !released }} onSelect={noop} /></StateCell>;
+          })}
+          <StateCell label="Active (expanded, 16:9)" minH={300} note="The shelf card is portrait at rest and 16:9 when active, so Dreamy and the centre card sit in the thumbnail's middle third."><HeroShelfCard item={{ id: GLOSSARY_GAMES[0].careerSlug, title: GLOSSARY_GAMES[0].title, cover: GLOSSARY_GAMES[0].cover, sub: GLOSSARY_GAMES[0].sub }} active onSelect={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 

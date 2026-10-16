@@ -38,7 +38,7 @@ Every world already has a row in `WORLD_SYSTEMS` (15, Personal Care & Community 
        { number: 2, ...terms as above..., cases: [one or two], powerPlay },                          // apply
        { number: 3, ...terms with a `confusion` each..., sort, cases, powerPlay },                   // analyze
        { number: 4, ...terms with a `confusion` each..., selectAll?, cases, powerPlay },             // decide
-       { number: 5, title, tier, goal, unlocks, milestone, nextMilestone, companyValue, nextCompanyValue, words: [five words] },  // roadmap only
+       { number: 5, title, tier, goal, unlocks, milestone, nextMilestone, companyValue, nextCompanyValue, words: [five words] },  // optional: roadmap words, or playable
      ],
    };
    ```
@@ -51,6 +51,10 @@ Every world already has a row in `WORLD_SYSTEMS` (15, Personal Care & Community 
 7. **Level 1 art (optional, see below).** Without it the industry teaches with words only, which is the rule for every level after the first anyway.
 
 That is the whole job. No question is written by hand.
+
+## Required levels (enforced)
+
+Levels 1 to 4 must be playable in every world; `validateBlueprint` refuses a blueprint where any of them is missing or only roadmap words (`REQUIRED_LEVELS` in `generate.ts`). This is Joshua's plan: "4 initial levels per Glossary World", "20 terms across Levels 1 to 4". Levels 5 and 6 are optional, playable or roadmap (17 Oct 2026, Chandu: "if 5 and 6 are playable but 1-4 are also available across everything its fine. 1-4 should be there mandatorily"). Nursing, Software and Aviation ship six playable levels; Culinary ships four.
 
 ## Copy limits and layout rules (enforced)
 
