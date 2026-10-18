@@ -1,13 +1,13 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { DreamSpark, StreakFlame } from "./ScoreIcons";
+import { XpBadge, StreakBolt } from "./ScoreIcons";
 import { useDreamScore } from "@/lib/dreamScore";
 import { DREAM_SCORE_TARGET_ATTR } from "./xpFlight";
 import { DreamScoreTip, STREAK_TIP } from "./DreamScoreTip";
 import { Shimmer } from "@/components/app/states";
 
-/** THE streak and Dream Score chip: flame and streak, then the dream spark
+/** THE streak and Dream Score chip: lightning and streak, then the XP badge
  *  and the XP, no divider, the same everywhere the top bar appears (desktop nav,
  *  phone and tablet header, the Resume Builder's own header). The XP half
  *  carries the flying-XP landing target and re-keys on the total so the
@@ -36,17 +36,17 @@ export function DreamScoreChip({ className = "" }: { className?: string }) {
       style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}
     >
       <DreamScoreTip text={STREAK_TIP}>
-        <span aria-label="12 day streak" className="flex items-center gap-[3px] font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}><StreakFlame size={15} />12</span>
+        <span aria-label="12 day streak" className="flex items-center gap-[3px] font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}><StreakBolt size={24} />12</span>
       </DreamScoreTip>
       {known ? (
         <DreamScoreTip>
           <span key={xp} {...{ [DREAM_SCORE_TARGET_ATTR]: "" }} aria-label={`Dream Score ${xp} XP`} className="flex items-center gap-[4px] font-bold motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]">
-            <DreamSpark size={18} />{xp.toLocaleString("en-US")}
+            <XpBadge size={26} />{xp.toLocaleString("en-US")}
           </span>
         </DreamScoreTip>
       ) : (
         <span aria-label="Loading Dream Score" className="flex items-center gap-[4px]">
-          <DreamSpark size={18} />
+          <XpBadge size={26} />
           <Shimmer className="h-[12px] w-[28px] rounded-full" />
         </span>
       )}

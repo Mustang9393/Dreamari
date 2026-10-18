@@ -16,7 +16,7 @@ import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { PlayBurst } from "@/components/play/PlayBurst";
 import { Confetti } from "@/components/flow/aurora/Confetti";
 import { GestureHint } from "@/components/flow/GestureHint";
-import { StreakFlame, DreamSpark } from "@/components/app/ScoreIcons";
+import { StreakBolt, XpBadge } from "@/components/app/ScoreIcons";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { PlayBackdrop } from "@/components/play/PlayBackdrop";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
@@ -567,13 +567,13 @@ export function FoundationsSection() {
           </StateGrid>
         </Specimen>
 
-        <Specimen name="Streak and score icons" file="src/components/app/ScoreIcons.tsx" purpose="Illustrated gradient marks for the streak and Dream Score chips, instead of flat single-colour icons." when="Anywhere a streak count or Dream Score value is shown.">
+        <Specimen name="Streak and score icons" file="src/components/app/ScoreIcons.tsx" purpose="Dimensional lightning for streaks and a centered XP badge for Dream Score. Editable SVG paths and gradients." when="Anywhere a streak count or Dream Score value is shown.">
           <StateGrid min={120}>
-            <StateCell label="StreakFlame">
-              <StreakFlame size={30} />
+            <StateCell label="StreakBolt">
+              <StreakBolt size={30} />
             </StateCell>
-            <StateCell label="DreamSpark">
-              <DreamSpark size={30} />
+            <StateCell label="XpBadge">
+              <XpBadge size={30} />
             </StateCell>
           </StateGrid>
         </Specimen>

@@ -8,9 +8,10 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ChevronLeft, Flame, Play, Sparkle } from "lucide-react";
+import { ChevronRight, ChevronLeft, Play, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HeaderActions } from "./Inbox";
+import { StreakBolt } from "./ScoreIcons";
 import { HoverBeam } from "./HoverBeam";
 import { DeadlineTile, PlanTile, ResumeTile } from "./HomeDashboard";
 import { PARTNER_POSTS, SCHOLARSHIP_ITEMS } from "@/components/opportunities/data";
@@ -337,7 +338,7 @@ function HeroBanner() {
           title="Discover a new career in 30 seconds"
           meta={
             <span className="flex flex-wrap items-center gap-[var(--space-3)]">
-              <HeroChip color="var(--chart-3)"><Flame className="h-[12px] w-[12px]" aria-hidden /> 12-day streak</HeroChip>
+              <HeroChip color="var(--chart-3)"><StreakBolt size={18} /> 12-day streak</HeroChip>
               <span>Keep it alive today.</span>
             </span>
           }
