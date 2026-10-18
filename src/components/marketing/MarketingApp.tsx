@@ -68,6 +68,7 @@ export function MarketingApp() {
         // the vivid wash just stopping arbitrarily or running out.
         <div
           aria-hidden
+          data-landing-wash
           className="pointer-events-none absolute inset-0"
           style={{
             background: [

@@ -14,7 +14,8 @@ import { archiveCurrentProfile, writeStudentProfile } from "@/lib/studentProfile
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
 import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
-import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_DREAMY, type BuildState, type StageId } from "./types";
+import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_ACCENTS_V2, STAGE_DREAMY, type BuildState, type StageId } from "./types";
+import { useLookV2 } from "@/components/app/look";
 
 // The rebuilt build-profile flow (docs/BUILD_FLOW_SPEC.md = verbatim copy source).
 // Design/layout/structure follow the Figma Build Flow frames (3009-15623):
@@ -76,7 +77,8 @@ export function BuildFlowExperience() {
     setState((current) => ({ ...current, ...update }));
   }
 
-  const accent = STAGE_ACCENTS[stageId];
+  const accents = useLookV2() ? STAGE_ACCENTS_V2 : STAGE_ACCENTS;
+  const accent = accents[stageId];
   const isComplete = stageId === "complete";
 
   // A trailing glow of the last few steps, not every step ever visited.
@@ -93,7 +95,7 @@ export function BuildFlowExperience() {
   // of building indefinitely -- newer territory for this component, not a
   // straight revert to how it worked before.
   const TRAIL_LENGTH = 3;
-  const visitedAccents = useMemo(() => STAGES.slice(0, stageIndex).map((s) => STAGE_ACCENTS[s.id]).slice(-TRAIL_LENGTH), [stageIndex]);
+  const visitedAccents = useMemo(() => STAGES.slice(0, stageIndex).map((s) => accents[s.id]).slice(-TRAIL_LENGTH), [stageIndex, accents]);
 
   const dreamy = stageId in STAGE_DREAMY ? STAGE_DREAMY[stageId as keyof typeof STAGE_DREAMY] : null;
   const skipToMatch = () => router.push("/match-grid");

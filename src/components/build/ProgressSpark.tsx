@@ -26,7 +26,9 @@ export function barGradientColorAt(fraction: number): string {
   const fallback: [string, string, string] = ["#4767f3", "#8b5cf6", "#ff4585"];
   const names = ["--color-brand-500", "--color-accent-purple", "--color-world-arts-media-sport"];
   const cs = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
-  const [c1, c2, c3] = names.map((name, i) => hexToRgb(cs?.getPropertyValue(name) || "") ?? hexToRgb(fallback[i])!);
+  // --build-bar-a/b/c: the look-v2 preview's stops (look-v2.css); unset otherwise.
+  const read = (name: string) => cs?.getPropertyValue(name).trim() || "";
+  const [c1, c2, c3] = names.map((name, i) => hexToRgb(read(`--build-bar-${"abc"[i]}`) || read(name)) ?? hexToRgb(fallback[i])!);
   const f = Math.min(1, Math.max(0, fraction));
   return f <= 0.5 ? mix(c1, c2, f / 0.5) : mix(c2, c3, (f - 0.5) / 0.5);
 }

@@ -174,6 +174,21 @@ export const STAGE_ACCENTS: Record<StageId, string> = {
   complete: "#ff4585",
 };
 
+// DEMO-ONLY (?look=v2): the same walk, deep cobalt to luminous sky, all at
+// the references' hue (213deg), with no violet or pink stops.
+export const STAGE_ACCENTS_V2: Record<StageId, string> = {
+  welcome: "#176acf",
+  interests: "#1e74dc",
+  subjects: "#2780ec",
+  workVibe: "#3a8cf1",
+  milestone: "#4a96f4",
+  education: "#59a0f8",
+  cost: "#74b0f8",
+  location: "#8abdf9",
+  profile: "#9ec6fa",
+  complete: "#9ec6fa",
+};
+
 // Dreamy's coaching line + expression sprite per stage (sprites in
 // public/images/dreamy/, catalogued from the supplied expression packs).
 export const STAGE_DREAMY: Record<Exclude<StageId, "welcome" | "milestone" | "complete">, { line: string; sprite: string }> = {

@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { Briefcase, ChevronLeft, CirclePlay, Compass, GraduationCap, House, Menu, Moon, Rocket, Sun, Users, X } from "lucide-react";
 import { MessagesButton, NotificationsButton } from "./Inbox";
 import { useGlobalTheme } from "./theme";
+import { setLookV2, useLookV2 } from "./look";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
 import { useStudentAvatarSrc } from "@/lib/avatar";
 import { STUDENT } from "@/components/profile/data";
@@ -296,6 +297,7 @@ export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLin
   // their full pages; this item turns the sheets on for review, and off again
   const sheets = useSyncExternalStore(subscribeSheets, sheetsEnabled, () => false);
   const { theme, toggle } = useGlobalTheme();
+  const lookV2 = useLookV2();
   return (
     <div className={`flex flex-col gap-[2px] ${className}`}>
       {extra}
@@ -344,6 +346,20 @@ export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLin
         Detail sheets preview
         <span className="rounded-full px-[8px] py-[1px] text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ background: sheets ? "var(--primary)" : "var(--glass-surface-2)", color: sheets ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{sheets ? "On" : "Off"}</span>
       </Link>
+      {/* DEMO-ONLY: the black-and-blue look (18 Oct 2026, Joshua's focus-group
+         direction), switchable in place so the team can compare v1 and v2 on
+         any screen. Same as ?look=v2 / ?look=v1. */}
+      <button
+        type="button"
+        role="switch"
+        aria-checked={lookV2}
+        onClick={() => setLookV2(!lookV2)}
+        className="dm-quiet flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-left text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+        style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+      >
+        v2 look (black and blue)
+        <span className="rounded-full px-[8px] py-[1px] text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ background: lookV2 ? "var(--primary)" : "var(--glass-surface-2)", color: lookV2 ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{lookV2 ? "On" : "Off"}</span>
+      </button>
       {!hideDemoLinks && (
         <>
           <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Connect demo · view as</span>

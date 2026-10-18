@@ -221,11 +221,11 @@ export function PreGameFlow({
       {mode === "start" && (
         <header className="relative z-10 flex items-center justify-between gap-[12px] px-[16px] pt-[16px] sm:px-[28px] sm:pt-[24px]">
           {inRun ? (
-            <button type="button" onClick={() => { playSelect(); onClose(); }} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full px-[16px] py-[9px] text-[13px] font-bold" style={{ ...GLASS, color: "var(--foreground)" }}>
+            <button type="button" onClick={() => { playSelect(); onClose(); }} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-[10px] px-[16px] py-[9px] text-[13px] font-bold" style={{ ...GLASS, color: "var(--foreground)" }}>
               <X className="h-[14px] w-[14px]" aria-hidden /> Close
             </button>
           ) : (
-            <button type="button" onClick={() => goBackOr(router, "/play")} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full px-[16px] py-[9px] text-[13px] font-bold" style={{ ...GLASS, color: "var(--foreground)" }}>
+            <button type="button" onClick={() => goBackOr(router, "/play")} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-[10px] px-[16px] py-[9px] text-[13px] font-bold" style={{ ...GLASS, color: "var(--foreground)" }}>
               <ChevronLeft className="h-[15px] w-[15px]" aria-hidden /> Back
             </button>
           )}
@@ -247,7 +247,7 @@ export function PreGameFlow({
             </div>
           </div>
           <span className="flex-none text-[12.5px] font-extrabold tabular-nums" style={{ color: MUTED }}>{step + 1}/{total}</span>
-          <button type="button" onClick={skip} className="dm-quiet flex-none cursor-pointer rounded-full px-[10px] py-[6px] text-[12px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--foreground)" }}>
+          <button type="button" onClick={skip} className="dm-quiet flex-none cursor-pointer rounded-[8px] px-[10px] py-[6px] text-[12px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--foreground)" }}>
             {inRun ? "Close" : "Skip"}
           </button>
         </header>
@@ -541,7 +541,7 @@ function SkillsScreen({ skills, accent }: { skills: string[]; accent: string }) 
                 initial={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.25 + index * 0.14, type: "spring", stiffness: 420, damping: 18 }}
-                className="dm-quiet cursor-pointer rounded-full px-[18px] py-[11px] text-[12px] font-extrabold tracking-[0.12em] uppercase sm:text-[12.5px]"
+                className="dm-quiet cursor-pointer rounded-[12px] px-[18px] py-[11px] text-[12px] font-extrabold tracking-[0.12em] uppercase sm:text-[12.5px]"
                 style={active
                   ? { background: `color-mix(in srgb, ${accent} 24%, var(--card))`, border: `1px solid ${accent}`, color: "var(--foreground)", boxShadow: `0 0 24px -6px color-mix(in srgb, ${accent} 70%, transparent)` }
                   : { ...GLASS, color: "var(--foreground)" }}

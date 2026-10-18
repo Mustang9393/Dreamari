@@ -119,7 +119,7 @@ export function LeaderboardExperience() {
         </motion.header>
 
         {/* 1. Choose the view: three equal tabs, as in the Replit. */}
-        <motion.div {...ENTER(1)} role="tablist" aria-label="Leaderboard view" className="grid grid-cols-3 gap-[4px] rounded-full p-[5px]" style={{ background: "rgba(255,255,255,0.045)" }}>
+        <motion.div {...ENTER(1)} role="tablist" aria-label="Leaderboard view" className="grid grid-cols-3 gap-[4px] rounded-[17px] p-[5px]" style={{ background: "rgba(255,255,255,0.045)" }}>
           {TABS.map((t) => {
             const on = t.id === tab;
             const Icon = t.icon;
@@ -131,10 +131,10 @@ export function LeaderboardExperience() {
                 aria-label={t.label}
                 type="button"
                 onClick={() => setTab(t.id)}
-                className="relative flex min-h-[44px] cursor-pointer items-center justify-center gap-[8px] rounded-full px-[10px] text-[13px] font-bold sm:min-h-[48px] sm:text-[14px]"
+                className="relative flex min-h-[44px] cursor-pointer items-center justify-center gap-[8px] rounded-[12px] px-[10px] text-[13px] font-bold sm:min-h-[48px] sm:text-[14px]"
                 style={{ color: on ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
               >
-                {on && <motion.span layoutId="lb-tab" className="absolute inset-0 rounded-full" style={{ background: "var(--primary)", boxShadow: "0 14px 30px -14px var(--primary)" }} transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+                {on && <motion.span layoutId="lb-tab" className="absolute inset-0 rounded-[12px]" style={{ background: "var(--primary)", boxShadow: "0 14px 30px -14px var(--primary)" }} transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
                 <Icon className="relative h-[15px] w-[15px] flex-none" aria-hidden />
                 <span className="relative truncate">
                   <span className="md:hidden">{t.short}</span>
@@ -173,7 +173,7 @@ export function LeaderboardExperience() {
                     aria-selected={on}
                     type="button"
                     onClick={() => setLeague(l)}
-                    className="flex cursor-pointer items-center gap-[6px] rounded-full px-[12px] py-[7px] text-[12px] font-bold"
+                    className="flex cursor-pointer items-center gap-[6px] rounded-[8px] px-[12px] py-[7px] text-[12px] font-bold"
                     style={{ background: on ? `color-mix(in srgb, ${LEAGUE_COLOR[l]} 18%, transparent)` : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
                   >
                     <LeagueEmblem league={l} size={16} dim={!on} />

@@ -34,7 +34,7 @@ export function ArtVersionToggle({
     <div
       role="radiogroup"
       aria-label="Scene art version"
-      className={`flex flex-none items-center rounded-full border ${start ? "gap-[2px] p-[3px]" : "gap-[1px] p-[2px]"}`}
+      className={`flex flex-none items-center rounded-[11px] border ${start ? "gap-[2px] p-[3px]" : "gap-[1px] p-[2px]"}`}
       style={{
         borderColor: start ? "color-mix(in srgb, var(--foreground) 14%, transparent)" : "var(--color-glass-border-raised)",
         background: start
@@ -55,7 +55,7 @@ export function ArtVersionToggle({
             onClick={() => {
               if (!on) onChange(option);
             }}
-            className={`dm-quiet cursor-pointer rounded-full font-extrabold tracking-[0.04em] tabular-nums ${
+            className={`dm-quiet cursor-pointer rounded-[8px] font-extrabold tracking-[0.04em] tabular-nums ${
               start ? "min-h-[32px] px-[14px] text-[12.5px] leading-none" : "min-h-[22px] px-[9px] text-[10.5px] leading-none"
             }`}
             style={{

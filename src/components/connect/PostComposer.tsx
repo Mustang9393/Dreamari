@@ -184,7 +184,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, i
   const preview: Insight = { id: "preview", boardId, type: "insight", proId: pro.id, title: "", body, postedAgo: "", helpful: 0, replies: [] };
 
   const iconBtn = "dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-35";
-  const right = <button type="button" onClick={publish} disabled={!ready} className="dm-quiet min-h-[44px] cursor-pointer rounded-full px-[12px] text-[14.5px] font-bold disabled:cursor-default disabled:opacity-40" style={{ color: BLUE }}>Share</button>;
+  const right = <button type="button" onClick={publish} disabled={!ready} className="dm-quiet min-h-[44px] cursor-pointer rounded-[12px] px-[12px] text-[14.5px] font-bold disabled:cursor-default disabled:opacity-40" style={{ color: BLUE }}>Share</button>;
 
   return createPortal(
     // The dialog role sits on the wrapper so the Share to options, portalled
@@ -201,9 +201,9 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish, boards, i
             <IconTip label="Close (draft is kept)"><button type="button" onClick={onClose} aria-label="Close" className={iconBtn}><X className="h-5 w-5" aria-hidden /></button></IconTip>
           </span>
           {textOnly ? <span className="text-center text-[14.5px] font-bold">New post</span> : (
-            <div role="radiogroup" aria-label="Post type" className="mx-auto flex rounded-full p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+            <div role="radiogroup" aria-label="Post type" className="mx-auto flex rounded-[13px] p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
               {([["text", "Text post"], ["graphic", "Graphic post"]] as const).map(([k, label]) => (
-                <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => pickKind(k)} className="dm-quiet min-h-[38px] cursor-pointer rounded-full px-[14px] text-[13px] font-bold whitespace-nowrap" style={kind === k ? { background: "color-mix(in srgb, var(--foreground) 16%, transparent)", color: "var(--foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
+                <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => pickKind(k)} className="dm-quiet min-h-[38px] cursor-pointer rounded-[10px] px-[14px] text-[13px] font-bold whitespace-nowrap" style={kind === k ? { background: "color-mix(in srgb, var(--foreground) 16%, transparent)", color: "var(--foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
               ))}
             </div>
           )}
@@ -305,7 +305,7 @@ function Writing({ title, setTitle, body, setBody, prompts, rows, autoFocus = fa
       </div>
       {ideas && (
         <span className={`${pad} flex flex-wrap gap-[6px] pb-[12px]`}>
-          {prompts.slice(0, 4).map((p) => <button key={p} type="button" onClick={() => { setTitle(p); setIdeas(false); }} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[4px] text-left text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{p}</button>)}
+          {prompts.slice(0, 4).map((p) => <button key={p} type="button" onClick={() => { setTitle(p); setIdeas(false); }} className="dm-quiet cursor-pointer rounded-[8px] border px-[10px] py-[4px] text-left text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{p}</button>)}
         </span>
       )}
     </div>
@@ -336,7 +336,7 @@ function ShareTo({ portalContainer, boardId, setBoardId, ready, title, body, gra
 }
 
 function Chip({ on, onClick, children, label }: { on: boolean; onClick: () => void; children: React.ReactNode; label?: string }) {
-  return <button type="button" aria-pressed={on} aria-label={label} onClick={onClick} className="dm-quiet flex h-[34px] flex-none cursor-pointer items-center justify-center rounded-full border px-[12px] text-[12.5px] font-bold" style={chipStyle(on)}>{children}</button>;
+  return <button type="button" aria-pressed={on} aria-label={label} onClick={onClick} className="dm-quiet flex h-[34px] flex-none cursor-pointer items-center justify-center rounded-[10px] border px-[12px] text-[12.5px] font-bold" style={chipStyle(on)}>{children}</button>;
 }
 /** One horizontal row of choices, Instagram's filter strip. */
 function Strip({ label, children }: { label: string; children: React.ReactNode }) {

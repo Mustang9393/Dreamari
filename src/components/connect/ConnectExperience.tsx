@@ -1,5 +1,6 @@
 "use client";
 
+import { useGlobalTheme } from "@/components/app/theme";
 import { canGoBack } from "@/lib/backStep";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -444,7 +445,7 @@ export function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; 
       onClick={onClick}
       aria-pressed={pressed}
       aria-label={`Helpful, ${count.toLocaleString("en-US")} ${pluralize(count, "person", "people")} found this helpful`}
-      className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
+      className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-[8px] px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
       style={pressed ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
     >
       {/* Zero reads as noise, not information (direct feedback, 28 Sept
@@ -591,11 +592,11 @@ function RingStats({ items }: { items: [number, string][] }) {
         <span key={label} className="flex flex-col items-center gap-[4px]">
           <span
             className="flex size-[46px] items-center justify-center rounded-full border"
-            style={{ background: "rgba(255,255,255,0.09)", borderColor: "rgba(255,255,255,0.14)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
+            style={{ background: "var(--ev-ring-bg, rgba(255,255,255,0.09))", borderColor: "var(--ev-ring-border, rgba(255,255,255,0.14))", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
           >
-            <span className="text-[13px] leading-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{value.toLocaleString("en-US")}</span>
+            <span className="text-[13px] leading-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--ev-ink, #fff)" }}>{value.toLocaleString("en-US")}</span>
           </span>
-          <span className="text-[10.5px] leading-[13px] font-semibold capitalize" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.7)" }}>{label}</span>
+          <span className="text-[10.5px] leading-[13px] font-semibold capitalize" style={{ fontFamily: "var(--font-body)", color: "var(--ev-faint, rgba(255,255,255,0.7))" }}>{label}</span>
         </span>
       ))}
     </div>
@@ -606,11 +607,11 @@ function RingStats({ items }: { items: [number, string][] }) {
  *  carries its printing along the tear (an upright stack may replace this
  *  before shipping, brands forbid rotated logos), and one small QR badge in
  *  the corner that opens the branded code. */
-function TicketStub({ lead, partner, accent, onQr }: { lead: string; partner?: string; accent: string; onQr: () => void }) {
+function TicketStub({ lead, partner, accent, onQr, ink }: { lead: string; partner?: string; accent: string; onQr: () => void; ink?: string }) {
   return (
     <div className="relative z-10 flex w-[var(--stubw)] flex-none items-center justify-center overflow-hidden" style={{ textShadow: "none" }}>
-      <span aria-hidden className="connect-ticket-tear pointer-events-none absolute border-dashed" style={{ borderColor: `color-mix(in srgb, ${accent} 50%, rgba(255,255,255,0.18))` }} />
-      <span className="block -rotate-90 whitespace-nowrap"><EventMarks lead={lead} partner={partner} /></span>
+      <span aria-hidden className="connect-ticket-tear pointer-events-none absolute border-dashed" style={{ borderColor: `color-mix(in srgb, ${accent} 50%, var(--ev-tear, rgba(255,255,255,0.18)))` }} />
+      <span className="block -rotate-90 whitespace-nowrap"><EventMarks lead={lead} partner={partner} ink={ink} /></span>
       <QrBadge onClick={onQr} className="absolute top-[10px] right-[10px]" />
     </div>
   );
@@ -626,7 +627,7 @@ export function QrBadge({ onClick, className = "", label = "Show event QR code" 
         aria-label={label}
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
         className="dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-[8px] border opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100"
-        style={{ background: "rgba(8,10,22,0.55)", borderColor: "rgba(255,255,255,0.16)", color: "rgba(255,255,255,0.9)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none" }}
+        style={{ background: "var(--ev-qr-bg, rgba(8,10,22,0.55))", borderColor: "var(--ev-qr-border, rgba(255,255,255,0.16))", color: "var(--ev-qr-ink, rgba(255,255,255,0.9))", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none" }}
       >
         <QrCode className="h-[15px] w-[15px]" aria-hidden />
       </button>
@@ -678,10 +679,10 @@ export function EventSurface({ accent, edge = true, tab = true }: { accent: stri
   const lit = `color-mix(in srgb, ${accent} 62%, #ffffff)`;
   return (
     <>
-      <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 70% at 100% 0%, color-mix(in srgb, ${lit} 58%, transparent) 0%, color-mix(in srgb, ${lit} 18%, transparent) 42%, transparent 72%)` }} />
-      <span aria-hidden className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 14px)" }} />
-      <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.85) 0%, rgba(12,16,35,0.35) 45%, transparent 100%)" }} />
-      <span aria-hidden className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.18 }} />
+      <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 70% at 100% 0%, color-mix(in srgb, ${lit} var(--ev-glow-a, 58%), transparent) 0%, color-mix(in srgb, ${lit} var(--ev-glow-b, 18%), transparent) 42%, transparent 72%)` }} />
+      <span aria-hidden className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(135deg, var(--ev-hatch, rgba(255,255,255,0.055)) 0 1px, transparent 1px 14px)" }} />
+      <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--ev-floor, rgba(12,16,35,0.85)) 0%, var(--ev-floor-mid, rgba(12,16,35,0.35)) 45%, transparent 100%)" }} />
+      <span aria-hidden className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: "var(--ev-grain, 0.18)" as unknown as number }} />
       {tab && <span aria-hidden className="absolute top-0 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: lit, left: "var(--tab-x, 50%)" }} />}
       {/* the card's edge, drawn here so every event surface gets the same one
          (the ticket card draws its own edge so it can follow the notches) */}
@@ -1315,7 +1316,7 @@ function ActionChip({ children, onClick, pressed, label }: { children: React.Rea
     ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }
     : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" };
   return onClick ? (
-    <button type="button" onClick={onClick} aria-pressed={pressed} aria-label={label} className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] font-bold" style={style}>
+    <button type="button" onClick={onClick} aria-pressed={pressed} aria-label={label} className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-[8px] px-[10px] text-[12px] font-bold" style={style}>
       {children}
     </button>
   ) : (
@@ -1744,10 +1745,11 @@ export function ConnectExperience() {
           // in light) are replaced by solid tints of the page's own
           // foreground over its own background, so a card reads as a card in
           // both themes and the border carries a real edge. Scoped to this
-          // page; the app-wide tokens are untouched.
-          ["--glass-surface-1" as string]: "color-mix(in srgb, var(--foreground) 7%, var(--background))",
-          ["--glass-surface-2" as string]: "color-mix(in srgb, var(--foreground) 12%, var(--background))",
-          ["--glass-border" as string]: "color-mix(in srgb, var(--foreground) 22%, transparent)",
+          // page; the app-wide tokens are untouched. The values live in
+          // app.css (.connect-surfaces) so light mode can differ: there the
+          // same mix came out grey, DARKER than the panel under it (Chandu,
+          // 18 Oct 2026: "muddy grey surfaces in connect... the surface gets
+          // lighter as they are stacked").
         }}
         // Same side padding as every other tab (px-5, then the 56px rail from
         // sm). Home, the boards and the dashboards fill the shared 1440
@@ -1771,7 +1773,7 @@ export function ConnectExperience() {
         // comment area's reading column kept narrower, centred inside the
         // full-width black zone ("the threads can be narrower within the
         // black area").
-        className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8"
+        className="connect-surfaces relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8"
       >
         {/* The demo role switcher is a utility, not part of the page: it
            shows only where it applies (the Connect landing, or while a
@@ -2202,7 +2204,7 @@ function RoleTabs({ role, onPick, children }: { role: DemoRole; onPick: (role: D
         aria-expanded={showTabs}
         aria-controls="connect-demo-roles"
         onClick={() => setOpen((value) => !value)}
-        className="dm-quiet flex-none cursor-pointer rounded-full border px-[12px] py-[5px] text-[11px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+        className="dm-quiet flex-none cursor-pointer rounded-[8px] border px-[12px] py-[5px] text-[11px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
         style={{ borderColor: "var(--glass-border)", color: showTabs ? "var(--foreground)" : "var(--muted-foreground)", background: "color-mix(in srgb, var(--card) 92%, transparent)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 8px 20px -10px rgba(0,0,0,0.6)" }}
       >
         Demo
@@ -3310,7 +3312,7 @@ function FeedEventCard({ event, proName, reminded, onToggleRemind, onOpen }: { e
         type="button"
         onClick={(e) => { e.stopPropagation(); onToggleRemind(); }}
         aria-pressed={reminded}
-        className="dm-quiet relative z-20 flex-none cursor-pointer rounded-full border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-bold"
+        className="dm-quiet relative z-20 flex-none cursor-pointer rounded-[8px] border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-bold"
         style={reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--border))", color: "var(--foreground)", background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--glass-surface-1))" } : { borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}
       >
         {reminded ? "Reminder Set" : "Remind Me"}
@@ -3388,7 +3390,7 @@ function DiscoverRail({
               <li key={c.id} className={row}>
                 <span aria-hidden className="size-[10px] flex-none rounded-full" style={{ background: communityAccent(c) }} />
                 <button type="button" onClick={() => nav?.openBoard(c.id)} className="dm-link min-w-0 flex-1 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</button>
-                <button type="button" onClick={() => nav?.openBoard(c.id)} className="dm-quiet flex-none cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Open</button>
+                <button type="button" onClick={() => nav?.openBoard(c.id)} className="dm-quiet flex-none cursor-pointer rounded-[8px] border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Open</button>
                 {dismiss(c.name, () => onDismissBoard(c.id))}
               </li>
             ))}
@@ -4047,7 +4049,9 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
    *  boards?"): Enter code leads the action row until it's unlocked */
   gated?: boolean;
 }) {
-  const eventInk = "#f6f5fb";
+  const eventInk = "var(--ev-ink, #f6f5fb)";
+  // light mode draws the partner marks in ink (the --ev-* palette, app.css)
+  const markInk = useGlobalTheme().theme === "light" ? "#101a26" : undefined;
   const upcoming = event.lifecycle === "Upcoming";
   const preview = upcoming && !!onRemind && (!gated || joined);
   const pAccent = partnerAccent(event.host);
@@ -4064,7 +4068,7 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
        tear-off of a paper ticket. The shadow rides an outer
        wrapper as a drop-shadow so it follows the notched outline.
        Community cards keep their own shape. */
-    <div className="group relative h-full" style={{ filter: "drop-shadow(0 16px 22px rgba(0,0,0,0.45))" }}>
+    <div className="event-card group relative h-full" style={{ filter: "drop-shadow(var(--ev-drop, 0 16px 22px rgba(0,0,0,0.45)))" }}>
       {/* Ticket (direct feedback, 4 Sept 2026): body on the left, a
          side stub on the right at every width, torn apart by two
          notches and a perforation. The stub carries the lockup,
@@ -4085,18 +4089,18 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
         onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; if (joined || preview) onOpenEvent(event.id); else onEnterCode(event.id); }}
         onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (joined || preview) onOpenEvent(event.id); else onEnterCode(event.id); } }}
         className="connect-ticket dm-tap relative flex h-[316px] cursor-pointer overflow-hidden rounded-[var(--radius-lg)]"
-        style={{ background: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.12))`, fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}
+        style={{ background: `color-mix(in srgb, ${lit} 50%, var(--ev-edge-mix, rgba(255,255,255,0.12)))`, fontFamily: "var(--font-display)", textShadow: `var(--ev-text-shadow, ${CARD_TEXT_SHADOW})` }}
       >
-        <div aria-hidden className="connect-ticket-inner absolute inset-px overflow-hidden rounded-[calc(var(--radius-lg)-1px)]" style={{ background: "#0e0c20", ["--tab-x" as string]: "calc((100% - var(--stubw)) / 2)" }}>
+        <div aria-hidden className="connect-ticket-inner absolute inset-px overflow-hidden rounded-[calc(var(--radius-lg)-1px)]" style={{ background: "var(--ev-ground, #0e0c20)", ["--tab-x" as string]: "calc((100% - var(--stubw)) / 2)" }}>
           <EventSurface accent={pAccent} edge={false} />
-          <span className="connect-ticket-paper absolute" style={{ background: `linear-gradient(180deg, color-mix(in srgb, ${lit} 16%, rgba(255,255,255,0.05)) 0%, color-mix(in srgb, ${lit} 8%, rgba(255,255,255,0.03)) 100%)` }} />
+          <span className="connect-ticket-paper absolute" style={{ background: `linear-gradient(180deg, color-mix(in srgb, ${lit} 16%, var(--ev-paper-a, rgba(255,255,255,0.05))) 0%, color-mix(in srgb, ${lit} 8%, var(--ev-paper-b, rgba(255,255,255,0.03))) 100%)` }} />
         </div>
         {/* body */}
         <div className="relative z-10 flex min-w-0 flex-1 flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pt-[var(--space-6)]">
           <h3 className="line-clamp-3 min-h-[78px] text-[21px] leading-[26px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
-          <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
-            <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {when}</span>
-            <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {event.location}</span>
+          <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--ev-soft, rgba(255,255,255,0.8))", fontFamily: "var(--font-body)" }}>
+            <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} var(--ev-icon-a, 60%), var(--ev-icon-mix, #fff))` }} /> {when}</span>
+            <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} var(--ev-icon-a, 60%), var(--ev-icon-mix, #fff))` }} /> {event.location}</span>
           </p>
           {/* fixed zones so every ticket is the same height: the
              counts row, then the action on its own line */}
@@ -4113,7 +4117,7 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
               <span className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px]">
                 <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open Board <ChevronRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
                 {openLabel && (
-                  <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
+                  <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--ev-soft, rgba(255,255,255,0.8))", fontFamily: "var(--font-body)" }}>
                     <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: "var(--world-food-farming-nature)", boxShadow: "0 0 0 3px color-mix(in srgb, var(--world-food-farming-nature) 28%, transparent)" }} />
                     {openLabel}
                   </span>
@@ -4128,14 +4132,14 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onRemind!(); }}
                 aria-pressed={!!reminded}
-                className="dm-quiet relative z-20 flex min-h-[38px] flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[13px] leading-[16px] font-bold"
-                style={{ fontFamily: "var(--font-body)", ...(reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, rgba(255,255,255,0.2))", color: "#fff", background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, rgba(255,255,255,0.06))" } : { borderColor: "rgba(255,255,255,0.22)", color: "#fff", background: "rgba(255,255,255,0.08)" }) }}
+                className="dm-quiet relative z-20 flex min-h-[38px] flex-none cursor-pointer items-center gap-[6px] rounded-[10px] border px-[14px] text-[13px] leading-[16px] font-bold"
+                style={{ fontFamily: "var(--font-body)", ...(reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--ev-btn-border, rgba(255,255,255,0.2)))", color: "var(--ev-btn-ink, #fff)", background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, var(--ev-btn-bg, rgba(255,255,255,0.06)))" } : { borderColor: "var(--ev-btn-border, rgba(255,255,255,0.22))", color: "var(--ev-btn-ink, #fff)", background: "var(--ev-btn-bg, rgba(255,255,255,0.08))" }) }}
               >
                 {reminded ? <Check className="h-[14px] w-[14px]" aria-hidden /> : remindLabels[0] === "Remind Me" ? <Bell className="h-[14px] w-[14px]" aria-hidden /> : <Users className="h-[14px] w-[14px]" aria-hidden />}
                 {reminded ? remindLabels[1] : remindLabels[0]}
               </button>
               )}
-              {hostLine && <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}><Building2 className="h-[14px] w-[14px] flex-none" aria-hidden />{hostLine}</span>}
+              {hostLine && <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--ev-soft, rgba(255,255,255,0.8))", fontFamily: "var(--font-body)" }}><Building2 className="h-[14px] w-[14px] flex-none" aria-hidden />{hostLine}</span>}
               </span>
             ) : preview ? (
               <span className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px]">
@@ -4144,23 +4148,23 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onRemind!(); }}
                 aria-pressed={!!reminded}
-                className="dm-quiet relative z-20 flex min-h-[38px] flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[13px] leading-[16px] font-bold"
-                style={{ fontFamily: "var(--font-body)", ...(reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, rgba(255,255,255,0.2))", color: "#fff", background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, rgba(255,255,255,0.06))" } : { borderColor: "rgba(255,255,255,0.22)", color: "#fff", background: "rgba(255,255,255,0.08)" }) }}
+                className="dm-quiet relative z-20 flex min-h-[38px] flex-none cursor-pointer items-center gap-[6px] rounded-[10px] border px-[14px] text-[13px] leading-[16px] font-bold"
+                style={{ fontFamily: "var(--font-body)", ...(reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--ev-btn-border, rgba(255,255,255,0.2)))", color: "var(--ev-btn-ink, #fff)", background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, var(--ev-btn-bg, rgba(255,255,255,0.06)))" } : { borderColor: "var(--ev-btn-border, rgba(255,255,255,0.22))", color: "var(--ev-btn-ink, #fff)", background: "var(--ev-btn-bg, rgba(255,255,255,0.08))" }) }}
               >
                 {reminded ? <Check className="h-[14px] w-[14px]" aria-hidden /> : remindLabels[0] === "Remind Me" ? <Bell className="h-[14px] w-[14px]" aria-hidden /> : <Users className="h-[14px] w-[14px]" aria-hidden />}
                 {reminded ? remindLabels[1] : remindLabels[0]}
               </button>
-              {hostLine && <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}><Building2 className="h-[14px] w-[14px] flex-none" aria-hidden />{hostLine}</span>}
+              {hostLine && <span className="flex items-center gap-[6px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--ev-soft, rgba(255,255,255,0.8))", fontFamily: "var(--font-body)" }}><Building2 className="h-[14px] w-[14px] flex-none" aria-hidden />{hostLine}</span>}
               </span>
             ) : upcoming ? (
-              <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
+              <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--ev-faint, rgba(255,255,255,0.7))", fontFamily: "var(--font-body)" }}>Opens after the event</p>
             ) : (
               <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter Code</PrimaryCta>
             )}
           </div>
         </div>
         {/* stub: the lockup on its side; tap for the branded QR */}
-        <TicketStub lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} accent={lit} onQr={() => onQr(event)} />
+        <TicketStub lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} accent={lit} onQr={() => onQr(event)} ink={markInk} />
       </div>
     </div>
   );
@@ -4608,7 +4612,7 @@ function BoardView({
           {firms.length > 1 && (
             <div className="flex flex-wrap gap-[6px]">
               {["All", ...firms].map((f) => (
-                <button key={f} type="button" aria-pressed={firm === f} onClick={() => setFirm(f)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center rounded-full border px-[12px] text-[13px] leading-[18px] font-semibold" style={firm === f ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{f}</button>
+                <button key={f} type="button" aria-pressed={firm === f} onClick={() => setFirm(f)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center rounded-[10px] border px-[12px] text-[13px] leading-[18px] font-semibold" style={firm === f ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{f}</button>
               ))}
             </div>
           )}
@@ -4789,7 +4793,8 @@ function EventView({
   const [remindNote, setRemindNote] = useState(false);
   const [postedQs, setPostedQs] = useState<{ id: string; title: string }[]>([]);
   const [planAdded, setPlanAdded] = useState(false);
-  const eventInk = "#f6f5fb";
+  const eventInk = "var(--ev-ink, #f6f5fb)";
+  const boardMarkInk = useGlobalTheme().theme === "light" ? "#101a26" : undefined;
   const pAccent = partnerAccent(event.host);
   const [qrOpen, setQrOpen] = useState(false);
   // Falls back to Questions for any old/unrecognised ?filter= value.
@@ -4840,15 +4845,15 @@ function EventView({
       ) : (
       <section
         aria-label="Event context"
-        className="group relative overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)]"
-        style={{ background: "#0e0c20", fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
+        className="event-card group relative overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)]"
+        style={{ background: "var(--ev-ground, #0e0c20)", fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px var(--ev-board-shadow, rgba(0,0,0,0.65))", textShadow: `var(--ev-text-shadow, ${CARD_TEXT_SHADOW})` }}
       >
         <EventSurface accent={pAccent} />
         {/* the lockup sits in the header's top-right corner, on the header's own
            padding, at card size: a fixed anchor rather than a flex item that
            drifted with the title's line count (direct feedback) */}
         <div className="absolute top-[var(--space-5)] right-[var(--space-6)] z-10 flex items-center gap-[10px]">
-          <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} />
+          <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} ink={boardMarkInk} />
           <QrBadge onClick={() => setQrOpen(true)} />
         </div>
         <div className="relative z-10 flex flex-wrap items-center gap-x-[var(--space-5)] gap-y-[12px]">

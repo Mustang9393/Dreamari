@@ -2285,9 +2285,9 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
             <h3 id="compare-sheet-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My top {entries.length}</h3>
           </span>
           <span className="flex items-center gap-[8px]">
-            <div role="radiogroup" aria-label="Compare as" className="flex rounded-full p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
+            <div role="radiogroup" aria-label="Compare as" className="flex rounded-[11px] p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
               {([["highlights", "Highlights"], ["original", "Detailed"]] as const).map(([k, label]) => (
-                <button key={k} type="button" role="radio" aria-checked={mode === k} onClick={() => setMode(k)} className="dm-quiet h-[30px] cursor-pointer rounded-full px-[12px] text-[12.5px] font-bold" style={mode === k ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
+                <button key={k} type="button" role="radio" aria-checked={mode === k} onClick={() => setMode(k)} className="dm-quiet h-[30px] cursor-pointer rounded-[8px] px-[12px] text-[12.5px] font-bold" style={mode === k ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
               ))}
             </div>
             <IconTip label="Close">

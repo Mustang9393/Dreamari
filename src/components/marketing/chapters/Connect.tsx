@@ -199,7 +199,7 @@ function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
           <button
             type="button"
             onClick={onEnter}
-            className="flex w-full items-center justify-center rounded-full border font-bold"
+            className="flex w-full items-center justify-center rounded-[12px] border font-bold"
             style={{
               color: "var(--c)",
               gap: "calc(var(--mu) * 8px)",

@@ -69,7 +69,7 @@ export function LoadingView({ label = "Loading", shape = "chip" }: { label?: str
   if (shape === "button")
     return (
       <div className="flex justify-center">
-        <button type="button" disabled aria-busy="true" className="inline-flex cursor-not-allowed items-center gap-[6px] rounded-full px-[16px] py-[8px] text-[13px] leading-[18px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 72%, transparent)", color: "#fff" }}>
+        <button type="button" disabled aria-busy="true" className="inline-flex cursor-not-allowed items-center gap-[6px] rounded-[10px] px-[16px] py-[8px] text-[13px] leading-[18px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 72%, transparent)", color: "#fff" }}>
           <LoaderCircle className="h-[14px] w-[14px] motion-safe:animate-spin" style={{ animationDuration: "1.1s" }} aria-hidden />
           {label}…
         </button>
@@ -137,7 +137,7 @@ export function ErrorView({ verb = "load this", fallback, pill, variant = "card"
   if (pill)
     return (
       <div className="flex justify-center">
-        <button type="button" onClick={act} className="dm-quiet inline-flex cursor-pointer items-center gap-[6px] rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)" }}>
+        <button type="button" onClick={act} className="dm-quiet inline-flex cursor-pointer items-center gap-[6px] rounded-[8px] border px-[10px] py-[4px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)" }}>
           <span aria-hidden className="size-[6px] rounded-full" style={{ background: ERROR_INK }} />
           {message ?? `${pill} didn't finish`} · <RotateCcw className="h-3 w-3" aria-hidden /> Retry
         </button>

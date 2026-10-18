@@ -273,7 +273,7 @@ export function GetHiredChapter() {
             type="button"
             onClick={() => setStage((value) => Math.max(0, value - 1))}
             disabled={stage === 0}
-            className="cursor-pointer rounded-full border px-4 py-2 text-[12px] font-bold disabled:cursor-default disabled:opacity-30"
+            className="cursor-pointer rounded-[10px] border px-4 py-2 text-[12px] font-bold disabled:cursor-default disabled:opacity-30"
             style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
           >
             Back
@@ -294,7 +294,7 @@ export function GetHiredChapter() {
               <button
                 type="button"
                 onClick={() => setStage((value) => Math.min(STAGES.length - 1, value + 1))}
-                className="cursor-pointer rounded-full border px-5 py-2 text-[12px] font-bold"
+                className="cursor-pointer rounded-[10px] border px-5 py-2 text-[12px] font-bold"
                 style={{ background: "color-mix(in srgb, var(--primary) 22%, var(--glass-surface-2))", borderColor: "color-mix(in srgb, var(--primary) 45%, transparent)", color: "var(--foreground)" }}
               >
                 Next

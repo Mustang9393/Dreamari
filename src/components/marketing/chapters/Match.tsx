@@ -185,7 +185,7 @@ function MatchDemo() {
                 <button
                   type="button"
                   onClick={reset}
-                  className="mt-1 flex items-center rounded-full border font-semibold"
+                  className="mt-1 flex items-center rounded-[8px] border font-semibold"
                   style={{
                     gap: "calc(var(--mu) * 6px)",
                     padding: "calc(var(--mu) * 7px) calc(var(--mu) * 14px)",

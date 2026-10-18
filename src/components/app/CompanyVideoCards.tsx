@@ -168,7 +168,7 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
           <button
             type="button"
             onClick={retry}
-            className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold"
+            className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-[8px] border px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold"
             style={{ borderColor: "rgba(255,255,255,0.3)", color: "#fff", background: "rgba(255,255,255,0.08)" }}
           >
             <RotateCcw className="h-[13px] w-[13px]" aria-hidden /> Try again

@@ -48,6 +48,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
          of cutting off hard. */}
       <div
         aria-hidden
+        data-hero-surface
         className="pointer-events-none absolute inset-0"
         style={{
           background: "linear-gradient(90deg, var(--hero-accent-purple), var(--hero-mid) 65%, var(--background) 100%)",
@@ -58,6 +59,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
       />
       <div
         aria-hidden
+        data-hero-glow
         className="pointer-events-none absolute -top-56 -right-40 h-[640px] w-[640px] rounded-full blur-[10px]"
         style={{ background: "radial-gradient(circle at 50% 50%, rgba(47,107,242,.35), rgba(122,45,226,.18) 45%, transparent 70%)" }}
       />

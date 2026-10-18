@@ -222,7 +222,7 @@ function Waypoints({ items, value, onChange, label }: { items: string[]; value: 
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(item)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-full border py-2.5 pr-4 pl-3.5 text-[13.5px] font-bold transition-colors duration-300"
+            className="flex cursor-pointer items-center gap-2.5 rounded-[12px] border py-2.5 pr-4 pl-3.5 text-[13.5px] font-bold transition-colors duration-300"
             style={{
               background: selected ? "color-mix(in srgb, var(--primary) 14%, var(--surface))" : "var(--surface)",
               borderColor: selected ? "color-mix(in srgb, var(--primary) 42%, transparent)" : "var(--border)",
@@ -277,7 +277,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
            how our surface colors play wiht each other"), so it's much
            quieter here, not the same strength turned down slightly. */}
         <div aria-hidden className="mkt-drift-a pointer-events-none absolute -top-40 right-[-10%] h-[680px] w-[680px] rounded-full blur-[90px]" style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--primary) 22%, transparent), transparent 70%)", opacity: theme === "light" ? 0.35 : 1 }} />
-        <div aria-hidden className="mkt-drift-b pointer-events-none absolute top-[38%] left-[-12%] h-[620px] w-[620px] rounded-full blur-[90px]" style={{ background: "radial-gradient(circle, rgba(125,92,255,0.22), transparent 70%)", opacity: theme === "light" ? 0.35 : 1 }} />
+        <div aria-hidden data-drift-violet className="mkt-drift-b pointer-events-none absolute top-[38%] left-[-12%] h-[620px] w-[620px] rounded-full blur-[90px]" style={{ background: "radial-gradient(circle, rgba(125,92,255,0.22), transparent 70%)", opacity: theme === "light" ? 0.35 : 1 }} />
         <div className="relative mx-auto max-w-[1100px]">
           <motion.div className="mb-10 flex justify-center sm:mb-12" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
             <AudienceToggle view={view} onChange={onChangeView} />

@@ -190,7 +190,7 @@ function BuildDemo() {
               onMouseLeave={() => setMoreHovered(false)}
               onFocus={() => setMoreHovered(true)}
               onBlur={() => setMoreHovered(false)}
-              className="flex flex-none cursor-pointer items-center rounded-full border font-bold uppercase transition-colors duration-150"
+              className="flex flex-none cursor-pointer items-center rounded-[8px] border font-bold uppercase transition-colors duration-150"
               style={{
                 fontSize: "calc(var(--mu) * 8.5px)",
                 letterSpacing: "0.04em",

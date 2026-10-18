@@ -65,7 +65,7 @@ const VIEW = { once: true, amount: 0.3 } as const;
 /** Blue-to-violet gradient type, the page's one display flourish. */
 export function Grad({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <span className={className} style={{ backgroundImage: `linear-gradient(92deg, ${BLUE} 0%, ${VIOLET} 55%, #a855f7 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+    <span data-grad-text className={className} style={{ backgroundImage: `linear-gradient(92deg, ${BLUE} 0%, ${VIOLET} 55%, #a855f7 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
       {children}
     </span>
   );

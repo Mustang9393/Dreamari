@@ -176,7 +176,7 @@ export function PhaseProgress({ percent, almostDone }: { percent: number; almost
         className="mt-2"
         percent={percent}
         height={4}
-        fill="linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple), var(--color-world-arts-media-sport))"
+        fill="linear-gradient(90deg, var(--build-bar-a, var(--color-brand-500)), var(--build-bar-b, var(--color-accent-purple)), var(--build-bar-c, var(--color-world-arts-media-sport)))"
         glow="var(--color-accent-purple)"
         glowAt={barGradientColorAt}
         idle

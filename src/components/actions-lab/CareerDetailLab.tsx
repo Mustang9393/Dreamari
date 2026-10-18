@@ -660,7 +660,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
             id="pay"
             title={pay.title ?? "Pay by state"}
             action={
-              <div role="tablist" aria-label="Pay by state view" className="dm-glass flex items-center gap-[2px] rounded-full border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              <div role="tablist" aria-label="Pay by state view" className="dm-glass flex items-center gap-[2px] rounded-[13px] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                 {([["states", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
                   <button
                     key={id}
@@ -668,7 +668,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                     role="tab"
                     aria-selected={payView === id}
                     onClick={() => setPayView(id)}
-                    className="dm-quiet relative min-h-[32px] cursor-pointer rounded-full px-[14px] text-[13px] leading-[16px] font-semibold"
+                    className="dm-quiet relative min-h-[32px] cursor-pointer rounded-[10px] px-[14px] text-[13px] leading-[16px] font-semibold"
                     style={{ color: payView === id ? "var(--background)" : "var(--foreground)" }}
                   >
                     {/* Fill slides between the two views via a shared
@@ -679,7 +679,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                       <motion.span
                         layoutId="career-pay-view-pill"
                         aria-hidden
-                        className="absolute inset-0 rounded-full"
+                        className="absolute inset-0 rounded-[10px]"
                         style={{ background: "var(--foreground)" }}
                         transition={{ type: "spring", stiffness: 500, damping: 40 }}
                       />

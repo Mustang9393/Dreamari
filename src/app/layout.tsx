@@ -9,6 +9,7 @@ import { SkipLink } from "@/components/app/SkipLink";
 import { ThemeBoot } from "@/components/app/theme";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import "./globals.css";
+import "./look-v2.css";
 
 // Replaces Montserrat app-wide: Inter is built specifically for UI legibility
 // at small sizes (tall x-height, open counters), has a genuinely wide static
@@ -44,6 +45,14 @@ export default function RootLayout({
         {/* Welcome first, then the page: see SplashVeil.tsx */}
         <script dangerouslySetInnerHTML={{ __html: SPLASH_VEIL_SCRIPT }} />
         <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
+        <script
+          dangerouslySetInnerHTML={{
+            // DEMO-ONLY: the black-and-blue look preview (look-v2.css). ?look=v2
+            // turns it on and remembers it, ?look=v1 turns it off. Set before
+            // paint so the old palette never flashes.
+            __html: `try{var q=new URLSearchParams(location.search).get("look");if(q==="v2")localStorage.setItem("dreamari-look","v2");else if(q==="v1")localStorage.removeItem("dreamari-look");if(localStorage.getItem("dreamari-look")==="v2")document.documentElement.classList.add("look-v2")}catch(e){}`,
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             // Defaults to dark everywhere except the build flow ("/flow"), which defaults

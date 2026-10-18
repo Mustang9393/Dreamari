@@ -270,7 +270,7 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
         {filters.map((f) => {
           const on = f.key === filter;
           return (
-            <button key={f.key} type="button" role="tab" aria-selected={on} onClick={() => setFilter(f.key)} className="dm-quiet relative cursor-pointer rounded-full border px-[11px] py-[4px] text-[12px] leading-[16px] font-bold" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
+            <button key={f.key} type="button" role="tab" aria-selected={on} onClick={() => setFilter(f.key)} className="dm-quiet relative cursor-pointer rounded-[8px] border px-[11px] py-[4px] text-[12px] leading-[16px] font-bold" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
               {f.label}
               {f.key === "messages" && inbox.unread > 0 && <span aria-hidden className="absolute -top-[3px] -right-[3px] size-[8px] rounded-full" style={{ background: "#FF3040", boxShadow: "0 0 0 1.5px var(--background)" }} />}
             </button>

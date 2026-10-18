@@ -883,7 +883,7 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
         {/* one nudge, dismissable, rotates as the conversation moves */}
         {!nudgeGone && nudge && (
           <div className="flex items-center gap-[6px] motion-safe:animate-[fade-slide-up_0.18s_ease-out_both]">
-            <button type="button" onClick={() => setDraft(nudge)} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-left text-[12.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--muted-foreground)" }}>
+            <button type="button" onClick={() => setDraft(nudge)} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[6px] rounded-[8px] border px-[12px] py-[6px] text-left text-[12.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--muted-foreground)" }}>
               <Sparkles className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} /> <span className="truncate">{nudge}</span>
             </button>
             <IconTip label="Dismiss suggestion">
@@ -990,7 +990,7 @@ function MeetingRequestSheet({ onClose, onSend }: { onClose: () => void; onSend:
         <div role="radiogroup" className="flex flex-wrap gap-[6px]">
           {D.MEETING.reschedule.map((s) => {
             const on = s === slot;
-            return <button key={s} type="button" role="radio" aria-checked={on} onClick={() => setSlot(s)} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-semibold" style={on ? { borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>{s}</button>;
+            return <button key={s} type="button" role="radio" aria-checked={on} onClick={() => setSlot(s)} className="dm-quiet cursor-pointer rounded-[8px] border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-semibold" style={on ? { borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>{s}</button>;
           })}
         </div>
       </div>
@@ -1223,7 +1223,7 @@ function RematchPanel({ who, onToast }: { who: string; onToast: (t: string) => v
       <div role="radiogroup" aria-label="Next year" className="flex flex-wrap gap-[6px]">
         {D.REMATCH.options.map((o) => {
           const on = pick === o;
-          return <button key={o} type="button" role="radio" aria-checked={on} onClick={() => { setPick(o); onToast("Saved. You can change this until April 30."); }} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { borderColor: `color-mix(in srgb, ${GOOD} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${GOOD} 14%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>{on && <Check className="mr-[4px] inline h-3.5 w-3.5" aria-hidden style={{ color: GOOD }} />}{o}</button>;
+          return <button key={o} type="button" role="radio" aria-checked={on} onClick={() => { setPick(o); onToast("Saved. You can change this until April 30."); }} className="dm-quiet cursor-pointer rounded-[8px] border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { borderColor: `color-mix(in srgb, ${GOOD} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${GOOD} 14%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>{on && <Check className="mr-[4px] inline h-3.5 w-3.5" aria-hidden style={{ color: GOOD }} />}{o}</button>;
         })}
       </div>
     </Panel>
@@ -1711,7 +1711,7 @@ function SettingsView({ onToast }: { onToast: (t: string) => void }) {
               {s.options.map((o) => {
                 const on = values[s.key] === o;
                 return (
-                  <button key={o} type="button" role="radio" aria-checked={on} onClick={() => { setValues((v) => ({ ...v, [s.key]: o })); onToast(`${s.title}: ${o}`); }} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[5px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
+                  <button key={o} type="button" role="radio" aria-checked={on} onClick={() => { setValues((v) => ({ ...v, [s.key]: o })); onToast(`${s.title}: ${o}`); }} className="dm-quiet cursor-pointer rounded-[8px] border px-[12px] py-[5px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
                     {o}
                   </button>
                 );
@@ -1728,7 +1728,7 @@ function SettingsView({ onToast }: { onToast: (t: string) => void }) {
             {D.VERIFICATION.options.map((o) => {
               const on = (values.verification ?? D.VERIFICATION.value) === o;
               return (
-                <button key={o} type="button" role="radio" aria-checked={on} onClick={() => { setValues((v) => ({ ...v, verification: o })); onToast(`${D.VERIFICATION.title}: ${o}`); }} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[5px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
+                <button key={o} type="button" role="radio" aria-checked={on} onClick={() => { setValues((v) => ({ ...v, verification: o })); onToast(`${D.VERIFICATION.title}: ${o}`); }} className="dm-quiet cursor-pointer rounded-[8px] border px-[12px] py-[5px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
                   {o}
                 </button>
               );

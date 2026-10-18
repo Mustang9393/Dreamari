@@ -254,7 +254,7 @@ function Rail({ title, subtitle, count, onViewAll, peek = false, children }: { t
                number counters next to the row titles on explore. No numbers.") */}
             {title}
           </h2>
-          {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
+          {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-[8px] px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
         </div>
         {subtitle && (
           <p className="text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
@@ -303,7 +303,7 @@ function TrendingRail({ slots, onViewAll }: { slots: { slot: TrendingSlot; rank:
         <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
           {TRENDING_TITLE}
         </h2>
-        {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
+        {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-[8px] px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
       </div>
       <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:pl-[var(--space-14)] md:pr-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
         {slots.map(({ slot, rank }) => {
@@ -367,7 +367,7 @@ function SearchResults({ query, hits, onQuery, heading, onBack, backLabel = "All
   return (
     <section className="flex w-full flex-col gap-[var(--space-5)]" aria-live="polite">
       {onBack && (
-        <button type="button" onClick={onBack} className="dm-quiet -mb-[8px] flex w-fit cursor-pointer items-center gap-[4px] rounded-full py-[6px] pr-[12px] pl-[6px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>
+        <button type="button" onClick={onBack} className="dm-quiet -mb-[8px] flex w-fit cursor-pointer items-center gap-[4px] rounded-[8px] py-[6px] pr-[12px] pl-[6px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
         </button>
       )}
@@ -490,7 +490,7 @@ function SearchPanel({ query, onQuery }: { query: string; onQuery: (q: string) =
       type="button"
       aria-expanded={filtersOpen}
       onClick={() => setFiltersOpen((open) => !open)}
-      className="dm-quiet flex h-9 flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[13px] font-semibold"
+      className="dm-quiet flex h-9 flex-none cursor-pointer items-center gap-[6px] rounded-[10px] border px-[14px] text-[13px] font-semibold"
       style={{ fontFamily: "var(--font-body)", background: filtersOpen ? "var(--glass-surface-2)" : "var(--glass-surface-1)", borderColor: activeFilters > 0 ? "var(--primary)" : "var(--glass-border)", color: "var(--foreground)" }}
     >
       <SlidersHorizontal className="h-4 w-4" aria-hidden />
@@ -514,7 +514,7 @@ function SearchPanel({ query, onQuery }: { query: string; onQuery: (q: string) =
         <Listbox ariaLabel="Sort by" value={sort} onChange={(v) => setSort(v as SortOption)} options={SORT_OPTIONS.map((o) => ({ value: o, label: o }))} className={FILTER_FIELD} style={FILTER_FIELD_STYLE} />
       </div>
       {activeFilters > 0 && (
-        <button type="button" onClick={() => { setWorld("All"); setSort("Recommended"); }} className="dm-quiet flex h-10 cursor-pointer items-center rounded-full px-[12px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>
+        <button type="button" onClick={() => { setWorld("All"); setSort("Recommended"); }} className="dm-quiet flex h-10 cursor-pointer items-center rounded-[12px] px-[12px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>
           Clear filters
         </button>
       )}
@@ -627,7 +627,7 @@ function NonCollegeSwitch({ on, onChange }: { on: boolean; onChange: (on: boolea
         role="switch"
         aria-checked={on}
         onClick={flip}
-        className="dm-quiet relative -ml-[8px] flex h-8 flex-none cursor-pointer items-center gap-[10px] rounded-full px-[8px]"
+        className="dm-quiet relative -ml-[8px] flex h-8 flex-none cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px]"
         style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-body)" }}
       >
         <span className="text-[13px] leading-[16px] font-semibold whitespace-nowrap transition-colors">Non-college</span>

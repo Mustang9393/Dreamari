@@ -126,7 +126,7 @@ export function Chips<T extends string | number>({ options, value, onChange, lab
         const on = o.key === value;
         const n = count?.(o.key);
         return (
-          <button key={String(o.key)} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[6px] rounded-full border px-[13px] text-[13.5px] font-semibold whitespace-nowrap" style={on ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
+          <button key={String(o.key)} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[6px] rounded-[10px] border px-[13px] text-[13.5px] font-semibold whitespace-nowrap" style={on ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
             {o.label}{typeof n === "number" && <span className="text-[12px] font-medium tabular-nums" style={{ color: on ? "rgba(255,255,255,0.8)" : "var(--muted-foreground)" }}>{n}</span>}
           </button>
         );
@@ -222,7 +222,7 @@ export function Dropdown({ label, value, icon, active, panel, quiet = false, den
       <button ref={btn} type="button" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((o) => !o)}
         className={quiet
           ? "dm-dd dm-quiet flex h-[36px] cursor-pointer items-center gap-[6px] rounded-[9px] px-[10px] text-[14px] leading-[18px] font-semibold whitespace-nowrap"
-          : "dm-quiet flex h-[40px] cursor-pointer items-center gap-[7px] rounded-full border pr-[12px] pl-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap"}
+          : "dm-quiet flex h-[40px] cursor-pointer items-center gap-[7px] rounded-[12px] border pr-[12px] pl-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap"}
         style={quiet
           ? { background: open ? "color-mix(in srgb, var(--foreground) 8%, transparent)" : "transparent", color: active || open ? "var(--foreground)" : "var(--muted-foreground)" }
           : active ? { background: "color-mix(in srgb, var(--primary) 20%, var(--glass-surface-1))", borderColor: ACCENT, color: "var(--foreground)" } : { background: "var(--glass-surface-1)", borderColor: open ? "color-mix(in srgb, var(--foreground) 35%, transparent)" : "var(--glass-border)", color: "var(--foreground)" }}>

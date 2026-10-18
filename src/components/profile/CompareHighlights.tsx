@@ -133,7 +133,7 @@ export function CompareHighlights({ careers, focusId }: { careers: ProfileCareer
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
         <div role="tablist" aria-label="Highlight" className="flex flex-wrap gap-[4px]">
           {SLIDES.map((s) => (
-            <button key={s.key} role="tab" aria-selected={s.key === slide} type="button" onClick={() => setSlide(s.key)} className="dm-quiet cursor-pointer rounded-full px-[11px] py-[6px] text-[12.5px] font-bold" style={s.key === slide ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>{s.label}</button>
+            <button key={s.key} role="tab" aria-selected={s.key === slide} type="button" onClick={() => setSlide(s.key)} className="dm-quiet cursor-pointer rounded-[8px] px-[11px] py-[6px] text-[12.5px] font-bold" style={s.key === slide ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>{s.label}</button>
           ))}
         </div>
         <span className="flex items-center gap-[6px]">

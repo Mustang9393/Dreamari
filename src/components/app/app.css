@@ -498,7 +498,11 @@ html.light .dm-glass-3 {
 html.light .dm-report {
   --paper: #fbfaf7;
   --paper-raised: #ffffff;
-  --paper-sunken: #f4f2ed;
+  /* Was #f4f2ed: content wells sat darker than the white card around them.
+     Elevation rule (Chandu, 18 Oct 2026): every surface stacked on another
+     is lighter. Light has no room above white, so wells are white and the
+     rule line carries the edge. Print keeps its own palette ([data-preview]). */
+  --paper-sunken: #ffffff;
   --ink: #17181d;
   --ink-soft: #4a4d57;
   --ink-faint: #767a85;
@@ -900,7 +904,7 @@ html.dm-arriving main [role="tabpanel"] { animation: dm-arrive 420ms cubic-bezie
 .myb-lede { font-size: 13.5px; line-height: 19px; color: var(--myb-mute); text-wrap: balance; }
 .myb-nav { display: flex; min-height: 0; gap: 8px; margin-inline: -18px; padding: 2px 18px; overflow-x: auto; scrollbar-width: none; }
 .myb-nav::-webkit-scrollbar { display: none; }
-.myb-nav-item { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid color-mix(in srgb, var(--myb-ink) 24%, transparent); border-radius: 9999px; text-align: left; cursor: pointer; color: var(--myb-ink); transition: background-color 0.14s, border-color 0.14s; }
+.myb-nav-item { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid color-mix(in srgb, var(--myb-ink) 24%, transparent); border-radius: 10px; text-align: left; cursor: pointer; color: var(--myb-ink); transition: background-color 0.14s, border-color 0.14s; }
 .myb-nav-item[aria-selected="true"] { border-color: color-mix(in srgb, var(--color-brand-400) 75%, transparent); background: color-mix(in srgb, var(--color-brand-500) 16%, transparent); }
 .myb-nav-title { font-size: 13.5px; line-height: 18px; font-weight: 700; white-space: nowrap; }
 .myb-nav-mark { flex: 0 0 auto; height: 8px; width: 8px; border-radius: 9999px; background: var(--color-brand-400); }
@@ -1146,7 +1150,11 @@ html.light .xsheet .cpk-cta, .xsheet[data-ink="light"] .cpk-cta { color: #fff; }
   .t3s-report { width: auto; gap: 6px; padding: 0 12px 0 10px; font-size: 12.5px; line-height: 18px; font-weight: 700; white-space: nowrap; }
   .t3s-report-label { display: inline; }
 }
-.t3s-play { display: inline-flex; min-height: 32px; flex: 0 0 auto; align-items: center; gap: 6px; border-radius: 9999px; border: 1px solid transparent; background: var(--t3s-world); padding: 0 12px 0 10px; font-size: 12.5px; line-height: 18px; font-weight: 700; white-space: nowrap; color: #05070f; transition: transform 0.14s, filter 0.14s; }
+.t3s-play { display: inline-flex; min-height: 32px; flex: 0 0 auto; align-items: center; gap: 6px; border-radius: 10px; border: 1px solid transparent; background: var(--t3s-world); padding: 0 12px 0 10px; font-size: 12.5px; line-height: 18px; font-weight: 700; white-space: nowrap; color: #05070f; transition: transform 0.14s, filter 0.14s; }
+/* Light mode fills .t3s-play with the world colour's light rung (#a85f00,
+   #0055df...), each tuned to clear 4.5:1 against white. Dark ink on those
+   measured 4.1:1 and 3.2:1 (18 Oct 2026 contrast audit); white ink passes. */
+html.light .t3s-play { color: #ffffff; }
 @media (hover: hover) {
   .t3s-toggle:hover, .t3s-school:hover { color: color-mix(in srgb, var(--t3s-world) 40%, #f4f7ff); }
   .t3s-report:hover { border-color: var(--t3s-world); background: color-mix(in srgb, var(--t3s-world) 28%, color-mix(in srgb, #05070f 72%, transparent)); }
@@ -1259,4 +1267,59 @@ html.light { --uw-blue-text: #0B47B0; }
 .dm-status-flash { animation: dm-status-flash 2.2s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 @media (prefers-reduced-motion: reduce) {
   .dm-status-flash { animation: none; }
+}
+
+/* Connect's surfaces (ConnectExperience.tsx <main>). Dark: solid tints of
+   the page's own foreground over its background, so a card reads as a card
+   (Chandu, 15 Oct 2026). Light: the same mix went grey and sat DARKER than
+   the panel beneath it, against the elevation rule (each surface stacked on
+   another is lighter; 18 Oct 2026). Light has no headroom above white, so
+   raised surfaces are white and the border carries the separation. */
+.connect-surfaces {
+  --glass-surface-1: color-mix(in srgb, var(--foreground) 7%, var(--background));
+  --glass-surface-2: color-mix(in srgb, var(--foreground) 12%, var(--background));
+  --glass-border: color-mix(in srgb, var(--foreground) 22%, transparent);
+}
+html.light .connect-surfaces {
+  --glass-surface-1: #ffffff;
+  --glass-surface-2: #ffffff;
+  --glass-border: color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+
+/* Event tickets and the event board header (ConnectExperience.tsx). They
+   were night-only: a #0e0c20 body, white text, white-alpha rings, kept dark
+   in light mode (Chandu, 18 Oct 2026: "the event cards also need a light
+   mode version"). Every colour is an --ev-* variable whose fallback is the
+   original dark value, so dark mode and the QR sheet are unchanged; light
+   swaps the set here. The partner's brand colour still carries the card:
+   its glow in the corner, the top tab, the edge and the stub tint. Text
+   clears AA on white (ink 16:1, soft 9:1, faint 7:1). */
+html.light .event-card {
+  --ev-ground: #ffffff;
+  --ev-ink: #101a26;
+  --ev-soft: #3f4a58;
+  --ev-faint: #4b5664;
+  --ev-icon-mix: #101a26;
+  --ev-icon-a: 42%; /* EY yellow at 60% went olive, ~3:1; 42% keeps the hue and clears 4:1 */
+  --ev-hatch: rgba(16, 26, 38, 0.035);
+  --ev-floor: transparent;
+  --ev-floor-mid: transparent;
+  --ev-glow-a: 34%;
+  --ev-glow-b: 10%;
+  --ev-grain: 0.05;
+  --ev-text-shadow: none;
+  --ev-drop: 0 14px 22px rgba(16, 42, 80, 0.12);
+  --ev-board-shadow: rgba(16, 42, 80, 0.22);
+  --ev-edge-mix: rgba(16, 26, 38, 0.16);
+  --ev-paper-a: rgba(16, 26, 38, 0.025);
+  --ev-paper-b: rgba(16, 26, 38, 0.015);
+  --ev-ring-bg: rgba(16, 26, 38, 0.04);
+  --ev-ring-border: rgba(16, 26, 38, 0.12);
+  --ev-btn-bg: #ffffff;
+  --ev-btn-border: rgba(16, 26, 38, 0.18);
+  --ev-btn-ink: #101a26;
+  --ev-tear: rgba(16, 26, 38, 0.22);
+  --ev-qr-bg: #ffffff;
+  --ev-qr-border: rgba(16, 26, 38, 0.14);
+  --ev-qr-ink: #101a26;
 }

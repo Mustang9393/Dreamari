@@ -592,7 +592,7 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
           aria-expanded={open.has("sources")}
           aria-controls="sources-panel"
           onClick={() => toggle("sources")}
-          className="dm-quiet mx-auto mt-[var(--space-6)] flex cursor-pointer items-center gap-[4px] rounded-full px-[12px] py-[7px]"
+          className="dm-quiet mx-auto mt-[var(--space-6)] flex cursor-pointer items-center gap-[4px] rounded-[8px] px-[12px] py-[7px]"
         >
           <Info className="h-3 w-3 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Where these numbers come from</span>

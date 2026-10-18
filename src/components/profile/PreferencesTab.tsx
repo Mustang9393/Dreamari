@@ -52,11 +52,12 @@ import { EducationGrid, SelectField, SUBJECT_ICONS, VibeButtonRow } from "@/comp
 import { CostSlider } from "@/components/build/CostStep";
 import { STATE_NAMES } from "@/components/build/LocationStep";
 import { GpaField } from "@/components/build/GpaField";
-import { COST_STOPS, ENERGY_OPTIONS, GRADE_OPTIONS, INTEREST_WORLDS, PATH_OPTIONS, STAGE_ACCENTS, STAGE_DREAMY, SUBJECTS, TEAM_OPTIONS, TRAVEL_DISTANCE_OPTIONS, type BuildState, type StageId } from "@/components/build/types";
+import { COST_STOPS, ENERGY_OPTIONS, GRADE_OPTIONS, INTEREST_WORLDS, PATH_OPTIONS, STAGE_ACCENTS, STAGE_ACCENTS_V2, STAGE_DREAMY, SUBJECTS, TEAM_OPTIONS, TRAVEL_DISTANCE_OPTIONS, type BuildState, type StageId } from "@/components/build/types";
 import { useBuildAnswers, useBuildSavedAt, writeBuildAnswers } from "@/lib/buildAnswers";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS } from "./data";
 import * as O from "./preferencesOptions";
+import { useLookV2 } from "@/components/app/look";
 
 type SectionId = "industries" | "saved" | "subjects" | "skills" | "software" | "education" | "college" | "work" | "jobs";
 
@@ -303,7 +304,7 @@ function ProofBand({ proof }: { proof: Proof }) {
             <span className="flex items-center gap-[6px] text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}><Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} />{proof.text}</span>
           </span>
           {proof.href && (
-            <a href={proof.href} className="dm-solid flex flex-none items-center gap-[2px] rounded-full px-[14px] py-[7px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{proof.cta} <ChevronRight className="h-4 w-4" aria-hidden /></a>
+            <a href={proof.href} className="dm-solid flex flex-none items-center gap-[2px] rounded-[8px] px-[14px] py-[7px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{proof.cta} <ChevronRight className="h-4 w-4" aria-hidden /></a>
           )}
         </span>
         </HoverBeam>
@@ -502,6 +503,7 @@ const WORLD_ACCENT: Record<string, string> = Object.fromEntries(INTEREST_WORLDS.
 const sameAnswers = (a: BuildState, b: BuildState) => JSON.stringify(a) === JSON.stringify(b);
 
 export function BuildModal({ onClose }: { onClose: () => void }) {
+  const lookV2 = useLookV2();
   const saved = useBuildAnswers();
   const lastSaved = useBuildSavedAt();
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
@@ -571,7 +573,7 @@ export function BuildModal({ onClose }: { onClose: () => void }) {
           {/* Build's sky, clipped to the sheet */}
           <div aria-hidden className="myb-sky">
             <BackgroundSpace />
-            <AuroraBackground accent={STAGE_ACCENTS[stage]} visitedAccents={[]} lightning={false} />
+            <AuroraBackground accent={(lookV2 ? STAGE_ACCENTS_V2 : STAGE_ACCENTS)[stage]} visitedAccents={[]} lightning={false} />
           </div>
           <IconTip label="Close">
             <button type="button" aria-label="Close" onClick={onClose} className="myb-x dm-quiet"><X className="h-4 w-4" aria-hidden /></button>

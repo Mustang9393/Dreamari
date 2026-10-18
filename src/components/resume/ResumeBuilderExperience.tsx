@@ -464,12 +464,12 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
             {checking ? (
               <Working label="Checking" />
             ) : failed ? (
-              <button type="button" onClick={check} className="dm-quiet inline-flex cursor-pointer items-center gap-[5px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+              <button type="button" onClick={check} className="dm-quiet inline-flex cursor-pointer items-center gap-[5px] rounded-[8px] border px-[10px] py-[3px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
                 <AtsIcon className="h-3.5 w-3.5" /> Check didn&apos;t finish · Retry
               </button>
             ) : ats && !stale ? (
               // the score, always in view once it exists; opens the full report
-              <button type="button" onClick={() => setPanel("ats")} className="dm-quiet inline-flex flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold tabular-nums" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }} aria-label="Open ATS Check">
+              <button type="button" onClick={() => setPanel("ats")} className="dm-quiet inline-flex flex-none cursor-pointer items-center gap-[6px] rounded-[8px] border px-[10px] py-[3px] text-[11.5px] font-bold tabular-nums" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }} aria-label="Open ATS Check">
                 <AtsIcon className="h-3.5 w-3.5" style={{ color: "var(--accent-subtle)" }} /> {ats.qualityScore}/100{ats.jobMatchScore !== null ? ` · Match ${ats.jobMatchScore}` : ""}
               </button>
             ) : null}

@@ -262,12 +262,12 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
 
   // The one contained control on the page.
   const segment = (
-    <div role="tablist" aria-label="Scholarships, programs or internships" className="flex flex-none items-center gap-[3px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+    <div role="tablist" aria-label="Scholarships, programs or internships" className="flex flex-none items-center gap-[3px] rounded-[13px] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
       {(["scholarships", "programs", "internships"] as Tab[]).map((key) => {
         const on = tab === key;
         return (
-          <button key={key} type="button" role="tab" aria-selected={on} onClick={() => switchTab(key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[7px] rounded-full px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap sm:px-[16px]" style={on ? { background: ACCENT, color: "#fff" } : { color: "var(--foreground)" }}>
-            {LABEL[key]}<span className="text-[12px] font-semibold tabular-nums" style={{ color: on ? "rgba(255,255,255,0.8)" : "var(--muted-foreground)" }}>{counts[key]}</span>
+          <button key={key} type="button" role="tab" aria-selected={on} onClick={() => switchTab(key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[7px] rounded-[10px] px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap sm:px-[16px]" style={on ? { background: ACCENT, color: "#fff" } : { color: "var(--foreground)" }}>
+            {LABEL[key]}<span className="text-[12px] font-semibold tabular-nums" style={{ color: on ? "rgba(255,255,255,0.92)" : "var(--muted-foreground)" }}>{counts[key]}</span>
           </button>
         );
       })}
@@ -407,7 +407,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
           <div className="-mt-[12px] flex flex-wrap items-center gap-[8px]">
             <span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={MUTED}>{n} shown</span>
             {chips.map((c) => (
-              <button key={c.key} type="button" onClick={c.off} className="dm-quiet flex h-[30px] cursor-pointer items-center gap-[5px] rounded-full border pr-[8px] pl-[11px] text-[13px] font-semibold" style={{ borderColor: ACCENT, background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--foreground)" }}>
+              <button key={c.key} type="button" onClick={c.off} className="dm-quiet flex h-[30px] cursor-pointer items-center gap-[5px] rounded-[8px] border pr-[8px] pl-[11px] text-[13px] font-semibold" style={{ borderColor: ACCENT, background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--foreground)" }}>
                 {c.label} <X className="h-3.5 w-3.5" aria-hidden />
               </button>
             ))}
@@ -424,7 +424,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
                 const ids = x.items.map((e) => e.item.id);
                 return <Shelf key={`${tab}-${x.key}`} title={x.title} line={x.line} items={x.items} onViewAll={() => viewAll(x.key)}>{(e) => <Poster {...props(e, ids)} />}</Shelf>;
               })}
-              <button type="button" onClick={() => viewAll("all")} className="dm-quiet mx-auto flex cursor-pointer items-center gap-[6px] rounded-full border px-[20px] py-[11px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+              <button type="button" onClick={() => viewAll("all")} className="dm-quiet mx-auto flex cursor-pointer items-center gap-[6px] rounded-[12px] border px-[20px] py-[11px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
                 Browse all {now.length} {noun}s <ChevronRight className="h-4 w-4" aria-hidden />
               </button>
             </div>
@@ -433,7 +433,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
             <section className="flex flex-col gap-[10px]" aria-label={opened ? opened.title : `${noun}s open to you now`}>
               {shelf !== null && (
                 <div className="mb-[8px] flex flex-col gap-[10px]">
-                  <button type="button" onClick={closeShelf} className="dm-quiet -ml-[8px] flex w-fit cursor-pointer items-center gap-[4px] rounded-full px-[8px] py-[5px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                  <button type="button" onClick={closeShelf} className="dm-quiet -ml-[8px] flex w-fit cursor-pointer items-center gap-[4px] rounded-[8px] px-[8px] py-[5px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
                     <ChevronLeft className="h-4 w-4" aria-hidden /> All {LABEL[tab].toLowerCase()}
                   </button>
                   <h2 className="text-[21px] leading-[26px] font-bold sm:text-[24px] sm:leading-[30px]">
@@ -482,9 +482,9 @@ function Fafsa({ value }: { value: FafsaStatus }) {
         <span className="text-[15px] leading-[20px] font-bold">FAFSA opened October 1</span>
         <span className="text-[13px] leading-[18px]" style={MUTED}>Most college money starts here.</span>
       </span>
-      <div role="radiogroup" aria-label="FAFSA status" className="flex flex-none items-center gap-[3px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      <div role="radiogroup" aria-label="FAFSA status" className="flex flex-none items-center gap-[3px] rounded-[11px] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
         {([["not-started", "Not started"], ["in-progress", "Started"], ["submitted", "Submitted"]] as const).map(([k, label]) => (
-          <button key={k} type="button" role="radio" aria-checked={value === k} onClick={() => setFafsaStatus(k)} className="dm-quiet h-[30px] cursor-pointer rounded-full px-[12px] text-[13px] font-semibold whitespace-nowrap" style={value === k ? { background: ACCENT, color: "#fff" } : { color: "var(--foreground)" }}>{label}</button>
+          <button key={k} type="button" role="radio" aria-checked={value === k} onClick={() => setFafsaStatus(k)} className="dm-quiet h-[30px] cursor-pointer rounded-[8px] px-[12px] text-[13px] font-semibold whitespace-nowrap" style={value === k ? { background: ACCENT, color: "#fff" } : { color: "var(--foreground)" }}>{label}</button>
         ))}
       </div>
     </div>

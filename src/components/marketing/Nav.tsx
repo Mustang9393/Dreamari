@@ -106,7 +106,7 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
       style={{ transform: hidden ? "translateY(calc(-100% - 16px))" : "translateY(0)" }}
     >
       <div
-        className="relative flex w-full max-w-[1040px] items-center justify-between rounded-full py-2 pr-2 pl-5 transition-all duration-300 sm:py-2.5 sm:pr-2.5 sm:pl-6"
+        className="relative flex w-full max-w-[1040px] items-center justify-between rounded-[18px] py-2 pr-2 pl-5 transition-all duration-300 sm:py-2.5 sm:pr-2.5 sm:pl-6"
         style={{
           background: scrolled ? "color-mix(in srgb, var(--background) 58%, transparent)" : "transparent",
           backdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
@@ -144,7 +144,7 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
             href={cta.href}
             aria-hidden={!pastFold}
             tabIndex={pastFold ? 0 : -1}
-            className="rounded-xl px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-all duration-300 hover:-translate-y-px active:scale-[0.97] sm:px-5 sm:py-2.5 sm:text-sm"
+            className="rounded-[10px] px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-all duration-300 hover:-translate-y-px active:scale-[0.97] sm:px-5 sm:py-2.5 sm:text-sm"
             style={{
               background: "linear-gradient(180deg, #4a82ff, var(--primary))",
               color: "var(--primary-foreground)",
@@ -204,7 +204,7 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
                 <>
                   {schools ? (
                     onStudentClick && (
-                      <button type="button" onClick={() => { setMenuOpen(false); onStudentClick(); }} className="rounded-xl px-4 py-2 text-left text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+                      <button type="button" onClick={() => { setMenuOpen(false); onStudentClick(); }} className="rounded-[10px] px-4 py-2 text-left text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
                         For students
                       </button>
                     )
@@ -219,7 +219,7 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
                       aria-disabled={!ENTERPRISE_ENABLED}
                       title={!ENTERPRISE_ENABLED ? "Coming soon" : undefined}
                       onClick={ENTERPRISE_ENABLED ? () => { setMenuOpen(false); onSchoolsClick(); } : undefined}
-                      className="rounded-xl px-4 py-2 text-left text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-[10px] px-4 py-2 text-left text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
                       style={{ color: "var(--foreground)" }}
                     >
                       For schools

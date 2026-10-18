@@ -136,7 +136,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
             {SCOPES.map((s) => {
               const on = scope === s.key;
               return (
-                <button key={s.key} type="button" role="tab" aria-selected={on} onClick={() => setScope(s.key)} className="dm-quiet relative flex min-h-[34px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", background: on ? undefined : "var(--glass-surface-1)", color: on ? "#fff" : "var(--foreground)" }}>
+                <button key={s.key} type="button" role="tab" aria-selected={on} onClick={() => setScope(s.key)} className="dm-quiet relative flex min-h-[34px] flex-none cursor-pointer items-center rounded-[10px] border px-[13px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", background: on ? undefined : "var(--glass-surface-1)", color: on ? "#fff" : "var(--foreground)" }}>
                   {/* Fill slides between scopes via a shared layoutId
                      instead of snapping (direct feedback: "have whatever
                      highlight we end up keeping for tabs... animate and
@@ -145,7 +145,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
                     <motion.span
                       layoutId="global-search-scope-pill"
                       aria-hidden
-                      className="absolute inset-0 rounded-full"
+                      className="absolute inset-0 rounded-[10px]"
                       style={{ background: "var(--primary)" }}
                       transition={{ type: "spring", stiffness: 500, damping: 40 }}
                     />
@@ -171,7 +171,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
                 <div className="flex flex-col gap-[8px]">
                   <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Try</span>
                   <div className="flex flex-wrap gap-[8px]">
-                    {TRY.map((t) => <button key={t} type="button" onClick={() => setQ(t)} className="dm-quiet flex min-h-[34px] cursor-pointer items-center rounded-full border px-[13px] text-[13px] leading-[18px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>{t}</button>)}
+                    {TRY.map((t) => <button key={t} type="button" onClick={() => setQ(t)} className="dm-quiet flex min-h-[34px] cursor-pointer items-center rounded-[10px] border px-[13px] text-[13px] leading-[18px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>{t}</button>)}
                   </div>
                 </div>
               </div>

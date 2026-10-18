@@ -63,7 +63,7 @@ function Sheet() {
                       const on = levels[area] === o.key;
                       return (
                         <button key={o.key} type="button" role="radio" aria-checked={on} onClick={() => setLevels((l) => ({ ...l, [area]: o.key }))}
-                          className={`${on ? "" : "dm-quiet "}inline-flex h-10 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[14px] font-semibold`}
+                          className={`${on ? "" : "dm-quiet "}inline-flex h-10 cursor-pointer items-center gap-[6px] rounded-[12px] border px-[12px] text-[14px] font-semibold`}
                           style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)" }}>
                           <span aria-hidden>{o.face}</span>{o.label}
                         </button>

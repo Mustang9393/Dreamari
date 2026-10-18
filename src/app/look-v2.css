@@ -1,0 +1,248 @@
+/* DEMO-ONLY: the black-and-blue look (?look=v2, layout.tsx).
+
+   Why (18 Oct 2026): a Canadian student focus group said the colours and
+   gradients feel "vibe-coded". Joshua's direction: deep blacks, luminous
+   blues instead of purple, gradients used as atmospheric light rather than on
+   every surface, restrained glass. Two references (a black phone UI lit by one
+   soft blue bloom; an icy blue-to-white wash for light) set the target.
+
+   What this file does, and only this:
+   1. Re-hues the brand ramp from 221deg (cobalt leaning violet) to 213deg, the
+      hue sampled from the references (bloom #599df9, core #9ec6fa). Every rung
+      is checked for WCAG AA where it carries text (see docs/AI_HANDOFF.md).
+   2. Removes purple, teal and pink from the atmosphere: the app backdrop, the
+      light-mode body wash, the landing wash and the starfield nebulas.
+   3. Dark: near-black ground, a blue glow behind the header and a soft
+      horizon at the bottom, film grain. Light: cool white ground, the same
+      frame in ice blue, solid white cards.
+   4. Solid primary buttons, no glossy two-stop gradient.
+
+   Nothing outside html.look-v2 changes. Game worlds (glossary, Play
+   backdrops, simulations) and career-world colours keep their own palettes.
+   When this is approved the values move into Figma and the generated tokens,
+   and this file goes away. */
+
+/* ---------- 1. Brand ramp, hue 213 ---------- */
+html.look-v2 {
+  --color-brand-100: #e2eefd;
+  --color-brand-200: #bcd8fb;
+  --color-brand-300: #94c2f9;
+  --color-brand-400: #59a0f8;
+  --color-brand-500: #2780ec;
+  --color-brand-600: #176acf; /* 5.25:1 white text on it; 4.9:1 as text on the light page */
+  --color-brand-700: #1157ac;
+  --color-brand-900: #0b2f5b;
+  --color-brand-950: #061c37;
+  --color-accent-deep: #1157ac;
+  --color-accent-navy: #0e4281;
+  /* Purple and pink become the light end of the blue ramp. They are only used
+     for glows, sparks and gradient stops, never for text. */
+  --color-accent-purple: #59a0f8;
+  --color-decorative-pink-glow: #94c2f9;
+  --color-action-primary: #176acf;
+  --color-action-primary-hover: #1157ac;
+  --color-text-brand: #176acf;
+  --color-match-accent: #176acf;
+  --color-match-accent-dark: #59a0f8;
+  --color-surface-feature: #eaf3fd;
+  --color-surface-feature-strong: #d4e6fb;
+  --color-surface-page: #f3f6f9;
+}
+
+html.look-v2.dark {
+  --background: #000105;
+  --color-surface-page: #000105;
+  --color-surface-card: #10151d;
+  --color-action-primary: #176acf;
+  --color-action-primary-hover: #1e74dc; /* 4.6:1 white text */
+  --color-text-brand: #59a0f8; /* 7.0:1 on dark cards */
+  --color-match-toast-link: #59a0f8;
+  --color-match-toast-link-dark: #59a0f8;
+}
+
+/* The app's own token scope (marketing/tokens.css). Doubling the class beats
+   tokens.css's .marketing-v2 block whatever the bundle order. */
+html.look-v2 .marketing-v2 {
+  --background: #000105;
+  --card: #0e1219; /* neutral blue-black, was indigo #151829 */
+  --primary: #176acf;
+  --accent: #176acf;
+  --accent-subtle: #59a0f8;
+  --primary-ghost: #94c2f9;
+  --hero-accent-purple: #0b2f5b;
+  --hero-accent-teal: #04101e;
+  --hero-accent-pink: #061c37;
+  --hero-mid: #050b14;
+  --poster-scrim: linear-gradient(180deg, rgba(0, 1, 5, 0) 0%, rgba(0, 1, 5, 0.55) 30%, rgba(0, 1, 5, 0.86) 51%, #000105 100%);
+}
+
+/* ---------- Light ---------- */
+html.look-v2.light {
+  --background: #f3f6f9;
+  /* Light text/fill blue sits one step deeper than dark's #176acf: links on
+     the pale blue tints measured 4.1:1 at #176acf. #1460c0 is 6.1:1 on
+     white, 5.6:1 on the page, 4.8:1 on the strongest tint (#d4e6fb). */
+  --color-action-primary: #1460c0;
+  --color-text-brand: #1460c0;
+  --color-match-accent: #1460c0;
+}
+
+html.look-v2.light .marketing-v2.themeable {
+  --background: #f3f6f9 !important; /* cool white, was lavender-blue #e4eaf8 */
+  --foreground: #101a26 !important;
+  --muted-foreground: #4b5664 !important; /* 7.0:1 on white, 6.6:1 on the page */
+  --card: #ffffff !important;
+  --border: #d5dde7 !important;
+  --primary: #1460c0 !important;
+  --accent: #1460c0 !important;
+  --accent-subtle: #1460c0 !important;
+  --hero-accent-purple: #d3e4f8 !important; /* ice blue */
+  --hero-accent-teal: #eaf1f9 !important; /* was blush pink */
+  --hero-accent-pink: #eaf1f9 !important;
+  --hero-mid: #e6eef7 !important;
+  /* Solid surfaces: translucent white over a tinted page read grey-lavender. */
+  --glass-surface-1: #ffffff !important;
+  --glass-surface-2: #ffffff !important;
+  --glass-surface-3: #ffffff !important;
+  --glass-border: rgba(16, 42, 80, 0.12) !important;
+  --inset-surface: #f3f6f9 !important;
+  --inset-border: rgba(16, 42, 80, 0.1) !important;
+  --row-active-ink: #1460c0 !important;
+  --tier-color: #1157ac !important;
+}
+
+/* ---------- 2/3. Atmosphere ---------- */
+
+/* Film grain: what stops a gradient reading as a CSS mesh (reference 1).
+   A static tile, no animation, no filter on a moving layer. */
+html.look-v2 {
+  --look-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+html.look-v2.dark body {
+  background: #000105;
+}
+
+/* The app backdrop (AppBackdrop.tsx), as in reference 3: light behind the
+   header, a soft horizon rising from the bottom edge, black between, so the
+   content zone stays calm. Fixed to the viewport, so the two glows frame
+   every screen. Replaces indigo + teal. Tuned up 18 Oct 2026 (Chandu: "now
+   theres no glow at all... subtle soft blue glow near the header or footer"):
+   the first pass (26% top, 16% bottom) vanished under the cards. */
+html.look-v2 [data-app-backdrop] {
+  background:
+    radial-gradient(46% 30% at 50% -4%, rgba(89, 160, 248, 0.3) 0%, rgba(39, 128, 236, 0.13) 45%, transparent 76%),
+    radial-gradient(80% 52% at 50% -16%, rgba(23, 106, 207, 0.2) 0%, transparent 70%),
+    radial-gradient(72% 30% at 50% 106%, rgba(39, 128, 236, 0.26) 0%, rgba(17, 87, 172, 0.1) 50%, transparent 78%),
+    #000105 !important;
+}
+html.look-v2 [data-app-backdrop]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--look-grain);
+  opacity: 0.05;
+}
+/* the starfield SVG carries violet and pink nebulas */
+html.look-v2 [data-space-backdrop] {
+  display: none !important;
+}
+
+/* Light: cool white with the same frame as dark, in ice blue (reference 2's
+   wash): a glow under the header and a fainter one at the bottom edge. */
+html.look-v2.light body {
+  background:
+    radial-gradient(ellipse 55% 34% at 50% -6%, #d3e5fa 0, transparent 76%),
+    radial-gradient(ellipse 70% 26% at 50% 108%, #e1ecf9 0, transparent 75%),
+    #f3f6f9;
+  background-attachment: fixed;
+}
+html.look-v2.light [data-app-backdrop] {
+  background:
+    radial-gradient(55% 34% at 50% -6%, rgba(39, 128, 236, 0.17) 0%, rgba(39, 128, 236, 0.05) 50%, transparent 76%),
+    radial-gradient(70% 26% at 50% 108%, rgba(39, 128, 236, 0.1) 0%, transparent 75%),
+    #f3f6f9 !important;
+}
+html.look-v2.light [data-app-backdrop]::after {
+  opacity: 0.025;
+  filter: invert(1);
+}
+
+/* Landing (always dark): the multi-colour wash down the page becomes one bloom
+   behind the hero and one faint pool lower down. */
+html.look-v2 [data-landing-wash] {
+  background:
+    radial-gradient(ellipse 34% 9% at 50% 2%, rgba(89, 160, 248, 0.32), transparent 80%),
+    radial-gradient(ellipse 70% 24% at 50% 0%, rgba(39, 128, 236, 0.42), rgba(17, 87, 172, 0.14) 50%, transparent 76%),
+    radial-gradient(ellipse 80% 18% at 50% 58%, rgba(17, 87, 172, 0.12), transparent 70%),
+    #000105 !important;
+}
+html.look-v2 [data-landing-wash]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--look-grain);
+  opacity: 0.05;
+}
+html.look-v2 [data-hero-surface] {
+  display: none;
+}
+html.look-v2 [data-hero-glow] {
+  background: radial-gradient(circle at 50% 50%, rgba(89, 160, 248, 0.28), rgba(23, 106, 207, 0.1) 45%, transparent 70%) !important;
+}
+
+/* The landing's "DREAM" was a periwinkle literal (#7aa2ff, 225deg). */
+html.look-v2 .marketing-v2 {
+  --primary-tint: #59a0f8; /* 7.8:1 on the black ground */
+}
+
+/* Schools' one display flourish: blue to violet to purple becomes blue to sky
+   (dark), cobalt to deep cobalt (light, where pale text would fail AA). */
+html.look-v2 [data-grad-text] {
+  background-image: linear-gradient(92deg, #59a0f8 0%, #9ec6fa 100%) !important;
+}
+html.look-v2.light .themeable [data-grad-text],
+html.look-v2 .theme-light [data-grad-text] {
+  background-image: linear-gradient(92deg, #176acf 0%, #1157ac 100%) !important;
+}
+html.look-v2 [data-drift-violet] {
+  background: radial-gradient(circle, rgba(39, 128, 236, 0.16), transparent 70%) !important;
+}
+
+/* Dream Score count-up shimmer: lilac and pink stops become sky blue. */
+html.look-v2 .xp-shimmer-ink {
+  background-image: linear-gradient(100deg, var(--accent-subtle) 0%, #94c2f9 30%, #ffffff 50%, #59a0f8 70%, var(--accent-subtle) 100%);
+}
+
+/* Build progress bar (ui.tsx + ProgressSpark.tsx): blue to violet to pink
+   becomes one blue climbing toward light. Each stop keeps 3:1 against its
+   ground as a graphic (WCAG 1.4.11): dark climbs to sky, light deepens. */
+html.look-v2 {
+  --build-bar-a: #176acf;
+  --build-bar-b: #59a0f8;
+  --build-bar-c: #9ec6fa;
+}
+html.look-v2.light {
+  --build-bar-a: #2780ec;
+  --build-bar-b: #176acf;
+  --build-bar-c: #1157ac;
+}
+
+/* The Report's paper: warm cream and beige rules become cool neutrals, in
+   step with the page. (Wells are white in both looks; app.css.) */
+html.look-v2.light .dm-report {
+  --paper: #f7f9fb;
+  --rule: #e1e6ed;
+  --rule-strong: #c9d1dc;
+}
+
+/* Event tickets' night ground leaned violet (#0e0c20, 245deg). */
+html.look-v2:not(.light) .event-card {
+  --ev-ground: #0b1019;
+}
+
+/* ---------- 4. Controls ---------- */
+html.look-v2 [data-mkt-btn="primary"] {
+  background: var(--primary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 30px -14px rgba(39, 128, 236, 0.7) !important;
+}

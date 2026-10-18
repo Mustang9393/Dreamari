@@ -484,7 +484,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
       {(chips.length > 0 || q) && (
         <div className="-mt-[6px] flex flex-wrap items-center gap-[8px]" aria-label="Applied filters">
           {chips.map((c) => (
-            <button key={c.key} type="button" onClick={c.remove} aria-label={`Remove ${c.label}`} className="dm-quiet flex min-h-[30px] flex-none cursor-pointer items-center gap-[6px] rounded-full px-[11px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: SOFT }}>
+            <button key={c.key} type="button" onClick={c.remove} aria-label={`Remove ${c.label}`} className="dm-quiet flex min-h-[30px] flex-none cursor-pointer items-center gap-[6px] rounded-[8px] px-[11px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: SOFT }}>
               {c.label} <X className="h-3.5 w-3.5" aria-hidden />
             </button>
           ))}
@@ -517,7 +517,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
       )}
       {/* 5,716 schools: the list grows in pages instead of drawing every card. */}
       {loaded && n > shown && (
-        <button type="button" onClick={() => setShown((s) => s + PAGE)} className="dm-quiet mx-auto flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-full border px-[20px] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+        <button type="button" onClick={() => setShown((s) => s + PAGE)} className="dm-quiet mx-auto flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[12px] border px-[20px] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
           Show more schools <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>{(n - shown).toLocaleString("en-US")} left</span>
         </button>
       )}

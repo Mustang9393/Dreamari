@@ -37,10 +37,14 @@ const VARIANT_STYLE: Record<Variant, React.CSSProperties> = {
 // action on the page should be its most confident one.
 type Size = "md" | "lg" | "xl";
 
+// Corner radius scales with the button, Apple-style (18 Oct 2026: "kill all
+// the pill shaped CTAs and use apple style rounded corner CTAs"). Explicit
+// pixels, not rounded-xl: inside .marketing-v2, --radius-xl is 20px, which
+// turned the 34px nav CTA back into a pill.
 const SIZE_CLASSES: Record<Size, string> = {
-  md: "px-[22px] py-[14px] text-[14.5px]",
-  lg: "px-[32px] py-[17px] text-[16.5px]",
-  xl: "px-[44px] py-[20px] text-[18px]",
+  md: "rounded-[12px] px-[22px] py-[14px] text-[14.5px]",
+  lg: "rounded-[14px] px-[32px] py-[17px] text-[16.5px]",
+  xl: "rounded-[14px] px-[44px] py-[20px] text-[18px]",
 };
 
 type MarketingButtonProps = {
@@ -56,21 +60,21 @@ export function MarketingButton({ variant, size = "md", href, className = "", di
   // added 27 Sept 2026, this button had `disabled` passing through with no
   // visual treatment at all, for every variant since it's applied after the
   // variant's own background/color style.
-  const classes = `inline-flex items-center justify-center gap-2 rounded-xl font-bold whitespace-nowrap transition-transform duration-150 ${disabled ? "pointer-events-none opacity-40" : "hover:-translate-y-px active:scale-[0.97]"} ${SIZE_CLASSES[size]} ${className}`;
+  const classes = `inline-flex items-center justify-center gap-2 font-bold whitespace-nowrap transition-transform duration-150 ${disabled ? "pointer-events-none opacity-40" : "hover:-translate-y-px active:scale-[0.97]"} ${SIZE_CLASSES[size]} ${className}`;
 
   if (href) {
     // A disabled link has no native `disabled` semantics, so it needs the
     // same aria-disabled + unreachable-by-tab treatment as any disabled
     // anchor, on top of the pointer-events-none above.
     return (
-      <Link href={href} aria-disabled={disabled} tabIndex={disabled ? -1 : undefined} className={classes} style={VARIANT_STYLE[variant]}>
+      <Link href={href} aria-disabled={disabled} tabIndex={disabled ? -1 : undefined} data-mkt-btn={variant} className={classes} style={VARIANT_STYLE[variant]}>
         {children}
       </Link>
     );
   }
 
   return (
-    <button disabled={disabled} className={classes} style={VARIANT_STYLE[variant]} {...props}>
+    <button disabled={disabled} data-mkt-btn={variant} className={classes} style={VARIANT_STYLE[variant]} {...props}>
       {children}
     </button>
   );
