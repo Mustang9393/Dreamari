@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none" role="img" aria-label="XP — experience points reward badge">
+  <title>XP — experience points reward badge</title>
+  <defs>
+    <linearGradient id="xp-edge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#969de7"/>
+      <stop offset="38%" stop-color="#555d9f"/>
+      <stop offset="62%" stop-color="#303a76"/>
+      <stop offset="100%" stop-color="#18244f"/>
+    </linearGradient>
+    <linearGradient id="xp-rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f1edff"/>
+      <stop offset="20%" stop-color="#b6b3ee"/>
+      <stop offset="46%" stop-color="#828ddd"/>
+      <stop offset="55%" stop-color="#c7d1ff"/>
+      <stop offset="77%" stop-color="#788bd1"/>
+      <stop offset="100%" stop-color="#4b5d9b"/>
+    </linearGradient>
+    <linearGradient id="xp-face" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7b80c5"/>
+      <stop offset="45%" stop-color="#505a9b"/>
+      <stop offset="100%" stop-color="#253766"/>
+    </linearGradient>
+    <linearGradient id="xp-letters" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#e0e6ff"/>
+      <stop offset="100%" stop-color="#b7caff"/>
+    </linearGradient>
+  </defs>
+  <path d="M65 14Q69 14 73 16L102 33Q108 36 108 43V80Q108 87 102 90L73 107Q67 111 61 107L32 90Q26 87 26 80V43Q26 36 32 33L61 16Q63 14 65 14Z" transform="translate(0 7)" fill="url(#xp-edge)"/>
+  <path d="M65 14Q69 14 73 16L102 33Q108 36 108 43V80Q108 87 102 90L73 107Q67 111 61 107L32 90Q26 87 26 80V43Q26 36 32 33L61 16Q63 14 65 14Z" fill="url(#xp-rim)"/>
+  <path d="M66 24 98 42V79L66 98 35 79V42Z" fill="url(#xp-face)"/>
+  <path d="M35 42 66 24 98 42" stroke="#ebeaff" stroke-opacity=".6" stroke-width="1"/>
+  <path d="M35 79 66 98 98 79" stroke="#bacdff" stroke-opacity=".65" stroke-width="1"/>
+  <path d="M30 42Q30 39 35 36L63 20Q66 18 70 20L99 37" stroke="#f3f2ff" stroke-width="1.5" stroke-linecap="round" stroke-opacity=".85"/>
+  <g transform="translate(6.575 5.325) scale(.85)">
+    <path d="M44 49H53L60 59 67 49H76L64 65 76 82H67L60 71 53 82H44L56 65Z" fill="#15264f" transform="translate(0 1.6)"/>
+    <path d="M44 49H53L60 59 67 49H76L64 65 76 82H67L60 71 53 82H44L56 65Z" fill="url(#xp-letters)"/>
+    <path d="M79 49H89Q100 49 100 60Q100 71 89 71H87V82H79ZM87 56V64H89Q93 64 93 60Q93 56 89 56Z" fill="#15264f" fill-rule="evenodd" transform="translate(-3 1.6)"/>
+    <path d="M79 49H89Q100 49 100 60Q100 71 89 71H87V82H79ZM87 56V64H89Q93 64 93 60Q93 56 89 56Z" fill="url(#xp-letters)" fill-rule="evenodd" transform="translate(-3 0)"/>
+  </g>
+</svg>

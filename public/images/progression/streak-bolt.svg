@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none" role="img" aria-labelledby="streak-bolt-title">
+  <title id="streak-bolt-title">Streak — lightning bolt</title>
+  <defs>
+    <linearGradient id="bolt-depth" x1="34" y1="33" x2="91" y2="111" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9A660D"/>
+      <stop offset=".46" stop-color="#69400B"/>
+      <stop offset="1" stop-color="#37280E"/>
+    </linearGradient>
+    <linearGradient id="bolt-face" x1="42" y1="19" x2="84" y2="99" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF2B1"/>
+      <stop offset=".27" stop-color="#FFE071"/>
+      <stop offset=".62" stop-color="#EFB83D"/>
+      <stop offset="1" stop-color="#BD7D1B"/>
+    </linearGradient>
+    <linearGradient id="bolt-bevel" x1="70" y1="14" x2="55" y2="109" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFDE4"/>
+      <stop offset=".38" stop-color="#FFF1A4"/>
+      <stop offset="1" stop-color="#EAB744"/>
+    </linearGradient>
+    <linearGradient id="bolt-fold" x1="79" y1="42" x2="47" y2="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F2BD48"/>
+      <stop offset=".45" stop-color="#DA9829"/>
+      <stop offset="1" stop-color="#A16411"/>
+    </linearGradient>
+    <linearGradient id="bolt-edge" x1="79" y1="15" x2="36" y2="69" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFEA"/>
+      <stop offset="1" stop-color="#FFDA72"/>
+    </linearGradient>
+  </defs>
+  <!-- Rear extrusion establishes depth without a glow or drop-shadow filter. -->
+  <path d="M77 14 31 66Q29 69 33 70L56 74 43 112Q42 116 46 113L96 58Q99 55 95 54L71 50 81 17Q82 13 77 14Z" transform="translate(3 6)" fill="url(#bolt-depth)"/>
+  <!-- Main face: a single, deliberately asymmetric lightning silhouette. -->
+  <path d="M77 14 31 66Q29 69 33 70L56 74 43 112Q42 116 46 113L96 58Q99 55 95 54L71 50 81 17Q82 13 77 14Z" fill="url(#bolt-face)"/>
+  <!-- A narrow raised ridge follows the direction change. -->
+  <path d="M77 17 38 66 63 68 47 106 56 74 33 70Q29 69 31 66L77 14Q82 13 81 17L71 50 65 54Z" fill="url(#bolt-bevel)"/>
+  <!-- Lower angled plane, kept broad enough to read at 24px. -->
+  <path d="M65 54 94 57 47 106 63 68 57 68 43 112Q42 116 46 113L96 58Q99 55 95 54L71 50Z" fill="url(#bolt-fold)"/>
+  <path d="M77 16 32 67" stroke="url(#bolt-edge)" stroke-width="1.25" stroke-linecap="round"/>
+  <path d="M34 69 58 73" stroke="#FFF6C5" stroke-opacity=".55" stroke-width=".8" stroke-linecap="round"/>
+</svg>
