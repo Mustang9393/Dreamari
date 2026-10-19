@@ -20,6 +20,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, BookOpen, ChevronLeft, CircleDot, CircleHelp, HeartPulse, Landmark, Lightbulb, Lock, Play, Store, TrendingUp, Users, Wallet, X } from "lucide-react";
 import Image from "next/image";
+import { CareerScene } from "./CareerScene";
 import { useRouter } from "next/navigation";
 
 import { IconTip } from "@/components/app/IconTip";
@@ -89,7 +90,7 @@ export function PreGameFlow({
   const [step, setStep] = useState(0);
   const reduceMotion = useReducedMotion();
   const router = useRouter();
-  const preGameArt = artVersion === 2 ? v2PreGameArtFor(simulation.id) : undefined;
+  const preGameArt = artVersion && artVersion !== 1 ? v2PreGameArtFor(simulation.id, artVersion) : undefined;
   const lessonScreens = useMemo(() => {
     const screens = preGame.lesson?.screens ?? [];
     const image = preGameArt?.lesson?.src;
@@ -173,6 +174,7 @@ export function PreGameFlow({
   const screen = mode === "lesson" ? lessonScreens[step] : undefined;
   const photo = screen?.image;
   const backdrop = photo ?? preGameArt?.cover.src ?? simulation.cover;
+  const composedArt = photo ? preGameArt?.lesson : preGameArt?.cover;
   // Sharp art on the title screen and behind a lesson's own photo; the
   // teaching screens blur and dim it so the copy always wins.
   const filter = mode === "start"
@@ -201,7 +203,7 @@ export function PreGameFlow({
             animate={{ scale: 1.06 }}
             transition={{ duration: reduceMotion ? 0 : 18, ease: "easeOut" }}
           >
-            <Image src={backdrop} alt="" fill priority sizes={preGameArt ? "(max-width: 639px) 178svh, 100vw" : "100vw"} className="object-cover" style={{ filter, transition: "filter 0.7s ease" }} />
+            {composedArt?.composition ? <CareerScene scene={composedArt} filter={filter} /> : <Image src={backdrop} alt="" fill priority sizes={preGameArt ? "(max-width: 639px) 178svh, 100vw" : "100vw"} className="object-cover" style={{ filter, transition: "filter 0.7s ease" }} />}
           </motion.div>
         </motion.div>
       </AnimatePresence>
@@ -231,7 +233,7 @@ export function PreGameFlow({
           )}
           {/* DEMO-ONLY: v1/v2 comparison. Sets the scene art for the run
              (v1 sprites over rooms, v2 Joshua's painted scenes). */}
-          {artVersion && onArtVersion && <ArtVersionToggle version={artVersion} onChange={onArtVersion} accent={accent} size="start" />}
+          {artVersion && onArtVersion && <ArtVersionToggle includeV2={simulation.id === "registered-nurse"} version={artVersion} onChange={onArtVersion} accent={accent} size="start" />}
         </header>
       )}
       {total > 0 && (

@@ -1,3 +1,13 @@
+## 2026-10-19: Registered Nurse v2 art, fixed rooms with separate characters
+
+**Why (Chandu, finishing Codex's work):** the earlier RN art redrew the whole picture for every scene, so the room and the view out the window shifted from scene to scene. Codex made the corrected set on 19 Oct (review page: dreamari-career-art-comparisons.chanduq.chatgpt.site/registered-nurse): one saved background per location (station, corridor, Room 12, lobby, staff room) with transparent character layers on top. Chandu: "all the art was generated already... push it to main on its behalf as v2".
+
+- **Art switch is now v0 | v1 | v2 on Registered Nurse only** (internal `ArtVersion` 1 | 2 | 3). v2 is the default; `?v=1` is the 13 Oct anime set (now `rn-v1-images.ts`), `?v=0` the sprites. Other games keep v0 | v1.
+- `CareerScene.tsx` stacks the background, a time-of-day light layer (dawn, day, midday, late, night) and the character layer on one canvas, so they crop together on phones. A reaction swaps the person, never the room or the time of day. RN1-20 used to swap Denise for Rosa; it now uses Denise's own concerned pose.
+- Assets: `public/images/play/rn/v2/locked-2026-10-19/` (5 backgrounds, 13 foregrounds, manifest with hashes). All 18 match the review site byte for byte. Master prompt: `public/art-prompts/career-art-master.txt`.
+- Fixed in Codex's uncommitted work: two lines in `SimulationPlayer.tsx` passed the art version as a character's reaction tier (a comma typo), which broke reactions and failed tsc.
+- **Checked:** tsc (clean), eslint on changed files, tokens:check, `next build --webpack`. Played locally: start screen, lobby, station, corridor, Rosa at dawn, Room 12, Denise; all image layers load; the v0/v1 switch still shows the old art. **Not checked:** every beat, phone width, light mode, Windows/ChromeOS.
+
 ## 2026-10-19: v2 Top 3 without a banner: teach on the controls themselves
 
 **Why (Chandu):** "we are still keeping the permanent set of controls in the banner in v2? Isnt there a better way... my build can still be where it used to be in the cover image with its tooltip nudge appearing once the page is scrolled back up after the student lands on top 3 from match". The bar was a fifth thing whose only job was pointing at four others.

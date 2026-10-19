@@ -13,14 +13,16 @@ import type { ArtVersion } from "./ib-v2-scenes";
 // v2 to v0"): the painted scenes (internal 2) are now "v1" and the default;
 // sprites over rooms (internal 1) are "v0". Only the labels and the default
 // moved, so the internal 1 | 2 values stay as they were.
-const OPTIONS: ArtVersion[] = [1, 2];
-const LABEL: Record<ArtVersion, string> = { 1: "v0", 2: "v1" };
+const ORIGINAL_OPTIONS: ArtVersion[] = [1, 2];
+const NURSE_OPTIONS: ArtVersion[] = [1, 2, 3];
+const LABEL: Record<ArtVersion, string> = { 1: "v0", 2: "v1", 3: "v2" };
 
 export function ArtVersionToggle({
   version,
   onChange,
   accent,
   size = "hud",
+  includeV2 = false,
 }: {
   version: ArtVersion;
   onChange: (version: ArtVersion) => void;
@@ -28,6 +30,8 @@ export function ArtVersionToggle({
   /** `start`: the start screen's glass pill, sized like its Back button.
    *  `hud`: the compact in-game pill on the progress row. */
   size?: "start" | "hud";
+  /** RN adds the locked-location set while preserving both earlier versions. */
+  includeV2?: boolean;
 }) {
   const start = size === "start";
   return (
@@ -44,7 +48,7 @@ export function ArtVersionToggle({
         WebkitBackdropFilter: "blur(10px)",
       }}
     >
-      {OPTIONS.map((option) => {
+      {(includeV2 ? NURSE_OPTIONS : ORIGINAL_OPTIONS).map((option) => {
         const on = option === version;
         return (
           <button

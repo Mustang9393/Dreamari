@@ -1,3 +1,6 @@
+import { RN_V1_IMAGES } from "./rn-v1-images";
+import { RN_IMAGES } from "./rn-v2-images";
+import type { CareerComposition } from "./CareerScene";
 import type { Tier } from "./types";
 
 // DEMO-ONLY: v1/v2 comparison (12 Oct 2026). A student said the simulation
@@ -13,7 +16,7 @@ import type { Tier } from "./types";
 // way the team decides, fold the winner in and delete this file and both
 // toggles (see docs/HANDOFF_INDEX.md).
 
-export type ArtVersion = 1 | 2;
+export type ArtVersion = 1 | 2 | 3;
 
 type Point = { x: number; y: number };
 
@@ -22,239 +25,19 @@ type Point = { x: number; y: number };
  *  the same convention as a location's focal in art/<career>.json. Desktop
  *  is about 16:9 like the art, so it barely crops; a 390px phone shows about
  *  a quarter of the width, so `mobileFocal.x` is chosen to keep the face in. */
-export type V2Image = { src: string; alt: string; focal: Point; mobileFocal: Point };
+export type V2Image = { src: string; alt: string; focal: Point; mobileFocal: Point; composition?: CareerComposition };
 
 const DIR = "/images/play/ib/v2";
 
-// DEMO-ONLY: generated nursing artwork test; existing scripts remain untouched.
-const RN_IMAGES = {
-  "rn_rosa_station_dawn": {
-    "src": "/images/play/rn/v2/rosa-station-dawn-anime.png",
-    "alt": "rosa station dawn",
-    "focal": {
-      "x": 0.53,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.39,
-      "y": 0.3
-    }
-  },
-  "rn_rosa_explains_station_morning": {
-    "src": "/images/play/rn/v2/rosa-explains-station-morning-anime.png",
-    "alt": "rosa explains station morning",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.47,
-      "y": 0.3
-    }
-  },
-  "rn_pov_call_lights_corridor_morning": {
-    "src": "/images/play/rn/v2/pov-call-lights-corridor-morning-anime.png",
-    "alt": "pov call lights corridor morning",
-    "focal": {
-      "x": 0.6,
-      "y": 0.34
-    },
-    "mobileFocal": {
-      "x": 0.93,
-      "y": 0.34
-    }
-  },
-  "rn_denise_reads_notes_station_afternoon": {
-    "src": "/images/play/rn/v2/denise-reads-notes-station-afternoon-anime.png",
-    "alt": "denise reads notes station afternoon",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.5,
-      "y": 0.3
-    }
-  },
-  "rn_tyler_huddle_morning": {
-    "src": "/images/play/rn/v2/tyler-huddle-morning-anime.png",
-    "alt": "tyler huddle morning",
-    "focal": {
-      "x": 0.52,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.47,
-      "y": 0.3
-    }
-  },
-  "rn_room12_distress_midday": {
-    "src": "/images/play/rn/v2/room12-distress-midday-anime.png",
-    "alt": "room12 distress midday",
-    "focal": {
-      "x": 0.65,
-      "y": 0.33
-    },
-    "mobileFocal": {
-      "x": 0.65,
-      "y": 0.33
-    }
-  },
-  "rn_pov_med_cart_rosa_afternoon": {
-    "src": "/images/play/rn/v2/pov-med-cart-rosa-afternoon-anime.png",
-    "alt": "pov med cart rosa afternoon",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.64,
-      "y": 0.3
-    }
-  },
-  "rn_night_report_station_night": {
-    "src": "/images/play/rn/v2/night-report-station-night-anime.png",
-    "alt": "night report station night",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.5,
-      "y": 0.3
-    }
-  },
-  "rn_rosa_proud_station_late_day": {
-    "src": "/images/play/rn/v2/rosa-proud-station-late-day-anime.png",
-    "alt": "rosa proud station late day",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.47,
-      "y": 0.3
-    }
-  },
-  "rn_room12_anxious_morning": {
-    "src": "/images/play/rn/v2/room12-anxious-morning-anime.png",
-    "alt": "room12 anxious morning",
-    "focal": {
-      "x": 0.65,
-      "y": 0.33
-    },
-    "mobileFocal": {
-      "x": 0.65,
-      "y": 0.33
-    }
-  },
-  "rn_rosa_concerned_station_morning": {
-    "src": "/images/play/rn/v2/rosa-concerned-station-morning-anime.png",
-    "alt": "rosa concerned station morning",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.47,
-      "y": 0.3
-    }
-  },
-  "rn_riverbend_lobby_morning": {
-    "src": "/images/play/rn/v2/riverbend-lobby-morning.png",
-    "alt": "riverbend lobby morning",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.5,
-      "y": 0.3
-    }
-  },
-  "rn_four_west_station_morning": {
-    "src": "/images/play/rn/v2/four-west-station-morning.png",
-    "alt": "four west station morning",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.5,
-      "y": 0.3
-    }
-  },
-  "rn_four_west_corridor_morning": {
-    "src": "/images/play/rn/v2/four-west-corridor-morning.png",
-    "alt": "four west corridor morning",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.5,
-      "y": 0.3
-    }
-  },
-  "rn_four_west_staff_room_day": {
-    "src": "/images/play/rn/v2/four-west-staff-room-day.png",
-    "alt": "four west staff room day",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.5,
-      "y": 0.3
-    }
-  },
-  "rn_yvonne_lobby_trailer": {
-    "src": "/images/play/rn/v2/yvonne-lobby-trailer.png",
-    "alt": "yvonne lobby trailer",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.5,
-      "y": 0.3
-    }
-  },
-  "rn_four_west_ward_night": {
-    "src": "/images/play/rn/v2/four-west-ward-night.png",
-    "alt": "four west ward night",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.5,
-      "y": 0.3
-    }
-  },
-  "rn_denise_concerned_station_afternoon": {
-    "src": "/images/play/rn/v2/denise-concerned-station-afternoon-anime.png",
-    "alt": "denise concerned station afternoon",
-    "focal": {
-      "x": 0.5,
-      "y": 0.3
-    },
-    "mobileFocal": {
-      "x": 0.5,
-      "y": 0.3
-    }
-  }
-} satisfies Record<string, V2Image>;
-
-// DEMO-ONLY: keep the RN start and lesson art in sync with the live toggle.
-// Return stable objects so switching art never rebuilds the game data.
+// RN v2 uses locked room plates and transparent anime foregrounds.
 const RN_PRE_GAME_ART = {
   cover: RN_IMAGES.rn_four_west_station_morning,
   lesson: RN_IMAGES.rn_room12_anxious_morning,
 };
 
-export function v2PreGameArtFor(simulationId: string): { cover: V2Image; lesson?: V2Image } | undefined {
-  return simulationId === "registered-nurse" ? RN_PRE_GAME_ART : undefined;
+export function v2PreGameArtFor(simulationId: string, version: ArtVersion = 2): { cover: V2Image; lesson?: V2Image } | undefined {
+  if (simulationId !== "registered-nurse") return undefined;
+  return version === 3 ? RN_PRE_GAME_ART : { cover: RN_V1_IMAGES.rn_four_west_station_morning, lesson: RN_V1_IMAGES.rn_room12_anxious_morning };
 }
 
 const IMAGES = {
@@ -603,16 +386,30 @@ export function hasV2Art(simulationId: string): boolean {
 }
 
 /** The v2 scene for a beat, or undefined when the beat keeps its v1 room. */
-export function v2SceneFor(simulationId: string, beatId: string, verdict?: Tier): V2Image | undefined {
+export function v2SceneFor(simulationId: string, beatId: string, verdict?: Tier, version: ArtVersion = 2): V2Image | undefined {
   const art = V2_ART[simulationId]?.[beatId];
   if (!art) return undefined;
   const selected = verdict === "best" && art.best ? art.best : (verdict === "wrong" || verdict === "risky") && art.wrong ? art.wrong : art.image;
+  if (simulationId === "registered-nurse" && version !== 3) return RN_V1_IMAGES[selected as keyof typeof RN_V1_IMAGES];
+  if (simulationId === "registered-nurse") {
+    const base = RN_IMAGES[art.image as keyof typeof RN_IMAGES];
+    // A reaction changes the person, never the camera, room or time of day.
+    // The previous RN1-20 map incorrectly replaced Denise with Rosa.
+    const key = beatId === "RN1-20" && selected !== art.image ? "rn_denise_concerned_station_afternoon" : selected;
+    const reaction = RN_IMAGES[key as keyof typeof RN_IMAGES];
+    if (base.composition.location !== reaction.composition.location) return base;
+    return { ...reaction, src: base.src, composition: { ...reaction.composition, timeClass: base.composition.timeClass } };
+  }
   return IMAGES[selected];
 }
 
 /** Every v2 image a beat can show, for warming the next beats' pictures. */
-export function v2SourcesFor(simulationId: string, beatId: string): string[] {
+export function v2SourcesFor(simulationId: string, beatId: string, version: ArtVersion = 2): string[] {
   const art = V2_ART[simulationId]?.[beatId];
   if (!art) return [];
-  return [art.image, art.best, art.wrong].filter((key): key is ImageKey => Boolean(key)).map(key => IMAGES[key].src);
+  const sources = [undefined, "best", "wrong"].flatMap(verdict => {
+    const scene = v2SceneFor(simulationId, beatId, verdict as Tier | undefined, version);
+    return scene ? [scene.src, ...(scene.composition?.foreground ? [scene.composition.foreground] : [])] : [];
+  });
+  return [...new Set(sources)];
 }

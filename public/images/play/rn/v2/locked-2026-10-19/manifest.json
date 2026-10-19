@@ -1,0 +1,434 @@
+{
+  "version": "rn-v2-locked-2026-10-19",
+  "background_hashes": {
+    "station": "a1a8da0ccf20a484e7b4b96130908ecfb900854593579626ffba28ce47931106",
+    "room12": "f1688620dfcb30099a3e76899e877c440caf96cb19788548530a6186a3ed354b",
+    "lobby": "1a3ef13fd19b4ae208bed1551f2523ade899d9c5b1e53d15531e478d22d0fe40",
+    "corridor": "7cf0f61878aeffc47d5f500f64002b94ec6e7160f27cc732ff1e7d3117f44c35",
+    "staff": "d9ac0679306654e418d825d419bdbf25d94c7c319f8b7da076bba85f497d3e69"
+  },
+  "foreground_checks": {
+    "rosa-explains-station-morning": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "6f9697ea4adff37731709459b39bee9116c650bdbde73798b1a5e7b8de33f1a1"
+    },
+    "rosa-station-dawn": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "2122dd9a364a38702d76307cf035ec090593580d94a95bd179ffe77aa9203b99"
+    },
+    "denise-reads-notes-station-afternoon": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "ddb9cb1568a61236877e38467ddef9d616df5846972412cb6448be41cc755fca"
+    },
+    "rosa-concerned-station-morning": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "2abbd4b08510954879cead82f2b9cbc2222cc4b249a9ba6f0d2347dfd9f3db76"
+    },
+    "rosa-proud-station-late-day": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "6811c9387377ffdea30ebc71b5b850d6046c4739fb9616d295d2104052936681"
+    },
+    "denise-concerned-station-afternoon": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "eb44aec4351f40cd465eaa3d3e2b07fdd4f3f10a384acce94063619e90f4bd85"
+    },
+    "night-report-station-night": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "0fbd1824dcfc2a178c9233a7613fe876fbcbec7838f2cd39fa874d1810d90562"
+    },
+    "tyler-huddle-morning": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "2e665734eaa93afd7a56986eee514f4700acf8ea0e4aeea1105e4e443b63ba34"
+    },
+    "pov-med-cart-rosa-afternoon": {
+      "dimensions": [
+        1671,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "80d3cc177d9e42bbbe60474ac7a4f91583c8e77f3205c2de7fd144e4fe889135"
+    },
+    "room12-anxious-morning": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "77753c1b219287766fce65b6a8f6efca27e0e6d359aec0bbe401c876734249fe"
+    },
+    "yvonne-lobby-trailer": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "796f0fabacb3cfa05b4073c18fd39f5de8570460001b14b408e9aed24a9ee842"
+    },
+    "pov-call-lights-corridor-morning": {
+      "dimensions": [
+        1671,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "338c58528cd31f2390fb01e9f16bc0e4096afc7b2ae60da2db6705a4f3a030fc"
+    },
+    "room12-distress-midday": {
+      "dimensions": [
+        1672,
+        941
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "sha256": "524a2241d2250ade56afc95c2087231b717ccd4830e6e258dd01761f513eb4f2"
+    }
+  },
+  "scenes": [
+    {
+      "id": "rosa-station-dawn",
+      "title": "Rosa welcomes the new shift",
+      "time": "Dawn \u00b7 6:55 AM",
+      "caption": "A welcoming gesture and a different night-shift colleague. Pale window rays meet cool early light.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/station.png",
+      "location": "station",
+      "foreground": "foregrounds/rosa-station-dawn.png",
+      "timeClass": "dawn",
+      "scale": 0.82,
+      "top": 0.02,
+      "doorPatch": false,
+      "background_sha256": "a1a8da0ccf20a484e7b4b96130908ecfb900854593579626ffba28ce47931106"
+    },
+    {
+      "id": "rosa-explains-station-morning",
+      "title": "Rosa explains the shift",
+      "time": "Mid-morning",
+      "caption": "Warm brown eyes, side-parted low bun and a small teaching gesture.",
+      "origin": "50% 29%",
+      "cast_note": "Rosa \u00b7 Latina \u00b7 28. warm brown eyes; soft heart-shaped face; large almond-shaped eyes. open, warm gestures; head angle varies with conversation.",
+      "plate": "backgrounds/station.png",
+      "location": "station",
+      "foreground": "foregrounds/rosa-explains-station-morning.png",
+      "timeClass": "day",
+      "scale": 0.82,
+      "top": 0.02,
+      "doorPatch": false,
+      "background_sha256": "a1a8da0ccf20a484e7b4b96130908ecfb900854593579626ffba28ce47931106"
+    },
+    {
+      "id": "pov-call-lights-corridor-morning",
+      "title": "Call lights on Four West",
+      "time": "Morning",
+      "caption": "The elderly patient is visible through the open door; the player's cart stays in the foreground.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/corridor.png",
+      "location": "corridor",
+      "foreground": "foregrounds/pov-call-lights-corridor-morning.png",
+      "timeClass": "day",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": true,
+      "background_sha256": "7cf0f61878aeffc47d5f500f64002b94ec6e7160f27cc732ff1e7d3117f44c35"
+    },
+    {
+      "id": "denise-reads-notes-station-afternoon",
+      "title": "Denise reviews the notes",
+      "time": "Early afternoon",
+      "caption": "Blue-grey eyes, a longer mature face, upright head and contained posture.",
+      "origin": "50% 29%",
+      "cast_note": "Denise \u00b7 White \u00b7 50. blue-grey eyes; long oval face with a firmer softly squared jaw; smaller hooded anime eyes. head upright, chin level; measured, contained hand movements.",
+      "plate": "backgrounds/station.png",
+      "location": "station",
+      "foreground": "foregrounds/denise-reads-notes-station-afternoon.png",
+      "timeClass": "day",
+      "scale": 0.82,
+      "top": 0.02,
+      "doorPatch": false,
+      "background_sha256": "a1a8da0ccf20a484e7b4b96130908ecfb900854593579626ffba28ce47931106"
+    },
+    {
+      "id": "tyler-huddle-morning",
+      "title": "Tyler leads the huddle",
+      "time": "Early morning",
+      "caption": "Amber-brown eyes, a longer male face and simple textured hair; Rosa listens behind him.",
+      "origin": "32% 29%",
+      "cast_note": "Tyler \u00b7 Black \u00b7 23. amber-brown eyes; longer angular male face; medium anime eyes. upright three-quarter turn; relaxed shoulders and one open hand.",
+      "plate": "backgrounds/station.png",
+      "location": "station",
+      "foreground": "foregrounds/tyler-huddle-morning.png",
+      "timeClass": "day",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "a1a8da0ccf20a484e7b4b96130908ecfb900854593579626ffba28ce47931106"
+    },
+    {
+      "id": "room12-distress-midday",
+      "title": "Room 12: distress",
+      "time": "Midday",
+      "caption": "The same patient and high bun, now frightened with one hand on her chest. Clearer midday light.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/room12.png",
+      "location": "room12",
+      "foreground": "foregrounds/room12-distress-midday.png",
+      "timeClass": "midday",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "f1688620dfcb30099a3e76899e877c440caf96cb19788548530a6186a3ed354b"
+    },
+    {
+      "id": "pov-med-cart-rosa-afternoon",
+      "title": "Rosa at the medication cart",
+      "time": "Early afternoon",
+      "caption": "The same Rosa design in a new camera position; hands and scanner carry the scene action.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/corridor.png",
+      "location": "corridor",
+      "foreground": "foregrounds/pov-med-cart-rosa-afternoon.png",
+      "timeClass": "day",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "7cf0f61878aeffc47d5f500f64002b94ec6e7160f27cc732ff1e7d3117f44c35"
+    },
+    {
+      "id": "night-report-station-night",
+      "title": "The night nurse takes report",
+      "time": "Night \u00b7 7 PM",
+      "caption": "A South Asian nurse with glasses, a low braid and a narrow mature face. Warm lamp light from the right.",
+      "origin": "50% 29%",
+      "cast_note": "Night nurse \u00b7 South Asian \u00b7 55. dark brown eyes; narrow mature oval face with smaller anime eyes behind rectangular glasses. seated upright at eye level, looking up from notes.",
+      "plate": "backgrounds/station.png",
+      "location": "station",
+      "foreground": "foregrounds/night-report-station-night.png",
+      "timeClass": "night",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "a1a8da0ccf20a484e7b4b96130908ecfb900854593579626ffba28ce47931106"
+    },
+    {
+      "id": "rosa-proud-station-late-day",
+      "title": "Rosa\u2019s proud reaction",
+      "time": "Late afternoon",
+      "caption": "Folded arms, the same face and bun, soft window shafts and a blue sky.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/station.png",
+      "location": "station",
+      "foreground": "foregrounds/rosa-proud-station-late-day.png",
+      "timeClass": "late",
+      "scale": 0.82,
+      "top": 0.02,
+      "doorPatch": false,
+      "background_sha256": "a1a8da0ccf20a484e7b4b96130908ecfb900854593579626ffba28ce47931106"
+    },
+    {
+      "id": "room12-anxious-morning",
+      "title": "Room 12: anxious questioning",
+      "time": "Morning",
+      "caption": "Grey-green eyes, a rounder face, centre part and high bun; upright tense posture.",
+      "origin": "50% 29%",
+      "cast_note": "Room 12 patient \u00b7 Middle Eastern \u00b7 42. grey-green eyes; rounder olive-skinned face; medium rounded anime eyes. upright tense shoulders, head level; hands respond to the scene.",
+      "plate": "backgrounds/room12.png",
+      "location": "room12",
+      "foreground": "foregrounds/room12-anxious-morning.png",
+      "timeClass": "day",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "f1688620dfcb30099a3e76899e877c440caf96cb19788548530a6186a3ed354b"
+    },
+    {
+      "id": "rosa-concerned-station-morning",
+      "title": "Rosa\u2019s concerned reaction",
+      "time": "Mid-morning",
+      "caption": "A small neutral mouth and open explanatory hand; the same identity and morning station.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/station.png",
+      "location": "station",
+      "foreground": "foregrounds/rosa-concerned-station-morning.png",
+      "timeClass": "day",
+      "scale": 0.82,
+      "top": 0.02,
+      "doorPatch": false,
+      "background_sha256": "a1a8da0ccf20a484e7b4b96130908ecfb900854593579626ffba28ce47931106"
+    },
+    {
+      "id": "riverbend-lobby-morning",
+      "title": "Riverbend reception",
+      "time": "Morning",
+      "caption": "Tall walnut walls, sculpted pale counters, champagne details and navy visitor seating.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/lobby.png",
+      "location": "lobby",
+      "foreground": null,
+      "timeClass": "day",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "1a3ef13fd19b4ae208bed1551f2523ade899d9c5b1e53d15531e478d22d0fe40"
+    },
+    {
+      "id": "four-west-station-morning",
+      "title": "Four West station",
+      "time": "Morning",
+      "caption": "The shared station architecture: river windows left, walnut cabinets and corridor right.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/station.png",
+      "location": "station",
+      "foreground": null,
+      "timeClass": "day",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "a1a8da0ccf20a484e7b4b96130908ecfb900854593579626ffba28ce47931106"
+    },
+    {
+      "id": "four-west-corridor-morning",
+      "title": "Four West corridor",
+      "time": "Morning",
+      "caption": "Four doors, integrated call lights, a medication cart and a car-park window.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/corridor.png",
+      "location": "corridor",
+      "foreground": null,
+      "timeClass": "day",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "7cf0f61878aeffc47d5f500f64002b94ec6e7160f27cc732ff1e7d3117f44c35"
+    },
+    {
+      "id": "four-west-staff-room-day",
+      "title": "Staff break room",
+      "time": "Daytime",
+      "caption": "A quieter courtyard view, walnut coffee storage, pale stone table and navy chairs.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/staff.png",
+      "location": "staff",
+      "foreground": null,
+      "timeClass": "day",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "d9ac0679306654e418d825d419bdbf25d94c7c319f8b7da076bba85f497d3e69"
+    },
+    {
+      "id": "yvonne-lobby-trailer",
+      "title": "Yvonne in the lobby",
+      "time": "Morning",
+      "caption": "A Black chief nursing officer with a broader face, deep umber eyes and a turned, composed gaze.",
+      "origin": "50% 29%",
+      "cast_note": "Yvonne \u00b7 Black \u00b7 55. deep umber brown eyes; broader mature face with a soft square jaw; narrower almond eyes. upright three-quarter turn toward an offscreen colleague; composed, still.",
+      "plate": "backgrounds/lobby.png",
+      "location": "lobby",
+      "foreground": "foregrounds/yvonne-lobby-trailer.png",
+      "timeClass": "day",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "1a3ef13fd19b4ae208bed1551f2523ade899d9c5b1e53d15531e478d22d0fe40"
+    },
+    {
+      "id": "four-west-ward-night",
+      "title": "Room 12 after dark",
+      "time": "Night",
+      "caption": "The same room, bed and equipment under a bedside practical lamp and cool exterior light.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/room12.png",
+      "location": "room12",
+      "foreground": null,
+      "timeClass": "night",
+      "scale": 1,
+      "top": 0,
+      "doorPatch": false,
+      "background_sha256": "f1688620dfcb30099a3e76899e877c440caf96cb19788548530a6186a3ed354b"
+    },
+    {
+      "id": "denise-concerned-station-afternoon",
+      "title": "Denise\u2019s concerned reaction",
+      "time": "Early afternoon",
+      "caption": "The same blue-grey eyes, longer face and smooth low bun; tablet placed on the counter.",
+      "origin": "50% 29%",
+      "plate": "backgrounds/station.png",
+      "location": "station",
+      "foreground": "foregrounds/denise-concerned-station-afternoon.png",
+      "timeClass": "day",
+      "scale": 0.82,
+      "top": 0.02,
+      "doorPatch": false,
+      "background_sha256": "a1a8da0ccf20a484e7b4b96130908ecfb900854593579626ffba28ce47931106"
+    }
+  ],
+  "lighting": "Deterministic browser preview grades and overlays; no independent room regeneration"
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { CareerScene } from "./CareerScene";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -106,12 +107,12 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
   // ?v=0 marks the old sprite version (labelled v0) so a reload keeps it.
   const v2Available = hasV2Art(simulation.id);
   const [artVersion, setArtVersionState] = useState<ArtVersion>(initialArtVersion);
-  const v2 = v2Available && artVersion === 2;
+  const v2 = v2Available && artVersion !== 1;
   const setArtVersion = useCallback((next: ArtVersion) => {
     setArtVersionState(next);
     const url = new URL(window.location.href);
     if (next === 1) url.searchParams.set("v", "0");
-    else url.searchParams.delete("v");
+    else url.searchParams.set("v", next === 3 ? "2" : "1");
     window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
   }, []);
   // Opens on "Start Level N" instead of navigating straight there -- one
@@ -310,11 +311,11 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
   // DEMO-ONLY: v1/v2 comparison. A v2 beat with a painted scene of its own
   // shows it (a Best verdict can swap in an approval scene); every other v2
   // beat keeps the v1 room above, with nobody standing in it.
-  const v2Scene: V2Image | undefined = v2 ? v2SceneFor(simulation.id, beat.id, phase === "feedback" ? result?.tier : undefined) : undefined;
+  const v2Scene: V2Image | undefined = v2 ? v2SceneFor(simulation.id, beat.id, phase === "feedback" ? result?.tier : undefined, artVersion) : undefined;
   const sceneSrc = v2Scene?.src ?? scene.src;
   // The Best verdict's scene, fetched (at the size next/image will ask for)
   // while the question is still up, so the cut to it is not a black frame.
-  const v2BestScene = v2 && phase !== "feedback" ? v2SceneFor(simulation.id, beat.id, "best") : undefined;
+  const v2BestScene = v2 && phase !== "feedback" ? v2SceneFor(simulation.id, beat.id, "best", artVersion) : undefined;
   const v2Warm = v2BestScene && v2BestScene.src !== v2Scene?.src ? v2BestScene : undefined;
   // Wired 27 Sept 2026: a real loading view for the level's first paint,
   // gated on the actual scene image finishing (or, for a moodlit "none"
@@ -581,14 +582,14 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
       if (b.art) wanted.add(b.art);
       const room = locationFor(b.id);
       if (room) wanted.add(room.src);
-      if (v2) for (const src of v2SourcesFor(simulation.id, b.id)) wanted.add(src);
+      if (v2) for (const src of v2SourcesFor(simulation.id, b.id, artVersion)) wanted.add(src);
     }
     for (const src of wanted) {
       const img = new window.Image();
       img.decoding = "async";
       img.src = src;
     }
-  }, [index, level.beats, v2, simulation.id]);
+  }, [index, level.beats, v2, simulation.id, artVersion]);
 
   // Music: the Main Song runs for the whole level, switching to the
   // Promotion Song only once an ending actually advances the player --
@@ -1001,7 +1002,7 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
         onBack={index > 0 ? goBack : undefined}
         onOpenConnect={DEMO_CONNECT_SHORTCUT && nextLevel ? () => setConnectOpen(true) : undefined}
         // DEMO-ONLY: v1/v2 comparison, the in-game switch for the current screen.
-        artToggle={v2Available ? <ArtVersionToggle version={artVersion} onChange={setArtVersion} accent={accent} /> : undefined}
+        artToggle={v2Available ? <ArtVersionToggle includeV2={simulation.id === "registered-nurse"} version={artVersion} onChange={setArtVersion} accent={accent} /> : undefined}
       />
 
       {pip && ownPlan ? (
@@ -1353,6 +1354,7 @@ function LocationBackdrop({
  *  with the same entrance push. Keyed on the picture, so a cut to a new scene
  *  (or a flip from v1) plays that entrance again. */
 function V2Backdrop({ scene, filter, slowFilter, onReady }: { scene: V2Image; filter?: string; slowFilter?: boolean; onReady?: () => void }) {
+  if (scene.composition) return <CareerScene scene={scene} filter={filter} onReady={onReady} />;
   return (
     <>
       <Image
