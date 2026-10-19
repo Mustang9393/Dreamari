@@ -1,3 +1,11 @@
+## 2026-10-19: new Glossary Games covers on the Play tab
+
+**Why (Chandu):** "Please use these images for the glossary game thumbnails where appropriate and push." Four new single-object covers replace the 17 Oct three-glossy-objects set.
+
+- Finance = cash stack, Medical = green cross, Flight = jet, Tech = laptop. Saved as `public/images/app/glossary-<subject>-thumb-oct19.webp` (1400 by 788, quality 86, 10 to 20 KB each) and set as `cover` in `GLOSSARY_GAMES` (`src/components/play/games.ts`). The oct17b files stay in the repo (unreferenced).
+- SOP section 6.7 (md, html, and its copy in USMAN_MASTER_HANDOFF) now names the oct19 set as the reference and describes the new style (one flat isometric object on the navy gradient) in the Codex cover prompt.
+- Checked on /play: all four cards load the new covers; Finance and Medical seen at rest in a screenshot.
+
 ## 2026-10-19: Black & Blue is the default; the switch is for Classic
 
 **Why (Chandu):** "lets have black and blue be the default and the switch to be done for classic."

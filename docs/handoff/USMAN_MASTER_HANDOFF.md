@@ -2326,7 +2326,7 @@ _17 October 2026. One document with everything needed to scale the glossary game
 
 | Check | Result |
 |---|---|
-| Live on main | Everything in this document is on main. Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's 17 Oct covers (three objects on a night cloud floor, no Dreamy); Next level keeps the student's theme; Dreamy's speech bubble wraps on whole words at phone width. Since 17 Oct: Codex's Level 1 term art and welcome scenes for Software, Aviation and Nursing in both themes, living worlds (asset-free time of day per world; weather removed on 17 Oct, Chandu's decision), the symmetry and alignment pass, and the light-mode pass. |
+| Live on main | Everything in this document is on main. Mastery shows as a count and five anonymous segments; Signal's scene cards use Signal's frame; the Play tab's four glossary cards carry Chandu's 19 Oct covers (one isometric object on a navy gradient, no Dreamy); Next level keeps the student's theme; Dreamy's speech bubble wraps on whole words at phone width. Since 17 Oct: Codex's Level 1 term art and welcome scenes for Software, Aviation and Nursing in both themes, living worlds (asset-free time of day per world; weather removed on 17 Oct, Chandu's decision), the symmetry and alignment pass, and the light-mode pass. |
 | Light mode | A contrast sweep of every Culinary screen (all six levels, the welcome, teach cards, unlocked screen, Power Play and review) in Drift and Signal with the app in light mode: every line at 4.5:1 or better (3:1 large), disabled buttons excepted. Fixed on 17 Oct: Signal's gold and cyan words and their navy drop shadows, the welcome copy over the daytime city, the Start label, the A to D keys, the compare card names, the theme switch label, the empty mastery segments. |
 | Alignment audit | One screen of every shape the five games produce (30 shapes) in both themes at 1440x900 and 375x812: no row of unequal tiles, no off-centre short row, no block off the column's edges, no HUD or bubble off the column. Every screen also checked by eye for what the audit cannot see. The welcome screen is one centred column up to 860px. |
 | Art QA | Three Level 1 packs, six welcomes, 72 exports with alpha and hash receipts (2.2 MB served); Finance and the words-only later levels unchanged. World scenes: deterministic, asset-free, Finance bypassed, performance contract held. |
@@ -2447,7 +2447,7 @@ TASK: turn the roadmap Levels 5 and 6 of src/components/glossary/blueprints/[slu
 ### 5. Prompt C: release an industry to the Play hub (Chandu, after QA)
 
 ```
-Only once the industry has its Play tab cover (the Play tab shows only games with thumbnail art; until then it plays from the hamburger menu's Glossary QA link). In the Dreamari repo: add "[slug]" to GLOSSARY_HUB_RELEASED in src/components/glossary/data.ts. If the hub has no card for it, add one to GLOSSARY_GAMES in src/components/play/games.ts keyed to its example career slug (or the industry slug when no catalog career owns it) with title "[Subject] Terms", sub "Learn key [subject] terms" and a cover (a 1400 by 788 WebP thumbnail: three glossy objects of the subject on a night cloud floor, matching the four on the hub; section 6.7). Confirm Codex has registered its Level 1 term art (termArt.ts) and welcome illustration (welcomeArt.ts). Run npx tsc --noEmit, open /play and confirm the card is playable, commit with the why, push to main.
+Only once the industry has its Play tab cover (the Play tab shows only games with thumbnail art; until then it plays from the hamburger menu's Glossary QA link). In the Dreamari repo: add "[slug]" to GLOSSARY_HUB_RELEASED in src/components/glossary/data.ts. If the hub has no card for it, add one to GLOSSARY_GAMES in src/components/play/games.ts keyed to its example career slug (or the industry slug when no catalog career owns it) with title "[Subject] Terms", sub "Learn key [subject] terms" and a cover (a 1400 by 788 WebP thumbnail: one isometric object of the subject on the navy night gradient, matching the four on the hub; section 6.7). Confirm Codex has registered its Level 1 term art (termArt.ts) and welcome illustration (welcomeArt.ts). Run npx tsc --noEmit, open /play and confirm the card is playable, commit with the why, push to main.
 ```
 
 ### 6. Images (Codex or ChatGPT)
@@ -2582,18 +2582,18 @@ Chandu's "Dream Expressions V2" pack (19 Drift stills) is at public/images/dream
 
 #### 6.7 Play tab covers (one per released industry)
 
-Each glossary card on the Play tab has a landscape cover: three glossy 3D objects that say the subject at a glance, grouped in the centre on a night cloud floor. No Dreamy, no people, no text. 1400 by 788 WebP, under 130 KB. The four on the tab are the reference set (Chandu, 17 Oct 2026): public/images/app/glossary-finance-thumb-oct17b.webp (a calculator, a rising chart, gold coins), glossary-medical-thumb-oct17b.webp (a stethoscope, a green cross, a clipboard with a heart line), glossary-flight-thumb-oct17b.webp (a jet, a pilot's cap, a crossed wrench and screwdriver) and glossary-tech-thumb-oct17b.webp (a laptop, a padlock shield, a server stack). The card is portrait at rest and 16:9 when active, so the group stays inside the middle third. File: public/images/app/glossary-<subject>-thumb-<mmmdd>.webp, set as cover on the card in GLOSSARY_GAMES. No cover, no card: the game plays from the hamburger menu's Glossary QA link until its cover exists.
+Each glossary card on the Play tab has a landscape cover: one isometric object that says the subject at a glance, centred on the navy night gradient. No Dreamy, no people, no text. 1400 by 788 WebP, under 130 KB. The four on the tab are the reference set (Chandu, 19 Oct 2026): public/images/app/glossary-finance-thumb-oct19.webp (a cash stack), glossary-medical-thumb-oct19.webp (a green cross), glossary-flight-thumb-oct19.webp (a jet) and glossary-tech-thumb-oct19.webp (a laptop). The card is portrait at rest and 16:9 when active, so the object stays inside the middle third. File: public/images/app/glossary-<subject>-thumb-<mmmdd>.webp, set as cover on the card in GLOSSARY_GAMES. No cover, no card: the game plays from the hamburger menu's Glossary QA link until its cover exists.
 
 ```
 Use case: Play tab game cover.
-Match the four attached covers exactly in frame, camera, lighting, palette and material: a deep navy to violet night sky with small white four-point sparkles; soft rounded cloud banks in blue and violet with pink rim light at the sides and along the bottom; a smooth cloud floor with soft reflections; in the centre, three glossy 3D objects from the subject, grouped tightly and overlapping a little, lit with a cool blue glow and warm gold accents.
+Match the four attached covers exactly in frame, camera, palette and finish: a flat vector illustration, no photo texture; a dark navy background (#02061f to #0a1a4a) with soft diagonal light bands and a faint glow behind the centre; in the centre, ONE isometric object from the subject, clean flat faces with gentle gradients, in one hue family (greens, blues or white), no outlines.
 Subject: {{the workplace}}.
-Objects: {{three plain objects that say the subject at a glance, e.g. a stethoscope, a green medical cross, a clipboard with a heart line}}.
-Composition: 1400 by 788 landscape (16:9). The group sits in the middle third, about 45% of the width, nothing important near the edges (the card crops to portrait at rest).
+Object: {{one plain object that says the subject at a glance, e.g. a green medical cross, a laptop, a jet, a stack of cash}}.
+Composition: 1400 by 788 landscape (16:9). The object sits in the middle, about 20 to 30% of the width, nothing important near the edges (the card crops to portrait at rest).
 No Dreamy, no people, no characters. No text, letters, numbers, logo or watermark; a simple symbol such as a $ on a coin is fine.
 ```
 
-Package: resize the chosen source to 1400 by 788 and save as WebP under 130 KB (sharp: resize(1400, 788, { fit: "cover" }).webp({ quality: 86 })). Check it on /play at rest (portrait) and active (16:9): the three objects stay whole in both.
+Package: resize the chosen source to 1400 by 788 and save as WebP under 130 KB (sharp: resize(1400, 788, { fit: "cover" }).webp({ quality: 86 })). Check it on /play at rest (portrait) and active (16:9): the object stays whole in both.
 
 #### 6.8 Living worlds (code only, no image to make)
 
@@ -2698,7 +2698,7 @@ PART 3. WELCOME SCENE, BOTH THEMES (section 6.2)
 One composed scene of the anchor's workplace, never a person. Add welcome {brief, sources, prompts} to the manifest, generate both themes, run node scripts/glossary-welcome-art.mjs prepare <manifest> and validate <manifest>, and register WELCOME_ART["<slug>"] in src/components/glossary/welcomeArt.ts.
 
 PART 4. PLAY TAB COVER (section 6.7)
-Attach the four existing covers as references: public/images/app/glossary-finance-thumb-oct17b.webp, glossary-medical-thumb-oct17b.webp, glossary-flight-thumb-oct17b.webp, glossary-tech-thumb-oct17b.webp. Use the cover prompt in section 6.7 with the workplace and three objects that say the subject at a glance. No Dreamy, no people, no text. Save as public/images/app/glossary-<subject>-thumb-<mmmdd>.webp, 1400 by 788, under 130 KB, and check it on /play at rest and active.
+Attach the four existing covers as references: public/images/app/glossary-finance-thumb-oct19.webp, glossary-medical-thumb-oct19.webp, glossary-flight-thumb-oct19.webp, glossary-tech-thumb-oct19.webp. Use the cover prompt in section 6.7 with one object that says the subject at a glance. No Dreamy, no people, no text. Save as public/images/app/glossary-<subject>-thumb-<mmmdd>.webp, 1400 by 788, under 130 KB, and check it on /play at rest and active.
 
 PART 5. THE WORLD'S SIGNAL BACKGROUND, ONLY IF IT HAS NONE
 If SIGNAL_WORLD_BACKDROPS in src/components/glossary/worldBackdrops.ts has no entry for this game's career world, run section 7d for that one world. Otherwise skip.
@@ -2892,7 +2892,7 @@ Then in the browser: paste scripts/qa/glossary-alignment-audit.js into the conso
 
 #### 10.7 Process
 
-- Nothing is pushed to main without Chandu's go-ahead; nothing reaches the Play hub without Prompt C. The Play tab shows only glossaries with a thumbnail cover; the rest play from the hamburger menu's Glossary QA link (Chandu, 17 Oct 2026).
+- Nothing is pushed to main without Chandu's go-ahead; nothing reaches the Play hub without Prompt C. The Play tab shows only glossaries with a thumbnail cover; the rest play from the hamburger menu's Glossary QA link (Chandu, 19 Oct 2026).
 - Every demo-only piece carries a DEMO-ONLY comment. Every real change gets a dated docs/AI_HANDOFF.md entry and a commit that say why.
 - Student copy at eighth grade, no dashes; the same in these docs.
 - A new screen or state goes into the Component Lab in the same commit.
