@@ -73,8 +73,11 @@ export const REGISTERED_NURSE: Simulation = {
   world: "Health & Medicine",
   firm: "Riverbend Medical Center",
   cover: "/images/play/rn/locations/station-hero.webp",
-  thumb: "/images/play/rn/v2/rosa-proud-station-late-day-anime.png",
-  thumbFocus: "50% 10%",
+  // The locked v2 art (20 Oct 2026, Chandu: "use the latest images that
+  // were created"): the station room with Rosa's late-day layer flattened
+  // into one file, replacing the earlier flat -anime.png of the same beat.
+  thumb: "/images/play/rn/v2/locked-2026-10-19/cover-rosa-proud-station.webp",
+  thumbFocus: "52% 12%",
   // The trailer (Trailer tab): same seven-beat shape as every career --
   // the scale, the odds, the cost, the room, the consequence, the person
   // at the top, the ladder. Reuse only. The two statistic cards ship

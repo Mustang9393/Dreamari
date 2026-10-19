@@ -369,8 +369,14 @@ function HeroBanner() {
            game instead (direct feedback, 4 Sept 2026). */}
         <HeroPanel
           active={panel === (SHOW_DAILY_DROP ? 1 : 0)}
+          // Rosa stands mid-frame in the tile art, under the title when it
+          // fills the card, so from sm up it is inset in the right 64% over
+          // the empty station room blurred (as Drone Pilot), with its own
+          // focus that pushes her right; phones crop it full-bleed.
           photo={simThumb(REGISTERED_NURSE).src}
-          focus={simThumb(REGISTERED_NURSE).focus}
+          focus="30% 12%"
+          inset
+          blurBehind="/images/play/rn/v2/locked-2026-10-19/backgrounds/station.png"
           eyebrow="NEW GAME LAUNCHED"
           eyebrowColor="var(--accent-subtle)"
           title={`Day in the Life: ${REGISTERED_NURSE.title}`}

@@ -1,3 +1,12 @@
+## 2026-10-20: Registered Nurse carousel card and Play tile take the newest game art
+
+**Why (Chandu):** "for the carousel card of the registered nurse and also the thumbnail in the play tab, use the latest images that were created". The newest RN art is the layered set locked on 19 Oct (`public/images/play/rn/v2/locked-2026-10-19`, rooms and character layers kept separate; the game was built as a "v3" lab and promoted to v2). The tile still used the earlier flat `rosa-proud-station-late-day-anime.png`, and the day before Chandu had kept the old lobby image on the Home card ("lets stick to the older carousel image for now").
+
+- New `locked-2026-10-19/cover-rosa-proud-station.webp`: the `station` background with the `rosa-proud-station-late-day` foreground flattened into one file (Rosa alone, arms crossed).
+- `games.ts`: `REGISTERED_NURSE.thumb` points at it, `thumbFocus` "52% 12%" (Rosa centred in the 4:5 tile). `cover` (the in-game backdrop) is unchanged.
+- `HomeExperience.tsx`: the RN hero panel keeps `simThumb(...).src` but uses its own focus "30% 12%", `inset`, and the empty station room as `blurBehind`, like Drone Pilot. Rosa stands mid-frame, so full-bleed put the title over her; the inset pushes her right of the title from sm up, and phones crop full-bleed.
+- Checked: eslint; tsc (only a pre-existing missing `@dicebear/lorelei-neutral` error elsewhere); the image and crops applied live on the :3061 build at 375px, 800px and 1440px for Home, and at 1280px for the Play tile, dark mode. Not checked: this branch's own dev server (server slots full), light mode, Windows/Chromebook.
+
 ## 2026-10-20: Black & Blue focal pass (Home, Explore, career, Opportunities, Play)
 
 **Why:** Joshua asked for "stronger visual focal points to give the interface more dimension"; of the options, Chandu liked "bigger hero imagery and type, and more empty space around the one thing that matters" most, with "no glow, no Dreamy". One clear focal point per screen, more room around it, quieter neighbours. All under `html.look-v2`, so Classic is untouched.
