@@ -1,3 +1,10 @@
+## 2026-10-19: scroll edges fade instead of blur; Match's Learn more on one screen
+
+**Why (Chandu):** "the blur edges are too sharp for the scroll areas... they need to be organic and subtle and progressive", then "The blur areas are toooo tall and really bad and sharp. If we cant reliably duplicate this look dont try anymore. My reference is Apple ios UI." And for Match: "we dont need a tab for the learn more pop ups".
+
+- **`ScrollEdges` (cardChrome.tsx) no longer stacks backdrop-blur layers.** Their masks are not honoured with backdrop-filter in some Chromium builds, so the bands rendered as hard-edged rectangles. It now sets a soft, eased alpha mask on the scroller itself (iOS-list style): off while nothing is under an edge, easing in with the scroll, short ramps (0.85x the given size). No blur anywhere, so nothing can show a seam. The `tint` prop is kept for callers but unused. Every caller (Career Peek, Match's sheet, the others) gets it.
+- **Match's Learn more:** one screen, no tabs (What you'd do, Good fit if you like, School & path). `PeekSheet` hides its tab bar when given a single tab.
+
 ## 2026-10-19: brighter v2 nudges, plan steps open the career section, Match's Learn more redesigned
 
 **Why (Chandu):** "the nudges for move to #1 and remove from top 3 should be more prominent... use the BLUE glow from the blue and black theme"; "if something says learn what schools or majors to take etc, take the student to the career detail page and scroll to the relevant section (and expand if its collapsed)"; "in the match flow, update the learn more popups to look like the pop ups we have when we click on top 3 cards... keep the same information, designed way better".

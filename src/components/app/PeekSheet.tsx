@@ -163,7 +163,8 @@ export function PeekSheet<K extends string>({ id, accent, art, chip, title, titl
                   ))}
                 </div>
               )}
-              <div className="cpk-tabs"><Segmented<K> ariaLabel="Details" value={tab} onChange={onTab} options={tabs} grow /></div>
+              {/* one section set needs no tab bar (Match's Learn more, 19 Oct 2026) */}
+              {tabs.length > 1 && <div className="cpk-tabs"><Segmented<K> ariaLabel="Details" value={tab} onChange={onTab} options={tabs} grow /></div>}
               <div className="cpk-details relative min-h-0 flex-1">
                 <div key={refined ? tab : undefined} tabIndex={refined ? 0 : undefined} className="cpk-scroll" style={{ position: "absolute", inset: 0 }}>
                   <div key={tab} className="cpk-stack dm-rise">{body}</div>

@@ -515,10 +515,10 @@ export function RevealGrid<T>({ items, resetKey, renderItem }: { items: T[]; res
  *  sheet (PeekSheet, refined: the poster panel, the world accent, the fact
  *  strip, the segmented tabs, the frosted footer; a drawer on phones) with
  *  Match's own content from matchDetail(): pay and employers as the facts,
- *  "What you'd do" and "Good fit if you like" on Overview, "School & path"
- *  on its own tab, and the one Save / Add to My Top 3 action. Prev/next
+ *  "What you'd do", "Good fit if you like" and "School & path" on one screen
+ *  (no tabs), and the one Save / Add to My Top 3 action. Prev/next
  *  walk the same list as before. */
-type MatchTab = "overview" | "school";
+type MatchTab = "overview";
 export function DetailModal({ career, control, selected, full, onToggle, onClose, onPrev, onNext }: {
   career: LabCareer;
   control: Exclude<LabControl, "rank">;
@@ -531,7 +531,7 @@ export function DetailModal({ career, control, selected, full, onToggle, onClose
 }) {
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
   const detail = matchDetail(career);
-  const [tab, setTab] = useState<MatchTab>("overview");
+  const [tab, setTab] = useState<MatchTab>("overview");  // PeekSheet's single "tab"
   // PeekSheet steps through a list by index; Match only knows its neighbours,
   // so the position is just enough to enable the right arrows.
   const count = 1 + (onPrev ? 1 : 0) + (onNext ? 1 : 0);
@@ -553,20 +553,21 @@ export function DetailModal({ career, control, selected, full, onToggle, onClose
       title={career.title}
       titleStyle={posterTitleFont(career.world)}
       facts={facts}
-      tabs={[{ key: "overview", label: "Overview" }, { key: "school", label: "School & path" }]}
+      // all of it on one screen, no tabs (Chandu, 19 Oct 2026: "we dont need
+      // a tab for the learn more pop ups from match screen")
+      tabs={[{ key: "overview", label: "Overview" }]}
       tab={tab}
       onTab={setTab}
       count={count}
       index={index}
       onIndex={(i) => { if (i < index) onPrev?.(); else onNext?.(); }}
       onClose={onClose}
-      body={tab === "overview" ? (
+      body={(
         <>
           <section className="cpk-section"><h3 className="cpk-section-title">What you&apos;d do</h3>{list(detail.whatYouDo)}</section>
           <section className="cpk-section"><h3 className="cpk-section-title">Good fit if you like</h3>{list(detail.goodFitIf)}</section>
+          <section className="cpk-section"><h3 className="cpk-section-title">School &amp; path</h3>{list(detail.schoolPath)}</section>
         </>
-      ) : (
-        <section className="cpk-section"><h3 className="cpk-section-title">School &amp; path</h3>{list(detail.schoolPath)}</section>
       )}
       footer={
         <button type="button" onClick={onToggle} disabled={!selected && full} className="flex min-h-[46px] w-full cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-md)] text-[15px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={selected ? { background: "var(--glass-surface-1)", color: "var(--foreground)" } : { background: accent, color: careerButtonInk(career.world), boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}>
