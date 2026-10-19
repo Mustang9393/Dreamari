@@ -1,3 +1,38 @@
+## 2026-10-19: v2 About Me guides the goals; Top 3 folds into Career Goal; My schools gets My Build's finish
+
+**Why (Chandu):** "lets make about me the way to guide students first. They land with empty cards: career goal should be first ask to be fixed and when they click, they see their saved careers and we can have the sam ui and nudges we had to teahc them how to rank etc. Then #1 becomes the career goal, xp is gained, then next step is to fix a college/school goal ... we can get rid of the top 3 tab by folding it into here." Follow-ups the same day:
+- "lets keep saved tab as is"
+- "give the my schools tab also the premium finish we gave for my build"
+- "lets also have the tooltip nudges to teach the controls on my schools/ career goal etc."
+- "the new fanned out card thing ... is bad. We need to be more creative and make it not so busy."
+
+- **v2 tabs:** About Me, Saved, My Plan, Report, Resume. Top 3 is gone in v2; Saved is unchanged. v1 is untouched.
+- **About Me in v2 is a sequence:** Career Goal, then College Goal, then My Plan.
+  - A goal counts as set only once the student confirms it, so both cards start empty even when a Top 3 or starred school exists.
+  - Each goal pays +25 XP through flyXp.
+  - The College Goal card only nudges once the Career Goal is set: one ask at a time.
+  - After both are set, a "See your plan to get there" row (with nudge) opens My Plan.
+- **Empty goal cards: "out of focus until you choose."** One picture of the likeliest choice (the Top 3's #1, or the #1 or newest saved school), blurred and dimmed. With nothing saved, Build's sky shows instead and the card opens Explore.
+  - Setting the goal brings the picture into focus once (`.dm-goal-focus-in`, app.css).
+  - This replaced a first try with three fanned posters per card, rejected as too busy.
+- **Career Goal view:** the real Top 3 cards (Top3Tab), with their move, remove and add nudges and Compare, then "Make [#1] my Career Goal +25 XP", then saved careers with "Add to Top 3".
+  - `?tab=top3` and Match's arrival land here in v2.
+- **College Goal view:** the setting action lives on the #1 school card ("Make it my College Goal +25 XP"; once set, "Next: My Plan"), so no separate line repeats the school's name.
+- **My schools:** My Build's finish. One panel on Build's sky (the `education` accent), Reach / Target / Likely as three hairline-split columns at desktop with the gradient headings, and a switch on phones and tablets.
+- **Control nudges** (new shared `profile/SpotTip.tsx`: SpotTip plus `useSpotSequence`):
+  - My schools: "Move to Target or Likely" on Move, then "Make it your #1" on the star.
+  - My Build: "Tap any line to change it" under the first line.
+  - Each plays once, when its panel is on screen.
+  - Top 3 keeps its own sequence.
+- **v2's cover My Build button and its tooltip were removed:** About Me hosts My Build again in both versions.
+- **DEMO-ONLY:**
+  - Goal flags and the new nudges are per session, and a reload clears them. WelcomeSplash's clearOnReload now also clears `dreamari:goal:` and `dreamari:nudge:` keys.
+  - XP milestone ids get a per-page-load suffix in the demo so the +25 XP moment plays every run.
+- **Merged origin/main** (the new My Build: no Edit button, three columns on the sky).
+- **Unrelated fix:** the about-me worktree's node_modules pointed at the deleted united-way worktree. It is relinked to `../look-v2/node_modules`. glossary-thumbs has the same dead link.
+- **Validation:** tsc clean except the pre-existing `@dicebear` LineAvatar error. eslint has no new warnings; `buildDot` is unused since main's My Build change. Checked in the browser at phone, tablet (768) and desktop widths: both goals with XP (score 10 → 35 → 60), the redirect from `?tab=top3`, both nudges, the focus-in, and the reload reset.
+- **Next:** Chandu reviews the frosted empty cards and the goal sequence. Nothing pushed.
+
 ## 2026-10-19: simulation thumbnails use the new character art; the Top 3 nudge starts reliably
 
 **Why (Chandu):** "update the thumbnails to the career simulations for which we have new graphics", then "make sure there are characters and the compositions work for the new thumbnails in both 4:5 and 16:9 or whatever proportions the tiles scale to." Separately: "the move to #1 etc nudge isnt autoplaying btw."

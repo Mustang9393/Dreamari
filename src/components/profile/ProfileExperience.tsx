@@ -25,6 +25,7 @@ import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BuildModal, type BuildSection } from "./PreferencesTab";
 import { AboutMeTab, CollegeGoalView, useCollegeGoal, type AboutView } from "./AboutMeTab";
+import { SpotTip } from "./SpotTip";
 import { BookCounselorSheet, useMyNextMeeting } from "./BookCounselorSheet";
 import { BOOK_MEETING_ID, careerWindows, SAVE_PROGRAM_ID, SAVE_SCHOOLS_ID, SHARE_REPORT_ID, type CareerStep } from "./careerPlanSteps";
 import { reportHistorySnapshot, serverReportHistorySnapshot, subscribeReportHistory } from "@/lib/reportHistory";
@@ -1551,24 +1552,6 @@ function useRankHint(): { show: boolean | null; retired: boolean; retire: () => 
     try { window.localStorage.setItem(RANK_HINT_KEY, "1"); } catch { /* nothing to persist to */ }
   };
   return { show, retired, retire };
-}
-
-/** The words a lit card control already carries in its tooltip, shown once
- *  under it while v2's first-visit highlight points at it. */
-function SpotTip({ side, top = 48, children }: { side: "left" | "right"; /** px below the anchor's top */ top?: number; children: React.ReactNode }) {
-  return (
-    <motion.span
-      role="status"
-      data-side={side}
-      data-above={top < 0 ? "" : undefined}
-      initial={{ opacity: 0, y: -8, scale: 0.85 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 520, damping: 22 }}
-      style={{ top }}
-      className={`dm-tip dm-spot-tip pointer-events-none absolute z-[4] flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap ${side === "left" ? "left-0 origin-top-left" : "right-0 origin-top-right"}`}
-    >
-      <Sparkles className="h-[14px] w-[14px] flex-none" aria-hidden />
-      {children}
-    </motion.span>
-  );
 }
 
 export function Top3Tab({

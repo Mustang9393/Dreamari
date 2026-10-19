@@ -14,7 +14,7 @@
 // colleges/shared useSaved), so a save anywhere lands here with no extra step.
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ChevronRight, GraduationCap, Briefcase, Pencil, Plus, Star, Compass, Check, Map as MapIcon } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -30,6 +30,7 @@ import { useResolvedColleges } from "@/components/colleges/dataset";
 import { CollegePicture, useGoalBuckets, useSaved as useSavedColleges, useTopSchool, type GoalBucket } from "@/components/colleges/shared";
 import { fitFor, parseGpa } from "@/components/colleges/pathway";
 import { useBackStep } from "@/lib/backStep";
+import { SpotTip, useSpotSequence } from "./SpotTip";
 import { flyXp } from "@/components/app/xpFlight";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession } from "@/components/app/WelcomeSplash";
 import { useBuildAnswers } from "@/lib/buildAnswers";
@@ -168,6 +169,9 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
   // After a goal is set, the XP flies, then About Me comes back so the
   // student sees the card fill and the next goal start to nudge.
   const settle = () => window.setTimeout(() => go("home"), 1100);
+  // the goal that was just set: its picture comes into focus on About Me
+  const [justSet, setJustSet] = useState<"career" | "college" | null>(null);
+  const focusIn = (g: "career" | "college") => { setJustSet(g); window.setTimeout(() => setJustSet(null), 3200); };
 
   if (v2 && view === "career") {
     return (
@@ -179,6 +183,7 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
           if (!first) return;
           v2.onConfirmPrimary(first.id);
           markCareer();
+          focusIn("career");
           flyXp({ from, amount: CAREER_GOAL_XP, milestone: `profile:career-goal${DEMO_RUN}` });
           settle();
         }}
@@ -192,7 +197,7 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
         goal={college} onBack={() => setView("home")}
         confirm={{
           set: collegeSet,
-          onConfirm: (from) => { markCollege(); flyXp({ from, amount: COLLEGE_GOAL_XP, milestone: `profile:college-goal${DEMO_RUN}` }); settle(); },
+          onConfirm: (from) => { markCollege(); focusIn("college"); flyXp({ from, amount: COLLEGE_GOAL_XP, milestone: `profile:college-goal${DEMO_RUN}` }); settle(); },
           onNext: () => onGoTab("plan"),
         }}
       />
@@ -203,9 +208,11 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
 
   const primary = top3[0] ?? null;
   if (v2) {
-    // The careers the fan shows before a goal is set: the Top 3 first,
-    // then the newest saves.
-    const choices = [...top3, ...saved].slice(0, 3);
+    // Before a goal is set, the card shows the likeliest choice out of
+    // focus: the #1 of the Top 3 (else the newest save), the #1 school (else
+    // the newest saved school).
+    const lead = top3[0] ?? saved[0] ?? null;
+    const leadSchool = college.top ?? college.schools[0]?.c ?? null;
     return (
       <div className="flex flex-col gap-[var(--space-6)]">
         <section aria-labelledby="about-goals" className="flex flex-col gap-[var(--space-3)]">
@@ -216,15 +223,16 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
                 kind="Career Goal" Icon={Briefcase} title={primary.title} accent={WORLD_COLORS[primary.world]}
                 picture={<FacePhoto src={primary.photo} sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" fallback={primary.photoFocus ?? "50% 30%"} />}
                 onOpen={() => go("career")} openLabel="Open Career Goal"
+                focusIn={justSet === "career"}
               />
             ) : (
               <EmptyGoalCard
                 kind="Career Goal" Icon={Briefcase}
-                title={choices.length ? "Choose your career goal" : "Save careers to choose from"}
-                thumbs={choices.map((c) => <FacePhoto key={c.id} src={c.photo} sizes="120px" className="object-cover" fallback={c.photoFocus ?? "50% 25%"} />)}
-                xp={choices.length ? CAREER_GOAL_XP : undefined}
+                title={lead ? "Choose your career goal" : "Save careers to choose from"}
+                backdrop={lead ? <FacePhoto src={lead.photo} sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" fallback={lead.photoFocus ?? "50% 30%"} /> : null}
+                xp={lead ? CAREER_GOAL_XP : undefined}
                 nudge
-                href={choices.length ? undefined : "/explore"}
+                href={lead ? undefined : "/explore"}
                 onOpen={() => go("career")} openLabel="Open Career Goal"
               />
             )}
@@ -233,17 +241,18 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
                 kind="College Goal" Icon={GraduationCap} title={college.top.name}
                 picture={<CollegePicture c={college.top} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0 h-full w-full" />}
                 onOpen={() => go("college")} openLabel="Open College Goal"
+                focusIn={justSet === "college"}
               />
             ) : (
               <EmptyGoalCard
                 kind="College Goal" Icon={GraduationCap}
-                title={college.schools.length ? "Choose your college goal" : "Save schools to choose from"}
-                thumbs={college.schools.slice(0, 3).map(({ c }) => <CollegePicture key={c.slug} c={c} sizes="120px" className="absolute inset-0 h-full w-full" />)}
-                xp={college.schools.length ? COLLEGE_GOAL_XP : undefined}
+                title={leadSchool ? "Choose your college goal" : "Save schools to choose from"}
+                backdrop={leadSchool ? <CollegePicture c={leadSchool} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0 h-full w-full" /> : null}
+                xp={leadSchool ? COLLEGE_GOAL_XP : undefined}
                 // one ask at a time: the school goal waits for the career goal
                 nudge={careerSet}
                 quiet={!careerSet}
-                href={college.schools.length ? undefined : "/colleges"}
+                href={leadSchool ? undefined : "/colleges"}
                 onOpen={() => go("college")} openLabel="Open College Goal"
               />
             )}
@@ -329,42 +338,33 @@ function XpChip({ amount }: { amount: number }) {
   );
 }
 
-/** A goal before the student has set it (v2). What's on it: the choices
- *  themselves, fanned like a hand of cards (their Top 3 posters or saved
- *  campuses), so the empty card already looks like a decision and not a
- *  blank; one line saying what to do; and the XP it pays. With nothing to
- *  choose from yet, the fan is three dashed outlines and the card opens
- *  Explore instead. */
-function EmptyGoalCard({ kind, Icon, title, thumbs, xp, nudge, quiet = false, href, onOpen, openLabel }: {
-  kind: string; Icon: typeof Briefcase; title: string; thumbs: React.ReactNode[]; xp?: number; nudge: boolean; /** waiting its turn: dimmer */ quiet?: boolean; /** nothing to choose from: go here instead */ href?: string; onOpen: () => void; openLabel: string;
+/** A goal before the student has set it (v2): out of focus until chosen.
+ *  The fanned posters were too busy (Chandu, 19 Oct 2026: "the new fanned
+ *  out card thing ... is bad. We need to be more creative and make it not so
+ *  busy"). One picture now, the likeliest choice, blurred and dimmed like
+ *  frosted glass, so the card already hints at the answer without a crowd;
+ *  setting the goal brings it into focus (GoalCard's focusIn). Same layout
+ *  as the filled card, so only the focus changes. With nothing to choose
+ *  from, Build's sky stands in and the card opens Explore. */
+function EmptyGoalCard({ kind, Icon, title, backdrop, xp, nudge, quiet = false, href, onOpen, openLabel }: {
+  kind: string; Icon: typeof Briefcase; title: string; backdrop: React.ReactNode | null; xp?: number; nudge: boolean; /** waiting its turn: dimmer */ quiet?: boolean; /** nothing to choose from: go here instead */ href?: string; onOpen: () => void; openLabel: string;
 }) {
-  const fan = [-11, 0, 11];
-  const slots = thumbs.length ? thumbs : [null, null, null];
-  // the middle card sits on top; with fewer than three, center what there is
-  const order = slots.length === 1 ? [1] : slots.length === 2 ? [0, 2] : [0, 1, 2];
+  const lookV2 = useLookV2();
   const body = (
     <>
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-[var(--space-5)] flex h-[132px] justify-center md:top-[var(--space-6)] md:h-[156px]" style={{ opacity: quiet ? 0.55 : 1 }}>
-        {slots.map((node, i) => {
-          const pos = order[i];
-          return (
-            <span
-              key={i}
-              className="absolute top-0 block h-[124px] w-[90px] overflow-hidden rounded-[12px] transition-transform duration-300 group-hover:-translate-y-[3px] md:h-[150px] md:w-[108px]"
-              style={{
-                transform: `translateX(${(pos - 1) * 62}px) rotate(${fan[pos]}deg)`,
-                transformOrigin: "50% 120%",
-                zIndex: pos === 1 ? 2 : 1,
-                border: node ? "1.5px solid rgba(255,255,255,0.28)" : "1.5px dashed rgba(255,255,255,0.32)",
-                background: node ? "#0e0c20" : "rgba(255,255,255,0.04)",
-                boxShadow: node ? "0 14px 30px -12px rgba(0,0,0,0.7)" : undefined,
-              }}
-            >
-              {node}
-              {node && pos !== 1 && <span className="absolute inset-0" style={{ background: "rgba(12,16,35,0.35)" }} />}
+      <span aria-hidden className="absolute inset-0">
+        {backdrop ? (
+          // a still blur (never animated at rest: Glossary Lab perf rule)
+          <span className="absolute inset-0" style={{ filter: `blur(18px) saturate(0.7) brightness(${quiet ? 0.42 : 0.6})`, transform: "scale(1.15)" }}>{backdrop}</span>
+        ) : (
+          <ThemeProvider>
+            <span className="myb-sky" style={{ opacity: quiet ? 0.6 : 1 }}>
+              <BackgroundSpace />
+              <AuroraBackground accent={(lookV2 ? STAGE_ACCENTS_V2 : STAGE_ACCENTS).interests} visitedAccents={[]} lightning={false} />
             </span>
-          );
-        })}
+          </ThemeProvider>
+        )}
+        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.9) 0%, rgba(12,16,35,0.35) 50%, rgba(12,16,35,0.1) 100%)" }} />
       </span>
       <span className="relative mt-auto flex flex-col gap-[6px] p-[var(--space-5)]">
         <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>
@@ -379,8 +379,8 @@ function EmptyGoalCard({ kind, Icon, title, thumbs, xp, nudge, quiet = false, hr
       </span>
     </>
   );
-  const className = "dm-tap group relative flex h-full min-h-[264px] w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] border text-left md:min-h-[300px]";
-  const style = { borderColor: nudge ? "color-mix(in srgb, var(--primary) 55%, var(--glass-border))" : "var(--glass-border)", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 26%, #0e0c20) 0%, #0e0c20 62%)", color: "#fff", textShadow: CARD_TEXT_SHADOW } as const;
+  const className = "dm-tap group relative isolate flex h-full min-h-[220px] w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] border text-left md:min-h-[300px]";
+  const style = { borderColor: nudge ? "color-mix(in srgb, var(--primary) 55%, var(--glass-border))" : "var(--glass-border)", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW } as const;
   return (
     <HoverBeam className="h-full">
       {href ? (
@@ -424,14 +424,17 @@ function GoalConfirm({ set, name, goal, onConfirm, next, xp }: { set: boolean; n
       </div>
     );
   }
+  // The #1 card above already names it, so the action says it once and
+  // nothing repeats the name in a sentence.
+  return <ConfirmButton label={`Make ${name} my ${goal}`} xp={xp} onConfirm={onConfirm} wide />;
+}
+
+function ConfirmButton({ label, xp, onConfirm, wide = false }: { label: string; xp: number; onConfirm: (from: Element | null) => void; wide?: boolean }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)]" style={{ ...INSET, borderColor: "color-mix(in srgb, var(--primary) 55%, var(--inset-border))" }}>
-      <span className="min-w-0 text-[15px] leading-[20px] font-bold">Your #1 is {name}.</span>
-      <button type="button" onClick={(e) => onConfirm(e.currentTarget)} className="dm-tap flex min-h-[44px] flex-none cursor-pointer items-center gap-[var(--space-2)] rounded-[var(--radius-md)] pr-[6px] pl-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-        <NudgeText on>Make it my {goal}</NudgeText>
-        <XpChip amount={xp} />
-      </button>
-    </div>
+    <button type="button" onClick={(e) => onConfirm(e.currentTarget)} className={`dm-tap flex min-h-[44px] cursor-pointer items-center gap-[var(--space-2)] rounded-[var(--radius-md)] pr-[6px] pl-[var(--space-4)] text-[14px] font-bold ${wide ? "w-full justify-between sm:w-fit" : "w-fit"}`} style={{ background: "var(--primary)", color: "var(--primary-foreground)", textShadow: "none" }}>
+      <span className="min-w-0 text-left"><NudgeText on>{label}</NudgeText></span>
+      <XpChip amount={xp} />
+    </button>
   );
 }
 
@@ -499,15 +502,15 @@ function SectionHead({ id, title, sub }: { id: string; title: string; sub?: stri
 // Label and name only (19 Oct 2026, Chandu: "less text: bigger picture,
 // just the label and the goal name"). The counts and how-to lines live one
 // tap in, inside each goal.
-function GoalCard({ kind, Icon, title, picture, accent, onOpen, openLabel }: {
-  kind: string; Icon: typeof Briefcase; title: string; picture: React.ReactNode; accent?: string; onOpen: () => void; openLabel: string;
+function GoalCard({ kind, Icon, title, picture, accent, onOpen, openLabel, focusIn = false }: {
+  kind: string; Icon: typeof Briefcase; title: string; picture: React.ReactNode; accent?: string; onOpen: () => void; openLabel: string; /** v2: just set, so the picture comes into focus once */ focusIn?: boolean;
 }) {
   return (
     <HoverBeam className="h-full">
       <button type="button" onClick={onOpen} aria-label={`${openLabel}: ${title}`} className="dm-tap group relative flex h-full min-h-[220px] w-full cursor-pointer md:min-h-[300px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 26%, #0e0c20) 0%, #0e0c20 62%)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
         {picture && (
           <span aria-hidden className="absolute inset-0">
-            {picture}
+            <span className={`absolute inset-0 ${focusIn ? "dm-goal-focus-in" : ""}`}>{picture}</span>
             <CardProgressiveBlur size="62%" />
             <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.55) 40%, rgba(12,16,35,0.05) 75%)" }} />
           </span>
@@ -536,6 +539,9 @@ function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
   // (Chandu: "The layout needs to be better on mobile and tablet. Long
   // scrolling isnt the best way."); from sm (640px, tablets) all three columns
   const [shown, setShown] = useState(0);
+  // Teach that every line opens its editor, once, on the first line.
+  const panel = useRef<HTMLDivElement>(null);
+  const [spot, stopSpot] = useSpotSequence("dreamari:nudge:my-build-lines", ["edit"] as const, panel, true, 3200);
   // DEMO-ONLY: the demo student (Jordan Rivera) starts with the Replit's
   // My Build answers for the fields Build itself doesn't ask, written to the
   // real store once, so the summary and the editor agree. Only while the
@@ -553,7 +559,7 @@ function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
     return summaryOf(answers, id, 0) || prefSummary(prefs, id);
   };
   return (
-    <div className="relative isolate grid overflow-hidden rounded-[var(--radius-lg)] border sm:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
+    <div ref={panel} className="relative isolate grid overflow-hidden rounded-[var(--radius-lg)] border sm:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
       {/* Build's own sky, the same one the Edit My Build sheet wears (Chandu,
          19 Oct 2026: "please use the same color background thing we did for
          the my build when you click on edit"), clipped to the panel */}
@@ -573,16 +579,19 @@ function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
           {/* the gradient ink the Profile's stat figures wear; on phones the
              switch above names the group, so the heading shows from sm */}
           <h4 className="hidden w-fit pb-[2px] text-[18px] leading-[23px] font-extrabold sm:block" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{g.title}</h4>
-          {g.lines.map((line) => {
+          {g.lines.map((line, li) => {
             const value = valueOf(line.id);
             const empty = !value.trim();
+            const lit = spot === "edit" && gi === shown && li === 0;
             return (
+              <span key={line.id} className="relative flex flex-col">
+              {/* below the line: above it, the tip covered the phone's group switch */}
+              {lit && <SpotTip side="left" top={84}>Tap any line to change it</SpotTip>}
               <button
-                key={line.id}
                 type="button"
-                onClick={() => onOpen(line.id)}
+                onClick={() => { stopSpot(); onOpen(line.id); }}
                 aria-label={`${line.label}: edit`}
-                className="dm-quiet group -mx-[10px] flex cursor-pointer items-start gap-[var(--space-2)] rounded-[var(--radius-md)] px-[10px] py-[8px] text-left"
+                className={`dm-quiet group -mx-[10px] flex cursor-pointer items-start gap-[var(--space-2)] rounded-[var(--radius-md)] px-[10px] py-[8px] text-left ${lit ? "dm-spot-ring" : ""}`}
               >
                 <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
                   <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{line.label}</span>
@@ -592,6 +601,7 @@ function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
                    ("its not clear that the different sections are clickable") */}
                 <Pencil className="mt-[3px] h-[14px] w-[14px] flex-none opacity-45 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" style={{ color: "var(--accent-subtle)" }} aria-hidden />
               </button>
+              </span>
             );
           })}
         </div>
@@ -770,7 +780,6 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
         <EmptyGroup text="No schools yet. Save a school in Explore Schools and it shows up here, ready to sort." cta="Explore schools" href="/colleges" />
       ) : (
         <>
-          {confirm && top && <GoalConfirm set={confirm.set} name={top.name} goal="College Goal" xp={COLLEGE_GOAL_XP} onConfirm={confirm.onConfirm} next={{ label: "Next: My Plan", onClick: confirm.onNext }} />}
           {top ? (
             <div className="relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "color-mix(in srgb, var(--primary) 40%, rgba(255,255,255,0.16))", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
               <span aria-hidden className="absolute inset-0">
@@ -779,13 +788,24 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
                 <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.5) 45%, transparent 80%)" }} />
               </span>
               <div className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-5)]">
-                <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>My #1 school</span>
+                <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>
+                  {confirm?.set && <Check className="h-[14px] w-[14px]" aria-hidden />}
+                  {confirm?.set ? "My College Goal" : "My #1 school"}
+                </span>
                 <span className="flex flex-col gap-[2px]">
                   <span className="text-[22px] leading-[27px] font-extrabold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{top.name}</span>
                   <span className="text-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{top.city}, {top.state}</span>
                 </span>
                 <span className="flex flex-wrap gap-[var(--space-2)]" style={{ textShadow: "none" }}>
-                  <button type="button" onClick={() => open(top)} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+                  {/* v2: setting the goal is the card's main action; once set,
+                     the next step is. View school steps back to glass. */}
+                  {confirm && !confirm.set && <ConfirmButton label="Make it my College Goal" xp={COLLEGE_GOAL_XP} onConfirm={confirm.onConfirm} />}
+                  {confirm?.set && (
+                    <button type="button" onClick={confirm.onNext} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+                      Next: My Plan <ChevronRight className="h-4 w-4" aria-hidden />
+                    </button>
+                  )}
+                  <button type="button" onClick={() => open(top)} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={confirm ? { background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.22)", color: "#fff", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" } : { background: "var(--primary)", color: "var(--primary-foreground)" }}>
                     View school <ChevronRight className="h-4 w-4" aria-hidden />
                   </button>
                 </span>
@@ -804,28 +824,7 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
               count={`${goal.schools.length}`}
               action={<Link href="/colleges" className={QUIET_LINK} style={{ color: "var(--accent-subtle)" }}>Explore schools <ChevronRight className="h-4 w-4" aria-hidden /></Link>}
             />
-            {/* Three lists side by side, one height (cards in a row share a
-               height); stacked on phones. */}
-            <div className="grid items-stretch gap-[var(--space-3)] lg:grid-cols-3">
-              {BUCKETS.map((b) => {
-                const list = goal.schools.filter((s) => s.bucket === b.id);
-                return (
-                  <div key={b.id} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={INSET}>
-                    <div className="flex items-center gap-[8px] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-2)]">
-                      <span aria-hidden className="size-[9px] flex-none rounded-full" style={{ background: b.color, boxShadow: `0 0 8px ${b.color}` }} />
-                      <span className="text-[15px] font-extrabold">{b.label}</span>
-                      <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{list.length}</span>
-                      <span className="ml-auto text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{b.note}</span>
-                    </div>
-                    {list.length ? list.map(({ c }) => (
-                      <SchoolRow key={c.slug} c={c} bucket={b.id} isTop={goal.top?.slug === c.slug} onOpen={() => open(c)} onStar={() => goal.setTop(goal.top?.slug === c.slug ? null : c.slug)} onMove={(next) => goal.move(c.slug, next)} />
-                    )) : (
-                      <p className="flex flex-1 items-center px-[var(--space-4)] pb-[var(--space-4)] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>None here yet.</p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            <SchoolsPanel goal={goal} onOpen={open} />
           </section>
         </>
       )}
@@ -833,33 +832,97 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
   );
 }
 
-function SchoolRow({ c, bucket, isTop, onOpen, onStar, onMove }: { c: College; bucket: GoalBucket; isTop: boolean; onOpen: () => void; onStar: () => void; onMove: (b: GoalBucket) => void }) {
+/** My schools in My Build's finish (Chandu, 19 Oct 2026: "give the my
+ *  schools tab also the premium finish we gave for my build"): one panel on
+ *  Build's sky, Reach / Target / Likely as three columns split by hairlines,
+ *  the gradient heading ink, and heading > school > city by size. Below
+ *  desktop the three lists sit behind a switch, one at a time, instead of a
+ *  long stack (the rows carry Move and the star, so they need the width). */
+function SchoolsPanel({ goal, onOpen }: { goal: CollegeGoal; onOpen: (c: College) => void }) {
+  const lookV2 = useLookV2();
+  const lists = BUCKETS.map((b) => goal.schools.filter((s) => s.bucket === b.id));
+  const [picked, setPicked] = useState<number | null>(null);
+  // until the student picks, the switch opens on the first list with schools
+  const shown = picked ?? Math.max(0, lists.findIndex((l) => l.length > 0));
+  // Teach the two controls on the first school, once: Move, then the star.
+  const panel = useRef<HTMLDivElement>(null);
+  const [spot, stopSpot] = useSpotSequence("dreamari:nudge:my-schools", ["move", "star"] as const, panel, goal.schools.length > 0);
   return (
-    <div className="dm-quiet group relative flex min-h-[64px] items-center gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-2)]" style={{ borderTop: "1px solid var(--inset-border)" }}>
-      <button type="button" onClick={onOpen} aria-label={`Open ${c.name}`} className="absolute inset-0 z-[5] cursor-pointer" />
+    <div ref={panel} className="relative isolate grid overflow-hidden rounded-[var(--radius-lg)] border lg:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
+      <ThemeProvider>
+        <div aria-hidden className="myb-sky">
+          <BackgroundSpace />
+          <AuroraBackground accent={(lookV2 ? STAGE_ACCENTS_V2 : STAGE_ACCENTS).education} visitedAccents={[]} lightning={false} />
+        </div>
+      </ThemeProvider>
+      <div className="px-[var(--space-5)] pt-[var(--space-5)] lg:hidden">
+        <Segmented ariaLabel="School list" value={String(shown)} onChange={(v) => setPicked(Number(v))} options={BUCKETS.map((b, i) => ({ key: String(i), label: `${b.label} ${lists[i].length}` }))} grow />
+      </div>
+      {BUCKETS.map((b, bi) => {
+        const list = lists[bi];
+        return (
+          <div key={b.id} className={`${bi === shown ? "flex" : "hidden"} min-w-0 flex-col gap-[var(--space-2)] px-[var(--space-5)] pt-[var(--space-4)] pb-[var(--space-5)] lg:flex lg:px-[var(--space-6)] lg:py-[var(--space-6)] ${bi ? "lg:border-l" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
+            <div className="flex flex-col gap-[2px] pb-[var(--space-1)]">
+              <span className="flex items-center gap-[8px]">
+                <span aria-hidden className="size-[9px] flex-none rounded-full" style={{ background: b.color, boxShadow: `0 0 10px ${b.color}` }} />
+                {/* on phones and tablets the switch names the list */}
+                <h4 className="hidden w-fit pb-[2px] text-[18px] leading-[23px] font-extrabold lg:block" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{b.label}</h4>
+                <span className="hidden text-[14px] font-semibold tabular-nums lg:inline" style={{ color: "var(--muted-foreground)" }}>{list.length}</span>
+                <span className="text-[14px] leading-[19px] lg:hidden" style={{ color: "var(--muted-foreground)" }}>{b.note}</span>
+              </span>
+              <span className="hidden text-[14px] leading-[19px] lg:block" style={{ color: "var(--muted-foreground)" }}>{b.note}</span>
+            </div>
+            {list.length ? list.map(({ c }, i) => (
+              <SchoolRow
+                key={c.slug} c={c} bucket={b.id} isTop={goal.top?.slug === c.slug} onOpen={() => onOpen(c)}
+                spot={bi === shown && i === 0 ? spot : null}
+                onStar={() => { stopSpot(); goal.setTop(goal.top?.slug === c.slug ? null : c.slug); }}
+                onMove={(next) => { stopSpot(); goal.move(c.slug, next); }}
+              />
+            )) : (
+              <p className="py-[8px] text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>None here yet.</p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SchoolRow({ c, bucket, isTop, onOpen, onStar, onMove, spot = null }: { c: College; bucket: GoalBucket; isTop: boolean; onOpen: () => void; onStar: () => void; onMove: (b: GoalBucket) => void; /** the first-visit nudge lighting one of this row's controls */ spot?: "move" | "star" | null }) {
+  const others = BUCKETS.filter((b) => b.id !== bucket).map((b) => b.label);
+  return (
+    <div className="dm-quiet group relative -mx-[10px] flex min-h-[60px] items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[10px] py-[8px]">
+      <button type="button" onClick={onOpen} aria-label={`Open ${c.name}`} className="absolute inset-0 z-[5] cursor-pointer rounded-[var(--radius-md)]" />
       {/* no thumbnail on phones: the name needs the width more */}
-      <span className="hidden flex-none sm:block"><CollegePicture c={c} sizes="44px" className="h-[44px] w-[44px] rounded-[var(--radius-sm)]" /></span>
-      <span className="flex min-w-0 flex-1 flex-col">
+      <span className="hidden flex-none sm:block"><CollegePicture c={c} sizes="44px" className="h-[44px] w-[44px] overflow-hidden rounded-[var(--radius-sm)]" /></span>
+      <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
         {/* two lines before it clips: in three columns one line cut most names */}
-        <span className="line-clamp-2 text-[15px] leading-[19px] font-bold">{c.name}</span>
-        <span className="truncate text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.city}, {c.state}</span>
+        <span className="line-clamp-2 text-[15px] leading-[20px] font-semibold">{c.name}</span>
+        <span className="truncate text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{c.city}, {c.state}</span>
       </span>
       <span className="relative z-[6] flex flex-none items-center gap-[2px]">
         {/* "Move", not the current bucket: the column already says that */}
-        <Listbox
-          value=""
-          placeholder="Move"
-          onChange={(v) => onMove(v as GoalBucket)}
-          options={BUCKETS.filter((b) => b.id !== bucket).map((b) => ({ value: b.id, label: `Move to ${b.label}` }))}
-          ariaLabel={`Move ${c.name} to Reach, Target or Likely`}
-          className="dm-quiet flex h-[32px] cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] px-[8px] text-[13px] font-bold"
-          style={{ color: "var(--muted-foreground)" }}
-        />
-        <IconTip label={isTop ? "Your #1 school" : "Make my #1"}>
-          <button type="button" onClick={onStar} aria-pressed={isTop} aria-label={isTop ? `${c.name} is your #1 school. Tap to clear` : `Make ${c.name} your #1 school`} className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-md)]" style={{ color: isTop ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
-            <Star className="h-[18px] w-[18px]" fill={isTop ? "currentColor" : "none"} aria-hidden />
-          </button>
-        </IconTip>
+        <span className="relative">
+          <Listbox
+            value=""
+            placeholder="Move"
+            onChange={(v) => onMove(v as GoalBucket)}
+            options={BUCKETS.filter((b) => b.id !== bucket).map((b) => ({ value: b.id, label: `Move to ${b.label}` }))}
+            ariaLabel={`Move ${c.name} to Reach, Target or Likely`}
+            className={`dm-quiet flex h-[32px] cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] px-[8px] text-[13px] font-bold ${spot === "move" ? "dm-spot" : ""}`}
+            style={{ color: spot === "move" ? "#fff" : "var(--muted-foreground)" }}
+          />
+          {spot === "move" && <SpotTip side="right" top={-46}>Move to {others.join(" or ")}</SpotTip>}
+        </span>
+        <span className="relative">
+          <IconTip label={isTop ? "Your #1 school" : "Make my #1"}>
+            <button type="button" onClick={onStar} aria-pressed={isTop} aria-label={isTop ? `${c.name} is your #1 school. Tap to clear` : `Make ${c.name} your #1 school`} className={`dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-md)] ${spot === "star" ? "dm-spot" : ""}`} style={{ color: spot === "star" ? "#fff" : isTop ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+              <Star className="h-[18px] w-[18px]" fill={isTop ? "currentColor" : "none"} aria-hidden />
+            </button>
+          </IconTip>
+          {spot === "star" && <SpotTip side="right" top={-48}>{isTop ? "Your #1 school. Tap to change" : "Make it your #1"}</SpotTip>}
+        </span>
       </span>
     </div>
   );
