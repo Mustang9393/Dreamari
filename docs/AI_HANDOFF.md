@@ -1,3 +1,7 @@
+## 2026-10-19: the Color switch becomes a quiet desktop toggle
+
+**Why (Chandu):** "the black and blue/classic is too big and sitting over the design and it shouldnt be in my face and so prominent like this." `ColorThemeSwitch` is now one small switch like My Profile's "V2 PROFILE": a muted "BLACK & BLUE" label and a mini track, no panel, 55% opacity until hovered or focused, fixed bottom-left on desktop (lg) only. Phones and tablets have no free corner (it sat over the cards there), so it is hidden below lg; `?look=v2` / `?look=v1` still switch the theme anywhere. Same state as before (look.ts).
+
 ## 2026-10-19: v2 Top 3 action bar and the v2 redundancy audit
 
 **Why (focus group, via Chandu):** redoing the Build, exploring more careers, and moving or removing Top 3 cards "were not clear to some users". Chandu: "make it very obvious but not by adding more text everywhere... the banner we currently have also needs a redesign", then "is that banner going to stay permanently there? NO x to close it etc? I feel like that just adds to more clutter", then "audit v2 for redundancies".
