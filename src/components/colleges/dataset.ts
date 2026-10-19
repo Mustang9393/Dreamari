@@ -2,7 +2,7 @@
 
 // The full college dataset (2 Oct 2026, Chandu: "this is the dataset Usman
 // gave me so we can have proper filters etc for the schools"): 5,716
-// colleges from IPEDS and the College Scorecard, 2024, as the live app
+// colleges (the demo lists only those with a real photo; see below) from IPEDS and the College Scorecard, 2024, as the live app
 // serves them. Built by scripts/colleges/build-dataset.mjs into
 // public/data/colleges/: one index Browse all filters (fetched once, about
 // 600 KB over the wire), and one file per school for its page.
@@ -14,7 +14,7 @@
 // coordinates for distance.
 
 import { useEffect, useState } from "react";
-import { COLLEGES, type College, type Level } from "./data";
+import { COLLEGES, collegeImage, type College, type Level } from "./data";
 
 type Row = {
   s: string; n: string; c: string; st: string; sn: string;
@@ -67,7 +67,13 @@ export function loadAllColleges(): Promise<College[]> {
         seen.add(row.s);
       }
       for (const c of COLLEGES) if (!seen.has(c.slug)) out.push(c);
-      return out;
+      // DEMO-ONLY: list only schools with a real campus photo (Chandu, 19 Oct
+      // 2026: "lets not show any school without real images"). On that date
+      // the CDN held 143 of the dataset's 4,617 photos (the rest are dead
+      // links, removed by scripts/colleges/verify-images.mjs) plus the 55
+      // hand-built schools' local photos. Production: show every school and
+      // let CollegePlaceholder cover the missing photos.
+      return out.filter((c) => collegeImage(c) !== null);
     })
     .catch((e) => { all = null; throw e; });
   return all;

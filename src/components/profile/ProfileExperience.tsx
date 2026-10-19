@@ -1236,6 +1236,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           <div role="tabpanel" id="profile-panel-about" aria-labelledby="profile-tab-about">
             <AboutMeTab
               top3={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
+              primary={primaryChosen && chosenPrimaryId ? careerById(chosenPrimaryId) : null}
               saved={savedLocker}
               onAddToTop3={addToTop3}
               onGoTab={setTab}
