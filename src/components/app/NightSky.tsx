@@ -19,9 +19,10 @@
 //     seeing, a few are bright, and only the bright ones carry a halo;
 //   - scintillate, not pulse: only brighter stars twinkle, irregularly (two
 //     unrelated sines multiplied), dim ones hold steady;
-//   - aren't uniform: a faint band where they crowd (like the Milky Way),
-//     thinning where there is light (under the header bloom) and toward the
-//     horizon.
+//   - aren't uniform: they sit in the upper sky and thin out toward the
+//     horizon (third pass, 20 Oct: only near the top, gone by halfway down,
+//     fewer and dimmer: "not EVERYWHERE", "tone it down a little bit more"),
+//     a little thinner under the header bloom.
 // Colours: mostly white and ice, a few in the sky blues.
 //
 // Cost: one canvas, two pre-rendered sprites (no shadowBlur, no CSS filter on
@@ -73,11 +74,6 @@ function pickTint(): number {
   return 0;
 }
 
-/** Normal-ish random (sum of uniforms), for the band's spread. */
-function gauss() {
-  return (Math.random() + Math.random() + Math.random() + Math.random() - 2) / 2;
-}
-
 export function NightSky() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -105,24 +101,20 @@ export function NightSky() {
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const count = Math.min(320, Math.round((width * height) / 4200));
-      // The band: a gentle diagonal from upper right to lower left.
-      const diag = Math.hypot(width, height);
+      // Stars live in the upper sky only (20 Oct 2026, Chandu: "a little too
+      // much... Lets have it be there near the top but not EVERYWHERE", then
+      // "tone it down a little bit more"): placed in the top half of the
+      // screen, densest near the top, about a third fewer than the first
+      // pass, and faded out by visibility() below.
+      const SKY = 0.5;
+      const count = Math.min(140, Math.round((width * height * SKY) / 6500));
       stars = Array.from({ length: count }, () => {
-        let x: number;
-        let y: number;
-        if (Math.random() < 0.38) {
-          const t = Math.random();
-          const spread = gauss() * diag * 0.11;
-          x = width * (1.05 - t * 1.1) + spread * 0.55;
-          y = height * (-0.05 + t * 1.1) + spread * 0.85;
-        } else {
-          x = Math.random() * width;
-          y = Math.random() * height;
-        }
+        // a few more toward the very top, like a sky above a lit horizon
+        const y = height * SKY * Math.pow(Math.random(), 1.35);
+        const x = Math.random() * width;
         return {
-          x: ((x % width) + width) % width,
-          y: Math.min(height, Math.max(0, y)),
+          x,
+          y,
           b: Math.pow(Math.random(), 3.4),
           tint: pickTint(),
           s1: 1.1 + Math.random() * 2.2,
@@ -133,14 +125,16 @@ export function NightSky() {
       });
     };
 
-    // Where light washes stars out: under the header bloom, and a little
-    // toward the horizon. Returns a 0..1 multiplier.
+    // A 0..1 multiplier: full strength in the top 15%, a smooth fade to
+    // nothing by halfway down (so the middle and bottom of every screen stay
+    // clear), and a little thinner right under the header bloom.
     const visibility = (x: number, y: number) => {
+      const t = Math.min(1, Math.max(0, (y - height * 0.15) / (height * 0.35)));
+      const fade = 1 - t * t * (3 - 2 * t); // smoothstep
       const dx = (x - width / 2) / (width * 0.42);
       const dy = (y + height * 0.06) / (height * 0.34);
       const bloom = Math.min(1, Math.hypot(dx, dy));
-      const horizon = y > height * 0.78 ? 1 - ((y - height * 0.78) / (height * 0.22)) * 0.5 : 1;
-      return (0.35 + 0.65 * bloom) * horizon;
+      return fade * (0.55 + 0.45 * bloom);
     };
 
     const DRIFT = 0.45; // px per second: the sky turning, not anything flying
@@ -154,7 +148,7 @@ export function NightSky() {
         if (x > width) x -= width;
         const vis = visibility(x, s.y);
         // brightness 0..1 to alpha; faint stars sit near the edge of seeing
-        const base = (0.16 + s.b * 0.84) * vis;
+        const base = (0.13 + s.b * 0.72) * vis;
         // scintillation: only brighter stars, irregular, never a pulse
         const amp = s.b * 0.45;
         const flicker = amp > 0.04

@@ -1,3 +1,11 @@
+## 2026-10-20: stars only near the top, fewer and dimmer
+
+**Why (Chandu):** "the stars are a little too much lets tone them down in some places. Lets have it be there near the top but not EVERYWHERE", then "tone it down a little bit more".
+
+- `NightSky.tsx`: stars are placed in the top half of the screen only (densest near the top), at full strength in the top 15% and smoothly faded to nothing by halfway down, so the middle and bottom of every screen stay clear. About a third fewer than before (one per ~6,500px² of that area, capped at 140) and dimmer (base alpha 0.13 to 0.85, was 0.16 to 1.0). The diagonal band is gone (it ran the full height). Still a little thinner right under the header bloom.
+- Also noted: the cloud horizon is parked (Chandu: "i dont wanna do the cloud horizon it will be too much... maybe later"); the prompt in docs/reference/look-v2-2026-10-18 is not pending work.
+- Checked: eslint, tsc; Explore dark with the page hidden (`sky-top-only.jpg`) and with it showing. Pushed to main on Chandu's go-ahead.
+
 ## 2026-10-20 — UX work graphics: designed evidence and local prototype
 
 **Why (Chandu):** “more designed ... engaging and fun ... not so full of text”; “make wireframes look like wireframes”; preview CTAs clash with game CTAs; refer to nursing’s ECG UI. The previous renderer treated every artifact as a text card or finished form, repeated it too often and gave its fake actions the game’s primary styling.
