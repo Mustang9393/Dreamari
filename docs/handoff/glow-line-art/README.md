@@ -44,7 +44,7 @@ The new Black & Blue ramp (`src/app/look-v2.css`). Use the app's tokens where a 
 
 ## Assets (`assets/`, and `preview.html` to see them together)
 
-The hall in dark and light, square (1600 × 1600) and wide (1600 × 640), as SVG with every colour resolved (opens in Figma and browsers) and as WebP. Use the SVGs for design review. In the app, render the component so the art follows the theme and the card's size.
+The hall in dark and light, square (1600 × 1600) and wide (1600 × 640), as SVG with every colour resolved (opens in Figma and browsers), PNG (for sharing) and WebP. Use the SVGs for design review. In the app, render the component so the art follows the theme and the card's size.
 
 ## Where it is wired in the prototype
 
