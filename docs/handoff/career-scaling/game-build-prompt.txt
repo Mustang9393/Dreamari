@@ -1,0 +1,21 @@
+Build a Dreamari career simulation for {CAREER} using docs/handoff/career-scaling/README.md and the current shared engine. Do the work, not just a plan.
+
+Inputs
+Career/catalogue ID: {CAREER_ID}
+Source script, if supplied: {SCRIPT_OR_NONE}
+Levels requested: {LEVELS_TO_BUILD; DEFAULT_ONE_LEVEL_PLUS_LADDER_PLAN}
+Existing cast/assets: {ASSET_LIBRARY_OR_NONE}
+Audience: students aged 13–14.
+
+1. Inspect AGENTS.md, HANDOFF_INDEX.md, AI_HANDOFF.md, types.ts, scoring.ts, coreKit.ts, and the new SOP. Current code governs runtime behaviour. Preserve approved source scripts. If none is supplied, author a clearly labelled draft rather than attributing it to Joshua.
+2. Ground the career in real tasks, tools, responsibilities and checks. Use primary sources for professional facts; record sources and assumptions. Omit unsourced salary, hiring odds, licensing claims and statistics. Fictional employers and project data are allowed and must be labelled fictional in author notes.
+3. Define the level's task, stakes, player authority, mentor/reviewer, teachable concepts and ten decisions. Plan later levels around growing responsibility, not renamed questions or an invented universal promotion ladder. Build only requested levels; keep unbuilt ones clearly planned.
+4. Use the existing core components only. Select interactions by the thinking required. No bespoke instrument, renderer, new question type, scoring rule or career-specific UI. Set directed/cinematic/worldTheme/coreKit, use existing world tokens. Use the shared scoring, feedback, save and recovery flows.
+5. Author a teach → example → practice → decision trace. Exactly ten scored decisions per Full level, increasing progress metadata 0.1–1.0, with registered skills and option-specific explanations. The first decision is an easy untimed win. Choose variety where it helps; do not force every mechanic or timed crisis into every career. No ambiguous arbitrary answer keys.
+6. Write short plain student-facing copy. The question must stand alone after the setup leaves. Distinguish observed evidence from inference. Do not fabricate a clinical procedure, regulation, engineering limit or certainty just to fill a screen. Seek the missing source when it blocks correctness.
+7. Create a cast record, scene list and level beat map before art. Use art-master-prompt.txt, complete scenes only. Reuse exact saved scenes for dialogue and feedback where nothing changes. No runtime sprites. Face chips are crops of the approved scenes. Do not build the game around text hidden inside generated art.
+8. Register the career, complete-scene art manifest, voices, recovery and intentional music state. Do not borrow IB names or music as a silent fallback. Preserve existing games. Register every non-review beat to a verified scene. Keep the script/art trace and asset hashes.
+9. Run the generic career validator, tsc, scoped eslint, tokens:check and production build. Test the real game at desktop and phone widths: teaching, every interaction used, wrong/correct feedback, recovery, restart/resume, final review, both outcomes and uncovered artwork. Record actual results and unresolved limitations. Do not claim hardware or SME review you did not do.
+10. Deliver a playable preview, source content, scene art, exact prompts, validation report and the later-level plan. Update AI_HANDOFF.md with WHY, changes and checks. Do not push or publish without the user's authorization for that destination.
+
+If any check fails, repair the smallest failing part and rerun the affected checks. If a professional fact or supported-engine limitation blocks a release, make the draft reviewable and state the precise gap. Do not invent a passing result.

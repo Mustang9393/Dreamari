@@ -28,7 +28,7 @@
     "$schema": { "type": "string" },
     "career": { "type": "string", "pattern": "^[a-z0-9-]+$" },
     "folder": { "type": "string", "pattern": "^[a-z0-9-]+$" },
-    "spriteStandard": { "enum": ["full-figure-1024x2048", "waist-up-legacy"] },
+    "spriteStandard": { "enum": ["full-figure-1024x2048", "waist-up-legacy", "full-scene"] },
     "notes": { "type": "array", "items": { "type": "string" } },
     "locations": {
       "type": "object",
@@ -50,7 +50,7 @@
     "cast": {
       "type": "object",
       "additionalProperties": {
-        "type": "object", "required": ["default"], "additionalProperties": false,
+        "type": "object", "anyOf": [{ "required": ["default"] }, { "required": ["face"] }], "additionalProperties": false,
         "properties": {
           "default": { "$ref": "#/$defs/asset" },
           "tiers": { "type": "object", "propertyNames": { "$ref": "#/$defs/tier" }, "additionalProperties": { "$ref": "#/$defs/asset" } },

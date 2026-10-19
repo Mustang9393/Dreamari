@@ -150,13 +150,13 @@ export function buildRows(art: CareerArt, simulation: Simulation | undefined): L
       group.forEach((name, i) => {
         const slot = location.characterAnchors?.[i];
         const member = art.cast[name];
-        if (slot && member) sprites.push({ slot, name, src: member.default, source: "routed" });
+        if (slot && member?.default) sprites.push({ slot, name, src: member.default, source: "routed" });
       });
     } else if (location.characterAnchor) {
       const name = mostCommon(singles);
       const pick = name ?? firstCast;
       const member = pick ? art.cast[pick] : undefined;
-      if (pick && member) sprites.push({ slot: location.characterAnchor, name: pick, src: member.default, source: name ? "routed" : "fallback" });
+      if (pick && member?.default) sprites.push({ slot: location.characterAnchor, name: pick, src: member.default, source: name ? "routed" : "fallback" });
     }
     return { id, location, beats: routed, sprites };
   });
@@ -227,7 +227,7 @@ export function careerFlags(art: CareerArt, simulation: Simulation | undefined, 
   }
   const sprites = new Set<string>();
   for (const member of Object.values(art.cast)) {
-    sprites.add(member.default);
+    if (member.default) sprites.add(member.default);
     for (const src of Object.values(member.tiers ?? {})) if (src) sprites.add(src);
   }
   const noRatio = [...sprites].filter((src) => art.portraitRatios[src] === undefined);
@@ -249,7 +249,7 @@ export function careerFlags(art: CareerArt, simulation: Simulation | undefined, 
 
 /** Every image the review needs to probe for this career. */
 export function probeTargets(rows: LocationRow[], art: CareerArt): { plates: string[]; sprites: string[] } {
-  const cast = Object.values(art.cast).flatMap((member) => [member.default, ...Object.values(member.tiers ?? {}).filter((src): src is string => !!src)]);
+  const cast = Object.values(art.cast).flatMap((member) => [member.default, ...Object.values(member.tiers ?? {})].filter((src): src is string => !!src));
   return {
     plates: [...new Set(rows.map((r) => r.location.src))],
     sprites: [...new Set([...rows.flatMap((r) => r.sprites.map((s) => s.src)), ...cast])],

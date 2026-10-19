@@ -1,0 +1,108 @@
+{
+  "$schema": "./career-art.schema.json",
+  "career": "ui-ux-designer",
+  "folder": "ux",
+  "spriteStandard": "full-scene",
+  "notes": [
+    "Complete opaque illustrations. No runtime sprite/background assembly.",
+    "One immutable image per room/camera. Reuse exact files rather than regenerate reactions.",
+    "AI-authored draft art and content; human approval pending."
+  ],
+  "locations": {
+    "northline-studio": {
+      "src": "/images/play/ux/studio.png",
+      "alt": "Asha and Noah discuss the volunteer sign-up project in the studio.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "northline-research": {
+      "src": "/images/play/ux/research.png",
+      "alt": "Asha quietly observes Eleanor trying the sign-up prototype.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "northline-review": {
+      "src": "/images/play/ux/review.png",
+      "alt": "Samira reviews the design evidence with Asha in the review room.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    }
+  },
+  "cast": {
+    "Asha": {
+      "face": "/images/play/ux/face-asha.webp",
+      "voicePitch": 610
+    },
+    "Noah": {
+      "face": "/images/play/ux/face-noah.webp",
+      "voicePitch": 480
+    },
+    "Eleanor": {
+      "face": "/images/play/ux/face-eleanor.webp",
+      "voicePitch": 530
+    },
+    "Samira": {
+      "face": "/images/play/ux/face-samira.webp",
+      "voicePitch": 390
+    }
+  },
+  "portraitRatios": {},
+  "beatLocations": {
+    "UX1-01": "northline-studio",
+    "UX1-02": "northline-studio",
+    "UX1-03": "northline-studio",
+    "UX1-04": "northline-studio",
+    "UX1-05": "northline-studio",
+    "UX1-06": "northline-studio",
+    "UX1-07": "northline-studio",
+    "UX1-08": "northline-studio",
+    "UX1-09": "northline-studio",
+    "UX1-10": "northline-studio",
+    "UX1-11": "northline-studio",
+    "UX1-12": "northline-studio",
+    "UX1-13": "northline-studio",
+    "UX1-14": "northline-studio",
+    "UX1-15": "northline-research",
+    "UX1-16": "northline-research",
+    "UX1-17": "northline-research",
+    "UX1-18": "northline-research",
+    "UX1-19": "northline-studio",
+    "UX1-20": "northline-studio",
+    "UX1-21": "northline-studio",
+    "UX1-22": "northline-studio",
+    "UX1-23": "northline-studio",
+    "UX1-24": "northline-studio",
+    "UX1-25": "northline-studio",
+    "UX1-26": "northline-studio",
+    "UX1-27": "northline-review",
+    "UX1-28": "northline-review",
+    "UX1-29": "northline-review",
+    "UX1-30": "northline-review",
+    "UX1-31": "northline-review",
+    "UX1-32": "northline-review",
+    "UX1-33": "northline-review",
+    "UX1-34": "northline-review",
+    "UX1-35": "northline-review"
+  }
+}

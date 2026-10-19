@@ -1,3 +1,4 @@
+import { UX_LEVEL_1 } from "./ux-level-1";
 import { IB_LEVEL_1 } from "./ib-level-1";
 import { IB_LEVEL_1_V2 } from "./ib-level-1-v2";
 import { IB_LEVEL_2 } from "./ib-level-2";
@@ -96,7 +97,69 @@ export const AVIATION_MAINTENANCE: Simulation = {
   upcoming: ["Technician", "Lead Technician", "Inspector", "Maintenance Manager"],
 };
 
-export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE, AVIATION_MAINTENANCE];
+// AI-authored local draft used to test the scaling SOP.
+export const UX_DESIGNER: Simulation = {
+  "id": "ui-ux-designer",
+  "careerId": "ui-ux-designer",
+  "title": "UX Designer",
+  "world": "Tech & Engineering",
+  "firm": "Northline Studio",
+  "cover": "/images/play/ux/studio.png",
+  "levels": [UX_LEVEL_1],
+  "upcoming": [
+    "UX Designer",
+    "Senior UX Designer",
+    "Lead UX Designer",
+    "Design Manager",
+    "Design Director"
+  ],
+  "trailer": [
+    {
+      "id": "UX-TR-1",
+      "seconds": 4,
+      "text": "A useful design starts with someone trying to do something.",
+      "art": "/images/play/ux/studio.png"
+    },
+    {
+      "id": "UX-TR-2",
+      "seconds": 4,
+      "text": "An attractive page can still get in their way.",
+      "art": "/images/play/ux/research.png"
+    },
+    {
+      "id": "UX-TR-3",
+      "seconds": 4,
+      "text": "Listen before you choose a solution.",
+      "art": "/images/play/ux/research.png"
+    },
+    {
+      "id": "UX-TR-4",
+      "seconds": 4,
+      "text": "Turn the evidence into something people can try.",
+      "art": "/images/play/ux/studio.png"
+    },
+    {
+      "id": "UX-TR-5",
+      "seconds": 4,
+      "text": "One missed detail can stop the whole task.",
+      "art": "/images/play/ux/review.png"
+    },
+    {
+      "id": "UX-TR-6",
+      "seconds": 4,
+      "text": "Your team needs to know what you found.",
+      "art": "/images/play/ux/review.png"
+    },
+    {
+      "id": "UX-TR-7",
+      "seconds": 4,
+      "text": "Junior designer to design director. How far will you get?",
+      "finale": true
+    }
+  ]
+};
+
+export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE, AVIATION_MAINTENANCE, UX_DESIGNER];
 
 /** Careers whose simulation is not built yet. Poster art only, no promises
  *  about when. Cover art here is its OWN `soon-*.png` file per career, not

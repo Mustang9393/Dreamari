@@ -13,7 +13,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { ErrorView, LoadingView } from "@/components/app/states";
 
 import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO, poseFor, VOICE_PITCH } from "./expressions";
-import { locationFor } from "./locations";
+import { isFullSceneImage, locationFor } from "./locations";
 import { DESKTOP_PLATE_SCALE, FALLBACK_PORTRAIT_RATIO, plateObjectPosition, spriteBox } from "./scenePlacement";
 import { PerformancePlanFlow } from "./PerformancePlanFlow";
 import { PERFORMANCE_PLANS, randomStepOrders, type PipState } from "./performance-plan";
@@ -1322,9 +1322,9 @@ function LocationBackdrop({
         alt={alt}
         fill
         priority
-        sizes="100vw"
+        sizes={isFullSceneImage(src) ? "(max-width: 639px) 116svh, 100vw" : "100vw"}
         className={`object-cover transition-[filter] sm:hidden ${drained ? "duration-[1100ms]" : "duration-500"}`}
-        style={{ objectPosition: plateObjectPosition(mobileFocal), filter }}
+        style={{ objectPosition: plateObjectPosition(mobileFocal), filter, ...(isFullSceneImage(src) ? { top: "8%", height: "65%", bottom: "auto", maskImage: "linear-gradient(to bottom, black 0%, black 82%, transparent 100%)" } : {}) }}
         onLoad={onReady}
       />
       <Image

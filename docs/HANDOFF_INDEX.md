@@ -1,3 +1,5 @@
+**New career simulation production (19 Oct 2026):** [SOP, prompts and UX proof](handoff/career-scaling/README.md). Complete scene images, no runtime sprites for new careers; older Play chapters remain the component reference. UX Designer is an AI-authored local draft, not a production release.
+
 # Dreamari prototype: engineering handoff index
 
 Start here. This file tells an engineer, or an AI agent working for one, what is locked, where the truth for each feature lives, and what is demo scaffolding that must not be built.
