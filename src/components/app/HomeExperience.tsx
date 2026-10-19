@@ -184,6 +184,7 @@ export function HeroAction({ children, onClick }: { children: React.ReactNode; o
     <button
       type="button"
       onClick={onClick}
+      data-lit
       className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold"
       style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontFamily: "var(--font-body)" }}
     >

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 import { CompanyChip } from "@/components/connect/primitives";

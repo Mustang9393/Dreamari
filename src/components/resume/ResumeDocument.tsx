@@ -2,7 +2,7 @@
 
 import { Expand, Maximize2, Minus, Plus, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { DEFAULT_SECTION_ORDER, type ResumeData, type ResumeSectionId } from "@/lib/resume";
 import { Portal } from "@/components/profile/CareerReport";
 import { RESUME_TEMPLATES, type ResumeTemplateId } from "./data";

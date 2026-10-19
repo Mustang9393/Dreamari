@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { COMMUNITIES, LISTED_COMMUNITIES, INSIGHTS, PROS, THREADS, type InsightGraphic, type Pro } from "./data";
 import { InsightGraphicView, captionFor, publishInsight } from "./FeedBreathers";

@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type 
 import { liftSplashVeil, markWelcomeOpen } from "./SplashVeil";
 import { ChevronRight, EyeOff, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { createPortal, preload } from "react-dom";
 import styles from "./WelcomeSplash.module.css";
 
@@ -211,7 +211,7 @@ function SplashDialog({ surface, onDone, onSecondary, override }: { surface: Spl
         {scene.rows && <ul className={styles.rows}>{scene.rows.map((row, i) => (
           <li key={i} className={`${styles.row} ${row.icon ? styles.rowIcon : ""} ${row.note ? styles.rowNote : ""}`}>{row.icon && <row.icon size={18} aria-hidden="true" />}<span>{row.text}</span></li>
         ))}</ul>}
-        <div className={styles.ctaWrap}>
+        <div className={styles.ctaWrap} data-lit>
         <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4.8} strength={1} active>
         <button ref={cta} type="button" className={styles.cta} onClick={advance} aria-disabled={departing}>
           {scene.cta}<ChevronRight size={18} strokeWidth={2.75} aria-hidden="true" />

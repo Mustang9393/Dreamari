@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, ImageOff, Info, Plus, Sparkles, X } from "lucide-react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { Coachmark, useFirstUseHint } from "@/components/flow/GestureSpotlight";

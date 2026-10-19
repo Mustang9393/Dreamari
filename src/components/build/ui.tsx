@@ -395,6 +395,7 @@ export function StepFooter({
         }}
         disabled={nextDisabled}
         type="button"
+        data-lit
       >
         {nextLabel}
       </Button>

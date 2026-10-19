@@ -1,6 +1,6 @@
 "use client";
 
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { MarketingButton } from "./Button";
 import { useRevealOnScroll } from "./scrollHooks";
 

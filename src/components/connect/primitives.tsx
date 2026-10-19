@@ -8,7 +8,7 @@
 import Image from "next/image";
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { ChevronRight, CheckCircle2, Clock, UserRound } from "lucide-react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { useStudentAvatarSrc } from "@/lib/avatar";
 import { PROS, type Thread } from "./data";

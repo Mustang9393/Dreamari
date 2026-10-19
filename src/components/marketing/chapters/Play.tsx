@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { ChapterShell } from "../ChapterShell";
 import { advanceTo, usePlayingOnScroll } from "../scrollHooks";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";

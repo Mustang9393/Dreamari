@@ -5,7 +5,7 @@ import { useEffect, useSyncExternalStore, useState, useLayoutEffect } from "reac
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession } from "@/components/app/WelcomeSplash";
 import { liftSplashVeil } from "@/components/app/SplashVeil";
 import { ArrowRight, Copy, Download, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { useForcedState, SurfaceStateView, type SurfaceStatus } from "@/components/app/SurfaceState";
 import { readStudentProfile } from "@/lib/studentProfile";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { Mascot } from "./Mascot";

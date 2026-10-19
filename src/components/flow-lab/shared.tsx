@@ -17,7 +17,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, ImageOff, Info, Plus, Sparkles, X } from "lucide-react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { IconTip } from "@/components/app/IconTip";
 import { Working } from "@/components/app/Working";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";

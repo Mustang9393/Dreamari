@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { X, type LucideIcon } from "lucide-react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { IconTip } from "@/components/app/IconTip";
 
 // The compact "what now" banner (Joshua Pierce, Slack, 5 Sept 2026): a slow

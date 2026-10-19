@@ -1,3 +1,15 @@
+## 2026-10-19: v2 look, more blue, placed where it means something
+
+**Why (Chandu, with the three references again):** "lets have the blue be more present... It shouldnt be so missing. But it should appear logically where it can, because we still want that opulent look." The references are not sparing with blue; what keeps them premium is one light source per screen, light rather than paint, everything else monochrome, and intensity that follows the moment. All of this is behind the v2 toggle.
+
+- **Frame on every screen:** the header light is now a pale core inside a wider bloom (42% plus a 26% halo, was 30/20) and the bottom horizon 36% (was 26). The phone/tablet tab bar carries the horizon itself (it was a solid slab hiding it). Muted text on the brightest part of the header light measured 7.5:1, page titles 14:1 (sampled from real pixels; the contrast script can't see the fixed backdrop).
+- **Big moments get reference 1's full bloom:** every welcome splash is lit from inside the dialog, rising behind Dreamy and gone to black by the button; the per-surface violet, magenta and orange tints become the one blue. The Build welcome treats Dreamy as reference 3's orb: black ground, the light gathered behind him, his six drifting halo blobs in six blues instead of BorderBeam's rainbow, violet stripped from the orb, flare, dust and ground light. Build and Match's canvas paints the step accent as one bloom from the top in both themes (was a full-bleed 16% tint that read navy edge to edge; light was a periwinkle wash); the two side nebulas are off.
+- **One lit action per screen** (`data-lit`): the splash CTA, Build's Let's Go and Next Step, Home's hero action and the landing's primary sit on a small pool of light. Every other button stays flat. The light is outside the fill, so text contrast is unchanged.
+- **Edge glow without the rainbow:** every BorderBeam now comes through `src/components/app/Beam.tsx`; under v2 "colorful" becomes "mono" (a white light along the edge). "ocean" was not used: a third of its stops are violet. Off v2, nothing changes.
+- **Kept calm on purpose:** data screens (Explore, Opportunities, Profile, career detail, Build's question screens) get only the frame; no light sits behind text a student has to read.
+
+Checked: tsc, eslint, the contrast and pill audits on Home and Explore, pixel samples on Opportunities. Before/after: `docs/reference/look-v2-2026-10-18/more-blue-*.jpg`. Pushed to main behind the v2 toggle on Chandu's go-ahead.
+
 ## 2026-10-18: bespoke streak lightning and centered XP badge
 
 **Why (Chandu):** requested sleek, scalable vector marks for streaks and XP; rejected fire, abstract symbols and a calendar; final direction: “Lightning bolt but sexy.” XP lettering must be centered. Explicit follow-up: “push these into dreamari for me”.

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FocusEvent, type ReactNode } from "react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { useReducedMotion } from "framer-motion";
 import { isKeyboardFocus } from "./IconTip";
 

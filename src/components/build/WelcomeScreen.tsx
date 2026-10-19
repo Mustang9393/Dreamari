@@ -5,7 +5,8 @@ import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { bricolage } from "./fonts";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
+import { useLookV2 } from "@/components/app/look";
 import { DreamySprite, InkText } from "./ui";
 import styles from "./WelcomeScreen.module.css";
 
@@ -47,6 +48,9 @@ const BLOBS = [
   { x: 26, y: 56, w: 30, h: 26, c: "rgba(255, 50, 100, 0.28)", p: [12, 6, -6, -8, 8, 10], t: [10, 11, 6], d: 3.6 },
   { x: 60, y: 30, w: 26, h: 24, c: "rgba(255, 160, 30, 0.24)", p: [-10, 12, -4, -10, -14, 4], t: [14, 6.5, 8.5], d: 2.1 },
 ];
+// DEMO-ONLY (?look=v2): the same six blobs, drifting the same way, in one
+// blue from deep cobalt to pale sky; no violet, pink, teal or amber.
+const BLOB_TINTS_V2 = ["rgba(39, 128, 236, 0.6)", "rgba(89, 160, 248, 0.55)", "rgba(23, 106, 207, 0.46)", "rgba(158, 198, 250, 0.42)", "rgba(89, 160, 248, 0.26)", "rgba(188, 216, 251, 0.24)"];
 const CHAPTERS = ["Build", "Match", "Explore", "Play", "Connect"];
 
 /** A dedicated opening scene; the question HUD starts with Interests. */
@@ -68,6 +72,7 @@ export function WelcomeAtmosphere() {
 }
 
 export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?: () => void }) {
+  const lookV2 = useLookV2();
   const [departing, setDeparting] = useState(false);
   const [wave, setWave] = useState(false);
   const [ready, setReady] = useState(false);
@@ -145,7 +150,7 @@ export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?:
                 key={i}
                 style={{
                   left: `${b.x}%`, top: `${b.y}%`, width: `${b.w}%`, height: `${b.h}%`,
-                  background: `radial-gradient(circle at 42% 40%, ${b.c}, transparent 72%)`,
+                  background: `radial-gradient(circle at 42% 40%, ${lookV2 ? BLOB_TINTS_V2[i] : b.c}, transparent 72%)`,
                   "--dx1": `${b.p[0]}%`, "--dy1": `${b.p[1]}%`, "--dx2": `${b.p[2]}%`, "--dy2": `${b.p[3]}%`, "--dx3": `${b.p[4]}%`, "--dy3": `${b.p[5]}%`,
                   animationDuration: `${b.t[0]}s, ${b.t[1]}s, ${b.t[2]}s`, animationDelay: `${b.d}s, ${b.d * 0.7}s, ${b.d * 1.3}s`,
                 } as CSSProperties}
@@ -187,7 +192,7 @@ export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?:
           </h1>
           <p className={styles.description}>Tell us about you, so we can personalize your experience and help you find your dream career.</p>
           <div className={styles.actions}>
-            <div className={styles.ctaBeam}>
+            <div className={styles.ctaBeam} data-lit>
             <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4.8} strength={1} active={ready}>
             <Button size="large" onClick={begin} aria-disabled={departing} className={styles.cta}>
               Let’s Go <ChevronRight size={20} strokeWidth={2.75} aria-hidden="true" />

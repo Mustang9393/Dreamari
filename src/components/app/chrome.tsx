@@ -709,6 +709,7 @@ export function MobileNav({ active, items, profile }: {
       // indicator's safe area added BELOW the bar. It used to sit inside a
       // fixed 56px height, which squashed the icons on devices with a home
       // indicator.
+      data-tabbar
       className="fixed inset-x-0 bottom-0 z-40 flex h-[calc(50px+env(safe-area-inset-bottom))] items-start justify-around border-t pt-[3px] md:h-[calc(58px+env(safe-area-inset-bottom))] md:pt-[7px] lg:hidden"
       style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)" }}
     >

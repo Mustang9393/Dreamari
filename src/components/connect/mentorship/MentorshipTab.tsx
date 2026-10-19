@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { BookOpen, Calendar, CalendarPlus, Check, ChevronDown, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, Handshake, Link2, Lock, MapPin, Maximize2, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, TrendingDown, TrendingUp, Video, X } from "lucide-react";
 import { clearMeetingDecision, openDock, setDock, setMentorshipContext, setProgramContext, setUnreadMessages, useInbox } from "@/lib/inbox";
 import { playMessageTone } from "./sound";

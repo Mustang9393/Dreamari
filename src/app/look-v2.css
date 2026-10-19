@@ -128,12 +128,16 @@ html.look-v2.dark body {
    content zone stays calm. Fixed to the viewport, so the two glows frame
    every screen. Replaces indigo + teal. Tuned up 18 Oct 2026 (Chandu: "now
    theres no glow at all... subtle soft blue glow near the header or footer"):
-   the first pass (26% top, 16% bottom) vanished under the cards. */
+   the first pass (26% top, 16% bottom) vanished under the cards. Raised
+   again 19 Oct ("lets have the blue be more present... it should appear
+   logically where it can"): a pale core inside a wider bloom, so the top
+   reads as one light source the way reference 1 does. */
 html.look-v2 [data-app-backdrop] {
   background:
-    radial-gradient(46% 30% at 50% -4%, rgba(89, 160, 248, 0.3) 0%, rgba(39, 128, 236, 0.13) 45%, transparent 76%),
-    radial-gradient(80% 52% at 50% -16%, rgba(23, 106, 207, 0.2) 0%, transparent 70%),
-    radial-gradient(72% 30% at 50% 106%, rgba(39, 128, 236, 0.26) 0%, rgba(17, 87, 172, 0.1) 50%, transparent 78%),
+    radial-gradient(44% 30% at 50% -6%, rgba(158, 198, 250, 0.22) 0%, transparent 60%),
+    radial-gradient(56% 40% at 50% -6%, rgba(89, 160, 248, 0.42) 0%, rgba(39, 128, 236, 0.16) 46%, transparent 78%),
+    radial-gradient(90% 60% at 50% -18%, rgba(23, 106, 207, 0.26) 0%, transparent 72%),
+    radial-gradient(80% 34% at 50% 108%, rgba(39, 128, 236, 0.36) 0%, rgba(17, 87, 172, 0.14) 50%, transparent 80%),
     #000105 !important;
 }
 html.look-v2 [data-app-backdrop]::after {
@@ -159,8 +163,8 @@ html.look-v2.light body {
 }
 html.look-v2.light [data-app-backdrop] {
   background:
-    radial-gradient(55% 34% at 50% -6%, rgba(39, 128, 236, 0.17) 0%, rgba(39, 128, 236, 0.05) 50%, transparent 76%),
-    radial-gradient(70% 26% at 50% 108%, rgba(39, 128, 236, 0.1) 0%, transparent 75%),
+    radial-gradient(58% 38% at 50% -6%, rgba(39, 128, 236, 0.22) 0%, rgba(39, 128, 236, 0.07) 50%, transparent 78%),
+    radial-gradient(76% 30% at 50% 108%, rgba(39, 128, 236, 0.14) 0%, transparent 76%),
     #f3f6f9 !important;
 }
 html.look-v2.light [data-app-backdrop]::after {
@@ -241,8 +245,55 @@ html.look-v2:not(.light) .event-card {
   --ev-ground: #0b1019;
 }
 
+/* The phone/tablet tab bar was a solid slab that hid the bottom horizon.
+   Under v2 it carries the horizon itself, rising from below (reference 3:
+   the input sits on its light). Still opaque at the top edge, so labels
+   keep their contrast. */
+html.look-v2 [data-tabbar] {
+  background:
+    radial-gradient(70% 160% at 50% 170%, rgba(39, 128, 236, 0.38) 0%, rgba(17, 87, 172, 0.12) 55%, transparent 80%),
+    #03060c !important;
+}
+html.look-v2.light [data-tabbar] {
+  background:
+    radial-gradient(70% 160% at 50% 170%, rgba(39, 128, 236, 0.16) 0%, transparent 78%),
+    #ffffff !important;
+}
+
+/* Build and Match's space (BackgroundSpace.tsx): three nebulas (top, left,
+   lower middle) made one blue wash across the whole screen. v2 keeps the top
+   one as the single light source and drops the side washes; the ground goes
+   to the same near-black. AuroraBackground's canvas paints its step accent
+   as a bloom from the same point. */
+html.look-v2.dark [data-flow-space] {
+  background: #000105 !important;
+}
+html.look-v2 [data-flow-space] [data-nebula="2"],
+html.look-v2 [data-flow-space] [data-nebula="3"] {
+  display: none;
+}
+
 /* ---------- 4. Controls ---------- */
+/* One lit action per screen (19 Oct 2026): the hero action sits on a small
+   pool of light, as reference 3's input sits on its glow. Only these carry
+   it (data-lit): the welcome splash CTA, Build's Let's Go and Next Step,
+   Home's hero banner action, the landing's primary. Every other button is
+   flat. The light is outside the fill, so text contrast is unchanged. */
+html.look-v2 [data-lit] {
+  box-shadow: 0 12px 34px -12px rgba(39, 128, 236, 0.85), 0 0 46px -14px rgba(89, 160, 248, 0.55) !important;
+  border-radius: var(--radius-md);
+}
+html.look-v2.light [data-lit] {
+  box-shadow: 0 10px 26px -12px rgba(23, 106, 207, 0.55) !important;
+}
+html.look-v2 [data-lit]:is(:disabled, [aria-disabled="true"]) {
+  box-shadow: none !important;
+}
+
 html.look-v2 [data-mkt-btn="primary"] {
   background: var(--primary) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 30px -14px rgba(39, 128, 236, 0.7) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 12px 34px -12px rgba(39, 128, 236, 0.85), 0 0 46px -14px rgba(89, 160, 248, 0.55) !important;
+}
+html.look-v2.light [data-flow-space] {
+  background: #f3f6f9 !important;
 }

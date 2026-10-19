@@ -6,7 +6,7 @@ import { heroFocus } from "@/components/career/heroFocus";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { statePay } from "./statePay";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";

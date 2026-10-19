@@ -20,14 +20,14 @@ export function BackgroundSpace() {
   const { theme } = useTheme();
   const light = theme === "light";
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-20 overflow-hidden" style={{ background: "var(--color-night-background)" }}>
+    <div aria-hidden data-flow-space className="pointer-events-none fixed inset-0 -z-20 overflow-hidden" style={{ background: "var(--color-night-background)" }}>
       {/* Radial-gradient nebulas, NOT filter:blur() -- giant blur() layers blow iOS
          Safari's GPU memory and crash the tab ("a problem repeatedly occurred"), which is
          exactly what happened in prod. Gradients give the same soft wash for free. px
          floors keep phones from going flat black. */}
-      <div className="absolute" style={{ width: "max(calc(90vw / var(--vz, 1)), 900px)", aspectRatio: "1", left: "50%", top: "calc(-30vh / var(--vz, 1))", transform: "translateX(-40%)", background: `radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) ${light ? 46 : 34}%, transparent) 0%, color-mix(in srgb, var(--color-brand-500) ${light ? 20 : 14}%, transparent) 40%, transparent 68%)` }} />
-      <div className="absolute" style={{ width: "max(calc(100vw / var(--vz, 1)), 980px)", aspectRatio: "1", left: "min(calc(-30vw / var(--vz, 1)), -220px)", top: "calc(40vh / var(--vz, 1))", background: `radial-gradient(circle, color-mix(in srgb, var(--color-accent-purple) ${light ? 34 : 24}%, transparent) 0%, transparent 66%)` }} />
-      <div className="absolute" style={{ width: "max(calc(75vw / var(--vz, 1)), 700px)", aspectRatio: "1", left: "calc(4vw / var(--vz, 1))", top: "calc(18vh / var(--vz, 1))", background: `radial-gradient(circle, color-mix(in srgb, var(--color-decorative-pink-glow) ${light ? 20 : 14}%, transparent) 0%, transparent 64%)` }} />
+      <div data-nebula="1" className="absolute" style={{ width: "max(calc(90vw / var(--vz, 1)), 900px)", aspectRatio: "1", left: "50%", top: "calc(-30vh / var(--vz, 1))", transform: "translateX(-40%)", background: `radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) ${light ? 46 : 34}%, transparent) 0%, color-mix(in srgb, var(--color-brand-500) ${light ? 20 : 14}%, transparent) 40%, transparent 68%)` }} />
+      <div data-nebula="2" className="absolute" style={{ width: "max(calc(100vw / var(--vz, 1)), 980px)", aspectRatio: "1", left: "min(calc(-30vw / var(--vz, 1)), -220px)", top: "calc(40vh / var(--vz, 1))", background: `radial-gradient(circle, color-mix(in srgb, var(--color-accent-purple) ${light ? 34 : 24}%, transparent) 0%, transparent 66%)` }} />
+      <div data-nebula="3" className="absolute" style={{ width: "max(calc(75vw / var(--vz, 1)), 700px)", aspectRatio: "1", left: "calc(4vw / var(--vz, 1))", top: "calc(18vh / var(--vz, 1))", background: `radial-gradient(circle, color-mix(in srgb, var(--color-decorative-pink-glow) ${light ? 20 : 14}%, transparent) 0%, transparent 64%)` }} />
       {/* 0.55 (16 Sept 2026) was a mistake -- at that strength this box's own
          soft-but-real falloff edge became visible as a rectangle around
          Dreamy instead of reading as ambient wash, exactly the kind of hard

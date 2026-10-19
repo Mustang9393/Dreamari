@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ArrowRight, BadgeCheck, Check, ChevronLeft, ChevronRight, HelpCircle, MessageCircle, RotateCcw, Sparkles, ThumbsUp, UserPlus, Users, X } from "lucide-react";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardBottomScrim } from "@/components/app/cardChrome";
 import { awardDreamScore } from "@/lib/dreamScore";

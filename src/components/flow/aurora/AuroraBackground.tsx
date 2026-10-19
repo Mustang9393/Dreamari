@@ -396,8 +396,39 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
         // canvas read as flat/plain once that got fixed and the dot-matrix grid (which
         // used to be the visual texture carrying the whole background) came out too.
         ctx.clearRect(0, 0, width, height);
-        const tintAlpha = 0.16 + transitionBoost * 0.26;
-        ctx.fillStyle = `rgba(${cr0 | 0}, ${cg0 | 0}, ${cb0 | 0}, ${tintAlpha.toFixed(3)})`;
+        if (document.documentElement.classList.contains("look-v2")) {
+          // DEMO-ONLY, the v2 look (src/app/look-v2.css): the accent is light
+          // from one source, not a full-bleed tint. A flat 16% wash read as
+          // navy edge to edge; reference 1 is black lit by one bloom. Same
+          // brighten-and-settle curve on each step.
+          const cx = width / 2;
+          const cy = -height * 0.08;
+          const bloom = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(width, height) * 0.78);
+          const rgb = `${cr0 | 0}, ${cg0 | 0}, ${cb0 | 0}`;
+          bloom.addColorStop(0, `rgba(${rgb}, ${(0.4 + transitionBoost * 0.3).toFixed(3)})`);
+          bloom.addColorStop(0.42, `rgba(${rgb}, ${(0.13 + transitionBoost * 0.1).toFixed(3)})`);
+          bloom.addColorStop(1, `rgba(${rgb}, 0)`);
+          ctx.fillStyle = bloom;
+          ctx.fillRect(0, 0, width, height);
+        } else {
+          const tintAlpha = 0.16 + transitionBoost * 0.26;
+          ctx.fillStyle = `rgba(${cr0 | 0}, ${cg0 | 0}, ${cb0 | 0}, ${tintAlpha.toFixed(3)})`;
+          ctx.fillRect(0, 0, width, height);
+        }
+      } else if (document.documentElement.classList.contains("look-v2")) {
+        // DEMO-ONLY, the v2 look: cool white ground (the app's light page)
+        // with the step accent as one bloom from the top, instead of the
+        // periwinkle wash plus a full-bleed tint.
+        ctx.fillStyle = "#f3f6f9";
+        ctx.fillRect(0, 0, width, height);
+        const cx = width / 2;
+        const cy = -height * 0.08;
+        const bloom = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(width, height) * 0.78);
+        const rgb = `${cr0 | 0}, ${cg0 | 0}, ${cb0 | 0}`;
+        bloom.addColorStop(0, `rgba(${rgb}, ${(0.2 + transitionBoost * 0.14).toFixed(3)})`);
+        bloom.addColorStop(0.45, `rgba(${rgb}, ${(0.06 + transitionBoost * 0.05).toFixed(3)})`);
+        bloom.addColorStop(1, `rgba(${rgb}, 0)`);
+        ctx.fillStyle = bloom;
         ctx.fillRect(0, 0, width, height);
       } else {
         ctx.fillStyle = lightWashGradientRef.current ?? "#f3f4f8";

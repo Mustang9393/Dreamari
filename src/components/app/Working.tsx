@@ -1,6 +1,6 @@
 "use client";
 
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { LoaderCircle } from "lucide-react";
 
 /** The app's one "it's thinking" chip: beam running round the pill, a light

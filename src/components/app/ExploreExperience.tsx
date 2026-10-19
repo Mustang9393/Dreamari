@@ -5,7 +5,7 @@
 import { openCareerPeek } from "@/components/app/peek";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BorderBeam } from "border-beam";
+import { BorderBeam } from "@/components/app/Beam";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
