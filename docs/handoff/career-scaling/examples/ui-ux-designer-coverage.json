@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "career": "ui-ux-designer",
   "levels": [
     "ux-l1"
@@ -283,7 +283,7 @@
       "beat": "UX1-05",
       "scene": "ux-goals",
       "shotGroup": "ux-goals",
-      "artifact": "ux-join-flow"
+      "noArtifactReason": "General principle; the concrete visual appears with its worked example rather than repeating it here."
     },
     {
       "beat": "UX1-06",
@@ -367,7 +367,7 @@
       "beat": "UX1-19",
       "scene": "ux-iteration",
       "shotGroup": "ux-iteration",
-      "artifact": "ux-prototype-versions"
+      "artifact": "ux-live-prototype"
     },
     {
       "beat": "UX1-20",
@@ -379,7 +379,7 @@
       "beat": "UX1-21",
       "scene": "ux-form-review",
       "shotGroup": "ux-form-review",
-      "artifact": "ux-form-example"
+      "noArtifactReason": "General principle; the concrete visual appears with its worked example rather than repeating it here."
     },
     {
       "beat": "UX1-22",
@@ -409,7 +409,7 @@
       "beat": "UX1-26",
       "scene": "ux-peer-discussion",
       "shotGroup": "ux-peer-discussion",
-      "artifact": "ux-evidence"
+      "noArtifactReason": "General principle; the concrete visual appears with its worked example rather than repeating it here."
     },
     {
       "beat": "UX1-27",
@@ -427,7 +427,7 @@
       "beat": "UX1-29",
       "scene": "ux-review-challenge",
       "shotGroup": "ux-review-challenge",
-      "artifact": "ux-evidence"
+      "noArtifactReason": "General principle; the concrete visual appears with its worked example rather than repeating it here."
     },
     {
       "beat": "UX1-30",
@@ -457,7 +457,7 @@
       "beat": "UX1-34",
       "scene": "ux-handover",
       "shotGroup": "ux-handover",
-      "artifact": "ux-handover"
+      "artifact": "ux-release-check"
     },
     {
       "beat": "UX1-35",

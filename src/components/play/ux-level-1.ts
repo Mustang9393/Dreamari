@@ -138,15 +138,14 @@ export const UX_LEVEL_1: Level = {
       "body": "A user goal is what someone came to do. A design idea is one possible way to help.",
       "speaker": "System",
       "system": true,
-      "cta": "Continue",
-      "artifact": UX_ARTIFACTS.flow
+      "cta": "Continue"
     },
     {
       "id": "UX1-06",
       "kind": "card",
       "variant": "chapter",
       "title": "For example",
-      "body": "A volunteer wants to find a nearby event and join it. A purple button is a design idea, not their goal.",
+      "body": "Joining an event is the goal. A purple button is only a design idea.",
       "speaker": "System",
       "system": true,
       "cta": "Continue",
@@ -212,8 +211,8 @@ export const UX_LEVEL_1: Level = {
       "id": "UX1-09",
       "kind": "card",
       "variant": "chapter",
-      "title": "Four tools for the work",
-      "body": "These words will help you choose what to do next.",
+      "title": "Sketch the structure first.",
+      "body": "A wireframe shows what goes where, before colours and polish.",
       "speaker": "System",
       "system": true,
       "cta": "Continue",
@@ -454,12 +453,12 @@ export const UX_LEVEL_1: Level = {
       "id": "UX1-19",
       "kind": "card",
       "variant": "chapter",
-      "title": "Turn evidence into a small test.",
-      "body": "Name the difficulty, sketch a change, make a prototype, then watch another attempt. A sketch alone does not prove improvement.",
+      "title": "A prototype lets you try the route.",
+      "body": "Try the route. A working demo still needs testing with people.",
       "speaker": "Arjun",
       "system": false,
       "cta": "Continue",
-      "artifact": UX_ARTIFACTS.iteration
+      "artifact": UX_ARTIFACTS.prototype
     },
     {
       "id": "UX1-20",
@@ -517,15 +516,14 @@ export const UX_LEVEL_1: Level = {
       "body": "Use visible field labels and plain error messages. Do not rely on colour alone to show a problem.",
       "speaker": "System",
       "system": true,
-      "cta": "Continue",
-      "artifact": UX_ARTIFACTS.formExample
+      "cta": "Continue"
     },
     {
       "id": "UX1-22",
       "kind": "card",
       "variant": "chapter",
-      "title": "For example",
-      "body": "Label the field Email address. If it is incomplete, explain what to fix beside the field instead of showing only a red border.",
+      "title": "Say what to fix.",
+      "body": "A label names the field. The error explains the next step.",
       "speaker": "System",
       "system": true,
       "cta": "Continue",
@@ -607,8 +605,7 @@ export const UX_LEVEL_1: Level = {
       "body": "State the problem, point to evidence, then name the next check. Separate what you know from what you expect.",
       "speaker": "Arjun",
       "system": false,
-      "cta": "Continue",
-      "artifact": UX_ARTIFACTS.notes
+      "cta": "Continue"
     },
     {
       "id": "UX1-27",
@@ -705,15 +702,14 @@ export const UX_LEVEL_1: Level = {
         }
       ],
       "whenRight": "The explanation connects the problem, evidence and a testable next step.",
-      "whenWrong": "A convincing explanation still needs evidence and an honest next check.",
-      "artifact": UX_ARTIFACTS.notes
+      "whenWrong": "A convincing explanation still needs evidence and an honest next check."
     },
     {
       "id": "UX1-30",
       "kind": "card",
       "variant": "chapter",
       "title": "Make the handover useful.",
-      "body": "A developer needs the route, the important states and the reason for the change. Include errors and keyboard use, not just the best-looking screen.",
+      "body": "Include the route, key states and evidence. Flag what still needs testing.",
       "speaker": "Arjun",
       "system": false,
       "cta": "Continue",
@@ -814,7 +810,7 @@ export const UX_LEVEL_1: Level = {
           "why": "Hiding the blocker makes the next person decide without important evidence."
         }
       ],
-      "artifact": UX_ARTIFACTS.handover
+      "artifact": UX_ARTIFACTS.releaseCheck
     },
     {
       "id": "UX1-35",

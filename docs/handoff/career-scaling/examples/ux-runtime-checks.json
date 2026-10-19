@@ -6,7 +6,6 @@
     "Recovery failure and repair branches not exercised in this UX run",
     "Best ending screen not reached in the first run before a build reload; score 100 was observed",
     "DEMO_START_FRESH intentionally disables resume in current shared prototype",
-    "Global Color control can overlap the phone CTA",
     "No Windows/Chromebook hardware QA",
     "No full multi-career generation study or time-of-day edit test"
   ],
@@ -45,5 +44,29 @@
       "Human content and visual continuity QA"
     ],
     "browserInterruption": "Reconnected after restart; checked both shared midpoint branches and actual form decision"
+  },
+  "graphicsRevision": {
+    "date": "2026-10-20",
+    "status": "Redesigned QA candidate; targeted browser checks recorded",
+    "passed": [
+      "Wireframe: structural SVG, no coloured prototype CTA; desktop and 390x844 checked",
+      "Prototype: event \u2192 form \u2192 confirmation; invalid input, keyboard Enter and reset tested; reputation remains 50 and 0/10 decisions until game Continue",
+      "Game Continue independently advances from prototype to ranking",
+      "Draft form: both findings still score Best, +5 to 55; phone layout inspected",
+      "Comparison cards inspected at phone width",
+      "Research evidence board, flow, handover/release states and workshop/hospitality reuse fixtures inspected",
+      "Static preview action labels are not focusable game buttons",
+      "No new React warnings after replacing per-item Motion wrappers with CSS entrance animation",
+      "Motion uses reduced-motion CSS and useReducedMotion; no OS preference was changed during QA"
+    ],
+    "pending": [
+      "Human visual/content QA",
+      "Full end-to-end replay of every existing branch after this visual revision",
+      "Actual Windows/Chromebook hardware",
+      "Full reduced-motion browser emulation was not available"
+    ],
+    "evidenceFolder": "outputs/ux-graphics-redesign",
+    "graphicBeats": 9,
+    "graphicRecords": 9
   }
 }

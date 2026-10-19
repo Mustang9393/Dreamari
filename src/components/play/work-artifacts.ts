@@ -2,6 +2,10 @@
 export type ArtifactBase = { id: string; title: string; caption: string; provenance: string };
 export type InterfaceSpec = {
   heading: string;
+  siteName?: string;
+  navigation?: string;
+  illustration?: "landscape";
+  fidelity?: "wireframe" | "ui";
   description: string;
   fields: { label: string; value: string; required: "colour" | "text"; error?: string }[];
   action: string;
@@ -9,9 +13,9 @@ export type InterfaceSpec = {
   detail: string;
 };
 export type WorkArtifact = ArtifactBase & (
-  | { kind: "flow"; steps: { title: string; detail: string }[] }
-  | { kind: "notes"; entries: { label: string; text: string }[] }
-  | { kind: "interface"; screen: InterfaceSpec }
+  | { kind: "flow"; steps: { title: string; detail: string; icon?: "search" | "calendar" | "check" | "file" | "tool" }[] }
+  | { kind: "notes"; layout?: "board" | "handover"; entries: { label: string; text: string; tone?: "fact" | "quote" | "unknown" | "blocked" | "next" }[] }
+  | { kind: "interface"; screen: InterfaceSpec; process?: string[]; demo?: { kind: "email-signup"; fieldLabel: string; placeholder: string; error: string; submitLabel: string; successTitle: string; successBody: string } }
   | { kind: "comparison"; panels: { label: string; screen: InterfaceSpec }[] }
 );
 
@@ -23,5 +27,6 @@ export function artifactProblems(a: WorkArtifact): string[] {
   const screens = a.kind === "interface" ? [a.screen] : a.kind === "comparison" ? a.panels.map(p => p.screen) : [];
   for (const s of screens) if (!s.heading || !s.action || !s.detail || s.fields.some(f => !f.label)) errors.push("Incomplete interface");
   if (a.kind === "comparison" && (a.panels.length !== 2 || a.panels[0].label === a.panels[1].label)) errors.push("Comparison requires two named versions");
+  if (a.kind === "interface" && a.demo && (a.screen.fields.length || Object.values(a.demo).some(v => !v))) errors.push("Incomplete prototype demo or unsupported initial form");
   return errors;
 }

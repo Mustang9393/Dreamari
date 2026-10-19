@@ -1,7 +1,7 @@
 {
   "career": "ui-ux-designer",
   "coverageGroups": 15,
-  "artifactBeats": 13,
+  "artifactBeats": 9,
   "status": "structural checks passed; human and runtime review are separate",
   "assertions": 566,
   "levels": [

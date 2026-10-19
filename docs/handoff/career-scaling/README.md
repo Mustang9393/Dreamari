@@ -1,6 +1,6 @@
 # Dreamari career game production SOP
 
-Version 1.2 · 20 October 2026 · AI production workflow; UX Designer QA draft.
+Version 1.3 · 20 October 2026 · AI production workflow; UX Designer QA draft.
 
 **Outcome:** turn a career name (and an optional source brief) into a playable, reviewable simulation using the existing IB, nursing and aviation engine. The reusable unit is a decision with evidence, choices and consequences. A new career supplies data and art; it does not get a new gameplay implementation.
 
@@ -303,7 +303,7 @@ The authoring, scene art and artifact prompts travel with that package. Changing
 
 ## Current proof and limits
 
-UX Designer is an AI-authored Level 1 QA draft (hamburger → UX Designer · QA draft): 37 beats, ten decisions, eight scored mechanics, 15 complete compositions, seven work-graphic records displayed on 13 beats, and an unscored mid-game review after five decisions. Later levels remain planned and unbuilt. Arjun is the Indian male mentor; Noah is the Mexican male peer; Samira is the Black female lead; Eleanor is the older White participant. Full scenes address the first-person player; research shots are explicit observed-task exceptions. The original coverage, checkpoint and work-graphic gaps have implementations in this candidate, pending human QA. Shared native flow, notes, interface and comparison renderers also accept two other-career fixtures; this is structural reuse evidence, not validation of two complete additional games.
+UX Designer is an AI-authored Level 1 QA draft (hamburger → UX Designer · QA draft): 37 beats, ten decisions, eight scored mechanics, 15 complete compositions, nine work-graphic records displayed on nine relevant beats, and an unscored mid-game review after five decisions. Later levels remain planned and unbuilt. Arjun is the Indian male mentor; Noah is the Mexican male peer; Samira is the Black female lead; Eleanor is the older White participant. Full scenes address the first-person player; research shots are explicit observed-task exceptions. The original coverage, checkpoint and work-graphic gaps have implementations in this candidate, pending human QA. Wireframes now use a structural sketch, flows use connected steps, notes use an evidence board and the prototype is a local three-state demo. Preview actions use a smaller neutral treatment distinct from game CTAs. The shared native flow, notes, interface and comparison renderers also accept two other-career fixtures; this is structural reuse evidence, not validation of two complete additional games.
 
 The usability and accessible-form teaching follows [GOV.UK's moderated testing guidance](https://www.gov.uk/service-manual/user-research/using-moderated-usability-testing), [W3C labels and instructions](https://www.w3.org/WAI/WCAG21/Understanding/labels-or-instructions), and [W3C error identification](https://www.w3.org/WAI/WCAG22/Understanding/error-identification). The employer, people, dialogue, test notes and project are fictional. These sources support the teaching principles, not a claim that a real study took place.
 
@@ -312,3 +312,11 @@ The usability and accessible-form teaching follows [GOV.UK's moderated testing g
 Create `examples/<career-id>-coverage.json` before art production. Each required group records its purpose, scene ID, covered beats, visible cast, viewpoint, speaking target and eyeline. Each beat records its artifact ID or a reason no graphic is needed. The validator checks the plan against actual runtime routing and asset hashes; it rejects missing groups, accidental substitutions and duplicate files standing in for distinct required shots. It also verifies the midpoint exists after five decisions and its threshold is reachable. These are structural checks, not computer-vision proof of style or eye contact.
 
 The player is the camera. For player-directed speech, the speaker faces the lens; no visible second character stands in for the player. Include peers only when the script calls for them. Observed-task and explicit NPC-to-NPC exchanges require a written reason. Select diverse roles before generating, then preserve each identity. Remove giant character-name splashes; ordinary dialogue labels carry the name and role.
+
+## 12. Graphic design and game-action hierarchy
+
+Use the actual medium: a wireframe is a neutral layout drawing, not a finished coloured form; a prototype has recognisable interface structure; research observations, quotes and uncertainties have separate compact cards. Use icons and connections to reduce repeated prose. Keep one concise teaching line and preserve what later decisions depend on.
+
+The game owns the large primary CTA. Static artifact actions are non-focusable small outlined labels inside a bounded preview. A working prototype uses real local controls in its own inset canvas, explicit demo status and reset; no points, game advancement or external submission. Validate with keyboard, invalid input, success and reset. Motion clarifies entry or state changes and honours reduced motion. Do not autoplay a long loop.
+
+Coverage follows the learning task and the story state. Remove a repeated graphic if it merely decorates another paragraph. Handover evidence before a test records that test as pending; a later release check records the actual blocker. UX v1.3 uses nine relevant graphic beats, rather than repeating seven records on 13 beats. This is a relevance decision, not a new quota.

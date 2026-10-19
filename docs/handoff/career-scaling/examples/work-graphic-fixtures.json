@@ -37,6 +37,22 @@
           "detail": "Tell the supervisor what remains"
         }
       ]
+    },
+    {
+      "id": "workshop-record",
+      "kind": "interface",
+      "title": "Inspection record preview",
+      "caption": "Synthetic non-event interface fixture. This is a read-only record preview, not a real maintenance instruction.",
+      "provenance": "Synthetic cross-career fixture",
+      "screen": {
+        "heading": "Job 104",
+        "siteName": "Workshop log",
+        "description": "Service inspection",
+        "detail": "Check the approved work instructions before sign-off.",
+        "fields": [],
+        "action": "Open the record",
+        "actionPlacement": "after-details"
+      }
     }
   ]
 }
