@@ -1,3 +1,10 @@
+## 2026-10-19: Top 3 nudge plays all three beats
+
+**Why (Chandu):** "the move to #1 nudge is good but now its not autoplaying and showing the remove and add in succession." In v1 the banner's reading clock retires the rank hint at 2.5s, and the sequence's effect cleanup cleared the remaining timers with it, so only "Move to #1" played.
+
+- The sequence's timers now live in a ref and are cleared only on unmount; once it starts it plays to the end in both versions: "Move to #1" (arrows), "Remove from Top 3" (X's), then **"Add more from Explore"**: the empty Add a career slot when there is room, otherwise v2's "Explore more" link or v1's Explore banner (`.dm-spot-ring`, the glow without the fill), each ~2.5s, then it settles and retires the hint.
+- The tip can sit above its target (`SpotTip top={-48}`, caret flips down via `data-above`).
+
 ## 2026-10-19: the house tooltip (.dm-tip) everywhere; Top 3 nudges in v1; Match saves fly into the circles
 
 **Why (Chandu):** "the nudge tooltip for my build in v2 should ALSO have the blue glow stuff. ANY tooltip anywhere across the app should use that style from now on. Make sure to update the component library." Then "lets have our new top 3 card nudges in v1 as well", and "in match when a student saves a profile show it floating, leaving a trail and slotting into the 3 circles so students know its happening. Right now they barely noticed the circles."

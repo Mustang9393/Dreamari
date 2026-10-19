@@ -1714,13 +1714,15 @@ function HintGlyph({ children }: { children: React.ReactNode }) {
 
 /** The words a lit card control already carries in its tooltip, shown once
  *  under it while v2's first-visit highlight points at it. */
-function SpotTip({ side, children }: { side: "left" | "right"; children: React.ReactNode }) {
+function SpotTip({ side, top = 48, children }: { side: "left" | "right"; /** px below the anchor's top */ top?: number; children: React.ReactNode }) {
   return (
     <motion.span
       role="status"
       data-side={side}
+      data-above={top < 0 ? "" : undefined}
       initial={{ opacity: 0, y: -8, scale: 0.85 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 520, damping: 22 }}
-      className={`dm-tip dm-spot-tip pointer-events-none absolute top-[48px] z-[4] flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap ${side === "left" ? "left-0 origin-top-left" : "right-0 origin-top-right"}`}
+      style={{ top }}
+      className={`dm-tip dm-spot-tip pointer-events-none absolute z-[4] flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap ${side === "left" ? "left-0 origin-top-left" : "right-0 origin-top-right"}`}
     >
       <Sparkles className="h-[14px] w-[14px] flex-none" aria-hidden />
       {children}
@@ -1804,15 +1806,21 @@ export function Top3Tab({
   // first time the cards are on screen the arrows light up with their own
   // tooltip ("Move to #1"), then the X's ("Remove from Top 3"), once. Using
   // either control stops it.
-  const [spot, setSpot] = useState<"move" | "remove" | null>(null);
+  const [spot, setSpot] = useState<"move" | "remove" | "add" | null>(null);
   const played = useRef(false);
   const stopPlay = useRef(false);
   // both versions (19 Oct 2026, Chandu: "lets have our new top 3 card nudges in v1 as well")
   const playOn = hint === true && top3.length > 1 && !hintPaused;
+  // Once it starts it plays to the end (19 Oct 2026, Chandu: it stopped
+  // after "Move to #1"): v1's banner clock retires the hint at 2.5s, which
+  // used to cancel the remaining beats. The timers now live past that and
+  // are cleared only on unmount.
+  const playTimers = useRef<number[]>([]);
+  useEffect(() => () => playTimers.current.forEach((t) => window.clearTimeout(t)), []);
   useEffect(() => {
     const el = document.querySelector<HTMLElement>('[id^="top3-card-"]');
     if (!playOn || !el || played.current) return;
-    const timers: number[] = [];
+    const timers = playTimers.current;
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting || played.current || document.visibilityState !== "visible") return;
       played.current = true;
@@ -1820,10 +1828,11 @@ export function Top3Tab({
       const at = (ms: number, fn: () => void) => timers.push(window.setTimeout(() => { if (!stopPlay.current) fn(); }, ms));
       at(500, () => setSpot("move"));
       at(3000, () => setSpot("remove"));
-      at(5500, () => { setSpot(null); retireHint(); });
+      at(5500, () => setSpot("add"));
+      at(8000, () => { setSpot(null); retireHint(); });
     }, { threshold: 0.6, rootMargin: "-88px 0px -80px 0px" });
     observer.observe(el);
-    return () => { observer.disconnect(); timers.forEach((t) => window.clearTimeout(t)); };
+    return () => observer.disconnect();
     // retireHint is stable in behaviour; re-running on its identity would replay
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playOn]);
@@ -2249,8 +2258,9 @@ export function Top3Tab({
          Once read: the sentence morphs into the resting Explore line and
          the banner settles to the calm, slow beam it always had (same
          treatment as "Do this next", direct feedback 11 Sept 2026). */}
+      {/* v1 with all three full: the add beat lights the Explore banner */}
       {!flowV2 && (
-      <div onPointerEnter={() => setHolding(true)} onPointerLeave={() => setHolding(false)} onFocus={() => setHolding(true)} onBlur={() => setHolding(false)}>
+      <div className={`relative ${spot === "add" && top3.length >= 3 ? "dm-spot-ring rounded-[var(--radius-lg)]" : ""}`} onPointerEnter={() => setHolding(true)} onPointerLeave={() => setHolding(false)} onFocus={() => setHolding(true)} onBlur={() => setHolding(false)}>
         <NextStepBanner
           text={nudging ? "Change these anytime: move, remove, or add more from Explore." : "Explore hundreds of careers and save the ones that interest you."}
           content={<RankBannerCopy nudging={nudging} retired={hintRetired} />}
@@ -2273,6 +2283,7 @@ export function Top3Tab({
           // demo: comes back every visit; remembered once the demo flag is off
           storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
         />
+        {spot === "add" && top3.length >= 3 && <SpotTip side="right" top={-48}>Add more from Explore</SpotTip>}
       </div>
       )}
 
@@ -2313,7 +2324,7 @@ export function Top3Tab({
         </div>
         {undoSlot && <div className="mt-[var(--space-3)]">{undoSlot}</div>}
         {top3.length < 3 && (
-          <button type="button" onClick={onAdd} className="dm-tap dm-glass mt-[var(--space-3)] flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border text-[15px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          <button type="button" onClick={onAdd} className={`${spot === "add" ? "dm-spot-ring" : ""} dm-tap dm-glass mt-[var(--space-3)] flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border text-[15px] font-bold`} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
             <Plus className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} aria-hidden /> Add a career
           </button>
         )}
@@ -2340,7 +2351,7 @@ export function Top3Tab({
           exit={{ opacity: 0, transition: { duration: 0.15 } }}
           type="button"
           onClick={onAdd}
-          className="dm-tap dm-glass flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed backdrop-blur-[20px] backdrop-saturate-[1.5]"
+          className={`${spot === "add" && i === 0 ? "dm-spot-ring" : ""} dm-tap dm-glass flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed backdrop-blur-[20px] backdrop-saturate-[1.5]`}
           style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
         >
           <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
@@ -2368,8 +2379,9 @@ export function Top3Tab({
         {/* v2: with all three slots full, the quiet way to more careers
            (the empty slot does this when there is room) */}
         {flowV2 && top3.length >= 3 ? (
-          <span className="flex justify-end">
-            <Link href="/explore" className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[8px] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <span className="relative flex justify-end">
+            {spot === "add" && <SpotTip side="right" top={-48}>Add more from Explore</SpotTip>}
+            <Link href="/explore" className={`${spot === "add" ? "dm-spot-ring" : ""} dm-link flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[8px] text-[13.5px] font-semibold`} style={{ color: "var(--muted-foreground)" }}>
               <Plus className="h-3.5 w-3.5" aria-hidden /> Explore more
             </Link>
           </span>
