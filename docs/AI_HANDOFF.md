@@ -1,3 +1,12 @@
+## 2026-10-19: v2 Top 3 without a banner: teach on the controls themselves
+
+**Why (Chandu):** "we are still keeping the permanent set of controls in the banner in v2? Isnt there a better way... my build can still be where it used to be in the cover image with its tooltip nudge appearing once the page is scrolled back up after the student lands on top 3 from match". The bar was a fifth thing whose only job was pointing at four others.
+
+- **No banner in v2** (the action bar and "Edit Top 3" are gone). v1 is unchanged (its Explore banner, hint and tour).
+- **Reorder and Remove are taught on the cards:** the first time the cards are on screen, the arrows light (`.dm-spot`) with their own tooltip words under them ("Move to #1" on the #2 card side by side, "Move to #2" on the top card when stacked), then the X's with "Remove from Top 3"; once (demo: per session, like the other first-visit tips). Using either control stops it.
+- **My Build is back on the cover in v2** with its original tag ("Into something new? Change it here and your matches follow."). It is due 1.6s after the page settles but only paints while the button is on screen and clear of the nav, so a student scrolled down to the cards from Match sees it the moment they scroll back up; 9s, until My Build is opened once.
+- **"+ Explore more"** sits beside "Compare all 3" when all three slots are full (the empty slot does this when there is room).
+
 ## 2026-10-19: the Color switch becomes a quiet desktop toggle
 
 **Why (Chandu):** "the black and blue/classic is too big and sitting over the design and it shouldnt be in my face and so prominent like this." `ColorThemeSwitch` is now one small switch like My Profile's "V2 PROFILE": a muted "BLACK & BLUE" label and a mini track, no panel, 55% opacity until hovered or focused, fixed bottom-left on desktop (lg) only. Phones and tablets have no free corner (it sat over the cards there), so it is hidden below lg; `?look=v2` / `?look=v1` still switch the theme anywhere. Same state as before (look.ts).
