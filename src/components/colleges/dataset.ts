@@ -93,3 +93,19 @@ export async function loadDatasetCollege(slug: string): Promise<College | null> 
   const c = (await r.json()) as College;
   return { ...c, dataset: true };
 }
+
+/** Saved slugs as colleges, in the order given. The hand-built ones resolve
+ *  at once; a school saved from Browse all lives only in the dataset, so the
+ *  index is fetched only when one of those is in the list. Without this a
+ *  dataset school saved in Explore vanished from Saved and About Me. */
+export function useResolvedColleges(slugs: string[]): College[] {
+  const needsDataset = slugs.some((slug) => !COLLEGES.some((c) => c.slug === slug));
+  const [dataset, setDataset] = useState<Map<string, College> | null>(null);
+  useEffect(() => {
+    if (!needsDataset || dataset) return;
+    let live = true;
+    loadAllColleges().then((list) => { if (live) setDataset(new Map(list.map((c) => [c.slug, c]))); }).catch(() => { /* hand-built ones still show */ });
+    return () => { live = false; };
+  }, [needsDataset, dataset]);
+  return slugs.map((slug) => COLLEGES.find((c) => c.slug === slug) ?? dataset?.get(slug)).filter((c): c is College => !!c);
+}

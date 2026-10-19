@@ -23,7 +23,8 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { BuildModal } from "./PreferencesTab";
+import { BuildModal, type BuildSection } from "./PreferencesTab";
+import { AboutMeTab } from "./AboutMeTab";
 import { CareerPeek } from "./CareerPeek";
 import { CompareHighlights } from "./CompareHighlights";
 import { CardDeck } from "@/components/play/PlayHub";
@@ -52,6 +53,7 @@ import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
 import { collegeBySlug, collegeImage } from "@/components/colleges/data";
+import { useResolvedColleges } from "@/components/colleges/dataset";
 import { SaveButton, tags as collegeTags, useSaved as useSavedColleges } from "@/components/colleges/shared";
 import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
 import { useSavedVideos } from "@/lib/savedVideos";
@@ -75,7 +77,7 @@ import {
 // horizon, and the Career Locker is its own tab plus a strip at the end of
 // Overview. College Lookup CTAs point at /colleges (feature in the works).
 
-type TabId = "overview" | "top3" | "routes" | "plan" | "report" | "locker" | "resume" | "preferences" | "settings";
+type TabId = "overview" | "about" | "top3" | "routes" | "plan" | "report" | "locker" | "resume" | "preferences" | "settings";
 
 function careerById(id: string | null): ProfileCareer | null {
   return ALL_PROFILE_CAREERS.find((career) => career.id === id) ?? null;
@@ -135,7 +137,7 @@ const COVER_CAREER = "career";
 // else's), then stored picks on a later visit, and finally the demo default so
 // /profile still stands up on its own with nothing saved.
 
-const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "preferences", "settings"];
+const TAB_IDS: TabId[] = ["overview", "about", "top3", "routes", "plan", "report", "locker", "resume", "preferences", "settings"];
 /** Has the student opened My Build? Retires its nudge. In demo mode it
  *  follows the welcomes' rule, once per session, so a demo shows it again
  *  after a reload (Chandu, 2 Oct 2026: "I don't see the nudge for My Build
@@ -197,10 +199,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // Arriving from a "View saved" or "See Top 3": the page slides in, then
   // the tab strip, then the open panel (src/lib/showTheWay.ts).
   useEffect(() => { playArrival(); }, []);
-  // One layout since 4 Oct 2026 (Chandu: "V2 is finalised right? lets remove
-  // v1"): five tabs, no Overview. Top 3 is where the Profile opens and where
-  // Close buttons return.
-  const homeTab: TabId = "top3";
+  // About Me is where the Profile opens and where Close buttons return (Joshua
+  // Pierce, Slack, 19 Oct 2026: "About Me becomes the Profile landing page").
+  // The one exception is the arrival from Match, which is about the Top 3 it
+  // just built, so it still opens there.
+  const homeTab: TabId = initialWelcome ? "top3" : "about";
   const [profileTourReady, setProfileTourReady] = useState(false);
   const [profileTourStep, setProfileTourStep] = useState<"plan" | "report" | "resume" | "top3">("plan");
   // Arriving from Match (?welcome=1): the page is assembled in front of the
@@ -231,7 +234,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const revealOnArrival = initialFromSaved && initialTab === "locker";
   const revealRef = useRef(revealOnArrival);
   const [panelPhase, setPanelPhase] = useState<"idle" | "out" | "in">("idle");
-  const [tab, setTab] = useState<TabId>(revealOnArrival ? "top3" : initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "top3");
+  const [tab, setTab] = useState<TabId>(revealOnArrival ? "top3" : initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : homeTab);
   const tablistRef = useRef<HTMLDivElement | null>(null);
   const runSavedReveal = () => {
     if (!revealRef.current) return;
@@ -344,9 +347,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
   useEffect(() => {
-    // There is no Overview any more; a stale ?tab=overview link lands on Top 3.
+    // Overview became About Me (the Replit's own anchor is #overview), so an
+    // old ?tab=overview link lands there.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one correction for an old link, no cascade
-    if (tab === "overview") setTab("top3");
+    if (tab === "overview") setTab("about");
   }, [tab]);
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
   // Which Settings section the gear menu asked for; Settings scrolls to it.
@@ -356,40 +360,14 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // not to a fixed Top 3. null means Settings was the page's first view (a
   // ?tab=settings link), so X falls back to Top 3 and Back leaves the page.
   const [settingsFrom, setSettingsFrom] = useState<TabId | null>(null);
-  const closeSettings = () => { setSettingsSection(null); setTab(settingsFrom ?? "top3"); setSettingsFrom(null); };
+  const closeSettings = () => { setSettingsSection(null); setTab(settingsFrom ?? homeTab); setSettingsFrom(null); };
   useBackStep(tab === "settings" && settingsFrom !== null, closeSettings);
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
-  // Preferences teaching moment: counts visits, fires once on the second.
-  const [prefsTag, setPrefsTag] = useState(false);
+  // My Build's "new" sweep, on About Me's Edit My Build button until the
+  // student opens it once. The header button and its coachmark went with
+  // About Me (19 Oct 2026): My Build lives on the landing tab now, in view
+  // without a pointer.
   const [buildDot, setBuildDot] = useState(false);
-  const buildBtnRef = useRef<HTMLButtonElement>(null);
-  const [tagPos, setTagPos] = useState<{ top: number; right: number } | null>(null);
-  useEffect(() => {
-    if (!prefsTag) return;
-    // Re-measured every 200ms while the tag is live (it lives 9s), so it
-    // follows the header through the arrival animation and any resize; a
-    // single measurement at show time sometimes landed before layout settled.
-    // The tag only paints while the icon itself is on screen and clear of
-    // the nav bar (Chandu, 2 Oct 2026: "otherwise it's pointing at the
-    // profile avatar on the navbar"). When the page has scrolled, as it does
-    // landing on Saved from a nudge, the tag waits and appears the moment
-    // the header is back in view; its nine seconds count only while shown.
-    // The dot on the icon covers the wait.
-    let shownAt = 0;
-    const place = () => {
-      const r = buildBtnRef.current?.getBoundingClientRect();
-      if (!r || r.width === 0) return;
-      const clearOfNav = r.top >= 80 && r.bottom <= window.innerHeight - 40;
-      if (!clearOfNav) { setTagPos(null); return; }
-      if (!shownAt) shownAt = Date.now();
-      if (Date.now() - shownAt > 9000) { setPrefsTag(false); return; }
-      const next = { top: Math.round(r.bottom + window.scrollY + 10), right: Math.max(12, Math.round(document.documentElement.clientWidth - r.right)) };
-      setTagPos((cur) => (cur && cur.top === next.top && cur.right === next.right ? cur : next));
-    };
-    const id = window.setInterval(place, 200);
-    const raf = window.requestAnimationFrame(place);
-    return () => { window.clearInterval(id); window.cancelAnimationFrame(raf); setTagPos(null); };
-  }, [prefsTag]);
   useEffect(() => {
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only flag read after mount
@@ -399,57 +377,21 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // My Build is a modal over the page (6 Oct 2026): sections down the left,
   // the editor on the right, one Save for all of it.
   const [buildOpen, setBuildOpen] = useState(false);
-  const openBuild = () => {
-    setPrefsTag(false);
+  const [buildSection, setBuildSection] = useState<BuildSection | undefined>(undefined);
+  const openBuild = (section?: BuildSection) => {
     setBuildDot(false);
     markBuildOpened();
+    setBuildSection(section);
     setBuildOpen(true);
   };
-  // v2 first visit: Overview, which hosted the four-step tour, is gone, so
-  // the tour is the Top 3 tab's own hint (the pulsing banner and the #1
-  // card's tag), armed once the page has settled.
-  // One thing at a time (Chandu, 2 Oct 2026: "do not scroll down on the Top
-  // 3 without first finishing the Build coachmark"): the Top 3 hint arms
-  // only once the My Build tag has had its turn, or was not due at all.
-  const [tagCycleDone, setTagCycleDone] = useState(false);
-  const tagWasShown = useRef(false);
+  // v2 first visit: the tour is the Top 3 tab's own hint (the pulsing
+  // banner and the #1 card's tag), armed once the page has settled. It used
+  // to wait for the My Build coachmark's turn; that coachmark is gone.
   useEffect(() => {
-    if (prefsTag) { tagWasShown.current = true; return; }
-    if (tagWasShown.current) { setTagCycleDone(true); return; }
-    // Not due: My Build already opened once, or a forced/first-view tag has
-    // not fired yet. Give the 1.6s show timer its chance before deciding.
-    const t = window.setTimeout(() => {
-      if (buildOpened()) setTagCycleDone(true);
-    }, 2200);
-    return () => window.clearTimeout(t);
-  }, [prefsTag]);
-  useEffect(() => {
-    if (!showProfileTour || initialWelcome || !tagCycleDone) return;
+    if (!showProfileTour || initialWelcome) return;
     const t = window.setTimeout(() => { setProfileTourStep("top3"); setProfileTourReady(true); }, 400);
     return () => window.clearTimeout(t);
-  }, [showProfileTour, initialWelcome, tagCycleDone]);
-  useEffect(() => {
-    // Waits for the welcome splash, so the two never fire together.
-    if (welcomeOpen || welcomePending) return;
-    // DEMO-ONLY: ?nudge=build shows it on demand (Chandu, 1 Oct 2026: "I don't
-    // think I ever saw that second visit nudge, how do I trigger it?").
-    const forced = new URLSearchParams(window.location.search).get("nudge") === "build";
-    if (!forced) {
-      // Every visit until My Build has been opened once (Chandu, 2 Oct 2026:
-      // "I need to see the nudge on the first view itself", then "I don't
-      // see the My Build nudge": a once-ever flag had already been spent).
-      // Opening My Build is the only thing that retires it, and the icon
-      // keeps a dot between visits (see buildDot), the way Instagram marks a
-      // tab with something new, instead of a coachmark.
-      try {
-        if (buildOpened()) return;
-      } catch { return; }
-    }
-    // Shown 1.6s after the page settles; it retires itself nine seconds
-    // after it is first on screen (see the position loop), or on tap.
-    const show = window.setTimeout(() => setPrefsTag(true), 1600);
-    return () => window.clearTimeout(show);
-  }, [welcomeOpen, welcomePending]);
+  }, [showProfileTour, initialWelcome]);
   // Screen position for the portaled settings menu (see settingsBtnRef
   // below) -- computed fresh each open, since the button can move (window
   // resize, scroll) between opens.
@@ -899,62 +841,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {/* Resume moved into the main tablist below -- it deserves the
                  same first-class standing as Overview/Report, not a small
                  icon tucked in the header. */}
-              {/* Preferences takes the header spot Saved had (direct
-                 instruction, 30 Sept 2026), since Saved is a tab. */}
-              <span className="relative">
-              <button
-                ref={buildBtnRef}
-                type="button"
-                aria-label="My Build"
-                onClick={openBuild}
-                className={`dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold ${prefsTag ? "dm-tab-nudge" : ""}`}
-                style={{ background: tab === "preferences" || prefsTag ? "var(--glass-surface-3)" : "transparent", color: tab === "preferences" || prefsTag ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
-              >
-                <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" />{" "}
-                {/* The text sweep with its spark (the Cover button's old nudge)
-                   until My Build has been opened once; the coachmark rides
-                   alongside on the first views. A muted base so the glint
-                   shows (same reason Cover's label had one). */}
-                <span className={`relative hidden sm:inline ${buildDot ? "dm-text-nudge" : ""}`} style={buildDot ? { color: "rgba(255,255,255,0.55)" } : undefined}>
-                  My Build
-                  {buildDot && (
-                    <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
-                      <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
-                    </svg>
-                  )}
-                </span>
-              </button>
-              {/* The teaching moment (Chandu, 1 Oct 2026: "a teaching moment
-                 for preferences, timed, maybe on the second visit"). Second
-                 visit only: the first visit belongs to the profile tour and
-                 the welcome. 1.6s after the page settles, the icon pulses and
-                 one line slides out under it. Tapping the line opens
-                 Preferences; otherwise it leaves after 9s. Once, ever. */}
-              {/* Rendered through a portal: inside the cover card the tag was
-                 clipped by the card's rounded overflow on desktop (2 Oct 2026;
-                 Chandu: "I don't see the My Build nudge"). Positioned in page
-                 coordinates under the button, so it scrolls with the header. */}
-              {prefsTag && tagPos && (
-                <Portal>
-                  <div className="marketing-v2 themeable" style={{ background: "transparent" }}>
-                    <motion.button
-                      type="button"
-                      initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                      onClick={openBuild}
-                      className="dm-tap absolute z-[80] flex w-max max-w-[280px] cursor-pointer items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-left text-[14px] leading-[18px] font-bold"
-                      style={{ top: tagPos.top, right: tagPos.right, background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 14px 30px -12px rgba(0,0,0,0.6)", textShadow: "none", fontFamily: "var(--font-body)" }}
-                    >
-                      <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "var(--primary)" }} />
-                      <Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden />
-                      {/* 2 Oct 2026, Chandu: better copy that says they can change
-                         their preferences and Dreamari changes with them. */}
-                      Into something new? Change it here and your matches follow.
-                    </motion.button>
-                  </div>
-                </Portal>
-              )}
-              </span>
+              {/* My Build left the header for About Me (Joshua, 19 Oct 2026:
+                 "I'm not sure we still need the separate My Build area at the
+                 top... if About Me becomes the Profile landing page"). One home
+                 for it, on the tab the Profile opens on; the gear menu keeps a
+                 shortcut. */}
               {/* The gear menu, split into the things a student actually
                  comes here for (direct feedback, 10 Sept 2026): each item
                  opens Settings scrolled to that section. */}
@@ -1150,7 +1041,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = ["top3", "locker", "plan", "report", "resume"];
+            const order: TabId[] = ["about", "top3", "locker", "plan", "report", "resume"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -1174,6 +1065,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             // Joshua's concern was a seventh tab ("too much info or too
             // long?"); this is five.
             [
+              // About Me leads (19 Oct 2026, Joshua's About Me spec): six tabs.
+              { id: "about", label: "About Me" },
               { id: "top3", label: "Top 3" },
               { id: "locker", label: "Saved", badge: savedTotal || undefined },
               { id: "plan", label: "My Plan" },
@@ -1212,6 +1105,18 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           ))}
         </div>
 
+        {tab === "about" && (
+          <div role="tabpanel" id="profile-panel-about" aria-labelledby="profile-tab-about">
+            <AboutMeTab
+              top3={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
+              saved={savedLocker}
+              onAddToTop3={addToTop3}
+              onGoTab={setTab}
+              onOpenBuild={openBuild}
+              buildNudge={buildDot}
+            />
+          </div>
+        )}
         {tab === "top3" && (
           <motion.div role="tabpanel" id="profile-panel-top3" aria-labelledby="profile-tab-top3" initial={false} animate={panelPhase === "out" ? { opacity: 0, x: -28 } : { opacity: 1, x: 0 }} transition={{ duration: REVEAL_OUT_MS / 1000, ease: [0.4, 0, 1, 1] }}>
             <Top3Tab
@@ -1274,7 +1179,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {/* v2 opens it from the header button; it still shows here, inside
            the tab card, so the tabs stay the way back (no second title, no
            close button over the page's own header). */}
-        {buildOpen && <BuildModal onClose={() => setBuildOpen(false)} />}
+        {buildOpen && <BuildModal initialSection={buildSection} onClose={() => setBuildOpen(false)} />}
         {tab === "locker" && (
           <motion.div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker" initial={panelPhase === "in" ? { opacity: 0, x: 28 } : false} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}>
             <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("top3")} embedded />
@@ -3700,7 +3605,8 @@ export function CompareTable({ routes, selectedId }: { routes: ProfileCareer["ro
 export function SchoolsShelf() {
   const router = useRouter();
   const [saved, toggleSaved] = useSavedColleges();
-  const colleges = [...saved].map((slug) => collegeBySlug(slug)).filter((c): c is NonNullable<typeof c> => !!c);
+  // dataset schools (saved from Browse all) resolve too, not only hand-built ones
+  const colleges = useResolvedColleges([...saved]);
   if (colleges.length === 0) {
     return (
       <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>

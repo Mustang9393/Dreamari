@@ -488,8 +488,8 @@ function SectionFields({ id, draft, patch, patchJobs, namedCareers }: { id: Excl
 // answers, the student profile and the preferences), the foot says what
 // moved, and Saved careers rides along as the ninth section.
 
-type BuildSection = "interests" | "subjects" | "workVibe" | "education" | "cost" | "location" | "profile" | "saved";
-const BUILD_SECTIONS: { id: BuildSection; title: string; question: string; subtitle?: string; sprite: string; cite?: string }[] = [
+export type BuildSection = "interests" | "subjects" | "workVibe" | "education" | "cost" | "location" | "profile" | "saved";
+export const BUILD_SECTIONS: { id: BuildSection; title: string; question: string; subtitle?: string; sprite: string; cite?: string }[] = [
   { id: "interests", title: "Career fields", question: "Which career fields interest you?", subtitle: "Choose up to 3", sprite: STAGE_DREAMY.interests.sprite, cite: "Harvard FAS Mignone + O*NET Interest Profiler" },
   { id: "subjects", title: "Subjects", question: "Which subjects do you enjoy?", subtitle: "Choose up to 2", sprite: STAGE_DREAMY.subjects.sprite },
   { id: "workVibe", title: "Work style", question: "Where do you work best?", subtitle: "Pick one from each row.", sprite: STAGE_DREAMY.workVibe.sprite, cite: "MIT CAPD Self Assessment + O*NET Work Styles" },
@@ -502,14 +502,14 @@ const BUILD_SECTIONS: { id: BuildSection; title: string; question: string; subti
 const WORLD_ACCENT: Record<string, string> = Object.fromEntries(INTEREST_WORLDS.map((w) => [w.label, `var(--color-world-${w.slug})`]));
 const sameAnswers = (a: BuildState, b: BuildState) => JSON.stringify(a) === JSON.stringify(b);
 
-export function BuildModal({ onClose }: { onClose: () => void }) {
+export function BuildModal({ onClose, initialSection = "interests" }: { onClose: () => void; /** About Me's rows open the editor on their own section */ initialSection?: BuildSection }) {
   const lookV2 = useLookV2();
   const saved = useBuildAnswers();
   const lastSaved = useBuildSavedAt();
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   const [savedCareersSet, toggleSaved] = useSavedCareers();
   const reduce = useReducedMotion();
-  const [section, setSection] = useState<BuildSection>("interests");
+  const [section, setSection] = useState<BuildSection>(initialSection);
   const [draft, setDraft] = useState<BuildState>(saved);
   const patch = (next: Partial<BuildState>) => setDraft((d) => ({ ...d, ...next }));
   const dirty = !sameAnswers(draft, saved);
@@ -556,7 +556,10 @@ export function BuildModal({ onClose }: { onClose: () => void }) {
   // EVERYTHING SHOULD GO ONLY ONE STEP BACK"): the browser's Back moves to
   // the section before, like the sheet's own Back button, and only from the
   // first section does Back close the sheet (HistoryHost owns that step).
-  useBackSteps(Math.max(0, idx), () => setSection(BUILD_SECTIONS[Math.max(0, idx - 1)].id));
+  // Counted from the section it opened on, so a sheet About Me opened on
+  // Location closes on the first Back, not after walking back to Career fields.
+  const startIdx = BUILD_SECTIONS.findIndex((s) => s.id === initialSection);
+  useBackSteps(Math.max(0, idx - startIdx), () => setSection(BUILD_SECTIONS[Math.max(0, idx - 1)].id));
   const stage: StageId = section === "saved" ? "complete" : section;
 
   // 7 Oct 2026: the sheet is dreamonna's My Build, which is the Build screen
@@ -575,8 +578,10 @@ export function BuildModal({ onClose }: { onClose: () => void }) {
             <BackgroundSpace />
             <AuroraBackground accent={(lookV2 ? STAGE_ACCENTS_V2 : STAGE_ACCENTS)[stage]} visitedAccents={[]} lightning={false} />
           </div>
-          <IconTip label="Close">
-            <button type="button" aria-label="Close" onClick={onClose} className="myb-x dm-quiet"><X className="h-4 w-4" aria-hidden /></button>
+          {/* the tooltip's wrapper takes the corner; it was a relative span,
+             so the button's own absolute corner landed outside the sheet */}
+          <IconTip label="Close" className="absolute top-[14px] right-[14px] z-[3]">
+            <button type="button" aria-label="Close" onClick={onClose} className="myb-x dm-quiet" style={{ position: "static" }}><X className="h-4 w-4" aria-hidden /></button>
           </IconTip>
 
           {/* the stage: title, lede, the eight questions */}
@@ -696,7 +701,7 @@ export function BuildModal({ onClose }: { onClose: () => void }) {
 }
 
 /** What a section says in the SAVED answers, for the EDITED tags. */
-function summaryOf(s: BuildState, id: BuildSection, savedCount: number): string {
+export function summaryOf(s: BuildState, id: BuildSection, savedCount: number): string {
   switch (id) {
     case "interests": return s.interests.join(" · ");
     case "subjects": return s.subjects.join(" · ");

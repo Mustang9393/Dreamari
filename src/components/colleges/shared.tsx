@@ -68,6 +68,25 @@ export function useTopSchool(): [string | null, (slug: string | null) => void] {
   return [raw || null, set];
 }
 
+// Where the student files each saved school in My Profile > About Me's
+// College Goal (Joshua, Slack, 19 Oct 2026: "the student can move it into
+// Reach, Target, or Likely"). Only the student's own moves are stored; a
+// school they never moved sits where fitFor puts it (see goalBucketFor).
+export type GoalBucket = "reach" | "target" | "likely";
+const BUCKET_KEY = "dm-colleges-goal-bucket";
+const BUCKET_EVENT = "dm-colleges-goal-bucket-change";
+function readBuckets(): string { try { return window.localStorage.getItem(BUCKET_KEY) ?? "{}"; } catch { return "{}"; } }
+function subscribeBuckets(cb: () => void) { window.addEventListener(BUCKET_EVENT, cb); window.addEventListener("storage", cb); return () => { window.removeEventListener(BUCKET_EVENT, cb); window.removeEventListener("storage", cb); }; }
+export function useGoalBuckets(): [Record<string, GoalBucket>, (slug: string, bucket: GoalBucket) => void] {
+  const raw = useSyncExternalStore(subscribeBuckets, readBuckets, () => "{}");
+  const buckets = useMemo(() => { try { return JSON.parse(raw) as Record<string, GoalBucket>; } catch { return {}; } }, [raw]);
+  const set = (slug: string, bucket: GoalBucket) => {
+    try { window.localStorage.setItem(BUCKET_KEY, JSON.stringify({ ...buckets, [slug]: bucket })); } catch { /* private mode */ }
+    window.dispatchEvent(new Event(BUCKET_EVENT));
+  };
+  return [buckets, set];
+}
+
 /** The picture at the top of a card or a page: the campus photo when we have
  *  one, otherwise the branded campus placeholder. */
 export function CollegePicture({ c, sizes, priority = false, className = "", position }: { c: College; sizes: string; priority?: boolean; className?: string; /** CSS object-position for the cover crop; default centre */ position?: string }) {

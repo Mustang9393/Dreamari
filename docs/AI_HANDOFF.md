@@ -1,3 +1,19 @@
+## 2026-10-19: My Profile opens on About Me (Career Goal, College Goal, My Build)
+
+**Why (Joshua, Slack, 19 Oct 2026):** a new About Me landing section in the Replit (dceeai.replit.app/my-profile#overview, inspired by SchooLinks' About Me) whose main goal is "to make the student's two primary goals immediately visible: Career Goal, College Goal", plus My Build "so students can quickly review or edit the preferences they originally entered in Build". The flow: "Explore Careers → Saved Career → Career Goal → Top 3" and "Explore Schools → Saved School → College Goal → Reach / Target / Likely", so that My Profile is "the place where students organize the decisions they're making throughout Dreamari". On the header's My Build button: "I'll leave that to your judgment."
+
+- **About Me is the first tab and where the Profile opens** (`AboutMeTab.tsx`). Six tabs now. The arrival from Match (`?welcome=1`) still opens on Top 3, because that arrival is about the Top 3 Match just built. Old `?tab=overview` links land on About Me. Settings' close falls back to About Me.
+- **My Goals:** two picture cards, one height. Career Goal shows the #1 career's poster; College Goal shows the #1 school's campus, or "Pick your #1 school" with Reach/Target/Likely counts. Each opens a drill-in (one browser Back returns).
+  - *Career Goal:* primary career hero (Learn more, Career Report), My Top 3 rows (Reorder goes to the Top 3 tab), saved careers not in the Top 3 with "Add to Top 3" (the same addToTop3 as the Top 3 tab, so a full Top 3 gets the existing swap sheet).
+  - *College Goal:* #1 school hero, then Reach / Target / Likely lists. Saved schools are filed by the same fit band Explore Schools shows (`fitFor`; Safety and open admission read as Likely, no data as Target). "Move" files a school elsewhere (new store `useGoalBuckets`, key `dm-colleges-goal-bucket`); the star sets the #1 (existing `useTopSchool`).
+  - Nothing here is typed in by hand: both read the stores Explore already writes (`dreamari-saved-careers`, `dm-colleges-saved`).
+- **My Build** is a stacked-row summary (fields, subjects, work style, education, tuition, location; grade/GPA are in the header, saved careers are in Career Goal). Each row opens the My Build sheet on that section (`BuildModal initialSection`; its Back steps count from there). The "new" sweep moved to the Edit My Build button.
+- **Header My Build button removed (judgment call Joshua left to us):** About Me puts My Build on the landing tab, so a second entry in the header was the same thing twice (density rule). The gear menu keeps a shortcut. Its 9-second coachmark went with it; the Top 3 first-visit hint no longer waits for that coachmark.
+- **DEMO-ONLY:** `DEMO_BUILD` in `lib/buildAnswers.ts` seeds My Build for a visitor who never ran Build (Business & Finance, Tech & Engineering; Mathematics, Business; 4 years; New York; College), so the demo never opens on six empty rows. A student who did Build never sees it.
+- **Fixes found on the way:** (1) schools saved from Browse all (the 5,716-school dataset) vanished from Saved and would have vanished from College Goal, because only hand-built colleges resolved; `useResolvedColleges` (dataset.ts) loads the dataset index only when such a school is saved. (2) The My Build sheet's close button sat outside the sheet (IconTip's relative wrapper became its positioning parent); the wrapper now takes the corner.
+- **Checked:** tsc, eslint on changed files (warnings only, pre-existing). Local :3013 at 1280 and 375: saving four schools on Explore Schools fills College Goal (two are dataset schools); Move and star persist; Add to Top 3 moves a saved career into the Top 3; browser Back leaves each drill-in; `?welcome=1` lands on Top 3; no horizontal scroll at 375. Not run: `npm run tokens:check`, light mode, Windows/ChromeOS.
+- **Open:** not committed or pushed (Chandu: "Do not push but build and show me"). The Replit's own Explore → College Goal mapping was not wired when reviewed (saving NYU there left the card unchanged), so our behaviour is built from Joshua's written flow.
+
 ## 2026-10-19: v2 look, more blue, placed where it means something
 
 **Why (Chandu, with the three references again):** "lets have the blue be more present... It shouldnt be so missing. But it should appear logically where it can, because we still want that opulent look." The references are not sparing with blue; what keeps them premium is one light source per screen, light rather than paint, everything else monochrome, and intensity that follows the moment. All of this is behind the v2 toggle.
@@ -9,6 +25,7 @@
 - **Kept calm on purpose:** data screens (Explore, Opportunities, Profile, career detail, Build's question screens) get only the frame; no light sits behind text a student has to read.
 
 Checked: tsc, eslint, the contrast and pill audits on Home and Explore, pixel samples on Opportunities. Before/after: `docs/reference/look-v2-2026-10-18/more-blue-*.jpg`. Pushed to main behind the v2 toggle on Chandu's go-ahead.
+
 
 ## 2026-10-18: bespoke streak lightning and centered XP badge
 

@@ -15,10 +15,27 @@ const AT_KEY = "dreamari-build-answers-at";
 const listeners = new Set<() => void>();
 let cache: BuildState | null = null;
 
+// DEMO-ONLY: the answers a visitor who never ran Build sees in My Build
+// (About Me's summary and the editor), shaped like the demo student's Top 3
+// (Investment Banking first), so the demo never opens on six empty rows. A
+// student who did Build, or saves here once, never sees these. Production:
+// delete DEMO_BUILD and return the profile seed as is.
+const DEMO_BUILD: Partial<BuildState> = {
+  interests: ["Business & Finance", "Tech & Engineering"],
+  subjects: ["Mathematics", "Business"],
+  energy: "Fast pace",
+  teamStyle: "Small team",
+  education: "4 years",
+  costIndex: 1,
+  state: "New York",
+  path: "college",
+};
+
 function seedFromProfile(): BuildState {
   const p = readStudentProfile();
   const prefs = preferencesSnapshot();
   const labelFor = (v: string) => INTEREST_WORLDS.find((w) => w.slug === v || w.label === v)?.label ?? v;
+  if (!p.interests.length && !prefs.industries.length && !p.subjects.length) return { ...INITIAL_BUILD_STATE, ...DEMO_BUILD, gpa: p.gpa, zipCode: p.zipCode, email: p.email };
   return {
     ...INITIAL_BUILD_STATE,
     interests: (prefs.industries.length ? prefs.industries : p.interests.map(labelFor)).slice(0, 3),
