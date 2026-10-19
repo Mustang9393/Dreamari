@@ -1,3 +1,21 @@
+## 2026-10-19: simulation thumbnails use the new character art; the Top 3 nudge starts reliably
+
+**Why (Chandu):** "update the thumbnails to the career simulations for which we have new graphics", then "make sure there are characters and the compositions work for the new thumbnails in both 4:5 and 16:9 or whatever proportions the tiles scale to." Separately: "the move to #1 etc nudge isnt autoplaying btw."
+
+- New `Simulation.thumb` + `thumbFocus`, read through `simThumb()` (games.ts). Kept apart from `cover`, so the in-game PreGame backdrop does not move.
+  - Investment Banker: `ib/v2/christina-thumbsup-glassdoor-sunset.webp` at `30% 18%`.
+  - Registered Nurse: `rn/v2/rosa-proud-station-late-day-anime.png` at `50% 10%`.
+  - Aviation Maintenance: `amt/amt-fluid-leak.webp` at `29% 12%`.
+- Each one was picked because its lead character is in frame. The focus was checked at 5:7, 4:5, 1:1, 16:9, 2.6:1 and Home's 3.7:1 banner, keeping faces in the upper half, clear of the title scrim.
+- Wired into: the Play hub row and phone deck, PlayStage, the Home banner and Continue rail, Feed moments, the counselor's Most played, and the component lab.
+- Verified in the browser:
+  - phone deck (about 5:6)
+  - desktop row: 16:9 hero, 5:7 side cards
+  - Home Continue rail (2:1)
+- Nudge: the cards mount about 250 ms after the hint turns on. The old IntersectionObserver effect found no card, returned, and never re-ran. It now checks every 250 ms for whichever card is on screen until the sequence starts.
+  - Verified: move at 0.9 s, remove at 3.4 s, add at 6 s, done at 8.4 s after the welcome closes.
+  - Also: the dev server had stopped recompiling when the disk filled up (ENOSPC). It was restarted.
+
 ## 2026-10-19: v1's Explore banner is about exploring only, and arrives as the nudges' last beat
 
 **Why (Chandu):** "the explore banner can now just be about exploring and it can show up after the first sequence of nudges. Since we are already doing the new blue tooltips for reorganizing and removing we can skip that part on the banner."

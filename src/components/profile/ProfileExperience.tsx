@@ -1699,21 +1699,31 @@ export function Top3Tab({
   const playTimers = useRef<number[]>([]);
   useEffect(() => () => playTimers.current.forEach((t) => window.clearTimeout(t)), []);
   useEffect(() => {
-    const el = document.querySelector<HTMLElement>('[id^="top3-card-"]');
-    if (!playOn || !el || played.current) return;
+    if (!playOn || played.current) return;
     const timers = playTimers.current;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting || played.current || document.visibilityState !== "visible") return;
+    // 19 Oct 2026, Chandu: "the move to #1 etc nudge isnt autoplaying". The
+    // cards mount a beat after the hint turns on (and the row and the deck
+    // swap at the lg breakpoint), so an observer on the first card node found
+    // nothing, or a node that was then replaced, and never fired. Look for
+    // whichever card is on screen now, every quarter second, until it plays.
+    const check = () => {
+      if (played.current || document.visibilityState !== "visible") return;
+      const el = document.querySelector<HTMLElement>('[id^="top3-card-"]');
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const seen = Math.min(r.bottom, window.innerHeight - 80) - Math.max(r.top, 88);
+      if (seen < Math.min(r.height * 0.5, 220)) return;
       played.current = true;
-      observer.disconnect();
+      window.clearInterval(poll);
       const at = (ms: number, fn: () => void) => timers.push(window.setTimeout(() => { if (!stopPlay.current) fn(); }, ms));
       at(500, () => setSpot("move"));
       at(3000, () => setSpot("remove"));
       at(5500, () => setSpot("add"));
       at(8000, () => { setSpot(null); retireHint(); });
-    }, { threshold: 0.6, rootMargin: "-88px 0px -80px 0px" });
-    observer.observe(el);
-    return () => observer.disconnect();
+    };
+    const poll = window.setInterval(check, 250);
+    check();
+    return () => window.clearInterval(poll);
     // retireHint is stable in behaviour; re-running on its identity would replay
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playOn]);

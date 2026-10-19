@@ -21,7 +21,7 @@ import type { Enriched } from "@/components/opportunities/Card";
 import { timing, today } from "@/components/opportunities/match";
 import { IconTip } from "@/components/app/IconTip";
 import type { Field } from "@/components/opportunities/types";
-import { SIMULATIONS } from "@/components/play/games";
+import { SIMULATIONS, simThumb } from "@/components/play/games";
 import { logTime } from "@/lib/counselorTimeLog";
 import { countActivity, useActivity } from "@/lib/activityEvents";
 import { notify } from "./LogSheet";
@@ -133,7 +133,7 @@ export function MostPlayedSimulations({ students, titled = true }: { students: n
       <div className="cv-rail-sm grid grid-cols-3 gap-[var(--space-5)]" style={{ ["--rail-w" as string]: "78%" }}>
         {rows.map(({ sim, started, finished }, i) => (
           <button type="button" key={sim.id} onClick={() => openDeadline({ id: `sim:${sim.id}`, title: sim.title, when: `${started} played · ${finished} finished`, days: null, students: roster.filter((s) => s.careerTrack === sim.world).slice(0, Math.max(1, Math.min(12, started))), href: "", lede: `Students exploring ${sim.world} who played it.` })} className="dm-tap group relative flex aspect-[16/10] cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)" }}>
-            <Image src={sim.cover} alt="" fill sizes="(min-width: 640px) 33vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+            <Image src={simThumb(sim).src} alt="" fill sizes="(min-width: 640px) 33vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" style={{ objectPosition: simThumb(sim).focus }} />
             <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(8,10,22,0) 35%, rgba(8,10,22,0.86) 100%)" }} />
             <span className="absolute top-[12px] left-[12px] rounded-full px-[10px] py-[3px] text-[12px] font-semibold text-white" style={{ background: "rgba(8,10,22,0.62)", backdropFilter: "blur(8px)" }}>#{i + 1}</span>
             <span className="relative flex items-end justify-between gap-[var(--space-3)] p-[var(--space-4)] text-white">

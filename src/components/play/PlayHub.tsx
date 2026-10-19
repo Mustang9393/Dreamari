@@ -18,7 +18,7 @@ import { SurfaceState } from "@/components/app/SurfaceState";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { glossaryFor, isGlossaryReleased } from "@/components/glossary/data";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
-import { FEATURED_ROW_SOON_IDS, GLOSSARY_GAMES, SIMULATIONS, SOON, worldForCareer } from "./games";
+import { FEATURED_ROW_SOON_IDS, GLOSSARY_GAMES, SIMULATIONS, SOON, simThumb, worldForCareer } from "./games";
 import { TrailerFlow } from "./TrailerFlow";
 import { PlayStage } from "./PlayStage";
 import type { Simulation } from "./types";
@@ -678,7 +678,7 @@ export function CardDeck<T extends { id: string }>({
 // works"). Reuses HeroShelfCard's own existing no-cover visual for a
 // failed one too, rather than introducing a second "missing image" look
 // on the same page.
-function CoverPhoto({ src, world, sizes, className }: { src?: string; world?: string; sizes: string; className: string }) {
+function CoverPhoto({ src, world, sizes, className, focus }: { src?: string; world?: string; sizes: string; className: string; focus?: string }) {
   const [failed, setFailed] = useState(false);
   const tint = (world && WORLD_COLORS[world]) || "var(--glossary-accent, var(--world-business-money-office))";
   if (!src || failed) {
@@ -688,7 +688,7 @@ function CoverPhoto({ src, world, sizes, className }: { src?: string; world?: st
       </span>
     );
   }
-  return <Image src={src} alt="" fill sizes={sizes} className={className} onError={() => setFailed(true)} />;
+  return <Image src={src} alt="" fill sizes={sizes} className={className} style={focus ? { objectPosition: focus } : undefined} onError={() => setFailed(true)} />;
 }
 
 export function RowCard({
@@ -725,7 +725,7 @@ export function RowCard({
 }) {
   const title = candidate.kind === "sim" ? candidate.sim.title : candidate.soon.title;
   const world = candidate.kind === "sim" ? candidate.sim.world : candidate.soon.world;
-  const cover = candidate.kind === "sim" ? candidate.sim.cover : candidate.soon.cover;
+  const { src: cover, focus } = candidate.kind === "sim" ? simThumb(candidate.sim) : { src: candidate.soon.cover, focus: undefined };
   // Three real size tiers, not two -- "hero" (this row active, this card
   // featured), "side" (row active, a different card featured), "compact"
   // (row at rest, same COMPACT_W/COMPACT_HEIGHT every other row rests at).
@@ -761,7 +761,7 @@ export function RowCard({
   const worldSize = tier === "hero" ? "text-[11px] sm:text-[13px] md:text-[15px]" : tier === "side" ? "text-[11px] sm:text-[10px] md:text-[13px] lg:text-[14px]" : "text-[10.5px] sm:text-[11.5px]";
   const content = (
     <div className="relative h-full w-full">
-      <CoverPhoto src={cover} world={world} sizes={large ? "(min-width: 1024px) 764px, 90vw" : tier === "compact" ? "(min-width: 768px) 347px, 60vw" : "(min-width: 1024px) 304px, 45vw"} className="object-cover" />
+      <CoverPhoto src={cover} focus={focus} world={world} sizes={large ? "(min-width: 1024px) 764px, 90vw" : tier === "compact" ? "(min-width: 768px) 347px, 60vw" : "(min-width: 1024px) 304px, 45vw"} className="object-cover" />
       {candidate.kind === "soon" && !large && (
         <span className={`absolute top-[8px] left-[8px] z-[1] flex items-center rounded-full px-[8px] py-[3px] text-[11px] font-bold ${tier === "compact" ? "gap-[5px]" : ""}`} style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
           {tier === "compact" && <Lock className="h-[12px] w-[12px]" aria-hidden />}

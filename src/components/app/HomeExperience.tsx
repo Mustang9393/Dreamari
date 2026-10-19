@@ -22,7 +22,7 @@ import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
 import { careerSlug } from "@/components/career/slug";
 import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/DailyDropDemo";
-import { INVESTMENT_BANKING, REGISTERED_NURSE } from "@/components/play/games";
+import { INVESTMENT_BANKING, REGISTERED_NURSE, simThumb } from "@/components/play/games";
 import type { Simulation } from "@/components/play/types";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "@/components/play/progress";
 import { WORLD_COLORS, posterTitleFont } from "./worlds";
@@ -362,8 +362,8 @@ function HeroBanner() {
            game instead (direct feedback, 4 Sept 2026). */}
         <HeroPanel
           active={panel === (SHOW_DAILY_DROP ? 1 : 0)}
-          photo={REGISTERED_NURSE.cover}
-          focus="50% 30%"
+          photo={simThumb(REGISTERED_NURSE).src}
+          focus={simThumb(REGISTERED_NURSE).focus}
           eyebrow="NEW GAME LAUNCHED"
           eyebrowColor="var(--accent-subtle)"
           title={`Day in the Life: ${REGISTERED_NURSE.title}`}
@@ -569,7 +569,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
   const ib = useSimRun(activity.kind === "sim" ? activity.sim : INVESTMENT_BANKING);
   const title = activity.kind === "sim" ? activity.sim.title : activity.title;
   const world = activity.kind === "sim" ? activity.sim.world : activity.world;
-  const cover = activity.kind === "sim" ? activity.sim.cover : activity.cover;
+  const { src: cover, focus } = activity.kind === "sim" ? simThumb(activity.sim) : { src: activity.cover, focus: undefined };
   const href = activity.kind === "sim" ? `/play/${activity.sim.id}` : activity.href;
   const pct = activity.kind === "sim" ? ib.pct : activity.pct;
   const label = activity.kind === "sim" ? ib.label : activity.label;
@@ -591,7 +591,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
     <HoverBeam strength={0.8}>
     <Link href={href} className="dm-tap group relative flex h-full min-h-[190px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:min-h-[212px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
       <span className="sr-only">{verb} {title}</span>
-      <Image src={cover} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
+      <Image src={cover} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" style={focus ? { objectPosition: focus } : undefined} />
       {/* the real, sighted verb -- top-left, off the bottom stack, so the
          card reads "continue vs. new" in words, not just by whether a
          progress bar happens to be present */}

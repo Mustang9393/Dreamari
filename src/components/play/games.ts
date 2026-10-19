@@ -36,6 +36,13 @@ export const INVESTMENT_BANKING: Simulation = {
   world: "Business & Finance",
   firm: "Cobalt Capital",
   cover: "/images/play/ib/l1-04.webp",
+  // Tiles (19 Oct 2026, Chandu: "update the thumbnails to the career
+  // simulations for which we have new graphics", "make sure there are
+  // characters and the compositions work in both 4:5 and 16:9"). Each thumb
+  // is a v2 scene with the lead character in it; the focus was checked at
+  // 5:7, 4:5, 1:1, 16:9 and 2.6:1 crops.
+  thumb: "/images/play/ib/v2/christina-thumbsup-glassdoor-sunset.webp",
+  thumbFocus: "30% 18%",
   // The trailer (Trailer tab): plays once before Level 1, skippable, ~20
   // seconds, no choices, no score. REUSE ONLY -- six of seven cards use art
   // that already exists; only the finale's ladder is new. The seven-beat
@@ -65,6 +72,8 @@ export const REGISTERED_NURSE: Simulation = {
   world: "Health & Medicine",
   firm: "Riverbend Medical Center",
   cover: "/images/play/rn/locations/station-hero.webp",
+  thumb: "/images/play/rn/v2/rosa-proud-station-late-day-anime.png",
+  thumbFocus: "50% 10%",
   // The trailer (Trailer tab): same seven-beat shape as every career --
   // the scale, the odds, the cost, the room, the consequence, the person
   // at the top, the ladder. Reuse only. The two statistic cards ship
@@ -92,6 +101,8 @@ export const AVIATION_MAINTENANCE: Simulation = {
   world: "Fixing Machines & Engines",
   firm: "Kestrel Aero Maintenance",
   cover: "/images/play/amt/locations/kestrel-hangar-floor.webp",
+  thumb: "/images/play/amt/amt-fluid-leak.webp",
+  thumbFocus: "29% 12%",
   levels: [AMT_LEVEL_1],
   upcoming: ["Technician", "Lead Technician", "Inspector", "Maintenance Manager"],
 };
@@ -123,6 +134,11 @@ export const SOON: { careerId: string; title: string; world: string; cover: stri
  *  grid below. */
 // AMT is a real simulation since 5 Oct 2026, so it left this list.
 export const FEATURED_ROW_SOON_IDS = ["accountant", "emergency-medicine-doctor"];
+
+/** A simulation's tile art and where to anchor it (see Simulation.thumb). */
+export function simThumb(sim: Simulation): { src: string; focus: string } {
+  return { src: sim.thumb ?? sim.cover, focus: sim.thumbFocus ?? "50% 50%" };
+}
 
 export function simulationFor(id: string): Simulation | undefined {
   return SIMULATIONS.find((simulation) => simulation.id === id || simulation.careerId === id);

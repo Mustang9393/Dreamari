@@ -29,6 +29,7 @@ import { careerButtonInk } from "@/components/actions-lab/CareerHeaderActions";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import { playSelect } from "./sound";
+import { simThumb } from "./games";
 import type { Simulation } from "./types";
 
 type SoonCareer = { careerId: string; title: string; world: string; cover: string };
@@ -57,7 +58,7 @@ const MUTED_WORLDS = new Set(["Fixing Machines & Engines"]);
 const stageAccent = (world: string) => (MUTED_WORLDS.has(world) ? "var(--primary)" : WORLD_COLORS[world] ?? "var(--primary)");
 
 const info = (c: StageCandidate) =>
-  c.kind === "sim" ? { title: c.sim.title, world: c.sim.world, cover: c.sim.cover } : { title: c.soon.title, world: c.soon.world, cover: c.soon.cover };
+  c.kind === "sim" ? { title: c.sim.title, world: c.sim.world, cover: simThumb(c.sim).src, focus: simThumb(c.sim).focus } : { title: c.soon.title, world: c.soon.world, cover: c.soon.cover, focus: undefined };
 
 export function PlayStage({ candidates, focusId, onTrailer }: { candidates: StageCandidate[]; focusId?: string; onTrailer: (sim: Simulation) => void }) {
   const n = candidates.length;
@@ -158,7 +159,7 @@ export function PlayStage({ candidates, focusId, onTrailer }: { candidates: Stag
              page colour, so it melts into the backdrop with no visible
              band where it starts or ends */}
           <span className="absolute inset-0" style={{ WebkitMaskImage: STAGE_MASK, maskImage: STAGE_MASK, WebkitMaskComposite: "source-in", maskComposite: "intersect" }}>
-            <Image src={now.cover} alt="" fill sizes="100vw" className="object-cover" style={{ objectPosition: "50% 30%", transform: "scale(1.06)", opacity: 0.32 }} />
+            <Image src={now.cover} alt="" fill sizes="100vw" className="object-cover" style={{ objectPosition: now.focus ?? "50% 30%", transform: "scale(1.06)", opacity: 0.32 }} />
             <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(3,6,16,.78) 0%, rgba(3,6,16,.55) 38%, rgba(3,6,16,.15) 70%, rgba(3,6,16,.4) 100%)" }} />
             <span className="absolute inset-0" style={{ background: `radial-gradient(55% 65% at 70% 50%, color-mix(in srgb, ${accent} 24%, transparent), transparent 70%)` }} />
           </span>
@@ -198,6 +199,7 @@ export function PlayStage({ candidates, focusId, onTrailer }: { candidates: Stag
                   title={card.title}
                   world={card.world}
                   cover={card.cover}
+                  focus={card.focus}
                   centre={centre}
                   pulseKey={centre ? active : -1}
                   onPick={() => { if (!dragged()) turn(i); }}
@@ -238,8 +240,8 @@ export function PlayStage({ candidates, focusId, onTrailer }: { candidates: Stag
   );
 }
 
-function StageCard({ candidate, title, world, cover, centre, pulseKey, onPick, blocked }: {
-  candidate: StageCandidate; title: string; world: string; cover: string; centre: boolean; pulseKey: number; onPick: () => void; blocked: () => boolean;
+function StageCard({ candidate, title, world, cover, focus, centre, pulseKey, onPick, blocked }: {
+  candidate: StageCandidate; title: string; world: string; cover: string; focus?: string; centre: boolean; pulseKey: number; onPick: () => void; blocked: () => boolean;
 }) {
   const accent = stageAccent(world);
   const soon = candidate.kind === "soon";
@@ -247,7 +249,7 @@ function StageCard({ candidate, title, world, cover, centre, pulseKey, onPick, b
   // ring carries no half-cut titles (8 Oct 2026, "too many things clashing")
   const face = (
     <>
-      <Image src={cover} alt="" fill sizes="300px" className="object-cover" style={{ filter: soon ? "saturate(.55) brightness(.8)" : undefined }} />
+      <Image src={cover} alt="" fill sizes="300px" className="object-cover" style={{ objectPosition: focus, filter: soon ? "saturate(.55) brightness(.8)" : undefined }} />
       <span aria-hidden className="absolute inset-x-0 bottom-0 h-[38%]" style={{ backgroundImage: "var(--poster-scrim)" }} />
       {soon && (
         <span aria-hidden className="absolute top-[12px] left-[12px] flex size-[30px] items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--background) 60%, transparent)", color: "var(--foreground)" }}>
