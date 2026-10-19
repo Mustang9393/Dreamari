@@ -88,13 +88,12 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, bui
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
       <section aria-labelledby="about-goals" className="flex flex-col gap-[var(--space-3)]">
-        <SectionHead id="about-goals" title="My Goals" sub="Save careers and schools in Explore. They show up here." />
+        <SectionHead id="about-goals" title="My Goals" />
         <div className="grid gap-[var(--space-3)] md:grid-cols-2">
           <GoalCard
             kind="Career Goal"
             Icon={Briefcase}
             title={primary ? primary.title : "Pick a career you’re working toward"}
-            line={primary ? "#1 in your Top 3" : "Save careers in Explore to start your Top 3."}
             accent={primary ? WORLD_COLORS[primary.world] : undefined}
             picture={primary ? <FacePhoto src={primary.photo} sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" fallback={primary.photoFocus ?? "50% 30%"} /> : null}
             onOpen={() => go("career")}
@@ -104,7 +103,6 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, bui
             kind="College Goal"
             Icon={GraduationCap}
             title={college.top ? college.top.name : college.schools.length ? "Pick your #1 school" : "Pick a school you’re working toward"}
-            line={college.schools.length ? college.counts : "Save schools in Explore. They show up here."}
             picture={college.top ? <CollegePicture c={college.top} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0 h-full w-full" /> : null}
             onOpen={() => go("college")}
             openLabel="Open College Goal"
@@ -144,12 +142,15 @@ function SectionHead({ id, title, sub }: { id: string; title: string; sub?: stri
 /** One goal as a picture card: the #1 career's poster or the #1 school's
  *  campus behind it, the goal's name on the picture, one line under it. The
  *  whole card opens the goal (every card opens something). */
-function GoalCard({ kind, Icon, title, line, picture, accent, onOpen, openLabel }: {
-  kind: string; Icon: typeof Briefcase; title: string; line: string; picture: React.ReactNode; accent?: string; onOpen: () => void; openLabel: string;
+// Label and name only (19 Oct 2026, Chandu: "less text: bigger picture,
+// just the label and the goal name"). The counts and how-to lines live one
+// tap in, inside each goal.
+function GoalCard({ kind, Icon, title, picture, accent, onOpen, openLabel }: {
+  kind: string; Icon: typeof Briefcase; title: string; picture: React.ReactNode; accent?: string; onOpen: () => void; openLabel: string;
 }) {
   return (
     <HoverBeam className="h-full">
-      <button type="button" onClick={onOpen} aria-label={`${openLabel}: ${title}`} className="dm-tap group relative flex h-full min-h-[208px] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 26%, #0e0c20) 0%, #0e0c20 62%)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+      <button type="button" onClick={onOpen} aria-label={`${openLabel}: ${title}`} className="dm-tap group relative flex h-full min-h-[220px] w-full cursor-pointer md:min-h-[300px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 26%, #0e0c20) 0%, #0e0c20 62%)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
         {picture && (
           <span aria-hidden className="absolute inset-0">
             {picture}
@@ -161,10 +162,9 @@ function GoalCard({ kind, Icon, title, line, picture, accent, onOpen, openLabel 
           <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: accent ?? "var(--accent-subtle)" }}>
             <Icon className="h-[14px] w-[14px]" aria-hidden /> {kind}
           </span>
-          <span className="text-[22px] leading-[27px] font-extrabold tracking-[-0.01em] text-balance" style={{ fontFamily: "var(--font-display)" }}>{title}</span>
-          <span className="flex items-center justify-between gap-[var(--space-3)]">
-            <span className="text-[14px] leading-[19px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{line}</span>
-            <ChevronRight className="h-5 w-5 flex-none transition-transform duration-200 group-hover:translate-x-[2px]" aria-hidden />
+          <span className="flex items-end justify-between gap-[var(--space-3)]">
+            <span className="text-[22px] leading-[27px] font-extrabold tracking-[-0.01em] text-balance" style={{ fontFamily: "var(--font-display)" }}>{title}</span>
+            <ChevronRight className="mb-[3px] h-5 w-5 flex-none transition-transform duration-200 group-hover:translate-x-[2px]" aria-hidden />
           </span>
         </span>
       </button>
@@ -337,7 +337,6 @@ function EmptyGroup({ text, cta, href }: { text: string; cta: string; href: stri
 type CollegeGoal = {
   schools: { c: College; bucket: GoalBucket }[];
   top: College | null;
-  counts: string;
   setTop: (slug: string | null) => void;
   move: (slug: string, bucket: GoalBucket) => void;
 };
@@ -354,8 +353,7 @@ function useCollegeGoal(): CollegeGoal {
   return useMemo(() => {
     const schools = colleges.map((c) => ({ c, bucket: buckets[c.slug] ?? defaultBucket(c, gpa) }));
     const top = schools.find((s) => s.c.slug === topSlug)?.c ?? null;
-    const counts = BUCKETS.map((b) => `${b.label} ${schools.filter((s) => s.bucket === b.id).length}`).join(" · ");
-    return { schools, top, counts, setTop, move };
+    return { schools, top, setTop, move };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- setTop/move are fresh closures over their own stores
   }, [colleges, topSlug, buckets, gpa]);
 }
