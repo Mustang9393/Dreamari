@@ -78,15 +78,12 @@ export function Tip({ label, children, hideFromLg = false, className = "", off =
             ref={bubbleRef}
             id={id}
             role="tooltip"
-            className={`pointer-events-none fixed z-[9999] -translate-x-1/2 rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap motion-safe:animate-[fade-slide-up_0.18s_ease-out_both] ${hideFromLg ? "lg:hidden" : ""}`}
+            // the house tooltip (.dm-tip, globals.css; 19 Oct 2026)
+            className={`dm-tip pointer-events-none fixed z-[9999] -translate-x-1/2 rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap motion-safe:animate-[fade-slide-up_0.18s_ease-out_both] ${hideFromLg ? "lg:hidden" : ""}`}
             style={{
               left: tip.x,
               top: tip.above ? undefined : tip.triggerBottom + 8,
               bottom: tip.above ? window.innerHeight - tip.triggerTop + 8 : undefined,
-              background: "color-mix(in srgb, var(--background) 94%, var(--foreground))",
-              borderColor: "var(--glass-border)",
-              color: "var(--foreground)",
-              boxShadow: "0 14px 30px -16px rgba(0,0,0,0.7)",
               fontFamily: "var(--font-body)",
             }}
           >

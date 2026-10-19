@@ -10,7 +10,7 @@
 // behind the page's own stacking context.
 
 import { useState, type ReactNode } from "react";
-import { Bell, Share2 } from "lucide-react";
+import { Bell, Bookmark, Share2, Sparkles } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { SidePanel } from "@/components/counselor/v4/SidePanel";
@@ -19,7 +19,7 @@ import { DocumentPage as DocumentDeskPage, FitPage, FullScreenDocument, type Sig
 import { DocumentPage as DocumentPreviewPage, DocumentPreviewModal } from "@/components/counselor/v4/DocumentPreview";
 import { getRoster } from "@/lib/counselorRoster";
 import { Top3SwapModal } from "@/components/career/Top3SwapModal";
-import { BottomBar, DetailModal, PicksTray, RankSlots, TopThreeScreen } from "@/components/flow-lab/shared";
+import { BottomBar, DetailModal, PicksTray, RankSlots, SaveFlight, TopThreeScreen } from "@/components/flow-lab/shared";
 import { labCatalog } from "@/components/flow-lab/lab";
 import { InfoButton, InfoSheet } from "@/components/flow-lab/notes";
 import { ResumeModal } from "@/components/resume/ui";
@@ -59,7 +59,21 @@ export function OverlaysSection() {
       title="Overlays"
       intro="Modals, panels and sheets, app-wide. Each one below opens behind its own button so nothing heavy mounts on page load, exactly one at a time."
     >
-      <Specimen name="Tip / IconTip" file="src/components/app/IconTip.tsx" purpose="The tooltip every icon-only control shows on hover and keyboard focus: portalled, flips above when short on room below, and clamps to the viewport." when="Any icon-only button, app-wide, the house rule for icon-only controls.">
+      <Specimen name="House tooltip (.dm-tip)" file="src/app/globals.css (.dm-tip), src/components/app/app.css (.dm-spot-tip caret)" purpose="The one tooltip look, app-wide (19 Oct 2026, Chandu: ANY tooltip anywhere should use it): the Black & Blue look's blue as a glowing gradient bubble (#2f6bf2 to bloom #599df9, core #9ec6fa) with white text. Hover tips (IconTip), nudges (Top 3 spot tips, My Build's tag), coachmarks and info tips all wear it." when="Every tooltip, hint or nudge bubble. New ones add className dm-tip and nothing else for colour.">
+        <StateGrid min={240}>
+          <StateCell label="Hover tip" note="IconTip's bubble: label only, 12px semibold.">
+            <span className="dm-tip inline-block rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap">Notifications</span>
+          </StateCell>
+          <StateCell label="Nudge with caret" note="Top 3's first-visit spot tip: a spark, the control's own words, a caret toward it.">
+            <span data-side="left" className="dm-tip dm-spot-tip relative mt-[6px] inline-flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap"><Sparkles className="h-[14px] w-[14px]" aria-hidden /> Move to #1</span>
+          </StateCell>
+          <StateCell label="Teaching tag" note="My Build's tag on the Profile cover (v2): a sentence, still one line of meaning.">
+            <span className="dm-tip inline-flex max-w-[280px] items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-[14px] leading-[18px] font-bold"><Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden /> Into something new? Change it here and your matches follow.</span>
+          </StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="Tip / IconTip" file="src/components/app/IconTip.tsx" purpose="The tooltip every icon-only control shows on hover and keyboard focus: portalled, flips above when short on room below, clamps to the viewport, and wears the house tooltip (.dm-tip)." when="Any icon-only button, app-wide, the house rule for icon-only controls.">
         <StateGrid min={240}>
           <StateCell label="Default" note="Hover or Tab to each icon to see its label.">
             <div className="flex items-center gap-[var(--space-3)]">
@@ -96,7 +110,7 @@ export function OverlaysSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Coachmark / GestureSpotlight" file="src/components/flow/GestureSpotlight.tsx" purpose="A portalled callout pointing at a live target, with an optional spotlight dimmer, for first-run guided hints." when="Guiding a student to a real control the first time it matters.">
+      <Specimen name="Coachmark / GestureSpotlight" file="src/components/flow/GestureSpotlight.tsx" purpose="A portalled callout pointing at a live target, with an optional spotlight dimmer, for first-run guided hints. Its bubble wears the house tooltip blue and glow (the glow sits on a wrapper because the bubble is clipped to its caret shape)." when="Guiding a student to a real control the first time it matters.">
         <StateGrid min={260}>
           <StateCell label="In the app">
             <NotRendered reason="Gated by a module-private COACHMARKS_ENABLED = false inside the file; `active` is always false regardless of the `active` prop passed in, so no prop can force it on." see="src/components/flow/GestureSpotlight.tsx" />
@@ -323,6 +337,14 @@ export function OverlaysSection() {
         </StateGrid>
       </Specimen>
 
+      <Specimen name="SaveFlight" file="src/components/flow-lab/shared.tsx" purpose="A save, made visible (19 Oct 2026, Chandu: students barely noticed the circles): the career's photo lifts from where it was saved, arcs into its circle in the tray with a comet trail in the house blue glow, and the circle bursts as it lands. Transform and opacity only." when="Match's Save, from a card or the Learn more sheet. Skipped under reduced motion (the circle just fills).">
+        <StateGrid min={320}>
+          <StateCell label="Replay" minH={200} note="Press Save: the photo flies from the button into the next open circle.">
+            <SaveFlightDemo />
+          </StateCell>
+        </StateGrid>
+      </Specimen>
+
       <Specimen name="PicksTray" file="src/components/flow-lab/shared.tsx" purpose="A row of small avatar dots, one per saved slot; empty slots stay dashed outlines." when="A Flow Lab screen's header, showing progress toward the save limit.">
         <StateGrid min={200}>
           <StateCell label="Empty"><PicksTray saved={[]} max={3} /></StateCell>
@@ -406,5 +428,30 @@ export function OverlaysSection() {
         </StateGrid>
       </Specimen>
     </Section>
+  );
+}
+
+/** SaveFlight, replayable: Save sends the next catalog career into the tray. */
+function SaveFlightDemo() {
+  const [saved, setSaved] = useState<typeof LAB_CATALOG>([]);
+  const [flight, setFlight] = useState<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null);
+  const next = LAB_CATALOG[saved.length % 3];
+  const save = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const list = saved.length >= 3 ? [] : saved;
+    if (saved.length >= 3) setSaved([]);
+    const r = e.currentTarget.getBoundingClientRect();
+    window.requestAnimationFrame(() => {
+      const slot = document.querySelector<HTMLElement>(`[data-save-flight-demo] [data-pick-slot="${list.length}"]`)?.getBoundingClientRect();
+      if (slot) setFlight({ from: { x: r.left + r.width / 2, y: r.top + r.height / 2 }, to: { x: slot.left + slot.width / 2, y: slot.top + slot.height / 2 } });
+    });
+  };
+  return (
+    <div data-save-flight-demo className="flex w-full flex-col items-center gap-[var(--space-5)]">
+      <PicksTray saved={saved} max={3} landing={flight ? next.id : null} />
+      <button type="button" onClick={save} disabled={!!flight} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] text-[13px] font-bold disabled:opacity-50" style={{ borderColor: "var(--glass-border)" }}>
+        <Bookmark className="h-4 w-4" aria-hidden /> Save {next.title}
+      </button>
+      {flight && <SaveFlight career={next} from={flight.from} to={flight.to} onDone={() => { setFlight(null); setSaved((cur) => [...(cur.length >= 3 ? [] : cur), next]); }} />}
+    </div>
   );
 }

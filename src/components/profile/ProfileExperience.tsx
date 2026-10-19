@@ -954,10 +954,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                       initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
                       transition={{ type: "spring", stiffness: 380, damping: 28 }}
                       onClick={() => openBuild()}
-                      className="dm-tap absolute z-[80] flex w-max max-w-[280px] cursor-pointer items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-left text-[14px] leading-[18px] font-bold"
-                      style={{ top: tagPos.top, right: tagPos.right, background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 14px 30px -12px rgba(0,0,0,0.6)", textShadow: "none", fontFamily: "var(--font-body)" }}
+                      className="dm-tip dm-tap absolute z-[80] flex w-max max-w-[280px] cursor-pointer items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-left text-[14px] leading-[18px] font-bold"
+                      style={{ top: tagPos.top, right: tagPos.right, textShadow: "none", fontFamily: "var(--font-body)" }}
                     >
-                      <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "var(--primary)" }} />
+                      {/* the caret in the bubble's own blue (the house .dm-tip, 19 Oct 2026) */}
+                      <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "#4a8df6", boxShadow: "-1px -1px 0 0 rgba(158,198,250,0.7)" }} />
                       <Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden />
                       {/* 2 Oct 2026, Chandu: better copy that says they can change
                          their preferences and Dreamari changes with them. */}
@@ -1719,7 +1720,7 @@ function SpotTip({ side, children }: { side: "left" | "right"; children: React.R
       role="status"
       data-side={side}
       initial={{ opacity: 0, y: -8, scale: 0.85 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 520, damping: 22 }}
-      className={`dm-spot-tip pointer-events-none absolute top-[48px] z-[4] flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap ${side === "left" ? "left-0 origin-top-left" : "right-0 origin-top-right"}`}
+      className={`dm-tip dm-spot-tip pointer-events-none absolute top-[48px] z-[4] flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap ${side === "left" ? "left-0 origin-top-left" : "right-0 origin-top-right"}`}
     >
       <Sparkles className="h-[14px] w-[14px] flex-none" aria-hidden />
       {children}
@@ -1797,7 +1798,7 @@ export function Top3Tab({
     // retireHint is stable in behaviour; re-running on its identity would restart the clock every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clockOn]);
-  // v2: teach on the cards themselves (19 Oct 2026, focus group: moving and
+  // Both versions: teach on the cards themselves (19 Oct 2026, focus group: moving and
   // removing Top 3 cards "were not clear to some users"; Chandu: "make it
   // very obvious but not by adding more text", then no permanent bar). The
   // first time the cards are on screen the arrows light up with their own
@@ -1806,7 +1807,8 @@ export function Top3Tab({
   const [spot, setSpot] = useState<"move" | "remove" | null>(null);
   const played = useRef(false);
   const stopPlay = useRef(false);
-  const playOn = flowV2 && hint === true && top3.length > 1 && !hintPaused;
+  // both versions (19 Oct 2026, Chandu: "lets have our new top 3 card nudges in v1 as well")
+  const playOn = hint === true && top3.length > 1 && !hintPaused;
   useEffect(() => {
     const el = document.querySelector<HTMLElement>('[id^="top3-card-"]');
     if (!playOn || !el || played.current) return;

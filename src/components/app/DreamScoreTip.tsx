@@ -31,8 +31,8 @@ export function DreamScoreTip({ children, className = "", text = DREAM_SCORE_TIP
         <span
           id={id}
           role="tooltip"
-          className="absolute top-[calc(100%+10px)] right-0 z-50 w-[240px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left text-[12.5px] leading-[17px] font-medium motion-safe:animate-[fade-slide-up_0.2s_ease-out_both]"
-          style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))", color: "var(--foreground)", boxShadow: "0 18px 40px -20px rgba(0,0,0,0.7), 0 0 24px -12px var(--primary)", fontFamily: "var(--font-body)" }}
+          className="dm-tip absolute top-[calc(100%+10px)] right-0 z-50 w-[240px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left text-[12.5px] leading-[17px] font-medium motion-safe:animate-[fade-slide-up_0.2s_ease-out_both]"
+          style={{ fontFamily: "var(--font-body)" }}
         >
           <span aria-hidden className="absolute -top-[6px] right-[18px] block size-[11px] rotate-45 border-t border-l" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }} />
           {text}

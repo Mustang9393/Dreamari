@@ -14,6 +14,7 @@
 // three empty slots show how ranking works.
 
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeftRight, Bookmark, Check, ChevronRight, ImageOff, Info, Plus, X } from "lucide-react";
@@ -337,41 +338,100 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
 /** The bottom bar's saved tray: one slot per save allowed (three since 27
  *  Sept 2026), filled with the saved career's photo. The empty slots ARE
  *  the limit, so no counter or hint line has to say it. */
-export function PicksTray({ saved, max, onOpen }: { saved: LabCareer[]; max: number; onOpen?: (id: string) => void }) {
+export function PicksTray({ saved, max, onOpen, landing, landed }: { saved: LabCareer[]; max: number; onOpen?: (id: string) => void; /** a save still flying in (SaveFlight): its circle waits, empty */ landing?: string | null; /** the save that just landed: its circle bursts */ landed?: string | null }) {
   return (
     <div className="flex items-center gap-1 sm:gap-1.5" role="img" aria-label={`${saved.length} of ${max} saved`}>
       {Array.from({ length: max }, (_, i) => {
         const c = saved[i];
-        return c ? (
-          <motion.button
-            key={c.id}
-            type="button"
-            aria-label={`Open ${c.title}`}
-            onClick={() => onOpen?.(c.id)}
-            initial={{ scale: 0.4, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 420, damping: 22 }}
-            className="relative size-7 flex-none cursor-pointer overflow-hidden rounded-full border-2 sm:size-8"
-            style={{ borderColor: WORLD_COLORS[c.world] ?? "var(--primary)" }}
-          >
-            <LabPhoto career={c} sizes="32px" className="object-cover" />
-          </motion.button>
+        return c && c.id !== landing ? (
+          <span key={c.id} data-pick-slot={i} className="relative flex-none">
+            <motion.button
+              type="button"
+              aria-label={`Open ${c.title}`}
+              onClick={() => onOpen?.(c.id)}
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 420, damping: 22 }}
+              className="relative block size-7 flex-none cursor-pointer overflow-hidden rounded-full border-2 sm:size-8"
+              style={{ borderColor: WORLD_COLORS[c.world] ?? "var(--primary)" }}
+            >
+              <LabPhoto career={c} sizes="32px" className="object-cover" />
+            </motion.button>
+            {/* the landing: a ring of the house blue bursts out once */}
+            {c.id === landed && (
+              <motion.span aria-hidden className="pointer-events-none absolute inset-0 rounded-full" initial={{ scale: 1, opacity: 0.95 }} animate={{ scale: 2.4, opacity: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} style={{ boxShadow: "0 0 0 2px #9ec6fa, 0 0 18px 4px rgba(89,157,249,0.8)" }} />
+            )}
+          </span>
         ) : (
           // Empty slots pull toward the next save (Joshua, 28 Sept 2026: "the
           // next open circle subtly pulse/highlight... the remaining empty
           // slots can continue pulsing"): the next one pulses in the text colour (white on the dark glass) with a
           // border beam,
           // later ones follow faintly, staggered so it reads as momentum.
-          <BorderBeam key={`empty-${i}`} size="sm" colorVariant="colorful" theme="dark" duration={2.4} strength={1} active={i === saved.length} className="size-7 flex-none rounded-full sm:size-8">
+          <span key={`empty-${i}`} data-pick-slot={i} className="flex-none">
+          <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={2.4} strength={1} active={i === saved.length} className="size-7 flex-none rounded-full sm:size-8">
           <span
               aria-hidden
               className={`block size-7 flex-none rounded-full border-2 border-dashed sm:size-8 ${i === saved.length ? "dm-slot-pulse" : "dm-slot-pulse-faint"}`}
               style={{ borderColor: i === saved.length ? "color-mix(in srgb, var(--foreground) 85%, transparent)" : "color-mix(in srgb, var(--foreground) 26%, transparent)", animationDelay: `${(i - saved.length) * 0.35}s` }}
             />
           </BorderBeam>
+          </span>
         );
       })}
     </div>
+  );
+}
+
+/** A save, made visible (19 Oct 2026, Chandu: "when a student saves a
+ *  profile show it floating, leaving a trail and slotting into the 3
+ *  circles so students know it's happening. Right now they barely noticed
+ *  the circles"). The career's photo lifts from where it was saved, arcs up
+ *  and down into its circle in the tray with a comet trail of fading copies
+ *  in the house blue glow, and the circle bursts as it lands (PicksTray
+ *  `landing` / `landed`). Transform and opacity only: no blur filters on
+ *  moving layers (the Glossary perf rule). */
+export function SaveFlight({ career, from, to, onDone }: { career: LabCareer; from: { x: number; y: number }; to: { x: number; y: number }; onDone: () => void }) {
+  const size = 64;
+  const end = 32;
+  const lift = Math.max(90, Math.min(220, Math.abs(to.y - from.y) * 0.35));
+  const mid = { x: (from.x + to.x) / 2, y: Math.min(from.y, to.y) - lift };
+  const xs = [from.x, mid.x, to.x].map((v) => v - size / 2);
+  const ys = [from.y, mid.y, to.y].map((v) => v - size / 2);
+  const scales = [1, 0.9, end / size];
+  const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+  const TRAIL = 6;
+  const DURATION = 0.8;
+  const photo = (
+    <span className="relative block size-full overflow-hidden rounded-full border-2" style={{ borderColor: accent }}>
+      <LabPhoto career={career} sizes="64px" className="object-cover" />
+    </span>
+  );
+  return createPortal(
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-[120]">
+      {/* the trail: smaller, fainter copies on the same path, a beat behind */}
+      {Array.from({ length: TRAIL }, (_, k) => k + 1).map((k) => (
+        <motion.span
+          key={k}
+          className="absolute top-0 left-0 rounded-full"
+          style={{ width: size, height: size, background: `radial-gradient(circle, rgba(158,198,250,${0.55 - k * 0.07}) 0%, rgba(89,157,249,${0.35 - k * 0.05}) 45%, transparent 70%)` }}
+          initial={{ x: xs[0], y: ys[0], scale: 0.8 - k * 0.08, opacity: 0 }}
+          animate={{ x: xs, y: ys, scale: scales.map((sc) => sc * (0.85 - k * 0.08)), opacity: [0, 1 - k * 0.12, 0] }}
+          transition={{ duration: DURATION, delay: k * 0.045, ease: [0.45, 0, 0.25, 1], times: [0, 0.5, 1] }}
+        />
+      ))}
+      <motion.span
+        className="absolute top-0 left-0 block rounded-full"
+        style={{ width: size, height: size, boxShadow: "0 0 0 2px #9ec6fa, 0 0 22px 6px rgba(89,157,249,0.75)" }}
+        initial={{ x: xs[0], y: ys[0], scale: 0.6, opacity: 0 }}
+        animate={{ x: xs, y: ys, scale: scales, opacity: [1, 1, 1] }}
+        transition={{ duration: DURATION, ease: [0.45, 0, 0.25, 1], times: [0, 0.5, 1] }}
+        onAnimationComplete={onDone}
+      >
+        {photo}
+      </motion.span>
+    </div>,
+    document.body,
   );
 }
 

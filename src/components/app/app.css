@@ -1333,12 +1333,7 @@ html.light .event-card {
   50% { box-shadow: 0 0 0 2px #ffffff, 0 0 20px 6px rgba(89, 157, 249, 0.95), 0 0 44px 14px rgba(89, 157, 249, 0.45); }
 }
 .dm-spot { animation: dm-spot-glow 1s ease-in-out infinite; background-color: rgba(47, 107, 242, 0.55) !important; }
-/* the tooltip that rides with it: a glowing blue bubble, caret to the control */
-.dm-spot-tip {
-  background: linear-gradient(135deg, #2f6bf2 0%, #599df9 100%);
-  color: #ffffff;
-  box-shadow: 0 0 0 1px rgba(158, 198, 250, 0.7), 0 10px 26px -8px rgba(47, 107, 242, 0.9), 0 0 28px 4px rgba(89, 157, 249, 0.45);
-}
+/* the tooltip that rides with it is the house .dm-tip (globals.css); this adds its caret */
 .dm-spot-tip::before {
   content: "";
   position: absolute;

@@ -214,27 +214,23 @@ function BuildDemo() {
             >
               <div
                 role="tooltip"
-                className="rounded-[var(--radius-md)] border text-left transition-all duration-150"
+                // the house tooltip (.dm-tip, globals.css; 19 Oct 2026)
+                className="dm-tip rounded-[var(--radius-md)] border text-left transition-all duration-150"
                 style={{
                   width: "max(220px, 80cqw)",
                   maxWidth: "320px",
                   padding: "calc(var(--mu) * 10px) calc(var(--mu) * 12px)",
-                  background: "var(--glass-surface-3)",
-                  borderColor: "var(--glass-border)",
-                  backdropFilter: "blur(20px)",
-                  WebkitBackdropFilter: "blur(20px)",
-                  boxShadow: "var(--shadow-md)",
                   opacity: moreHovered ? 1 : 0,
                   transform: moreHovered ? "translateY(0)" : "translateY(4px)",
                 }}
               >
                 <p
                   className="font-bold uppercase"
-                  style={{ fontSize: "calc(var(--mu) * 8px)", letterSpacing: "0.06em", color: "var(--muted-foreground)" }}
+                  style={{ fontSize: "calc(var(--mu) * 8px)", letterSpacing: "0.06em", color: "rgba(255,255,255,0.78)" }}
                 >
                   Plus 10 more categories
                 </p>
-                <p className="mt-1.5 leading-snug" style={{ fontSize: "calc(var(--mu) * 10px)", color: "var(--foreground)" }}>
+                <p className="mt-1.5 leading-snug" style={{ fontSize: "calc(var(--mu) * 10px)", color: "#ffffff" }}>
                   {MORE_INTERESTS.join(" · ")}
                 </p>
               </div>

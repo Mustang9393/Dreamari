@@ -1,3 +1,12 @@
+## 2026-10-19: the house tooltip (.dm-tip) everywhere; Top 3 nudges in v1; Match saves fly into the circles
+
+**Why (Chandu):** "the nudge tooltip for my build in v2 should ALSO have the blue glow stuff. ANY tooltip anywhere across the app should use that style from now on. Make sure to update the component library." Then "lets have our new top 3 card nudges in v1 as well", and "in match when a student saves a profile show it floating, leaving a trail and slotting into the 3 circles so students know its happening. Right now they barely noticed the circles."
+
+- **`.dm-tip` (globals.css)** is the one tooltip look: the Black & Blue blue as a glowing gradient bubble (#2f6bf2 to #599df9, rim #9ec6fa), white text, same in light and dark. Applied at the source: IconTip (every hover tip), DreamScoreTip, the Career Report's "More" tip, the landing page's Build "+ more" tip, Top 3's spot tips, My Build's cover tag, and the Coachmark bubble (its glow on a viewport-sized wrapper, since the bubble is clipped to its caret shape; coachmarks are still switched off by COACHMARKS_ENABLED). The counselor dashboard's chart tooltip (ivFlow) is left alone: that app's design budget keeps glow to the hero. Component library: a new "House tooltip (.dm-tip)" entry plus updated IconTip and Coachmark notes.
+- **Top 3 card nudges in v1 too:** the play-once glow and tooltip on the arrows and X now run in both versions (v1 keeps its banner and hint as well).
+- **`SaveFlight` (flow-lab/shared.tsx):** in Match, a save lifts the career's photo from where the student tapped (captured pointerdown; Safari does not focus clicked buttons), arcs it into the next open circle with a comet trail of fading copies in the house blue, and the circle bursts as it lands (PicksTray `landing` / `landed`; slots carry `data-pick-slot`). Transform and opacity only; skipped under reduced motion. Component library: a replayable SaveFlight entry.
+- **Checked:** full tsc, eslint on changed files; browser: library entries render, a live IconTip hover is blue, a Match save caught mid-flight and landing. **Not checked:** light mode, Windows/ChromeOS.
+
 ## 2026-10-19: scroll edges fade instead of blur; Match's Learn more on one screen
 
 **Why (Chandu):** "the blur edges are too sharp for the scroll areas... they need to be organic and subtle and progressive", then "The blur areas are toooo tall and really bad and sharp. If we cant reliably duplicate this look dont try anymore. My reference is Apple ios UI." And for Match: "we dont need a tab for the learn more pop ups".
