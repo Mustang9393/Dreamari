@@ -25,10 +25,9 @@ import { Listbox } from "@/components/app/Listbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { openCareerPeek, openSchoolPeek } from "@/components/app/peek";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import type { College } from "@/components/colleges/data";
+import { COLLEGES, collegeImage, type College } from "@/components/colleges/data";
 import { useResolvedColleges } from "@/components/colleges/dataset";
 import { CollegePlaceholder } from "@/components/colleges/CollegePlaceholder";
-import { CareerPlaceholder } from "./CareerPlaceholder";
 import { CollegePicture, useGoalBuckets, useSaved as useSavedColleges, useTopSchool, type GoalBucket } from "@/components/colleges/shared";
 import { fitFor, parseGpa } from "@/components/colleges/pathway";
 import { useBackStep } from "@/lib/backStep";
@@ -122,6 +121,7 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
   if (view === "career") return <CareerGoalView top3={top3} saved={saved} onBack={() => setView("home")} onAddToTop3={onAddToTop3} onGoTab={onGoTab} />;
   if (view === "college") return <CollegeGoalView goal={college} onBack={() => setView("home")} />;
 
+  const demoCollegePicture = college.top ?? college.schools.find((s) => collegeImage(s.c))?.c ?? COLLEGES.find((c) => collegeImage(c)) ?? null;
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
       <section aria-labelledby="about-goals" className="flex flex-col gap-[var(--space-3)]">
@@ -131,12 +131,12 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
             kind="Career Goal"
             Icon={Briefcase}
             title={primary ? primary.title : top3.length ? "Pick your #1 career" : "Pick a career you’re working toward"}
-            accent={primary ? WORLD_COLORS[primary.world] : undefined}
+            accent={(primary ?? top3[0]) ? WORLD_COLORS[(primary ?? top3[0]).world] : undefined}
             // No #1 picked yet (Chandu, 19 Oct 2026: "they will already have 3
-            // but will not have fixed a primary"): the career summit art, and
-            // the card opens Top 3, where the #1 is set. Kept dark because this
-            // card stays dark with white text in light mode.
-            picture={primary ? <FacePhoto src={primary.photo} sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" fallback={primary.photoFocus ?? "50% 30%"} /> : <CareerPlaceholder dark wide className="absolute inset-0" />}
+            // but will not have fixed a primary"): the top-ranked career's photo
+            // stands in ("careers will have images for sure"), and the card
+            // opens Top 3, where the #1 is set.
+            picture={(primary ?? top3[0]) ? <FacePhoto src={(primary ?? top3[0]).photo} sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" fallback={(primary ?? top3[0]).photoFocus ?? "50% 30%"} /> : null}
             onOpen={() => (primary || !top3.length ? go("career") : onGoTab("top3"))}
             openLabel="Open Career Goal"
           />
@@ -144,9 +144,13 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
             kind="College Goal"
             Icon={GraduationCap}
             title={college.top ? college.top.name : college.schools.length ? "Pick your #1 school" : "Pick a school you’re working toward"}
-            // No #1 school yet: the school cards' hall (Chandu, 19 Oct 2026:
-            // "this should be used for schools/college goal").
-            picture={college.top ? <CollegePicture c={college.top} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0 h-full w-full" /> : <CollegePlaceholder dark wide className="absolute inset-0" />}
+            // No #1 school yet. Production: the school cards' hall (Chandu, 19
+            // Oct 2026: "this should be used for schools/college goal").
+            // DEMO-ONLY: the demo shows a real campus photo instead, the first
+            // saved school with one, else the first hand-built school with one
+            // (Chandu: "The vercel should not show any using the fallbacks
+            // though. Since its the demo we want pictures everywhere").
+            picture={demoCollegePicture ? <CollegePicture c={demoCollegePicture} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0 h-full w-full" /> : <CollegePlaceholder dark wide className="absolute inset-0" />}
             onOpen={() => go("college")}
             openLabel="Open College Goal"
           />

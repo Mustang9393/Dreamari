@@ -1,24 +1,22 @@
-# Missing-picture art: school hall and career summit
+# Missing-picture art: the school hall
 
 For Usman, 19 Oct 2026. What to build in dreamonna, why, and everything needed to do it. Chandu signed off the design on 19 Oct 2026.
 
 ## What it is
 
-Two line drawings in the Black & Blue look. Each sits on a near-black ground under one soft blue glow with film grain, and its lines brighten near the light and fade away from it.
+A line drawing of a school hall in the Black & Blue look. It sits on a near-black ground under one soft blue glow with film grain, and its lines brighten near the light and fade away from it. Schools only: careers always have photos (Chandu, 19 Oct 2026: "careers will have images for sure. Lets only do the schools").
 
 | Art | Shows when | File in this repo |
 |---|---|---|
 | **School hall** (dome, pediment with the Dreamari mark, four columns, two wings) | A school card, school page header or About Me's College Goal has no real campus photo | `src/components/colleges/CollegePlaceholder.tsx` |
-| **Career summit** (a path climbing a peak to a flag with the Dreamari mark) | About Me's Career Goal when the student has a Top 3 but has not picked a #1 | `src/components/profile/CareerPlaceholder.tsx` |
 
-Both are thin wrappers around one shared component, `src/components/app/GlowLineArt.tsx`, which owns the glow, the line treatment and the grain. Build that once and both drawings come with it.
+`CollegePlaceholder` is a thin wrapper around `src/components/app/GlowLineArt.tsx`, which owns the glow, the line treatment and the grain.
 
 ## Why it looks like this
 
 - The old fallback (a faint grey campus sketch) "does not feel as polished".
 - Brief that stuck: the glow card treatment from the Black & Blue references, a college line graphic that "catches the light" from the background, no orb, no Dreamy.
 - Then: not "overly detailed", not "too narrow", nothing that "looks broken", soft corners, and a glow that is "consistent" and "symmetric" on every card. So every school gets the same art. Each part is one joined outline with rounded joins, and the glow is mirrored about the centre line.
-- Career is a different drawing on purpose: the hall is for schools ("career needs another one").
 
 ## Build notes
 
@@ -44,14 +42,14 @@ The new Black & Blue ramp (`src/app/look-v2.css`). Use the app's tokens where a 
 | `--cp-mark` | #ffffff | #176acf | The Dreamari mark |
 | `--cp-grain` | .07 | .04 | Grain opacity |
 
-## Assets (`assets/`)
+## Assets (`assets/`, and `preview.html` to see them together)
 
-Each drawing in dark and light, square (1600 × 1600) and wide (1600 × 640), as SVG with every colour resolved (opens in Figma and browsers) and as WebP. Use the SVGs for design review. In the app, render the component so the art follows the theme and the card's size.
+The hall in dark and light, square (1600 × 1600) and wide (1600 × 640), as SVG with every colour resolved (opens in Figma and browsers) and as WebP. Use the SVGs for design review. In the app, render the component so the art follows the theme and the card's size.
 
 ## Where it is wired in the prototype
 
 - School cards and pictures: `CollegeCard`, `SchoolCard` and `CollegePicture` in `src/components/colleges/shared.tsx` fall back to `CollegePlaceholder` when the photo is missing or fails to load (`onError`).
-- About Me (`src/components/profile/AboutMeTab.tsx`): College Goal with no #1 school shows `<CollegePlaceholder dark wide />`. Career Goal with no chosen #1 shows `<CareerPlaceholder dark wide />`, reads "Pick your #1 career" and opens Top 3. `ProfileExperience.tsx` passes the chosen #1 as `primary`. It is `null` until the student picks one; Top 3's first item is not treated as their #1.
+- About Me (`src/components/profile/AboutMeTab.tsx`): College Goal with no #1 school shows `<CollegePlaceholder dark wide />` in production. **DEMO-ONLY:** the demo shows a real campus photo there instead (the first saved school with one, else a hand-built school), because the demo shows no fallbacks anywhere. Career Goal with no chosen #1 shows the top-ranked Top 3 career's photo, reads "Pick your #1 career" and opens Top 3. `ProfileExperience.tsx` passes the chosen #1 as `primary`. It is `null` until the student picks one; Top 3's first item is not treated as their #1.
 
 ## School photos (data, not design)
 
@@ -61,4 +59,4 @@ On 19 Oct 2026 only **143 of the 4,617** campus photo links in the dataset you e
 
 ## In the zip
 
-`glow-line-art-handoff.zip` holds this README, `assets/`, and the source files above (`GlowLineArt.tsx`, `CollegePlaceholder.tsx`, `CareerPlaceholder.tsx`, `college-brand-mark.ts` for the mark's path, the light-mode CSS rule, `verify-images.mjs`).
+`glow-line-art-handoff.zip` holds this README, `assets/`, and the source files above (`GlowLineArt.tsx`, `CollegePlaceholder.tsx`, `college-brand-mark.ts` for the mark's path, the light-mode CSS rule, `verify-images.mjs`).

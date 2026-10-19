@@ -1,3 +1,12 @@
+## 2026-10-19: schools only for the fallback art; the demo shows no fallbacks
+
+**Why (Chandu):** "lets not do that, careers will have images for sure. Lets only do the schools"; "The vercel should not show any using the fallbacks though. Since its the demo we want pictures everywhere".
+
+- The career summit is gone (`CareerPlaceholder.tsx` and its assets deleted). About Me's Career Goal with no #1 picked shows the top-ranked Top 3 career's photo, still reads "Pick your #1 career" and opens Top 3. Known gap from the entry below still stands: `CareerGoalView` calls Top 3's first item the "Primary career".
+- **DEMO-ONLY:** About Me's College Goal with no #1 school shows a real campus photo (the first saved school with one, else the first hand-built school with one) instead of the hall. Production keeps the hall there. With the photo-only school list, the demo now shows the hall only if a real photo fails to load.
+- Usman's package (`docs/handoff/glow-line-art/`) is schools only, adds `preview.html` (the four hall assets on one page), and the zip is rebuilt.
+- Checked: eslint and tsc on touched files (only main's existing `@dicebear` error); About Me live: both goal cards show photos, no fallback on the page.
+
 ## 2026-10-19: About Me goal art, a career summit, a symmetric glow; the demo lists only schools with real photos; handoff package for Usman
 
 **Why (Chandu):** the school hall "should be used for schools/college goal, career needs another one, they will already have 3 but will not have fixed a primary"; "the glow on the fallback looks uneven and leans to a side ... Can we have it be more symmetric?"; "on the vercel lets not show any school without real images. IF we had them before please use them. This was for usman to have the design so please give me the designs as code and whatever assets he needs".

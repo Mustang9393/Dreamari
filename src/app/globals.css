@@ -2178,7 +2178,7 @@ html.light .marketing-v2 .photo-ink {
   --pc-leaf-border: rgba(255, 255, 255, 0.9);
   --pc-leaf-shadow: 0 10px 24px -14px rgba(30, 48, 120, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
-/* Missing-picture art in light (GlowLineArt.tsx: the school hall, the career summit): the ice-blue wash
+/* Missing-picture art in light (GlowLineArt.tsx: the school hall): the ice-blue wash
    from the Black & Blue look, with the hall drawn in brand blue so it still
    reads through the cards' light frost. Dark reads the defaults. */
 html.light .marketing-v2 [data-glow-art]:not([data-cp-dark]) {

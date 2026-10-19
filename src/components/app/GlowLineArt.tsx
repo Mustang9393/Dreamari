@@ -24,9 +24,10 @@ export type GlowLineArtProps = {
 /** Missing-picture art in the Black & Blue look: one fixed light (overlapping
  * soft lobes, eased falloff, film grain) on the near-black ground, and a
  * drawing in a few joined, round-cornered lines whose brightness comes from
- * that light (a radial stroke gradient centred on it). Shared by the school
- * cards' hall (CollegePlaceholder) and the career goal's summit
- * (CareerPlaceholder) so both read as one family.
+ * that light (a radial stroke gradient centred on it). Used by the school
+ * hall (CollegePlaceholder); kept separate so another drawing can share the
+ * same light. (A career summit was tried and dropped, 19 Oct 2026: "careers
+ * will have images for sure. Lets only do the schools.")
  * Gradients only, no blur filters, so card hover zooms stay cheap. Strokes
  * are ordinary: `vector-effect: non-scaling-stroke` made Chrome map the
  * gradient in screen space and parts of the drawing dropped out. */
