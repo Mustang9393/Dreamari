@@ -1141,14 +1141,17 @@ html.light .xsheet .cpk-cta, .xsheet[data-ink="light"] .cpk-cta { color: #fff; }
 .t3s-toggle { display: flex; min-height: 36px; min-width: 0; flex: 1 1 0; cursor: pointer; align-items: center; gap: 3px; white-space: nowrap; text-align: left; border-radius: var(--radius-sm); font-size: 13px; line-height: 18px; font-weight: 700; color: color-mix(in srgb, var(--t3s-world) 62%, #f4f7ff); }
 .t3s-toggle svg { transition: transform 0.2s; }
 .t3s-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
-.t3s-report { display: inline-flex; height: 32px; width: 32px; flex: 0 0 auto; cursor: pointer; align-items: center; justify-content: center; border: 1px solid color-mix(in srgb, var(--t3s-world) 60%, transparent); border-radius: 9999px; background: color-mix(in srgb, var(--t3s-world) 16%, color-mix(in srgb, #05070f 72%, transparent)); color: #f4f7ff; transition: transform 0.14s, border-color 0.14s, background-color 0.14s; }
-.t3s-report svg { color: color-mix(in srgb, var(--t3s-world) 70%, #f4f7ff); }
+/* Always worded (Chandu, 19 Oct 2026: "no icon only ctas please. call it
+   report or something instead of just the report icon"). A narrow card
+   drops the icon, never the word. */
+.t3s-report { display: inline-flex; height: 32px; flex: 0 0 auto; cursor: pointer; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; border: 1px solid color-mix(in srgb, var(--t3s-world) 60%, transparent); border-radius: 9999px; background: color-mix(in srgb, var(--t3s-world) 16%, color-mix(in srgb, #05070f 72%, transparent)); color: #f4f7ff; font-size: 12.5px; line-height: 18px; font-weight: 700; white-space: nowrap; transition: transform 0.14s, border-color 0.14s, background-color 0.14s; }
+.t3s-report svg { display: none; color: color-mix(in srgb, var(--t3s-world) 70%, #f4f7ff); }
 .t3s-report:active { transform: scale(0.97); }
-.t3s-report-label { display: none; }
-/* a card wide enough for Show more, Play and a worded Report on one line */
+.t3s-report-label { display: inline; }
+/* a card wide enough for Show more, Play and Report with its icon */
 @container (min-width: 340px) {
-  .t3s-report { width: auto; gap: 6px; padding: 0 12px 0 10px; font-size: 12.5px; line-height: 18px; font-weight: 700; white-space: nowrap; }
-  .t3s-report-label { display: inline; }
+  .t3s-report { padding: 0 12px 0 10px; }
+  .t3s-report svg { display: block; }
 }
 .t3s-play { display: inline-flex; min-height: 32px; flex: 0 0 auto; align-items: center; gap: 6px; border-radius: 10px; border: 1px solid transparent; background: var(--t3s-world); padding: 0 12px 0 10px; font-size: 12.5px; line-height: 18px; font-weight: 700; white-space: nowrap; color: #05070f; transition: transform 0.14s, filter 0.14s; }
 /* Light mode fills .t3s-play with the world colour's light rung (#a85f00,

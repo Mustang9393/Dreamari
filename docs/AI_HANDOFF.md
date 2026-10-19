@@ -1,3 +1,61 @@
+## 2026-10-19: component library catches up with today; College Goal picker; Career Goal chosen on the cards
+
+**Why (Chandu):**
+- "please update the component library with all of todays changes from everywhere"
+- Mid-way:
+  - "give the compare all three button a subtle border shaped with rounded corners"
+  - "the cta from match says see my top 3, it should now change right?"
+  - "when i click on an empty college goal card shouldn't it show me my recommended ones instead of taking me to explore schools? ... open a large modal like the build one"
+  - "Use the same card designs from explore here ... the whole thing/details page appears with a back button in the same large modal"
+  - "keep the making a career the primary within the ranking activity itself instead of a separate glowing cta ... Simplify it"
+  - "no icon only ctas please. call it report"
+  - "if i have a college selected why is the college goal card showing a blank blue thing?"
+
+**Product changes**
+- **Top 3:**
+  - "Compare all 3" is a quiet outlined button with rounded corners.
+  - The cards' Report is always worded. Narrow cards drop the icon, not the word.
+- **Match (V2Flow, live use only):** the last button reads "Choose my career goal" when the v2 Profile is on. The Flow Lab and v1 keep "See my Top 3".
+- **v2 Career Goal:** chosen in the ranking itself. Every Top 3 card's button reads "Make my goal", which moves that card to #1, sets the goal, pays +25 XP and returns to About Me. Once set, #1's button is My Plan. The separate glowing confirm bar is gone.
+- **v2 College Goal:**
+  - It is simply the starred #1 school. No confirm step, so a starred school shows on the card straight away, which fixes the "blank blue" card.
+  - The first choice pays +25 XP, whether from the picker or the star in My schools.
+  - The empty card opens `CollegeGoalPicker` (new, `profile/CollegeGoalPicker.tsx`). It reuses Edit My Build's sheet (`.myb-*`) and shows the Career Goal's For you lists (`pathway.ts`): Saved first, then Target, Reach, Likely.
+  - The picker's cards are Explore's own `SchoolCard`. A card opens the school's whole page (`CollegeDetailExperience` under `InSheet`) in the same sheet, with "Back to schools" and "Choose this school".
+
+**Component library**
+- **Profile** (`features/ProfileCareerColleges.tsx`), new specimens:
+  - AboutMeTab (v1, and v2 live)
+  - GoalCard, EmptyGoalCard and NextStepRow, in every state including focus-in
+  - CollegeGoalView with My schools (no schools, no #1, goal set)
+  - CollegeGoalPicker
+  - BuildModal (Edit My Build)
+  - BookCounselorSheet
+  - OutlookTab (live route)
+  - Top3Tab: updated purpose, plus a "Career Goal mode (v2)" cell
+- **Overlays:**
+  - New: SpotTip, SpotBadge and useSpotSequence.
+  - Changed: the House tooltip's teaching-tag cell now shows the My Build line nudge, since the cover tag is gone.
+- **Surfaces:**
+  - New: GlowLineArt.
+  - Changed: CollegePlaceholder (square, wide, dark, light, light cards with no top band) and the scroll edge fade in CardProgressiveBlur.
+- **Controls:**
+  - New: TextTabs and ColorThemeSwitch.
+  - Changed: Segmented gets an overflow-to-dropdown cell.
+- **Foundations:**
+  - New: LightPulse and the look-v2 light hooks.
+  - Changed: `.dm-spot`, `.dm-spot-ring` and `.dm-goal-focus-in` added to the utilities.
+- **Game UI:**
+  - New: CareerScene and ArtVersionToggle (RN v2 rooms, `game/ScenePieces.tsx`), and simulation thumbnails at the app's tile shapes.
+  - Changed: Glossary cover notes; the UX Designer draft gets a live-route cell.
+- **Exported only for the lab:** GoalCard, EmptyGoalCard, NextStepRow, HallArt and GoalSchoolPicture from AboutMeTab.
+
+**Validation:** tsc clean (the pre-existing `@dicebear` error aside), and eslint shows only the 2 old ProfileExperience warnings. The library page loads with every new specimen present, checked by screenshot. In the browser:
+- **Picker:** saved and For you lists, Explore cards, school page in the sheet, Back, and Choose (TCNJ became the goal, +25 XP).
+- **Make my goal:** on card #2, Airline Pilot moved to #1 and became the goal.
+- **v1 Top 3:** Report is worded and Compare is outlined.
+- **Demo data:** restored afterwards (IB #1, Rutgers #1 school).
+
 ## 2026-10-19: light school cards lose the dark band across the top
 
 **Why (Chandu):** "the light mode cards for the school/fallback cards look off, theres a dark gradient on top".

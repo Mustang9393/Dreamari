@@ -7,7 +7,12 @@
 // CollegePlaceholder, PosterCard) are not repeated here -- see that section.
 
 import { useState, type ReactNode } from "react";
-import { Info } from "lucide-react";
+import { Briefcase, GraduationCap, Info } from "lucide-react";
+import { FacePhoto } from "@/components/app/FacePhoto";
+import { AboutMeTab, CollegeGoalView, EmptyGoalCard, GoalCard, GoalSchoolPicture, HallArt, NextStepRow, type CollegeGoal, type Top3Goal } from "@/components/profile/AboutMeTab";
+import { CollegeGoalPicker } from "@/components/profile/CollegeGoalPicker";
+import { BuildModal } from "@/components/profile/PreferencesTab";
+import { BookCounselorSheet } from "@/components/profile/BookCounselorSheet";
 import { SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, EDGE, MONO, noop, Inert, LiveRoute } from "../../kit";
 
 import { ALL_PROFILE_CAREERS, STUDENT } from "@/components/profile/data";
@@ -38,7 +43,7 @@ import {
   DegreeSheet,
 } from "@/components/career/CareerDetailExperience";
 
-import { COLLEGES, type Level, type Control, type Setting, type Admission, type Size } from "@/components/colleges/data";
+import { COLLEGES, collegeImage, type College, type Level, type Control, type Setting, type Admission, type Size } from "@/components/colleges/data";
 import { BrowseShelves } from "@/components/colleges/BrowseShelves";
 import { Menu, MenuItem, WhySheet } from "@/components/colleges/ForYouSchools";
 import { FilterTray, CompareSheet } from "@/components/colleges/CollegesExperience";
@@ -51,6 +56,25 @@ import type { Route } from "@/components/colleges/pathway";
 const IB = ALL_PROFILE_CAREERS.find((c) => c.id === "investment-banking")!;
 const NURSE = ALL_PROFILE_CAREERS.find((c) => c.id === "registered-nurse")!;
 const PILOT = ALL_PROFILE_CAREERS.find((c) => c.id === "airline-pilot")!;
+
+// About Me fixtures: schools with real photos, spread over the three lists
+const PHOTO_SCHOOLS: College[] = COLLEGES.filter((c) => collegeImage(c)).slice(0, 5);
+const NO_PHOTO_SCHOOL: College | undefined = COLLEGES.find((c) => !collegeImage(c));
+const goalOf = (schools: College[], top: College | null): CollegeGoal => ({
+  schools: schools.map((c, i) => ({ c, bucket: (["reach", "target", "likely"] as const)[i % 3] })),
+  top, setTop: noop, move: noop,
+});
+
+/** The goal card the moment a goal is set, replayable: the picture comes into focus. */
+function FocusInDemo() {
+  const [n, setN] = useState(0);
+  return (
+    <div className="flex flex-col gap-[var(--space-2)]">
+      <GoalCard key={n} kind="Career Goal" Icon={Briefcase} title={IB.title} picture={<FacePhoto src={IB.photo} sizes="360px" className="object-cover" fallback={IB.photoFocus ?? "50% 30%"} />} onOpen={noop} openLabel="Open Career Goal" focusIn />
+      <button type="button" onClick={() => setN((x) => x + 1)} className="dm-quiet w-fit cursor-pointer rounded-[var(--radius-md)] px-[10px] py-[6px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Replay</button>
+    </div>
+  );
+}
 
 const RUNG_WITH_DETAIL = {
   number: "1",
@@ -191,7 +215,7 @@ function CompareSheetDemo() {
 }
 
 /** Top 3 with real ordering, remove and Undo, the way Profile wires it. */
-function Top3Live({ start, removedAt }: { start: string[]; removedAt?: number }) {
+function Top3Live({ start, removedAt, goal }: { start: string[]; removedAt?: number; goal?: Top3Goal }) {
   const [state, setState] = useState(() => {
     if (removedAt === undefined) return { ids: start, undo: null as null | { ids: string[]; id: string } };
     return { ids: start.filter((_, i) => i !== removedAt), undo: { ids: start, id: start[removedAt] } };
@@ -199,6 +223,7 @@ function Top3Live({ start, removedAt }: { start: string[]; removedAt?: number })
   const removed = state.undo ? { id: state.undo.id, title: ALL_PROFILE_CAREERS.find((c) => c.id === state.undo!.id)?.title ?? "Career", index: state.undo.ids.indexOf(state.undo.id) } : null;
   return (
     <Top3Tab
+      goal={goal}
       top3={state.ids} focusId={state.ids[0] ?? null} primaryChosen setFocusId={noop} chosenRoute={(c) => c.routes[0]}
       onAdd={noop}
       onRemove={(id) => setState((s) => ({ ids: s.ids.filter((x) => x !== id), undo: { ids: s.ids, id } }))}
@@ -220,7 +245,7 @@ export function ProfileCareerCollegesModules() {
         Cards already shown in Surfaces (<code style={MONO}>PosterCard</code>, <code style={MONO}>CollegeCard</code>, <code style={MONO}>SchoolCard</code>, <code style={MONO}>CollegePicture</code>, <code style={MONO}>MarkBadge</code>, <code style={MONO}>CollegePlaceholder</code>) are not repeated below.
       </p>
 
-      <Specimen name="Top3Tab" file="src/components/profile/ProfileExperience.tsx" purpose="My Top 3's card grid: position is rank, with a rank pill (arrows move a card one place), a visible remove, an inline Undo slot, and a self-retiring how-to line." when="Profile's Top 3 tab.">
+      <Specimen name="Top3Tab" file="src/components/profile/ProfileExperience.tsx" purpose="My Top 3's card grid: position is rank, with a rank pill (arrows move a card one place), a visible remove, an inline Undo slot, and first-visit control nudges that play in turn: Move to #1, Remove from Top 3, Add more from Explore. Report is always a worded button, and Compare all 3 a quiet outlined one." when="Profile's Top 3 tab (v1); inside About Me's Career Goal (v2).">
         <StateGrid min={320}>
           <StateCell label="Empty" minH={220}>
             <Top3Tab top3={[]} focusId={null} primaryChosen={false} setFocusId={noop} chosenRoute={(c) => c.routes[0]} onAdd={noop} onRemove={noop} onReorder={noop} removed={null} onUndo={noop} onDismissUndo={noop} onOpenCompare={noop} onGoReport={noop} showTour={false} onTourDone={noop} />
@@ -230,6 +255,96 @@ export function ProfileCareerCollegesModules() {
           </StateCell>
           <StateCell label="Just removed (Undo in its slot)" minH={560} pad={false} note="No confirm dialog: the freed slot offers Undo where the card was.">
             <Top3Live start={[IB.id, NURSE.id, PILOT.id]} removedAt={1} />
+          </StateCell>
+          <StateCell label="Career Goal mode (v2)" minH={560} pad={false} note="Shows with the v2 Profile on. The goal is chosen in the ranking itself: every card says Make my goal, which moves it to #1 and sets the goal (Chandu: 'keep the making a career the primary within the ranking activity itself').">
+            <Top3Live start={[IB.id, NURSE.id, PILOT.id]} goal={{ set: false, onChoose: noop }} />
+          </StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="AboutMeTab" file="src/components/profile/AboutMeTab.tsx" purpose="My Profile's landing tab: My Goals (Career Goal, College Goal), My Build, and in v2 the guided path: Career Goal, then College Goal, then My Plan, each goal paying +25 XP (Chandu, 19 Oct 2026: 'lets make about me the way to guide students first')." when="Every Profile visit; v2 also replaces the Top 3 tab (its cards live inside Career Goal) and takes Match's arrival.">
+        <StateGrid min={360}>
+          <StateCell label="v1" minH={520} note="Goal cards with the picked #1 and the starred school, then My Build on Build's sky.">
+            <AboutMeTab top3={[IB, NURSE, PILOT]} primary={IB} saved={[]} onAddToTop3={noop} onGoTab={noop} onOpenBuild={noop} />
+          </StateCell>
+          <StateCell label="v2, live" minH={520} note="Reads this visit's real state: a Career Goal counts once chosen on the ranking cards, a College Goal is the starred #1 school. A reload starts the demo empty again.">
+            <AboutMeTab top3={[IB, NURSE, PILOT]} primary={null} saved={[]} onAddToTop3={noop} onGoTab={noop} onOpenBuild={noop} v2={{ renderTop3: (goal) => <Top3Live start={[IB.id, NURSE.id, PILOT.id]} goal={goal} />, onConfirmPrimary: noop }} />
+          </StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="GoalCard, EmptyGoalCard, NextStepRow" file="src/components/profile/AboutMeTab.tsx" purpose="About Me's goal cards. Empty, a goal is out of focus until chosen: the likeliest career's photo blurred, or for schools the fallback hall art kept whole (HallArt). The step to take now glows and carries a 'Start here' or 'Next step' badge. Set, the picture comes into focus. After the Career Goal, a row leads to My Plan." when="About Me's My Goals, v1 and v2 (the badges, XP and focus-in are v2).">
+        <StateGrid min={300}>
+          <StateCell label="Career, before a goal" minH={300} pad={false} note="Match's arrival lands here: the card glows with 'Start here' until the goal is chosen.">
+            <EmptyGoalCard kind="Career Goal" Icon={Briefcase} title="Choose your career goal" backdrop={<FacePhoto src={IB.photo} sizes="360px" className="object-cover" fallback={IB.photoFocus ?? "50% 30%"} />} xp={25} nudge badge="Start here" onOpen={noop} openLabel="Open Career Goal" />
+          </StateCell>
+          <StateCell label="College, waiting its turn" minH={300} pad={false} note="One ask at a time: dimmed, no badge, until the Career Goal is set.">
+            <EmptyGoalCard kind="College Goal" Icon={GraduationCap} title="Choose your college goal" backdrop={null} art={<HallArt />} xp={25} nudge={false} quiet onOpen={noop} openLabel="Open College Goal" />
+          </StateCell>
+          <StateCell label="College, next step" minH={300} pad={false} note="Opens the College Goal picker (CollegeGoalPicker), not Explore.">
+            <EmptyGoalCard kind="College Goal" Icon={GraduationCap} title="Choose your college goal" backdrop={null} art={<HallArt />} xp={25} nudge badge="Next step" onOpen={noop} openLabel="Open College Goal" />
+          </StateCell>
+          <StateCell label="Career Goal set" minH={300} pad={false}>
+            <GoalCard kind="Career Goal" Icon={Briefcase} title={IB.title} picture={<FacePhoto src={IB.photo} sizes="360px" className="object-cover" fallback={IB.photoFocus ?? "50% 30%"} />} onOpen={noop} openLabel="Open Career Goal" />
+          </StateCell>
+          {PHOTO_SCHOOLS[0] && (
+            <StateCell label="College Goal set" minH={300} pad={false}>
+              <GoalCard kind="College Goal" Icon={GraduationCap} title={PHOTO_SCHOOLS[0].name} picture={<GoalSchoolPicture c={PHOTO_SCHOOLS[0]} sizes="360px" />} onOpen={noop} openLabel="Open College Goal" />
+            </StateCell>
+          )}
+          {NO_PHOTO_SCHOOL && (
+            <StateCell label="College Goal set, no photo" minH={300} pad={false} note="The hall art, square at full height with feathered sides, so a wide card never crops the dome.">
+              <GoalCard kind="College Goal" Icon={GraduationCap} title={NO_PHOTO_SCHOOL.name} picture={<GoalSchoolPicture c={NO_PHOTO_SCHOOL} sizes="360px" />} onOpen={noop} openLabel="Open College Goal" />
+            </StateCell>
+          )}
+          <StateCell label="Just set (focus-in)" minH={340} pad={false} note=".dm-goal-focus-in: the picture sharpens once, 1.1s.">
+            <FocusInDemo />
+          </StateCell>
+          <StateCell label="Next step row" minH={160}>
+            <div className="flex w-full flex-col gap-[var(--space-3)]">
+              <NextStepRow title="See your plan to get there" sub={`Steps toward ${IB.title}`} nudge={false} onClick={noop} />
+              <NextStepRow title="See your plan to get there" sub={`Steps toward ${IB.title} and ${PHOTO_SCHOOLS[0]?.name ?? "your school"}`} nudge onClick={noop} />
+            </div>
+          </StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="CollegeGoalView, My schools" file="src/components/profile/AboutMeTab.tsx" purpose="College Goal: the #1 school as a hero (or the hall art while there is none), then My schools in My Build's finish: one panel on Build's sky, Reach / Target / Likely as hairline-split columns at desktop and a switch below it. The star makes a school the #1 and, in v2, the College Goal. Control nudges teach the star and Move once." when="About Me's College Goal, and v2's Saved > Schools (embedded).">
+        <StateGrid min={360}>
+          <StateCell label="No schools yet" minH={280}>
+            <CollegeGoalView goal={goalOf([], null)} onBack={noop} />
+          </StateCell>
+          <StateCell label="No #1 yet" minH={560} note="The star goes first in the nudge, and the first star keeps a soft glow after it.">
+            <CollegeGoalView goal={goalOf(PHOTO_SCHOOLS, null)} onBack={noop} />
+          </StateCell>
+          {PHOTO_SCHOOLS[1] && (
+            <StateCell label="Goal set (v2)" minH={560} note="'My College Goal' with the next step, My Plan.">
+              <CollegeGoalView goal={goalOf(PHOTO_SCHOOLS, PHOTO_SCHOOLS[1])} onBack={noop} goalNext={noop} />
+            </StateCell>
+          )}
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="CollegeGoalPicker" file="src/components/profile/CollegeGoalPicker.tsx" purpose="Choosing a College Goal from the schools that fit, in Edit My Build's sheet: the Career Goal's For you lists (saved first, then Target, Reach, Likely) as Explore's own school cards. A card opens the school's whole page in the same sheet with Back and 'Choose this school' (Chandu, 19 Oct 2026: 'open a large modal like the build one and show the recommended (for you) colleges')." when="v2 About Me: tapping the empty College Goal card.">
+        <StateGrid min={240}>
+          <StateCell label="Open (live)" minH={100} note="Lists, a card's page, Back, and Choose all work; Choose here just closes.">
+            <Overlay label="Open the picker">{(close) => <CollegeGoalPicker careerIds={[IB.id]} saved={PHOTO_SCHOOLS.slice(0, 2)} onPick={() => close()} onClose={close} />}</Overlay>
+          </StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="BuildModal (Edit My Build)" file="src/components/profile/PreferencesTab.tsx" purpose="Edit My Build: every Build answer plus the old Preferences fields (skills, software, school, internships and jobs, team size, environment), sections down the side, one Save. About Me's My Build rows open it on their own section." when="About Me's My Build, and the gear menu.">
+        <StateGrid min={240}>
+          <StateCell label="Open (live)" minH={100}>
+            <Overlay label="Open Edit My Build">{(close) => <BuildModal onClose={close} />}</Overlay>
+          </StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="BookCounselorSheet" file="src/components/profile/BookCounselorSheet.tsx" purpose="Book a meeting with your counselor, from a My Plan step." when="v2 My Plan's counselor step, once the Career Report is shared.">
+        <StateGrid min={240}>
+          <StateCell label="Open (live)" minH={100}>
+            <Overlay label="Open booking">{(close) => <BookCounselorSheet onClose={close} />}</Overlay>
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -396,6 +511,14 @@ export function ProfileCareerCollegesModules() {
       </Specimen>
 
       <SubHead>Career</SubHead>
+
+      <Specimen name="OutlookTab (Career outlook lab)" file="src/components/outlook-lab/OutlookTab.tsx" purpose="DEMO-ONLY lab: Career Detail's Pay tab as 'Pay & Outlook'. The approved pay by state map, then outlook by state for the chosen state (growth and openings, each against the US) and the top states. One tab, not a sixth 'Job Outlook' tab: pay and growth by state answer the same question, and six tabs no longer fit a phone tab row." when="Only from the hamburger's lab links (/outlook-lab/[slug]); the live Career Detail is untouched.">
+        <StateGrid min={360}>
+          <StateCell label="Software Engineer (live page)" minH={460} pad={false}>
+            <LiveRoute href="/outlook-lab/software-engineer" height={440} />
+          </StateCell>
+        </StateGrid>
+      </Specimen>
 
       <Specimen name="CareerDetailExperience" file="src/components/career/CareerDetailExperience.tsx" purpose="A full career's page: hero, quick facts, pay by state, the career ladder, and folded sections below it." when="Every /career/[slug] page.">
         <StateGrid min={260}>

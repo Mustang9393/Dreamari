@@ -24,7 +24,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BuildModal, type BuildSection } from "./PreferencesTab";
-import { AboutMeTab, CollegeGoalView, useCollegeGoal, type AboutView } from "./AboutMeTab";
+import { AboutMeTab, CollegeGoalView, useCollegeGoal, type AboutView, type Top3Goal } from "./AboutMeTab";
 import { SpotTip } from "./SpotTip";
 import { BookCounselorSheet, useMyNextMeeting } from "./BookCounselorSheet";
 import { BOOK_MEETING_ID, careerWindows, SAVE_PROGRAM_ID, SAVE_SCHOOLS_ID, SHARE_REPORT_ID, type CareerStep } from "./careerPlanSteps";
@@ -733,8 +733,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
 
   // The Top 3 cards with their nudges: their own tab in v1, inside About Me's
   // Career Goal in v2.
-  const top3Cards = (
+  const top3Cards = (goal?: Top3Goal) => (
     <Top3Tab
+      goal={goal}
       top3={top3} focusId={focusId} primaryChosen={primaryChosen} setFocusId={setFocusId} chosenRoute={chosenRoute}
       showTour={showProfileTour && profileTourReady && !welcomeOpen && profileTourStep === "top3"}
       hintPaused={welcomeOpen || welcomePending}
@@ -1182,7 +1183,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               onGoTab={setTab}
               onOpenBuild={openBuild}
               v2={flowV2 ? {
-                top3Slot: top3Cards,
+                renderTop3: top3Cards,
                 onConfirmPrimary: (id) => setEdits({ ids: [id, ...top3.filter((x) => x !== id)], focus: id }),
                 initialView: aboutStart.view,
               } : undefined}
@@ -1191,7 +1192,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         )}
         {tab === "top3" && (
           <motion.div role="tabpanel" id="profile-panel-top3" aria-labelledby="profile-tab-top3" initial={false} animate={panelPhase === "out" ? { opacity: 0, x: -28 } : { opacity: 1, x: 0 }} transition={{ duration: REVEAL_OUT_MS / 1000, ease: [0.4, 0, 1, 1] }}>
-            {top3Cards}
+            {top3Cards()}
           </motion.div>
         )}
         {tab === "routes" && (
@@ -1563,8 +1564,10 @@ function useRankHint(): { show: boolean | null; retired: boolean; retire: () => 
 }
 
 export function Top3Tab({
-  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, onPlan, showTour, onTourDone, hintPaused = false,
+  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, onPlan, showTour, onTourDone, hintPaused = false, goal,
 }: {
+  /** v2 About Me's Career Goal: the cards' own button sets the goal */
+  goal?: Top3Goal;
   top3: string[];
   focusId: string | null;
   /** false while the strongest match is only the default */
@@ -1927,8 +1930,17 @@ export function Top3Tab({
                       <button type="button" onClick={() => openPeek(index)} className="t3s-toggle" aria-label={`Learn more about ${career.title}`}>
                         Learn more <ChevronRight className="h-4 w-4" aria-hidden />
                       </button>
-                      {/* #1 is already the plan's career: its button opens the plan (audit) */}
+                      {/* Inside About Me's Career Goal the goal is chosen right
+                         here, in the ranking: any card's button makes it #1 and
+                         the goal (Chandu, 19 Oct 2026: "keep the making a career
+                         the primary within the ranking activity itself instead
+                         of a separate glowing cta"). Once set, #1 opens its plan. */}
+                      {goal && !(goal.set && index === 0) ? (
+                        <button type="button" onClick={(e) => { stopPlay.current = true; setSpot(null); goal.onChoose(id, e.currentTarget); }} aria-label={`Make ${career.title} my Career Goal`} className="t3s-play dm-solid">Make my goal</button>
+                      ) : (
+                      /* #1 is already the plan's career: its button opens the plan (audit) */
                       <button type="button" onClick={() => onPlan?.(id)} aria-label={index === 0 ? `My Plan for ${career.title}` : `Plan for ${career.title}`} className="t3s-play dm-solid">{index === 0 ? "My Plan" : "Plan this"}</button>
+                      )}
                     </div>
                     ) : (
                     <div className="t3s-actions pointer-events-auto">
@@ -1936,15 +1948,13 @@ export function Top3Tab({
                         Show more <ChevronRight className="h-4 w-4" aria-hidden />
                       </button>
                       <Link href={`/play?focus=${sim ? sim.id : id}`} aria-label={`Play ${career.title}`} className="t3s-play dm-solid"><Play className="h-[12px] w-[12px]" fill="currentColor" aria-hidden /> Play</Link>
-                      <IconTip label="Career Report">
-                        <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="t3s-report">
-                          <FileText className="h-[15px] w-[15px]" aria-hidden />
-                          {/* the word, when the card has room (Chandu, 8 Oct
-                             2026: "say Report instead of just the icon AS LONG
-                             AS THERE IS SPACE AND NOTHING OVERLAPS") */}
-                          <span className="t3s-report-label">Report</span>
-                        </button>
-                      </IconTip>
+                      {/* always worded now (Chandu, 19 Oct 2026: "no icon only
+                         ctas please"); narrow cards drop the icon, not the word,
+                         so no tooltip is needed */}
+                      <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="t3s-report">
+                        <FileText className="h-[15px] w-[15px]" aria-hidden />
+                        <span className="t3s-report-label">Report</span>
+                      </button>
                     </div>
                     )}
                   </div>
@@ -2171,7 +2181,10 @@ export function Top3Tab({
       <div className="grid grid-cols-[1fr_auto_1fr] items-center">
         <span />
         {top3.length > 1 ? (
-          <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[8px] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          // a subtle outline with rounded corners (Chandu, 19 Oct 2026: "give
+          // the compare all three button a subtle border shaped with rounded
+          // corners"), so it reads as a button and not a stray link
+          <button type="button" onClick={onOpenCompare} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)", borderColor: "color-mix(in srgb, var(--foreground) 16%, transparent)" }}>
             <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
           </button>
         ) : <span />}

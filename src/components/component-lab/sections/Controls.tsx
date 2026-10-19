@@ -21,6 +21,8 @@ import { AudienceToggle } from "@/components/marketing/AudienceToggle";
 import { Disclosure as MarketingDisclosure } from "@/components/marketing/Disclosure";
 import { Disclosure as CounselorDisclosure, ShowAll } from "@/components/counselor/v4/Disclosure";
 import { Segmented } from "@/components/connect/viz";
+import { TextTabs } from "@/components/app/TextTabs";
+import { ColorThemeSwitch } from "@/components/app/ColorThemeSwitch";
 import { SubTabs } from "@/components/counselor/v4/SubTabs";
 import { ScrollChips, SelectBox } from "@/components/counselor/chips";
 import { Toggle } from "@/components/counselor/v4/Settings";
@@ -215,6 +217,31 @@ function GlobalSearchDemo() {
   return <SearchTrigger />;
 }
 
+function OverflowSegmentedDemo({ count }: { count: number }) {
+  const labels = ["About Me", "Saved", "My Plan", "Report", "Resume", "Skills", "Software", "Internships"];
+  const [value, setValue] = useState("t0");
+  return <Segmented ariaLabel="Profile sections" value={value} onChange={setValue} options={labels.slice(0, count).map((label, i) => ({ key: `t${i}`, label }))} />;
+}
+
+function TextTabsDemo({ caps, soft, many }: { caps?: boolean; soft?: boolean; many?: boolean }) {
+  const items = (many ? ["Careers", "Schools", "Pay by State", "Outlook", "Programs"] : ["Careers", "Schools", "People"]).map((label) => ({ key: label.toLowerCase().replace(/ /g, "-"), label }));
+  const [value, setValue] = useState(items[0].key);
+  return <TextTabs items={items} value={value} onChange={setValue} ariaLabel="Saved" layoutId={`lab-text-tabs-${caps === false ? "tc" : ""}${soft ? "soft" : ""}${many ? "many" : ""}`} caps={caps} soft={soft} />;
+}
+
+/** ColorThemeSwitch's face with its own classes, minus the fixed position
+ *  and the lg-only display, so each state can be shown at once. */
+function ThemeSwitchFace({ classic }: { classic: boolean }) {
+  return (
+    <span inert className="flex w-fit items-center gap-[7px] rounded-[var(--radius-sm,6px)] px-[6px] py-[3px] text-[10.5px] leading-[14px] font-semibold tracking-[0.06em] uppercase opacity-55" style={{ color: "var(--muted-foreground, rgba(255,255,255,0.62))", fontFamily: "var(--font-body)" }}>
+      Classic
+      <span aria-hidden className="relative h-[14px] w-[24px] flex-none rounded-full" style={{ background: classic ? "var(--primary, #2f6bf2)" : "color-mix(in srgb, var(--foreground, #f4f7ff) 22%, transparent)" }}>
+        <span className="absolute top-[2px] size-[10px] rounded-full bg-white" style={{ left: classic ? 12 : 2 }} />
+      </span>
+    </span>
+  );
+}
+
 export function ControlsSection() {
   return (
     <Section id="controls" title="Controls" intro="Buttons, pickers, tabs, chips and form fields. Interactive states are live: click them.">
@@ -314,8 +341,22 @@ export function ControlsSection() {
           <StateCell label="Selected, with badges"><SegmentedDemo /></StateCell>
           <StateCell label="No badge / one option" note="badge is only rendered when truthy; a single-option Segmented still renders, just with nothing to switch between."><Segmented ariaLabel="Roster filter" value="active" onChange={noop} options={[{ key: "active", label: "Active" }]} /></StateCell>
           <StateCell label="99+ badge" note="Badge has no cap; a triple-digit count widens the pill instead of being capped at 99+."><Segmented ariaLabel="Roster filter" value="active" onChange={noop} options={[{ key: "active", label: "Active", badge: 128 }, { key: "saved", label: "Saved" }]} /></StateCell>
-          <StateCell label="Overflow (many options, scroll)" note="overflow-x-auto on the tablist; no visual fade cue at the scroll edge (ScrollChips below has one, Segmented doesn't)." minH={80}>
-            <Segmented ariaLabel="Roster filter" value="opt3" onChange={noop} options={Array.from({ length: 8 }, (_, i) => ({ key: `opt${i}`, label: `Option ${i + 1}` }))} />
+          <StateCell label="Fits" note="Three tabs in a 375px box: they fit, so the row stays a row." minH={80}>
+            <div className="w-full max-w-[375px]"><OverflowSegmentedDemo count={3} /></div>
+          </StateCell>
+          <StateCell label="Overflowing (becomes a dropdown)" note="Eight tabs in a 260px box: wider than its space, so the shared Listbox takes the row's place, until the tabs fit again. It re-measures when web fonts load and when a tab resizes. Chandu, 19 Oct 2026: &quot;on mobile the tabs should be a dropdown. Otherwise they get cut off.&quot;" minH={80}>
+            <div className="w-full max-w-[260px]"><OverflowSegmentedDemo count={8} /></div>
+          </StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="TextTabs" file="src/components/app/TextTabs.tsx" purpose="The app's secondary tabs: text with a sliding underline. Primary tabs are pills (Segmented), secondary are text and underline, so the two never clash. In Black & Blue the underline (data-tab-ink) glows." when="Inside a page or panel that already has a primary pill tablist (My Profile's Saved, Explore's Careers / Schools strip, Connect's sections). Never stacked on another tab row of the same design.">
+        <StateGrid>
+          <StateCell label="Default (caps)"><TextTabsDemo /></StateCell>
+          <StateCell label="Title Case (caps false)" note="Connect's sections, 14 Oct 2026."><TextTabsDemo caps={false} /></StateCell>
+          <StateCell label="Soft (counselor)" note="13px sentence case, muted until active, a hairline under the row."><TextTabsDemo soft /></StateCell>
+          <StateCell label="Overflowing" note="No dropdown yet: it scrolls sideways with the scrollbar hidden. Hand-built tab rows are not covered by Segmented's dropdown." minH={80}>
+            <div className="w-full max-w-[220px]"><TextTabsDemo many /></div>
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -353,6 +394,22 @@ export function ControlsSection() {
           <StateCell label="Pending / saving" note="Real pending prop (27 Sept 2026): spinner in the thumb, not clickable while a save is in flight."><Toggle on onChange={noop} pending /></StateCell>
         </StateGrid>
         <p className="text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>File-local in counselor/v4/Settings.tsx; only the <code>export</code> keyword was added so it could render here.</p>
+      </Specimen>
+
+      <Specimen name="ColorThemeSwitch" file="src/components/app/ColorThemeSwitch.tsx, src/components/app/look.ts" purpose="The color theme switch. Black & Blue is the default; the switch turns on Classic. One muted label and a mini track, dimmed until hovered or focused, fixed bottom-left. Chandu, 19 Oct 2026: &quot;lets have black and blue be the default and the switch to be done for classic&quot;, and it &quot;shouldnt be in my face&quot;." when="Mounted once by the root layout on every student page, desktop only (lg and up): on phones and tablets it covered the cards, and ?look=v1 / ?look=v2 still switch there. Not on the Counselor Dashboard, never printed. DEMO-ONLY.">
+        <StateGrid>
+          <StateCell label="Off: Black & Blue (default)" note="The track's face, drawn with the switch's own classes: the real one reads the page's theme, so it can't be forced to one state here.">
+            <ThemeSwitchFace classic={false} />
+          </StateCell>
+          <StateCell label="On: Classic" note="On means Classic, saved as &quot;v1&quot; in localStorage dreamari-look.">
+            <ThemeSwitchFace classic />
+          </StateCell>
+          <StateCell label="Live (desktop only)" note="The real switch, held in this box. Clicking it switches the whole lab's theme, the same as on any page. Hidden below lg." minH={80}>
+            <Reveal label="Show the live switch" closeLabel="Hide" height={72}>
+              <ColorThemeSwitch />
+            </Reveal>
+          </StateCell>
+        </StateGrid>
       </Specimen>
 
       <Specimen name="ChipRow, InterestPicker, Field" file="src/components/flow-lab/shared.tsx" purpose="Multi-select chip group (ChipRow), the Match Lab's worlds picker built on it (InterestPicker), and the labelled section wrapper (Field) they sit inside." when="Match Lab and Build's own multi-pick questions.">

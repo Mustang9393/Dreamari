@@ -32,6 +32,7 @@ import { CollegePicture, useGoalBuckets, useSaved as useSavedColleges, useTopSch
 import { fitFor, parseGpa } from "@/components/colleges/pathway";
 import { useBackStep } from "@/lib/backStep";
 import { SpotBadge, SpotTip, useSpotSequence } from "./SpotTip";
+import { CollegeGoalPicker } from "./CollegeGoalPicker";
 import { flyXp } from "@/components/app/xpFlight";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession } from "@/components/app/WelcomeSplash";
 import { useBuildAnswers } from "@/lib/buildAnswers";
@@ -86,6 +87,9 @@ const BUILD_GROUPS: { title: string; short: string; lines: BuildLine[] }[] = [
 ];
 
 export type AboutView = "home" | "career" | "college";
+/** Career Goal inside the ranking (v2): whether it is set, and the card
+ *  action that makes a career the goal (it moves to #1 and the XP pays). */
+export type Top3Goal = { set: boolean; onChoose: (id: string, from: Element | null) => void };
 type View = AboutView;
 
 // v2 (19 Oct 2026, Chandu: "lets make about me the way to guide students
@@ -93,13 +97,13 @@ type View = AboutView;
 // fixed ... Then #1 becomes the career goal, xp is gained, then next step is
 // to fix a college/school goal ... we can get rid of the top 3 tab by
 // folding it into here"). The goals are a sequence: Career Goal, then
-// College Goal, then My Plan. A goal counts as set only once the student
-// confirms it here, so the cards start empty even when a Top 3 or a starred
-// school already exists from Match or Explore.
+// College Goal, then My Plan. The Career Goal counts as set only once the
+// student chooses it on the ranking cards here ("Make my goal"), so the card
+// starts empty even though Match already ordered the Top 3. The College Goal
+// is simply the starred #1 school, wherever it was starred.
 const CAREER_GOAL_XP = 25;
 const COLLEGE_GOAL_XP = 25;
 const CAREER_SET_KEY = "dreamari:goal:career-set";
-const COLLEGE_SET_KEY = "dreamari:goal:college-set";
 const GOAL_EVENT = "dreamari:goal-set";
 
 function readGoalFlag(key: string): boolean {
@@ -136,8 +140,9 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
   onOpenBuild: (section?: BuildSection) => void;
   /** v2: the guided goals, with the Top 3 cards inside Career Goal */
   v2?: {
-    /** the Top 3 cards and their nudges (Top3Tab), shown inside Career Goal */
-    top3Slot: React.ReactNode;
+    /** the Top 3 cards and their nudges (Top3Tab), shown inside Career Goal,
+     *  where each card's own button sets the goal */
+    renderTop3: (goal: Top3Goal) => React.ReactNode;
     /** make this career the primary (#1), so Report and Plan follow it */
     onConfirmPrimary: (id: string) => void;
     initialView?: AboutView;
@@ -166,43 +171,53 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
 
   const college = useCollegeGoal();
   const [careerFlag, markCareer] = useGoalFlag(CAREER_SET_KEY);
-  const [collegeFlag, markCollege] = useGoalFlag(COLLEGE_SET_KEY);
   const careerSet = careerFlag && top3.length > 0;
-  const collegeSet = collegeFlag && college.top !== null;
+  // A starred #1 school IS the College Goal: choosing it is the act, with no
+  // second confirm (Chandu, 19 Oct 2026: "if i have a college selected why
+  // is the college goal card showing a blank blue thing?").
+  const collegeSet = college.top !== null;
+  // the XP and the focus-in, the first time a #1 school is chosen here
+  const chooseSchool = (slug: string | null, from: Element | null) => {
+    const first = !college.top && !!slug;
+    college.setTop(slug);
+    if (!first) return;
+    focusIn("college");
+    flyXp({ from, amount: COLLEGE_GOAL_XP, milestone: `profile:college-goal${DEMO_RUN}` });
+  };
   // After a goal is set, the XP flies, then About Me comes back so the
   // student sees the card fill and the next goal start to nudge.
   const settle = () => window.setTimeout(() => go("home"), 1100);
   // the goal that was just set: its picture comes into focus on About Me
   const [justSet, setJustSet] = useState<"career" | "college" | null>(null);
   const focusIn = (g: "career" | "college") => { setJustSet(g); window.setTimeout(() => setJustSet(null), 3200); };
+  // v2: the College Goal picker sheet over About Me
+  const [picking, setPicking] = useState(false);
 
   if (v2 && view === "career") {
     return (
       <CareerGoalV2
-        top3={top3} saved={saved} slot={v2.top3Slot} set={careerSet}
+        top3={top3} saved={saved}
+        slot={v2.renderTop3({
+          set: careerSet,
+          onChoose: (id, from) => {
+            v2.onConfirmPrimary(id);
+            markCareer();
+            focusIn("career");
+            flyXp({ from, amount: CAREER_GOAL_XP, milestone: `profile:career-goal${DEMO_RUN}` });
+            settle();
+          },
+        })}
         onBack={() => setView("home")} onAddToTop3={onAddToTop3}
-        onConfirm={(from) => {
-          const first = top3[0];
-          if (!first) return;
-          v2.onConfirmPrimary(first.id);
-          markCareer();
-          focusIn("career");
-          flyXp({ from, amount: CAREER_GOAL_XP, milestone: `profile:career-goal${DEMO_RUN}` });
-          settle();
-        }}
-        onNext={() => go("college")}
       />
     );
   }
   if (v2 && view === "college") {
     return (
       <CollegeGoalView
-        goal={college} onBack={() => setView("home")}
-        confirm={{
-          set: collegeSet,
-          onConfirm: (from) => { markCollege(); focusIn("college"); flyXp({ from, amount: COLLEGE_GOAL_XP, milestone: `profile:college-goal${DEMO_RUN}` }); settle(); },
-          onNext: () => onGoTab("plan"),
-        }}
+        // the star in My schools sets the goal (and pays, the first time)
+        goal={{ ...college, setTop: (slug) => { const first = !college.top && !!slug; chooseSchool(slug, null); if (first) settle(); } }}
+        onBack={() => setView("home")}
+        goalNext={() => onGoTab("plan")}
       />
     );
   }
@@ -210,13 +225,11 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
   if (view === "college") return <CollegeGoalView goal={college} onBack={() => setView("home")} />;
 
   if (v2) {
-    // Before a goal is set, the card shows the likeliest choice out of
-    // focus: the #1 of the Top 3 (else the newest save), the #1 school (else
-    // the newest saved school).
+    // Before a goal is set, the Career Goal card shows the likeliest choice
+    // out of focus: the #1 of the Top 3, else the newest save.
     // the Career Goal, once confirmed, is whatever is #1 in the Top 3
     const goalCareer = top3[0] ?? null;
     const lead = top3[0] ?? saved[0] ?? null;
-    const leadSchool = college.top ?? college.schools[0]?.c ?? null;
     return (
       <div className="flex flex-col gap-[var(--space-6)]">
         <section aria-labelledby="about-goals" className="flex flex-col gap-[var(--space-3)]">
@@ -251,22 +264,36 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
             ) : (
               <EmptyGoalCard
                 kind="College Goal" Icon={GraduationCap}
-                title={leadSchool ? "Choose your college goal" : "Save schools to choose from"}
+                // the picker always has the schools that fit, so the card
+                // never sends the student off to Explore to find some first
+                title="Choose your college goal"
                 // the school-card fallback art, crisp: an empty College Goal is a
                 // campus waiting to be named (Chandu, 19 Oct 2026: "use the
                 // fallback graphic we made for empty college goal stuff")
                 art={<HallArt />}
                 backdrop={null}
-                xp={leadSchool ? COLLEGE_GOAL_XP : undefined}
+                xp={COLLEGE_GOAL_XP}
                 // one ask at a time: the school goal waits for the career goal
                 nudge={careerSet}
                 badge={careerSet ? "Next step" : undefined}
                 quiet={!careerSet}
-                href={leadSchool ? undefined : "/colleges"}
-                onOpen={() => go("college")} openLabel="Open College Goal"
+                // the For you schools in a large sheet (CollegeGoalPicker),
+                // not the College Goal view or Explore Schools
+                onOpen={() => setPicking(true)} openLabel="Open College Goal"
               />
             )}
           </div>
+          {picking && (
+            <CollegeGoalPicker
+              careerIds={top3.map((c) => c.id)}
+              saved={college.schools.map((s) => s.c)}
+              onClose={() => setPicking(false)}
+              onPick={(c, from) => {
+                chooseSchool(c.slug, from);
+                setPicking(false);
+              }}
+            />
+          )}
           {careerSet && (
             <NextStepRow
               title="See your plan to get there"
@@ -364,7 +391,8 @@ function XpChip({ amount }: { amount: number }) {
  *  setting the goal brings it into focus (GoalCard's focusIn). Same layout
  *  as the filled card, so only the focus changes. With nothing to choose
  *  from, Build's sky stands in and the card opens Explore. */
-function EmptyGoalCard({ kind, Icon, title, backdrop, art, xp, nudge, badge, quiet = false, href, onOpen, openLabel }: {
+// exported for the component lab
+export function EmptyGoalCard({ kind, Icon, title, backdrop, art, xp, nudge, badge, quiet = false, href, onOpen, openLabel }: {
   kind: string; Icon: typeof Briefcase; title: string; backdrop: React.ReactNode | null; /** shown sharp instead (College: the school fallback art) */ art?: React.ReactNode; xp?: number; nudge: boolean; /** this is the step to take now: the card glows and says so */ badge?: string; /** waiting its turn: dimmer */ quiet?: boolean; /** nothing to choose from: go here instead */ href?: string; onOpen: () => void; openLabel: string;
 }) {
   const lookV2 = useLookV2();
@@ -414,7 +442,8 @@ function EmptyGoalCard({ kind, Icon, title, backdrop, art, xp, nudge, badge, qui
 }
 
 /** The step after both goals: one row into My Plan. */
-function NextStepRow({ title, sub, nudge, onClick }: { title: string; sub?: string; nudge: boolean; onClick: () => void }) {
+// exported for the component lab
+export function NextStepRow({ title, sub, nudge, onClick }: { title: string; sub?: string; nudge: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} className="dm-quiet group flex min-h-[64px] w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)] text-left" style={{ ...INSET, borderColor: nudge ? "color-mix(in srgb, var(--primary) 55%, var(--inset-border))" : "var(--inset-border)" }}>
       <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--accent-subtle)" }}>
@@ -429,58 +458,26 @@ function NextStepRow({ title, sub, nudge, onClick }: { title: string; sub?: stri
   );
 }
 
-/** Set a goal: names the #1 and pays the XP; once set, says so and points
- *  at the next goal. */
-function GoalConfirm({ set, name, goal, onConfirm, next, xp }: { set: boolean; name: string; goal: string; onConfirm: (from: Element | null) => void; next: { label: string; onClick: () => void }; xp: number }) {
-  if (set) {
-    return (
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)]" style={INSET}>
-        <span className="flex min-w-0 items-center gap-[8px] text-[15px] leading-[20px] font-bold">
-          <Check className="h-5 w-5 flex-none" style={{ color: "var(--success, #5fd6a8)" }} aria-hidden />
-          <span className="min-w-0">{name} is your {goal}.</span>
-        </span>
-        <button type="button" onClick={next.onClick} className="dm-tap flex min-h-[40px] flex-none cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-          {next.label} <ChevronRight className="h-4 w-4" aria-hidden />
-        </button>
-      </div>
-    );
-  }
-  // The #1 card above already names it, so the action says it once and
-  // nothing repeats the name in a sentence.
-  return <ConfirmButton label={`Make ${name} my ${goal}`} xp={xp} onConfirm={onConfirm} wide glow />;
-}
-
-function ConfirmButton({ label, xp, onConfirm, wide = false, glow = false }: { label: string; xp: number; onConfirm: (from: Element | null) => void; wide?: boolean; /** the step to take now: the house glow */ glow?: boolean }) {
-  return (
-    <button type="button" onClick={(e) => onConfirm(e.currentTarget)} className={`dm-tap flex min-h-[44px] cursor-pointer items-center gap-[var(--space-2)] rounded-[var(--radius-md)] pr-[6px] pl-[var(--space-4)] text-[14px] font-bold ${wide ? "w-full justify-between sm:w-fit" : "w-fit"} ${glow ? "dm-spot-ring" : ""}`} style={{ background: "var(--primary)", color: "var(--primary-foreground)", textShadow: "none" }}>
-      <span className="min-w-0 text-left"><NudgeText on>{label}</NudgeText></span>
-      <XpChip amount={xp} />
-    </button>
-  );
-}
 
 /** v2 Career Goal: the Top 3 cards themselves (with their move, remove and
  *  add nudges), then the #1 confirmed as the goal, then the saved careers
  *  that can still join. Replaces the Top 3 tab. */
-function CareerGoalV2({ top3, saved, slot, set, onBack, onAddToTop3, onConfirm, onNext }: {
-  top3: ProfileCareer[]; saved: ProfileCareer[]; slot: React.ReactNode; set: boolean; onBack: () => void; onAddToTop3: (id: string) => void; onConfirm: (from: Element | null) => void; onNext: () => void;
+function CareerGoalV2({ top3, saved, slot, onBack, onAddToTop3 }: {
+  top3: ProfileCareer[]; saved: ProfileCareer[]; slot: React.ReactNode; onBack: () => void; onAddToTop3: (id: string) => void;
 }) {
   const router = useRouter();
   const open = (c: ProfileCareer, row: ProfileCareer[]) => { if (!openCareerPeek(c.id, row.map((x) => x.id))) router.push(`/career/${c.id}`); };
-  const first = top3[0] ?? null;
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <BackLink onBack={onBack} />
       <div className="flex flex-col gap-[2px]">
         <h3 className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Goal</h3>
-        <p className="text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Put the career you want most at #1.</p>
+        <p className="text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Tap Make my goal on the career you want most.</p>
       </div>
-      {top3.length ? (
-        <>
-          {slot}
-          {first && <GoalConfirm set={set} name={first.title} goal="Career Goal" xp={CAREER_GOAL_XP} onConfirm={onConfirm} next={{ label: "Next: College Goal", onClick: onNext }} />}
-        </>
-      ) : (
+      {/* choosing happens on the cards themselves (Chandu, 19 Oct 2026:
+         "keep the making a career the primary within the ranking activity
+         itself instead of a separate glowing cta ... Simplify it") */}
+      {top3.length ? slot : (
         <EmptyGroup text="Your Top 3 is empty. Save careers in Explore, then add them here." cta="Explore careers" href="/explore" />
       )}
       {saved.length > 0 && (
@@ -523,7 +520,8 @@ function SectionHead({ id, title, sub }: { id: string; title: string; sub?: stri
 // Label and name only (19 Oct 2026, Chandu: "less text: bigger picture,
 // just the label and the goal name"). The counts and how-to lines live one
 // tap in, inside each goal.
-function GoalCard({ kind, Icon, title, picture, accent, onOpen, openLabel, focusIn = false }: {
+// exported for the component lab
+export function GoalCard({ kind, Icon, title, picture, accent, onOpen, openLabel, focusIn = false }: {
   kind: string; Icon: typeof Briefcase; title: string; picture: React.ReactNode; accent?: string; onOpen: () => void; openLabel: string; /** v2: just set, so the picture comes into focus once */ focusIn?: boolean;
 }) {
   return (
@@ -787,7 +785,7 @@ export function useCollegeGoal(): CollegeGoal {
   }, [colleges, topSlug, buckets, gpa]);
 }
 
-export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, confirm }: { goal: CollegeGoal; onBack?: () => void; /** where Back returns, when it isn't About Me */ backLabel?: string; /** v2: inside Saved > Schools, so no Back and no page title */ embedded?: boolean; /** v2 About Me: the #1 school is confirmed as the College Goal */ confirm?: { set: boolean; onConfirm: (from: Element | null) => void; onNext: () => void } }) {
+export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, goalNext }: { goal: CollegeGoal; onBack?: () => void; /** where Back returns, when it isn't About Me */ backLabel?: string; /** v2: inside Saved > Schools, so no Back and no page title */ embedded?: boolean; /** v2 About Me: the #1 school is the College Goal; this is the step after it (My Plan) */ goalNext?: () => void }) {
   const router = useRouter();
   const allColleges = goal.schools.map((s) => s.c);
   const open = (c: College) => { if (!openSchoolPeek(c, allColleges)) router.push(`/colleges/${c.slug}`); };
@@ -814,8 +812,8 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
               </span>
               <div className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-5)]">
                 <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>
-                  {confirm?.set && <Check className="h-[14px] w-[14px]" aria-hidden />}
-                  {confirm?.set ? "My College Goal" : "My #1 school"}
+                  {goalNext && <Check className="h-[14px] w-[14px]" aria-hidden />}
+                  {goalNext ? "My College Goal" : "My #1 school"}
                 </span>
                 <span className="flex flex-col gap-[2px]">
                   <span className="text-[22px] leading-[27px] font-extrabold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{top.name}</span>
@@ -824,13 +822,12 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
                 <span className="flex flex-wrap gap-[var(--space-2)]" style={{ textShadow: "none" }}>
                   {/* v2: setting the goal is the card's main action; once set,
                      the next step is. View school steps back to glass. */}
-                  {confirm && !confirm.set && <ConfirmButton label="Make it my College Goal" xp={COLLEGE_GOAL_XP} onConfirm={confirm.onConfirm} glow />}
-                  {confirm?.set && (
-                    <button type="button" onClick={confirm.onNext} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+                  {goalNext && (
+                    <button type="button" onClick={goalNext} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
                       Next: My Plan <ChevronRight className="h-4 w-4" aria-hidden />
                     </button>
                   )}
-                  <button type="button" onClick={() => open(top)} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={confirm ? { background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.22)", color: "#fff", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" } : { background: "var(--primary)", color: "var(--primary-foreground)" }}>
+                  <button type="button" onClick={() => open(top)} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={goalNext ? { background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.22)", color: "#fff", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" } : { background: "var(--primary)", color: "var(--primary-foreground)" }}>
                     View school <ChevronRight className="h-4 w-4" aria-hidden />
                   </button>
                 </span>
@@ -862,7 +859,8 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
  *  graphic is getting cropped"). Here it stays square at the card's full
  *  height, its sides feathered into the art's own ground colour, which the
  *  box is painted with (light mode included, through the same --cp-*). */
-function HallArt({ align = "center" }: { align?: "center" | "right" }) {
+// exported for the component lab
+export function HallArt({ align = "center" }: { align?: "center" | "right" }) {
   return (
     <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(var(--cp-ground, #000105), var(--cp-ground-2, #03070f))" }}>
       <span
@@ -881,7 +879,8 @@ function HallArt({ align = "center" }: { align?: "center" | "right" }) {
 
 /** A goal-sized school picture: the campus photo, or, with none, the
  *  fallback art kept whole (HallArt) instead of cropped to the card. */
-function GoalSchoolPicture({ c, sizes, align = "center" }: { c: College; sizes: string; align?: "center" | "right" }) {
+// exported for the component lab
+export function GoalSchoolPicture({ c, sizes, align = "center" }: { c: College; sizes: string; align?: "center" | "right" }) {
   return collegeImage(c) ? <CollegePicture c={c} sizes={sizes} className="absolute inset-0 h-full w-full" /> : <HallArt align={align} />;
 }
 

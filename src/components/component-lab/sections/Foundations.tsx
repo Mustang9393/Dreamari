@@ -12,6 +12,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ComponentType, ty
 import { Section, SubHead, Specimen, StateGrid, StateCell, Reveal, noop, MONO } from "../kit";
 import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { dispatchLight } from "@/components/app/LightPulse";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { PlayBurst } from "@/components/play/PlayBurst";
 import { Confetti } from "@/components/flow/aurora/Confetti";
@@ -250,6 +251,38 @@ function Replayable({ children }: { children: (nonce: number) => ReactNode }) {
   );
 }
 
+/** A real aria-pressed toggle, the target LightPulse blooms on. */
+function PressedDemo() {
+  const [on, setOn] = useState(false);
+  return (
+    <button type="button" aria-pressed={on} onClick={() => setOn((v) => !v)} className="dm-quiet cursor-pointer rounded-full border px-[14px] py-[7px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" }}>
+      {on ? "Following" : "Follow"}
+    </button>
+  );
+}
+
+/** A bar that steps forward and calls dispatchLight at its head. */
+function LightBarDemo() {
+  const [pct, setPct] = useState(30);
+  const track = useRef<HTMLSpanElement>(null);
+  const step = () => {
+    const next = pct >= 100 ? 30 : Math.min(100, pct + 35);
+    setPct(next);
+    const r = track.current?.getBoundingClientRect();
+    if (r) dispatchLight(r.left + (r.width * next) / 100, r.top + r.height / 2, 0.8);
+  };
+  return (
+    <div className="flex flex-col items-center gap-[10px]">
+      <span ref={track} className="block h-[6px] w-[150px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
+        <span className="block h-full rounded-full transition-[width] duration-300" style={{ width: `${pct}%`, background: "var(--primary)" }} />
+      </span>
+      <button type="button" onClick={step} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[10.5px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" }}>
+        Step
+      </button>
+    </div>
+  );
+}
+
 /** One `dm-*` utility: a live sample plus its class name in MONO. */
 function UtilityCell({ label, cls, note, children }: { label: string; cls: string; note?: string; children: ReactNode }) {
   return (
@@ -463,6 +496,25 @@ export function FoundationsSection() {
               )}
             </Replayable>
           </UtilityCell>
+          <UtilityCell label="Spot glow, filled" cls="dm-spot" note="The control-teaching glow (SpotTip): a small control lights in the Black & Blue blue and pulses. Reduced motion holds it still.">
+            <button type="button" onClick={noop} className="dm-spot cursor-pointer rounded-[var(--radius-md)] px-[10px] py-[6px] text-[13px] font-bold" style={{ color: "#fff" }}>
+              Move
+            </button>
+          </UtilityCell>
+          <UtilityCell label="Spot glow, ring" cls="dm-spot-ring" note="The same glow without the fill, for larger targets: a card, an empty slot, a My Build line.">
+            <div className="dm-spot-ring rounded-[var(--radius-md)] border px-[16px] py-[10px] text-[13px] font-semibold" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
+              Career Goal
+            </div>
+          </UtilityCell>
+          <UtilityCell label="Goal comes into focus" cls="dm-goal-focus-in" note="About Me v2: an unset goal's picture sits out of focus; setting the goal brings it into focus once. At rest the picture is plain.">
+            <Replayable>
+              {(n) => (
+                <span className="block h-[64px] w-[130px] overflow-hidden rounded-[var(--radius-md)]">
+                  <span key={n} className="dm-goal-focus-in block h-full w-full" style={{ background: "linear-gradient(135deg, #2f6bf2 0%, #9ec6fa 45%, #0e0c20 100%)" }} />
+                </span>
+              )}
+            </Replayable>
+          </UtilityCell>
           <UtilityCell label="Staggered reveal" cls="seq-reveal">
             <Replayable>
               {(n) => (
@@ -497,6 +549,48 @@ export function FoundationsSection() {
                   Career card
                 </div>
               </HoverBeam>
+            </StateCell>
+          </StateGrid>
+        </Specimen>
+
+        <Specimen name="LightPulse" file="src/components/app/LightPulse.tsx" purpose="Light at a moment, in Black & Blue: a soft radial bloom where a lit action is pressed, something is switched on, or a progress bar lands, then it fades back to calm. One fixed layer, opacity and scale only. Part 4 of &quot;light that behaves like light&quot; (Chandu, 19 Oct 2026: &quot;lets try 1,2,3,4&quot;)." when="Nothing to add per screen: the root layout mounts it once, and it listens for clicks on [data-lit] and [aria-pressed=false], and for dispatchLight(x, y) calls (SparkBar's head). Off in Classic and for reduced motion.">
+          <StateGrid min={200}>
+            <StateCell label="Lit action pressed" note="Click it. data-lit marks the one lit action per screen; it blooms at 1.2 strength. The layout's own LightPulse plays it; Classic turns it off.">
+              <button type="button" data-lit onClick={noop} className="dm-solid cursor-pointer rounded-full px-[18px] py-[9px] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "#fff" }}>
+                Let&apos;s Go
+              </button>
+            </StateCell>
+            <StateCell label="Switched on" note="A control whose aria-pressed is about to turn true blooms softer (0.7). Once on, look-v2.css gives it a faint ring of light.">
+              <PressedDemo />
+            </StateCell>
+            <StateCell label="Progress lands" note="dispatchLight at a bar's head, the way SparkBar does when it advances.">
+              <LightBarDemo />
+            </StateCell>
+          </StateGrid>
+        </Specimen>
+
+        <Specimen name="Light hooks (look-v2.css)" file="src/app/look-v2.css (section 5)" purpose="Black & Blue's light as attribute hooks, so components opt in without their own styles: a rim light on card tops, light under the current tab or pill, a glowing tab underline, and one lit action per screen. Blue only, never a fill, never behind text. Chandu, 19 Oct 2026: &quot;lets have the blue be more present... But it should appear logically where it can, because we still want that opulent look.&quot;" when="Already wired into the shared pieces (Segmented, TextTabs, SparkBar, the nav). Add data-lit to a screen's one primary action and nothing else. In Classic these render plain.">
+          <StateGrid min={200}>
+            <StateCell label="Rim light" note="A .dm-tap card at 16px+ radius catches the header light along its top edge (a masked ::after), fading out by the corners.">
+              <div tabIndex={0} className="dm-tap w-full rounded-[var(--radius-lg)] border p-[var(--space-4)] text-center text-[13px] font-semibold" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
+                Career card
+              </div>
+            </StateCell>
+            <StateCell label="Fill light" note="data-fill-light (Segmented's sliding pill), or any selected control filled with var(--primary): a soft light beneath it.">
+              <span data-fill-light className="rounded-[var(--radius-sm)] px-[14px] py-[8px] text-[13px] font-semibold" style={{ background: "var(--primary)", color: "#fff" }}>
+                Active
+              </span>
+            </StateCell>
+            <StateCell label="Tab ink" note="data-tab-ink: TextTabs' underline glows.">
+              <span className="relative inline-block px-[2px] py-[3px] text-[14px] font-bold uppercase">
+                Careers
+                <span data-tab-ink aria-hidden className="absolute inset-x-0 -bottom-[5px] h-[2px]" style={{ background: "var(--accent)" }} />
+              </span>
+            </StateCell>
+            <StateCell label="Lit action" note="data-lit: the screen's one lit action (splash CTA, Let's Go, Next Step, Home's hero action). Everything else stays flat.">
+              <button type="button" data-lit onClick={noop} className="dm-solid cursor-pointer rounded-full px-[18px] py-[9px] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "#fff" }}>
+                Next Step
+              </button>
             </StateCell>
           </StateGrid>
         </Specimen>
