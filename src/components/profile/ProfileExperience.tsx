@@ -24,7 +24,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BuildModal, type BuildSection } from "./PreferencesTab";
-import { AboutMeTab, CollegeGoalView, useCollegeGoal } from "./AboutMeTab";
+import { AboutMeTab, CollegeGoalView, useCollegeGoal, type AboutView } from "./AboutMeTab";
 import { BookCounselorSheet, useMyNextMeeting } from "./BookCounselorSheet";
 import { BOOK_MEETING_ID, careerWindows, SAVE_PROGRAM_ID, SAVE_SCHOOLS_ID, SHARE_REPORT_ID, type CareerStep } from "./careerPlanSteps";
 import { reportHistorySnapshot, serverReportHistorySnapshot, subscribeReportHistory } from "@/lib/reportHistory";
@@ -374,46 +374,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // without a pointer.
   const [buildDot, setBuildDot] = useState(false);
   const flowV2 = useTop3FlowV2();
-  // v2: My Build's tip under its cover button (the pre-About Me tag, back)
-  const [prefsTag, setPrefsTag] = useState(false);
-  const buildBtnRef = useRef<HTMLButtonElement>(null);
-  const [tagPos, setTagPos] = useState<{ top: number; right: number } | null>(null);
-  useEffect(() => {
-    if (!prefsTag) return;
-    // Re-measured every 200ms while the tag is live (it lives 9s), so it
-    // follows the header through the arrival animation and any resize; a
-    // single measurement at show time sometimes landed before layout settled.
-    // The tag only paints while the icon itself is on screen and clear of
-    // the nav bar (Chandu, 2 Oct 2026: "otherwise it's pointing at the
-    // profile avatar on the navbar"). When the page has scrolled, as it does
-    // landing on Saved from a nudge, the tag waits and appears the moment
-    // the header is back in view; its nine seconds count only while shown.
-    // The dot on the icon covers the wait.
-    let shownAt = 0;
-    const place = () => {
-      const r = buildBtnRef.current?.getBoundingClientRect();
-      if (!r || r.width === 0) return;
-      const clearOfNav = r.top >= 80 && r.bottom <= window.innerHeight - 40;
-      if (!clearOfNav) { setTagPos(null); return; }
-      if (!shownAt) shownAt = Date.now();
-      if (Date.now() - shownAt > 9000) { setPrefsTag(false); return; }
-      const next = { top: Math.round(r.bottom + window.scrollY + 10), right: Math.max(12, Math.round(document.documentElement.clientWidth - r.right)) };
-      setTagPos((cur) => (cur && cur.top === next.top && cur.right === next.right ? cur : next));
-    };
-    const id = window.setInterval(place, 200);
-    const raf = window.requestAnimationFrame(place);
-    return () => { window.clearInterval(id); window.cancelAnimationFrame(raf); setTagPos(null); };
-  }, [prefsTag]);
-  // v2: the tip is due on every visit until My Build is opened once (demo:
-  // per session). It is set 1.6s after the page settles but only paints
-  // while the button is on screen, so a student scrolled down to the cards
-  // from Match sees it the moment they scroll back up (the place loop).
-  useEffect(() => {
-    if (!flowV2 || welcomeOpen || welcomePending) return;
-    try { if (buildOpened()) return; } catch { return; }
-    const show = window.setTimeout(() => setPrefsTag(true), 1600);
-    return () => window.clearTimeout(show);
-  }, [flowV2, welcomeOpen, welcomePending]);
   useEffect(() => {
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only flag read after mount
@@ -423,22 +383,26 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // My Build is a modal over the page (6 Oct 2026): sections down the left,
   // the editor on the right, one Save for all of it.
   const [buildOpen, setBuildOpen] = useState(false);
-  // v2 has no About Me: an About Me landing (the default, old links) goes to
-  // Top 3; a ?goal= link (a "Saved" or "View saved") goes to that Saved shelf.
-  const goalParam = useSearchParams()?.get("goal");
+  // v2 has no Top 3 tab (19 Oct 2026, Chandu: "we can get rid of the top 3
+  // tab by folding it into here"). Every way in that still names it (Match's
+  // arrival, "See Top 3", ?tab=top3) lands on About Me's Career Goal, where
+  // the Top 3 cards now live. `n` remounts About Me on that view.
+  const [aboutStart, setAboutStart] = useState<{ view: AboutView; n: number }>({ view: "home", n: 0 });
   useEffect(() => {
-    if (!flowV2 || tab !== "about") return;
-    if (goalParam === "college" || goalParam === "career") {
-      try { const url = new URL(window.location.href); url.searchParams.set("tab", "locker"); url.searchParams.set("shelf", goalParam === "college" ? "schools" : "careers"); url.searchParams.delete("goal"); window.history.replaceState(window.history.state, "", url.toString()); } catch { /* fine */ }
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- the v2 flag is client-only, read after mount
-      setTab("locker");
-    } else setTab("top3");
-  }, [flowV2, tab, goalParam]);
+    if (!flowV2 || tab !== "top3") return;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", "about");
+      window.history.replaceState(window.history.state, "", url.toString());
+    } catch { /* fine */ }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the v2 flag is client-only, read after mount
+    setAboutStart((cur) => ({ view: "career", n: cur.n + 1 }));
+    setTab("about");
+  }, [flowV2, tab]);
   // v2: My Plan's "Book a meeting with your counselor" step
   const [bookingOpen, setBookingOpen] = useState(false);
   const [buildSection, setBuildSection] = useState<BuildSection | undefined>(undefined);
   const openBuild = (section?: BuildSection) => {
-    setPrefsTag(false);
     setBuildDot(false);
     markBuildOpened();
     setBuildSection(section);
@@ -759,6 +723,27 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
 
 
 
+  // The Top 3 cards with their nudges: their own tab in v1, inside About Me's
+  // Career Goal in v2.
+  const top3Cards = (
+    <Top3Tab
+      top3={top3} focusId={focusId} primaryChosen={primaryChosen} setFocusId={setFocusId} chosenRoute={chosenRoute}
+      showTour={showProfileTour && profileTourReady && !welcomeOpen && profileTourStep === "top3"}
+      hintPaused={welcomeOpen || welcomePending}
+      onTourDone={dismissProfileTour}
+      // No confirm dialog: a removed career goes back to Saved and
+      // the freed slot offers Undo right where the card was, so a
+      // mis-tap costs one tap (a dialog plus a toast was two layers
+      // for a reversible action).
+      onAdd={() => { setUndoRemove(null); setAddOpen(true); }} onRemove={removeFromTop3} onReorder={reorderTop3}
+      removed={undoRemove ? { id: undoRemove.id, title: undoRemove.title, index: undoRemove.ids.indexOf(undoRemove.id) } : null}
+      onDismissUndo={() => setUndoRemove(null)}
+      onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
+      onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
+      onPlan={(id) => { reorderTop3([id, ...top3.filter((x) => x !== id)]); setTab("plan"); }}
+    />
+  );
+
   return (
     // overflowX clip (not the class's hidden) keeps sideways-drag protection without
     // creating a scroll container, so the report's sticky section rail can pin.
@@ -909,67 +894,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                  cover with its tooltip nudge (Chandu, 19 Oct 2026: "my build
                  can still be where it used to be in the cover image with its
                  tooltip nudge appearing once the page is scrolled back up"). */}
-              {flowV2 && (
-              <>
-              {/* Preferences takes the header spot Saved had (direct
-                 instruction, 30 Sept 2026), since Saved is a tab. */}
-              <span className="relative">
-              <button
-                ref={buildBtnRef}
-                type="button"
-                aria-label="My Build"
-                onClick={() => openBuild()}
-                className={`dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold ${prefsTag ? "dm-tab-nudge" : ""}`}
-                style={{ background: tab === "preferences" || prefsTag ? "var(--glass-surface-3)" : "transparent", color: tab === "preferences" || prefsTag ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
-              >
-                <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" />{" "}
-                {/* The text sweep with its spark (the Cover button's old nudge)
-                   until My Build has been opened once; the coachmark rides
-                   alongside on the first views. A muted base so the glint
-                   shows (same reason Cover's label had one). */}
-                <span className={`relative hidden sm:inline ${buildDot ? "dm-text-nudge" : ""}`} style={buildDot ? { color: "rgba(255,255,255,0.55)" } : undefined}>
-                  My Build
-                  {buildDot && (
-                    <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
-                      <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
-                    </svg>
-                  )}
-                </span>
-              </button>
-              {/* The teaching moment (Chandu, 1 Oct 2026: "a teaching moment
-                 for preferences, timed, maybe on the second visit"). Second
-                 visit only: the first visit belongs to the profile tour and
-                 the welcome. 1.6s after the page settles, the icon pulses and
-                 one line slides out under it. Tapping the line opens
-                 Preferences; otherwise it leaves after 9s. Once, ever. */}
-              {/* Rendered through a portal: inside the cover card the tag was
-                 clipped by the card's rounded overflow on desktop (2 Oct 2026;
-                 Chandu: "I don't see the My Build nudge"). Positioned in page
-                 coordinates under the button, so it scrolls with the header. */}
-              {prefsTag && tagPos && (
-                <Portal>
-                  <div className="marketing-v2 themeable" style={{ background: "transparent" }}>
-                    <motion.button
-                      type="button"
-                      initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                      onClick={() => openBuild()}
-                      className="dm-tip dm-tap absolute z-[80] flex w-max max-w-[280px] cursor-pointer items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-left text-[14px] leading-[18px] font-bold"
-                      style={{ top: tagPos.top, right: tagPos.right, textShadow: "none", fontFamily: "var(--font-body)" }}
-                    >
-                      {/* the caret in the bubble's own blue (the house .dm-tip, 19 Oct 2026) */}
-                      <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "#4a8df6", boxShadow: "-1px -1px 0 0 rgba(158,198,250,0.7)" }} />
-                      <Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden />
-                      {/* 2 Oct 2026, Chandu: better copy that says they can change
-                         their preferences and Dreamari changes with them. */}
-                      Into something new? Change it here and your matches follow.
-                    </motion.button>
-                  </div>
-                </Portal>
-              )}
-              </span>
-              </>
-              )}
+              {/* v2 has About Me again (19 Oct 2026), so My Build's cover
+                 button and its tooltip went: one home for it, on About Me,
+                 in both versions. */}
               {/* The gear menu, split into the things a student actually
                  comes here for (direct feedback, 10 Sept 2026): each item
                  opens Settings scrolled to that section. */}
@@ -1165,7 +1092,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = flowV2 ? ["top3", "locker", "plan", "report", "resume"] : ["about", "top3", "locker", "plan", "report", "resume"];
+            const order: TabId[] = flowV2 ? ["about", "locker", "plan", "report", "resume"] : ["about", "top3", "locker", "plan", "report", "resume"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -1193,9 +1120,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               // v2 hides it (audit, 19 Oct 2026): its Career Goal is the Top 3
               // #1, My Build is on the action bar and in Settings, and College
               // Goal moved into Saved > Schools.
-              ...(flowV2 ? [] : [{ id: "about" as TabId, label: "About Me" }]),
-              { id: "top3", label: "Top 3" },
-              { id: "locker", label: "Saved", badge: savedTotal || undefined },
+              // v2 (19 Oct 2026, Chandu): About Me guides the student
+              // through the goals and holds the Top 3 cards inside Career
+              // Goal, so v2 has no Top 3 tab. Saved stays as it is ("lets
+              // keep saved tab as is").
+              { id: "about" as TabId, label: "About Me" },
+              ...(flowV2 ? [] : [{ id: "top3" as TabId, label: "Top 3" }]),
+              { id: "locker" as TabId, label: "Saved", badge: savedTotal || undefined },
               { id: "plan", label: "My Plan" },
               { id: "report", label: "Report" },
               { id: "resume", label: "Resume" },
@@ -1235,33 +1166,24 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {tab === "about" && (
           <div role="tabpanel" id="profile-panel-about" aria-labelledby="profile-tab-about">
             <AboutMeTab
+              key={aboutStart.n}
               top3={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
               saved={savedLocker}
               onAddToTop3={addToTop3}
               onGoTab={setTab}
               onOpenBuild={openBuild}
               buildNudge={buildDot}
+              v2={flowV2 ? {
+                top3Slot: top3Cards,
+                onConfirmPrimary: (id) => setEdits({ ids: [id, ...top3.filter((x) => x !== id)], focus: id }),
+                initialView: aboutStart.view,
+              } : undefined}
             />
           </div>
         )}
         {tab === "top3" && (
           <motion.div role="tabpanel" id="profile-panel-top3" aria-labelledby="profile-tab-top3" initial={false} animate={panelPhase === "out" ? { opacity: 0, x: -28 } : { opacity: 1, x: 0 }} transition={{ duration: REVEAL_OUT_MS / 1000, ease: [0.4, 0, 1, 1] }}>
-            <Top3Tab
-              top3={top3} focusId={focusId} primaryChosen={primaryChosen} setFocusId={setFocusId} chosenRoute={chosenRoute}
-              showTour={showProfileTour && profileTourReady && !welcomeOpen && profileTourStep === "top3"}
-              hintPaused={welcomeOpen || welcomePending}
-              onTourDone={dismissProfileTour}
-              // No confirm dialog: a removed career goes back to Saved and
-              // the freed slot offers Undo right where the card was, so a
-              // mis-tap costs one tap (a dialog plus a toast was two layers
-              // for a reversible action).
-              onAdd={() => { setUndoRemove(null); setAddOpen(true); }} onRemove={removeFromTop3} onReorder={reorderTop3}
-              removed={undoRemove ? { id: undoRemove.id, title: undoRemove.title, index: undoRemove.ids.indexOf(undoRemove.id) } : null}
-              onDismissUndo={() => setUndoRemove(null)}
-              onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
-              onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
-              onPlan={(id) => { reorderTop3([id, ...top3.filter((x) => x !== id)]); setTab("plan"); }}
-            />
+            {top3Cards}
           </motion.div>
         )}
         {tab === "routes" && (
