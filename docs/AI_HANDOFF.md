@@ -1,3 +1,10 @@
+## 2026-10-19: Home hero frost stops at the title, so photo subjects stay sharp
+
+**Why (Chandu):** "The character in the image is being blurred too much in this carousel card. On all devices and screen sizes." The frost (a 16px-blurred copy of the photo, masked in under the text) ran to 64% of the card width on tablet and desktop and 60% of the height on phones, so any subject near the middle of a photo sat under the blur.
+
+- `src/components/app/HomeExperience.tsx` `HeroPanel`: `FROST` now fades out by 44% of the width (the title's right edge), and the new `FROST_PHONE` fades out by 36% of the height. The dark scrims are unchanged and still carry text legibility past the blur. Applies to every full-bleed hero panel, plus the phone frost on the inset ones (Drone Pilot, partner).
+- Tried and turned down the same day: moving the Registered Nurse hero to the v2 art (`rosa-station-dawn-anime.png`, inset over the empty station). Chandu: "lets stick to the older carousel image for registered nurse for now." The nurse panel keeps `REGISTERED_NURSE.cover`.
+- Checked: eslint and tsc; the new masks applied live on the :3061 build at desktop width and at 375px phone width, dark mode. Not checked: this worktree's own dev server (all five server slots were held by other chats), light mode, Windows/Chromebook.
 ## 2026-10-19: light school cards lose the dark band across the top
 
 **Why (Chandu):** "the light mode cards for the school/fallback cards look off, theres a dark gradient on top".
