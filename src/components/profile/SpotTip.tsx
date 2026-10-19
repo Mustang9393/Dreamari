@@ -82,3 +82,20 @@ export function useSpotSequence<B extends string>(key: string, beats: readonly B
   }, [enabled, key]);
   return [beat, stop];
 }
+
+/** The house tooltip as a badge inside a glowing card ("Start here", "Next
+ *  step"): it stays until the step is done, so it never times out, and it
+ *  sits inside the card so it covers nothing around it. */
+export function SpotBadge({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.span
+      aria-hidden
+      initial={{ opacity: 0, y: -6, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 520, damping: 22, delay: 0.3 }}
+      className="dm-tip pointer-events-none absolute top-[var(--space-4)] left-[var(--space-4)] z-[3] flex items-center gap-[6px] rounded-[10px] px-[12px] py-[7px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap"
+      style={{ textShadow: "none" }}
+    >
+      <Sparkles className="h-[14px] w-[14px] flex-none" aria-hidden />
+      {children}
+    </motion.span>
+  );
+}

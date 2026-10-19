@@ -1,3 +1,25 @@
+## 2026-10-19: Match arrival lands on About Me; College Goal uses the hall art, uncropped; stronger goal nudges
+
+**Why (Chandu):** "use the fallback graphic we made for empty college goal stuff. Also the nudge needs to be better for choosing a college goal. How are we going to handle the career goal not set state? Think of it in terms of the actual flow where a student comes from match and lands on about me." Then: "the college goal graphic is getting cropped."
+
+- **Career Goal not set, from Match** (`/profile?picks=…&tab=top3&welcome=1`): v2 now lands on About Me itself, not inside Career Goal.
+  - The student sees the whole path first: Career Goal, College Goal, then the plan.
+  - The Career Goal card glows (`dm-spot-ring`) and carries a "Start here" badge: the house tooltip inside the card (`SpotBadge`, SpotTip.tsx). It stays until the goal is set and never times out.
+  - One tap opens the Top 3 from Match with its nudges. After confirming, the badge moves to the College card ("Next step").
+  - Other `?tab=top3` links still open Career Goal directly.
+  - Until the goal is set, Report and My Plan keep following the strongest match, as before.
+- **Empty College Goal states use the school fallback art** (CollegePlaceholder, the lit hall), crisp, not blurred:
+  - the About Me card
+  - "Pick your #1 school" when there is no #1
+  - "No schools yet" when nothing is saved
+  - any #1 school without a photo
+- **Cropping:** the art is a square drawn to fill by cropping, so short, wide cards lost the dome and steps. New `HallArt` keeps it square at the card's full height, centered (or right-aligned on wide cards), with its sides feathered into the art's own ground colour (`--cp-ground`, so light mode matches).
+- **College nudges:**
+  - With no #1, the My schools sequence lights the star first ("Make it your #1"), then Move, and the first star keeps a soft glow after the tooltip.
+  - With an unconfirmed #1, "Make it my College Goal" glows. Career's confirm button glows the same way.
+- **Validation:** tsc clean (except the pre-existing `@dicebear` error). A simulated Match arrival on phone lands on About Me with "Start here", and the college art is whole. Desktop College Goal with no #1 shows the full hall plus the glowing star. The test's #1 school was restored afterwards.
+- **Next:** Chandu reviews the Match arrival. Nothing pushed.
+
 ## 2026-10-19: v2 About Me guides the goals; Top 3 folds into Career Goal; My schools gets My Build's finish
 
 **Why (Chandu):** "lets make about me the way to guide students first. They land with empty cards: career goal should be first ask to be fixed and when they click, they see their saved careers and we can have the sam ui and nudges we had to teahc them how to rank etc. Then #1 becomes the career goal, xp is gained, then next step is to fix a college/school goal ... we can get rid of the top 3 tab by folding it into here." Follow-ups the same day:

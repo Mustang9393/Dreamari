@@ -389,15 +389,22 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // arrival, "See Top 3", ?tab=top3) lands on About Me's Career Goal, where
   // the Top 3 cards now live. `n` remounts About Me on that view.
   const [aboutStart, setAboutStart] = useState<{ view: AboutView; n: number }>({ view: "home", n: 0 });
+  // Except the arrival from Match (19 Oct 2026, Chandu: "think of it in
+  // terms of the actual flow where a student comes from match and lands on
+  // about me"): it lands on About Me itself, where the student sees the
+  // whole path (Career Goal, College Goal, then the plan) and the Career
+  // Goal card says "Start here". One tap opens the Top 3 they just built.
+  const matchArrival = useRef(initialWelcome);
   useEffect(() => {
     if (!flowV2 || tab !== "top3") return;
+    const view: AboutView = matchArrival.current ? "home" : "career";
+    matchArrival.current = false;
     try {
       const url = new URL(window.location.href);
       url.searchParams.set("tab", "about");
       window.history.replaceState(window.history.state, "", url.toString());
     } catch { /* fine */ }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the v2 flag is client-only, read after mount
-    setAboutStart((cur) => ({ view: "career", n: cur.n + 1 }));
+    setAboutStart((cur) => ({ view, n: cur.n + 1 }));
     setTab("about");
   }, [flowV2, tab]);
   // v2: My Plan's "Book a meeting with your counselor" step

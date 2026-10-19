@@ -25,12 +25,13 @@ import { Listbox } from "@/components/app/Listbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { openCareerPeek, openSchoolPeek } from "@/components/app/peek";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import type { College } from "@/components/colleges/data";
+import { collegeImage, type College } from "@/components/colleges/data";
 import { useResolvedColleges } from "@/components/colleges/dataset";
 import { CollegePicture, useGoalBuckets, useSaved as useSavedColleges, useTopSchool, type GoalBucket } from "@/components/colleges/shared";
 import { fitFor, parseGpa } from "@/components/colleges/pathway";
 import { useBackStep } from "@/lib/backStep";
-import { SpotTip, useSpotSequence } from "./SpotTip";
+import { SpotBadge, SpotTip, useSpotSequence } from "./SpotTip";
+import { CollegePlaceholder } from "@/components/colleges/CollegePlaceholder";
 import { flyXp } from "@/components/app/xpFlight";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession } from "@/components/app/WelcomeSplash";
 import { useBuildAnswers } from "@/lib/buildAnswers";
@@ -232,6 +233,7 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
                 backdrop={lead ? <FacePhoto src={lead.photo} sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" fallback={lead.photoFocus ?? "50% 30%"} /> : null}
                 xp={lead ? CAREER_GOAL_XP : undefined}
                 nudge
+                badge="Start here"
                 href={lead ? undefined : "/explore"}
                 onOpen={() => go("career")} openLabel="Open Career Goal"
               />
@@ -239,7 +241,7 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
             {collegeSet && college.top ? (
               <GoalCard
                 kind="College Goal" Icon={GraduationCap} title={college.top.name}
-                picture={<CollegePicture c={college.top} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0 h-full w-full" />}
+                picture={<GoalSchoolPicture c={college.top} sizes="(min-width: 768px) 50vw, 100vw" />}
                 onOpen={() => go("college")} openLabel="Open College Goal"
                 focusIn={justSet === "college"}
               />
@@ -247,10 +249,15 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
               <EmptyGoalCard
                 kind="College Goal" Icon={GraduationCap}
                 title={leadSchool ? "Choose your college goal" : "Save schools to choose from"}
-                backdrop={leadSchool ? <CollegePicture c={leadSchool} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0 h-full w-full" /> : null}
+                // the school-card fallback art, crisp: an empty College Goal is a
+                // campus waiting to be named (Chandu, 19 Oct 2026: "use the
+                // fallback graphic we made for empty college goal stuff")
+                art={<HallArt />}
+                backdrop={null}
                 xp={leadSchool ? COLLEGE_GOAL_XP : undefined}
                 // one ask at a time: the school goal waits for the career goal
                 nudge={careerSet}
+                badge={careerSet ? "Next step" : undefined}
                 quiet={!careerSet}
                 href={leadSchool ? undefined : "/colleges"}
                 onOpen={() => go("college")} openLabel="Open College Goal"
@@ -289,7 +296,7 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
             kind="College Goal"
             Icon={GraduationCap}
             title={college.top ? college.top.name : college.schools.length ? "Pick your #1 school" : "Pick a school you’re working toward"}
-            picture={college.top ? <CollegePicture c={college.top} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0 h-full w-full" /> : null}
+            picture={college.top ? <GoalSchoolPicture c={college.top} sizes="(min-width: 768px) 50vw, 100vw" /> : null}
             onOpen={() => go("college")}
             openLabel="Open College Goal"
           />
@@ -346,14 +353,16 @@ function XpChip({ amount }: { amount: number }) {
  *  setting the goal brings it into focus (GoalCard's focusIn). Same layout
  *  as the filled card, so only the focus changes. With nothing to choose
  *  from, Build's sky stands in and the card opens Explore. */
-function EmptyGoalCard({ kind, Icon, title, backdrop, xp, nudge, quiet = false, href, onOpen, openLabel }: {
-  kind: string; Icon: typeof Briefcase; title: string; backdrop: React.ReactNode | null; xp?: number; nudge: boolean; /** waiting its turn: dimmer */ quiet?: boolean; /** nothing to choose from: go here instead */ href?: string; onOpen: () => void; openLabel: string;
+function EmptyGoalCard({ kind, Icon, title, backdrop, art, xp, nudge, badge, quiet = false, href, onOpen, openLabel }: {
+  kind: string; Icon: typeof Briefcase; title: string; backdrop: React.ReactNode | null; /** shown sharp instead (College: the school fallback art) */ art?: React.ReactNode; xp?: number; nudge: boolean; /** this is the step to take now: the card glows and says so */ badge?: string; /** waiting its turn: dimmer */ quiet?: boolean; /** nothing to choose from: go here instead */ href?: string; onOpen: () => void; openLabel: string;
 }) {
   const lookV2 = useLookV2();
   const body = (
     <>
       <span aria-hidden className="absolute inset-0">
-        {backdrop ? (
+        {art ? (
+          <span className="absolute inset-0" style={{ opacity: quiet ? 0.55 : 1, transition: "opacity 600ms ease" }}>{art}</span>
+        ) : backdrop ? (
           // a still blur (never animated at rest: Glossary Lab perf rule)
           <span className="absolute inset-0" style={{ filter: `blur(18px) saturate(0.7) brightness(${quiet ? 0.42 : 0.6})`, transform: "scale(1.15)" }}>{backdrop}</span>
         ) : (
@@ -366,6 +375,7 @@ function EmptyGoalCard({ kind, Icon, title, backdrop, xp, nudge, quiet = false, 
         )}
         <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.9) 0%, rgba(12,16,35,0.35) 50%, rgba(12,16,35,0.1) 100%)" }} />
       </span>
+      {badge && <SpotBadge>{badge}</SpotBadge>}
       <span className="relative mt-auto flex flex-col gap-[6px] p-[var(--space-5)]">
         <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>
           <Icon className="h-[14px] w-[14px]" aria-hidden /> {kind}
@@ -379,7 +389,7 @@ function EmptyGoalCard({ kind, Icon, title, backdrop, xp, nudge, quiet = false, 
       </span>
     </>
   );
-  const className = "dm-tap group relative isolate flex h-full min-h-[220px] w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] border text-left md:min-h-[300px]";
+  const className = `dm-tap group relative isolate flex h-full min-h-[220px] w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] border text-left md:min-h-[300px] ${badge ? "dm-spot-ring" : ""}`;
   const style = { borderColor: nudge ? "color-mix(in srgb, var(--primary) 55%, var(--glass-border))" : "var(--glass-border)", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW } as const;
   return (
     <HoverBeam className="h-full">
@@ -426,12 +436,12 @@ function GoalConfirm({ set, name, goal, onConfirm, next, xp }: { set: boolean; n
   }
   // The #1 card above already names it, so the action says it once and
   // nothing repeats the name in a sentence.
-  return <ConfirmButton label={`Make ${name} my ${goal}`} xp={xp} onConfirm={onConfirm} wide />;
+  return <ConfirmButton label={`Make ${name} my ${goal}`} xp={xp} onConfirm={onConfirm} wide glow />;
 }
 
-function ConfirmButton({ label, xp, onConfirm, wide = false }: { label: string; xp: number; onConfirm: (from: Element | null) => void; wide?: boolean }) {
+function ConfirmButton({ label, xp, onConfirm, wide = false, glow = false }: { label: string; xp: number; onConfirm: (from: Element | null) => void; wide?: boolean; /** the step to take now: the house glow */ glow?: boolean }) {
   return (
-    <button type="button" onClick={(e) => onConfirm(e.currentTarget)} className={`dm-tap flex min-h-[44px] cursor-pointer items-center gap-[var(--space-2)] rounded-[var(--radius-md)] pr-[6px] pl-[var(--space-4)] text-[14px] font-bold ${wide ? "w-full justify-between sm:w-fit" : "w-fit"}`} style={{ background: "var(--primary)", color: "var(--primary-foreground)", textShadow: "none" }}>
+    <button type="button" onClick={(e) => onConfirm(e.currentTarget)} className={`dm-tap flex min-h-[44px] cursor-pointer items-center gap-[var(--space-2)] rounded-[var(--radius-md)] pr-[6px] pl-[var(--space-4)] text-[14px] font-bold ${wide ? "w-full justify-between sm:w-fit" : "w-fit"} ${glow ? "dm-spot-ring" : ""}`} style={{ background: "var(--primary)", color: "var(--primary-foreground)", textShadow: "none" }}>
       <span className="min-w-0 text-left"><NudgeText on>{label}</NudgeText></span>
       <XpChip amount={xp} />
     </button>
@@ -777,13 +787,17 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
       {!embedded && <h3 className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>College Goal</h3>}
 
       {goal.schools.length === 0 ? (
-        <EmptyGroup text="No schools yet. Save a school in Explore Schools and it shows up here, ready to sort." cta="Explore schools" href="/colleges" />
+        <ArtCard eyebrow="My schools" title="No schools yet" line="Save schools in Explore. They show up here, ready to sort.">
+          <Link href="/colleges" className="dm-tap flex min-h-[44px] w-fit items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)", textShadow: "none" }}>
+            <Compass className="h-4 w-4" aria-hidden /> Explore schools
+          </Link>
+        </ArtCard>
       ) : (
         <>
           {top ? (
             <div className="relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "color-mix(in srgb, var(--primary) 40%, rgba(255,255,255,0.16))", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
               <span aria-hidden className="absolute inset-0">
-                <CollegePicture c={top} sizes="(min-width: 1024px) 1100px, 100vw" className="absolute inset-0 h-full w-full" />
+                <GoalSchoolPicture c={top} sizes="(min-width: 1024px) 1100px, 100vw" align="right" />
                 <CardProgressiveBlur size="66%" />
                 <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.5) 45%, transparent 80%)" }} />
               </span>
@@ -799,7 +813,7 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
                 <span className="flex flex-wrap gap-[var(--space-2)]" style={{ textShadow: "none" }}>
                   {/* v2: setting the goal is the card's main action; once set,
                      the next step is. View school steps back to glass. */}
-                  {confirm && !confirm.set && <ConfirmButton label="Make it my College Goal" xp={COLLEGE_GOAL_XP} onConfirm={confirm.onConfirm} />}
+                  {confirm && !confirm.set && <ConfirmButton label="Make it my College Goal" xp={COLLEGE_GOAL_XP} onConfirm={confirm.onConfirm} glow />}
                   {confirm?.set && (
                     <button type="button" onClick={confirm.onNext} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
                       Next: My Plan <ChevronRight className="h-4 w-4" aria-hidden />
@@ -812,10 +826,9 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
               </div>
             </div>
           ) : (
-            <p className="flex items-center gap-[8px] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)] text-[15px] leading-[20px] font-semibold" style={INSET}>
-              <Star className="h-4 w-4 flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden />
-              Tap the star on a school to make it your #1.
-            </p>
+            // the #1 slot, waiting: the school fallback art where the campus
+            // photo will be, and the one thing to do (the star below glows)
+            <ArtCard eyebrow="My #1 school" title="Pick your #1 school" line={<>Tap the <Star className="mx-[2px] inline h-[15px] w-[15px] -translate-y-[1px]" aria-label="star" /> next to a school below.</>} />
           )}
 
           <section className="flex flex-col gap-[var(--space-3)]">
@@ -828,6 +841,56 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, con
           </section>
         </>
       )}
+    </div>
+  );
+}
+
+/** The school-card fallback art (CollegePlaceholder) in a box of any shape.
+ *  It is drawn square and fills by cropping, so on a short, wide card the
+ *  hall lost its dome and steps (Chandu, 19 Oct 2026: "the college goal
+ *  graphic is getting cropped"). Here it stays square at the card's full
+ *  height, its sides feathered into the art's own ground colour, which the
+ *  box is painted with (light mode included, through the same --cp-*). */
+function HallArt({ align = "center" }: { align?: "center" | "right" }) {
+  return (
+    <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(var(--cp-ground, #000105), var(--cp-ground-2, #03070f))" }}>
+      <span
+        className="absolute inset-y-0 block aspect-square h-full max-w-none"
+        style={{
+          ...(align === "right" ? { right: "4%" } : { left: "50%", transform: "translateX(-50%)" }),
+          maskImage: "linear-gradient(to right, transparent, #000 22%, #000 78%, transparent)",
+          WebkitMaskImage: "linear-gradient(to right, transparent, #000 22%, #000 78%, transparent)",
+        }}
+      >
+        <CollegePlaceholder className="absolute inset-0 h-full w-full" />
+      </span>
+    </span>
+  );
+}
+
+/** A goal-sized school picture: the campus photo, or, with none, the
+ *  fallback art kept whole (HallArt) instead of cropped to the card. */
+function GoalSchoolPicture({ c, sizes, align = "center" }: { c: College; sizes: string; align?: "center" | "right" }) {
+  return collegeImage(c) ? <CollegePicture c={c} sizes={sizes} className="absolute inset-0 h-full w-full" /> : <HallArt align={align} />;
+}
+
+/** A College Goal space with no photo yet: the school-card fallback art
+ *  (CollegePlaceholder, the lit hall) at hero size, with what goes here. */
+function ArtCard({ eyebrow, title, line, children }: { eyebrow: string; title: string; line: React.ReactNode; children?: React.ReactNode }) {
+  return (
+    <div className="relative isolate flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+      <span aria-hidden className="absolute inset-0">
+        <HallArt align="right" />
+        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,1,5,0.9) 0%, rgba(0,1,5,0.4) 45%, transparent 80%)" }} />
+      </span>
+      <div className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-5)]">
+        <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>{eyebrow}</span>
+        <span className="flex flex-col gap-[4px]">
+          <span className="text-[22px] leading-[27px] font-extrabold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{title}</span>
+          <span className="text-[14px] leading-[20px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{line}</span>
+        </span>
+        {children}
+      </div>
     </div>
   );
 }
@@ -846,7 +909,8 @@ function SchoolsPanel({ goal, onOpen }: { goal: CollegeGoal; onOpen: (c: College
   const shown = picked ?? Math.max(0, lists.findIndex((l) => l.length > 0));
   // Teach the two controls on the first school, once: Move, then the star.
   const panel = useRef<HTMLDivElement>(null);
-  const [spot, stopSpot] = useSpotSequence("dreamari:nudge:my-schools", ["move", "star"] as const, panel, goal.schools.length > 0);
+  // With no #1 yet the star is the step that matters, so it goes first.
+  const [spot, stopSpot] = useSpotSequence("dreamari:nudge:my-schools", (goal.top ? ["move", "star"] : ["star", "move"]) as ("move" | "star")[], panel, goal.schools.length > 0);
   return (
     <div ref={panel} className="relative isolate grid overflow-hidden rounded-[var(--radius-lg)] border lg:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
       <ThemeProvider>
@@ -876,6 +940,8 @@ function SchoolsPanel({ goal, onOpen }: { goal: CollegeGoal; onOpen: (c: College
               <SchoolRow
                 key={c.slug} c={c} bucket={b.id} isTop={goal.top?.slug === c.slug} onOpen={() => onOpen(c)}
                 spot={bi === shown && i === 0 ? spot : null}
+                // no #1 yet: after the tooltip, the first star keeps glowing
+                starGlow={!goal.top && bi === shown && i === 0}
                 onStar={() => { stopSpot(); goal.setTop(goal.top?.slug === c.slug ? null : c.slug); }}
                 onMove={(next) => { stopSpot(); goal.move(c.slug, next); }}
               />
@@ -889,7 +955,7 @@ function SchoolsPanel({ goal, onOpen }: { goal: CollegeGoal; onOpen: (c: College
   );
 }
 
-function SchoolRow({ c, bucket, isTop, onOpen, onStar, onMove, spot = null }: { c: College; bucket: GoalBucket; isTop: boolean; onOpen: () => void; onStar: () => void; onMove: (b: GoalBucket) => void; /** the first-visit nudge lighting one of this row's controls */ spot?: "move" | "star" | null }) {
+function SchoolRow({ c, bucket, isTop, onOpen, onStar, onMove, spot = null, starGlow = false }: { c: College; bucket: GoalBucket; isTop: boolean; onOpen: () => void; onStar: () => void; onMove: (b: GoalBucket) => void; /** the first-visit nudge lighting one of this row's controls */ spot?: "move" | "star" | null; /** the star is the step to take now */ starGlow?: boolean }) {
   const others = BUCKETS.filter((b) => b.id !== bucket).map((b) => b.label);
   return (
     <div className="dm-quiet group relative -mx-[10px] flex min-h-[60px] items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[10px] py-[8px]">
@@ -917,7 +983,7 @@ function SchoolRow({ c, bucket, isTop, onOpen, onStar, onMove, spot = null }: { 
         </span>
         <span className="relative">
           <IconTip label={isTop ? "Your #1 school" : "Make my #1"}>
-            <button type="button" onClick={onStar} aria-pressed={isTop} aria-label={isTop ? `${c.name} is your #1 school. Tap to clear` : `Make ${c.name} your #1 school`} className={`dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-md)] ${spot === "star" ? "dm-spot" : ""}`} style={{ color: spot === "star" ? "#fff" : isTop ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+            <button type="button" onClick={onStar} aria-pressed={isTop} aria-label={isTop ? `${c.name} is your #1 school. Tap to clear` : `Make ${c.name} your #1 school`} className={`dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-md)] ${spot === "star" ? "dm-spot" : starGlow && spot !== "move" ? "dm-spot-ring" : ""}`} style={{ color: spot === "star" ? "#fff" : isTop ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
               <Star className="h-[18px] w-[18px]" fill={isTop ? "currentColor" : "none"} aria-hidden />
             </button>
           </IconTip>
