@@ -14,7 +14,7 @@ Status: AI-authored local draft, not a supplied Joshua script. No professional o
 
 ## Cast: canonical selected draft scenes
 
-Asha is a 32-year-old Indian mentor, warm medium-brown skin, dark brown almond eyes, gently pointed oval face, black side-parted hair in a low bun, teal overshirt over ivory top, charcoal trousers and small gold studs. The selected generated studio frame established a side part despite an earlier requested centre part. That first prompt was not followed exactly; the record follows the selected drawing and later prompts use it explicitly. This is a draft selection, not user approval.
+Arjun is the 32-year-old Indian male mentor, with medium-brown skin, dark brown eyes, short neat black side-parted hair, a teal overshirt over an ivory crewneck and charcoal trousers. The v4 cast record and scene assets are the selected QA candidate; human visual approval is pending.
 
 Noah is a 25-year-old Mexican peer, light olive skin, grey-green eyes, longer angular face, short chestnut hair, slate-blue rolled-sleeve shirt and navy trousers. His hair is more articulated than the requested four masses; further simplification remains a visual-review item. He appears only in the immutable studio image, so repeated studio scenes cannot change his hair.
 
@@ -26,9 +26,9 @@ Face chips are crops from studio/research/review images. They are not separately
 
 | Camera | Fixed complete image | Exterior and layout |
 |---|---|---|
-| northline-studio | studio.png | Canal and pale city buildings through tall left glazing; desk behind cast; walnut shelves right. Asha and Noah stand in front of the desk with bodies continuing below waist. |
-| northline-research | research.png | Courtyard tree and pale wall through left glazing; acoustic panels; round table and navy chairs. Asha and Eleanor sit naturally at the laptop. |
-| northline-review | review.png | Planted lower roof and city blocks through left glazing; walnut panels, wall screen and pale review table. Samira and Asha stand in front of the furniture. |
+| northline-studio | studio.png | Canal and pale city buildings through tall left glazing; desk behind cast; walnut shelves right. Arjun and Noah stand in front of the desk with bodies continuing below waist. |
+| northline-research | research.png | Courtyard tree and pale wall through left glazing; acoustic panels; round table and navy chairs. Arjun and Eleanor sit naturally at the laptop. |
+| northline-review | review.png | Planted lower roof and city blocks through left glazing; walnut panels, wall screen and pale review table. Samira and Arjun stand in front of the furniture. |
 
 Each camera is a separate complete image. Every repeat uses the exact same file, not an independently generated version. Daylight is used throughout this single-project sequence; no night scene is required by this story. A different room has deliberately different geography.
 
@@ -58,6 +58,11 @@ No salaries, hiring rates, regulations, research statistics or credential claims
 
 ## Exactness stress test
 
-One candidate requested only a closed mouth for Asha, with the rest unchanged. It is quarantined in `art-candidates/` and not served in the game. The decoded-pixel comparison outside the allowed mouth rectangle is recorded in `ux-pixel-test.json`. It fails the exactness gate despite looking visually similar. The game therefore reuses the unmodified studio image for all studio dialogue and feedback. The same-image control must pass with zero protected pixel differences.
+One candidate requested only a closed mouth for Arjun, with the rest unchanged. It is quarantined in `art-candidates/` and not served in the game. The decoded-pixel comparison outside the allowed mouth rectangle is recorded in `ux-pixel-test.json`. It fails the exactness gate despite looking visually similar. The game therefore reuses the unmodified studio image for all studio dialogue and feedback. The same-image control must pass with zero protected pixel differences.
 
 This tests a useful failure mode. It does not establish a fresh-generation success rate, identity accuracy score, time-of-day edit reliability or cross-career art reliability. Those require more approved samples and repeated tests.
+
+
+### Revised QA candidate
+
+Selected runtime art is `public/images/play/ux/v4/`: 15 compositions. See `ui-ux-designer-coverage.json` for exact beat routing and viewpoint exceptions; `ux-scene-generation-v4.json` records the final first-person generation prompts. Older three-scene and restricted-edit findings above are historical, not the selected routing. Player-directed speakers look toward the camera; research observes Eleanor’s task. UX1-MID adds a reachable review after five decisions. Seven canonical work graphics appear on 13 beats using the shared renderer.

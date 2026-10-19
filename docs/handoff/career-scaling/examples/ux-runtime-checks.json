@@ -1,7 +1,16 @@
 {
-  "status": "Local draft validated; production gates remain open",
-  "date": "2026-10-19",
-  "passed": [
+  "status": "UX expanded QA candidate; historical runtime checks retained separately",
+  "limits": [
+    "Human content/art approval pending",
+    "No higher UX levels built",
+    "Recovery failure and repair branches not exercised in this UX run",
+    "Best ending screen not reached in the first run before a build reload; score 100 was observed",
+    "DEMO_START_FRESH intentionally disables resume in current shared prototype",
+    "Global Color control can overlap the phone CTA",
+    "No Windows/Chromebook hardware QA",
+    "No full multi-career generation study or time-of-day edit test"
+  ],
+  "historicalPassed": [
     "All ten decisions answered Best in the actual shared player; reputation reached 100",
     "All eight scored question types exercised: choice, match, bucket, rapid, rank, flags, chain, pick",
     "Unscored practice mistake left reputation unchanged",
@@ -18,15 +27,22 @@
     "SOP desktop/390px phone layout: no horizontal page overflow, anchors resolve, copy button works",
     "Share ZIP integrity and local HTTP 200 checks"
   ],
-  "limits": [
-    "Human content/art approval pending",
-    "No higher UX levels built",
-    "Recovery failure and repair branches not exercised in this UX run",
-    "Best ending screen not reached in the first run before a build reload; score 100 was observed",
-    "DEMO_START_FRESH intentionally disables resume in current shared prototype",
-    "Global Color control can overlap the phone CTA",
-    "No Windows/Chromebook hardware QA",
-    "No full multi-career generation study or time-of-day edit test",
-    "Main app and RN update not deployed"
-  ]
+  "historicalDate": "2026-10-19",
+  "currentRevision": {
+    "date": "2026-10-20",
+    "passed": [
+      "566 structural assertions, 15 shot groups",
+      "Scoped ESLint, TypeScript, token check and production build",
+      "Old three-scene manifest rejected with 85 errors",
+      "Generated selected scenes inspected during generation",
+      "First decision and wireframe artifact rendered in local player"
+    ],
+    "pending": [
+      "Midpoint pass/fail browser checks after full revision",
+      "Phone framing after final POV shots",
+      "Full end-to-end replay of expanded revision",
+      "Human content and visual continuity QA"
+    ],
+    "browserInterruption": "Browser unavailable following app restart; release checks will resume where possible"
+  }
 }

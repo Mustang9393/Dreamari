@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { WorkArtifact } from "./WorkArtifact";
 import { CareerScene } from "./CareerScene";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { useRouter } from "next/navigation";
@@ -48,7 +49,6 @@ import { TickerTapeStorm } from "./BagSecured";
 import { CareerSeal, EndingBackdrop } from "./Celebrations";
 import { HeroCamera } from "./HeroCamera";
 import { TorqueBody } from "./TorqueBody";
-import { IntroSplash } from "./IntroSplash";
 import { musicFailedSnapshot, musicMutedSnapshot, playMusic, retryMusic, serverMusicFailedSnapshot, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicFailed, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import {
@@ -684,13 +684,6 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
   }
   const bigCharacterVisible = stageCast.length > 0;
   const bossEntrance = directed && beat.kind === "card" && beat.entrance === "boss";
-  // v3 (cinematic): a character's introduction ("Rosa \u2022 Staff Nurse")
-  // gets their name set huge behind them (Citizen Sleeper's DRAGOS /
-  // YU-JIN), instead of a small label inside the box.
-  const introParts = cinematic && beat.kind === "card" && beat.variant === "character" && beat.setup?.includes("\u2022") ? beat.setup.split("\u2022").map((part) => part.trim()) : undefined;
-  const intro = cinematic && beat.kind === "card" && beat.introduce
-    ? { name: beat.introduce.name, role: beat.introduce.role ?? "" }
-    : introParts && introParts[0] ? { name: introParts[0], role: introParts[1] ?? "" } : undefined;
   // "Level 1.5" from the section card on (Level.sectionAfter).
   const sectionStart = level.sectionAfter ? level.beats.findIndex((b) => b.id === level.sectionAfter?.beatId) : -1;
   const sectionLabel = sectionStart >= 0 && index >= sectionStart ? level.sectionAfter?.label : undefined;
@@ -888,7 +881,6 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
             {/* The boss arrival (directed, doc screen 24): the room drops
                into shadow around a warm spotlight behind the character, so
                the entrance reads as an event before a word is read. */}
-            {intro && !v2 && <IntroSplash key={intro.name} name={intro.name} accent={accent} />}
             {bossEntrance && (
               <div
                 aria-hidden
@@ -1318,16 +1310,18 @@ function LocationBackdrop({
     : dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined;
   return (
     <>
+      <div className="absolute inset-0 sm:hidden" style={isFullSceneImage(src) ? { top: "8%", height: "65%", bottom: "auto", maskImage: "linear-gradient(to bottom, black 0%, black 82%, transparent 100%)" } : undefined}>
       <Image
         src={src}
         alt={alt}
         fill
         priority
         sizes={isFullSceneImage(src) ? "(max-width: 639px) 116svh, 100vw" : "100vw"}
-        className={`object-cover transition-[filter] sm:hidden ${drained ? "duration-[1100ms]" : "duration-500"}`}
-        style={{ objectPosition: plateObjectPosition(mobileFocal), filter, ...(isFullSceneImage(src) ? { top: "8%", height: "65%", bottom: "auto", maskImage: "linear-gradient(to bottom, black 0%, black 82%, transparent 100%)" } : {}) }}
+        className={`object-cover transition-[filter] ${drained ? "duration-[1100ms]" : "duration-500"}`}
+        style={{ objectPosition: plateObjectPosition(mobileFocal), filter }}
         onLoad={onReady}
       />
+      </div>
       <Image
         src={src}
         alt={alt}
@@ -1654,7 +1648,12 @@ function BeatStage({
   // a name -- a student should be able to tell at a glance whether the
   // office is talking (a named character with a face) or the game is.
   const voiceless = beat.speaker === "Dreamy" || beat.speaker === "Narrator" || beat.speaker === "System";
-  const namedSpeaker = voiceless ? undefined : beat.speaker;
+  // Full composed scenes no longer need a large name behind a separate sprite.
+  // Introductions keep their identity and role in the ordinary dialogue label.
+  const introducedName = beat.kind === "card" && beat.variant === "character"
+    ? beat.castMember ?? beat.introduce?.name ?? beat.setup?.split("•")[0]?.trim()
+    : undefined;
+  const namedSpeaker = introducedName ?? (voiceless ? undefined : beat.speaker);
   // The three voices, each with its own face, box shape and sound (or
   // silence): a CHARACTER speaks in the display face with voice blips and
   // a chat-notched bubble; the NARRATOR sets scenes in quiet italics; a
@@ -1917,7 +1916,7 @@ function BeatBody({
       {promptText}
     </p>
   );
-  const body = (() => {
+  const content = (() => {
     if (beat.kind === "card") return <CardBody beat={beat} accent={accent} onNext={onNext} reputation={reputation} />;
     if (beat.kind === "check") return <CheckBody beat={beat} onNext={onNext} />;
     if (beat.kind === "reveal") return <RevealBody beat={beat} onNext={onNext} />;
@@ -1936,6 +1935,7 @@ function BeatBody({
     if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
     return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} style={beat.kind === "review" ? beat.style : undefined} deciding={beat.kind === "review" ? beat.deciding : undefined} decidingNote={beat.kind === "review" ? beat.decidingNote : undefined} />;
   })();
+  const body = beat.artifact ? <div className="flex min-w-0 flex-col"><WorkArtifact artifact={beat.artifact} />{content}</div> : content;
   if (!prompt) return body;
   // Directed: heading first, then its instruction (both v2 scripts), or the
   // instruction IS the heading (RN v2 screen 33).

@@ -1,3 +1,4 @@
+import type { WorkArtifact } from "./work-artifacts";
 // The simulation engine's vocabulary. Every career simulation is DATA in this
 // shape -- adding Level 2, or the other 24 careers, means writing beats, not
 // components. The rules here are the ones on the Scoring Model and Interaction
@@ -48,6 +49,8 @@ export type Choice = {
 export type DreamyPose = "happy" | "glasses" | "idea" | "curious" | "alert" | "nervous" | "party" | "puzzle" | "heart";
 
 type BeatBase = {
+  /** Read-only, data-driven evidence shared across careers; no independent scoring. */
+  artifact?: WorkArtifact;
   id: string;
   /** Action Prompt (Interaction Rules): the short grey line telling the
    *  student what to do on screens whose action is not a labelled button --

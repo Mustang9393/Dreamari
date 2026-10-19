@@ -1,0 +1,46 @@
+{
+  "version": 3,
+  "status": "AI-selected identities, human QA pending",
+  "cast": [
+    {
+      "name": "Arjun",
+      "role": "Senior UX Designer / mentor",
+      "gender": "man",
+      "ethnicity": "Indian",
+      "age": 32,
+      "canonical": "/images/play/ux/v4/studio.png",
+      "design": "Medium-brown skin, dark brown almond eyes, short neat black side-parted hair, clean shaven, teal overshirt/ivory crewneck/charcoal trousers.",
+      "face": "/images/play/ux/face-arjun-v4.webp"
+    },
+    {
+      "name": "Noah",
+      "role": "Junior UX Designer / peer",
+      "gender": "man",
+      "ethnicity": "Mexican",
+      "age": 25,
+      "canonical": "/images/play/ux/v4/studio.png",
+      "design": "Light olive skin, grey-green eyes, chestnut short spikier hair, slate-blue shirt/navy trousers.",
+      "face": "/images/play/ux/face-noah-v4.webp"
+    },
+    {
+      "name": "Eleanor",
+      "role": "Research participant",
+      "gender": "woman",
+      "ethnicity": "White",
+      "age": 58,
+      "canonical": "/images/play/ux/v4/research.png",
+      "design": "Green eyes, grey bob, plum cardigan/pale-blue shirt/navy trousers.",
+      "face": "/images/play/ux/face-eleanor-v4.webp"
+    },
+    {
+      "name": "Samira",
+      "role": "Design Lead / reviewer",
+      "gender": "woman",
+      "ethnicity": "Black",
+      "age": 46,
+      "canonical": "/images/play/ux/v4/review.png",
+      "design": "Deep brown skin, amber-brown eyes, dark side-swept short hair/grey temple accent, gold hoops, aubergine suit/cream top.",
+      "face": "/images/play/ux/face-samira-v4.webp"
+    }
+  ]
+}

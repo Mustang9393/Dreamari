@@ -1,13 +1,14 @@
 import type { Level } from "./types";
+import { UX_ARTIFACTS, UX_FORM_FINDINGS } from "./ux-work-artifacts";
 
-// AI-authored draft from the reusable SOP. Fictional studio/project; not a Joshua script.
+// AI-authored fictional project, using the shared engine and read-only evidence.
 export const UX_LEVEL_1: Level = {
   "id": "ux-l1",
   "n": 1,
   "role": "Junior UX Designer",
   "title": "Make the sign-up work",
   "blurb": "Help people join a volunteer event. Research, test and explain a clearer design.",
-  "cover": "/images/play/ux/studio.png",
+  "cover": "/images/play/ux/v4/arrival.png",
   "mood": "day",
   "hideBand": true,
   "directed": true,
@@ -17,15 +18,15 @@ export const UX_LEVEL_1: Level = {
   "quietQuestions": true,
   "saveSlot": 501,
   "cast": {
-    "Asha": "/images/play/ux/face-asha.webp",
-    "Noah": "/images/play/ux/face-noah.webp",
-    "Eleanor": "/images/play/ux/face-eleanor.webp",
-    "Samira": "/images/play/ux/face-samira.webp"
+    "Arjun": "/images/play/ux/face-arjun-v4.webp",
+    "Noah": "/images/play/ux/face-noah-v4.webp",
+    "Eleanor": "/images/play/ux/face-eleanor-v4.webp",
+    "Samira": "/images/play/ux/face-samira-v4.webp"
   },
   "preGame": {
     "startLabel": "Start the project",
     "skipLabel": "Skip to the studio",
-    "handoffLine": "Northline Studio \u00b7 Your first project",
+    "handoffLine": "Northline Studio · Your first project",
     "howToCta": "Start the project",
     "ladder": [
       "Junior UX Designer",
@@ -48,13 +49,13 @@ export const UX_LEVEL_1: Level = {
           "kind": "say",
           "heading": "Help someone finish a task",
           "body": "UX means user experience. A good design helps someone do what they came to do.",
-          "image": "/images/play/ux/studio.png"
+          "image": "/images/play/ux/v4/studio.png"
         },
         {
           "kind": "say",
           "heading": "Watch before you change",
           "body": "See what people try. Separate what happened from what you think caused it.",
-          "image": "/images/play/ux/research.png"
+          "image": "/images/play/ux/v4/research.png"
         },
         {
           "kind": "check",
@@ -101,30 +102,30 @@ export const UX_LEVEL_1: Level = {
       "id": "UX1-03",
       "kind": "card",
       "variant": "character",
-      "title": "Asha is your mentor.",
-      "body": "She helps you turn what you observe into a design decision. She will review your work before it reaches a client.",
+      "title": "Arjun is your mentor.",
+      "body": "He helps you turn what you observe into a design decision. He will review your work before it reaches a client.",
       "speaker": "Narrator",
       "system": false,
       "cta": "Continue",
-      "castMember": "Asha",
-      "setup": "Asha \u2022 Senior UX Designer"
+      "castMember": "Arjun",
+      "setup": "Arjun • Senior UX Designer"
     },
     {
       "id": "UX1-04",
       "kind": "card",
       "variant": "chapter",
       "title": "You start as a Junior UX Designer.",
-      "body": "Asha reviews the work you hand in. Samira, the design lead, decides whether it is ready for the client.",
+      "body": "Arjun reviews the work you hand in. Samira, the design lead, decides whether it is ready for the client.",
       "speaker": "System",
       "system": true,
       "cta": "Continue",
       "ladder": [
         {
-          "label": "You \u00b7 Junior UX Designer",
+          "label": "You · Junior UX Designer",
           "lit": true
         },
         {
-          "label": "Asha \u00b7 Senior UX Designer",
+          "label": "Arjun · Senior UX Designer",
           "lit": true
         }
       ]
@@ -137,7 +138,8 @@ export const UX_LEVEL_1: Level = {
       "body": "A user goal is what someone came to do. A design idea is one possible way to help.",
       "speaker": "System",
       "system": true,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": UX_ARTIFACTS.flow
     },
     {
       "id": "UX1-06",
@@ -147,7 +149,8 @@ export const UX_LEVEL_1: Level = {
       "body": "A volunteer wants to find a nearby event and join it. A purple button is a design idea, not their goal.",
       "speaker": "System",
       "system": true,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": UX_ARTIFACTS.flow
     },
     {
       "id": "UX1-07",
@@ -172,8 +175,8 @@ export const UX_LEVEL_1: Level = {
     {
       "id": "UX1-08",
       "kind": "choice",
-      "speaker": "Asha",
-      "setup": "Asha asks you to investigate why people leave the sign-up page.",
+      "speaker": "Arjun",
+      "setup": "Arjun asks you to investigate why people leave the sign-up page.",
       "question": "What should you find out first?",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -213,7 +216,8 @@ export const UX_LEVEL_1: Level = {
       "body": "These words will help you choose what to do next.",
       "speaker": "System",
       "system": true,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": UX_ARTIFACTS.wireframe
     },
     {
       "id": "UX1-10",
@@ -243,7 +247,7 @@ export const UX_LEVEL_1: Level = {
     {
       "id": "UX1-11",
       "kind": "match",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "setup": "",
       "question": "Match each tool to its purpose.",
       "feedback": "",
@@ -283,7 +287,8 @@ export const UX_LEVEL_1: Level = {
       "body": "An observation records what you saw or heard. An assumption is an explanation you have not checked.",
       "speaker": "System",
       "system": true,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": UX_ARTIFACTS.notes
     },
     {
       "id": "UX1-13",
@@ -298,7 +303,7 @@ export const UX_LEVEL_1: Level = {
     {
       "id": "UX1-14",
       "kind": "bucket",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "setup": "",
       "question": "Sort the research notes.",
       "feedback": "",
@@ -340,7 +345,7 @@ export const UX_LEVEL_1: Level = {
       "variant": "chapter",
       "title": "Let the participant try.",
       "body": "Give a realistic task without naming the button. Observe before helping. You are testing the design, not the person.",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "system": false,
       "cta": "Continue"
     },
@@ -359,17 +364,17 @@ export const UX_LEVEL_1: Level = {
       "kind": "card",
       "variant": "character",
       "title": "Eleanor is trying the sign-up.",
-      "body": "She has used volunteer sites before. Asha takes notes while Eleanor works at her own pace.",
+      "body": "She has used volunteer sites before. Arjun takes notes while Eleanor works at her own pace.",
       "speaker": "Narrator",
       "system": false,
       "cta": "Continue",
       "castMember": "Eleanor",
-      "setup": "Eleanor \u2022 Research Participant"
+      "setup": "Eleanor • Research Participant"
     },
     {
       "id": "UX1-18",
       "kind": "rapid",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "setup": "",
       "question": "Choose the more useful research habit.",
       "feedback": "",
@@ -451,14 +456,15 @@ export const UX_LEVEL_1: Level = {
       "variant": "chapter",
       "title": "Turn evidence into a small test.",
       "body": "Name the difficulty, sketch a change, make a prototype, then watch another attempt. A sketch alone does not prove improvement.",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "system": false,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": UX_ARTIFACTS.iteration
     },
     {
       "id": "UX1-20",
       "kind": "rank",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "setup": "",
       "question": "Put the next steps in order.",
       "feedback": "",
@@ -479,6 +485,31 @@ export const UX_LEVEL_1: Level = {
       "whenWrong": "Start with the observed problem and test the change before calling it a fix."
     },
     {
+      "id": "UX1-MID",
+      "kind": "card",
+      "variant": "act",
+      "speaker": "System",
+      "title": "",
+      "body": "",
+      "review": {
+        "threshold": 65,
+        "intro": {
+          "kicker": "Mid-project review",
+          "line": "Arjun is reviewing how you approached the first half."
+        },
+        "progressLine": "Reviewing your research and iteration decisions...",
+        "pass": {
+          "title": "You have a solid starting point.",
+          "body": "You connected a task to evidence and planned a test. Now check whether the design works for more people."
+        },
+        "fail": {
+          "title": "There is still time to improve.",
+          "body": "Use the next decisions to check the evidence and explain what the design still needs."
+        }
+      },
+      "cta": "Continue the project"
+    },
+    {
       "id": "UX1-21",
       "kind": "card",
       "variant": "chapter",
@@ -486,7 +517,8 @@ export const UX_LEVEL_1: Level = {
       "body": "Use visible field labels and plain error messages. Do not rely on colour alone to show a problem.",
       "speaker": "System",
       "system": true,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": UX_ARTIFACTS.formExample
     },
     {
       "id": "UX1-22",
@@ -496,12 +528,13 @@ export const UX_LEVEL_1: Level = {
       "body": "Label the field Email address. If it is incomplete, explain what to fix beside the field instead of showing only a red border.",
       "speaker": "System",
       "system": true,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": UX_ARTIFACTS.formExample
     },
     {
       "id": "UX1-23",
       "kind": "flags",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "setup": "",
       "question": "Find both problems in this draft form.",
       "feedback": "",
@@ -512,30 +545,10 @@ export const UX_LEVEL_1: Level = {
       ],
       "progress": 0.6,
       "planLineIfFailed": "you handed over a form with unclear labels and errors",
-      "rows": [
-        {
-          "label": "The email field has a visible label.",
-          "flag": false,
-          "why": "The label tells people what belongs in the field."
-        },
-        {
-          "label": "Required fields are marked only in red.",
-          "flag": true,
-          "why": "Colour alone does not explain which fields are required."
-        },
-        {
-          "label": "The error says: Something went wrong.",
-          "flag": true,
-          "why": "It does not identify the problem or explain what to fix."
-        },
-        {
-          "label": "The button says Join this event.",
-          "flag": false,
-          "why": "The label describes the action clearly."
-        }
-      ],
+      "rows": UX_FORM_FINDINGS,
       "whenRight": "People need clear labels and useful error messages, not colour clues alone.",
-      "whenWrong": "The red-only marker and the vague error hide information people need."
+      "whenWrong": "The red-only marker and the vague error hide information people need.",
+      "artifact": UX_ARTIFACTS.form
     },
     {
       "id": "UX1-24",
@@ -547,7 +560,7 @@ export const UX_LEVEL_1: Level = {
       "system": false,
       "cta": "Continue",
       "castMember": "Noah",
-      "setup": "Noah \u2022 Junior UX Designer"
+      "setup": "Noah • Junior UX Designer"
     },
     {
       "id": "UX1-25",
@@ -583,7 +596,8 @@ export const UX_LEVEL_1: Level = {
           "tier": "wrong",
           "why": "Appearance alone does not show whether people can finish."
         }
-      ]
+      ],
+      "artifact": UX_ARTIFACTS.iteration
     },
     {
       "id": "UX1-26",
@@ -591,9 +605,10 @@ export const UX_LEVEL_1: Level = {
       "variant": "chapter",
       "title": "Explain the decision in three parts.",
       "body": "State the problem, point to evidence, then name the next check. Separate what you know from what you expect.",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "system": false,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": UX_ARTIFACTS.notes
     },
     {
       "id": "UX1-27",
@@ -605,28 +620,28 @@ export const UX_LEVEL_1: Level = {
       "system": false,
       "cta": "Continue",
       "castMember": "Samira",
-      "setup": "Samira \u2022 Design Lead"
+      "setup": "Samira • Design Lead"
     },
     {
       "id": "UX1-28",
       "kind": "card",
       "variant": "chapter",
       "title": "Samira reviews what leaves the studio.",
-      "body": "Asha helped you prepare. Now show Samira the problem, the evidence and the test you still need.",
+      "body": "Arjun helped you prepare. Now show Samira the problem, the evidence and the test you still need.",
       "speaker": "System",
       "system": true,
       "cta": "Continue",
       "ladder": [
         {
-          "label": "You \u00b7 Junior UX Designer",
+          "label": "You · Junior UX Designer",
           "lit": true
         },
         {
-          "label": "Asha \u00b7 Senior UX Designer",
+          "label": "Arjun · Senior UX Designer",
           "lit": true
         },
         {
-          "label": "Samira \u00b7 Design Lead",
+          "label": "Samira · Design Lead",
           "lit": true
         }
       ]
@@ -690,7 +705,8 @@ export const UX_LEVEL_1: Level = {
         }
       ],
       "whenRight": "The explanation connects the problem, evidence and a testable next step.",
-      "whenWrong": "A convincing explanation still needs evidence and an honest next check."
+      "whenWrong": "A convincing explanation still needs evidence and an honest next check.",
+      "artifact": UX_ARTIFACTS.notes
     },
     {
       "id": "UX1-30",
@@ -698,9 +714,10 @@ export const UX_LEVEL_1: Level = {
       "variant": "chapter",
       "title": "Make the handover useful.",
       "body": "A developer needs the route, the important states and the reason for the change. Include errors and keyboard use, not just the best-looking screen.",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "system": false,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": UX_ARTIFACTS.handover
     },
     {
       "id": "UX1-31",
@@ -715,7 +732,7 @@ export const UX_LEVEL_1: Level = {
     {
       "id": "UX1-32",
       "kind": "pick",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "setup": "",
       "question": "Choose the three items for the handover.",
       "feedback": "",
@@ -796,7 +813,8 @@ export const UX_LEVEL_1: Level = {
           "tier": "wrong",
           "why": "Hiding the blocker makes the next person decide without important evidence."
         }
-      ]
+      ],
+      "artifact": UX_ARTIFACTS.handover
     },
     {
       "id": "UX1-35",
@@ -804,7 +822,7 @@ export const UX_LEVEL_1: Level = {
       "variant": "chapter",
       "title": "You have a clearer way to work.",
       "body": "You followed a real task, separated evidence from guesses and explained what still needs checking. Keep those habits on the next project.",
-      "speaker": "Asha",
+      "speaker": "Arjun",
       "system": false,
       "cta": "Continue"
     },

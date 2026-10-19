@@ -1,0 +1,42 @@
+{
+  "fixtures": [
+    {
+      "id": "service-handover",
+      "kind": "notes",
+      "title": "Workshop handover",
+      "caption": "Fictional service handover, no technical limits supplied.",
+      "provenance": "Synthetic cross-career fixture",
+      "entries": [
+        {
+          "label": "Observed",
+          "text": "A fastener is missing."
+        },
+        {
+          "label": "Next step",
+          "text": "Check the approved work instructions before sign-off."
+        }
+      ]
+    },
+    {
+      "id": "event-prep",
+      "kind": "flow",
+      "title": "Prepare the event service",
+      "caption": "A dependency sequence from a fictional hospitality brief.",
+      "provenance": "Synthetic cross-career fixture",
+      "steps": [
+        {
+          "title": "Read the brief",
+          "detail": "Check guest requirements"
+        },
+        {
+          "title": "Prepare the station",
+          "detail": "Use the agreed checklist"
+        },
+        {
+          "title": "Confirm readiness",
+          "detail": "Tell the supervisor what remains"
+        }
+      ]
+    }
+  ]
+}

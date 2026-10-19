@@ -23,7 +23,11 @@ const {bespokeIn}=load(path.join(root,'src/components/play/coreKit.ts'));
 const {SKILL_MEANING}=load(path.join(root,'src/components/play/skills.ts'));
 const {WORLD_COLORS}=load(path.join(root,'src/components/app/worlds.ts'));
 const {PERFORMANCE_PLANS}=load(path.join(root,'src/components/play/performance-plan.ts'));
-const art=JSON.parse(fs.readFileSync(path.join(root,'src/components/play/art',sim.careerId+'.json'),'utf8'));
+const artPath=process.argv[5]??path.join(root,'src/components/play/art',sim.careerId+'.json');
+const art=JSON.parse(fs.readFileSync(artPath,'utf8'));
+const coveragePath=path.join(root,'docs/handoff/career-scaling/examples',sim.careerId+'-coverage.json');
+const coverage=fs.existsSync(coveragePath)?JSON.parse(fs.readFileSync(coveragePath,'utf8')):null;
+const {artifactProblems}=load(path.join(root,'src/components/play/work-artifacts.ts'));
 const traceFile=process.argv[4]??path.join(root,'docs/handoff/career-scaling/examples',sim.careerId+'-trace.json');
 const trace=fs.existsSync(traceFile)?JSON.parse(fs.readFileSync(traceFile,'utf8')).trace:[];
 const errors=[];let count=0;
@@ -52,6 +56,27 @@ for(const [name,cast] of Object.entries(art.cast)){
  check(!cast.default&&!cast.tiers&&!cast.poses,name+': full-scene cast must not supply runtime sprites');
  check(exists(cast.face),name+': face chip missing');check(cast.voicePitch>=200&&cast.voicePitch<=900,name+': voice pitch missing');
 }
+check(coverage?.career===sim.careerId,'Missing scene and graphic coverage plan');
+if(coverage){
+ check(unique(coverage.groups.map(g=>g.id)),'Duplicate shot group IDs');
+ const assigned=new Set();
+ for(const g of coverage.groups){
+  check(g.required&&g.purpose&&g.beats?.length,g.id+': incomplete required shot group');
+  check(['address-player','observe-task','npc-dialogue'].includes(g.pov)&&g.speakingTarget&&g.visibleCast?.length,g.id+': missing POV/speaking target');
+  if(g.pov==='address-player')check(g.eyeline==='camera'&&g.speakingTarget==='player',g.id+': player dialogue must address camera');
+  check(art.locations[g.scene],g.id+': missing planned scene');
+  for(const beat of g.beats??[]){check(!assigned.has(beat),beat+': duplicate coverage');assigned.add(beat);check(art.beatLocations[beat]===g.scene,beat+': planned scene was substituted');}
+ }
+ const selected=coverage.groups.filter(g=>g.required).map(g=>assets[g.scene]?.fileSha256).filter(Boolean);
+ check(unique(selected),'Different required shot groups reuse identical image bytes');
+ for(const m of coverage.milestones??[]){
+  const level=sim.levels.find(l=>l.beats.some(b=>b.id===m.beat));const at=level?.beats.findIndex(b=>b.id===m.beat)??-1;const b=level?.beats[at];
+  check(b?.kind==='card'&&b.variant==='act'&&b.review,m.beat+': missing mid-game review');
+  check(level?.beats.slice(0,at).filter(isScored).length===m.afterDecisions,m.beat+': misplaced review');
+  check(b?.review?.threshold===m.threshold&&m.threshold<=50+5*m.afterDecisions,m.beat+': unreachable or mismatched threshold');
+ }
+ check((coverage.milestones?.length??0)>0,'Missing planned mid-game milestone');
+}
 const levels=[];
 for(const level of sim.levels){
  const scored=level.beats.filter(isScored);
@@ -66,7 +91,12 @@ for(const level of sim.levels){
   check(allIds.filter(id=>id===b.id).length===1,b.id+': duplicate global ID');
   check(coreKinds.has(b.kind),b.id+': unsupported kind');
   if(b.timer)check(['choice','rapid','flags','pick'].includes(b.kind)&&b.timer>0,b.id+': unsupported timer');
-  if(b.kind!=='review')check(art.locations[art.beatLocations[b.id]],b.id+': unrouted scene');
+  if(b.kind!=='review'){
+   check(art.locations[art.beatLocations[b.id]],b.id+': unrouted scene');
+   const row=coverage?.beats.find(r=>r.beat===b.id);check(row&&row.scene===art.beatLocations[b.id]&&coverage.groups.some(g=>g.id===row.shotGroup&&g.beats.includes(b.id)),b.id+': missing/mismatched coverage row');
+   check(b.artifact?row?.artifact===b.artifact.id:Boolean(row?.noArtifactReason),b.id+': missing artifact or no-artifact rationale');
+  }
+  if(b.artifact)for(const problem of artifactProblems(b.artifact))check(false,b.id+': '+problem);
   if(b.speaker&&!['Narrator','System'].includes(b.speaker))check(art.cast[b.speaker],b.id+': unknown speaker');
   check(!JSON.stringify(b).includes('—'),b.id+': student copy contains em dash');
   const tr=trace.find(t=>t.beat===b.id);
@@ -98,6 +128,6 @@ for(const level of sim.levels){
  check(scored[0]?.kind==='choice'&&!scored[0]?.timer,level.id+': first decision must be untimed easy-win choice');
  levels.push({id:level.id,screens:level.beats.length,scored:scored.length,questionTypes:[...new Set(scored.map(b=>b.kind))],bespoke:bespokeIn(level)});
 }
-const report={career:sim.id,status:errors.length?'failed':'structural checks passed; human and runtime review are separate',assertions:count,levels,sceneAssets:assets,routedBeats:Object.keys(art.beatLocations).length,errors,notCertified:['Subject-matter correctness','Aesthetic approval','All runtime branches','Windows/Chromebook hardware']};
+const report={career:sim.id,coverageGroups:coverage?.groups.length??0,artifactBeats:sim.levels.flatMap(l=>l.beats).filter(b=>b.artifact).length,status:errors.length?'failed':'structural checks passed; human and runtime review are separate',assertions:count,levels,sceneAssets:assets,routedBeats:Object.keys(art.beatLocations).length,errors,notCertified:['Subject-matter correctness','Aesthetic approval','All runtime branches','Windows/Chromebook hardware']};
 const reportFile=process.argv[3];if(reportFile)fs.writeFileSync(reportFile,JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report,null,2));if(errors.length)process.exitCode=1;

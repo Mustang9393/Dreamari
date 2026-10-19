@@ -4,14 +4,14 @@
   "folder": "ux",
   "spriteStandard": "full-scene",
   "notes": [
-    "Complete opaque illustrations. No runtime sprite/background assembly.",
-    "One immutable image per room/camera. Reuse exact files rather than regenerate reactions.",
-    "AI-authored draft art and content; human approval pending."
+    "Complete opaque scene illustrations; no runtime sprite assembly.",
+    "Fifteen authored shot/state groups; exact reuse only within an unchanged narrative moment.",
+    "AI-selected art; human QA remains pending. New cameras preserve landmark continuity, not pixel identity."
   ],
   "locations": {
     "northline-studio": {
-      "src": "/images/play/ux/studio.png",
-      "alt": "Asha and Noah discuss the volunteer sign-up project in the studio.",
+      "src": "/images/play/ux/v4/studio.png",
+      "alt": "Arjun addresses the player directly from the studio.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -23,8 +23,8 @@
       "locked": true
     },
     "northline-research": {
-      "src": "/images/play/ux/research.png",
-      "alt": "Asha quietly observes Eleanor trying the sign-up prototype.",
+      "src": "/images/play/ux/v4/research.png",
+      "alt": "First-person observation of Arjun and Eleanor during the usability session.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -36,8 +36,164 @@
       "locked": true
     },
     "northline-review": {
-      "src": "/images/play/ux/review.png",
-      "alt": "Samira reviews the design evidence with Asha in the review room.",
+      "src": "/images/play/ux/v4/review.png",
+      "alt": "Samira addresses the player directly from the review room.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-arrival": {
+      "src": "/images/play/ux/v4/arrival.png",
+      "alt": "Arjun addresses the player directly from the studio.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-goals": {
+      "src": "/images/play/ux/v4/goals.png",
+      "alt": "Arjun addresses the player directly from the studio.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-toolkit": {
+      "src": "/images/play/ux/v4/toolkit.png",
+      "alt": "Arjun addresses the player directly from the studio.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-notes": {
+      "src": "/images/play/ux/v4/notes.png",
+      "alt": "Arjun addresses the player directly from the studio.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-research-pause": {
+      "src": "/images/play/ux/v4/research-pause.png",
+      "alt": "First-person observation of Arjun and Eleanor during the usability session.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-iteration": {
+      "src": "/images/play/ux/v4/iteration.png",
+      "alt": "Arjun addresses the player directly from the studio.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-midpoint": {
+      "src": "/images/play/ux/v4/midpoint.png",
+      "alt": "Arjun addresses the player directly from the studio.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-form-review": {
+      "src": "/images/play/ux/v4/form-review.png",
+      "alt": "Arjun addresses the player directly from the studio.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-peer-discussion": {
+      "src": "/images/play/ux/v4/peer-discussion.png",
+      "alt": "Noah addresses the player directly from the studio.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-review-challenge": {
+      "src": "/images/play/ux/v4/review-challenge.png",
+      "alt": "Samira addresses the player directly from the review room.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-handover": {
+      "src": "/images/play/ux/v4/handover.png",
+      "alt": "Samira addresses the player directly from the review room.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "ux-closing": {
+      "src": "/images/play/ux/v4/closing.png",
+      "alt": "Arjun addresses the player directly from the review room.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -50,59 +206,60 @@
     }
   },
   "cast": {
-    "Asha": {
-      "face": "/images/play/ux/face-asha.webp",
-      "voicePitch": 610
-    },
     "Noah": {
-      "face": "/images/play/ux/face-noah.webp",
+      "face": "/images/play/ux/face-noah-v4.webp",
       "voicePitch": 480
     },
     "Eleanor": {
-      "face": "/images/play/ux/face-eleanor.webp",
+      "face": "/images/play/ux/face-eleanor-v4.webp",
       "voicePitch": 530
     },
+    "Arjun": {
+      "face": "/images/play/ux/face-arjun-v4.webp",
+      "voicePitch": 430
+    },
     "Samira": {
-      "face": "/images/play/ux/face-samira.webp",
+      "face": "/images/play/ux/face-samira-v4.webp",
       "voicePitch": 390
     }
   },
   "portraitRatios": {},
   "beatLocations": {
-    "UX1-01": "northline-studio",
-    "UX1-02": "northline-studio",
-    "UX1-03": "northline-studio",
+    "UX1-01": "ux-arrival",
+    "UX1-02": "ux-arrival",
+    "UX1-03": "ux-arrival",
     "UX1-04": "northline-studio",
-    "UX1-05": "northline-studio",
-    "UX1-06": "northline-studio",
-    "UX1-07": "northline-studio",
-    "UX1-08": "northline-studio",
-    "UX1-09": "northline-studio",
-    "UX1-10": "northline-studio",
-    "UX1-11": "northline-studio",
-    "UX1-12": "northline-studio",
-    "UX1-13": "northline-studio",
-    "UX1-14": "northline-studio",
+    "UX1-05": "ux-goals",
+    "UX1-06": "ux-goals",
+    "UX1-07": "ux-goals",
+    "UX1-08": "ux-goals",
+    "UX1-09": "ux-toolkit",
+    "UX1-10": "ux-toolkit",
+    "UX1-11": "ux-toolkit",
+    "UX1-12": "ux-notes",
+    "UX1-13": "ux-notes",
+    "UX1-14": "ux-notes",
     "UX1-15": "northline-research",
     "UX1-16": "northline-research",
     "UX1-17": "northline-research",
-    "UX1-18": "northline-research",
-    "UX1-19": "northline-studio",
-    "UX1-20": "northline-studio",
-    "UX1-21": "northline-studio",
-    "UX1-22": "northline-studio",
-    "UX1-23": "northline-studio",
-    "UX1-24": "northline-studio",
-    "UX1-25": "northline-studio",
-    "UX1-26": "northline-studio",
+    "UX1-18": "ux-research-pause",
+    "UX1-19": "ux-iteration",
+    "UX1-20": "ux-iteration",
+    "UX1-21": "ux-form-review",
+    "UX1-22": "ux-form-review",
+    "UX1-23": "ux-form-review",
+    "UX1-24": "ux-peer-discussion",
+    "UX1-25": "ux-peer-discussion",
+    "UX1-26": "ux-peer-discussion",
     "UX1-27": "northline-review",
     "UX1-28": "northline-review",
-    "UX1-29": "northline-review",
-    "UX1-30": "northline-review",
-    "UX1-31": "northline-review",
-    "UX1-32": "northline-review",
-    "UX1-33": "northline-review",
-    "UX1-34": "northline-review",
-    "UX1-35": "northline-review"
+    "UX1-29": "ux-review-challenge",
+    "UX1-30": "ux-handover",
+    "UX1-31": "ux-handover",
+    "UX1-32": "ux-handover",
+    "UX1-33": "ux-handover",
+    "UX1-34": "ux-handover",
+    "UX1-35": "ux-closing",
+    "UX1-MID": "ux-midpoint"
   }
 }

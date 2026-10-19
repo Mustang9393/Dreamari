@@ -1,3 +1,13 @@
+## 2026-10-20 — UX QA expansion: complete scenes, first-person conversations and work evidence
+
+**Why (Chandu):** “Generate images for every scene that needs it”; replace Asha with an Indian/Japanese male; “we are the player ... first person POV”; add career-relevant designed screens like nursing’s ECG; “push it to main accessible from the hamburger menu so i can QA.”
+
+- UX Level 1 now has 37 beats, 15 composed scenes and Arjun as Indian male mentor. Noah appears only where the peer is relevant; Samira reviews the player directly. Research shots observe Eleanor’s task. Ordinary speaker labels replace giant character names. Same selected files are reused deliberately; fresh camera generations are not claimed pixel-identical.
+- Seven canonical work-graphic records on 13 beats show a flow, wireframe, research notes, prototype comparison, form and handover. Shared native flow/notes/interface/comparison components take data without career-ID layout branches. Form evidence and correct flags share data. Two other-career rendering fixtures are fixtures, not built games.
+- Added the existing shared act/review midpoint after five decisions, threshold 65, conditional feedback, and continuation. Existing ten decisions/eight scored mechanics and final pass threshold remain. Fixed Next Image fill/height conflict by sizing its wrapper.
+- SOP v1.2 adds shot coverage, first-person eyeline/speaking-target checks, cast diversity and ordinary labels. Coverage validator passes 566 assertions/15 groups; the previous three-scene manifest is rejected with 85 errors. Tokens (508), TypeScript, scoped lint and local production build checked. Browser checks from this work are recorded separately; current browser connection became unavailable before final midpoint/phone rechecks. Do not claim those passed or all new branches played end-to-end.
+- Release preserves the existing hamburger “UX Designer · QA draft” and normal hub exclusion. Human QA of style/identity/room continuity, new work graphics and midpoint remains the next step. Later levels are unbuilt; DEMO_START_FRESH still disables resume. Production status and merged-main validation will be recorded after release.
+
 ## 2026-10-19: UX Designer discussion release; AI-owned production and work graphics
 
 **Why (Chandu):** "Push this to main in the quick links in hamburger menu so i can discuss this first"; "whatever bespoke graphic we create ... should also be scaleable"; "Only human intervention should be to QA."

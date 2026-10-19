@@ -4,6 +4,8 @@ CAREER: {CAREER}
 LEVEL / ROLE: {LEVEL_AND_ROLE}
 SCENE ID: {SCENE_ID}
 SCRIPT ACTION: {ACTION}
+PLAYER POV / SPEAKING TARGET: {ADDRESS_PLAYER | OBSERVE_TASK | NPC_DIALOGUE; TARGET}
+EYELINE: {CAMERA_FOR_PLAYER_DIALOGUE; OTHERWISE_TASK_OR_NAMED_PERSON}
 LOCATION / CAMERA ID: {LOCATION_CAMERA_ID}
 TIME AND LIGHT SETUP: {TIME_LIGHT_DIRECTION_SKY_PRACTICALS}
 VISIBLE CAST: {CAST_IDS_AND_DESIGNS}
@@ -31,6 +33,9 @@ ENVIRONMENT
 Match the background reference's painted depth, architectural clarity and selective detail. Use clear foreground, midground and distance. Keep rooms richer than faces, but avoid photographic surface noise, dense generated screens and clutter.
 Make the workplace beautiful and visibly expensive through proportions, fitted joinery, generous useful space, refined materials and carefully placed light. Keep it authentic to the career. An expensive workshop remains a workshop; a hospital remains functional and cleanable. Do not turn every workplace into a hotel or add luxury detail to skin and hair.
 Use a small coherent material palette and enough real equipment to explain the work. Screens show sparse structural shapes. Documents and badges contain no invented words or personal data. Important numbers, diagrams and instructions belong in native game UI using artifact-master-prompt.txt. When a scene shows a screen, prototype, plan or document, use the supplied canonical artifact state for its broad layout; keep the same project and version across relevant shots. Do not invent unrelated interface content. The readable artifact in the game UI remains authoritative.
+
+PLAYER VIEWPOINT
+The camera is the player’s first-person viewpoint. A character speaking to the player looks toward the lens and addresses the viewer. Do not insert a visible player avatar or a second person as a stand-in for the player. Include a peer only when the script requires that peer. For an observed task, characters may look at the work; record why the dialogue is voice-over or why the player is observing. Reserve NPC-to-NPC conversations for explicitly authored exchanges, never the default conversation image. Vary gestures and expressions without tilting every head the same way.
 
 PHYSICAL STAGING
 People occupy real space in the room. Finish every visible body, hand, limb, furniture edge and shadow. Standing figures continue naturally below the waist. Seated figures have plausible hips, legs and chair contact. A desk may physically occlude a person, but a body must not end at a counter or float above it. Props must be held or supported plausibly.

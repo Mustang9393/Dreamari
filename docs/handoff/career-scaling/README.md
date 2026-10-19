@@ -1,6 +1,6 @@
 # Dreamari career game production SOP
 
-Version 1.1 · 19 October 2026 · AI production workflow; UX Designer QA draft.
+Version 1.2 · 20 October 2026 · AI production workflow; UX Designer QA draft.
 
 **Outcome:** turn a career name (and an optional source brief) into a playable, reviewable simulation using the existing IB, nursing and aviation engine. The reusable unit is a decision with evidence, choices and consequences. A new career supplies data and art; it does not get a new gameplay implementation.
 
@@ -219,7 +219,7 @@ For time changes, define what may change: light, sky brightness, practical fixtu
 
 Count unique **location × camera × required state** combinations, not screens. The AI authors a shot coverage plan before generation: arrival, working action, conversation, visual evidence, escalation/change, mid-game milestone and closing, where those story moments exist. Vary camera, staging, activity and expression when the story changes, while preserving identities and location geography. Exact repeats are intentional only while the depicted state still fits. A named new camera need not be pixel-identical to another camera; it must agree with the room record.
 
-Do not promise a fixed image count for every career. Coverage must be sufficient to show the work and its turning points; three rooms do not automatically mean three adequate images. The UX proof's three full scenes across 35 scene-bearing beats are a **known under-coverage issue from human QA**. RN's 18 routed compositions are a useful coverage comparison, not a universal quota. When an edit fails the pixel gate, report the missing variant and use an honest fallback; do not mark the coverage requirement passed merely because one file can repeat.
+Do not promise a fixed image count for every career. Coverage must be sufficient to show the work and its turning points; three rooms do not automatically mean three adequate images. The initial UX proof's three full scenes across 35 scene-bearing beats failed human coverage QA. The revised candidate has 15 planned compositions across 36 scene-bearing beats, with a coverage validator that rejects the old three-image manifest. RN's 18 routed compositions are a useful coverage comparison, not a universal quota. When an edit fails the pixel gate, report the missing variant and use an honest fallback; do not mark the coverage requirement passed merely because one file can repeat.
 
 ### Art acceptance
 
@@ -303,6 +303,12 @@ The authoring, scene art and artifact prompts travel with that package. Changing
 
 ## Current proof and limits
 
-UX Designer is an AI-authored Level 1 QA draft (hamburger → UX Designer · QA draft): 36 beats, ten decisions, eight scored mechanics, three complete scene anchors and a planned six-stage ladder. It uses the shared player. Later levels are unbuilt. The UX work uses complete scenes; the separately published nurse layered v2 remains unchanged. Human QA identified insufficient UX scene variety, a missing mid-game review and missing designed work artifacts. Those are recorded in `examples/ux-qa-feedback-2026-10-19.md`; this SOP revision specifies their next implementation, not a claim that they are already fixed in the 36-beat draft.
+UX Designer is an AI-authored Level 1 QA draft (hamburger → UX Designer · QA draft): 37 beats, ten decisions, eight scored mechanics, 15 complete compositions, seven work-graphic records displayed on 13 beats, and an unscored mid-game review after five decisions. Later levels remain planned and unbuilt. Arjun is the Indian male mentor; Noah is the Mexican male peer; Samira is the Black female lead; Eleanor is the older White participant. Full scenes address the first-person player; research shots are explicit observed-task exceptions. The original coverage, checkpoint and work-graphic gaps have implementations in this candidate, pending human QA. Shared native flow, notes, interface and comparison renderers also accept two other-career fixtures; this is structural reuse evidence, not validation of two complete additional games.
 
 The usability and accessible-form teaching follows [GOV.UK's moderated testing guidance](https://www.gov.uk/service-manual/user-research/using-moderated-usability-testing), [W3C labels and instructions](https://www.w3.org/WAI/WCAG21/Understanding/labels-or-instructions), and [W3C error identification](https://www.w3.org/WAI/WCAG22/Understanding/error-identification). The employer, people, dialogue, test notes and project are fictional. These sources support the teaching principles, not a claim that a real study took place.
+
+## 16. Enforced shot and viewpoint contract
+
+Create `examples/<career-id>-coverage.json` before art production. Each required group records its purpose, scene ID, covered beats, visible cast, viewpoint, speaking target and eyeline. Each beat records its artifact ID or a reason no graphic is needed. The validator checks the plan against actual runtime routing and asset hashes; it rejects missing groups, accidental substitutions and duplicate files standing in for distinct required shots. It also verifies the midpoint exists after five decisions and its threshold is reachable. These are structural checks, not computer-vision proof of style or eye contact.
+
+The player is the camera. For player-directed speech, the speaker faces the lens; no visible second character stands in for the player. Include peers only when the script calls for them. Observed-task and explicit NPC-to-NPC exchanges require a written reason. Select diverse roles before generating, then preserve each identity. Remove giant character-name splashes; ordinary dialogue labels carry the name and role.

@@ -1,11 +1,13 @@
 {
   "career": "ui-ux-designer",
+  "coverageGroups": 15,
+  "artifactBeats": 13,
   "status": "structural checks passed; human and runtime review are separate",
-  "assertions": 281,
+  "assertions": 566,
   "levels": [
     {
       "id": "ux-l1",
-      "screens": 36,
+      "screens": 37,
       "scored": 10,
       "questionTypes": [
         "choice",
@@ -22,31 +24,127 @@
   ],
   "sceneAssets": {
     "northline-studio": {
-      "src": "/images/play/ux/studio.png",
-      "fileSha256": "a488d2907ab2d5c6b703a8586fbf15d671009f39d5425914a2da7408e6973192",
-      "pixelSha256": "863fd539ef301538557d618e2eaaf56d1b2250f1fb1151f016f553c2e9671ea2",
+      "src": "/images/play/ux/v4/studio.png",
+      "fileSha256": "25ac1626b60effe46d7ad069c335ac8d8f6ea558794a16e297fd236017b37725",
+      "pixelSha256": "ed3757a6f52c1c56b64a9783510ca76d97a9bfc34956ab28816f8b6338c42a0c",
       "width": 1672,
       "height": 941,
       "opaque": true
     },
     "northline-research": {
-      "src": "/images/play/ux/research.png",
-      "fileSha256": "280c6fd8ee55f8eff8c25adac88ff33c9327435a56ad05c2768f8877e0e60857",
-      "pixelSha256": "76d0ed630a647417d0efbbacd8a28ebf29e4491cb2564ea3524ced3e1381ab4f",
+      "src": "/images/play/ux/v4/research.png",
+      "fileSha256": "628abd626db5f51816f2f41dbf3e18f049d4368f6dac276448bd750b990c424d",
+      "pixelSha256": "9a0afa396c30d545a2f9d666650a0fd775432a165e9c9400d3b128be2f0676af",
       "width": 1672,
       "height": 941,
       "opaque": true
     },
     "northline-review": {
-      "src": "/images/play/ux/review.png",
-      "fileSha256": "1a0881407545efcc7eb636dc117d3db3d12ecb4feadf00c84eb1d569258341a1",
-      "pixelSha256": "921e50231d75a845c7b7531f119b33db66a8b2322725d3497e0380b72076757f",
+      "src": "/images/play/ux/v4/review.png",
+      "fileSha256": "ffb8ed7c14a608fcdc490fdb638dca400601875cc794de29bb8840ffffa93c5f",
+      "pixelSha256": "fffd737cad0c33b1abf78ec23dc9d11db5ccb600f568bc01df7253812a6aba4f",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-arrival": {
+      "src": "/images/play/ux/v4/arrival.png",
+      "fileSha256": "0a3e867a7fc48da23c51c7ef4a4deaa269d24ce1eff8480d0985efda33e7f0dd",
+      "pixelSha256": "16f1f37d89588426de1c6781004373669bb496edc650f87add26b82e5c344965",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-goals": {
+      "src": "/images/play/ux/v4/goals.png",
+      "fileSha256": "79ac9bb0ca770adde6bef9dd47f428230c35df06e12ceac397879fe93e4e6623",
+      "pixelSha256": "ce401acf98b32868f16107b1c768e00218850de8d9819c79d79127a4ef1cb2b0",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-toolkit": {
+      "src": "/images/play/ux/v4/toolkit.png",
+      "fileSha256": "0d3477bb5268e056bcd58f2663ec661113b626f017de9ad9c3369516b57ccaf3",
+      "pixelSha256": "7846f51dbf794b7ed85e1495159be5298f818d9e689b6dda80e412c9e0d75850",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-notes": {
+      "src": "/images/play/ux/v4/notes.png",
+      "fileSha256": "3eaab7bef7b927b414218e49ff9d4fcb66e35148519778cd85b5761b8121d96a",
+      "pixelSha256": "9428bc324a8a1dc8eec101295235c42d190eab7e2a8cac632f924e6d55fc3c11",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-research-pause": {
+      "src": "/images/play/ux/v4/research-pause.png",
+      "fileSha256": "84efcc522bf93d81b4007a6aca6381c991a6e929d448adbc3e5ff7cc1a7590cf",
+      "pixelSha256": "e844f7f603b32a9d2277436082f6adf2ebeb6a50aa767bcaf7bd98dc3a0d6472",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-iteration": {
+      "src": "/images/play/ux/v4/iteration.png",
+      "fileSha256": "a63341e1e5fbdfb29301b6ec4d676437f1a9050ff543fad99589e50ecd360e6d",
+      "pixelSha256": "03c82ac253b76805fa8c527df322caaffbf55496e8b51cf1042e3babfdc6b08e",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-midpoint": {
+      "src": "/images/play/ux/v4/midpoint.png",
+      "fileSha256": "aa27b25048226216c66e47a48b42ad7ba8f171a54ed8e4d95f1cca3fbf445d7b",
+      "pixelSha256": "a7da4ae01bce9894b7d01c82f5a2b1e4b18581b3c932a5dff7d7032f422b76ae",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-form-review": {
+      "src": "/images/play/ux/v4/form-review.png",
+      "fileSha256": "7bbe8f35e37e0269de002607b9b59f21378c3d7046df23f4a4dea4fef769fe74",
+      "pixelSha256": "137183c1a14142da4d675b84d54e639ea62096099fbac80cffa874fe452f36cd",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-peer-discussion": {
+      "src": "/images/play/ux/v4/peer-discussion.png",
+      "fileSha256": "c78eb6cd861c6f745c4c2912d8e865a74f95441c1f4fab7cfa537166117add2b",
+      "pixelSha256": "3d1df96d1ab1016b14c6af625c6f4286c53f2545de4717087158c4419212141e",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-review-challenge": {
+      "src": "/images/play/ux/v4/review-challenge.png",
+      "fileSha256": "72a8234a6e71a52428708d7a984b140ddc5eab10733bb8cd8384167375d5bb2d",
+      "pixelSha256": "676459bc888ea9ab65901f599ce0721ffaf16f346c3e86695736de8c4121e9dc",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-handover": {
+      "src": "/images/play/ux/v4/handover.png",
+      "fileSha256": "cdb59f4ed9402d398d71f9a7f438b29c357ff991bda5ae805aed0787de1fcad3",
+      "pixelSha256": "1b6f8c7b8fd468b6e4b06219895a2b1624a39cb18749c409a7bea8c2f811b6a3",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-closing": {
+      "src": "/images/play/ux/v4/closing.png",
+      "fileSha256": "569309d16992e1e27e72c421e4e6931826c09dea49bf17e4ff02253074845d0c",
+      "pixelSha256": "7d37d9929c2041634c8242f1bd95d96771dc9c604b0a15f26091febe4db5ad07",
       "width": 1672,
       "height": 941,
       "opaque": true
     }
   },
-  "routedBeats": 35,
+  "routedBeats": 36,
   "errors": [],
   "notCertified": [
     "Subject-matter correctness",
