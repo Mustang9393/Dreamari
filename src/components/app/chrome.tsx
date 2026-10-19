@@ -11,7 +11,6 @@ import { Briefcase, ChevronLeft, CirclePlay, Compass, GraduationCap, House, Menu
 import { MessagesButton, NotificationsButton } from "./Inbox";
 import { useGlobalTheme } from "./theme";
 import { setLookV2, useLookV2 } from "./look";
-import { setTop3FlowV2, useTop3FlowV2 } from "@/lib/top3Flow";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
 import { useStudentAvatarSrc } from "@/lib/avatar";
 import { STUDENT } from "@/components/profile/data";
@@ -299,7 +298,6 @@ export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLin
   const sheets = useSyncExternalStore(subscribeSheets, sheetsEnabled, () => false);
   const { theme, toggle } = useGlobalTheme();
   const lookV2 = useLookV2();
-  const top3FlowV2 = useTop3FlowV2();
   return (
     <div className={`flex flex-col gap-[2px] ${className}`}>
       {extra}
@@ -361,19 +359,6 @@ export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLin
       >
         v2 look (black and blue)
         <span className="rounded-full px-[8px] py-[1px] text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ background: lookV2 ? "var(--primary)" : "var(--glass-surface-2)", color: lookV2 ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{lookV2 ? "On" : "Off"}</span>
-      </button>
-      {/* DEMO-ONLY: Top 3 -> My Plan path (19 Oct 2026, src/lib/top3Flow.ts).
-         Same as ?top3=v2 / ?top3=v1. */}
-      <button
-        type="button"
-        role="switch"
-        aria-checked={top3FlowV2}
-        onClick={() => setTop3FlowV2(!top3FlowV2)}
-        className="dm-quiet flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-left text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
-        style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
-      >
-        v2 profile (Top 3 to My Plan)
-        <span className="rounded-full px-[8px] py-[1px] text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ background: top3FlowV2 ? "var(--primary)" : "var(--glass-surface-2)", color: top3FlowV2 ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{top3FlowV2 ? "On" : "Off"}</span>
       </button>
       {!hideDemoLinks && (
         <>

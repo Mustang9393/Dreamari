@@ -66,7 +66,7 @@ import { OpportunitiesShelf, useSavedOpportunityCount } from "@/components/oppor
 import { playArrival } from "@/lib/showTheWay";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import { useBackStep } from "@/lib/backStep";
-import { useTop3FlowV2 } from "@/lib/top3Flow";
+import { setTop3FlowV2, useTop3FlowV2 } from "@/lib/top3Flow";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -1219,6 +1219,26 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
            comment above), but the underlying route-choice flow still needs
            a real destination rather than a dead link. */}
         {tab === "settings" && <SettingsView section={settingsSection} onClose={closeSettings} />}
+        {/* DEMO-ONLY: the v2 profile switch (lib/top3Flow), at the foot of
+           the page and quiet so it never competes with the Profile itself
+           (Chandu, 19 Oct 2026: "put the toggle in the my profile under the
+           page as a small toggle that doesnt compete with the UI"). Same as
+           ?top3=v2 / ?top3=v1. */}
+        <div className="flex justify-end">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={flowV2}
+            onClick={() => setTop3FlowV2(!flowV2)}
+            className="dm-quiet flex cursor-pointer items-center gap-[8px] rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[11px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            v2 profile
+            <span aria-hidden className="relative h-[14px] w-[24px] flex-none rounded-full transition-colors" style={{ background: flowV2 ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 22%, transparent)" }}>
+              <span className="absolute top-[2px] size-[10px] rounded-full bg-white transition-[left] duration-200" style={{ left: flowV2 ? 12 : 2 }} />
+            </span>
+          </button>
+        </div>
       </main>
 
       {/* ---- Welcome to Your Profile (arrival from Match only): the shared

@@ -4,8 +4,8 @@
 // audit found Top 3 still a dead end ("I added to Top 3 but didn't know what
 // to do next", 25 Sept survey): "lets do a v2 toggle so we can demonstrate how
 // we can solve the top 3 dead end." Off by default. Turned on by ?top3=v2
-// (?top3=v1 turns it off) or the Quick links menu's switch; remembered in
-// localStorage. What it changes (Chandu's flow, 19 Oct 2026):
+// (?top3=v1 turns it off) or the small switch at the foot of My Profile;
+// remembered in localStorage. What it changes (Chandu's flow, 19 Oct 2026):
 //   1. Top 3 cards: "Plan this" (makes it #1, opens My Plan) and Learn more.
 //      Play moves off the cards into My Plan's steps.
 //   2. My Plan keeps its seasons and In app / Out of app design; its In app
