@@ -402,7 +402,10 @@ export function SchoolCard({
            sit) fading to nearly clear over the upper photo -- same curve
            CollegeCard already uses for its own full-bleed cards */}
         <span className="absolute inset-0" style={{ background: "var(--pc-scrim, linear-gradient(to top, rgb(12 16 35 / 0.96) 0%, rgb(12 16 35 / 0.86) 30%, rgb(12 16 35 / 0.55) 52%, rgb(12 16 35 / 0.2) 70%, transparent 88%))" }} />
-        <span className="absolute inset-x-0 top-0 h-[64px]" style={{ background: cardTopScrim() }} />
+        {/* pc-top-dark: dark mode only. In light (Chandu, 19 Oct 2026: the light
+           school cards have "a dark gradient on top") the band is hidden; the
+           bookmark keeps its own dark disc, so it still reads (globals.css). */}
+        <span className="pc-top-dark absolute inset-x-0 top-0 h-[64px]" style={{ background: cardTopScrim() }} />
         {/* Hover cue, school cards only (direct feedback, 11 Sept 2026): a
            labelled pill, not a bare chevron, centred on the photo band. Uses
            the poster-card hover rules (dim + cue) from globals.css. */}

@@ -1,3 +1,10 @@
+## 2026-10-19: light school cards lose the dark band across the top
+
+**Why (Chandu):** "the light mode cards for the school/fallback cards look off, theres a dark gradient on top".
+
+- SchoolCard's 64px top band (`cardTopScrim()`, a fixed dark gradient for the white bookmark on dark photos) ignored the theme while every other layer switched to the light frost. It now carries `pc-top-dark`, hidden by `html.light .marketing-v2 .photo-ink .pc-top-dark` in globals.css. The bookmark keeps its own dark disc, so it still reads. Dark mode is unchanged.
+- Checked live at tablet width: light, a photo card next to a fallback card, band gone, bookmark readable; dark, band still shown.
+
 ## 2026-10-19: empty College Goal card shows the school fallback art in the demo too
 
 **Why (Chandu):** "Use the fallback for school for an empty college goals card." This replaces the DEMO-ONLY swap from 01ab42c7, where v1's About Me showed a real campus photo when there was no #1 school.

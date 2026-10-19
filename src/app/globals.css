@@ -2166,6 +2166,9 @@ html.light .marketing-v2 .photo-ink {
 /* CollegeCard prints its name at the top, so in light the top frost has
    to cover the badge, the mark and two lines of name. */
 html.light .marketing-v2 .photo-ink .pc-top { height: 150px; }
+/* SchoolCard's top band is dark shading for the bookmark on dark photos; in
+   light it read as a dark gradient across the top of every card. */
+html.light .marketing-v2 .photo-ink .pc-top-dark { display: none; }
 /* Opportunities posters in light (Chandu, 7 Oct 2026: option 1, light like
    the school cards). The world colour stays as a soft corner light, the
    progressive blur stops dimming, and a frost of the page colour carries
