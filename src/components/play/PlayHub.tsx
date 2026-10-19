@@ -672,6 +672,17 @@ export function CardDeck<T extends { id: string }>({
  *  non-interactive card instead of a button, per direct feedback ("color
  *  but just not pressable"). */
 // Custom-designed edge case, 22 Sept 2026: neither RowCard nor
+// One `sizes` for every tier (19 Oct 2026, Chandu: resting thumbnails
+// "appear low quality until the card is clicked ... they look really bad").
+// The side and compact tiers are tall portrait slots, but most covers are
+// 16:9, so object-cover scales the art up to the HERO's width just to fill
+// the slot's height. Per-tier sizes ("304px") made Next serve a ~640px
+// variant that got stretched ~2.4x; the hero asked for 764px, which is why
+// focusing a card suddenly sharpened it. Asking for the hero width
+// everywhere also means focusing a card reuses the same, already-loaded file.
+// Phones get 180vw: the deck card is portrait (~300x365), so 16:9 art fills
+// it only at ~650px wide, close to twice the screen width.
+const COVER_SIZES = "(min-width: 1024px) 764px, (min-width: 640px) 676px, 180vw";
 // HeroShelfCard handled a failed `cover` load (HeroShelfCard already had
 // a fallback for a MISSING cover -- BookOpen on a tinted circle -- but
 // not for one that's present but 404s). Confirmed PlayHub never imports
@@ -764,7 +775,7 @@ export function RowCard({
   const worldSize = tier === "hero" ? "text-[11px] sm:text-[13px] md:text-[15px]" : tier === "side" ? "text-[11px] sm:text-[10px] md:text-[13px] lg:text-[14px]" : "text-[10.5px] sm:text-[11.5px]";
   const content = (
     <div className="relative h-full w-full">
-      <CoverPhoto src={cover} world={world} sizes={large ? "(min-width: 1024px) 764px, 90vw" : tier === "compact" ? "(min-width: 768px) 347px, 60vw" : "(min-width: 1024px) 304px, 45vw"} className="object-cover" />
+      <CoverPhoto src={cover} world={world} sizes={COVER_SIZES} className="object-cover" />
       {candidate.kind === "soon" && !large && (
         <span className={`absolute top-[8px] left-[8px] z-[1] flex items-center rounded-full px-[8px] py-[3px] text-[11px] font-bold ${tier === "compact" ? "gap-[5px]" : ""}`} style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
           {tier === "compact" && <Lock className="h-[12px] w-[12px]" aria-hidden />}
@@ -1055,7 +1066,7 @@ export function HeroShelfCard({ item, large = false, active = false, onSelect, d
   const subSize = tier === "hero" ? "text-[11px] sm:text-[13px] md:text-[15px]" : tier === "side" ? "text-[11px] sm:text-[10px] md:text-[13px] lg:text-[14px]" : "text-[10.5px] sm:text-[11.5px]";
   const content = (
     <div className="relative h-full w-full">
-      <CoverPhoto src={item.cover} world={item.world} sizes={tier === "hero" ? "(min-width: 1024px) 764px, 90vw" : tier === "side" ? "(min-width: 1024px) 304px, 45vw" : "(min-width: 768px) 347px, 60vw"} className="object-cover" />
+      <CoverPhoto src={item.cover} world={item.world} sizes={COVER_SIZES} className="object-cover" />
       {item.locked && tier !== "hero" && !quiet && (
         <span className={`absolute top-[8px] left-[8px] z-[1] flex items-center rounded-full px-[8px] py-[3px] text-[11px] font-bold ${tier === "compact" ? "gap-[5px]" : ""}`} style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
           {tier === "compact" && <Lock className="h-[12px] w-[12px]" aria-hidden />}
