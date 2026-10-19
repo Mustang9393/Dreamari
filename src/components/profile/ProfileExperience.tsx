@@ -25,6 +25,9 @@ import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BuildModal, type BuildSection } from "./PreferencesTab";
 import { AboutMeTab } from "./AboutMeTab";
+import { BookCounselorSheet, useMyNextMeeting } from "./BookCounselorSheet";
+import { BOOK_MEETING_ID, careerWindows, SAVE_PROGRAM_ID, SAVE_SCHOOLS_ID, SHARE_REPORT_ID, type CareerStep } from "./careerPlanSteps";
+import { reportHistorySnapshot, serverReportHistorySnapshot, subscribeReportHistory } from "@/lib/reportHistory";
 import { CareerPeek } from "./CareerPeek";
 import { CompareHighlights } from "./CompareHighlights";
 import { CardDeck } from "@/components/play/PlayHub";
@@ -63,6 +66,7 @@ import { OpportunitiesShelf, useSavedOpportunityCount } from "@/components/oppor
 import { playArrival } from "@/lib/showTheWay";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import { useBackStep } from "@/lib/backStep";
+import { useTop3FlowV2 } from "@/lib/top3Flow";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -377,6 +381,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // My Build is a modal over the page (6 Oct 2026): sections down the left,
   // the editor on the right, one Save for all of it.
   const [buildOpen, setBuildOpen] = useState(false);
+  const flowV2 = useTop3FlowV2();
+  // v2: My Plan's "Book a meeting with your counselor" step
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const meetingBooked = useMyNextMeeting() !== null;
   const [buildSection, setBuildSection] = useState<BuildSection | undefined>(undefined);
   const openBuild = (section?: BuildSection) => {
     setBuildDot(false);
@@ -1133,6 +1141,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               onDismissUndo={() => setUndoRemove(null)}
               onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
               onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
+              onPlan={(id) => { reorderTop3([id, ...top3.filter((x) => x !== id)]); setTab("plan"); }}
             />
           </motion.div>
         )}
@@ -1149,7 +1158,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           <div role="tabpanel" id="profile-panel-plan" aria-labelledby="profile-tab-plan">
             {/* V2 approved, 22 Sept 2026 ("v2 is approved for my plan...
                no more toggle") -- hard-coded "v2". */}
-            <MyPlanTab focus={focus} onGoRoutes={() => setTab("routes")} variant="v2" />
+            <MyPlanTab focus={focus} onGoRoutes={() => setTab("routes")} variant="v2" topIds={top3} onBookMeeting={() => setBookingOpen(true)} />
           </div>
         )}
         {tab === "report" && focus && (
@@ -1180,6 +1189,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
            the tab card, so the tabs stay the way back (no second title, no
            close button over the page's own header). */}
         {buildOpen && <BuildModal initialSection={buildSection} onClose={() => setBuildOpen(false)} />}
+        {bookingOpen && <BookCounselorSheet onClose={() => setBookingOpen(false)} />}
         {tab === "locker" && (
           <motion.div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker" initial={panelPhase === "in" ? { opacity: 0, x: 28 } : false} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}>
             <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("top3")} embedded />
@@ -1564,7 +1574,7 @@ function HintGlyph({ children }: { children: React.ReactNode }) {
 }
 
 export function Top3Tab({
-  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, showTour, onTourDone, hintPaused = false,
+  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, onPlan, showTour, onTourDone, hintPaused = false,
 }: {
   top3: string[];
   focusId: string | null;
@@ -1582,6 +1592,8 @@ export function Top3Tab({
   onDismissUndo: () => void;
   onOpenCompare: () => void;
   onGoReport: () => void;
+  /** v2 (lib/top3Flow): make this career #1 and open its path in My Plan */
+  onPlan?: (id: string) => void;
   showTour: boolean;
   onTourDone: () => void;
   /** a popup is over the page: the hint's reading clock waits */
@@ -1594,6 +1606,7 @@ export function Top3Tab({
   // the pointer or focus isn't on it (the copy never changes mid-read). A
   // move or remove ends the nudge at once: they've got it.
   const nudging = hint !== false && top3.length > 1;
+  const flowV2 = useTop3FlowV2();
   const [holding, setHolding] = useState(false);
   const [pulse, setPulse] = useState(false);
   const pulsed = useRef(false);
@@ -1900,6 +1913,19 @@ export function Top3Tab({
                        play button doesn't need a label or report doesn't"):
                        Show more opens the Peek, Play keeps its word, Report is
                        its icon with a tooltip. Three things, one line, room. */}
+                    {/* v2 (lib/top3Flow, 19 Oct 2026, Chandu: "plan this
+                       shouldnt be the only cta, as we want the learn more to
+                       be a thing... the play stuff can happen from my plan"):
+                       Learn more and Plan this. Play and the Report are steps
+                       in the plan. */}
+                    {flowV2 ? (
+                    <div className="t3s-actions pointer-events-auto">
+                      <button type="button" onClick={() => openPeek(index)} className="t3s-toggle" aria-label={`Learn more about ${career.title}`}>
+                        Learn more <ChevronRight className="h-4 w-4" aria-hidden />
+                      </button>
+                      <button type="button" onClick={() => onPlan?.(id)} aria-label={`Plan for ${career.title}`} className="t3s-play dm-solid">Plan this</button>
+                    </div>
+                    ) : (
                     <div className="t3s-actions pointer-events-auto">
                       <button type="button" onClick={() => openPeek(index)} className="t3s-toggle" aria-label={`Show more about ${career.title}`}>
                         Show more <ChevronRight className="h-4 w-4" aria-hidden />
@@ -1915,6 +1941,7 @@ export function Top3Tab({
                         </button>
                       </IconTip>
                     </div>
+                    )}
                   </div>
                 </>
               )}
@@ -2029,10 +2056,11 @@ export function Top3Tab({
          treatment as "Do this next", direct feedback 11 Sept 2026). */}
       <div onPointerEnter={() => setHolding(true)} onPointerLeave={() => setHolding(false)} onFocus={() => setHolding(true)} onBlur={() => setHolding(false)}>
         <NextStepBanner
-          text={nudging ? "Change these anytime: move, remove, or add more from Explore." : "Explore hundreds of careers and save the ones that interest you."}
-          content={<RankBannerCopy nudging={nudging} retired={hintRetired} />}
-          ctaLabel="Explore"
-          href="/explore"
+          text={nudging ? "Change these anytime: move, remove, or add more from Explore." : flowV2 ? "Tap Plan this on the career you want to work toward." : "Explore hundreds of careers and save the ones that interest you."}
+          // v2: once the move/remove hint is read, the banner points forward to the plan
+          content={flowV2 && !nudging ? undefined : <RankBannerCopy nudging={nudging} retired={hintRetired} />}
+          ctaLabel={flowV2 ? "My Plan" : "Explore"}
+          href={flowV2 ? "/profile?tab=plan" : "/explore"}
           Icon={Compass}
           emphasis="priority"
           calm={!nudging}
@@ -2724,10 +2752,10 @@ export function RoutesTab({
 
 // ---- My Plan: what to do about it, plus what is coming up ----
 
-function MyPlanTab({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCareer | null; onGoRoutes: () => void; variant?: "v1" | "v2" }) {
+function MyPlanTab({ focus, onGoRoutes, variant = "v1", topIds = [], onBookMeeting }: { focus: ProfileCareer | null; onGoRoutes: () => void; variant?: "v1" | "v2"; topIds?: string[]; onBookMeeting?: () => void }) {
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <GradePlanCard focus={focus} onGoRoutes={onGoRoutes} variant={variant} />
+      <GradePlanCard focus={focus} onGoRoutes={onGoRoutes} variant={variant} topIds={topIds} onBookMeeting={onBookMeeting} />
     </div>
   );
 }
@@ -2978,7 +3006,14 @@ function seasonIndexFor(d: Date): number {
   return m >= 7 && m <= 10 ? 0 : m === 11 || m <= 1 ? 1 : 2;
 }
 
-function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCareer | null; onGoRoutes: () => void; variant?: "v1" | "v2" }) {
+function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookMeeting }: { focus: ProfileCareer | null; onGoRoutes: () => void; variant?: "v1" | "v2"; topIds?: string[]; onBookMeeting?: () => void }) {
+  // v2 (lib/top3Flow): the same seasons, In app steps written for the #1
+  // career (careerPlanSteps.ts), and the ones the app can see tick themselves.
+  const flowV2 = useTop3FlowV2();
+  const [savedSchoolsSet] = useSavedColleges();
+  const savedOpportunityCount = useSavedOpportunityCount();
+  const reportVersions = useSyncExternalStore(subscribeReportHistory, reportHistorySnapshot, serverReportHistorySnapshot);
+  const meetingBooked = useMyNextMeeting() !== null;
   const defaultGrade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
   // High School | College (Joshua Pierce, Slack, 18 Sept 2026: "expand it
   // so students can continue using it through college"). Same Fall /
@@ -3002,7 +3037,8 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
   // the entire row clickable like the rest with hover accordions not just
   // the lock icons"). It used to open a modal from the small lock only.
   const [openNote, setOpenNote] = useState<string | null>(null);
-  const basePlan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { id: focus.id, title: focus.title } : null);
+  const plainPlan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { id: focus.id, title: focus.title } : null);
+  const basePlan = flowV2 && stage === "hs" && focus ? { ...plainPlan, windows: careerWindows(plainPlan.windows, focus, grade, topIds) } : plainPlan;
   const levelLabel = stage === "hs" ? `Grade ${grade}` : `Year ${year}`;
   // No progress bar starts at zero (Joshua Pierce, 29 Sept 2026: "always
   // start a progress bar with one action completed such as 'start Fall
@@ -3021,8 +3057,15 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
   const started = (w: GradeWindow) => SEASON_ORDER.indexOf(w.id) <= seasonNow;
   const plan = { ...basePlan, windows: basePlan.windows.map((w) => ({ ...w, steps: [{ id: startId(w), label: "START", inApp: true, title: `Start your ${w.title} ${w.id === "winter" ? "term" : "semester"}` } as GradeStep, ...w.steps] })) };
   const autoDone = new Set(plan.windows.filter(started).map(startId));
+  if (flowV2) {
+    if (reportVersions.length > 0) autoDone.add(SHARE_REPORT_ID);
+    if (meetingBooked) autoDone.add(BOOK_MEETING_ID);
+    if (savedSchoolsSet.size >= 3) { autoDone.add(SAVE_SCHOOLS_ID); autoDone.add("g11-fall-explore"); }
+    if (savedOpportunityCount > 0) autoDone.add(SAVE_PROGRAM_ID);
+  }
+  const isDone = (id: string) => done.has(id) || autoDone.has(id);
   const allSteps = plan.windows.flatMap((w) => w.steps).filter((s) => !s.optional);
-  const doneCount = allSteps.filter((s) => done.has(s.id) || autoDone.has(s.id)).length;
+  const doneCount = allSteps.filter((s) => isDone(s.id)).length;
   const pct = Math.round((doneCount / Math.max(allSteps.length, 1)) * 100);
   const RULE = "var(--inset-border)";
   // The head start's points fly from the percentage the first time a
@@ -3113,7 +3156,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
 
       {plan.windows.map((w) => {
         const countedSteps = w.steps.filter((s) => !s.optional);
-        const wDone = countedSteps.filter((s) => done.has(s.id) || autoDone.has(s.id)).length;
+        const wDone = countedSteps.filter((s) => isDone(s.id)).length;
         const isOpen = openWindow === w.id;
         const v2 = variant === "v2";
         return (
@@ -3166,7 +3209,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
               const groups = (["app", "out"] as const).map((group) => {
                 const rows = w.steps.filter((s) => (group === "out") === !s.inApp);
                 const counted = rows.filter((s) => !s.optional);
-                return { group, rows, counted, groupDone: counted.filter((s) => !s.counselorVerified && (done.has(s.id) || autoDone.has(s.id))).length };
+                return { group, rows, counted, groupDone: counted.filter((s) => !s.counselorVerified && isDone(s.id)).length };
               });
               const rowCount = Math.max(1, ...groups.map((g) => g.rows.length));
               const renderRow = (s: (typeof w.steps)[number]) => {
@@ -3189,7 +3232,8 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
                       </div>
                     );
                   }
-                  const complete = !s.counselorVerified && done.has(s.id);
+                  const cs = s as CareerStep;
+                  const complete = !s.counselorVerified && isDone(s.id);
                   // Verb above the task, not in a fixed side column, so
                   // a half-width column keeps the task line long.
                   const body = (
@@ -3210,6 +3254,22 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
                       )}
                     </span>
                   );
+                  // v2: a step that waits on another (the counselor meeting waits
+                  // for the shared Career Report, so the counselor has read it)
+                  if (cs.waitsFor && !isDone(cs.waitsFor.id) && !complete) {
+                    return (
+                      <div key={s.id} className="flex items-center gap-[12px] border-t py-[10px]" style={{ borderColor: RULE, opacity: 0.7 }}>
+                        <span aria-hidden className="flex size-[28px] flex-none items-center justify-center rounded-[6px] border border-dashed md:size-[22px]" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
+                          <Lock className="h-3 w-3" style={{ color: "var(--muted-foreground)" }} />
+                        </span>
+                        <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
+                          <span className="text-[11px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{s.label}</span>
+                          <span className="min-w-0 text-[15px] leading-[21px]" style={{ color: "var(--foreground)" }}>{s.title}</span>
+                          <span className="pt-[1px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{cs.waitsFor.reason}</span>
+                        </span>
+                      </div>
+                    );
+                  }
                   if (s.counselorVerified) {
                     const noteOpen = openNote === s.id;
                     return (
@@ -3238,7 +3298,12 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
                         </button>
                         </IconTip>
 
-                      {s.href && !complete ? (
+                      {cs.action === "book-meeting" && !complete ? (
+                        <button type="button" onClick={onBookMeeting} aria-label={`${s.label}: ${s.title}`} className="dm-quiet -mx-[8px] -my-[6px] flex min-w-0 flex-1 cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left">
+                          {body}
+                          <ChevronRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+                        </button>
+                      ) : s.href && !complete ? (
                         <Link href={s.href} aria-label={`${s.label}: ${s.title}`} className="dm-quiet -mx-[8px] -my-[6px] flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)] px-[8px] py-[6px]">
                           {body}
                           <ChevronRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />

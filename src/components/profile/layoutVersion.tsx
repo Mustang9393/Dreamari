@@ -8,6 +8,11 @@
 export function savedHref(): string {
   return "/profile?tab=locker&from=saved";
 }
+/** About Me opened on one goal (19 Oct 2026): a saved school or career
+ *  lands where Joshua's flow files it, not on the Saved shelf. */
+export function goalHref(goal: "career" | "college"): string {
+  return `/profile?tab=about&goal=${goal}`;
+}
 export function top3Href(): string {
   return "/profile?tab=top3";
 }

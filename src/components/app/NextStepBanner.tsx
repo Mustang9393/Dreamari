@@ -137,7 +137,7 @@ export function NextStepBanner({
               <span className="text-[13.5px] leading-[18px] font-semibold lg:text-[15px] lg:leading-[21px]" style={{ color: "var(--foreground)" }}>{content ?? text}</span>
             </span>
             {!ctaHidden && (
-              <Link href={href} className={`dm-solid flex min-h-[40px] grow shrink-0 basis-0 items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_2.2s_ease-out_infinite]"} ${ctaDelayMs ? "motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" : ""}`} style={{ background: "var(--primary)", color: "#FFFFFF", animationDelay: ctaDelayMs ? `${ctaDelayMs}ms` : undefined }}>
+              <Link href={href} className={`dm-solid flex min-h-[40px] grow shrink-0 basis-0 items-center whitespace-nowrap justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_2.2s_ease-out_infinite]"} ${ctaDelayMs ? "motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" : ""}`} style={{ background: "var(--primary)", color: "#FFFFFF", animationDelay: ctaDelayMs ? `${ctaDelayMs}ms` : undefined }}>
                 {Icon && <Icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden />} {ctaLabel}
               </Link>
             )}
@@ -186,7 +186,7 @@ export function NextStepBanner({
             <span className="text-[13.5px] leading-[18px] font-semibold lg:text-[15px] lg:leading-[21px]" style={{ color: "var(--foreground)" }}>{content ?? text}</span>
           </span>
           {!ctaHidden && (
-            <Link href={href} className={`dm-solid flex min-h-[40px] grow shrink-0 basis-0 items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_3.2s_ease-out_infinite]"} ${ctaDelayMs ? "motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" : ""}`} style={{ background: "var(--primary)", color: "#FFFFFF", animationDelay: ctaDelayMs ? `${ctaDelayMs}ms` : undefined }}>
+            <Link href={href} className={`dm-solid flex min-h-[40px] grow shrink-0 basis-0 items-center whitespace-nowrap justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_3.2s_ease-out_infinite]"} ${ctaDelayMs ? "motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" : ""}`} style={{ background: "var(--primary)", color: "#FFFFFF", animationDelay: ctaDelayMs ? `${ctaDelayMs}ms` : undefined }}>
               {Icon && <Icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden />} {ctaLabel}
             </Link>
           )}

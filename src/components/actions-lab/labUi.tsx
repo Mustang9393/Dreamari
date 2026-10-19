@@ -10,7 +10,7 @@ import { TOAST_GLASS } from "@/components/app/Toast";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { savedHref, top3Href } from "@/components/profile/layoutVersion";
+import { goalHref, top3Href } from "@/components/profile/layoutVersion";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, Check, ChevronRight, Loader2, RotateCcw, Sparkles, Undo2, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
@@ -115,7 +115,7 @@ function ActionFeedback({ top = false, inline = false }: { top?: boolean; inline
             {bar.undo && <button type="button" onClick={() => { onHold(false); bar.undo!(); }} className="flex flex-none cursor-pointer items-center gap-1 rounded-[8px] border px-3 py-1.5 text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--foreground) 45%, transparent)", color: "var(--foreground)" }}><Undo2 className="h-3.5 w-3.5" aria-hidden />Undo</button>}
             {/* Goes to the real page, in the Profile layout being shown
                (v1 Saved view, v2 Saved tab, v3 under Top 3). */}
-            {bar.link && <button type="button" onClick={() => { onHold(false); const to = bar.link!.open === "saved" ? savedHref() : top3Href(); setBar(null); showTheWay(router, to); }} className="flex flex-none cursor-pointer items-center gap-0.5 rounded-[8px] px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{bar.link.label} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}
+            {bar.link && <button type="button" onClick={() => { onHold(false); const to = bar.link!.open === "saved" ? goalHref("career") : top3Href(); setBar(null); showTheWay(router, to); }} className="flex flex-none cursor-pointer items-center gap-0.5 rounded-[8px] px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{bar.link.label} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}
             {bar.retry && <button type="button" onClick={() => { onHold(false); setBar(null); bar.retry!(); }} className="flex-none cursor-pointer rounded-[8px] px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Try again</button>}
             <IconTip label="Dismiss"><button type="button" aria-label="Dismiss" onClick={() => { onHold(false); setBar(null); }} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full"><X className="h-4 w-4" aria-hidden /></button></IconTip>
             {!bar.error && (

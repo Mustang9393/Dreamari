@@ -15,7 +15,7 @@ import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, 
 import { ACCENT, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
 import { ForYouBrowseToggle } from "@/components/actions-lab/ExploreLab";
-import { savedHref } from "@/components/profile/layoutVersion";
+import { goalHref } from "@/components/profile/layoutVersion";
 import { BrowseV2 } from "./BrowseV2";
 
 // Find a school -- colleges and trade schools both live here, so the page
@@ -140,7 +140,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
           <ForYouBrowseToggle tab={view} onTab={switchView} />
         </div>
 
-        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} onShowSaved={() => router.push(`${savedHref()}&shelf=schools`)} />}
+        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} onShowSaved={() => router.push(goalHref("college"))} />}
         {/* Browse all: the filter bar above the results (BrowseV2.tsx,
            30 Sept 2026). The v1 quick-pick chips and slide-in Filters sheet
            are retired from this page; FilterTray stays exported below for

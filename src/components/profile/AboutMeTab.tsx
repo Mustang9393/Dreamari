@@ -14,9 +14,9 @@
 // colleges/shared useSaved), so a save anywhere lands here with no extra step.
 
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ChevronRight, GraduationCap, Briefcase, Plus, Star, Compass } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FacePhoto } from "@/components/app/FacePhoto";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
@@ -70,7 +70,19 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, bui
   /** My Build has never been opened: its Edit button carries the sweep */
   buildNudge: boolean;
 }) {
-  const [view, setView] = useState<View>("home");
+  // ?goal=career|college opens straight on that goal: Explore Schools' "See
+  // saved" and a career's "View saved" land where the save was filed.
+  const goalParam = useSearchParams()?.get("goal");
+  const [view, setView] = useState<View>(goalParam === "career" || goalParam === "college" ? goalParam : "home");
+  // Once landed, the URL forgets it, so Back to About Me and a reload agree.
+  useEffect(() => {
+    if (!goalParam) return;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("goal");
+      window.history.replaceState(window.history.state, "", url.toString());
+    } catch { /* nothing to tidy */ }
+  }, [goalParam]);
   // A drill-in is one Back step (8 Oct 2026 rule, "ALWAYS EVERYTHING SHOULD
   // GO ONLY ONE STEP BACK"): the browser's Back returns to About Me.
   useBackStep(view !== "home", () => setView("home"));
@@ -202,10 +214,10 @@ function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
   );
 }
 
-function BackLink({ onBack }: { onBack: () => void }) {
+function BackLink({ onBack, label = "About Me" }: { onBack: () => void; label?: string }) {
   return (
     <button type="button" onClick={onBack} className="dm-quiet -ml-[8px] flex w-fit cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[8px] py-[6px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-      <ArrowLeft className="h-4 w-4" aria-hidden /> About Me
+      <ArrowLeft className="h-4 w-4" aria-hidden /> {label}
     </button>
   );
 }
@@ -334,14 +346,14 @@ function EmptyGroup({ text, cta, href }: { text: string; cta: string; href: stri
 
 // --------------------------------------------------------------- College Goal
 
-type CollegeGoal = {
+export type CollegeGoal = {
   schools: { c: College; bucket: GoalBucket }[];
   top: College | null;
   setTop: (slug: string | null) => void;
   move: (slug: string, bucket: GoalBucket) => void;
 };
 
-function useCollegeGoal(): CollegeGoal {
+export function useCollegeGoal(): CollegeGoal {
   const [savedSlugs] = useSavedColleges();
   const [topSlug, setTop] = useTopSchool();
   const [buckets, move] = useGoalBuckets();
@@ -358,14 +370,14 @@ function useCollegeGoal(): CollegeGoal {
   }, [colleges, topSlug, buckets, gpa]);
 }
 
-function CollegeGoalView({ goal, onBack }: { goal: CollegeGoal; onBack: () => void }) {
+export function CollegeGoalView({ goal, onBack, backLabel }: { goal: CollegeGoal; onBack: () => void; /** where Back returns, when it isn't About Me (v2 opens this from My Plan) */ backLabel?: string }) {
   const router = useRouter();
   const allColleges = goal.schools.map((s) => s.c);
   const open = (c: College) => { if (!openSchoolPeek(c, allColleges)) router.push(`/colleges/${c.slug}`); };
   const top = goal.top;
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <BackLink onBack={onBack} />
+      <BackLink onBack={onBack} label={backLabel} />
       <h3 className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>College Goal</h3>
 
       {goal.schools.length === 0 ? (

@@ -172,7 +172,7 @@ export function ForYouSchools({
         { key: "mid", title: "Selective", list: all.filter((m) => rate(m) >= 30 && rate(m) < 70).slice(0, 4) },
         { key: "easy", title: "Most students get in", list: all.filter((m) => rate(m) >= 70).slice(0, 4) },
       );
-    } else sections.push({ key: "target", title: "Target", list: g.target.slice(0, 4) }, { key: "safety", title: "Safety", list: g.safety.slice(0, 4) }, { key: "reach", title: "Reach", list: g.reach.slice(0, 2) });
+    } else sections.push({ key: "target", title: "Target", list: g.target.slice(0, 4) }, { key: "safety", title: "Likely", list: g.safety.slice(0, 4) }, { key: "reach", title: "Reach", list: g.reach.slice(0, 2) });
     // The Replit's 2-year row under a bachelor's route (direct feedback, 11
     // Sept 2026: "everything shows Direct path, the Replit has other
     // signals"): community colleges as a 2-year start, whose cards carry
@@ -486,7 +486,7 @@ export function WhySheet({ onClose, onEdit, career, route, program, gpaLabel, pl
     <Sheet title="Why these schools?" onClose={onClose}>
       <ul className="flex list-none flex-col gap-[12px] p-0">
         {line(`They offer ${program}, the usual ${route.label.toLowerCase()} route into ${career}.`)}
-        {line(gpaLabel ? `Target, Safety and Reach compare your ${gpaLabel} GPA with each school's average.` : "GPA is off, so the rows show how selective each school is instead.")}
+        {line(gpaLabel ? `Target, Likely and Reach compare your ${gpaLabel} GPA with each school's average.` : "GPA is off, so the rows show how selective each school is instead.")}
         {line(`Schools in ${place} come first.`)}
       </ul>
       <button type="button" onClick={onEdit} className="dm-quiet flex min-h-[46px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[15px] font-bold" style={FIELD}>
@@ -532,7 +532,7 @@ function EditSheet({ onClose, career, routes, route, onRoute, place, onPlace, us
         <Field label="Where">
           <Select ariaLabel="State" value={place} options={[...US_STATES]} onChange={onPlace} />
         </Field>
-        <Field label="GPA" hint={useGpa ? "On: schools sort into Target, Safety and Reach around your GPA." : "Off: rows show how selective each school is instead."}>
+        <Field label="GPA" hint={useGpa ? "On: schools sort into Target, Likely and Reach around your GPA." : "Off: rows show how selective each school is instead."}>
           <div className="flex min-h-[46px] items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[14px]" style={FIELD}>
             <span className="text-[15px] font-bold">Use my GPA</span>
             <button type="button" role="switch" aria-checked={useGpa} aria-label="Use my GPA" onClick={() => onUseGpa(!useGpa)} className="relative inline-flex h-[26px] w-[46px] flex-none cursor-pointer items-center rounded-full transition-colors" style={{ background: useGpa ? ACCENT : "var(--glass-surface-2)" }}>

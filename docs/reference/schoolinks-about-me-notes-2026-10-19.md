@@ -40,3 +40,37 @@ Watched frame by frame for Joshua's About Me spec:
 | Empty goal tile: icon + "No X chosen" | Empty card: "Pick a … you're working toward" | Same idea. |
 
 **Bottom line:** the part Joshua borrowed, goal tiles first on the profile, is the part we built. The rest of SchooLinks' About Me is a long form-filled page that our Resume tab already covers, and copying it would add a lot of reading. Nothing here argues for adding text to the My Goals cards.
+
+---
+
+# Joshua's Replit About Me, clicked through (19 Oct 2026, second pass)
+
+dceeai.replit.app/my-profile#overview. Every control on About Me and its two goal pages was clicked.
+
+**About Me:** College Goal card on the left, Career Goal on the right. My Build rows: Industries, Subjects, Work style, Education, Location, Skills to build. "Edit My Build" opens the Preferences tab.
+
+**College Goal is wired, through "Make #1", not through saving.** Saving NYU alone left the card on "Choose a school you're working toward". Pressing Make #1 on the Saved schools page (/colleges/saved) turned the card into "New York University · Finance · Location", with "View College Goal".
+
+**College Goal page:**
+- Primary college panel with "Change goal": opens an in-panel picker of ten schools, then Done.
+- Reach / Target / Likely as stacked sections, two school rows per line. Each row's menu: Move to (the other two), Remove from Plan. The primary has a PRIMARY tag. These schools are demo seeds (Columbia, Rutgers, Fordham, Pace, William Paterson), not the student's saves.
+- **Majors I'm considering:** Finance, Economics, Applied Mathematics; Edit Majors makes them removable and suggests "+ Computer Science", "+ Business"; Explore Majors link.
+- Saved schools drawer ("0 saved" although NYU was saved: the Replit's two saved lists disagree), then a full-width Explore Schools button.
+
+**Career Goal page:** primary career (Learn More, Career Report), My Top 3 (3 rows, PRIMARY tag), Saved careers (empty), full-width Explore Careers.
+
+**Saved schools page (/colleges/saved, "Your decision board"):** a My Plan strip (career, education, program, #1 school), each saved school with an application status menu (Saved, Finalist, Applying, Applied, Accepted, Waitlisted, Denied, Enrolled), Compare, Make #1, remove; Goal history ("Today · #1 school changed to New York University"); a counselor snapshot preview.
+
+**His answer to the Top 3 dead end:** the Top 3 tab ends with "Choose your #1 career to create your plan. Investment Banking is your #1" and **Go to My Plan**. My Plan is an 11-step checklist for the #1 career; step 5 is "Find your school fit". Each Top 3 card also has a "Suggested schools" slot (empty in the Replit: "School matches not available in this report").
+
+## Ours vs his
+
+| His | Ours |
+|---|---|
+| College Goal left, Career right | Career left, College right |
+| Goal set by Make #1 (saves don't map) | Saves map straight in, #1 by star |
+| Remove from Plan in each row's menu | Move only; removing means unsaving elsewhere |
+| Majors I'm considering on College Goal | Not on About Me (saved majors live in the Career Report) |
+| Change goal picker | Star a row |
+| Skills to build in My Build | Not shown (our Build doesn't ask it) |
+| Top 3 → Go to My Plan → "Find your school fit" | v2 (in progress): Top 3 banner → Find schools |

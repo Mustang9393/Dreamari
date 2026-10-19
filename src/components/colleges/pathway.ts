@@ -245,10 +245,13 @@ export function schoolsFor(pathway: Pathway, profile: StudentProfile): SchoolGro
 // The Replit's taxonomy, verbatim (direct feedback, 10 Sept 2026: "use the
 // same copy/taxonomy from the replit"). "Fit unavailable" stays chip-less:
 // a school without a published acceptance rate simply shows no fit.
+// "Likely", not "Safety", on every student surface (19 Oct 2026, Chandu:
+// "Use likely"): For you said Safety while Browse all, the Replit and About
+// Me's College Goal said Likely for the same band. The type keeps "Safety".
 export const FIT_WORDS: Record<Fit, string> = {
   Reach: "Reach",
   Target: "Target",
-  Safety: "Safety",
+  Safety: "Likely",
   "Open admission": "Open admission",
   "Fit unavailable": "",
 };
