@@ -590,7 +590,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            header card's border and shadow carry the world colour, and a
            radial wash of it sits in the top-right, the same recipe as the
            Career Peek sheet and the Top 3 cards. */}
-        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--glass-border))`, background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW, boxShadow: `0 30px 90px -34px color-mix(in srgb, ${accent} 40%, transparent), 0 16px 48px -4px rgba(0,0,0,0.5)` }}>
+        <section data-focal className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--glass-border))`, background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW, boxShadow: `0 30px 90px -34px color-mix(in srgb, ${accent} 40%, transparent), 0 16px 48px -4px rgba(0,0,0,0.5)` }}>
           {/* Faces stay in frame (direct feedback): the poster photos carry the
              subject in their upper part, so the crop anchors near the top. On
              phones the photo runs behind the whole card; from md up it sits on

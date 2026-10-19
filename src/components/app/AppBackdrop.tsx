@@ -4,6 +4,7 @@
 // static throughout the app"). Every app screen renders this once behind a
 // transparent root.
 import { PeekHost } from "./peek";
+import { NightSky } from "./NightSky";
 
 export function AppBackdrop() {
   return (
@@ -42,6 +43,8 @@ export function AppBackdrop() {
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
+      {/* Black & Blue, dark: drifting points of light (./NightSky.tsx) */}
+      <NightSky />
     </div>
     </>
   );

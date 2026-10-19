@@ -308,6 +308,7 @@ function HeroBanner() {
   return (
     <section
       aria-label="Highlights"
+      data-focal
       className="relative h-[400px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:h-[360px]"
       style={{ borderColor: "var(--glass-border)" }}
       onTouchStart={(event) => {
