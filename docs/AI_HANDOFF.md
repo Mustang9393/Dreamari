@@ -1,3 +1,10 @@
+## 2026-10-19: v1's Explore banner is about exploring only, and arrives as the nudges' last beat
+
+**Why (Chandu):** "the explore banner can now just be about exploring and it can show up after the first sequence of nudges. Since we are already doing the new blue tooltips for reorganizing and removing we can skip that part on the banner."
+
+- v1's banner says only "Explore hundreds of careers and save the ones that interest you." with its Explore button. The two-mood sentence ("Change these anytime: move, remove...") and its 2.5s reading clock are gone (RankBannerCopy, HintGlyph and the word lists removed).
+- First visit: hidden during "Move to #1" and "Remove from Top 3", then slides in (height + fade) as the third beat, glowing with "Add more from Explore", and stays. When the nudges were already seen, or there is one card or none, it is simply there. v2 still has no banner.
+
 ## 2026-10-19: Top 3 nudge plays all three beats
 
 **Why (Chandu):** "the move to #1 nudge is good but now its not autoplaying and showing the remove and add in succession." In v1 the banner's reading clock retires the rank hint at 2.5s, and the sequence's effect cleanup cleared the remaining timers with it, so only "Move to #1" played.
