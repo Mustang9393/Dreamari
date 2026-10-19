@@ -168,7 +168,7 @@ For every scored decision, list the concepts it uses and a preceding beat that t
 
 Use the existing `card` / `variant: "act"` / `review` milestone (RN2-28, AMT and IB are references), not a new success screen implementation. Include its review intro, score count, conditional result and continuation. A passing result earns the success treatment; a failing result gets useful forward-looking feedback without confetti or a false success claim. It is unscored and must not add an eleventh decision.
 
-Choose and document a threshold reachable at that point under the current score/recovery rules; do not reuse the final 85 threshold blindly when five Best decisions reach only 75 from a 50 start. Test pass, fail and continue. Offer Finish Later only when resume works; with `DEMO_START_FRESH`, omit that action or explicitly repair and test persistence within the requested scope. The current UX draft omitted this milestone; it is a known QA gap, not a model to copy.
+Choose and document a threshold reachable at that point under the current score/recovery rules; do not reuse the final 85 threshold blindly when five Best decisions reach only 75 from a 50 start. Test pass, fail and continue. Offer Finish Later only when resume works; with `DEMO_START_FRESH`, omit that action or explicitly repair and test persistence within the requested scope. The initial UX draft omitted this milestone. The revised candidate implements UX1-MID after five decisions, with threshold 65.
 
 ### Copy and answer rules
 
@@ -307,7 +307,7 @@ UX Designer is an AI-authored Level 1 QA draft (hamburger → UX Designer · QA 
 
 The usability and accessible-form teaching follows [GOV.UK's moderated testing guidance](https://www.gov.uk/service-manual/user-research/using-moderated-usability-testing), [W3C labels and instructions](https://www.w3.org/WAI/WCAG21/Understanding/labels-or-instructions), and [W3C error identification](https://www.w3.org/WAI/WCAG22/Understanding/error-identification). The employer, people, dialogue, test notes and project are fictional. These sources support the teaching principles, not a claim that a real study took place.
 
-## 16. Enforced shot and viewpoint contract
+## 11. Enforced shot and viewpoint contract
 
 Create `examples/<career-id>-coverage.json` before art production. Each required group records its purpose, scene ID, covered beats, visible cast, viewpoint, speaking target and eyeline. Each beat records its artifact ID or a reason no graphic is needed. The validator checks the plan against actual runtime routing and asset hashes; it rejects missing groups, accidental substitutions and duplicate files standing in for distinct required shots. It also verifies the midpoint exists after five decisions and its threshold is reachable. These are structural checks, not computer-vision proof of style or eye contact.
 
