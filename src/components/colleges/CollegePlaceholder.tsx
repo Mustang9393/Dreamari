@@ -1,84 +1,101 @@
 import React, { useId, type CSSProperties } from "react";
 import { DREAMARI_MARK_PATH } from "./college-brand-mark";
 
-export const COLLEGE_ART_VARIANTS = ["neutral", "contour", "weave"] as const;
+/** One look for every school: the same light, the same hall. Kept as a list
+ *  for the component lab, which shows each variant. */
+export const COLLEGE_ART_VARIANTS = ["hall"] as const;
 type Variant = typeof COLLEGE_ART_VARIANTS[number];
-function hash(value: string) {
-  let result = 2166136261;
-  for (const char of value) result = Math.imul(result ^ char.charCodeAt(0), 16777619);
-  return result >>> 0;
-}
 
-/** Quiet missing-photo media, not promotional artwork. Matches the dark
- * photo/scrim layer used by Explore cards in both light and dark themes.
- * Detail stays above card copy; SVG always preserves its proportions. */
-export function CollegePlaceholder({ seed = "dreamari", variant, accent, className = "", style }: {
-  seed?: string; variant?: Variant; accent?: string; className?: string; style?: CSSProperties;
+/* Colours read through --cp-* so light mode restyles the art from CSS
+   (globals.css). Defaults are the dark Black & Blue values (look-v2.css). */
+const v = (name: string, dark: string) => `var(--cp-${name}, ${dark})`;
+const C = {
+  ground: v("ground", "#000105"), ground2: v("ground-2", "#03070f"),
+  bloom: v("bloom", "#2780ec"), bloom2: v("bloom-2", "#59a0f8"), core: v("core", "#9ec6fa"), navy: v("navy", "#0b2f5b"),
+  line: v("line", "#e2eefd"), line2: v("line-2", "#59a0f8"), mark: v("mark", "#ffffff"),
+};
+const GRAIN = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E";
+
+// The light source, behind the dome; the drawing's lines answer to it.
+const LX = 400, LY = 170;
+
+/* A low, wide hall drawn as a few joined outlines with soft corners, so no
+   line ends near another and nothing reads as a gap. The drum's sides run
+   down to meet the pediment's slope exactly (y on the slope at x=340/460). */
+const OUTLINE = "M170 470V364Q170 350 184 350H290V310Q290 304 296 301L394 256Q400 253 406 256L504 301Q510 304 510 310V350H616Q630 350 630 364V470Z";
+const DOME = "M340 282V238Q340 228 350 228H450Q460 228 460 238V282M352 228A48 48 0 0 1 448 228M392 180V168Q392 162 398 162H402Q408 162 408 168V180";
+const INNER = [
+  "M290 318H510",                                   // entablature
+  "M318 330V456M358 330V456M442 330V456M482 330V456", // columns, a bay left open for the door
+  "M386 470V436A14 14 0 0 1 414 436V470",            // door
+  "M200 440V398A8 8 0 0 1 216 398V440M244 440V398A8 8 0 0 1 260 398V440", // wing windows
+  "M540 440V398A8 8 0 0 1 556 398V440M584 440V398A8 8 0 0 1 600 398V440",
+  "M276 484H524M262 498H538",                        // steps
+  "M400 162V150",                                    // finial
+];
+
+/** Missing-photo art for a college, in the Black & Blue look.
+ * History, 19 Oct 2026 (Chandu): a grey line drawing of a campus "does not
+ * feel as polished"; after several directions: keep the glow card, drop the
+ * orb and Dreamy, and "let the line graphic ... take the glow ... from the
+ * background and catch the light". Then "overly detailed", "too narrow",
+ * "things look broken", "dont have to make it so sharp along corners", and
+ * "let the glow be consistent". So: one fixed light (overlapping soft lobes
+ * behind the dome, eased falloff, film grain) on the near-black ground, and a
+ * low, wide hall in a few joined, round-cornered lines whose brightness
+ * comes from that light (a radial stroke gradient centred on it), the
+ * Dreamari mark in the pediment. Gradients only, no blur filters, so the
+ * cards' hover zoom stays cheap. Light mode swaps the --cp-* colours. */
+export function CollegePlaceholder({ className = "", style }: {
+  seed?: string; variant?: Variant; /** kept for callers; colour comes from the theme */ accent?: string; className?: string; style?: CSSProperties;
 }) {
   const id = `college-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const url = (name: string) => `url(#${id}-${name})`;
-  const scene = variant ?? COLLEGE_ART_VARIANTS[hash(seed) % COLLEGE_ART_VARIANTS.length];
-  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1050" preserveAspectRatio="xMidYMin slice" aria-hidden="true" focusable="false" data-college-art={scene} className={className} style={{ width: "100%", height: "100%", display: "block", ...style }}>
+  const stop = (color: string, opacity: number = 1) => ({ stopColor: color, stopOpacity: opacity });
+  // Eased falloff: many stops, so a lobe fades like light, not like a CSS spot.
+  const soft = (name: string, color: string, peak: number) => <radialGradient id={`${id}-${name}`}>
+    {[0, 0.18, 0.36, 0.55, 0.74, 1].map((o, i) => <stop key={o} offset={o} style={stop(color, peak * [1, 0.72, 0.42, 0.2, 0.07, 0][i])} />)}
+  </radialGradient>;
+  const lines = <><path d={OUTLINE} /><path d={DOME} />{INNER.map(d => <path key={d} d={d} />)}</>;
+
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-college-art="hall" className={className} style={{ width: "100%", height: "100%", display: "block", ...style }}>
     <defs>
-      {/* Existing dark card and scrim surfaces, independent of page theme. */}
-      <linearGradient id={`${id}-surface`} x2=".25" y2="1"><stop stopColor="#202431" /><stop offset=".55" stopColor="#151829" /><stop offset="1" stopColor="#0c1023" /></linearGradient>
-      <radialGradient id={`${id}-light`}><stop stopColor="#f4f7ff" stopOpacity=".035" /><stop offset="1" stopColor="#f4f7ff" stopOpacity="0" /></radialGradient>
-      <radialGradient id={`${id}-accent`}><stop stopColor={accent ?? "var(--college-art-accent, var(--primary, #2f6bf2))"} stopOpacity=".045" /><stop offset="1" stopColor="#2f6bf2" stopOpacity="0" /></radialGradient>
-      <linearGradient id={`${id}-pattern-fade`} x2="0" y2="1"><stop stopColor="white" /><stop offset=".5" stopColor="white" /><stop offset=".7" stopColor="black" /></linearGradient>
-      <mask id={`${id}-mask`}><path d="M0 0H800V1050H0Z" fill={url("pattern-fade")} /></mask>
-      <pattern id={`${id}-dots`} width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="16" cy="16" r="1" fill="#f4f7ff" opacity=".06" /></pattern>
+      <linearGradient id={`${id}-ground`} x2="0" y2="1"><stop style={stop(C.ground)} /><stop offset="1" style={stop(C.ground2)} /></linearGradient>
+      {soft("wash", C.bloom, 0.75)}
+      {soft("lobe", C.bloom2, 0.6)}
+      {soft("core", C.core, 0.85)}
+      {soft("deep", C.navy, 0.9)}
+      <radialGradient id={`${id}-line`} gradientUnits="userSpaceOnUse" cx={LX} cy={LY} r="460">
+        <stop style={stop(C.line)} /><stop offset=".32" style={stop(C.line, 0.9)} /><stop offset=".65" style={stop(C.line2, 0.6)} /><stop offset="1" style={stop(C.line2, 0.25)} />
+      </radialGradient>
+      <radialGradient id={`${id}-face`} gradientUnits="userSpaceOnUse" cx={LX} cy={LY} r="340">
+        <stop style={stop(C.core, 0.16)} /><stop offset=".5" style={stop(C.bloom2, 0.06)} /><stop offset="1" style={stop(C.bloom2, 0)} />
+      </radialGradient>
+      <linearGradient id={`${id}-horizon`} x2="1"><stop style={stop(C.core, 0)} /><stop offset=".5" style={stop(C.core, 0.45)} /><stop offset="1" style={stop(C.core, 0)} /></linearGradient>
+      <pattern id={`${id}-grain`} width="160" height="160" patternUnits="userSpaceOnUse"><image href={GRAIN} width="160" height="160" /></pattern>
     </defs>
-    <path d="M0 0H800V1050H0Z" fill={url("surface")} />
-    <ellipse cx="400" cy="210" rx="410" ry="350" fill={url("light")} />
-    <ellipse cx="660" cy="70" rx="470" ry="360" fill={url("accent")} />
-    <g mask={url("mask")}>
-      {scene === "neutral" && <path d="M0 0H800V700H0Z" fill={url("dots")} />}
-      {scene === "contour" && <g fill="none" stroke="#f4f7ff" strokeWidth="1" opacity=".035">
-        {[0,1,2,3,4].map(i => <path key={i} d={`M${-220+i*55} -70C${-30+i*55} 180 ${30+i*55} 360 ${-100+i*55} 600`} />)}
-        {[0,1,2].map(i => <path key={i} d={`M${610+i*65} -30Q${480+i*65} 280 ${800+i*65} 520`} />)}
-      </g>}
-      {scene === "weave" && <g fill="none" stroke="#f4f7ff" strokeWidth="1" opacity=".025">
-        {Array.from({length:16},(_,i) => <path key={i} d={`M${-650+i*110} 0l800 700M${-650+i*110} 700l800-700`} />)}
-      </g>}
+
+    <rect width="800" height="800" fill={url("ground")} />
+    {/* One light, the same on every card: overlapping lobes at different
+       angles, so it pools and drifts instead of sitting as one round spot. */}
+    <ellipse cx="400" cy="250" rx="560" ry="320" fill={url("wash")} transform="rotate(-10 400 250)" />
+    <ellipse cx="520" cy="150" rx="300" ry="160" fill={url("lobe")} transform="rotate(22 520 150)" />
+    <ellipse cx="270" cy="230" rx="280" ry="140" fill={url("lobe")} opacity=".6" transform="rotate(-24 270 230)" />
+    <ellipse cx="410" cy="175" rx="210" ry="120" fill={url("core")} transform="rotate(-16 410 175)" />
+    {/* A darker current under the light gives it shape. */}
+    <ellipse cx="440" cy="600" rx="500" ry="180" fill={url("deep")} transform="rotate(6 440 600)" />
+
+    {/* Faint light on the faces turned toward the source. */}
+    <path d={`${OUTLINE}M352 228A48 48 0 0 1 448 228Z`} fill={url("face")} />
+    <path d="M40 470H760" stroke={url("horizon")} strokeWidth="2" />
+    {/* The hall in lines of light: a soft wide pass, then the line itself. */}
+    <g fill="none" stroke={url("line")} strokeLinecap="round" strokeLinejoin="round">
+      <g strokeWidth="12" opacity=".12">{lines}</g>
+      <g strokeWidth="3">{lines}</g>
     </g>
-    {/* Edge-to-edge symbolic campus: fills the photo area instead of nesting
-       a tiny image icon inside it. Neutral tonal layers retain placeholder status. */}
-    <defs>
-      <linearGradient id={`${id}-campus-fade`} x2="0" y2="1"><stop offset=".26" stopColor="white" /><stop offset=".76" stopColor="black" /></linearGradient>
-      <mask id={`${id}-campus-mask`}><path d="M0 0H800V1050H0Z" fill={url("campus-fade")} /></mask>
-      <linearGradient id={`${id}-stone`} x2=".6" y2="1"><stop stopColor="#647087" stopOpacity=".28" /><stop offset="1" stopColor="#647087" stopOpacity=".06" /></linearGradient>
-    </defs>
-    <g mask={url("campus-mask")} strokeLinejoin="round" strokeLinecap="round">
-      <circle cx="620" cy="128" r="57" fill="#b0b6c2" opacity=".07" />
-      <circle cx="620" cy="128" r="73" fill="none" stroke="#b0b6c2" strokeOpacity=".07" />
-      <path d="M-90 276Q245-28 814 90M-120 302Q285 0 835 117" fill="none" stroke="#99c2ff" strokeOpacity=".07" strokeWidth="2" />
-      <g fill="#b0b6c2" opacity=".24"><circle cx="112" cy="160" r="3" /><circle cx="248" cy="99" r="3" /><circle cx="426" cy="78" r="3" /></g>
-      <path d="m95 159 17-1m0-9v18M455 141h20m-10-10v20" stroke="#b0b6c2" strokeOpacity=".18" strokeWidth="2" />
-      {/* Background wings, cropped naturally at the edges. */}
-      <path d="M-30 496V292l243-52v256m374 0V240l243 52v204" fill={url("stone")} stroke="#b0b6c2" strokeOpacity=".19" strokeWidth="2" />
-      <path d="m-30 281 243-52v18L-30 303m617-74 243 52v22l-243-56" fill="#b0b6c2" fillOpacity=".1" stroke="#b0b6c2" strokeOpacity=".2" strokeWidth="2" />
-      {[22,80,138,640,698,756].map(x => <g key={x} fill="#b0b6c2" fillOpacity=".12">
-        <rect x={x} y="320" width="23" height="38" rx="3" /><rect x={x} y="385" width="23" height="38" rx="3" />
-      </g>)}
-      <path d="M195 492V253h410v239Z" fill="#252b3c" stroke="#b0b6c2" strokeOpacity=".28" strokeWidth="2" />
-      <path d="m166 258 234-132 234 132-20 17-214-120-214 120Z" fill="#647087" fillOpacity=".27" stroke="#b0b6c2" strokeOpacity=".35" strokeWidth="2" />
-      <path d="m202 259 198-111 198 111Z" fill={url("stone")} />
-      <path d="M195 278h410M195 295h410" stroke="#b0b6c2" strokeOpacity=".21" strokeWidth="2" />
-      <g transform="translate(358 204) scale(3.92523)"><path d={DREAMARI_MARK_PATH} fill="#c3cad7" opacity=".56" /></g>
-      {[222,298,374,450,526].map(x => <g key={x}>
-        <path d={`M${x} 477V350a26 26 0 0 1 52 0v127Z`} fill="#141a2b" stroke="#b0b6c2" strokeOpacity=".22" strokeWidth="2" />
-        <path d={`M${x+26} 334v143M${x+2} 382h48`} fill="none" stroke="#b0b6c2" strokeOpacity=".14" strokeWidth="2" />
-        <path d={`M${x-8} 312v167`} stroke="#b0b6c2" strokeOpacity=".14" strokeWidth="5" />
-      </g>)}
-      <path d="M183 489h434l18 18H165Zm-18 23h470l18 19H147Zm-18 24h506l20 20H127Z" fill="#b0b6c2" fillOpacity=".12" stroke="#b0b6c2" strokeOpacity=".18" strokeWidth="2" />
-      {/* Foreground planting gives scale and a layered, illustrative finish. */}
-      {[{x:77,y:413,s:1},{x:710,y:392,s:1.15}].map(({x,y,s}) => <g key={x} transform={`translate(${x} ${y}) scale(${s})`}>
-        <path d="M0 112V-50" stroke="#b0b6c2" strokeOpacity=".24" strokeWidth="5" />
-        <path d="M0-121C-44-100-80-43-58-11-95 29-39 69 0 47 39 69 95 29 58-11 80-43 44-100 0-121Z" fill="#303b4c" stroke="#b0b6c2" strokeOpacity=".15" strokeWidth="2" />
-        <path d="M0 52V-88M0-25l-31-30M0 6l34-35" fill="none" stroke="#b0b6c2" strokeOpacity=".17" strokeWidth="2" />
-      </g>)}
-      <path d="M-50 560Q125 477 309 570L170 756H-50Zm900 0Q675 477 491 570l139 186h220Z" fill="#526176" opacity=".12" />
-      <path d="M319 557 178 744m303-187 141 187M292 595h216M260 635h280" fill="none" stroke="#b0b6c2" strokeOpacity=".18" strokeWidth="2" />
-    </g>
+    <circle cx="400" cy="146" r="4" fill={C.line} />
+    <g transform="translate(379.7 274.5) scale(1.9)"><path d={DREAMARI_MARK_PATH} fill={C.mark} /></g>
+
+    <rect width="800" height="800" fill={url("grain")} style={{ opacity: "var(--cp-grain, .07)", mixBlendMode: "overlay" } as CSSProperties} />
   </svg>;
 }
