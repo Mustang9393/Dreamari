@@ -472,6 +472,37 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
   // the (i) that opened the popover, kept in state (not a ref) so render can read it
   const [factAnchor, setFactAnchor] = useState<HTMLElement | null>(null);
   const [tab, setTab] = useState<CareerTab>("overview");
+  // ?tab=education (optionally &section=good-at) opens that tab and scrolls
+  // to it (19 Oct 2026, Chandu: My Plan steps like "see the school or
+  // training this career needs" go "to the career detail page and scroll to
+  // the relevant section (and expand if it's collapsed)"). The page only:
+  // inside a peek sheet the host page's own ?tab= is not ours. Read after
+  // mount, not useSearchParams, so the route needs no Suspense wrapper.
+  useEffect(() => {
+    if (inSheet) return;
+    const q = new URLSearchParams(window.location.search);
+    const want = q.get("tab") as CareerTab | null;
+    if (!want || !CAREER_TABS.some((t) => t.key === want)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time URL read after mount
+    setTab(want);
+    const target = q.get("section") ?? want;
+    // a hand-rolled ease in instant steps: a smooth scroll here is cancelled
+    // before it moves (the same finding as Profile's easeScrollTo)
+    const t = window.setTimeout(() => {
+      const el = document.getElementById(target);
+      if (!el) return;
+      const from = window.scrollY;
+      const to = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 96);
+      const start = performance.now();
+      const step = (now: number) => {
+        const p = Math.min(1, (now - start) / 520);
+        window.scrollTo({ top: from + (to - from) * (1 - Math.pow(1 - p, 3)), behavior: "instant" as ScrollBehavior });
+        if (p < 1) window.requestAnimationFrame(step);
+      };
+      window.requestAnimationFrame(step);
+    }, 450);
+    return () => window.clearTimeout(t);
+  }, [inSheet]);
   const lab = useLab();
   const [connectOpen, setConnectOpen] = useState(false);
   // The states the student picked in Build: Pay by state shows those as

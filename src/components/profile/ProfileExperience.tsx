@@ -1717,10 +1717,11 @@ function SpotTip({ side, children }: { side: "left" | "right"; children: React.R
   return (
     <motion.span
       role="status"
-      initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
-      className={`pointer-events-none absolute top-[44px] z-[4] rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap ${side === "left" ? "left-0" : "right-0"}`}
-      style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+      data-side={side}
+      initial={{ opacity: 0, y: -8, scale: 0.85 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 520, damping: 22 }}
+      className={`dm-spot-tip pointer-events-none absolute top-[48px] z-[4] flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap ${side === "left" ? "left-0 origin-top-left" : "right-0 origin-top-right"}`}
     >
+      <Sparkles className="h-[14px] w-[14px] flex-none" aria-hidden />
       {children}
     </motion.span>
   );
@@ -1816,8 +1817,8 @@ export function Top3Tab({
       observer.disconnect();
       const at = (ms: number, fn: () => void) => timers.push(window.setTimeout(() => { if (!stopPlay.current) fn(); }, ms));
       at(500, () => setSpot("move"));
-      at(2300, () => setSpot("remove"));
-      at(4100, () => { setSpot(null); retireHint(); });
+      at(3000, () => setSpot("remove"));
+      at(5500, () => { setSpot(null); retireHint(); });
     }, { threshold: 0.6, rootMargin: "-88px 0px -80px 0px" });
     observer.observe(el);
     return () => { observer.disconnect(); timers.forEach((t) => window.clearTimeout(t)); };

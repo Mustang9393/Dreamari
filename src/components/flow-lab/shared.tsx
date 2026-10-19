@@ -16,12 +16,16 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, ImageOff, Info, Plus, Sparkles, X } from "lucide-react";
+import { ArrowLeftRight, Bookmark, Check, ChevronRight, ImageOff, Info, Plus, X } from "lucide-react";
 import { BorderBeam } from "@/components/app/Beam";
 import { IconTip } from "@/components/app/IconTip";
 import { Working } from "@/components/app/Working";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { matchDetail, REVEAL_STEP, type LabCareer, WORLDS } from "./lab";
+import { PeekList, PeekSheet, type PeekFact } from "@/components/app/PeekSheet";
+import { FacePhoto } from "@/components/app/FacePhoto";
+import { heroFocus } from "@/components/career/heroFocus";
+import { careerButtonInk } from "@/components/actions-lab/CareerHeaderActions";
 
 export const CARD = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
 const SUCCESS = "var(--color-feedback-success)";
@@ -505,11 +509,16 @@ export function RevealGrid<T>({ items, resetKey, renderItem }: { items: T[]; res
 
 // ------------------------------------------------------------------ modal ----
 
-/** Match's detail modal, section for section: hero with employers and
- *  salary, "What You'd Do", "Good Fit If You Like", "School & Path" as
- *  short bullets, one CTA, prev/next through the six. Content comes from
- *  matchDetail(), which is the deck's own copy for the six deck careers and
- *  the app's report/profile data for everything else. */
+/** Match's detail modal (19 Oct 2026, Chandu: "update the learn more
+ *  popups to look like the pop ups we have when we click on top 3 cards...
+ *  keep the same information, designed way better"). Now the Top 3 card's
+ *  sheet (PeekSheet, refined: the poster panel, the world accent, the fact
+ *  strip, the segmented tabs, the frosted footer; a drawer on phones) with
+ *  Match's own content from matchDetail(): pay and employers as the facts,
+ *  "What you'd do" and "Good fit if you like" on Overview, "School & path"
+ *  on its own tab, and the one Save / Add to My Top 3 action. Prev/next
+ *  walk the same list as before. */
+type MatchTab = "overview" | "school";
 export function DetailModal({ career, control, selected, full, onToggle, onClose, onPrev, onNext }: {
   career: LabCareer;
   control: Exclude<LabControl, "rank">;
@@ -522,103 +531,51 @@ export function DetailModal({ career, control, selected, full, onToggle, onClose
 }) {
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
   const detail = matchDetail(career);
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft" && onPrev) onPrev();
-      if (e.key === "ArrowRight" && onNext) onNext();
-    }
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
-  }, [onClose, onPrev, onNext]);
-  const round = "flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-md";
-  const roundStyle = { background: "color-mix(in srgb, var(--background) 55%, transparent)", borderColor: "rgba(255,255,255,0.4)" };
-  const chip = "rounded-[var(--radius-sm)] border px-2.5 py-1 text-[11px] font-bold backdrop-blur-md";
+  const [tab, setTab] = useState<MatchTab>("overview");
+  // PeekSheet steps through a list by index; Match only knows its neighbours,
+  // so the position is just enough to enable the right arrows.
+  const count = 1 + (onPrev ? 1 : 0) + (onNext ? 1 : 0);
+  const index = onPrev ? 1 : 0;
+  const facts: PeekFact[] = [
+    ...(detail.salary ? [{ label: "Typical pay", value: detail.salary }] : []),
+    ...(detail.employers ? [{ label: "Where people work", value: detail.employers }] : []),
+  ];
+  const list = (items: string[]) => (items.length ? <PeekList items={items} /> : <p className="cpk-body" style={{ color: "var(--muted-foreground)" }}>Details coming soon.</p>);
   return (
-    <motion.div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true" aria-label={`${career.title} details`}>
-      <motion.div initial={{ scale: 0.96, y: 8 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 8 }} className="relative flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[440px] flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}>
-        <IconTip label="Close" className="absolute top-3 right-3 z-[3]">
-          <button type="button" aria-label="Close" onClick={onClose} className={round} style={roundStyle}><X className="h-4.5 w-4.5 text-white" aria-hidden /></button>
-        </IconTip>
-        <div className="flow-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="relative w-full" style={{ aspectRatio: "3 / 2" }}>
-            <LabPhoto career={career} sizes="440px" className="object-cover object-top" />
-            {onPrev && (
-              <IconTip label="Previous career" className="absolute top-1/2 left-3 z-[2] -translate-y-1/2">
-                <button type="button" aria-label="Previous career" onClick={onPrev} className={round} style={roundStyle}><ChevronLeft className="h-5 w-5 text-white" aria-hidden /></button>
-              </IconTip>
-            )}
-            {onNext && (
-              <IconTip label="Next career" className="absolute top-1/2 right-3 z-[2] -translate-y-1/2">
-                <button type="button" aria-label="Next career" onClick={onNext} className={round} style={roundStyle}><ChevronRight className="h-5 w-5 text-white" aria-hidden /></button>
-              </IconTip>
-            )}
-            {/* pr-14 keeps the chips clear of the close button, as in Match. */}
-            <div className="absolute inset-x-0 top-0 z-[1] flex items-start justify-between gap-2 p-4 pr-14">
-              {detail.employers ? (
-                <span className={`max-w-[55%] truncate ${chip}`} style={{ color: "var(--poster-title)", background: "color-mix(in srgb, var(--background) 80%, transparent)", borderColor: "var(--glass-border)" }}>{detail.employers}</span>
-              ) : <span />}
-              {detail.salary && (
-                <span className={`flex-none ${chip}`} style={{ color: SUCCESS, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 80%, transparent)" }}>{detail.salary}</span>
-              )}
-            </div>
-            <div className="absolute inset-x-0 bottom-0 z-[1] flex flex-col items-center gap-1.5 px-2 pt-12 pb-3 text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)" }}>
-              <p className="line-clamp-3" style={{ ...posterTitleFont(career.world), fontSize: 26, lineHeight: 1.15, color: "var(--poster-title)" }}>{career.title}</p>
-              <p className="text-[10.5px] font-semibold tracking-[0.06em]" style={{ color: accent }}>{career.world}</p>
-            </div>
-          </div>
-          <div className="flex flex-col px-5 pt-4 pb-4">
-            <Section icon={<BookOpen className="h-4 w-4" />} label="What You'd Do"><Bullets items={detail.whatYouDo} /></Section>
-            <Divider />
-            <Section icon={<Sparkles className="h-4 w-4" />} label="Good Fit If You Like"><Bullets items={detail.goodFitIf} /></Section>
-            <Divider />
-            <Section icon={<GraduationCap className="h-4 w-4" />} label="School & Path"><Bullets items={detail.schoolPath} /></Section>
-          </div>
-        </div>
-        <div className="flex-none border-t px-4 py-3" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
-          <button type="button" onClick={onToggle} disabled={!selected && full} className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-md)] text-[15px] font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: selected ? "var(--color-feedback-danger, #dc2626)" : accent }}>
-            {control === "save"
-              ? (selected ? "Remove from Saved" : full ? "Saved is full" : <><Bookmark className="h-4 w-4" strokeWidth={3} aria-hidden /> Save</>)
-              : (selected ? "Remove from My Top 3" : full ? "Your Top 3 is full" : <><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> Add to My Top 3</>)}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-function Divider() {
-  return <hr aria-hidden className="my-3 border-0" style={{ height: 1, background: "var(--glass-border)" }} />;
-}
-
-/** Match's BulletList: 2-3 short bullets, never a paragraph; "Details
- *  coming soon." when nothing is authored yet (the app's thin-content
- *  convention). */
-function Bullets({ items }: { items: string[] }) {
-  if (items.length === 0) return <p className="text-[13px] font-medium italic" style={{ color: "var(--muted-foreground)" }}>Details coming soon.</p>;
-  return (
-    <ul className="flex flex-col gap-1.5">
-      {items.map((item) => (
-        <li key={item} className="flex items-start gap-2 text-[13px] leading-[1.5] font-medium" style={{ color: "var(--muted-foreground)" }}>
-          <span aria-hidden className="mt-[8px] size-1 flex-none rounded-full" style={{ background: "var(--muted-foreground)" }} />
-          {item}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Section({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
-  return (
-    <section>
-      <div className="flex items-center gap-2">
-        <span aria-hidden className="flex-none" style={{ color: "var(--foreground)" }}>{icon}</span>
-        <h3 className="text-[15px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>{label}</h3>
-      </div>
-      <div className="mt-1.5 text-left">{children}</div>
-    </section>
+    <PeekSheet<MatchTab>
+      refined
+      id={career.id}
+      accent={accent}
+      // face-aware, like the Top 3 sheet: the drawer's wide band keeps the
+      // face in view (a top-pinned crop showed the ceiling)
+      art={<FacePhoto src={career.photo} sizes="(max-width: 1023px) 100vw, 420px" className="object-cover" fallback={heroFocus(career.photo)?.desktop ?? "50% 30%"} priority />}
+      chip={career.world}
+      title={career.title}
+      titleStyle={posterTitleFont(career.world)}
+      facts={facts}
+      tabs={[{ key: "overview", label: "Overview" }, { key: "school", label: "School & path" }]}
+      tab={tab}
+      onTab={setTab}
+      count={count}
+      index={index}
+      onIndex={(i) => { if (i < index) onPrev?.(); else onNext?.(); }}
+      onClose={onClose}
+      body={tab === "overview" ? (
+        <>
+          <section className="cpk-section"><h3 className="cpk-section-title">What you&apos;d do</h3>{list(detail.whatYouDo)}</section>
+          <section className="cpk-section"><h3 className="cpk-section-title">Good fit if you like</h3>{list(detail.goodFitIf)}</section>
+        </>
+      ) : (
+        <section className="cpk-section"><h3 className="cpk-section-title">School &amp; path</h3>{list(detail.schoolPath)}</section>
+      )}
+      footer={
+        <button type="button" onClick={onToggle} disabled={!selected && full} className="flex min-h-[46px] w-full cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-md)] text-[15px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={selected ? { background: "var(--glass-surface-1)", color: "var(--foreground)" } : { background: accent, color: careerButtonInk(career.world), boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}>
+          {control === "save"
+            ? (selected ? "Remove from Saved" : full ? "Saved is full" : <><Bookmark className="h-4 w-4" strokeWidth={3} aria-hidden /> Save</>)
+            : (selected ? "Remove from My Top 3" : full ? "Your Top 3 is full" : <><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> Add to My Top 3</>)}
+        </button>
+      }
+    />
   );
 }
 

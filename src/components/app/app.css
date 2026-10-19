@@ -1324,12 +1324,31 @@ html.light .event-card {
   --ev-qr-ink: #101a26;
 }
 
-/* Top 3 action bar's "spot" (19 Oct 2026): Reorder and Remove light the
-   cards' own controls instead of describing them. A ring inside the
-   element's own shape, no spread halo (hover states follow the shape). */
-@keyframes dm-spot-ring {
-  0%, 100% { box-shadow: 0 0 0 2px var(--primary); }
-  50% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 45%, #ffffff); }
+/* v2 Top 3's first-visit "spot" (19 Oct 2026): the card controls light up
+   with the Black & Blue look's own glow (bloom #599df9, core #9ec6fa;
+   look-v2.css), brighter than a ring (Chandu: "more prominent... brighter
+   highlights, use the BLUE glow from the blue and black theme"). */
+@keyframes dm-spot-glow {
+  0%, 100% { box-shadow: 0 0 0 2px #9ec6fa, 0 0 14px 3px rgba(89, 157, 249, 0.75), 0 0 30px 8px rgba(89, 157, 249, 0.32); }
+  50% { box-shadow: 0 0 0 2px #ffffff, 0 0 20px 6px rgba(89, 157, 249, 0.95), 0 0 44px 14px rgba(89, 157, 249, 0.45); }
 }
-.dm-spot { box-shadow: 0 0 0 2px var(--primary); animation: dm-spot-ring 1.1s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .dm-spot { animation: none; } }
+.dm-spot { animation: dm-spot-glow 1s ease-in-out infinite; background-color: rgba(47, 107, 242, 0.55) !important; }
+/* the tooltip that rides with it: a glowing blue bubble, caret to the control */
+.dm-spot-tip {
+  background: linear-gradient(135deg, #2f6bf2 0%, #599df9 100%);
+  color: #ffffff;
+  box-shadow: 0 0 0 1px rgba(158, 198, 250, 0.7), 0 10px 26px -8px rgba(47, 107, 242, 0.9), 0 0 28px 4px rgba(89, 157, 249, 0.45);
+}
+.dm-spot-tip::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  background: #2f6bf2;
+  box-shadow: -1px -1px 0 0 rgba(158, 198, 250, 0.7);
+}
+.dm-spot-tip[data-side="left"]::before { left: 18px; }
+.dm-spot-tip[data-side="right"]::before { right: 13px; }
+@media (prefers-reduced-motion: reduce) { .dm-spot { animation: none; box-shadow: 0 0 0 2px #9ec6fa, 0 0 14px 3px rgba(89, 157, 249, 0.75); } }

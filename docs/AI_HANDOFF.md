@@ -1,3 +1,11 @@
+## 2026-10-19: brighter v2 nudges, plan steps open the career section, Match's Learn more redesigned
+
+**Why (Chandu):** "the nudges for move to #1 and remove from top 3 should be more prominent... use the BLUE glow from the blue and black theme"; "if something says learn what schools or majors to take etc, take the student to the career detail page and scroll to the relevant section (and expand if its collapsed)"; "in the match flow, update the learn more popups to look like the pop ups we have when we click on top 3 cards... keep the same information, designed way better".
+
+- **v2 nudges:** `.dm-spot` now glows with the Black & Blue look's own blue (bloom #599df9, core #9ec6fa; look-v2.css) and pulses; the tooltip (`.dm-spot-tip`) is a blue gradient bubble with a caret and a spark that springs in; each beat runs 2.5s. Still v2 only, once.
+- **Career page by link:** the live route renders `CareerDetailLab` (not `CareerDetailExperience`). `?tab=education` (optionally `&section=what-they-do`) opens that tab and eases to the section (a hand-rolled instant-step scroll; smooth scrolls get cancelled here). Skipped inside peek sheets so a host page's own `?tab=` never leaks in. My Plan v2's "See the school or training X needs" opens `?tab=education`; "Watch a day in X" opens Overview at "What they actually do".
+- **Match's Learn more (all versions, Match is shared):** `DetailModal` (flow-lab/shared.tsx) now renders on `PeekSheet` refined, the Top 3 card sheet: poster panel (face-aware crop, a drawer on phones), world accent and rule, a fact strip (Typical pay, Where people work), two tabs (Overview: What you'd do + Good fit if you like; School & path), the same Save / Add to My Top 3 button and prev/next. Same content from `matchDetail()`.
+
 ## 2026-10-19: Registered Nurse v2 art, fixed rooms with separate characters
 
 **Why (Chandu, finishing Codex's work):** the earlier RN art redrew the whole picture for every scene, so the room and the view out the window shifted from scene to scene. Codex made the corrected set on 19 Oct (review page: dreamari-career-art-comparisons.chanduq.chatgpt.site/registered-nurse): one saved background per location (station, corridor, Room 12, lobby, staff room) with transparent character layers on top. Chandu: "all the art was generated already... push it to main on its behalf as v2".
@@ -7,6 +15,7 @@
 - Assets: `public/images/play/rn/v2/locked-2026-10-19/` (5 backgrounds, 13 foregrounds, manifest with hashes). All 18 match the review site byte for byte. Master prompt: `public/art-prompts/career-art-master.txt`.
 - Fixed in Codex's uncommitted work: two lines in `SimulationPlayer.tsx` passed the art version as a character's reaction tier (a comma typo), which broke reactions and failed tsc.
 - **Checked:** tsc (clean), eslint on changed files, tokens:check, `next build --webpack`. Played locally: start screen, lobby, station, corridor, Rosa at dawn, Room 12, Denise; all image layers load; the v0/v1 switch still shows the old art. **Not checked:** every beat, phone width, light mode, Windows/ChromeOS.
+
 
 ## 2026-10-19: v2 Top 3 without a banner: teach on the controls themselves
 

@@ -68,8 +68,10 @@ export function careerWindows(windows: GradeWindow[], career: ProfileCareer, gra
     fall: [
       ...levels([[1, "career-glossary-1"]]),
       // the interview wants, in their order
-      s("career-training", "LEARN", `See the school or training ${title} needs`, "/profile?tab=report"),
-      s("career-watch", "EXPLORE", `Watch a day in ${title}`, `/career/${id}`),
+      // learning steps land on the career page's own section, opened and
+      // scrolled to (?tab=, CareerDetailExperience; Chandu, 19 Oct 2026)
+      s("career-training", "LEARN", `See the school or training ${title} needs`, `/career/${id}?tab=education`),
+      s("career-watch", "EXPLORE", `Watch a day in ${title}`, `/career/${id}?tab=overview&section=what-they-do`),
       s("career-follow", "CONNECT", "Follow someone who does this job", "/connect"),
       // Grade 9 already plays it in Winter (g9-winter-play, reworded above)
       ...(sim && grade !== 12 && grade !== 9 ? [s("career-sim", "PLAY", `Play the ${title} simulation`, `/play?focus=${sim.id}`)] : []),
