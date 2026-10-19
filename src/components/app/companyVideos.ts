@@ -26,7 +26,8 @@ export type CompanyVideo = {
 // was supplied for either. EY, AT&T and WildBrain were replaced 19 Oct 2026
 // with updated designed covers (Chandu, "Updated IG Reel Covers (1).zip":
 // "use these for the video thumbnails across the app"); WildBrain's is now
-// a real designed cover too, not the composite. Same file paths, so every
+// a real designed cover too, not the composite. EY's was swapped again
+// 20 Oct for a newer version ("EY.zip"). Same file paths, so every
 // surface that reads `poster` / videoPoster() picks them up.
 export const COMPANY_VIDEOS: CompanyVideo[] = [
   // Kellanova was acquired by Mars, so the clip carries the Mars mark.
