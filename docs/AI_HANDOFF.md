@@ -1,3 +1,12 @@
+## 2026-10-19: empty College Goal card shows the school fallback art in the demo too
+
+**Why (Chandu):** "Use the fallback for school for an empty college goals card." This replaces the DEMO-ONLY swap from 01ab42c7, where v1's About Me showed a real campus photo when there was no #1 school.
+
+- **v1:** About Me's College Goal card with no #1 school now shows the hall art through HallArt (kept whole, as on v2's card). A #1 school without a photo also gets HallArt.
+- **v2:** already worked this way. Unchanged.
+- **Elsewhere:** the demo's photo-only school lists (`dataset.ts`) are untouched.
+- **Validation:** tsc and eslint clean. v1 checked in the browser with no #1 school: the hall shows whole. The test's #1 school was restored afterwards.
+
 ## 2026-10-19: Match arrival lands on About Me; College Goal uses the hall art, uncropped; stronger goal nudges
 
 **Why (Chandu):** "use the fallback graphic we made for empty college goal stuff. Also the nudge needs to be better for choosing a college goal. How are we going to handle the career goal not set state? Think of it in terms of the actual flow where a student comes from match and lands on about me." Then: "the college goal graphic is getting cropped."

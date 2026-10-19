@@ -25,7 +25,7 @@ import { Listbox } from "@/components/app/Listbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { openCareerPeek, openSchoolPeek } from "@/components/app/peek";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { COLLEGES, collegeImage, type College } from "@/components/colleges/data";
+import { collegeImage, type College } from "@/components/colleges/data";
 import { useResolvedColleges } from "@/components/colleges/dataset";
 import { CollegePlaceholder } from "@/components/colleges/CollegePlaceholder";
 import { CollegePicture, useGoalBuckets, useSaved as useSavedColleges, useTopSchool, type GoalBucket } from "@/components/colleges/shared";
@@ -281,7 +281,6 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
       </div>
     );
   }
-  const demoCollegePicture = college.top ?? college.schools.find((s) => collegeImage(s.c))?.c ?? COLLEGES.find((c) => collegeImage(c)) ?? null;
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
       <section aria-labelledby="about-goals" className="flex flex-col gap-[var(--space-3)]">
@@ -304,13 +303,11 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
             kind="College Goal"
             Icon={GraduationCap}
             title={college.top ? college.top.name : college.schools.length ? "Pick your #1 school" : "Pick a school you’re working toward"}
-            // No #1 school yet. Production: the school cards' hall (Chandu, 19
-            // Oct 2026: "this should be used for schools/college goal").
-            // DEMO-ONLY: the demo shows a real campus photo instead, the first
-            // saved school with one, else the first hand-built school with one
-            // (Chandu: "The vercel should not show any using the fallbacks
-            // though. Since its the demo we want pictures everywhere").
-            picture={demoCollegePicture ? <CollegePicture c={demoCollegePicture} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0 h-full w-full" /> : <CollegePlaceholder dark wide className="absolute inset-0" />}
+            // No #1 school yet: the school fallback art, in the demo too
+            // (Chandu, 19 Oct 2026: "Use the fallback for school for an empty
+            // college goals card", after the demo had swapped in a real campus
+            // photo here). Kept whole by HallArt, the same as v2's card.
+            picture={college.top ? <GoalSchoolPicture c={college.top} sizes="(min-width: 768px) 50vw, 100vw" /> : <HallArt />}
             onOpen={() => go("college")}
             openLabel="Open College Goal"
           />
