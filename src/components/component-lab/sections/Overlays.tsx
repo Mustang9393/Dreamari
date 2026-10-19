@@ -9,10 +9,11 @@
 // DocumentDesk/DocumentPreview and every resume modal, so it never sits
 // behind the page's own stacking context.
 
-import { useState, type ReactNode } from "react";
-import { Bell, Bookmark, Share2, Sparkles } from "lucide-react";
+import { useRef, useState, type ReactNode } from "react";
+import { Bell, Bookmark, ChevronDown, Pencil, Share2, Sparkles, Star } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
+import { SpotBadge, SpotTip, useSpotSequence } from "@/components/profile/SpotTip";
 import { SidePanel } from "@/components/counselor/v4/SidePanel";
 import { DetailPane } from "@/components/counselor/chips";
 import { DocumentPage as DocumentDeskPage, FitPage, FullScreenDocument, type Signer } from "@/components/counselor/v4/DocumentDesk";
@@ -52,6 +53,65 @@ function InfoDemo() {
   );
 }
 
+/** A row the spot tips hang from, drawn with My schools' and My Build's own
+ *  classes (the rows themselves are file-local in AboutMeTab.tsx). */
+function SpotMove({ lit = false }: { lit?: boolean }) {
+  return (
+    <button type="button" onClick={noop} className={`dm-quiet flex h-[32px] cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] px-[8px] text-[13px] font-bold ${lit ? "dm-spot" : ""}`} style={{ color: lit ? "#fff" : "var(--muted-foreground)" }}>
+      Move <ChevronDown className="h-[14px] w-[14px]" aria-hidden />
+    </button>
+  );
+}
+function SpotStar({ lit = false }: { lit?: boolean }) {
+  return (
+    <button type="button" onClick={noop} aria-label="Make it your #1" className={`dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-md)] ${lit ? "dm-spot" : ""}`} style={{ color: lit ? "#fff" : "var(--muted-foreground)" }}>
+      <Star className="h-[18px] w-[18px]" aria-hidden />
+    </button>
+  );
+}
+function BuildLine({ lit = false }: { lit?: boolean }) {
+  return (
+    <button type="button" onClick={noop} aria-label="Interests: edit" className={`dm-quiet group flex w-full max-w-[260px] cursor-pointer items-start gap-[var(--space-2)] rounded-[var(--radius-md)] px-[10px] py-[8px] text-left ${lit ? "dm-spot-ring" : ""}`}>
+      <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+        <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>Interests</span>
+        <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Building things, helping people</span>
+      </span>
+      <Pencil className="mt-[3px] h-[14px] w-[14px] flex-none opacity-45" style={{ color: "var(--accent-subtle)" }} aria-hidden />
+    </button>
+  );
+}
+
+/** The real useSpotSequence on a two-control row. A fresh key per replay
+ *  (dreamari:nudge:*, so a page reload clears it too); using a control stops
+ *  the sequence, the same as on My schools. */
+function SpotSequenceRow({ nonce }: { nonce: number }) {
+  const row = useRef<HTMLDivElement>(null);
+  const [spot, stop] = useSpotSequence(`dreamari:nudge:component-lab-${nonce}`, ["move", "star"] as const, row);
+  return (
+    <div ref={row} className="flex items-center justify-end gap-[2px] pt-[56px]">
+      <span className="relative" onClickCapture={stop}>
+        <SpotMove lit={spot === "move"} />
+        {spot === "move" && <SpotTip side="right" top={-46}>Move to Target or Likely</SpotTip>}
+      </span>
+      <span className="relative" onClickCapture={stop}>
+        <SpotStar lit={spot === "star"} />
+        {spot === "star" && <SpotTip side="right" top={-48}>Make it your #1</SpotTip>}
+      </span>
+    </div>
+  );
+}
+function SpotSequenceDemo() {
+  const [nonce, setNonce] = useState(0);
+  return (
+    <div className="flex w-full flex-col items-center gap-[var(--space-3)]">
+      <div className="w-full max-w-[280px]"><SpotSequenceRow key={nonce} nonce={nonce} /></div>
+      <button type="button" onClick={() => setNonce((n) => n + 1)} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[10.5px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" }}>
+        Replay
+      </button>
+    </div>
+  );
+}
+
 export function OverlaysSection() {
   return (
     <Section
@@ -59,7 +119,7 @@ export function OverlaysSection() {
       title="Overlays"
       intro="Modals, panels and sheets, app-wide. Each one below opens behind its own button so nothing heavy mounts on page load, exactly one at a time."
     >
-      <Specimen name="House tooltip (.dm-tip)" file="src/app/globals.css (.dm-tip), src/components/app/app.css (.dm-spot-tip caret)" purpose="The one tooltip look, app-wide (19 Oct 2026, Chandu: ANY tooltip anywhere should use it): the Black & Blue look's blue as a glowing gradient bubble (#2f6bf2 to bloom #599df9, core #9ec6fa) with white text. Hover tips (IconTip), nudges (Top 3 spot tips, My Build's tag), coachmarks and info tips all wear it." when="Every tooltip, hint or nudge bubble. New ones add className dm-tip and nothing else for colour.">
+      <Specimen name="House tooltip (.dm-tip)" file="src/app/globals.css (.dm-tip), src/components/app/app.css (.dm-spot-tip caret)" purpose="The one tooltip look, app-wide (19 Oct 2026, Chandu: ANY tooltip anywhere should use it): the Black & Blue look's blue as a glowing gradient bubble (#2f6bf2 to bloom #599df9, core #9ec6fa) with white text. Hover tips (IconTip), nudges (SpotTip, SpotBadge), coachmarks and info tips all wear it." when="Every tooltip, hint or nudge bubble. New ones add className dm-tip and nothing else for colour.">
         <StateGrid min={240}>
           <StateCell label="Hover tip" note="IconTip's bubble: label only, 12px semibold.">
             <span className="dm-tip inline-block rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap">Notifications</span>
@@ -67,8 +127,57 @@ export function OverlaysSection() {
           <StateCell label="Nudge with caret" note="Top 3's first-visit spot tip: a spark, the control's own words, a caret toward it.">
             <span data-side="left" className="dm-tip dm-spot-tip relative mt-[6px] inline-flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap"><Sparkles className="h-[14px] w-[14px]" aria-hidden /> Move to #1</span>
           </StateCell>
-          <StateCell label="Teaching tag" note="My Build's tag on the Profile cover (v2): a sentence, still one line of meaning.">
-            <span className="dm-tip inline-flex max-w-[280px] items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-[14px] leading-[18px] font-bold"><Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden /> Into something new? Change it here and your matches follow.</span>
+          <StateCell label="My Build line nudge" note="About Me's My Build: the first line lights (dm-spot-ring) and a SpotTip hangs below it, beat 3.2s. The cover tag it replaces was removed 19 Oct 2026: My Build lives on About Me in both versions now.">
+            <span className="relative block h-[120px] w-full">
+              <BuildLine lit />
+              <SpotTip side="left" top={70}>Tap any line to change it</SpotTip>
+            </span>
+          </StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="SpotTip, SpotBadge, useSpotSequence" file="src/components/profile/SpotTip.tsx, src/components/app/app.css (.dm-spot, .dm-spot-ring, .dm-spot-tip)" purpose="The control-teaching nudge: the control itself glows (.dm-spot fills a small control, .dm-spot-ring rings a larger one) and a house tooltip with a caret says what it does, one beat at a time. SpotBadge is the same bubble pinned inside a glowing card until the step is done. Chandu, 19 Oct 2026: &quot;lets also have the tooltip nudges to teach the controls on my schools/ career goal etc.&quot;" when="First visit to a panel whose controls are not obvious (Top 3, My schools' Move and star, My Build's lines). SpotBadge for the next step in a guided flow (About Me's &quot;Start here&quot; on Career Goal, then &quot;Next step&quot; on College Goal).">
+        <StateGrid min={260}>
+          <StateCell label="Tip below, left caret" note="side=&quot;left&quot;, top below the anchor: the caret points up at the control.">
+            <span className="relative block h-[96px] w-full">
+              <SpotMove lit />
+              <SpotTip side="left" top={44}>Move to Target or Likely</SpotTip>
+            </span>
+          </StateCell>
+          <StateCell label="Tip above (data-above)" note="A negative top sets data-above, so the caret flips to point down.">
+            <span className="flex h-[96px] w-full items-end">
+              <span className="relative">
+                <SpotMove lit />
+                <SpotTip side="left" top={-46}>Move to Target or Likely</SpotTip>
+              </span>
+            </span>
+          </StateCell>
+          <StateCell label="Right side" note="side=&quot;right&quot;: anchored to the control's right edge, caret on the right. My schools' star.">
+            <span className="flex h-[96px] w-full items-end justify-end">
+              <span className="relative">
+                <SpotStar lit />
+                <SpotTip side="right" top={-48}>Make it your #1</SpotTip>
+              </span>
+            </span>
+          </StateCell>
+          <StateCell label="Lit control (.dm-spot)" note="The Black & Blue glow pulsing on a filled control, white label. Reduced motion holds a still glow.">
+            <span className="flex items-center gap-[var(--space-3)]">
+              <SpotMove lit />
+              <SpotStar lit />
+              <SpotStar />
+            </span>
+          </StateCell>
+          <StateCell label="Card with SpotBadge" note="dm-spot-ring on the card, SpotBadge inside it, so it covers nothing around it and never times out. A student arriving from Match sees it on Career Goal; College Goal gets &quot;Next step&quot; after.">
+            <span className="relative isolate flex min-h-[180px] w-full flex-col overflow-hidden rounded-[var(--radius-lg)] border text-left dm-spot-ring" style={{ borderColor: "var(--glass-border)", background: "#0e0c20", color: "#fff" }}>
+              <SpotBadge>Start here</SpotBadge>
+              <span className="mt-auto flex flex-col gap-[6px] p-[var(--space-5)]">
+                <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>Career Goal</span>
+                <span className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Pick your #1 career</span>
+              </span>
+            </span>
+          </StateCell>
+          <StateCell label="Live sequence" note="The real useSpotSequence: starts once the row is on screen, about 2.5s per beat, then retires. Click a control to stop it.">
+            <SpotSequenceDemo />
           </StateCell>
         </StateGrid>
       </Specimen>

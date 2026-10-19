@@ -58,6 +58,7 @@ import { Listbox } from "@/components/app/Listbox";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
 import { SurfaceState } from "@/components/app/SurfaceState";
+import { useTop3FlowV2 } from "@/lib/top3Flow";
 import { MAX_SAVED, buildSignals, careerById, demoFirst, exploreMoreWorlds, mixedForStudent, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
 import { BottomBar, ChipRow, DetailModal, SaveFlight, Field, InterestPicker, LabCard, LabScreen, PicksTray, ProfileTabs, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
@@ -146,7 +147,7 @@ const NOTES = {
     "Your saved careers, with one empty slot above them per save (two saves, two slots). Tap a card to fill the next slot: first tap is #1.",
     "Tap a filled slot to clear it.",
     "The back arrow returns to browsing, where Save toggles a career.",
-    "See my Top 3 sets them; they stay editable on the next screen.",
+    "See my Top 3 (in the app with the v2 Profile: Choose my career goal) sets them; they stay editable on the next screen.",
   ] },
   top3: { heading: "My Profile: Top Three", bullets: [
     "Ranking lands here, on the Top Three tab of My Profile, as in the real app. The tab row is shown, not wired: the lab never writes to the real profile.",
@@ -161,6 +162,12 @@ const NOTES = {
  *  which hands them to the real Profile. Without it, the Flow Lab. */
 export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onFinish?: (ids: string[]) => void }) {
   const demo = !!onFinish;
+  // v2 Profile: Match hands off to About Me, whose first step is choosing the
+  // Career Goal, so the last button names that step (Chandu, 19 Oct 2026:
+  // "the cta from match says see my top 3, it should now change right?").
+  // The Flow Lab, which ends on its own Top 3 screen, keeps "See my Top 3".
+  const profileV2 = useTop3FlowV2();
+  const finishLabel = demo && profileV2 ? "Choose my career goal" : "See my Top 3";
   const [state, setState] = useState<State>(EMPTY);
   const [hydrated, setHydrated] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -465,7 +472,7 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
         <BottomBar
           left={<QuietButton ariaLabel="Back to browsing" onClick={() => go("explore")}><ChevronLeft className="h-4 w-4" aria-hidden /></QuietButton>}
           // "See", not "Confirm": a lower-stakes word for a choice that stays editable.
-          cta={left > 0 ? `Pick ${left} more` : "See my Top 3"}
+          cta={left > 0 ? `Pick ${left} more` : finishLabel}
           ctaDisabled={left > 0 || need === 0}
           onCta={() => finish(state.rank)}
         />

@@ -276,7 +276,9 @@ function clearOnReload(): void {
     const stale: string[] = [];
     for (let i = 0; i < window.sessionStorage.length; i++) {
       const k = window.sessionStorage.key(i);
-      if (k && k.startsWith("dreamari:welcome:") && k.endsWith(":session")) stale.push(k);
+      // the welcomes, About Me's guided goals and the control nudges
+      // (19 Oct 2026: the goals start empty again on a refresh)
+      if (k && /^dreamari:(welcome|goal|nudge):/.test(k) && k.endsWith(":session")) stale.push(k);
     }
     stale.forEach((k) => window.sessionStorage.removeItem(k));
   } catch {

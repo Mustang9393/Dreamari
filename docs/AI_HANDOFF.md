@@ -7,6 +7,269 @@
 - Added the existing shared act/review midpoint after five decisions, threshold 65, conditional feedback, and continuation. Existing ten decisions/eight scored mechanics and final pass threshold remain. Fixed Next Image fill/height conflict by sizing its wrapper.
 - SOP v1.2 adds shot coverage, first-person eyeline/speaking-target checks, cast diversity and ordinary labels. Coverage validator passes 566 assertions/15 groups; the previous three-scene manifest is rejected with 85 errors. Tokens (508), TypeScript, scoped lint and local production build checked. Browser checks from this work are recorded separately; current browser connection became unavailable before final midpoint/phone rechecks. Do not claim those passed or all new branches played end-to-end.
 - Release preserves the existing hamburger “UX Designer · QA draft” and normal hub exclusion. Human QA of style/identity/room continuity, new work graphics and midpoint remains the next step. Later levels are unbuilt; DEMO_START_FRESH still disables resume. Production status and merged-main validation will be recorded after release.
+## 2026-10-20: Registered Nurse carousel card and Play tile take the newest game art
+
+**Why (Chandu):** "for the carousel card of the registered nurse and also the thumbnail in the play tab, use the latest images that were created". The newest RN art is the layered set locked on 19 Oct (`public/images/play/rn/v2/locked-2026-10-19`, rooms and character layers kept separate; the game was built as a "v3" lab and promoted to v2). The tile still used the earlier flat `rosa-proud-station-late-day-anime.png`, and the day before Chandu had kept the old lobby image on the Home card ("lets stick to the older carousel image for now").
+
+- New `locked-2026-10-19/cover-rosa-proud-station.webp`: the `station` background with the `rosa-proud-station-late-day` foreground flattened into one file (Rosa alone, arms crossed).
+- `games.ts`: `REGISTERED_NURSE.thumb` points at it, `thumbFocus` "52% 12%" (Rosa centred in the 4:5 tile). `cover` (the in-game backdrop) is unchanged.
+- `HomeExperience.tsx`: the RN hero panel keeps `simThumb(...).src` but uses its own focus "30% 12%", `inset`, and the empty station room as `blurBehind`, like Drone Pilot. Rosa stands mid-frame, so full-bleed put the title over her; the inset pushes her right of the title from sm up, and phones crop full-bleed.
+- Checked: eslint; tsc (only a pre-existing missing `@dicebear/lorelei-neutral` error elsewhere); the image and crops applied live on the :3061 build at 375px, 800px and 1440px for Home, and at 1280px for the Play tile, dark mode. Not checked: this branch's own dev server (server slots full), light mode, Windows/Chromebook.
+
+## 2026-10-20: Black & Blue focal pass (Home, Explore, career, Opportunities, Play)
+
+**Why:** Joshua asked for "stronger visual focal points to give the interface more dimension"; of the options, Chandu liked "bigger hero imagery and type, and more empty space around the one thing that matters" most, with "no glow, no Dreamy". One clear focal point per screen, more room around it, quieter neighbours. All under `html.look-v2`, so Classic is untouched.
+
+- **Home:** the hero banner is taller on laptops (430px, was 360) with 18px more room below it. A Dreamy greeting replacing "HOME" was tried and removed the same day (Chandu: Dreamy "should pop out or break frames... Not be a sticker. If we cant do that there lets just not do that"; no sprite is drawn for a frame-breaking pose, so that would be Codex art).
+- **Explore:** the first, personal rail ("Because you liked...", `data-focal-rail` on Rail when `peek`) is the one bigger row: posters about 14% larger on laptops (row zoom, as the page already uses), its heading 28px (others 24, page title 44), more room above. Later rails unchanged, so they read quieter.
+- **Career page:** Glossary Game keeps its world-colour outline (Chandu, 8 Oct) but loses its tinted fill (`data-secondary-game`), so Play is the one gold action; more room between the header and the facts. The gold key figures are production's own figure style and stay; Play's world glow is an earlier decision and stays.
+- **Opportunities:** "Best fits for you" (`focal` on Shelf) gets the same focal-row treatment: 28px heading, cards 8% larger on laptops, more room above. The filter row is a working control and stays.
+- **Play:** already leads with one billboard (game art, not restyled); only more room after the featured row (`[data-row-id="simulations"]`).
+- Checked: tsc; laptop width (1100px emulated) screenshots `focal-*.png` in docs/reference/look-v2-2026-10-18 (the emulated captures are small). Pushed to main on Chandu's go-ahead.
+
+## 2026-10-19: Black & Blue, less gloomy: a real night sky, opaque surfaces, fewer glows
+
+**Why (Joshua, after demoing the live look):** the black-and-blue aesthetic "feels slightly gloomy compared to the previous design, which felt more inspirational, vibrant, and engaging"; keep dark mode dark but make it "aspirational, uplifting, and immersive", with "brighter cobalt and sky-blue accents", "stronger visual focal points", and the "dreamy, optimistic feeling" without purple. **Chandu:** "flowy tiny stars sprinkled across the background... Not star shaped... realistic without clashing with the UI"; "I dont want to lift the black directly into navy"; then, on review, "the stars look a little too random... reading more like pixie dust", "no card or surface is transparent to the point that they do not even blur the stars", "the career header etc have too much glow. Lets not do glows for the sake of glows", "think of what this means for light mode, i doubt the stars work there".
+
+- **Night sky** (`src/components/app/NightSky.tsx`, inside AppBackdrop): dark Black & Blue only. Second pass after "pixie dust": no per-dot sway or current (the whole field drifts 0.45px/s, the sky turning); a steep brightness curve (most stars are pinpoints, one in ~8 bright, only bright ones get a halo); scintillation only on brighter stars, two unrelated sines multiplied (never a pulse); a faint diagonal band where stars crowd; stars thin under the header bloom and toward the horizon. Mostly white and ice, a few sky blue. One canvas, two pre-rendered sprites, ~30fps, paused in hidden tabs, frozen for reduced motion, off in light mode and Classic.
+- **Ground stays black** (#000105); a faint deep-blue lift only toward the horizon (a linear layer in the app backdrop).
+- **The one lit action is sky blue** in dark (#59a0f8 with #04101e ink, 7.0:1; hover #74b0f8): splash CTA, Let's Go / Next Step, Home hero action, the landing's Start Journey. Light mode keeps cobalt (sky blue on white fails AA). Its halo is reduced to a small seating shadow: the fill is the focus.
+- **Focal block** (`data-focal`: Home's highlights banner, the career header in both CareerDetailExperience and CareerDetailLab): a top-edge rim a touch brighter than a card's and a plain dark shadow. The first pass pooled blue light around them; removed on "too much glow". The career header's world-coloured glow is replaced by the plain shadow.
+- **Opaque surfaces:** dark surface tokens were white tints (glass-surface-1 3%, -2 9%), so stars showed through cards at full sharpness. Under Black & Blue: --glass-surface-1/2/3, --muted, --secondary, --inset-surface and the generated --color-glass-surface-* are near-opaque blue-blacks (94-96%), each step lighter than the one below; --surface #0d1119 (was indigo #11142a). A see-through audit (stacked opacity under 90% on any text-bearing panel, ignoring photos) on Home, Explore, Play, Opportunities, all Connect tabs and all Profile tabs: clean. The Opportunities filter bar is 62% but blurs (backdrop-filter, docked only), so stars are diffused, not sharp; kept. Event tickets flag only because the audit can't see their solid inner ground.
+- **Light mode:** no stars (night only). Its version of "aspirational" is the day sky: the ice-blue light from the top that's already there, plus a daytime cloud horizon.
+- **Cloud horizon:** a graphic, so a Codex prompt, not a stand-in: `docs/reference/look-v2-2026-10-18/cloud-horizon-codex-prompt.md` (night and day versions, file spec, where it plugs in, checks).
+- Checked: tsc, eslint; sky-only inspection screenshot; Home, career detail, Explore in dark; light mode (stars off, cobalt lit button). Screens: `sky-home-dark.jpg`, `sky-career-dark.jpg`, `sky-stars-only.jpg`. Pushed to main on Chandu's go-ahead.
+
+## 2026-10-19: component library catches up with today; College Goal picker; Career Goal chosen on the cards
+
+**Why (Chandu):**
+- "please update the component library with all of todays changes from everywhere"
+- Mid-way:
+  - "give the compare all three button a subtle border shaped with rounded corners"
+  - "the cta from match says see my top 3, it should now change right?"
+  - "when i click on an empty college goal card shouldn't it show me my recommended ones instead of taking me to explore schools? ... open a large modal like the build one"
+  - "Use the same card designs from explore here ... the whole thing/details page appears with a back button in the same large modal"
+  - "keep the making a career the primary within the ranking activity itself instead of a separate glowing cta ... Simplify it"
+  - "no icon only ctas please. call it report"
+  - "if i have a college selected why is the college goal card showing a blank blue thing?"
+
+**Product changes**
+- **Top 3:**
+  - "Compare all 3" is a quiet outlined button with rounded corners.
+  - The cards' Report is always worded. Narrow cards drop the icon, not the word.
+- **Match (V2Flow, live use only):** the last button reads "Choose my career goal" when the v2 Profile is on. The Flow Lab and v1 keep "See my Top 3".
+- **v2 Career Goal:** chosen in the ranking itself. Every Top 3 card's button reads "Make my goal", which moves that card to #1, sets the goal, pays +25 XP and returns to About Me. Once set, #1's button is My Plan. The separate glowing confirm bar is gone.
+- **v2 College Goal:**
+  - It is simply the starred #1 school. No confirm step, so a starred school shows on the card straight away, which fixes the "blank blue" card.
+  - The first choice pays +25 XP, whether from the picker or the star in My schools.
+  - The empty card opens `CollegeGoalPicker` (new, `profile/CollegeGoalPicker.tsx`). It reuses Edit My Build's sheet (`.myb-*`) and shows the Career Goal's For you lists (`pathway.ts`): Saved first, then Target, Reach, Likely.
+  - The picker's cards are Explore's own `SchoolCard`. A card opens the school's whole page (`CollegeDetailExperience` under `InSheet`) in the same sheet, with "Back to schools" and "Choose this school".
+
+**Component library**
+- **Profile** (`features/ProfileCareerColleges.tsx`), new specimens:
+  - AboutMeTab (v1, and v2 live)
+  - GoalCard, EmptyGoalCard and NextStepRow, in every state including focus-in
+  - CollegeGoalView with My schools (no schools, no #1, goal set)
+  - CollegeGoalPicker
+  - BuildModal (Edit My Build)
+  - BookCounselorSheet
+  - OutlookTab (live route)
+  - Top3Tab: updated purpose, plus a "Career Goal mode (v2)" cell
+- **Overlays:**
+  - New: SpotTip, SpotBadge and useSpotSequence.
+  - Changed: the House tooltip's teaching-tag cell now shows the My Build line nudge, since the cover tag is gone.
+- **Surfaces:**
+  - New: GlowLineArt.
+  - Changed: CollegePlaceholder (square, wide, dark, light, light cards with no top band) and the scroll edge fade in CardProgressiveBlur.
+- **Controls:**
+  - New: TextTabs and ColorThemeSwitch.
+  - Changed: Segmented gets an overflow-to-dropdown cell.
+- **Foundations:**
+  - New: LightPulse and the look-v2 light hooks.
+  - Changed: `.dm-spot`, `.dm-spot-ring` and `.dm-goal-focus-in` added to the utilities.
+- **Game UI:**
+  - New: CareerScene and ArtVersionToggle (RN v2 rooms, `game/ScenePieces.tsx`), and simulation thumbnails at the app's tile shapes.
+  - Changed: Glossary cover notes; the UX Designer draft gets a live-route cell.
+- **Exported only for the lab:** GoalCard, EmptyGoalCard, NextStepRow, HallArt and GoalSchoolPicture from AboutMeTab.
+
+**Validation:** tsc clean (the pre-existing `@dicebear` error aside), and eslint shows only the 2 old ProfileExperience warnings. The library page loads with every new specimen present, checked by screenshot. In the browser:
+- **Picker:** saved and For you lists, Explore cards, school page in the sheet, Back, and Choose (TCNJ became the goal, +25 XP).
+- **Make my goal:** on card #2, Airline Pilot moved to #1 and became the goal.
+- **v1 Top 3:** Report is worded and Compare is outlined.
+- **Demo data:** restored afterwards (IB #1, Rutgers #1 school).
+
+## 2026-10-19: Home hero frost stops at the title, so photo subjects stay sharp
+
+**Why (Chandu):** "The character in the image is being blurred too much in this carousel card. On all devices and screen sizes." The frost (a 16px-blurred copy of the photo, masked in under the text) ran to 64% of the card width on tablet and desktop and 60% of the height on phones, so any subject near the middle of a photo sat under the blur.
+
+- `src/components/app/HomeExperience.tsx` `HeroPanel`: `FROST` now fades out by 44% of the width (the title's right edge), and the new `FROST_PHONE` fades out by 36% of the height. The dark scrims are unchanged and still carry text legibility past the blur. Applies to every full-bleed hero panel, plus the phone frost on the inset ones (Drone Pilot, partner).
+- Tried and turned down the same day: moving the Registered Nurse hero to the v2 art (`rosa-station-dawn-anime.png`, inset over the empty station). Chandu: "lets stick to the older carousel image for registered nurse for now." The nurse panel keeps `REGISTERED_NURSE.cover`.
+- Checked: eslint and tsc; the new masks applied live on the :3061 build at desktop width and at 375px phone width, dark mode. Not checked: this worktree's own dev server (all five server slots were held by other chats), light mode, Windows/Chromebook.
+## 2026-10-19: light school cards lose the dark band across the top
+
+**Why (Chandu):** "the light mode cards for the school/fallback cards look off, theres a dark gradient on top".
+
+- SchoolCard's 64px top band (`cardTopScrim()`, a fixed dark gradient for the white bookmark on dark photos) ignored the theme while every other layer switched to the light frost. It now carries `pc-top-dark`, hidden by `html.light .marketing-v2 .photo-ink .pc-top-dark` in globals.css. The bookmark keeps its own dark disc, so it still reads. Dark mode is unchanged.
+- Checked live at tablet width: light, a photo card next to a fallback card, band gone, bookmark readable; dark, band still shown.
+
+## 2026-10-19: empty College Goal card shows the school fallback art in the demo too
+
+**Why (Chandu):** "Use the fallback for school for an empty college goals card." This replaces the DEMO-ONLY swap from 01ab42c7, where v1's About Me showed a real campus photo when there was no #1 school.
+
+- **v1:** About Me's College Goal card with no #1 school now shows the hall art through HallArt (kept whole, as on v2's card). A #1 school without a photo also gets HallArt.
+- **v2:** already worked this way. Unchanged.
+- **Elsewhere:** the demo's photo-only school lists (`dataset.ts`) are untouched.
+- **Validation:** tsc and eslint clean. v1 checked in the browser with no #1 school: the hall shows whole. The test's #1 school was restored afterwards.
+
+## 2026-10-19: Match arrival lands on About Me; College Goal uses the hall art, uncropped; stronger goal nudges
+
+**Why (Chandu):** "use the fallback graphic we made for empty college goal stuff. Also the nudge needs to be better for choosing a college goal. How are we going to handle the career goal not set state? Think of it in terms of the actual flow where a student comes from match and lands on about me." Then: "the college goal graphic is getting cropped."
+
+- **Career Goal not set, from Match** (`/profile?picks=…&tab=top3&welcome=1`): v2 now lands on About Me itself, not inside Career Goal.
+  - The student sees the whole path first: Career Goal, College Goal, then the plan.
+  - The Career Goal card glows (`dm-spot-ring`) and carries a "Start here" badge: the house tooltip inside the card (`SpotBadge`, SpotTip.tsx). It stays until the goal is set and never times out.
+  - One tap opens the Top 3 from Match with its nudges. After confirming, the badge moves to the College card ("Next step").
+  - Other `?tab=top3` links still open Career Goal directly.
+  - Until the goal is set, Report and My Plan keep following the strongest match, as before.
+- **Empty College Goal states use the school fallback art** (CollegePlaceholder, the lit hall), crisp, not blurred:
+  - the About Me card
+  - "Pick your #1 school" when there is no #1
+  - "No schools yet" when nothing is saved
+  - any #1 school without a photo
+- **Cropping:** the art is a square drawn to fill by cropping, so short, wide cards lost the dome and steps. New `HallArt` keeps it square at the card's full height, centered (or right-aligned on wide cards), with its sides feathered into the art's own ground colour (`--cp-ground`, so light mode matches).
+- **College nudges:**
+  - With no #1, the My schools sequence lights the star first ("Make it your #1"), then Move, and the first star keeps a soft glow after the tooltip.
+  - With an unconfirmed #1, "Make it my College Goal" glows. Career's confirm button glows the same way.
+- **Validation:** tsc clean (except the pre-existing `@dicebear` error). A simulated Match arrival on phone lands on About Me with "Start here", and the college art is whole. Desktop College Goal with no #1 shows the full hall plus the glowing star. The test's #1 school was restored afterwards.
+- **Next:** Chandu reviews the Match arrival. Nothing pushed.
+
+## 2026-10-19: v2 About Me guides the goals; Top 3 folds into Career Goal; My schools gets My Build's finish
+
+**Why (Chandu):** "lets make about me the way to guide students first. They land with empty cards: career goal should be first ask to be fixed and when they click, they see their saved careers and we can have the sam ui and nudges we had to teahc them how to rank etc. Then #1 becomes the career goal, xp is gained, then next step is to fix a college/school goal ... we can get rid of the top 3 tab by folding it into here." Follow-ups the same day:
+- "lets keep saved tab as is"
+- "give the my schools tab also the premium finish we gave for my build"
+- "lets also have the tooltip nudges to teach the controls on my schools/ career goal etc."
+- "the new fanned out card thing ... is bad. We need to be more creative and make it not so busy."
+
+- **v2 tabs:** About Me, Saved, My Plan, Report, Resume. Top 3 is gone in v2; Saved is unchanged. v1 is untouched.
+- **About Me in v2 is a sequence:** Career Goal, then College Goal, then My Plan.
+  - A goal counts as set only once the student confirms it, so both cards start empty even when a Top 3 or starred school exists.
+  - Each goal pays +25 XP through flyXp.
+  - The College Goal card only nudges once the Career Goal is set: one ask at a time.
+  - After both are set, a "See your plan to get there" row (with nudge) opens My Plan.
+- **Empty goal cards: "out of focus until you choose."** One picture of the likeliest choice (the Top 3's #1, or the #1 or newest saved school), blurred and dimmed. With nothing saved, Build's sky shows instead and the card opens Explore.
+  - Setting the goal brings the picture into focus once (`.dm-goal-focus-in`, app.css).
+  - This replaced a first try with three fanned posters per card, rejected as too busy.
+- **Career Goal view:** the real Top 3 cards (Top3Tab), with their move, remove and add nudges and Compare, then "Make [#1] my Career Goal +25 XP", then saved careers with "Add to Top 3".
+  - `?tab=top3` and Match's arrival land here in v2.
+- **College Goal view:** the setting action lives on the #1 school card ("Make it my College Goal +25 XP"; once set, "Next: My Plan"), so no separate line repeats the school's name.
+- **My schools:** My Build's finish. One panel on Build's sky (the `education` accent), Reach / Target / Likely as three hairline-split columns at desktop with the gradient headings, and a switch on phones and tablets.
+- **Control nudges** (new shared `profile/SpotTip.tsx`: SpotTip plus `useSpotSequence`):
+  - My schools: "Move to Target or Likely" on Move, then "Make it your #1" on the star.
+  - My Build: "Tap any line to change it" under the first line.
+  - Each plays once, when its panel is on screen.
+  - Top 3 keeps its own sequence.
+- **v2's cover My Build button and its tooltip were removed:** About Me hosts My Build again in both versions.
+- **DEMO-ONLY:**
+  - Goal flags and the new nudges are per session, and a reload clears them. WelcomeSplash's clearOnReload now also clears `dreamari:goal:` and `dreamari:nudge:` keys.
+  - XP milestone ids get a per-page-load suffix in the demo so the +25 XP moment plays every run.
+- **Merged origin/main** (the new My Build: no Edit button, three columns on the sky).
+- **Unrelated fix:** the about-me worktree's node_modules pointed at the deleted united-way worktree. It is relinked to `../look-v2/node_modules`. glossary-thumbs has the same dead link.
+- **Validation:** tsc clean except the pre-existing `@dicebear` LineAvatar error. eslint has no new warnings; `buildDot` is unused since main's My Build change. Checked in the browser at phone, tablet (768) and desktop widths: both goals with XP (score 10 → 35 → 60), the redirect from `?tab=top3`, both nudges, the focus-in, and the reload reset.
+- **Next:** Chandu reviews the frosted empty cards and the goal sequence. Nothing pushed.
+
+## 2026-10-19: simulation thumbnails use the new character art; the Top 3 nudge starts reliably
+
+**Why (Chandu):** "update the thumbnails to the career simulations for which we have new graphics", then "make sure there are characters and the compositions work for the new thumbnails in both 4:5 and 16:9 or whatever proportions the tiles scale to." Separately: "the move to #1 etc nudge isnt autoplaying btw."
+
+- New `Simulation.thumb` + `thumbFocus`, read through `simThumb()` (games.ts). Kept apart from `cover`, so the in-game PreGame backdrop does not move.
+  - Investment Banker: `ib/v2/christina-thumbsup-glassdoor-sunset.webp` at `30% 18%`.
+  - Registered Nurse: `rn/v2/rosa-proud-station-late-day-anime.png` at `50% 10%`.
+  - Aviation Maintenance: `amt/amt-fluid-leak.webp` at `29% 12%`.
+- Each one was picked because its lead character is in frame. The focus was checked at 5:7, 4:5, 1:1, 16:9, 2.6:1 and Home's 3.7:1 banner, keeping faces in the upper half, clear of the title scrim.
+- Wired into: the Play hub row and phone deck, PlayStage, the Home banner and Continue rail, Feed moments, the counselor's Most played, and the component lab.
+- Verified in the browser:
+  - phone deck (about 5:6)
+  - desktop row: 16:9 hero, 5:7 side cards
+  - Home Continue rail (2:1)
+- Nudge: the cards mount about 250 ms after the hint turns on. The old IntersectionObserver effect found no card, returned, and never re-ran. It now checks every 250 ms for whichever card is on screen until the sequence starts.
+  - Verified: move at 0.9 s, remove at 3.4 s, add at 6 s, done at 8.4 s after the welcome closes.
+  - Also: the dev server had stopped recompiling when the disk filled up (ENOSPC). It was restarted.
+## 2026-10-19: schools only for the fallback art; the demo shows no fallbacks
+
+**Why (Chandu):** "lets not do that, careers will have images for sure. Lets only do the schools"; "The vercel should not show any using the fallbacks though. Since its the demo we want pictures everywhere".
+
+- The career summit is gone (`CareerPlaceholder.tsx` and its assets deleted). About Me's Career Goal with no #1 picked shows the top-ranked Top 3 career's photo, still reads "Pick your #1 career" and opens Top 3. Known gap from the entry below still stands: `CareerGoalView` calls Top 3's first item the "Primary career".
+- **DEMO-ONLY:** About Me's College Goal with no #1 school shows a real campus photo (the first saved school with one, else the first hand-built school with one) instead of the hall. Production keeps the hall there. With the photo-only school list, the demo now shows the hall only if a real photo fails to load.
+- Usman's package (`docs/handoff/glow-line-art/`) is schools only, adds `preview.html` (the four hall assets on one page), and the zip is rebuilt.
+- Checked: eslint and tsc on touched files (only main's existing `@dicebear` error); About Me live: both goal cards show photos, no fallback on the page.
+
+## 2026-10-19: About Me goal art, a career summit, a symmetric glow; the demo lists only schools with real photos; handoff package for Usman
+
+**Why (Chandu):** the school hall "should be used for schools/college goal, career needs another one, they will already have 3 but will not have fixed a primary"; "the glow on the fallback looks uneven and leans to a side ... Can we have it be more symmetric?"; "on the vercel lets not show any school without real images. IF we had them before please use them. This was for usman to have the design so please give me the designs as code and whatever assets he needs".
+
+- `src/components/app/GlowLineArt.tsx` now owns the glow, the light-following lines and the grain; `CollegePlaceholder` (the hall) and the new `src/components/profile/CareerPlaceholder.tsx` (a path up a peak to a flag with the Dreamari mark) are thin wrappers. The back peaks meet the main slopes at the solved intersection and the path ends on the summit, so no line stops short. The light-mode rule in globals.css now targets `[data-glow-art]`.
+- The glow is symmetric: one wide wash, a mirrored pair of side lobes, a pale core, a darker band below, all centred.
+- About Me: College Goal with no #1 school shows the hall. Career Goal now takes the student's *chosen* #1 (`primary`, passed from ProfileExperience's `primaryChosen`/`chosenPrimaryId`); before one is chosen it shows the summit, reads "Pick your #1 career" and opens Top 3. Both use `dark wide`: these cards stay dark with white text in light mode and are about 2.3:1. Known gap: `CareerGoalView` (the drill-in, also `?goal=career`) still calls Top 3's first item the "Primary career".
+- School photos: only 143 of the dataset's 4,617 CDN campus photos exist (4,474 answer 403, the reply for a missing key, with or without browser headers; checked twice). No earlier photos exist in the repo or its history for the rest. `scripts/colleges/verify-images.mjs` removed the dead links from `public/data/colleges/index.json` and the detail files (one line per file), so nothing requests them. **DEMO-ONLY** filter in `loadAllColleges`: Explore Schools lists the 192 schools with a real photo (143 + 55 hand-built, 6 overlap). Hand-built schools all have local photos.
+- Usman's package: `docs/handoff/glow-line-art/` (README with design, why, colours, build notes, wiring and the photo data finding; `assets/` with SVG and WebP for both drawings, dark and light, square and wide; `glow-line-art-handoff.zip` with those plus the source files). HANDOFF_INDEX's 23 Sept fallback section now points there and marks the old spec superseded.
+- Checked: eslint and tsc on touched files; static renders of both drawings at several sizes, dark and light; About Me live (demo student has a Top 3 and no #1: summit and hall both show); Explore Schools live: "192 schools", no fallbacks, no broken images among those loaded. Not checked: the desktop grid at full width, Windows/Chromebook.
+
+## 2026-10-19: school cards' missing-photo art, a line-drawn hall in the Black & Blue light
+
+**Why (Chandu):** the old fallback (a faint grey line drawing of a campus) "does not feel as polished". Browse all lists 5,716 schools and many have no photo, so this art is common, not an edge case. Directions tried and turned down the same day: a flat night campus, an abstract Dreamari orb, a Blender 3D render, a busy 2.5D campus with full-colour Dreamy, and a line-art hall inside the orb. The brief that stuck: keep the glow card, no orb, no Dreamy, "let the line graphic ... take the glow ... from the background and catch the light"; then "overly detailed", "too narrow", "things look broken", "dont have to make it so sharp along corners", "let the glow be consistent".
+
+- `src/components/colleges/CollegePlaceholder.tsx` (same API; every card that falls back picks it up: CollegeCard, SchoolCard, CollegePicture, the Surfaces lab cell). Near-black ground, one fixed light behind the dome built from overlapping rotated soft lobes with an eased falloff (no single round spot), a darker band below for shape, film grain.
+- The hall is a low, wide silhouette in a few joined outlines with rounded corners and round joins (dome, lantern, drum, pediment with the Dreamari mark, four columns around a door, two arched windows per wing, two steps). The lines take their brightness from the same light (a radial stroke gradient centred on it), and the faces facing it get a faint wash.
+- "Breaking in places" was `vector-effect: non-scaling-stroke`: with a userSpace gradient stroke, Chrome maps the gradient in screen space and parts of the drawing drop out. Removed; strokes are ordinary and sized to read on every card.
+- Light mode: `html.light .marketing-v2 [data-college-art]` in globals.css swaps the `--cp-*` colours to the ice-blue wash with the hall in navy/brand blue. The lower half fades under the card's light frost, as real photos do there.
+- Gradients only, no blur filters, so the cards' hover zoom stays cheap. `COLLEGE_ART_VARIANTS` is now one entry (`hall`); `seed` and `accent` are accepted and ignored.
+- Checked: eslint and tsc on the file; a static render at three card sizes at 2x, dark and light; live Explore Schools cards at phone width with photos forced to fail, dark and light. Not checked: the desktop grid in the live app (the browser pane could not show it at full size), Windows/Chromebook.
+
+## 2026-10-19: My Build in About Me, one light summary; Edit My Build holds every Preferences field
+
+**Why (Chandu, in review rounds the same day):** "redesign the my build in the about me tab to look more like the actual build flow... the black+blue treatment... Do not lose the data it needs to show, refer the replit for that. Make it more simple. Right now its a LOT"; then "lets not do dreamy for everything. Just make sure the edit my build has all the data that preferences has, but we dont need a whole preferences tab and then my build in about me. Do all of it in about me... the my build section should look more premium"; "I like the approach of the colors and 3 columns but its currently very heavy... it doesnt leave room to add software skills etc like the preferences section in the replit does"; "we do not need to keep world colors"; "use the same color background thing we did for the my build when you click on edit"; "can we arrange the different data better? Also use better heirarchy. Heading>subheadinng>body only"; "its not clear that the different sections are clickable to edit. Lets also use the gradient style fonts"; "The layout needs to be better on mobile and tablet. Long scrolling isnt the best way."
+
+- **Summary (AboutMeTab `BuildSummary`):** one panel on Build's own sky (`BackgroundSpace` + `AuroraBackground` in `.myb-sky`, the same as the Edit sheet), three columns balanced 3 / 3 / 4: What you like (career fields, subjects, skills to build), How you work (work style, software to learn, internships & jobs), Your path (education, location, school, tuition). Type is strictly heading 18 (gradient ink, the Profile's stat gradient) > field 15 semibold > answer 14 muted. Every row is a button with an always-visible pencil that brightens on hover, and opens its own section of the editor. Phones (<640px): the three groups sit behind a Segmented switch (Likes / Work / Path) instead of a ten-row stack; from 640px all three columns show.
+- **Data:** the Replit's My Build (dceeai.replit.app/my-profile#overview: industries, subjects, work style, education, location, skills to build) plus Build's tuition and the Preferences fields (software, school, internships & jobs). DEMO-ONLY: the demo student's empty Preferences fields are seeded once with Replit-like values (`BuildSummary`'s effect, only while Preferences was never saved), written to the real store so summary and editor agree.
+- **Editor (PreferencesTab `BuildModal`):** four new sections, Skills, Software, School, Internships & jobs, using the old Preferences field editors (`SectionFields`, `Multi`); Work style also asks team size and work environment. Their own Preferences draft saves with the Build answers in one Save. The rail's summaries and changed marks cover them (`prefSummary`). The Preferences tab itself was already not rendered anywhere, so there is no second place left.
+- **Fixes on the way:** skills options deduped ignoring case ("Public speaking" showed twice); `Segmented` now re-measures when web fonts load and when any tab resizes (its first measure ran on the fallback font, so an overflowing row stayed cut off).
+- **No Edit My Build button** (Chandu: "Remove the edit my build CTA. It can all be done in the thing right?"): every row opens its own section, so the button and its first-visit sweep (`buildNudge`) went; the v2 cover's My Build button keeps its own nudge. More breathing room: wider column padding, more space between rows and between label and answer ("give the my build more breathing room").
+- Checked: tsc, eslint; dark mode at 375, 768, ~580 and 1280; the switch on a phone; a row opens its section; School > Medium saved, reached storage and showed in the summary. Light mode not checked. Not committed.
+
+## 2026-10-19: Updated video covers; Play thumbnails stop looking blurry at rest
+
+**Covers.** Chandu supplied "Updated IG Reel Covers (1).zip" (three PNGs): "use these for the video thumbnails across the app". They replace the EY (Inside Cybersecurity Consulting), AT&T (Headquarters Office Tour) and WildBrain (Office Tour) covers in `public/images/videos/*-cover.jpg`, converted to the existing 540x960 JPG at the same paths. Every surface reads them through `COMPANY_VIDEOS` / `videoPoster()` (Explore's company rail, Profile saved videos, counselor v5/v6), so no code paths changed. WildBrain now has a real designed cover instead of the composite. The For You reel plays clips full-bleed and has no thumbnail, so it was left alone.
+
+**Play blur.** Chandu: on the Play tab "the thumbnails appear low quality until the card is clicked and they are in the focused state ... They look really bad". Cause: `RowCard` and `HeroShelfCard` passed a different `sizes` per tier ("304px" for side cards, "347px" compact, "764px" hero). The side tier is a tall portrait slot (304x430) but the sim covers are 16:9, so `object-cover` scales the art up to ~764px wide to fill the height. Next served a ~640px file for a slot that needed ~1500 device px, which is a ~2.4x stretch. Focusing a card switched it to the hero's 764px hint, which is why it suddenly looked sharp. Fix: one `COVER_SIZES` for every tier (764px desktop, 676px tablet, 180vw phone; the phone deck card is portrait too and was getting 750px for art needing ~1300). Focusing a card now reuses the same already-loaded file. Trade-off: compact 16:9 rows download more than they strictly need; the files are small webp/png and identical to what the hero loads anyway.
+
+- Checked on :3022 (worktree `.worktrees/reel-covers`, branch `ig-reel-covers-1019` off origin/main): at 1440 every Play card requests `w=1920` (full source); at 375 the deck cards do too (were `w=750`). Explore rail shows the three new covers. Dark mode only. Not committed; waiting on Chandu's review.
+
+## 2026-10-19: Career outlook lab (Pay & Outlook), hamburger only
+
+**Why (Joshua, Slack):** after a focus group with students in Canada, "students want more detailed career outlook information": projected growth, projected job openings (growth plus replacement), pay by state, and state trends where available. He asked Chandu for "the cleanest UX approach" and whether to add a sixth Job Outlook tab. Usman: "State level data can be sparse so design should handle the absence of data in a graceful way." Chandu: "lets build a version of this in the hamburger quicklinks. Only accessible from there."
+
+**Decision: no sixth tab; Pay grows into Pay & Outlook.** Pay by state and growth by state answer the same question ("what does this job look like where I live?"), so one state view serves both instead of the student choosing a state twice. Six tabs also don't fit a phone or Chromebook tab row (on a phone, five already scroll and Pay sits half off-screen). CareerOneStop's occupation profile works this way (one location drives wages and projections); the BLS Occupational Outlook Handbook's separate Pay / State & Area Data / Job Outlook tabs are the pattern avoided.
+
+- Route `/outlook-lab/<slug>` (index redirects to Software Engineer, SOC 15-1252, the O*NET page Joshua linked). Reached only from the hamburger's lab links. It is the real Career Detail (`CareerDetailLab`) with a new `outlook` prop, default off, so `/career` renders exactly as before (checked: tabs still read Pay, facts still degree + pay).
+- Quick facts: the lab adds **Job growth by <year>** and **Jobs open each year** back to the strip (the live strip shows degree and pay only). Each cell is a button that opens Pay & Outlook and scrolls the tab row so the tab is visible on a phone.
+- **Job outlook** section: the profile's own verdict ("Growing faster than most jobs"), a line that it shows demand, not anyone's chance of being hired, jobs now vs the projection year as one lit line (the counselor glow kit, `GlowStroke` + `Orb`, borrowing its token scope), and where each year's openings come from (people moving on or retiring vs brand-new jobs = the ten-year change spread over ten years).
+- **By state**: the existing Your states / Whole country switch (extracted to `PayViewToggle`, same markup on the live page). One row per state: pay, growth, openings. Groups: Your states, Best pay, Growing fastest. Whole country is the existing pay map.
+- Sparse data: a state with no forecast keeps its row and says "No forecast yet"; a career with no state forecasts drops those two columns and says "States haven't shared job forecasts for this career yet. The US outlook above still applies."; no US outlook either says "Job forecasts for this career aren't ready yet."; the student's own state always gets a row, with "Not yet" where BLS publishes no pay (the live tab drops it silently).
+- Data: US numbers are parsed from figures every profile already carries (153 of 159 parse). State projections are **seeded, DEMO-ONLY**, pending Usman wiring Projections Central; see HANDOFF_INDEX's Demo vs Production entry.
+- Checked: tsc, eslint on touched files; in the browser at 1440 and 375, dark mode: Software Engineer (full data), Nurse Practitioner (no state forecasts), Broadcast Technician (declining, student's state without pay), no horizontal scroll at 375. Light mode not checked.
+- **Same day, redesigned after review.** Chandu: "the graph looks too vague... too much text. It feels very cluttered", "Should outlook be after the pay by state?", then "pay, growth, openings the table looks very cluttered and hard to read... easier to scan and read, better information hierarchy and visual hierarchy." The three-number table read as a spreadsheet, and the jobs-now-vs-later line was two points with an exaggerated slope, so it said nothing you could read. The tab is now three sections, each answering one question, and no list shows more than one figure per row:
+  1. **Your state** (first: the most personal part, and pay is what students already know). A state picker (shared `Listbox`) and three equal tiles: pay, growth, openings. Each tile says how it compares to the US ("$12K more than the US", "Faster than the US") instead of repeating the US figure, which is already in the quick facts. A missing forecast says "No forecast yet" in the tile.
+  2. **Compare states.** One ranked top five, one figure, picked with "Rank by pay / growth / openings". The student's state gets a "You" tag, or is pinned below the top five with its rank (#11). Growth and openings are disabled options when no state has a forecast. Pay links to the existing map ("See every state on a map").
+  3. **Job outlook.** The verdict plus one lit track: each year's openings split into people moving on or retiring vs brand-new jobs. The disclaimer sentence, the line chart and the repeated list were cut.
+  The seeded state growth is now spread wider (cubed) so a ranked top five doesn't tie.
+- **Third round, same day.** Chandu: "on mobile the tabs should be a dropdown. Otherwise they get cut off. THis should be the style for every screen where a tab set exceeds screen width"; "where did our pay by state/whole country map go? ... that was approved so lets not edit that too much"; "the bar graph thing for openings each year is bad... use the pretty sparkline graph we did before but give it an x and y axis and more visual detail without making it clutter".
+  - **Tabs (app-wide):** `Segmented` now measures its row (ResizeObserver) and, while the tabs overflow, renders the shared `Listbox` in their place; the row stays mounted invisibly at zero height so it keeps measuring and the tabs come back when they fit. Covers the 47 files that use Segmented. Not covered: the ~70 hand-built `role="tablist"` rows (Connect's section tabs overflow at 375: 369px of tabs in 335). Rule added to CROSS_BROWSER_GUARDRAILS.md.
+  - **Pay by state** is the live page's section again, rendered by the same code path (`tab === "pay" && pay`), with its Your states / Whole country toggle and map. The lab's Your state pay tile and pay ranking were removed so pay is said once.
+  - **Outlook by state** (after Pay by state): state picker, two tiles (growth, openings, each said against the US), then the top five states by growth or openings with the chosen state pinned under them.
+  - **Job outlook:** the openings split bar is gone. The lit line is back with a real y axis (round job counts zoomed to the data, labels with enough decimals to differ), dashed gridlines, an x axis (base year, midpoint, target year), a soft fill, a dimmer orb at the start and a lit one at the end with the figure and the change ("+84,100 jobs"). Drawn straight, because BLS publishes only the two ends. Figures sit on the side away from the line; a falling line gets more room below so its end figure clears the axis.
+  - Checked at 375 (tab dropdown opens and switches tabs; Pay by state; outlook; chart), at the pane's width (~580), rising (Software Engineer) and falling (Broadcast Technician) charts, and /connect at 375 for Segmented regressions (none; its hand-built tabs still overflow).
+- Open: Canada. O*NET and BLS are US-only, and the feedback came from Canadian students; Job Bank (ESDC) publishes outlook by province if that is in scope. Not committed; waiting on Chandu's review.
 
 ## 2026-10-19: UX Designer discussion release; AI-owned production and work graphics
 

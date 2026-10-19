@@ -21,6 +21,7 @@ import { GlossaryLiveGroup } from "./game/GlossaryLive";
 import { GlossaryScreensGroup } from "./game/GlossaryScreens";
 import { PlayHubCardsGroup } from "./game/PlayHubCards";
 import { PlayInteractionsGroup } from "./game/PlayInteractions";
+import { ScenePiecesGroup } from "./game/ScenePieces";
 import { SimulationPiecesGroup } from "./game/SimulationPieces";
 
 /** A group heading plus its specimens; `has` is which scales it holds. */
@@ -80,6 +81,10 @@ export function GameSection() {
 
       <Group title="Simulation player pieces" has={["core"]}>
         <SimulationPiecesGroup />
+      </Group>
+
+      <Group title="Scene art layers and the art switch" has={["core", "bespoke"]}>
+        <ScenePiecesGroup />
       </Group>
 
       <Group title="Cinematic presentation (Level 1 + Express)" has={["core", "bespoke"]}>

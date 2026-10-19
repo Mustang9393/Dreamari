@@ -146,6 +146,15 @@ already the house rule for icon-only controls (`IconTip`, universal rule);
 it also happens to be the fix for touch-stuck hover on Chromebooks, since a
 focus-triggered affordance works the same way for touch as for keyboard.
 
+**A tab set that doesn't fit becomes a dropdown** (Chandu, 19 Oct 2026:
+"on mobile the tabs should be a dropdown. Otherwise they get cut off. This
+should be the style for every screen where a tab set exceeds screen
+width"). Never a sideways-scrolling tab row with tabs cut off at the edge.
+`Segmented` (`src/components/connect/viz.tsx`) does this by itself: it
+measures its row and swaps to the shared `Listbox` while the tabs overflow.
+A hand-built `role="tablist"` row does not; use `Segmented`, or give it the
+same swap, and check it at 375px.
+
 ## What to do when you can't reproduce a Windows/Chromebook report
 
 Don't close it as "can't repro, Windows-only, skip." Check it against the

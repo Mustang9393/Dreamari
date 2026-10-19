@@ -246,7 +246,7 @@ function Rail({ title, subtitle, count, onViewAll, peek = false, children }: { t
   const welcomeInFront = useWelcomeInFront();
   const peeking = peek && !scrolled && !welcomeInFront;
   return (
-    <section aria-label={title} className="flex w-full flex-col gap-[var(--space-3)]">
+    <section aria-label={title} data-focal-rail={peek || undefined} className="flex w-full flex-col gap-[var(--space-3)]">
       <div className="flex flex-col gap-[var(--space-1)]">
         <div className="flex items-baseline justify-between gap-[12px]">
           <h2 className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>

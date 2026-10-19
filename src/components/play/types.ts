@@ -898,6 +898,14 @@ export type Simulation = {
   world: string;
   firm: string;
   cover: string;
+  /** The game's tile art everywhere it is listed (Play, Home, Feed, the
+   *  counselor's Most played). A character-led scene from the current art,
+   *  separate from `cover` so the in-game backdrop does not move. Read it
+   *  through simThumb(). */
+  thumb?: string;
+  /** objectPosition for `thumb`: keeps the faces in frame from a 5:7
+   *  portrait card to a 2.6:1 banner. */
+  thumbFocus?: string;
   /** Plays once before Level 1, skippable, no choices, no score -- about 20
    *  seconds of reused art (Trailer tab). */
   trailer?: TrailerCard[];

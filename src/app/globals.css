@@ -2166,6 +2166,9 @@ html.light .marketing-v2 .photo-ink {
 /* CollegeCard prints its name at the top, so in light the top frost has
    to cover the badge, the mark and two lines of name. */
 html.light .marketing-v2 .photo-ink .pc-top { height: 150px; }
+/* SchoolCard's top band is dark shading for the bookmark on dark photos; in
+   light it read as a dark gradient across the top of every card. */
+html.light .marketing-v2 .photo-ink .pc-top-dark { display: none; }
 /* Opportunities posters in light (Chandu, 7 Oct 2026: option 1, light like
    the school cards). The world colour stays as a soft corner light, the
    progressive blur stops dimming, and a frost of the page colour carries
@@ -2177,6 +2180,21 @@ html.light .marketing-v2 .photo-ink {
   --pc-leaf-bg: rgba(255, 255, 255, 0.72);
   --pc-leaf-border: rgba(255, 255, 255, 0.9);
   --pc-leaf-shadow: 0 10px 24px -14px rgba(30, 48, 120, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+/* Missing-picture art in light (GlowLineArt.tsx: the school hall): the ice-blue wash
+   from the Black & Blue look, with the hall drawn in brand blue so it still
+   reads through the cards' light frost. Dark reads the defaults. */
+html.light .marketing-v2 [data-glow-art]:not([data-cp-dark]) {
+  --cp-ground: #eaf3fd;
+  --cp-ground-2: #f7fafd;
+  --cp-bloom: #59a0f8;
+  --cp-bloom-2: #94c2f9;
+  --cp-core: #ffffff;
+  --cp-navy: #ffffff;
+  --cp-line: #0e4281;
+  --cp-line-2: #2780ec;
+  --cp-mark: #176acf;
+  --cp-grain: .04;
 }
 .photo-frost { display: none; }
 html.light .marketing-v2 .photo-frost {

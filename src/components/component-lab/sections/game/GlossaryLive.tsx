@@ -424,7 +424,7 @@ export function GlossaryLiveGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Play hub glossary cards" scale="core" file="src/components/play/PlayHub.tsx" purpose="The Play tab's glossary row: one card per GLOSSARY_GAMES entry with its 1400 by 788 thumbnail. A released industry opens its game; the rest show the lock until their slug joins GLOSSARY_HUB_RELEASED (Prompt C in the SOP)." when="The Play hub, Glossary Games row.">
+      <Specimen name="Play hub glossary cards" scale="core" file="src/components/play/PlayHub.tsx" purpose="The Play tab's glossary row: one card per GLOSSARY_GAMES entry with its 1400 by 788 thumbnail (the 19 Oct single-object covers: cash, cross, jet, laptop; sharp at rest since every tier loads the hero width). A released industry opens its game; the rest show the lock until their slug joins GLOSSARY_HUB_RELEASED (Prompt C in the SOP)." when="The Play hub, Glossary Games row.">
         <StateGrid min={240}>
           {GLOSSARY_GAMES.map((game) => {
             const g = glossaryFor(game.careerSlug);

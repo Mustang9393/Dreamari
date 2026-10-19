@@ -5,7 +5,7 @@
 // each feature's own data file. See docs/handoff/COMPONENT_INVENTORY.md
 // lines 198-218 for the source table this section renders.
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Users } from "lucide-react";
 import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedEmpty, ProposedError, LiveRoute, EDGE, noop } from "../kit";
 
@@ -15,7 +15,8 @@ import { LabCard } from "@/components/flow-lab/shared";
 import { labCatalog } from "@/components/flow-lab/lab";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { CardProgressiveBlur } from "@/components/app/cardChrome";
+import { CardProgressiveBlur, ScrollEdges } from "@/components/app/cardChrome";
+import { GlowLineArt } from "@/components/app/GlowLineArt";
 
 import { COLLEGES } from "@/components/colleges/data";
 import { CollegeCard, SchoolCard, CollegePicture, MarkBadge, type CardBadge } from "@/components/colleges/shared";
@@ -91,6 +92,17 @@ const college2 = COLLEGES[1];
 const collegeNoPhoto = { ...college, name: EDGE.longName, photoStatus: "rejected" as const };
 const badges: CardBadge[] = [{ label: "Target", tone: "target" }];
 
+// The light look of the glow art, copied from globals.css
+// (html.light .marketing-v2 [data-glow-art]) so one cell shows it in either
+// theme. The --cp-* variables inherit into the SVG.
+const GLOW_ART_LIGHT = {
+  "--cp-ground": "#eaf3fd", "--cp-ground-2": "#f7fafd", "--cp-bloom": "#59a0f8", "--cp-bloom-2": "#94c2f9", "--cp-core": "#ffffff",
+  "--cp-navy": "#ffffff", "--cp-line": "#0e4281", "--cp-line-2": "#2780ec", "--cp-mark": "#176acf", "--cp-grain": ".04",
+} as CSSProperties;
+
+// Enough rows to scroll, for ScrollEdges.
+const SCROLL_ROWS = Array.from({ length: 14 }, (_, i) => `Row ${i + 1}: a line of panel content`);
+
 const community = COMMUNITIES[0];
 const communityLongName = { ...community, name: EDGE.longTitle };
 const communityBroken = { ...community, photo: EDGE.brokenImage };
@@ -114,6 +126,19 @@ const matchCard: MatchCardContent = {
   gradient: ["#0b0d1a", "#2f6bf2"] as const,
   body: "You lit up talking about building things that other people actually use.",
 };
+
+function ScrollFadeDemo({ start = 0 }: { start?: number }) {
+  return (
+    <div className="relative h-[200px] w-full">
+      <div ref={(el) => { if (el && start && el.scrollTop === 0) el.scrollTop = start; }} className="dm-scroll h-full overflow-y-auto px-[var(--space-4)] py-[var(--space-3)]">
+        {SCROLL_ROWS.map((r) => (
+          <p key={r} className="border-b py-[8px] text-[13px] leading-[18px]" style={{ borderColor: "var(--border)" }}>{r}</p>
+        ))}
+      </div>
+      <ScrollEdges top={40} bottom={56} />
+    </div>
+  );
+}
 
 export function SurfacesSection() {
   return (
@@ -192,6 +217,12 @@ export function SurfacesSection() {
               <CardProgressiveBlur direction="left" size="60%" />
             </div>
           </StateCell>
+          <StateCell label="ScrollEdges, at the top" pad={false} minH={200} note="ScrollEdges (same file): a scroll area's edges fade the content itself through a short, eased mask. Nothing under the top edge yet, so only the bottom fades.">
+            <ScrollFadeDemo />
+          </StateCell>
+          <StateCell label="ScrollEdges, scrolled" pad={false} minH={200} note="Scroll it: the top edge eases in with the scroll and the bottom one goes at the end. Was a stack of backdrop blurs until 19 Oct 2026; Chandu: &quot;too sharp&quot;, &quot;toooo tall&quot;, and they showed as hard bands in some Chromium builds.">
+            <ScrollFadeDemo start={120} />
+          </StateCell>
         </StateGrid>
       </Specimen>
 
@@ -216,14 +247,43 @@ export function SurfacesSection() {
       <Specimen name="CollegePicture, MarkBadge, CollegePlaceholder" file="src/components/colleges/shared.tsx, src/components/colleges/CollegePlaceholder.tsx" purpose="The college photo and seal/monogram badge, and the placeholder art both fall back to when there's no photo." when="Any college-facing surface that needs a cover photo or a mark.">
         <StateGrid>
           <StateCell label="CollegePicture" pad={false} minH={160}><div className="relative h-[160px] w-full"><CollegePicture c={college} sizes="320px" /></div></StateCell>
-          <StateCell label="CollegePicture, fallback" pad={false} minH={160} note="Hard-coded dark colours; breaks in light mode (known)."><div className="relative h-[160px] w-full"><CollegePicture c={collegeNoPhoto} sizes="320px" /></div></StateCell>
+          <StateCell label="CollegePicture, fallback" pad={false} minH={160} note="Missing or failed photo: the hall (CollegePlaceholder). Light mode swaps the art to its ice-blue look."><div className="relative h-[160px] w-full"><CollegePicture c={collegeNoPhoto} sizes="320px" /></div></StateCell>
           <StateCell label="MarkBadge"><MarkBadge c={college} /></StateCell>
           <StateCell label="MarkBadge, fallback" note="Falls back to an initial monogram."><MarkBadge c={collegeNoPhoto} /></StateCell>
           {COLLEGE_ART_VARIANTS.map((variant) => (
-            <StateCell key={variant} label={`Placeholder: ${variant}`} pad={false} minH={160}>
+            <StateCell key={variant} label={`Placeholder: ${variant}`} pad={false} minH={160} note="Default framing in a short card: the slice crop keeps the hall's middle.">
               <div className="relative h-[160px] w-full"><CollegePlaceholder seed={college.slug} variant={variant} /></div>
             </StateCell>
           ))}
+          <StateCell label="Placeholder: square" pad={false} minH={220} note="The whole drawing, nothing cropped. About Me's empty College Goal shows it square at full height, sides feathered on the art's ground.">
+            <div className="mx-auto aspect-square w-[220px]"><CollegePlaceholder /></div>
+          </StateCell>
+          <StateCell label="Placeholder: wide" pad={false} minH={140} note="wide frames the upper part of the drawing, so a short, wide card keeps the hall and a title can sit over the base.">
+            <div className="relative h-[140px] w-full"><CollegePlaceholder wide /></div>
+          </StateCell>
+          <StateCell label="Placeholder: dark (forced)" pad={false} minH={160} note="dark keeps the Black & Blue art in light mode, for cards that stay dark with white text (About Me's goal cards). Same as the default in dark mode.">
+            <div className="relative h-[160px] w-full"><CollegePlaceholder dark /></div>
+          </StateCell>
+          <StateCell label="Placeholder: light" pad={false} minH={160} note="Light mode swaps the --cp-* colours to an ice-blue wash with navy lines (globals.css). Shown here with those values set on the cell, so it reads in either theme.">
+            <div className="relative h-[160px] w-full" style={GLOW_ART_LIGHT}><CollegePlaceholder /></div>
+          </StateCell>
+          <StateCell label="Light cards, no top band" note="Switch the lab to light to check: SchoolCard's dark band for the bookmark (pc-top-dark) is hidden in light, the bookmark keeps its own dark disc. Chandu, 19 Oct 2026: &quot;theres a dark gradient on top&quot;.">
+            <SchoolCard c={collegeNoPhoto} saved={false} onSave={noop} compared={false} program="Computer Science" fit={{ label: "Target", tone: "target" }} />
+          </StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="GlowLineArt" file="src/components/app/GlowLineArt.tsx" purpose="The missing-picture art's light, kept apart from any one drawing: one fixed light at the top centre (soft lobes, eased falloff, film grain) on a near-black ground, and line paths whose brightness comes from that light. CollegePlaceholder (the hall) is the only drawing today; a career summit was tried and dropped (Chandu, 19 Oct 2026: &quot;careers will have images for sure. Lets only do the schools.&quot;)." when="A new kind of missing picture: pass its own lines, faces and mark position, and it shares the same light. Gradients only, no blur filters, so card hover zooms stay cheap.">
+        <StateGrid>
+          <StateCell label="The light alone" pad={false} minH={160} note="No lines: the light, the horizon, the grain and the Dreamari mark. Symmetric about the centre line (Chandu: the earlier lobes &quot;lean to a side&quot;).">
+            <div className="relative h-[160px] w-full"><GlowLineArt name="lab" lines={[]} faces="" mark={[379.7, 274.5, 1.9]} /></div>
+          </StateCell>
+          <StateCell label="With a drawing" pad={false} minH={160} note="CollegePlaceholder's hall: each path a joined, round-cornered outline, lit from the same point.">
+            <div className="relative h-[160px] w-full"><CollegePlaceholder /></div>
+          </StateCell>
+          <StateCell label="Light look" pad={false} minH={160} note="html.light swaps the --cp-* colours unless data-cp-dark is set (the dark prop).">
+            <div className="relative h-[160px] w-full" style={GLOW_ART_LIGHT}><GlowLineArt name="lab-light" lines={[]} faces="" mark={[379.7, 274.5, 1.9]} /></div>
+          </StateCell>
         </StateGrid>
       </Specimen>
 

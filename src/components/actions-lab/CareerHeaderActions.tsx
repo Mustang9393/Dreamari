@@ -118,6 +118,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
             <button
               type="button"
               onClick={() => router.push(hasGlossaryGame ? `/play/glossary/${career.slug}` : "/play")}
+              data-secondary-game
               className={`dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold ${stack ? "max-[480px]:px-2 max-[480px]:whitespace-normal" : "whitespace-nowrap"}`}
               style={{ borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: `color-mix(in srgb, ${accent} 12%, ${T.quiet})`, color: T.fg }}
             >

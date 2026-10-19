@@ -39,7 +39,7 @@ import { fitFor, timing, today, useStudent, worldToField } from "@/components/op
 import { AwardChip, closesShort } from "@/components/opportunities/Card";
 import { OrgMark } from "@/components/opportunities/OrgMark";
 import type { Item } from "@/components/opportunities/types";
-import { GLOSSARY_GAMES, INVESTMENT_BANKING, REGISTERED_NURSE, SIMULATIONS } from "@/components/play/games";
+import { GLOSSARY_GAMES, INVESTMENT_BANKING, REGISTERED_NURSE, SIMULATIONS, simThumb } from "@/components/play/games";
 import { hasGlossary } from "@/components/glossary/data";
 
 // ---- the switch ---------------------------------------------------------------
@@ -374,11 +374,11 @@ export function MomentBreather({ community }: { community: Community }) {
   // from another world (a nursing sim on the tech board read as random).
   const game = community.world === "Business & Finance" ? INVESTMENT_BANKING : community.world === "Health & Medicine" ? REGISTERED_NURSE : null;
   const event = !game ? EVENTS.find((ev) => ev.lifecycle === "Upcoming" && /\d/.test(ev.date)) ?? null : null;
-  const photo = game ? game.cover : "/images/connect/events/panel-2.jpg";
+  const photo = game ? simThumb(game).src : "/images/connect/events/panel-2.jpg";
   const href = game ? `/play?focus=${game.id}` : event ? `/connect?event=${event.id}` : "/connect";
   const title = game ? `Day in the Life: ${game.title}` : event ? event.name : "Dream Opportunity events";
   const line = game ? `Play · Level ${game.levels[0].n} · ${game.levels[0].role}` : event ? `${event.date} · ${event.location}` : "Meet pros in person";
-  return <MomentCard href={href} photo={photo} title={title} line={line} why={game ? "Try the job for ten minutes" : "Meet pros in person"} play={!!game} />;
+  return <MomentCard href={href} photo={photo} focus={game ? simThumb(game).focus : undefined} title={title} line={line} why={game ? "Try the job for ten minutes" : "Meet pros in person"} play={!!game} />;
 }
 
 /** The Feed's Play moments, in the order to show them: the Day in the Life
@@ -402,7 +402,7 @@ export function PlayBreather({ id }: { id: string }) {
   if (type === "sim") {
     const game = SIMULATIONS.find((s) => s.id === ref);
     if (!game) return null;
-    return <MomentCard href={`/play?focus=${game.id}`} photo={game.cover} title={`Day in the Life: ${game.title}`} line={`Play · Level ${game.levels[0].n} · ${game.levels[0].role}`} why="Try the job for ten minutes" play />;
+    return <MomentCard href={`/play?focus=${game.id}`} photo={simThumb(game).src} focus={simThumb(game).focus} title={`Day in the Life: ${game.title}`} line={`Play · Level ${game.levels[0].n} · ${game.levels[0].role}`} why="Try the job for ten minutes" play />;
   }
   const glossary = GLOSSARY_GAMES.find((g) => g.careerSlug === ref);
   if (!glossary || !glossary.cover) return null;

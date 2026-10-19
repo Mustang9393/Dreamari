@@ -22,7 +22,7 @@ import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
 import { careerSlug } from "@/components/career/slug";
 import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/DailyDropDemo";
-import { INVESTMENT_BANKING, REGISTERED_NURSE } from "@/components/play/games";
+import { INVESTMENT_BANKING, REGISTERED_NURSE, simThumb } from "@/components/play/games";
 import type { Simulation } from "@/components/play/types";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "@/components/play/progress";
 import { WORLD_COLORS, posterTitleFont } from "./worlds";
@@ -74,7 +74,13 @@ function CaptionLabel({ color, children }: { color: string; children: React.Reac
  *  carry the type; the text block rises in with a stagger each time the
  *  panel comes round. Eyebrow, big title, one HUD line, one action, all in
  *  one tight block at the foot. */
-const FROST = "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)";
+/* The frost stops at the title's right edge (~44%), not the text column's
+   (64%): ending at 64% laid a 16px blur over any subject standing in the
+   middle of the photo (the nurse, 19 Oct 2026, Chandu: "the character is
+   being blurred too much... on all devices"). The dark scrim, not the
+   blur, is what keeps the type legible past that point. */
+const FROST = "linear-gradient(90deg, black 0%, black 18%, rgba(0,0,0,0.5) 32%, transparent 44%)";
+const FROST_PHONE = "linear-gradient(to top, black 0%, black 12%, rgba(0,0,0,0.5) 24%, transparent 36%)";
 
 export function HeroPanel({
   active,
@@ -136,7 +142,7 @@ export function HeroPanel({
                (not backdrop-filter) because the photo pushes in while the
                panel shows, and backdrop layers re-rasterising over a moving
                image flickered along the card edges. */}
-            <span className="absolute -inset-[3%] sm:hidden" style={{ maskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)", WebkitMaskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)" }}>
+            <span className="absolute -inset-[3%] sm:hidden" style={{ maskImage: FROST_PHONE, WebkitMaskImage: FROST_PHONE }}>
               <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
             </span>
             {!inset && (
@@ -302,6 +308,7 @@ function HeroBanner() {
   return (
     <section
       aria-label="Highlights"
+      data-focal
       className="relative h-[400px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:h-[360px]"
       style={{ borderColor: "var(--glass-border)" }}
       onTouchStart={(event) => {
@@ -362,8 +369,14 @@ function HeroBanner() {
            game instead (direct feedback, 4 Sept 2026). */}
         <HeroPanel
           active={panel === (SHOW_DAILY_DROP ? 1 : 0)}
-          photo={REGISTERED_NURSE.cover}
-          focus="50% 30%"
+          // Rosa stands mid-frame in the tile art, under the title when it
+          // fills the card, so from sm up it is inset in the right 64% over
+          // the empty station room blurred (as Drone Pilot), with its own
+          // focus that pushes her right; phones crop it full-bleed.
+          photo={simThumb(REGISTERED_NURSE).src}
+          focus="30% 12%"
+          inset
+          blurBehind="/images/play/rn/v2/locked-2026-10-19/backgrounds/station.png"
           eyebrow="NEW GAME LAUNCHED"
           eyebrowColor="var(--accent-subtle)"
           title={`Day in the Life: ${REGISTERED_NURSE.title}`}
@@ -569,7 +582,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
   const ib = useSimRun(activity.kind === "sim" ? activity.sim : INVESTMENT_BANKING);
   const title = activity.kind === "sim" ? activity.sim.title : activity.title;
   const world = activity.kind === "sim" ? activity.sim.world : activity.world;
-  const cover = activity.kind === "sim" ? activity.sim.cover : activity.cover;
+  const { src: cover, focus } = activity.kind === "sim" ? simThumb(activity.sim) : { src: activity.cover, focus: undefined };
   const href = activity.kind === "sim" ? `/play/${activity.sim.id}` : activity.href;
   const pct = activity.kind === "sim" ? ib.pct : activity.pct;
   const label = activity.kind === "sim" ? ib.label : activity.label;
@@ -591,7 +604,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
     <HoverBeam strength={0.8}>
     <Link href={href} className="dm-tap group relative flex h-full min-h-[190px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:min-h-[212px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
       <span className="sr-only">{verb} {title}</span>
-      <Image src={cover} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
+      <Image src={cover} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" style={focus ? { objectPosition: focus } : undefined} />
       {/* the real, sighted verb -- top-left, off the bottom stack, so the
          card reads "continue vs. new" in words, not just by whether a
          progress bar happens to be present */}
