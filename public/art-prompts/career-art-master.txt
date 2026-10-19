@@ -1,0 +1,56 @@
+DREAMARI — MASTER CAREER ART PROMPT
+
+Career: {CAREER}
+Game/script: {SCRIPT_OR_EXISTING_GAME}
+Scene list: {SCENE_LIST}
+Approved character-style reference: {CHARACTER_STYLE_REFERENCE}
+Approved background-quality reference: {BACKGROUND_STYLE_REFERENCE}
+Existing approved assets, if any: {ASSET_LIBRARY}
+
+Create a cohesive 2D anime art set for this career simulation. Use the existing script and scene list as the source of truth for cast, actions, locations and time of day. Keep the story and gameplay unchanged.
+
+DRAWING STYLE
+Draw people as clean Japanese 2D anime animation: thin controlled contours, clear anime eye shapes, a small nose mark, a short line mouth, flat base colours and one broad cel shadow. Hair uses a few large filled shapes with sparse interior lines. Clothing has a few useful folds. Keep people attractive, age-appropriate and professionally dressed.
+Match the approved reference's actual drawing treatment. Use it for style, not for the entire cast's face. Avoid individual hair strands, shine bands, sculpted cheeks, painted lips, glossy skin, airbrushed portraits, hatching and heavy comic-book contours.
+Paint backgrounds with richer depth, clear perspective and restrained texture. Keep character rendering simple even when the setting and lighting are cinematic.
+
+CAST — DISTINCT PEOPLE, STABLE IDENTITIES
+Use scripted identities. Where details are unspecified, create a varied cast with different ethnicities, skin tones, ages, face shapes, eye shapes and colours, hair silhouettes, builds, head angles and body language. Do not give everyone the same face, brown iris, tilted head and smile. Use natural variation without caricature.
+Record each person's permanent design: ID, age, ethnicity, skin tone, face and eye shapes, iris colour, hair colour/part/silhouette, build, outfit and accessories.
+Create one canonical design per person. Once selected, use that exact design as their sole identity reference for every later pose. Never use a different rendering of the same person as a competing reference.
+For variants, specify action, expression, head angle and gaze separately. Preserve permanent design details. A pose change must not quietly change face shape, eye colour, hairstyle or rendering detail.
+
+LOCATIONS — GENERATE ONCE, REUSE
+Create one approved empty background plate per location AND camera angle. Save it under a stable location ID.
+The plate includes the room and the entire exterior visible through its windows. Fix the architecture, furniture, equipment, doors, window frames, horizon, buildings, shoreline and trees.
+Every later scene from that camera must use the same saved background file. Do not regenerate a room for another character, expression or time of day. A textual instruction to “make it identical” is not a substitute for reusing the file.
+Put changing scene elements, such as an open door, on separate layers.
+Give workplaces an elegant, expensive architectural finish appropriate to the profession: generous proportions, fitted storage, a restrained material palette and beautiful light. Preserve the equipment and functions that make it a believable workplace. Luxury must not add detail to faces or turn every room into the same hotel lobby.
+
+FOREGROUND ASSETS
+Generate separate true-alpha PNG foregrounds for the required characters, poses, expressions, held props and first-person hands.
+Reference roles:
+1. Approved character image: drawing style only.
+2. This person's canonical image: identity.
+3. Fixed room plate: scale, perspective and lighting only; leave the room out of the foreground.
+Preserve camera scale and placement for direct dialogue reactions. Keep clean edges and transparent gaps between arms, bodies and props. No room, scenery, floor, glow, painted checkerboard or background shadow baked into character assets.
+Reuse existing approved foreground files wherever the script permits. Edit a canonical asset for a new state instead of generating a new person from text.
+
+LIGHT AND ATMOSPHERE
+Define one lighting setup for each scene, shared by the room, people, props and contact shadows.
+Dawn: pale low warm sunlight with cool blue-grey room fill.
+Morning/midday: clearer neutral daylight and blue sky; no automatic orange sunset wash.
+Late afternoon: lower warm window light with cooler unlit areas.
+Night: dark exterior and practical lamps; no daylight shafts.
+Use soft god rays only where a window, sun angle and room depth support them, especially dawn and late afternoon. Make them broad, faint and soft-edged, fading into clear air. No dense fog, glitter or opaque light stripes.
+Express character lighting with broad cel shapes, not additional facial or hair detail.
+Relight through controlled layers or grading while keeping room/exterior geometry fixed. Do not claim a colour grade simulates every physical shadow change.
+
+COMPOSITION AND DELIVERY
+Compose the saved background and transparent foregrounds in one shared coordinate space so crop, scale and perspective agree. Keep important faces, hands and props clear of actual dialogue and instrument overlays. Check desktop and portrait layouts.
+Deliver the reusable PNG layers, a cast record, location IDs, a scene-to-asset manifest, time/light settings and the exact prompts used. Record source asset hashes so repeated locations can be verified.
+
+ACCEPTANCE CHECK
+Compare the actual output with the approved references and canonical designs. Reject comic-like rendering, excess hair detail, changed identities, cloned faces/poses, contradictory light direction or changing room/window scenery.
+Verify one background file hash per location/camera across its scenes. Check real alpha and clean edges in every foreground. Test representative expression changes, multi-person scenes and day/night states under the game's real UI.
+Do not describe a prompt as guaranteeing identical fresh generations. Consistency comes from approved asset reuse, narrowly scoped edits and rejecting drift.

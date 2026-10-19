@@ -1,3 +1,13 @@
+## 2026-10-19: UX Designer discussion release; AI-owned production and work graphics
+
+**Why (Chandu):** "Push this to main in the quick links in hamburger menu so i can discuss this first"; "whatever bespoke graphic we create ... should also be scaleable"; "Only human intervention should be to QA."
+
+- Hamburger Quick Links adds **UX Designer · QA draft** at `/play/ui-ux-designer`. The Play hub excludes this draft until discussion/QA is complete; its existing published careers stay unchanged. Integrated current main, including independently published RN layered v2 and current theme/cover changes.
+- SOP v1.1 and game/art prompts now make the AI responsible for research, script, questions, cast, shot and graphic coverage, asset selection, implementation, validation and repair from a career name. Human involvement is QA of the playable candidate, not supplying missing authoring work or approving each asset. Added `artifact-master-prompt.txt` for career-relevant work graphics using canonical data shared with key checks, readable native graphics and generic reusable primitives validated with two different career fixtures; no new per-career gameplay/scoring engine.
+- The SOP now requires a shared mid-game review with reachable threshold and conditional pass/fail, plus story-driven scene coverage. Three UX images across 35 routed beats, missing mid-game review and missing work artifacts remain **known UX implementation gaps**, recorded in `examples/ux-qa-feedback-2026-10-19.md`. This release publishes the existing 36-beat discussion draft; those content/art changes are not falsely marked implemented.
+- Checked after integrating main: 281 structural assertions including the restored sparse-checkout UX assets, tsc, scoped eslint, tokens:check and production build. Browser: normal Play hub excludes UX; hamburger link appears and opens the UX start dialog. Prior runtime matrix remains documented; not claiming every gameplay branch re-run for this menu/docs release. Windows/Chromebook hardware not tested.
+- Shareable SOP uses the existing public Sites destination and the same three prompts in its page, direct text downloads and ZIP. Main-app destination: dreamari.vercel.app. Next: implement the reviewed scene/artifact coverage and mid-game review, then use human QA feedback to tighten the workflow.
+
 ## 2026-10-19: career scaling SOP and UX full-scene proof (local draft)
 
 **Why (Chandu):** "Reusable question types, interactions etc are key"; "Lets not do sprite+backgrounds" because waists were visibly cut above counters; "everything is consistent down to the last pixel." The earlier nurse layered v2 release was held and archived outside this checkout after that change of direction. Nothing was pushed to main.
@@ -10,6 +20,95 @@
 - Open: human content/art approval, Noah hair simplification and age readability, recovery failure/repair branches, full production hardware QA, no time-of-day/cross-career generation study. Existing `DEMO_START_FRESH` intentionally prevents resume. Existing global Color control overlaps phone CTA. Best ending screen was not reached before build reload; score 100 was observed. These stay explicit in the runtime report and production gate.
 - Sharing: the SOP/prompts/art/examples are published at https://dreamari-career-art-comparisons.chanduq.chatgpt.site/career-scaling/ (Site version 3, source 9d21dd9cc1725e9e73b2a911d8f39cbc9fae0383). The actual Next app UX game remains a local draft. Do not confuse publishing the SOP with deploying the game. Next: review the draft, resolve the shared shell/persistence decisions and remaining tests before a main-app release.
 
+## 2026-10-19: new Glossary Games covers on the Play tab
+
+**Why (Chandu):** "Please use these images for the glossary game thumbnails where appropriate and push." Four new single-object covers replace the 17 Oct three-glossy-objects set.
+
+- Finance = cash stack, Medical = green cross, Flight = jet, Tech = laptop. Saved as `public/images/app/glossary-<subject>-thumb-oct19.webp` (1400 by 788, quality 86, 10 to 20 KB each) and set as `cover` in `GLOSSARY_GAMES` (`src/components/play/games.ts`). The oct17b files stay in the repo (unreferenced).
+- SOP section 6.7 (md, html, and its copy in USMAN_MASTER_HANDOFF) now names the oct19 set as the reference and describes the new style (one flat isometric object on the navy gradient) in the Codex cover prompt.
+- Checked on /play: all four cards load the new covers; Finance and Medical seen at rest in a screenshot.
+
+## 2026-10-19: Black & Blue is the default; the switch is for Classic
+
+**Why (Chandu):** "lets have black and blue be the default and the switch to be done for classic."
+
+- `layout.tsx` (before paint): every visitor gets `html.look-v2` unless Classic was chosen. Classic is saved as `"v1"` in localStorage `dreamari-look` by `?look=v1` or the switch; `?look=v2` saves `"v2"`. Storage that throws (private mode) still gets Black & Blue (before, a blocked read meant no look at all). Anyone whose last choice was the old default (key removed) now lands on Black & Blue, which is the point.
+- `ColorThemeSwitch.tsx` keeps the quiet desktop-only design from main (ad2ccb36) but reads **Classic**: off by default, on means Classic.
+- `look.ts`: `setLookV2(false)` saves `"v1"` (it used to clear the key, which now means Black & Blue); the hook's server snapshot is `true`, so before hydration the switch, the Build canvas, Dreamy's halo and the edge-glow wrapper already assume the default; a saved Classic corrects right after mount.
+- look-v2.css header and HANDOFF_INDEX's Demo vs Production entry updated.
+- Checked: tsc, eslint; in the browser, a fresh visitor (key cleared) gets Black & Blue with Classic off; switching to Classic saves "v1" and survives a reload; `?look=v2` brings Black & Blue back. Disk note: the dev server failed with ENOSPC (the data volume was at 99%, 1.8 GB free); clearing this worktree's own `.next` cache freed ~2.5 GB. Other worktrees' `.next` caches were left alone (other sessions may be running on them); together they hold several GB. Pushed to main on Chandu's go-ahead.
+
+## 2026-10-19: v1's Explore banner is about exploring only, and arrives as the nudges' last beat
+
+**Why (Chandu):** "the explore banner can now just be about exploring and it can show up after the first sequence of nudges. Since we are already doing the new blue tooltips for reorganizing and removing we can skip that part on the banner."
+
+- v1's banner says only "Explore hundreds of careers and save the ones that interest you." with its Explore button. The two-mood sentence ("Change these anytime: move, remove...") and its 2.5s reading clock are gone (RankBannerCopy, HintGlyph and the word lists removed).
+- First visit: hidden during "Move to #1" and "Remove from Top 3", then slides in (height + fade) as the third beat, glowing with "Add more from Explore", and stays. When the nudges were already seen, or there is one card or none, it is simply there. v2 still has no banner.
+
+## 2026-10-19: Top 3 nudge plays all three beats
+
+**Why (Chandu):** "the move to #1 nudge is good but now its not autoplaying and showing the remove and add in succession." In v1 the banner's reading clock retires the rank hint at 2.5s, and the sequence's effect cleanup cleared the remaining timers with it, so only "Move to #1" played.
+
+- The sequence's timers now live in a ref and are cleared only on unmount; once it starts it plays to the end in both versions: "Move to #1" (arrows), "Remove from Top 3" (X's), then **"Add more from Explore"**: the empty Add a career slot when there is room, otherwise v2's "Explore more" link or v1's Explore banner (`.dm-spot-ring`, the glow without the fill), each ~2.5s, then it settles and retires the hint.
+- The tip can sit above its target (`SpotTip top={-48}`, caret flips down via `data-above`).
+
+## 2026-10-19: the house tooltip (.dm-tip) everywhere; Top 3 nudges in v1; Match saves fly into the circles
+
+**Why (Chandu):** "the nudge tooltip for my build in v2 should ALSO have the blue glow stuff. ANY tooltip anywhere across the app should use that style from now on. Make sure to update the component library." Then "lets have our new top 3 card nudges in v1 as well", and "in match when a student saves a profile show it floating, leaving a trail and slotting into the 3 circles so students know its happening. Right now they barely noticed the circles."
+
+- **`.dm-tip` (globals.css)** is the one tooltip look: the Black & Blue blue as a glowing gradient bubble (#2f6bf2 to #599df9, rim #9ec6fa), white text, same in light and dark. Applied at the source: IconTip (every hover tip), DreamScoreTip, the Career Report's "More" tip, the landing page's Build "+ more" tip, Top 3's spot tips, My Build's cover tag, and the Coachmark bubble (its glow on a viewport-sized wrapper, since the bubble is clipped to its caret shape; coachmarks are still switched off by COACHMARKS_ENABLED). The counselor dashboard's chart tooltip (ivFlow) is left alone: that app's design budget keeps glow to the hero. Component library: a new "House tooltip (.dm-tip)" entry plus updated IconTip and Coachmark notes.
+- **Top 3 card nudges in v1 too:** the play-once glow and tooltip on the arrows and X now run in both versions (v1 keeps its banner and hint as well).
+- **`SaveFlight` (flow-lab/shared.tsx):** in Match, a save lifts the career's photo from where the student tapped (captured pointerdown; Safari does not focus clicked buttons), arcs it into the next open circle with a comet trail of fading copies in the house blue, and the circle bursts as it lands (PicksTray `landing` / `landed`; slots carry `data-pick-slot`). Transform and opacity only; skipped under reduced motion. Component library: a replayable SaveFlight entry.
+- **Checked:** full tsc, eslint on changed files; browser: library entries render, a live IconTip hover is blue, a Match save caught mid-flight and landing. **Not checked:** light mode, Windows/ChromeOS.
+
+## 2026-10-19: scroll edges fade instead of blur; Match's Learn more on one screen
+
+**Why (Chandu):** "the blur edges are too sharp for the scroll areas... they need to be organic and subtle and progressive", then "The blur areas are toooo tall and really bad and sharp. If we cant reliably duplicate this look dont try anymore. My reference is Apple ios UI." And for Match: "we dont need a tab for the learn more pop ups".
+
+- **`ScrollEdges` (cardChrome.tsx) no longer stacks backdrop-blur layers.** Their masks are not honoured with backdrop-filter in some Chromium builds, so the bands rendered as hard-edged rectangles. It now sets a soft, eased alpha mask on the scroller itself (iOS-list style): off while nothing is under an edge, easing in with the scroll, short ramps (0.85x the given size). No blur anywhere, so nothing can show a seam. The `tint` prop is kept for callers but unused. Every caller (Career Peek, Match's sheet, the others) gets it.
+- **Match's Learn more:** one screen, no tabs (What you'd do, Good fit if you like, School & path). `PeekSheet` hides its tab bar when given a single tab.
+
+## 2026-10-19: brighter v2 nudges, plan steps open the career section, Match's Learn more redesigned
+
+**Why (Chandu):** "the nudges for move to #1 and remove from top 3 should be more prominent... use the BLUE glow from the blue and black theme"; "if something says learn what schools or majors to take etc, take the student to the career detail page and scroll to the relevant section (and expand if its collapsed)"; "in the match flow, update the learn more popups to look like the pop ups we have when we click on top 3 cards... keep the same information, designed way better".
+
+- **v2 nudges:** `.dm-spot` now glows with the Black & Blue look's own blue (bloom #599df9, core #9ec6fa; look-v2.css) and pulses; the tooltip (`.dm-spot-tip`) is a blue gradient bubble with a caret and a spark that springs in; each beat runs 2.5s. Still v2 only, once.
+- **Career page by link:** the live route renders `CareerDetailLab` (not `CareerDetailExperience`). `?tab=education` (optionally `&section=what-they-do`) opens that tab and eases to the section (a hand-rolled instant-step scroll; smooth scrolls get cancelled here). Skipped inside peek sheets so a host page's own `?tab=` never leaks in. My Plan v2's "See the school or training X needs" opens `?tab=education`; "Watch a day in X" opens Overview at "What they actually do".
+- **Match's Learn more (all versions, Match is shared):** `DetailModal` (flow-lab/shared.tsx) now renders on `PeekSheet` refined, the Top 3 card sheet: poster panel (face-aware crop, a drawer on phones), world accent and rule, a fact strip (Typical pay, Where people work), two tabs (Overview: What you'd do + Good fit if you like; School & path), the same Save / Add to My Top 3 button and prev/next. Same content from `matchDetail()`.
+
+## 2026-10-19: Registered Nurse v2 art, fixed rooms with separate characters
+
+**Why (Chandu, finishing Codex's work):** the earlier RN art redrew the whole picture for every scene, so the room and the view out the window shifted from scene to scene. Codex made the corrected set on 19 Oct (review page: dreamari-career-art-comparisons.chanduq.chatgpt.site/registered-nurse): one saved background per location (station, corridor, Room 12, lobby, staff room) with transparent character layers on top. Chandu: "all the art was generated already... push it to main on its behalf as v2".
+
+- **Art switch is now v0 | v1 | v2 on Registered Nurse only** (internal `ArtVersion` 1 | 2 | 3). v2 is the default; `?v=1` is the 13 Oct anime set (now `rn-v1-images.ts`), `?v=0` the sprites. Other games keep v0 | v1.
+- `CareerScene.tsx` stacks the background, a time-of-day light layer (dawn, day, midday, late, night) and the character layer on one canvas, so they crop together on phones. A reaction swaps the person, never the room or the time of day. RN1-20 used to swap Denise for Rosa; it now uses Denise's own concerned pose.
+- Assets: `public/images/play/rn/v2/locked-2026-10-19/` (5 backgrounds, 13 foregrounds, manifest with hashes). All 18 match the review site byte for byte. Master prompt: `public/art-prompts/career-art-master.txt`.
+- Fixed in Codex's uncommitted work: two lines in `SimulationPlayer.tsx` passed the art version as a character's reaction tier (a comma typo), which broke reactions and failed tsc.
+- **Checked:** tsc (clean), eslint on changed files, tokens:check, `next build --webpack`. Played locally: start screen, lobby, station, corridor, Rosa at dawn, Room 12, Denise; all image layers load; the v0/v1 switch still shows the old art. **Not checked:** every beat, phone width, light mode, Windows/ChromeOS.
+
+
+## 2026-10-19: v2 Top 3 without a banner: teach on the controls themselves
+
+**Why (Chandu):** "we are still keeping the permanent set of controls in the banner in v2? Isnt there a better way... my build can still be where it used to be in the cover image with its tooltip nudge appearing once the page is scrolled back up after the student lands on top 3 from match". The bar was a fifth thing whose only job was pointing at four others.
+
+- **No banner in v2** (the action bar and "Edit Top 3" are gone). v1 is unchanged (its Explore banner, hint and tour).
+- **Reorder and Remove are taught on the cards:** the first time the cards are on screen, the arrows light (`.dm-spot`) with their own tooltip words under them ("Move to #1" on the #2 card side by side, "Move to #2" on the top card when stacked), then the X's with "Remove from Top 3"; once (demo: per session, like the other first-visit tips). Using either control stops it.
+- **My Build is back on the cover in v2** with its original tag ("Into something new? Change it here and your matches follow."). It is due 1.6s after the page settles but only paints while the button is on screen and clear of the nav, so a student scrolled down to the cards from Match sees it the moment they scroll back up; 9s, until My Build is opened once.
+- **"+ Explore more"** sits beside "Compare all 3" when all three slots are full (the empty slot does this when there is room).
+
+## 2026-10-19: the Color switch becomes a quiet desktop toggle
+
+**Why (Chandu):** "the black and blue/classic is too big and sitting over the design and it shouldnt be in my face and so prominent like this." `ColorThemeSwitch` is now one small switch like My Profile's "V2 PROFILE": a muted "BLACK & BLUE" label and a mini track, no panel, 55% opacity until hovered or focused, fixed bottom-left on desktop (lg) only. Phones and tablets have no free corner (it sat over the cards there), so it is hidden below lg; `?look=v2` / `?look=v1` still switch the theme anywhere. Same state as before (look.ts).
+
+## 2026-10-19: v2 Top 3 action bar and the v2 redundancy audit
+
+**Why (focus group, via Chandu):** redoing the Build, exploring more careers, and moving or removing Top 3 cards "were not clear to some users". Chandu: "make it very obvious but not by adding more text everywhere... the banner we currently have also needs a redesign", then "is that banner going to stay permanently there? NO x to close it etc? I feel like that just adds to more clutter", then "audit v2 for redundancies".
+
+- **Action bar (Top 3, v2 only):** (shipped first for both versions by mistake and reverted for v1 the same day, Chandu: "All those changes are only for v2. Please revert v1 to whatever we had before"; v1 keeps its Explore banner, move/remove hint, reading clock and first-visit coachmark.) the banner's sentence became the actions: Reorder, Remove, Add careers, Redo My Build (keeps My Build's tooltip and spark). Reorder and Remove light the cards' own controls (`.dm-spot`, a ring inside the shape) on hover, focus or tap; the first time the bar is on screen it plays that once (arrows, then X's). It closes with its X or once any Top 3 action is used, and folds into "Edit Top 3" under the cards (demo mode: per session; otherwise remembered, `dreamari:top3-bar-closed`).
+- **v2 audit fixes:** (1) the "Strongest match" chip is gone (the rank pill's star marks #1); (2) the #1 card's button says My Plan, the others Plan this; (3) the bar's Add careers opens the same sheet as the empty slot (saved first, Explore at its foot); (4) the old first-visit coachmark and arrow pulse are off in v2, the bar teaches; (5) About Me is hidden in v2: Saved > Schools is College Goal (Reach / Target / Likely, the #1 star), `?goal=` links land on that Saved shelf, old About Me links open Top 3; (6) My Plan ticks are kept in v2 (`lib/planDone.ts`) and the Career Report's "Logged in Dreamari" lists them (DEMO-ONLY seeds until the first tick).
+- The v2 switch moved from Quick links to a quiet "V2 PROFILE" toggle at the foot of My Profile.
+- **Checked:** full `npx tsc --noEmit` (note: earlier quick checks prefixed with `timeout` never ran; macOS has no `timeout`), eslint on changed files, local :3013 desktop and phone: bar play and fold, Saved > Schools as College Goal, Report log from plan ticks. **Not checked:** light mode, Windows/ChromeOS, tokens:check.
+
 ## 2026-10-19: the look switch moves to a Color control, bottom-left
 
 **Why (Chandu):** "rename the blue thing to be a small control on the bottom of the page on the left to toggle the color theme. Remove from the hamburger menu."
@@ -19,6 +118,7 @@
 - It carries `marketing-v2 themeable` so its colours follow light/dark, with fallbacks for routes that don't load tokens.css. Light mode's tokens.css block gives every `.marketing-v2.themeable` `min-height: 100%` (meant for page roots): the control stretched to the full screen height until an inline `min-height: auto`. Worth knowing for any other small element that borrows that scope.
 - Listed in HANDOFF_INDEX's Demo vs Production section.
 - Checked: tsc, eslint; desktop and 375px phone, dark and light, both options, the menu no longer has the row. In local dev the Next.js "N" badge overlaps the control's label; that badge doesn't exist on Vercel. Pushed to main on Chandu's go-ahead.
+
 
 ## 2026-10-19: v2 look, light that behaves like light (rim, state, data, moments)
 

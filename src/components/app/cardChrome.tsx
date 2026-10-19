@@ -93,7 +93,14 @@ export function cardTopScrim() {
  *  overflows). Drop it inside a `relative` wrapper that also holds the scroll
  *  container (`scroller`, or the first overflow-y child found). Keep it off
  *  anything a student must reach: footers and CTAs stay outside the wrapper. */
-export function ScrollEdges({ top = 0, bottom = 56, tint = "var(--card)", scroller }: { top?: number; bottom?: number; /** the surface both ramps fade toward; "none" for frost only */ tint?: string; /** the scroll container; defaults to the wrapper's first overflow-y child */ scroller?: React.RefObject<HTMLElement | null> }) {
+export function ScrollEdges({ top = 0, bottom = 56, scroller }: { top?: number; bottom?: number; /** kept for callers; the fade needs no tint */ tint?: string; /** the scroll container; defaults to the wrapper's first overflow-y child */ scroller?: React.RefObject<HTMLElement | null> }) {
+  // 19 Oct 2026, Chandu: "the blur edges are too sharp for the scroll areas
+  // btw. they need to be organic and subtle and progressive". The layered
+  // backdrop blur showed hard horizontal band edges (its masks are not
+  // honoured with backdrop-filter in some Chromium builds), so the edges now
+  // fade the CONTENT itself through a soft, eased mask on the scroller: no
+  // band, no rectangle, nothing to show a seam. Same behaviour as before: off
+  // while nothing is under an edge, easing in with the scroll, longer ramps.
   const host = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const el = host.current;
@@ -105,80 +112,46 @@ export function ScrollEdges({ top = 0, bottom = 56, tint = "var(--card)", scroll
       target = Array.from(p.querySelectorAll<HTMLElement>("*")).find((n) => n !== el && !el.contains(n) && /auto|scroll/.test(getComputedStyle(n).overflowY) && n.scrollHeight > 0) ?? null;
     }
     if (!target) return;
-    // Ease the strength from zero; do not snap a full frost band on at 1px.
+    const scrollEl = target;
     const ease = (v: number) => { const x = Math.max(0, Math.min(1, v)); return x * x * (3 - 2 * x); };
+    // short ramps, like iOS lists (Chandu: the old bands were "toooo tall")
+    const topLen = Math.round(top * 0.85);
+    const botLen = Math.round(bottom * 0.85);
+    // eased alpha stops along a ramp: strength 0 = fully visible, 1 = fades out
+    const ramp = (strength: number, len: number, fromEnd: boolean) => {
+      const a = (k: number) => (1 - strength * (1 - k)).toFixed(3); // k: 0 at the edge, 1 inside
+      const at = (f: number) => (fromEnd ? `calc(100% - ${Math.round(len * (1 - f))}px)` : `${Math.round(len * f)}px`);
+      const stops = [0, 0.2, 0.42, 0.66, 1].map((f) => { const k = f * f * (3 - 2 * f); return `rgba(0,0,0,${a(k)}) ${at(fromEnd ? 1 - f : f)}`; });
+      return fromEnd ? stops.reverse() : stops;
+    };
     const paint = () => {
-      const t = ease(target.scrollTop / Math.max(top, 32));
-      const left = target.scrollHeight - target.clientHeight - target.scrollTop;
-      const b = target.scrollHeight - target.clientHeight < 4 ? 0 : ease(left / Math.max(bottom, 32));
-      el.style.setProperty("--se-top", t.toFixed(3));
-      el.style.setProperty("--se-bottom", b.toFixed(3));
+      const t = top > 0 ? ease(scrollEl.scrollTop / Math.max(top, 32)) : 0;
+      const left = scrollEl.scrollHeight - scrollEl.clientHeight - scrollEl.scrollTop;
+      const b = bottom > 0 && scrollEl.scrollHeight - scrollEl.clientHeight >= 4 ? ease(left / Math.max(bottom, 32)) : 0;
+      if (t === 0 && b === 0) { scrollEl.style.maskImage = ""; scrollEl.style.webkitMaskImage = ""; return; }
+      const g = `linear-gradient(to bottom, ${[...ramp(t, topLen, false), ...ramp(b, botLen, true)].join(", ")})`;
+      scrollEl.style.maskImage = g;
+      scrollEl.style.webkitMaskImage = g;
     };
     paint();
     let frame = 0;
     const schedule = () => { if (!frame) frame = requestAnimationFrame(() => { frame = 0; paint(); }); };
-    target.addEventListener("scroll", schedule, { passive: true });
+    scrollEl.addEventListener("scroll", schedule, { passive: true });
     const ro = new ResizeObserver(schedule);
     const observe = () => {
       ro.disconnect();
-      ro.observe(target);
-      if (target.firstElementChild) ro.observe(target.firstElementChild);
+      ro.observe(scrollEl);
+      if (scrollEl.firstElementChild) ro.observe(scrollEl.firstElementChild);
       schedule();
     };
     observe();
     // Switching tabs replaces the content node without replacing the scroller.
     const mo = new MutationObserver(observe);
-    mo.observe(target, { childList: true, subtree: true, characterData: true });
-    return () => { target.removeEventListener("scroll", schedule); ro.disconnect(); mo.disconnect(); cancelAnimationFrame(frame); };
+    mo.observe(scrollEl, { childList: true, subtree: true, characterData: true });
+    return () => {
+      scrollEl.removeEventListener("scroll", schedule); ro.disconnect(); mo.disconnect(); cancelAnimationFrame(frame);
+      scrollEl.style.maskImage = ""; scrollEl.style.webkitMaskImage = "";
+    };
   }, [scroller, top, bottom]);
-  return (
-    <span ref={host} aria-hidden className="contents" style={{ ["--se-top" as string]: 0, ["--se-bottom" as string]: 0 }}>
-      {top > 0 && <EdgeFrost edge="top" size={top} tint={tint} />}
-      {bottom > 0 && <EdgeFrost edge="bottom" size={bottom} tint={tint} />}
-    </span>
-  );
-}
-
-const EDGE_STOPS = [0.5, 1, 2, 4, 6, 9];
-function EdgeFrost({ edge, size, tint }: { edge: "top" | "bottom"; size: number; tint?: string }) {
-  const toward = edge === "top" ? "to top" : "to bottom";
-  const strength = edge === "top" ? "var(--se-top)" : "var(--se-bottom)";
-  const n = EDGE_STOPS.length;
-  // No opacity or mask on the WRAPPER: either one turns the wrapper into the
-  // backdrop root for its backdrop-filter children, which then blur a
-  // transparent box and show nothing (why the first version was invisible,
-  // 7 Oct 2026). Each layer carries its own two masks (the vertical ramp and
-  // the side fade, intersected) and scales its blur radius by the scroll
-  // strength, so the effect lives entirely on the filtered elements.
-  const side = "linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent)";
-  return (
-    <span className="pointer-events-none absolute inset-x-0 z-[2]" style={{ [edge]: 0, height: size }}>
-      {EDGE_STOPS.map((blur, i) => {
-        // Local crossfading bands, rather than six opaque filters piled up at
-        // the edge. Each blur hands off to the next; only the last stays solid.
-        const step = 100 / n;
-        const start = Math.max(0, (i - 0.5) * step);
-        const peak = (i + 1) * step;
-        const end = Math.min(100, (i + 2.5) * step);
-        const ramp = `linear-gradient(${toward}, transparent ${start}%, rgba(0,0,0,.15) ${start + (peak - start) * 0.35}%, rgba(0,0,0,.65) ${start + (peak - start) * 0.7}%, black ${peak}%${i < n - 1 ? `, rgba(0,0,0,.65) ${peak + (end - peak) * 0.3}%, rgba(0,0,0,.15) ${peak + (end - peak) * 0.7}%, transparent ${end}%` : ""})`;
-        return (
-          <span
-            key={blur}
-            className="absolute inset-0"
-            style={{
-              backdropFilter: `blur(calc(${blur}px * ${strength}))`,
-              WebkitBackdropFilter: `blur(calc(${blur}px * ${strength}))`,
-              maskImage: `${ramp}, ${side}`,
-              WebkitMaskImage: `${ramp}, ${side}`,
-              maskComposite: "intersect",
-              WebkitMaskComposite: "source-in",
-            }}
-          />
-        );
-      })}
-      {tint && tint !== "none" && (
-        <span className="absolute inset-0" style={{ opacity: strength, background: `linear-gradient(${toward}, transparent 0%, color-mix(in srgb, ${tint} 12%, transparent) 30%, color-mix(in srgb, ${tint} 55%, transparent) 65%, ${tint} 100%)`, maskImage: side, WebkitMaskImage: side }} />
-      )}
-    </span>
-  );
+  return <span ref={host} aria-hidden className="contents" />;
 }

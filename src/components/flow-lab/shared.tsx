@@ -14,14 +14,19 @@
 // three empty slots show how ranking works.
 
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, ImageOff, Info, Plus, Sparkles, X } from "lucide-react";
+import { ArrowLeftRight, Bookmark, Check, ChevronRight, ImageOff, Info, Plus, X } from "lucide-react";
 import { BorderBeam } from "@/components/app/Beam";
 import { IconTip } from "@/components/app/IconTip";
 import { Working } from "@/components/app/Working";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { matchDetail, REVEAL_STEP, type LabCareer, WORLDS } from "./lab";
+import { PeekList, PeekSheet, type PeekFact } from "@/components/app/PeekSheet";
+import { FacePhoto } from "@/components/app/FacePhoto";
+import { heroFocus } from "@/components/career/heroFocus";
+import { careerButtonInk } from "@/components/actions-lab/CareerHeaderActions";
 
 export const CARD = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
 const SUCCESS = "var(--color-feedback-success)";
@@ -333,41 +338,100 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
 /** The bottom bar's saved tray: one slot per save allowed (three since 27
  *  Sept 2026), filled with the saved career's photo. The empty slots ARE
  *  the limit, so no counter or hint line has to say it. */
-export function PicksTray({ saved, max, onOpen }: { saved: LabCareer[]; max: number; onOpen?: (id: string) => void }) {
+export function PicksTray({ saved, max, onOpen, landing, landed }: { saved: LabCareer[]; max: number; onOpen?: (id: string) => void; /** a save still flying in (SaveFlight): its circle waits, empty */ landing?: string | null; /** the save that just landed: its circle bursts */ landed?: string | null }) {
   return (
     <div className="flex items-center gap-1 sm:gap-1.5" role="img" aria-label={`${saved.length} of ${max} saved`}>
       {Array.from({ length: max }, (_, i) => {
         const c = saved[i];
-        return c ? (
-          <motion.button
-            key={c.id}
-            type="button"
-            aria-label={`Open ${c.title}`}
-            onClick={() => onOpen?.(c.id)}
-            initial={{ scale: 0.4, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 420, damping: 22 }}
-            className="relative size-7 flex-none cursor-pointer overflow-hidden rounded-full border-2 sm:size-8"
-            style={{ borderColor: WORLD_COLORS[c.world] ?? "var(--primary)" }}
-          >
-            <LabPhoto career={c} sizes="32px" className="object-cover" />
-          </motion.button>
+        return c && c.id !== landing ? (
+          <span key={c.id} data-pick-slot={i} className="relative flex-none">
+            <motion.button
+              type="button"
+              aria-label={`Open ${c.title}`}
+              onClick={() => onOpen?.(c.id)}
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 420, damping: 22 }}
+              className="relative block size-7 flex-none cursor-pointer overflow-hidden rounded-full border-2 sm:size-8"
+              style={{ borderColor: WORLD_COLORS[c.world] ?? "var(--primary)" }}
+            >
+              <LabPhoto career={c} sizes="32px" className="object-cover" />
+            </motion.button>
+            {/* the landing: a ring of the house blue bursts out once */}
+            {c.id === landed && (
+              <motion.span aria-hidden className="pointer-events-none absolute inset-0 rounded-full" initial={{ scale: 1, opacity: 0.95 }} animate={{ scale: 2.4, opacity: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} style={{ boxShadow: "0 0 0 2px #9ec6fa, 0 0 18px 4px rgba(89,157,249,0.8)" }} />
+            )}
+          </span>
         ) : (
           // Empty slots pull toward the next save (Joshua, 28 Sept 2026: "the
           // next open circle subtly pulse/highlight... the remaining empty
           // slots can continue pulsing"): the next one pulses in the text colour (white on the dark glass) with a
           // border beam,
           // later ones follow faintly, staggered so it reads as momentum.
-          <BorderBeam key={`empty-${i}`} size="sm" colorVariant="colorful" theme="dark" duration={2.4} strength={1} active={i === saved.length} className="size-7 flex-none rounded-full sm:size-8">
+          <span key={`empty-${i}`} data-pick-slot={i} className="flex-none">
+          <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={2.4} strength={1} active={i === saved.length} className="size-7 flex-none rounded-full sm:size-8">
           <span
               aria-hidden
               className={`block size-7 flex-none rounded-full border-2 border-dashed sm:size-8 ${i === saved.length ? "dm-slot-pulse" : "dm-slot-pulse-faint"}`}
               style={{ borderColor: i === saved.length ? "color-mix(in srgb, var(--foreground) 85%, transparent)" : "color-mix(in srgb, var(--foreground) 26%, transparent)", animationDelay: `${(i - saved.length) * 0.35}s` }}
             />
           </BorderBeam>
+          </span>
         );
       })}
     </div>
+  );
+}
+
+/** A save, made visible (19 Oct 2026, Chandu: "when a student saves a
+ *  profile show it floating, leaving a trail and slotting into the 3
+ *  circles so students know it's happening. Right now they barely noticed
+ *  the circles"). The career's photo lifts from where it was saved, arcs up
+ *  and down into its circle in the tray with a comet trail of fading copies
+ *  in the house blue glow, and the circle bursts as it lands (PicksTray
+ *  `landing` / `landed`). Transform and opacity only: no blur filters on
+ *  moving layers (the Glossary perf rule). */
+export function SaveFlight({ career, from, to, onDone }: { career: LabCareer; from: { x: number; y: number }; to: { x: number; y: number }; onDone: () => void }) {
+  const size = 64;
+  const end = 32;
+  const lift = Math.max(90, Math.min(220, Math.abs(to.y - from.y) * 0.35));
+  const mid = { x: (from.x + to.x) / 2, y: Math.min(from.y, to.y) - lift };
+  const xs = [from.x, mid.x, to.x].map((v) => v - size / 2);
+  const ys = [from.y, mid.y, to.y].map((v) => v - size / 2);
+  const scales = [1, 0.9, end / size];
+  const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+  const TRAIL = 6;
+  const DURATION = 0.8;
+  const photo = (
+    <span className="relative block size-full overflow-hidden rounded-full border-2" style={{ borderColor: accent }}>
+      <LabPhoto career={career} sizes="64px" className="object-cover" />
+    </span>
+  );
+  return createPortal(
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-[120]">
+      {/* the trail: smaller, fainter copies on the same path, a beat behind */}
+      {Array.from({ length: TRAIL }, (_, k) => k + 1).map((k) => (
+        <motion.span
+          key={k}
+          className="absolute top-0 left-0 rounded-full"
+          style={{ width: size, height: size, background: `radial-gradient(circle, rgba(158,198,250,${0.55 - k * 0.07}) 0%, rgba(89,157,249,${0.35 - k * 0.05}) 45%, transparent 70%)` }}
+          initial={{ x: xs[0], y: ys[0], scale: 0.8 - k * 0.08, opacity: 0 }}
+          animate={{ x: xs, y: ys, scale: scales.map((sc) => sc * (0.85 - k * 0.08)), opacity: [0, 1 - k * 0.12, 0] }}
+          transition={{ duration: DURATION, delay: k * 0.045, ease: [0.45, 0, 0.25, 1], times: [0, 0.5, 1] }}
+        />
+      ))}
+      <motion.span
+        className="absolute top-0 left-0 block rounded-full"
+        style={{ width: size, height: size, boxShadow: "0 0 0 2px #9ec6fa, 0 0 22px 6px rgba(89,157,249,0.75)" }}
+        initial={{ x: xs[0], y: ys[0], scale: 0.6, opacity: 0 }}
+        animate={{ x: xs, y: ys, scale: scales, opacity: [1, 1, 1] }}
+        transition={{ duration: DURATION, ease: [0.45, 0, 0.25, 1], times: [0, 0.5, 1] }}
+        onAnimationComplete={onDone}
+      >
+        {photo}
+      </motion.span>
+    </div>,
+    document.body,
   );
 }
 
@@ -505,11 +569,16 @@ export function RevealGrid<T>({ items, resetKey, renderItem }: { items: T[]; res
 
 // ------------------------------------------------------------------ modal ----
 
-/** Match's detail modal, section for section: hero with employers and
- *  salary, "What You'd Do", "Good Fit If You Like", "School & Path" as
- *  short bullets, one CTA, prev/next through the six. Content comes from
- *  matchDetail(), which is the deck's own copy for the six deck careers and
- *  the app's report/profile data for everything else. */
+/** Match's detail modal (19 Oct 2026, Chandu: "update the learn more
+ *  popups to look like the pop ups we have when we click on top 3 cards...
+ *  keep the same information, designed way better"). Now the Top 3 card's
+ *  sheet (PeekSheet, refined: the poster panel, the world accent, the fact
+ *  strip, the segmented tabs, the frosted footer; a drawer on phones) with
+ *  Match's own content from matchDetail(): pay and employers as the facts,
+ *  "What you'd do", "Good fit if you like" and "School & path" on one screen
+ *  (no tabs), and the one Save / Add to My Top 3 action. Prev/next
+ *  walk the same list as before. */
+type MatchTab = "overview";
 export function DetailModal({ career, control, selected, full, onToggle, onClose, onPrev, onNext }: {
   career: LabCareer;
   control: Exclude<LabControl, "rank">;
@@ -522,103 +591,52 @@ export function DetailModal({ career, control, selected, full, onToggle, onClose
 }) {
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
   const detail = matchDetail(career);
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft" && onPrev) onPrev();
-      if (e.key === "ArrowRight" && onNext) onNext();
-    }
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
-  }, [onClose, onPrev, onNext]);
-  const round = "flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-md";
-  const roundStyle = { background: "color-mix(in srgb, var(--background) 55%, transparent)", borderColor: "rgba(255,255,255,0.4)" };
-  const chip = "rounded-[var(--radius-sm)] border px-2.5 py-1 text-[11px] font-bold backdrop-blur-md";
+  const [tab, setTab] = useState<MatchTab>("overview");  // PeekSheet's single "tab"
+  // PeekSheet steps through a list by index; Match only knows its neighbours,
+  // so the position is just enough to enable the right arrows.
+  const count = 1 + (onPrev ? 1 : 0) + (onNext ? 1 : 0);
+  const index = onPrev ? 1 : 0;
+  const facts: PeekFact[] = [
+    ...(detail.salary ? [{ label: "Typical pay", value: detail.salary }] : []),
+    ...(detail.employers ? [{ label: "Where people work", value: detail.employers }] : []),
+  ];
+  const list = (items: string[]) => (items.length ? <PeekList items={items} /> : <p className="cpk-body" style={{ color: "var(--muted-foreground)" }}>Details coming soon.</p>);
   return (
-    <motion.div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true" aria-label={`${career.title} details`}>
-      <motion.div initial={{ scale: 0.96, y: 8 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 8 }} className="relative flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[440px] flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}>
-        <IconTip label="Close" className="absolute top-3 right-3 z-[3]">
-          <button type="button" aria-label="Close" onClick={onClose} className={round} style={roundStyle}><X className="h-4.5 w-4.5 text-white" aria-hidden /></button>
-        </IconTip>
-        <div className="flow-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="relative w-full" style={{ aspectRatio: "3 / 2" }}>
-            <LabPhoto career={career} sizes="440px" className="object-cover object-top" />
-            {onPrev && (
-              <IconTip label="Previous career" className="absolute top-1/2 left-3 z-[2] -translate-y-1/2">
-                <button type="button" aria-label="Previous career" onClick={onPrev} className={round} style={roundStyle}><ChevronLeft className="h-5 w-5 text-white" aria-hidden /></button>
-              </IconTip>
-            )}
-            {onNext && (
-              <IconTip label="Next career" className="absolute top-1/2 right-3 z-[2] -translate-y-1/2">
-                <button type="button" aria-label="Next career" onClick={onNext} className={round} style={roundStyle}><ChevronRight className="h-5 w-5 text-white" aria-hidden /></button>
-              </IconTip>
-            )}
-            {/* pr-14 keeps the chips clear of the close button, as in Match. */}
-            <div className="absolute inset-x-0 top-0 z-[1] flex items-start justify-between gap-2 p-4 pr-14">
-              {detail.employers ? (
-                <span className={`max-w-[55%] truncate ${chip}`} style={{ color: "var(--poster-title)", background: "color-mix(in srgb, var(--background) 80%, transparent)", borderColor: "var(--glass-border)" }}>{detail.employers}</span>
-              ) : <span />}
-              {detail.salary && (
-                <span className={`flex-none ${chip}`} style={{ color: SUCCESS, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 80%, transparent)" }}>{detail.salary}</span>
-              )}
-            </div>
-            <div className="absolute inset-x-0 bottom-0 z-[1] flex flex-col items-center gap-1.5 px-2 pt-12 pb-3 text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)" }}>
-              <p className="line-clamp-3" style={{ ...posterTitleFont(career.world), fontSize: 26, lineHeight: 1.15, color: "var(--poster-title)" }}>{career.title}</p>
-              <p className="text-[10.5px] font-semibold tracking-[0.06em]" style={{ color: accent }}>{career.world}</p>
-            </div>
-          </div>
-          <div className="flex flex-col px-5 pt-4 pb-4">
-            <Section icon={<BookOpen className="h-4 w-4" />} label="What You'd Do"><Bullets items={detail.whatYouDo} /></Section>
-            <Divider />
-            <Section icon={<Sparkles className="h-4 w-4" />} label="Good Fit If You Like"><Bullets items={detail.goodFitIf} /></Section>
-            <Divider />
-            <Section icon={<GraduationCap className="h-4 w-4" />} label="School & Path"><Bullets items={detail.schoolPath} /></Section>
-          </div>
-        </div>
-        <div className="flex-none border-t px-4 py-3" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
-          <button type="button" onClick={onToggle} disabled={!selected && full} className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-md)] text-[15px] font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: selected ? "var(--color-feedback-danger, #dc2626)" : accent }}>
-            {control === "save"
-              ? (selected ? "Remove from Saved" : full ? "Saved is full" : <><Bookmark className="h-4 w-4" strokeWidth={3} aria-hidden /> Save</>)
-              : (selected ? "Remove from My Top 3" : full ? "Your Top 3 is full" : <><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> Add to My Top 3</>)}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-function Divider() {
-  return <hr aria-hidden className="my-3 border-0" style={{ height: 1, background: "var(--glass-border)" }} />;
-}
-
-/** Match's BulletList: 2-3 short bullets, never a paragraph; "Details
- *  coming soon." when nothing is authored yet (the app's thin-content
- *  convention). */
-function Bullets({ items }: { items: string[] }) {
-  if (items.length === 0) return <p className="text-[13px] font-medium italic" style={{ color: "var(--muted-foreground)" }}>Details coming soon.</p>;
-  return (
-    <ul className="flex flex-col gap-1.5">
-      {items.map((item) => (
-        <li key={item} className="flex items-start gap-2 text-[13px] leading-[1.5] font-medium" style={{ color: "var(--muted-foreground)" }}>
-          <span aria-hidden className="mt-[8px] size-1 flex-none rounded-full" style={{ background: "var(--muted-foreground)" }} />
-          {item}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Section({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
-  return (
-    <section>
-      <div className="flex items-center gap-2">
-        <span aria-hidden className="flex-none" style={{ color: "var(--foreground)" }}>{icon}</span>
-        <h3 className="text-[15px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>{label}</h3>
-      </div>
-      <div className="mt-1.5 text-left">{children}</div>
-    </section>
+    <PeekSheet<MatchTab>
+      refined
+      id={career.id}
+      accent={accent}
+      // face-aware, like the Top 3 sheet: the drawer's wide band keeps the
+      // face in view (a top-pinned crop showed the ceiling)
+      art={<FacePhoto src={career.photo} sizes="(max-width: 1023px) 100vw, 420px" className="object-cover" fallback={heroFocus(career.photo)?.desktop ?? "50% 30%"} priority />}
+      chip={career.world}
+      title={career.title}
+      titleStyle={posterTitleFont(career.world)}
+      facts={facts}
+      // all of it on one screen, no tabs (Chandu, 19 Oct 2026: "we dont need
+      // a tab for the learn more pop ups from match screen")
+      tabs={[{ key: "overview", label: "Overview" }]}
+      tab={tab}
+      onTab={setTab}
+      count={count}
+      index={index}
+      onIndex={(i) => { if (i < index) onPrev?.(); else onNext?.(); }}
+      onClose={onClose}
+      body={(
+        <>
+          <section className="cpk-section"><h3 className="cpk-section-title">What you&apos;d do</h3>{list(detail.whatYouDo)}</section>
+          <section className="cpk-section"><h3 className="cpk-section-title">Good fit if you like</h3>{list(detail.goodFitIf)}</section>
+          <section className="cpk-section"><h3 className="cpk-section-title">School &amp; path</h3>{list(detail.schoolPath)}</section>
+        </>
+      )}
+      footer={
+        <button type="button" onClick={onToggle} disabled={!selected && full} className="flex min-h-[46px] w-full cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-md)] text-[15px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={selected ? { background: "var(--glass-surface-1)", color: "var(--foreground)" } : { background: accent, color: careerButtonInk(career.world), boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}>
+          {control === "save"
+            ? (selected ? "Remove from Saved" : full ? "Saved is full" : <><Bookmark className="h-4 w-4" strokeWidth={3} aria-hidden /> Save</>)
+            : (selected ? "Remove from My Top 3" : full ? "Your Top 3 is full" : <><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> Add to My Top 3</>)}
+        </button>
+      }
+    />
   );
 }
 

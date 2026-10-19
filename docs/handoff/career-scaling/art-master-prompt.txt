@@ -3,7 +3,7 @@ DREAMARI · COMPLETE SCENE ART MASTER
 CAREER: {CAREER}
 LEVEL / ROLE: {LEVEL_AND_ROLE}
 SCENE ID: {SCENE_ID}
-APPROVED SCRIPT ACTION: {ACTION}
+SCRIPT ACTION: {ACTION}
 LOCATION / CAMERA ID: {LOCATION_CAMERA_ID}
 TIME AND LIGHT SETUP: {TIME_LIGHT_DIRECTION_SKY_PRACTICALS}
 VISIBLE CAST: {CAST_IDS_AND_DESIGNS}
@@ -12,9 +12,12 @@ BACKGROUND QUALITY REFERENCE: {APPROVED_ENVIRONMENT_IMAGE}
 IDENTITY REFERENCES: {ONE_CANONICAL_IMAGE_PER_VISIBLE_PERSON}
 SCENE ANCHOR, IF THIS CAMERA ALREADY EXISTS: {EXACT_APPROVED_FULL_SCENE_FILE}
 OUTPUT: {DIMENSIONS_AND_FILE_ID}
+WORK ARTIFACT REFERENCES / STATE IDS: {CANONICAL_ARTIFACT_FILES_OR_NONE}
 UI SAFE AREAS / TARGET CROPS: {ACTUAL_HUD_DIALOGUE_AND_PORTRAIT_CROP}
 MODE: {NEW_LOCATION_ANCHOR | REUSE_EXISTING_SCENE | SCOPED_SCENE_EDIT}
 ALLOWED CHANGE, FOR AN EDIT: {EXACT_CHANGE_AND_EDIT_REGION}
+
+The AI fills this brief from the script and coverage map. Select and version canonical references after automated comparison; do not require human approval between shots. Human visual QA follows the assembled playable build. “Approved” below means the selected reference, not a claim of human sign-off.
 
 Create one complete opaque illustration with people, furniture, props, shadows and surroundings drawn together. Deliver a finished scene, not separate sprites, a collage, a contact sheet or a game mockup. Follow the script. Do not add story events or extra people.
 
@@ -27,7 +30,7 @@ Keep the cast varied in ethnicity, face shape, eye colour, age, height, head ang
 ENVIRONMENT
 Match the background reference's painted depth, architectural clarity and selective detail. Use clear foreground, midground and distance. Keep rooms richer than faces, but avoid photographic surface noise, dense generated screens and clutter.
 Make the workplace beautiful and visibly expensive through proportions, fitted joinery, generous useful space, refined materials and carefully placed light. Keep it authentic to the career. An expensive workshop remains a workshop; a hospital remains functional and cleanable. Do not turn every workplace into a hotel or add luxury detail to skin and hair.
-Use a small coherent material palette and enough real equipment to explain the work. Screens show sparse structural shapes. Documents and badges contain no invented words or personal data. Important numbers, diagrams and instructions belong in native game UI.
+Use a small coherent material palette and enough real equipment to explain the work. Screens show sparse structural shapes. Documents and badges contain no invented words or personal data. Important numbers, diagrams and instructions belong in native game UI using artifact-master-prompt.txt. When a scene shows a screen, prototype, plan or document, use the supplied canonical artifact state for its broad layout; keep the same project and version across relevant shots. Do not invent unrelated interface content. The readable artifact in the game UI remains authoritative.
 
 PHYSICAL STAGING
 People occupy real space in the room. Finish every visible body, hand, limb, furniture edge and shadow. Standing figures continue naturally below the waist. Seated figures have plausible hips, legs and chair contact. A desk may physically occlude a person, but a body must not end at a counter or float above it. Props must be held or supported plausibly.
@@ -46,6 +49,9 @@ For a new camera, record a new camera ID and establish its geography deliberatel
 COMPOSITION
 Use the actual game overlay and crop references. Keep the main face below the HUD and above dialogue; keep essential hands, tools and actions clear of controls. Leave quiet space for UI while finishing the image beneath it. If a wide action cannot survive a phone crop, make a deliberate portrait camera version from the approved scene references; do not make people tiny or cut essential faces away.
 No baked-in buttons, dialogue, meters, captions, names, logos, watermarks, borders or fake UI.
+
+SHOT COVERAGE
+Use the planned camera/action for this beat. Keep the drawing treatment stable across establishing, working, conversation and closing shots. Do not answer a request for a working-action shot by returning the same posed conversation again. Preserve the location geometry across camera changes; record each distinct camera. Use deliberate repeat files only when the action and state truly stay unchanged.
 
 ACCEPTANCE
 Compare the result with the canonical people, scene anchor and actual game UI. Reject identity drift, excess hair detail, comic or 3D rendering, incompatible light, changed room/exterior geography, extra limbs, floating waists, missing props and hidden story information.

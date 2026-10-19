@@ -212,6 +212,8 @@ const QUICK_LINKS = [
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-grid" },
   { label: "Play", href: "/play" },
+  // DEMO-ONLY: Level 1 draft for discussion and QA (19 Oct 2026).
+  { label: "UX Designer · QA draft", href: "/play/ui-ux-designer" },
   // DEMO-ONLY lab build of AMT Level 1 (5 Oct 2026): the detailed take with
   // the task card and the hands-on torque wrench; live Level 1 follows the
   // script. Flagged for Usman.

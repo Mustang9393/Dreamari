@@ -50,8 +50,8 @@
 //   lands on Top Three with #1 filled; two saves rank #1 and #2; three rank
 //   all three.
 
-import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { Listbox } from "@/components/app/Listbox";
@@ -59,7 +59,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { MAX_SAVED, buildSignals, careerById, demoFirst, exploreMoreWorlds, mixedForStudent, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
-import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PicksTray, ProfileTabs, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
+import { BottomBar, ChipRow, DetailModal, SaveFlight, Field, InterestPicker, LabCard, LabScreen, PicksTray, ProfileTabs, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
 type Step = "interests" | "explore" | "rank" | "top3";
 
@@ -209,9 +209,37 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
   const savedCareers = useMemo(() => state.saved.map(careerById).filter((c): c is LabCareer => !!c), [state.saved]);
   const top3 = useMemo(() => state.rank.map(careerById).filter((c): c is LabCareer => !!c), [state.rank]);
 
+  // A save flies into its circle (SaveFlight, 19 Oct 2026). The start is
+  // where the student tapped (pointerdown, captured page-wide: Safari does
+  // not focus a clicked button, so activeElement can't be trusted); the end
+  // is the next open circle in the tray.
+  const lastTap = useRef<{ x: number; y: number } | null>(null);
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => { lastTap.current = { x: e.clientX, y: e.clientY }; };
+    window.addEventListener("pointerdown", onDown, true);
+    return () => window.removeEventListener("pointerdown", onDown, true);
+  }, []);
+  const reduceMotion = useReducedMotion();
+  const [flight, setFlight] = useState<{ career: LabCareer; from: { x: number; y: number }; to: { x: number; y: number } } | null>(null);
+  const [landed, setLanded] = useState<string | null>(null);
+  const launch = (id: string, slot: number) => {
+    const career = careerById(id);
+    const target = document.querySelector<HTMLElement>(`[data-pick-slot="${slot}"]`)?.getBoundingClientRect();
+    if (!career || !target || reduceMotion) return;
+    const from = lastTap.current ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    setFlight({ career, from, to: { x: target.left + target.width / 2, y: target.top + target.height / 2 } });
+  };
+  const land = () => {
+    const id = flight?.career.id ?? null;
+    setFlight(null);
+    setLanded(id);
+    window.setTimeout(() => setLanded((cur) => (cur === id ? null : cur)), 700);
+  };
+
   // Functional updates throughout: two quick taps must never double-add.
   const toggleSave = (id: string) => {
     if (!state.saved.includes(id) && state.saved.length >= MAX_SAVED) setToast("Remove one first to save this career.");
+    if (!state.saved.includes(id) && state.saved.length < MAX_SAVED) launch(id, state.saved.length);
     setState((s) => s.saved.includes(id)
       ? { ...s, saved: s.saved.filter((x) => x !== id), rank: s.rank.filter((x) => x !== id) }
       : s.saved.length >= MAX_SAVED ? s : { ...s, saved: [...s.saved, id] });
@@ -368,7 +396,7 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
           </SurfaceState>
         </LabScreen>
         <BottomBar
-          status={<PicksTray saved={savedCareers} max={MAX_SAVED} onOpen={setOpenIdFromTray} />}
+          status={<PicksTray saved={savedCareers} max={MAX_SAVED} onOpen={setOpenIdFromTray} landing={flight?.career.id ?? null} landed={landed} />}
           // No ranking screen any more (Joshua, 28 Sept 2026: "remove the
           // page that says your top 3 for now... bring them straight to my
           // profile"). Saves cap at 3, so that screen only re-ordered the
@@ -385,6 +413,9 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
         <AnimatePresence>
           {open && (
             <DetailModal career={open.career} control="save" selected={state.saved.includes(open.career.id)} full={state.saved.length >= MAX_SAVED} onToggle={() => toggleSave(open.career.id)} onClose={() => setOpenId(null)} onPrev={openIdx > 0 ? () => setOpenId(ranked[openIdx - 1].career.id) : undefined} onNext={openIdx < ranked.length - 1 ? () => setOpenId(ranked[openIdx + 1].career.id) : undefined} />
+          )}
+          {flight && (
+            <SaveFlight key="save-flight" career={flight.career} from={flight.from} to={flight.to} onDone={land} />
           )}
         </AnimatePresence>
       </>

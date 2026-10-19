@@ -1,0 +1,24 @@
+.host { position: absolute; inset: 0; overflow: hidden; pointer-events: none; transition: filter .5s ease; }
+.canvas { position: absolute; isolation: isolate; }
+.background, .foreground { object-fit: fill; }
+.foreground { z-index: 2; top: var(--cast-top) !important; transform: scale(var(--cast-scale)); transform-origin: 50% 0%; }
+.wash, .rays, .callLights { position: absolute; inset: 0; pointer-events: none; }
+.wash { z-index: 1; }
+.rays { z-index: 3; background: linear-gradient(151deg, transparent 20%, #ffe8ad22 26%, #ffe8ad18 30%, transparent 36%, transparent 43%, #ffe8ad20 48%, transparent 55%); filter: blur(5px); mix-blend-mode: screen; opacity: .75; }
+.dawn .background { filter: brightness(.78) saturate(.87); }
+.dawn .wash { background: linear-gradient(105deg, #ffc16b20, transparent 45%, #18355c23); }
+.late .background { filter: sepia(.08) saturate(.97) brightness(.97); }
+.late .wash { background: linear-gradient(110deg, #ffc96b21, transparent 55%); }
+.midday .background { filter: saturate(.85) contrast(.92) brightness(1.04); }
+.night .background { filter: brightness(.2) saturate(.65); }
+.night .wash { background: radial-gradient(ellipse at 95% 60%, #ffbd7340, transparent 53%), linear-gradient(90deg, #06192b66, transparent 65%); }
+.night.room12 .wash { background: radial-gradient(ellipse at 22% 60%, #ffc47350, transparent 58%), linear-gradient(90deg, #071a2e44, transparent 60%); }
+.night .foreground { filter: brightness(.88) saturate(.9); }
+.cart { clip-path: polygon(0 0, 75% 0, 75% 100%, 0 100%); }
+.door { clip-path: polygon(79% 0, 100% 0, 100% 100%, 79% 100%); transform: translateX(4%); }
+.callLights { z-index: 4; }
+.callLights span { position: absolute; width: 3%; height: 2%; background: #ffba67; box-shadow: 0 0 8px #ff9a28; border-radius: 3px; }
+.callLights span:nth-child(1) { left: 8%; top: 1%; }
+.callLights span:nth-child(2) { left: 29%; top: 26%; }
+.callLights span:nth-child(3) { left: 70%; top: 26%; }
+.callLights span:nth-child(4) { left: 93%; top: 1%; }

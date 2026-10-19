@@ -1323,3 +1323,32 @@ html.light .event-card {
   --ev-qr-border: rgba(16, 26, 38, 0.14);
   --ev-qr-ink: #101a26;
 }
+
+/* v2 Top 3's first-visit "spot" (19 Oct 2026): the card controls light up
+   with the Black & Blue look's own glow (bloom #599df9, core #9ec6fa;
+   look-v2.css), brighter than a ring (Chandu: "more prominent... brighter
+   highlights, use the BLUE glow from the blue and black theme"). */
+@keyframes dm-spot-glow {
+  0%, 100% { box-shadow: 0 0 0 2px #9ec6fa, 0 0 14px 3px rgba(89, 157, 249, 0.75), 0 0 30px 8px rgba(89, 157, 249, 0.32); }
+  50% { box-shadow: 0 0 0 2px #ffffff, 0 0 20px 6px rgba(89, 157, 249, 0.95), 0 0 44px 14px rgba(89, 157, 249, 0.45); }
+}
+.dm-spot { animation: dm-spot-glow 1s ease-in-out infinite; background-color: rgba(47, 107, 242, 0.55) !important; }
+/* the same glow without the fill, for larger targets (an empty slot, a banner) */
+.dm-spot-ring { animation: dm-spot-glow 1s ease-in-out infinite; }
+/* the tooltip that rides with it is the house .dm-tip (globals.css); this adds its caret */
+.dm-spot-tip::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  background: #2f6bf2;
+  box-shadow: -1px -1px 0 0 rgba(158, 198, 250, 0.7);
+}
+.dm-spot-tip[data-side="left"]::before { left: 18px; }
+.dm-spot-tip[data-side="right"]::before { right: 13px; }
+/* a tip that sits above its target points down */
+.dm-spot-tip[data-above]::before { top: auto; bottom: -5px; box-shadow: 1px 1px 0 0 rgba(158, 198, 250, 0.7); }
+@media (prefers-reduced-motion: reduce) { .dm-spot-ring { animation: none; box-shadow: 0 0 0 2px #9ec6fa, 0 0 14px 3px rgba(89, 157, 249, 0.75); }
+  .dm-spot { animation: none; box-shadow: 0 0 0 2px #9ec6fa, 0 0 14px 3px rgba(89, 157, 249, 0.75); } }

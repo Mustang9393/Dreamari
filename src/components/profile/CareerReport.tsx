@@ -640,7 +640,7 @@ export function CareerReportView(props: ReportViewProps) {
                 <button type="button" aria-haspopup="menu" aria-expanded={moreOpen} aria-label="More report actions" onClick={() => setMoreOpen((o) => !o)} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border text-[16px] leading-none tracking-[0.1em]" style={chipStyle}>
                   •••
                 </button>
-                <span role="tooltip" className="pointer-events-none absolute -top-[32px] left-1/2 z-10 -translate-x-1/2 rounded-[6px] border px-[8px] py-[4px] text-[11px] leading-[14px] font-bold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100" style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                <span role="tooltip" className="dm-tip pointer-events-none absolute -top-[32px] left-1/2 z-10 -translate-x-1/2 rounded-[6px] border px-[8px] py-[4px] text-[11px] leading-[14px] font-bold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                   More
                 </span>
                 {moreOpen && (

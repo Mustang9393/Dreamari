@@ -20,11 +20,11 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { Coachmark, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BuildModal, type BuildSection } from "./PreferencesTab";
-import { AboutMeTab } from "./AboutMeTab";
+import { AboutMeTab, CollegeGoalView, useCollegeGoal } from "./AboutMeTab";
 import { BookCounselorSheet, useMyNextMeeting } from "./BookCounselorSheet";
 import { BOOK_MEETING_ID, careerWindows, SAVE_PROGRAM_ID, SAVE_SCHOOLS_ID, SHARE_REPORT_ID, type CareerStep } from "./careerPlanSteps";
 import { reportHistorySnapshot, serverReportHistorySnapshot, subscribeReportHistory } from "@/lib/reportHistory";
@@ -55,7 +55,7 @@ import { TextTabs } from "@/components/app/TextTabs";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
-import { collegeBySlug, collegeImage } from "@/components/colleges/data";
+import { collegeImage } from "@/components/colleges/data";
 import { useResolvedColleges } from "@/components/colleges/dataset";
 import { SaveButton, tags as collegeTags, useSaved as useSavedColleges } from "@/components/colleges/shared";
 import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
@@ -67,6 +67,7 @@ import { playArrival } from "@/lib/showTheWay";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import { useBackStep } from "@/lib/backStep";
 import { setTop3FlowV2, useTop3FlowV2 } from "@/lib/top3Flow";
+import { togglePlanDone, usePlanDone } from "@/lib/planDone";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -372,6 +373,47 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // About Me (19 Oct 2026): My Build lives on the landing tab now, in view
   // without a pointer.
   const [buildDot, setBuildDot] = useState(false);
+  const flowV2 = useTop3FlowV2();
+  // v2: My Build's tip under its cover button (the pre-About Me tag, back)
+  const [prefsTag, setPrefsTag] = useState(false);
+  const buildBtnRef = useRef<HTMLButtonElement>(null);
+  const [tagPos, setTagPos] = useState<{ top: number; right: number } | null>(null);
+  useEffect(() => {
+    if (!prefsTag) return;
+    // Re-measured every 200ms while the tag is live (it lives 9s), so it
+    // follows the header through the arrival animation and any resize; a
+    // single measurement at show time sometimes landed before layout settled.
+    // The tag only paints while the icon itself is on screen and clear of
+    // the nav bar (Chandu, 2 Oct 2026: "otherwise it's pointing at the
+    // profile avatar on the navbar"). When the page has scrolled, as it does
+    // landing on Saved from a nudge, the tag waits and appears the moment
+    // the header is back in view; its nine seconds count only while shown.
+    // The dot on the icon covers the wait.
+    let shownAt = 0;
+    const place = () => {
+      const r = buildBtnRef.current?.getBoundingClientRect();
+      if (!r || r.width === 0) return;
+      const clearOfNav = r.top >= 80 && r.bottom <= window.innerHeight - 40;
+      if (!clearOfNav) { setTagPos(null); return; }
+      if (!shownAt) shownAt = Date.now();
+      if (Date.now() - shownAt > 9000) { setPrefsTag(false); return; }
+      const next = { top: Math.round(r.bottom + window.scrollY + 10), right: Math.max(12, Math.round(document.documentElement.clientWidth - r.right)) };
+      setTagPos((cur) => (cur && cur.top === next.top && cur.right === next.right ? cur : next));
+    };
+    const id = window.setInterval(place, 200);
+    const raf = window.requestAnimationFrame(place);
+    return () => { window.clearInterval(id); window.cancelAnimationFrame(raf); setTagPos(null); };
+  }, [prefsTag]);
+  // v2: the tip is due on every visit until My Build is opened once (demo:
+  // per session). It is set 1.6s after the page settles but only paints
+  // while the button is on screen, so a student scrolled down to the cards
+  // from Match sees it the moment they scroll back up (the place loop).
+  useEffect(() => {
+    if (!flowV2 || welcomeOpen || welcomePending) return;
+    try { if (buildOpened()) return; } catch { return; }
+    const show = window.setTimeout(() => setPrefsTag(true), 1600);
+    return () => window.clearTimeout(show);
+  }, [flowV2, welcomeOpen, welcomePending]);
   useEffect(() => {
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only flag read after mount
@@ -381,12 +423,22 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // My Build is a modal over the page (6 Oct 2026): sections down the left,
   // the editor on the right, one Save for all of it.
   const [buildOpen, setBuildOpen] = useState(false);
-  const flowV2 = useTop3FlowV2();
+  // v2 has no About Me: an About Me landing (the default, old links) goes to
+  // Top 3; a ?goal= link (a "Saved" or "View saved") goes to that Saved shelf.
+  const goalParam = useSearchParams()?.get("goal");
+  useEffect(() => {
+    if (!flowV2 || tab !== "about") return;
+    if (goalParam === "college" || goalParam === "career") {
+      try { const url = new URL(window.location.href); url.searchParams.set("tab", "locker"); url.searchParams.set("shelf", goalParam === "college" ? "schools" : "careers"); url.searchParams.delete("goal"); window.history.replaceState(window.history.state, "", url.toString()); } catch { /* fine */ }
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the v2 flag is client-only, read after mount
+      setTab("locker");
+    } else setTab("top3");
+  }, [flowV2, tab, goalParam]);
   // v2: My Plan's "Book a meeting with your counselor" step
   const [bookingOpen, setBookingOpen] = useState(false);
-  const meetingBooked = useMyNextMeeting() !== null;
   const [buildSection, setBuildSection] = useState<BuildSection | undefined>(undefined);
   const openBuild = (section?: BuildSection) => {
+    setPrefsTag(false);
     setBuildDot(false);
     markBuildOpened();
     setBuildSection(section);
@@ -853,7 +905,71 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                  "I'm not sure we still need the separate My Build area at the
                  top... if About Me becomes the Profile landing page"). One home
                  for it, on the tab the Profile opens on; the gear menu keeps a
-                 shortcut. */}
+                 shortcut. v2 has no About Me, so there it is back on the
+                 cover with its tooltip nudge (Chandu, 19 Oct 2026: "my build
+                 can still be where it used to be in the cover image with its
+                 tooltip nudge appearing once the page is scrolled back up"). */}
+              {flowV2 && (
+              <>
+              {/* Preferences takes the header spot Saved had (direct
+                 instruction, 30 Sept 2026), since Saved is a tab. */}
+              <span className="relative">
+              <button
+                ref={buildBtnRef}
+                type="button"
+                aria-label="My Build"
+                onClick={() => openBuild()}
+                className={`dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold ${prefsTag ? "dm-tab-nudge" : ""}`}
+                style={{ background: tab === "preferences" || prefsTag ? "var(--glass-surface-3)" : "transparent", color: tab === "preferences" || prefsTag ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
+              >
+                <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" />{" "}
+                {/* The text sweep with its spark (the Cover button's old nudge)
+                   until My Build has been opened once; the coachmark rides
+                   alongside on the first views. A muted base so the glint
+                   shows (same reason Cover's label had one). */}
+                <span className={`relative hidden sm:inline ${buildDot ? "dm-text-nudge" : ""}`} style={buildDot ? { color: "rgba(255,255,255,0.55)" } : undefined}>
+                  My Build
+                  {buildDot && (
+                    <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
+                      <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+                    </svg>
+                  )}
+                </span>
+              </button>
+              {/* The teaching moment (Chandu, 1 Oct 2026: "a teaching moment
+                 for preferences, timed, maybe on the second visit"). Second
+                 visit only: the first visit belongs to the profile tour and
+                 the welcome. 1.6s after the page settles, the icon pulses and
+                 one line slides out under it. Tapping the line opens
+                 Preferences; otherwise it leaves after 9s. Once, ever. */}
+              {/* Rendered through a portal: inside the cover card the tag was
+                 clipped by the card's rounded overflow on desktop (2 Oct 2026;
+                 Chandu: "I don't see the My Build nudge"). Positioned in page
+                 coordinates under the button, so it scrolls with the header. */}
+              {prefsTag && tagPos && (
+                <Portal>
+                  <div className="marketing-v2 themeable" style={{ background: "transparent" }}>
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                      onClick={() => openBuild()}
+                      className="dm-tip dm-tap absolute z-[80] flex w-max max-w-[280px] cursor-pointer items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-left text-[14px] leading-[18px] font-bold"
+                      style={{ top: tagPos.top, right: tagPos.right, textShadow: "none", fontFamily: "var(--font-body)" }}
+                    >
+                      {/* the caret in the bubble's own blue (the house .dm-tip, 19 Oct 2026) */}
+                      <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "#4a8df6", boxShadow: "-1px -1px 0 0 rgba(158,198,250,0.7)" }} />
+                      <Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden />
+                      {/* 2 Oct 2026, Chandu: better copy that says they can change
+                         their preferences and Dreamari changes with them. */}
+                      Into something new? Change it here and your matches follow.
+                    </motion.button>
+                  </div>
+                </Portal>
+              )}
+              </span>
+              </>
+              )}
               {/* The gear menu, split into the things a student actually
                  comes here for (direct feedback, 10 Sept 2026): each item
                  opens Settings scrolled to that section. */}
@@ -1049,7 +1165,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = ["about", "top3", "locker", "plan", "report", "resume"];
+            const order: TabId[] = flowV2 ? ["top3", "locker", "plan", "report", "resume"] : ["about", "top3", "locker", "plan", "report", "resume"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -1074,7 +1190,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             // long?"); this is five.
             [
               // About Me leads (19 Oct 2026, Joshua's About Me spec): six tabs.
-              { id: "about", label: "About Me" },
+              // v2 hides it (audit, 19 Oct 2026): its Career Goal is the Top 3
+              // #1, My Build is on the action bar and in Settings, and College
+              // Goal moved into Saved > Schools.
+              ...(flowV2 ? [] : [{ id: "about" as TabId, label: "About Me" }]),
               { id: "top3", label: "Top 3" },
               { id: "locker", label: "Saved", badge: savedTotal || undefined },
               { id: "plan", label: "My Plan" },
@@ -1513,83 +1632,21 @@ function useRankHint(): { show: boolean | null; retired: boolean; retire: () => 
   return { show, retired, retire };
 }
 
-// The Top Three banner's one sentence, in two moods (direct idea, 28 Sept
-// 2026: the "change these anytime" nudge lives in the Explore banner, then
-// "the other copy should fade away and this copy should come take its place
-// from where it sat in the sentence"). The two sentences share their key
-// word: the nudge ends on "Explore", the resting line starts with it, and it
-// is the banner's own button label. So the nudge words blur away, "Explore"
-// glides from the end of the line to the start (a layout animation on the
-// same element), and the resting words arrive after it one by one.
-const NUDGE_WORDS = ["Change", "these", "anytime:", "move", "#arrows", "remove", "#x", "or", "add", "more", "from"];
-const REST_WORDS = ["hundreds", "of", "careers", "and", "save", "the", "ones", "that", "interest", "you."];
-// The sweep glints white over currentColor, so the nudge words sit a step
-// below full white for the glint to show (same reason as Cover's label).
-const NUDGE_INK = "color-mix(in srgb, var(--foreground) 76%, transparent)";
-function RankBannerCopy({ nudging, retired }: { nudging: boolean; retired: boolean }) {
-  const reduce = useReducedMotion();
-  // "leaving": the nudge words fade in place first, then the swap.
-  const [swapped, setSwapped] = useState(false);
-  useEffect(() => {
-    if (nudging || !retired) return;
-    const timer = window.setTimeout(() => setSwapped(true), reduce ? 0 : 420);
-    return () => window.clearTimeout(timer);
-  }, [nudging, retired, reduce]);
-  const phase: "nudge" | "leaving" | "rest" = nudging ? "nudge" : retired && !swapped ? "leaving" : "rest";
-  const explore = (
-    <motion.span key="explore" layout="position" transition={{ layout: { duration: reduce ? 0 : 0.65, ease: [0.16, 1, 0.3, 1] } }} className="font-bold" style={{ color: "var(--accent-subtle)" }}>
-      Explore{phase === "rest" ? "" : "."}
-    </motion.span>
-  );
+/** The words a lit card control already carries in its tooltip, shown once
+ *  under it while v2's first-visit highlight points at it. */
+function SpotTip({ side, top = 48, children }: { side: "left" | "right"; /** px below the anchor's top */ top?: number; children: React.ReactNode }) {
   return (
-    <span className="flex flex-wrap items-center gap-x-[0.27em]">
-      {phase === "rest" ? (
-        <>
-          {explore}
-          {REST_WORDS.map((word, index) => (
-            <motion.span
-              key={`r-${index}`}
-              initial={retired && !reduce ? { opacity: 0, y: 4, filter: "blur(3px)" } : false}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.34, delay: 0.38 + index * 0.045 }}
-            >
-              {word}
-            </motion.span>
-          ))}
-        </>
-      ) : (
-        <>
-          {NUDGE_WORDS.map((word, index) => (
-            <motion.span
-              key={`n-${index}`}
-              // no word sweep: the faster beam is the one shimmer while it
-              // nudges (Chandu, 2 Oct 2026: "remove one of the shimmers, a
-              // little too much in the first half")
-              className={undefined}
-              style={{ color: NUDGE_INK }}
-              animate={phase === "leaving" ? { opacity: 0, y: -3, filter: "blur(3px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.3, delay: phase === "leaving" ? index * 0.012 : 0 }}
-            >
-              {word === "#arrows" ? (
-                <><HintGlyph><ChevronUp className="h-3 w-3 lg:hidden" /><ChevronDown className="h-3 w-3 lg:hidden" /><ChevronLeft className="hidden h-3 w-3 lg:block" /><ChevronRight className="hidden h-3 w-3 lg:block" /></HintGlyph>,</>
-              ) : word === "#x" ? (
-                <><HintGlyph><X className="h-3 w-3" /></HintGlyph>,</>
-              ) : word}
-            </motion.span>
-          ))}
-          {explore}
-        </>
-      )}
-    </span>
-  );
-}
-
-/** A control glyph drawn the way the real control looks, for the hint line. */
-function HintGlyph({ children }: { children: React.ReactNode }) {
-  return (
-    <span aria-hidden className="mr-[1px] ml-[3px] inline-flex h-[20px] min-w-[20px] translate-y-[-1px] items-center justify-center gap-[1px] rounded-full border px-[3px] align-middle" style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+    <motion.span
+      role="status"
+      data-side={side}
+      data-above={top < 0 ? "" : undefined}
+      initial={{ opacity: 0, y: -8, scale: 0.85 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 520, damping: 22 }}
+      style={{ top }}
+      className={`dm-tip dm-spot-tip pointer-events-none absolute z-[4] flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap ${side === "left" ? "left-0 origin-top-left" : "right-0 origin-top-right"}`}
+    >
+      <Sparkles className="h-[14px] w-[14px] flex-none" aria-hidden />
       {children}
-    </span>
+    </motion.span>
   );
 }
 
@@ -1619,49 +1676,47 @@ export function Top3Tab({
   /** a popup is over the page: the hint's reading clock waits */
   hintPaused?: boolean;
 }) {
-  const { show: hint, retired: hintRetired, retire: retireHint } = useRankHint();
-  // Not permanent, but read (28 Sept 2026: "I don't want the nudge to be
-  // permanent. How can we solve but make sure it's read?"): the clock only
-  // runs while the banner is fully on screen, nothing covers the page and
-  // the pointer or focus isn't on it (the copy never changes mid-read). A
-  // move or remove ends the nudge at once: they've got it.
+  const { show: hint, retire: retireHint } = useRankHint();
+  // The rank hint is now the card nudges' sequence (below); a move or remove
+  // ends it at once: they've got it.
   const nudging = hint !== false && top3.length > 1;
   const flowV2 = useTop3FlowV2();
-  const [holding, setHolding] = useState(false);
-  const [pulse, setPulse] = useState(false);
-  const pulsed = useRef(false);
-  const clockOn = hint === true && top3.length > 1 && !hintPaused && !holding;
+  // Both versions: teach on the cards themselves (19 Oct 2026, focus group: moving and
+  // removing Top 3 cards "were not clear to some users"; Chandu: "make it
+  // very obvious but not by adding more text", then no permanent bar). The
+  // first time the cards are on screen the arrows light up with their own
+  // tooltip ("Move to #1"), then the X's ("Remove from Top 3"), once. Using
+  // either control stops it.
+  const [spot, setSpot] = useState<"move" | "remove" | "add" | null>(null);
+  const played = useRef(false);
+  const stopPlay = useRef(false);
+  // both versions (19 Oct 2026, Chandu: "lets have our new top 3 card nudges in v1 as well")
+  const playOn = hint === true && top3.length > 1 && !hintPaused;
+  // Once it starts it plays to the end (19 Oct 2026, Chandu: it stopped
+  // after "Move to #1"): v1's banner clock retires the hint at 2.5s, which
+  // used to cancel the remaining beats. The timers now live past that and
+  // are cleared only on unmount.
+  const playTimers = useRef<number[]>([]);
+  useEffect(() => () => playTimers.current.forEach((t) => window.clearTimeout(t)), []);
   useEffect(() => {
-    const el = document.getElementById("top3-rank-row");
-    if (!clockOn || !el) return;
-    // 2.5s of the banner on screen (Chandu, 2 Oct 2026: 3s "was too long",
-    // 1.5s "is short"; ~11 words at a normal reading pace). The clock pauses
-    // when it leaves view and resumes, rather than restarting, and counts
-    // while most of the banner is visible: restarting at full visibility
-    // meant a small scroll reset it, so people never saw the swap to the
-    // Explore line ("people will scroll a bit if it isn't fast enough").
-    const HOLD = 2500;
-    let timer: number | null = null;
-    let shownAt = 0;
-    let spent = 0;
-    const pause = () => {
-      if (timer === null) return;
-      window.clearTimeout(timer);
-      timer = null;
-      spent += performance.now() - shownAt;
-    };
+    const el = document.querySelector<HTMLElement>('[id^="top3-card-"]');
+    if (!playOn || !el || played.current) return;
+    const timers = playTimers.current;
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && document.visibilityState === "visible") {
-        // one pulse, the first time the student can actually see it
-        if (!pulsed.current) { pulsed.current = true; setPulse(true); window.setTimeout(() => setPulse(false), 2600); }
-        if (timer === null) { shownAt = performance.now(); timer = window.setTimeout(retireHint, Math.max(0, HOLD - spent)); }
-      } else pause();
+      if (!entry.isIntersecting || played.current || document.visibilityState !== "visible") return;
+      played.current = true;
+      observer.disconnect();
+      const at = (ms: number, fn: () => void) => timers.push(window.setTimeout(() => { if (!stopPlay.current) fn(); }, ms));
+      at(500, () => setSpot("move"));
+      at(3000, () => setSpot("remove"));
+      at(5500, () => setSpot("add"));
+      at(8000, () => { setSpot(null); retireHint(); });
     }, { threshold: 0.6, rootMargin: "-88px 0px -80px 0px" });
     observer.observe(el);
-    return () => { observer.disconnect(); if (timer !== null) window.clearTimeout(timer); };
-    // retireHint is stable in behaviour; re-running on its identity would restart the clock every render
+    return () => observer.disconnect();
+    // retireHint is stable in behaviour; re-running on its identity would replay
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clockOn]);
+  }, [playOn]);
   const [moved, setMoved] = useState<string | null>(null);
   // Two ways to read the cards (6 Oct 2026, after the production profile's
   // Simple / Detailed): Simple is the poster, the name, one line and a
@@ -1708,6 +1763,7 @@ export function Top3Tab({
     [next[from], next[to]] = [next[to], next[from]];
     onReorder(next);
     retireHint();
+    stopPlay.current = true;
     if (showTour) onTourDone();
     setMoved(id);
     window.setTimeout(() => setMoved((current) => (current === id ? null : current)), 900);
@@ -1719,6 +1775,7 @@ export function Top3Tab({
   };
   const remove = (id: string) => {
     retireHint();
+    stopPlay.current = true;
     if (showTour) onTourDone();
     onRemove(id);
   };
@@ -1762,7 +1819,7 @@ export function Top3Tab({
   // Always three columns and three slots (Chandu, 1 Oct 2026: "make sure it
   // shows 3 slots, even when there's only one selected"): the empty ones are
   // the promise of the feature, not dead space.
-  const showHint = nudging;
+  const showHint = nudging && !flowV2;
 
   // One Top 3 card, used by the desktop row and by the phone/tablet deck.
   const buildCard = (id: string, index: number) => {
@@ -1840,7 +1897,8 @@ export function Top3Tab({
                  the star: the career the Report and Plan follow. */}
               <div className="absolute top-[8px] left-[8px] z-[3]">
                 <Coachmark
-                  active={showTour && id === tourCareerId}
+                  // v2: the action bar's play-once highlight teaches this (audit)
+                  active={showTour && !flowV2 && id === tourCareerId}
                   anchorId={id === tourCareerId ? "profile-tour-top3" : undefined}
                   label={top3.length === 1 ? "Your #1 career. Add up to 3, and remove one anytime with the X." : "Use the arrows to change your order. Your #1 leads your Report and Plan."}
                   onDismiss={onTourDone}
@@ -1849,7 +1907,7 @@ export function Top3Tab({
                   align="start"
                 >
                   <div
-                    className="flex h-[36px] items-center rounded-full border"
+                    className={`flex h-[36px] items-center rounded-full border ${spot === "move" && top3.length > 1 ? "dm-spot" : ""}`}
                     style={{ background: "rgba(5,8,20,0.62)", borderColor: isFocus ? `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))` : "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
                   >
                     {top3.length > 1 && (
@@ -1893,6 +1951,8 @@ export function Top3Tab({
                     )}
                   </div>
                 </Coachmark>
+                {/* side by side: the #2 card says it; stacked (only the top card shows): #1 does */}
+                {spot === "move" && index === (wide ? 1 : 0) && <SpotTip side="left">{index === 0 ? "Move to #2" : "Move to #1"}</SpotTip>}
               </div>
               {/* Remove, in plain sight on the photo's other corner (testers
                  missed it inside the old ... menu). No confirm: it goes back
@@ -1903,12 +1963,13 @@ export function Top3Tab({
                     type="button"
                     aria-label={`Remove ${career.title} from Top 3`}
                     onClick={() => remove(id)}
-                    className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full border"
+                    className={`dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full border ${spot === "remove" ? "dm-spot" : ""}`}
                     style={{ background: "rgba(5,8,20,0.62)", borderColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: "#fff" }}
                   >
                     <X className="h-4 w-4" aria-hidden />
                   </button>
                 </IconTip>
+                {spot === "remove" && index === (wide ? 1 : 0) && <SpotTip side="right">Remove from Top 3</SpotTip>}
               </div>
 
               {view === "simple" && (
@@ -1924,7 +1985,8 @@ export function Top3Tab({
                 <>
                   <span aria-hidden className="t3s-shade" style={{ ["--t3s-world" as string]: accent }} />
                   <div className="t3s-text pointer-events-none" style={{ ["--t3s-world" as string]: accent }}>
-                    {isFocus && <span className="t3s-primary"><Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My primary" : "Strongest match"}</span>}
+                    {/* v2: the rank pill's star already marks #1 (audit, 19 Oct 2026) */}
+                    {isFocus && !flowV2 && <span className="t3s-primary"><Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My primary" : "Strongest match"}</span>}
                     <span className="t3s-world">{career.world}</span>
                     <button type="button" onClick={() => openPeek(index)} className="t3s-title pointer-events-auto" style={{ ...posterTitleFont(career.world), textShadow: "0 2px 18px rgba(0,0,0,0.5)" }}>{career.title}</button>
                     <p className="t3s-line">{report?.glance.simple ?? careerProfile(id)?.summary ?? ""}</p>
@@ -1943,7 +2005,8 @@ export function Top3Tab({
                       <button type="button" onClick={() => openPeek(index)} className="t3s-toggle" aria-label={`Learn more about ${career.title}`}>
                         Learn more <ChevronRight className="h-4 w-4" aria-hidden />
                       </button>
-                      <button type="button" onClick={() => onPlan?.(id)} aria-label={`Plan for ${career.title}`} className="t3s-play dm-solid">Plan this</button>
+                      {/* #1 is already the plan's career: its button opens the plan (audit) */}
+                      <button type="button" onClick={() => onPlan?.(id)} aria-label={index === 0 ? `My Plan for ${career.title}` : `Plan for ${career.title}`} className="t3s-play dm-solid">{index === 0 ? "My Plan" : "Plan this"}</button>
                     </div>
                     ) : (
                     <div className="t3s-actions pointer-events-auto">
@@ -2068,37 +2131,38 @@ export function Top3Tab({
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* One banner, two moods. While nudging: the "change these anytime"
-         sentence, a faster brighter beam, the wash and a pulsing Explore
-         button, and one soft pulse ring when it first comes into view.
-         Once read: the sentence morphs into the resting Explore line and
-         the banner settles to the calm, slow beam it always had (same
-         treatment as "Do this next", direct feedback 11 Sept 2026). */}
-      <div onPointerEnter={() => setHolding(true)} onPointerLeave={() => setHolding(false)} onFocus={() => setHolding(true)} onBlur={() => setHolding(false)}>
+      {/* v1's Explore banner, about exploring only (19 Oct 2026, Chandu:
+         "the explore banner can now just be about exploring and it can show
+         up after the first sequence of nudges. Since we are already doing
+         the new blue tooltips for reorganizing and removing we can skip
+         that part on the banner"). On a first visit it slides in as the
+         nudges' last beat ("Add more from Explore", glowing), then stays;
+         once the nudges have been seen it is simply there. v2 has none. */}
+      <AnimatePresence initial={false}>
+      {!flowV2 && (hint === false || top3.length <= 1 || spot === "add") && (
+      <motion.div
+        key="explore-banner"
+        initial={{ opacity: 0, y: -8, height: 0 }} animate={{ opacity: 1, y: 0, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className={`relative ${spot === "add" ? "dm-spot-ring rounded-[var(--radius-lg)]" : ""}`}
+      >
         <NextStepBanner
-          text={nudging ? "Change these anytime: move, remove, or add more from Explore." : flowV2 ? "Tap Plan this on the career you want to work toward." : "Explore hundreds of careers and save the ones that interest you."}
-          // v2: once the move/remove hint is read, the banner points forward to the plan
-          content={flowV2 && !nudging ? undefined : <RankBannerCopy nudging={nudging} retired={hintRetired} />}
-          ctaLabel={flowV2 ? "My Plan" : "Explore"}
-          href={flowV2 ? "/profile?tab=plan" : "/explore"}
+          text="Explore hundreds of careers and save the ones that interest you."
+          ctaLabel="Explore"
+          href="/explore"
           Icon={Compass}
           emphasis="priority"
-          calm={!nudging}
+          calm
           // slower ring at rest (direct feedback, 11 Sept 2026: "reduce speed and shimmer")
-          beamDuration={nudging ? 2.4 : 5}
-          // The button waits for the resting line (direct idea, 28 Sept
-          // 2026: "maybe the explore cta only appears after the first
-          // transition"): the nudge is about the cards, so nothing competes
-          // with it; the button arrives once "Explore" has led the new line.
-          ctaHidden={nudging}
-          sizeTo="Explore hundreds of careers and save the ones that interest you."
-          ctaDelayMs={hintRetired ? 1100 : 0}
+          beamDuration={5}
           wrapperId="top3-rank-row"
-          wrapperClassName={pulse ? "dm-banner-pulse" : ""}
           // demo: comes back every visit; remembered once the demo flag is off
           storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
         />
-      </div>
+        {spot === "add" && top3.length >= 3 && <SpotTip side="right" top={-48}>Add more from Explore</SpotTip>}
+      </motion.div>
+      )}
+      </AnimatePresence>
 
       {/* Side by side from md: up (stacked on phones only, where three columns
          would be unreadable), info running vertically inside each column --
@@ -2137,7 +2201,7 @@ export function Top3Tab({
         </div>
         {undoSlot && <div className="mt-[var(--space-3)]">{undoSlot}</div>}
         {top3.length < 3 && (
-          <button type="button" onClick={onAdd} className="dm-tap dm-glass mt-[var(--space-3)] flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border text-[15px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          <button type="button" onClick={onAdd} className={`${spot === "add" ? "dm-spot-ring" : ""} dm-tap dm-glass mt-[var(--space-3)] flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border text-[15px] font-bold`} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
             <Plus className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} aria-hidden /> Add a career
           </button>
         )}
@@ -2164,7 +2228,7 @@ export function Top3Tab({
           exit={{ opacity: 0, transition: { duration: 0.15 } }}
           type="button"
           onClick={onAdd}
-          className="dm-tap dm-glass flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed backdrop-blur-[20px] backdrop-saturate-[1.5]"
+          className={`${spot === "add" && i === 0 ? "dm-spot-ring" : ""} dm-tap dm-glass flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed backdrop-blur-[20px] backdrop-saturate-[1.5]`}
           style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
         >
           <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
@@ -2189,7 +2253,16 @@ export function Top3Tab({
             <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
           </button>
         ) : <span />}
-        <span />
+        {/* v2: with all three slots full, the quiet way to more careers
+           (the empty slot does this when there is room) */}
+        {flowV2 && top3.length >= 3 ? (
+          <span className="relative flex justify-end">
+            {spot === "add" && <SpotTip side="right" top={-48}>Add more from Explore</SpotTip>}
+            <Link href="/explore" className={`${spot === "add" ? "dm-spot-ring" : ""} dm-link flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[8px] text-[13.5px] font-semibold`} style={{ color: "var(--muted-foreground)" }}>
+              <Plus className="h-3.5 w-3.5" aria-hidden /> Explore more
+            </Link>
+          </span>
+        ) : <span />}
       </div>
 
       <AnimatePresence>
@@ -3034,6 +3107,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
   const savedOpportunityCount = useSavedOpportunityCount();
   const reportVersions = useSyncExternalStore(subscribeReportHistory, reportHistorySnapshot, serverReportHistorySnapshot);
   const meetingBooked = useMyNextMeeting() !== null;
+  const planDoneList = usePlanDone();
   const defaultGrade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
   // High School | College (Joshua Pierce, Slack, 18 Sept 2026: "expand it
   // so students can continue using it through college"). Same Fall /
@@ -3077,13 +3151,14 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
   const started = (w: GradeWindow) => SEASON_ORDER.indexOf(w.id) <= seasonNow;
   const plan = { ...basePlan, windows: basePlan.windows.map((w) => ({ ...w, steps: [{ id: startId(w), label: "START", inApp: true, title: `Start your ${w.title} ${w.id === "winter" ? "term" : "semester"}` } as GradeStep, ...w.steps] })) };
   const autoDone = new Set(plan.windows.filter(started).map(startId));
+  const planDoneIds = new Set(planDoneList.map((d) => d.id));
   if (flowV2) {
     if (reportVersions.length > 0) autoDone.add(SHARE_REPORT_ID);
     if (meetingBooked) autoDone.add(BOOK_MEETING_ID);
     if (savedSchoolsSet.size >= 3) { autoDone.add(SAVE_SCHOOLS_ID); autoDone.add("g11-fall-explore"); }
     if (savedOpportunityCount > 0) autoDone.add(SAVE_PROGRAM_ID);
   }
-  const isDone = (id: string) => done.has(id) || autoDone.has(id);
+  const isDone = (id: string) => (flowV2 ? planDoneIds.has(id) : done.has(id)) || autoDone.has(id);
   const allSteps = plan.windows.flatMap((w) => w.steps).filter((s) => !s.optional);
   const doneCount = allSteps.filter((s) => isDone(s.id)).length;
   const pct = Math.round((doneCount / Math.max(allSteps.length, 1)) * 100);
@@ -3099,13 +3174,20 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per plan shown
   }, [planKey]);
 
-  const toggle = (id: string) =>
+  // v2 keeps the ticks (lib/planDone) so the Career Report can log them
+  const toggle = (id: string) => {
+    if (flowV2) {
+      const step = plan.windows.flatMap((w) => w.steps).find((x) => x.id === id);
+      if (step) togglePlanDone({ id, title: step.title }, focus?.id ?? null);
+      return;
+    }
     setDone((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
+  };
 
   const chip = (on: boolean, onClick: () => void, label: string, key: string, group: string) => (
     <button key={key} type="button" role="tab" aria-selected={on} onClick={onClick} className="dm-quiet relative flex h-[24px] min-w-[24px] cursor-pointer items-center justify-center rounded-[6px] px-[8px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
@@ -3687,6 +3769,11 @@ export function CompareTable({ routes, selectedId }: { routes: ProfileCareer["ro
 
 // ---- Locker tab: rich poster grid ----
 
+function CollegeGoalSchools() {
+  const goal = useCollegeGoal();
+  return <CollegeGoalView goal={goal} embedded />;
+}
+
 export function SchoolsShelf() {
   const router = useRouter();
   const [saved, toggleSaved] = useSavedColleges();
@@ -3823,6 +3910,7 @@ export function VideosShelf() {
 
 export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = false }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void; /** inside a tab (v2) or under Top 3 (v3): no close button */ embedded?: boolean }) {
   const router = useRouter();
+  const flowV2 = useTop3FlowV2();
   // The locker holds everything a student saves across Dreamari, grouped
   // into the four categories students actually save (direct feedback, 16
   // Sept 2026, Slack): careers, schools, videos (Explore's "Videos Inside
@@ -3891,7 +3979,9 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
       {shelf === "events" ? (
         <EventStubs />
       ) : shelf === "schools" ? (
-        <SchoolsShelf />
+        // v2: the shelf IS College Goal (Reach / Target / Likely, the #1
+        // star), so About Me can go (audit, 19 Oct 2026)
+        flowV2 ? <CollegeGoalSchools /> : <SchoolsShelf />
       ) : shelf === "opportunities" ? (
         <OpportunitiesShelf />
       ) : shelf === "videos" ? (

@@ -417,6 +417,10 @@ export function Coachmark({
           />
         </>
       )}
+      {/* the glow wrapper: a viewport-sized fixed box (so the fixed bubble's
+         coordinates are unchanged) whose drop-shadow follows the clipped
+         bubble's shape, caret and all */}
+      <div aria-hidden={false} className="pointer-events-none fixed inset-0 z-[9999]" style={{ filter: "drop-shadow(0 0 1px rgba(158,198,250,0.8)) drop-shadow(0 0 16px rgba(89,157,249,0.5))" }}>
       <div
         ref={bubbleRef}
         data-coachmark-bubble
@@ -426,8 +430,11 @@ export function Coachmark({
           left,
           top,
           visibility: targetInViewport && size && targetRect ? "visible" : "hidden",
-          background: "linear-gradient(155deg, color-mix(in srgb, #2F6BF2 24%, rgba(24,24,36,0.97)) 0%, rgba(26,26,38,0.96) 55%, color-mix(in srgb, #7C5CFA 20%, rgba(24,24,36,0.97)) 100%)",
-          boxShadow: "0 22px 50px -24px rgba(0,0,0,0.8), inset 0 1px 0 0 rgba(255,255,255,0.14)",
+          // the house tooltip's blue (.dm-tip, 19 Oct 2026); its glow is on
+          // the wrapper, since this clip-path would cut a box-shadow or filter
+          background: "linear-gradient(135deg, #2f6bf2 0%, #4a8df6 55%, #599df9 100%)",
+          boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.22)",
+          pointerEvents: "auto",
           clipPath: size ? `path('${outlineD}')` : undefined,
           paddingTop: (placementSide === "bottom" ? ARROW_H : 0) + 14,
           paddingBottom: (placementSide === "top" ? ARROW_H : 0) + 14,
@@ -443,6 +450,7 @@ export function Coachmark({
             {cta}
           </span>
         </button>
+      </div>
       </div>
     </>,
     document.body,

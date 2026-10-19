@@ -31,6 +31,9 @@ import type { Simulation } from "./types";
 // (Career Simulations, matching "simulations stay dominant by default").
 const PLAY_ROW_IDS = ["simulations", "glossary", "soon"];
 
+// DEMO-ONLY: UX stays in hamburger Quick Links for discussion before a hub release.
+const HUB_SIMULATIONS = SIMULATIONS.filter((game) => game.id !== "ui-ux-designer");
+
 // TV UX (direct feedback, 21 Sept 2026: "he wants all rows like this" --
 // the row-focus treatment Glossary Games got on hover, but the actual
 // trigger Josh meant is scroll: whichever row you've scrolled to becomes
@@ -111,15 +114,15 @@ export function PlayHub() {
   // the student's own picks alone.
   const { mine, rest } = useMemo(() => {
     const chosen = picks.ids;
-    const picked = chosen.map((id) => SIMULATIONS.find((game) => game.careerId === id)).filter(Boolean) as Simulation[];
-    const flagship = SIMULATIONS.find((game) => game.id === DEMO_LEAD_SIMULATION);
+    const picked = chosen.map((id) => HUB_SIMULATIONS.find((game) => game.careerId === id)).filter(Boolean) as Simulation[];
+    const flagship = HUB_SIMULATIONS.find((game) => game.id === DEMO_LEAD_SIMULATION);
     const mine = flagship ? [flagship, ...picked.filter((game) => game !== flagship)] : picked;
-    const rest = SIMULATIONS.filter((game) => !mine.includes(game));
+    const rest = HUB_SIMULATIONS.filter((game) => !mine.includes(game));
     return { mine, rest };
   }, [picks.ids]);
 
   const soon = useMemo(() => {
-    const live = new Set(SIMULATIONS.map((game) => game.careerId));
+    const live = new Set(HUB_SIMULATIONS.map((game) => game.careerId));
     const chosen = new Set(picks.ids);
     return [...SOON.filter((game) => chosen.has(game.careerId)), ...SOON.filter((game) => !chosen.has(game.careerId))].filter(
       (game) => !live.has(game.careerId) && !FEATURED_ROW_SOON_IDS.includes(game.careerId),
