@@ -15,7 +15,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, ChevronRight, GraduationCap, Briefcase, Plus, Star, Compass } from "lucide-react";
+import { ArrowLeft, ChevronRight, GraduationCap, Briefcase, Pencil, Plus, Star, Compass } from "lucide-react";
+import { Segmented } from "@/components/connect/viz";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FacePhoto } from "@/components/app/FacePhoto";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -31,7 +32,13 @@ import { fitFor, parseGpa } from "@/components/colleges/pathway";
 import { useBackStep } from "@/lib/backStep";
 import { useBuildAnswers } from "@/lib/buildAnswers";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
-import { BUILD_SECTIONS, summaryOf, type BuildSection } from "./PreferencesTab";
+import { prefSummary, summaryOf, type BuildSection } from "./PreferencesTab";
+import { preferencesSnapshot, serverPreferencesSnapshot, subscribePreferences, writePreferences } from "@/lib/preferences";
+import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
+import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
+import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
+import { STAGE_ACCENTS, STAGE_ACCENTS_V2 } from "@/components/build/types";
+import { useLookV2 } from "@/components/app/look";
 import { ACADEMIC_RECORD } from "./report-data";
 import type { ProfileCareer } from "./data";
 
@@ -53,13 +60,30 @@ function defaultBucket(c: College, gpa: number | null): GoalBucket {
   return "target";
 }
 
-// The rows My Build shows here. Profile basics live in the header (grade,
-// GPA) and saved careers live in Career Goal, so neither repeats here.
-const BUILD_ROWS: BuildSection[] = ["interests", "subjects", "workVibe", "education", "cost", "location"];
+// My Build as one light, three-column summary (19 Oct 2026, Chandu: "redesign
+// the my build in the about me tab to look more like the actual build flow...
+// the black+blue treatment", then "lets not do dreamy for everything", "I like
+// the approach of the colors and 3 columns but its currently very heavy" and
+// "it doesnt leave room to add software skills etc like the preferences section
+// in the replit does", "we do not need to keep world colors"). The answers
+// grouped by the question they answer, in small, quiet type so a
+// column holds up to five answers. Everything is edited in Edit My Build, which
+// now carries the old Preferences tab's fields too, so there is one place.
+// Data: the Replit's My Build (dceeai.replit.app/my-profile#overview) plus
+// Build's tuition and the Preferences fields. Profile basics live in the
+// header and saved careers in Career Goal, so neither repeats here.
+type BuildLine = { id: BuildSection; label: string };
+const BUILD_GROUPS: { title: string; short: string; lines: BuildLine[] }[] = [
+  // balanced 3 / 3 / 4 (Chandu: "can we arrange the different data better?"):
+  // what you're into, how you'll work, where school takes you
+  { title: "What you like", short: "Likes", lines: [{ id: "interests", label: "Career fields" }, { id: "subjects", label: "Subjects" }, { id: "skills", label: "Skills to build" }] },
+  { title: "How you work", short: "Work", lines: [{ id: "workVibe", label: "Work style" }, { id: "software", label: "Software to learn" }, { id: "jobs", label: "Internships & jobs" }] },
+  { title: "Your path", short: "Path", lines: [{ id: "education", label: "Education" }, { id: "location", label: "Location" }, { id: "school", label: "School" }, { id: "cost", label: "Tuition" }] },
+];
 
 type View = "home" | "career" | "college";
 
-export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, buildNudge }: {
+export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild }: {
   /** Top 3 in rank order; [0] is the primary career */
   top3: ProfileCareer[];
   /** saved careers not in the Top 3, newest first */
@@ -67,8 +91,6 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, bui
   onAddToTop3: (id: string) => void;
   onGoTab: (tab: "top3" | "report") => void;
   onOpenBuild: (section?: BuildSection) => void;
-  /** My Build has never been opened: its Edit button carries the sweep */
-  buildNudge: boolean;
 }) {
   // ?goal=career|college opens straight on that goal: Explore Schools' "See
   // saved" and a career's "View saved" land where the save was filed.
@@ -123,19 +145,10 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, bui
       </section>
 
       <section aria-labelledby="about-build" className="flex flex-col gap-[var(--space-3)]">
-        <div className="flex items-end justify-between gap-[var(--space-3)]">
-          <SectionHead id="about-build" title="My Build" sub="What Dreamari uses to pick your matches." />
-          <button type="button" onClick={() => onOpenBuild()} className="dm-tap flex min-h-[40px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-            <span className={`relative ${buildNudge ? "dm-text-nudge" : ""}`} style={buildNudge ? { color: "rgba(255,255,255,0.7)" } : undefined}>
-              Edit My Build
-              {buildNudge && (
-                <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
-                  <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
-                </svg>
-              )}
-            </span>
-          </button>
-        </div>
+        {/* No Edit My Build button (Chandu, 19 Oct 2026: "Remove the edit my
+           build CTA. It can all be done in the thing right?"): every answer
+           below opens its own section of the editor. */}
+        <SectionHead id="about-build" title="My Build" sub="What Dreamari uses to pick your matches." />
         <BuildSummary onOpen={onOpenBuild} />
       </section>
     </div>
@@ -184,32 +197,76 @@ function GoalCard({ kind, Icon, title, picture, accent, onOpen, openLabel }: {
   );
 }
 
-/** My Build as stacked rows (settings-like lists read as rows, never a grid).
- *  Each row opens the editor on its own section. */
+/** My Build as one light panel in three columns (see BUILD_GROUPS); stacked
+ *  on phones. Each answer opens its own section of the editor. */
 function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
   const answers = useBuildAnswers();
+  const prefs = useSyncExternalStore(subscribePreferences, preferencesSnapshot, serverPreferencesSnapshot);
+  const lookV2 = useLookV2();
+  // phones: one group at a time behind a switch instead of ten stacked rows
+  // (Chandu: "The layout needs to be better on mobile and tablet. Long
+  // scrolling isnt the best way."); from sm (640px, tablets) all three columns
+  const [shown, setShown] = useState(0);
+  // DEMO-ONLY: the demo student (Jordan Rivera) starts with the Replit's
+  // My Build answers for the fields Build itself doesn't ask, written to the
+  // real store once, so the summary and the editor agree. Only while the
+  // student has never saved Preferences. Production: the student's own.
+  useEffect(() => {
+    if (prefs.updatedAt) return;
+    const seed: Partial<typeof prefs> = {};
+    if (!prefs.skillsToBuild.length) seed.skillsToBuild = ["Financial analysis", "Data analysis", "Public speaking"];
+    if (!prefs.softwareLearn.length) seed.softwareLearn = ["Excel", "Bloomberg Terminal"];
+    if (!prefs.schoolTypes.length && !prefs.campus.length) { seed.schoolTypes = ["4-Year College"]; seed.campus = ["City"]; }
+    if (!prefs.jobs.types.length) seed.jobs = { ...prefs.jobs, types: ["Internship", "Summer Job"], modes: ["Hybrid"] };
+    if (Object.keys(seed).length) writePreferences(seed);
+  }, [prefs]);
+  const valueOf = (id: BuildSection): string => {
+    return summaryOf(answers, id, 0) || prefSummary(prefs, id);
+  };
   return (
-    <div className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={INSET}>
-      {BUILD_ROWS.map((id, i) => {
-        const section = BUILD_SECTIONS.find((s) => s.id === id)!;
-        const value = summaryOf(answers, id, 0);
-        return (
-          <button
-            key={id}
-            type="button"
-            onClick={() => onOpen(id)}
-            className="dm-quiet group flex min-h-[52px] w-full cursor-pointer items-center gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-3)] text-left"
-            style={{ borderTop: i ? "1px solid var(--inset-border)" : undefined }}
-          >
-            {/* label over value on phones, side by side from sm up */}
-            <span className="flex min-w-0 flex-1 flex-col gap-[2px] sm:flex-row sm:items-center sm:gap-[var(--space-4)]">
-              <span className="flex-none text-[13px] leading-[17px] font-bold sm:w-[148px]" style={{ color: "var(--muted-foreground)" }}>{section.title}</span>
-              <span className="min-w-0 flex-1 text-[15px] leading-[20px] font-semibold" style={{ color: value ? "var(--foreground)" : "var(--accent-subtle)" }}>{value || "Add"}</span>
-            </span>
-            <ChevronRight className="h-4 w-4 flex-none opacity-50 transition-opacity group-hover:opacity-100" aria-hidden />
-          </button>
-        );
-      })}
+    <div className="relative isolate grid overflow-hidden rounded-[var(--radius-lg)] border sm:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
+      {/* Build's own sky, the same one the Edit My Build sheet wears (Chandu,
+         19 Oct 2026: "please use the same color background thing we did for
+         the my build when you click on edit"), clipped to the panel */}
+      <ThemeProvider>
+        <div aria-hidden className="myb-sky">
+          <BackgroundSpace />
+          <AuroraBackground accent={(lookV2 ? STAGE_ACCENTS_V2 : STAGE_ACCENTS).interests} visitedAccents={[]} lightning={false} />
+        </div>
+      </ThemeProvider>
+      <div className="px-[var(--space-5)] pt-[var(--space-5)] sm:hidden">
+        <Segmented ariaLabel="My Build group" value={String(shown)} onChange={(v) => setShown(Number(v))} options={BUILD_GROUPS.map((g, i) => ({ key: String(i), label: g.short }))} grow />
+      </div>
+      {BUILD_GROUPS.map((g, gi) => (
+        <div key={g.title} className={`${gi === shown ? "flex" : "hidden"} flex-col gap-[var(--space-3)] px-[var(--space-5)] pt-[var(--space-4)] pb-[var(--space-6)] sm:flex sm:px-[var(--space-5)] sm:py-[var(--space-6)] lg:px-[var(--space-6)] ${gi ? "sm:border-l" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
+          {/* heading > subheading > body, strictly by size ("Heading >
+             subheading > body only"): group 18, field 15, answer 14 */}
+          {/* the gradient ink the Profile's stat figures wear; on phones the
+             switch above names the group, so the heading shows from sm */}
+          <h4 className="hidden w-fit pb-[2px] text-[18px] leading-[23px] font-extrabold sm:block" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{g.title}</h4>
+          {g.lines.map((line) => {
+            const value = valueOf(line.id);
+            const empty = !value.trim();
+            return (
+              <button
+                key={line.id}
+                type="button"
+                onClick={() => onOpen(line.id)}
+                aria-label={`${line.label}: edit`}
+                className="dm-quiet group -mx-[10px] flex cursor-pointer items-start gap-[var(--space-2)] rounded-[var(--radius-md)] px-[10px] py-[8px] text-left"
+              >
+                <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+                  <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{line.label}</span>
+                  <span className="text-[14px] leading-[20px] font-normal" style={{ color: empty ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{empty ? "Add" : value}</span>
+                </span>
+                {/* always there, brighter on hover: says the row edits
+                   ("its not clear that the different sections are clickable") */}
+                <Pencil className="mt-[3px] h-[14px] w-[14px] flex-none opacity-45 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" style={{ color: "var(--accent-subtle)" }} aria-hidden />
+              </button>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

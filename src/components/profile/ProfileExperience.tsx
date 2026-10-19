@@ -1240,7 +1240,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               onAddToTop3={addToTop3}
               onGoTab={setTab}
               onOpenBuild={openBuild}
-              buildNudge={buildDot}
             />
           </div>
         )}

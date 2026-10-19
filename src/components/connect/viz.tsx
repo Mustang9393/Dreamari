@@ -44,6 +44,11 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
     const ro = new ResizeObserver(measure);
     ro.observe(row);
     if (row.parentElement) ro.observe(row.parentElement);
+    // the tabs themselves too: a web font arriving widens the labels without
+    // resizing the row, and the first measure ran on the fallback font
+    // (found on About Me's My Build switch at 375, 19 Oct 2026)
+    Array.from(row.children).forEach((c) => ro.observe(c));
+    document.fonts?.ready.then(measure).catch(() => {});
     return () => ro.disconnect();
   }, [options.length]);
   return (
