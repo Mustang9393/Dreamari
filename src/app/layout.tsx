@@ -7,6 +7,7 @@ import { LiveRegion } from "@/components/app/LiveRegion";
 import { OfflineBanner } from "@/components/app/SurfaceState";
 import { SkipLink } from "@/components/app/SkipLink";
 import { ThemeBoot } from "@/components/app/theme";
+import { LightPulse } from "@/components/app/LightPulse";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import "./globals.css";
 import "./look-v2.css";
@@ -84,6 +85,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <SkipLink />
         <ThemeBoot />
+        <LightPulse />
         <ErrorReporter />
         <ScrollReset />
         <HistoryHost />

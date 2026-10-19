@@ -2111,7 +2111,7 @@ function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: 
                over when we switch"). */}
             {on && (
               <motion.span
-                layoutId="connect-volunteer-picker-highlight"
+                layoutId="connect-volunteer-picker-highlight" data-fill-light
                 aria-hidden
                 className="absolute inset-0 rounded-[var(--radius-md)]"
                 style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 60%, transparent)" }}
@@ -2185,7 +2185,7 @@ function RoleTabs({ role, onPick, children }: { role: DemoRole; onPick: (role: D
             >
               {on && (
                 <motion.span
-                  layoutId="connect-role-tabs-pill"
+                  layoutId="connect-role-tabs-pill" data-fill-light
                   aria-hidden
                   className="absolute inset-0 rounded-[var(--radius-sm)]"
                   style={{ background: "var(--primary)" }}

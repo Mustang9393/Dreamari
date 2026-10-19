@@ -1,5 +1,6 @@
 "use client";
 
+import { dispatchLight } from "@/components/app/LightPulse";
 import { useEffect, useRef, useState } from "react";
 import { ProgressSpark } from "@/components/build/ProgressSpark";
 
@@ -130,6 +131,9 @@ export function SparkBar({
     // Animations API so it restarts cleanly per nonce and reverts to the inline
     // styles when done without any manual reset.
     if (!comet || comet.from === comet.to || !fillRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // the v2 look's moment light (LightPulse.tsx): a bloom where the bar lands
+    const track = trackRef.current?.getBoundingClientRect();
+    if (track) dispatchLight(track.left + (track.width * comet.to) / 100, track.top + track.height / 2, 0.8);
     const glowColor = comet.color;
     const glowShadow = (spread: number, blur: number) => `0 0 ${blur}px ${spread}px ${glowColor}`;
     const anim = fillRef.current.animate(
@@ -159,6 +163,24 @@ export function SparkBar({
           style={{ width: `${displayPercent}%`, background: fill, boxShadow: restingShadow }}
         />
       </div>
+      {/* DEMO-ONLY, the v2 look: a bright head at the leading edge, glowing
+          past the track (look-v2.css shows it; hidden otherwise). The bar's
+          own glow colour, so game bars keep their world. */}
+      {displayPercent > 0 && displayPercent < 100 && (
+        <span
+          aria-hidden
+          data-spark-head
+          className="pointer-events-none absolute top-1/2 rounded-full transition-[left] duration-700 ease-[cubic-bezier(0.33,1,0.68,1)] motion-reduce:transition-none"
+          style={{
+            left: `${displayPercent}%`,
+            width: Math.max(8, height * 1.6),
+            height: Math.max(8, height * 1.6),
+            transform: "translate(-60%, -50%)",
+            background: `radial-gradient(circle, #ffffff 0 30%, color-mix(in srgb, ${glow} 70%, #ffffff) 55%, transparent 72%)`,
+            boxShadow: `0 0 10px 2px color-mix(in srgb, ${glow} 70%, transparent), 0 0 24px 6px color-mix(in srgb, ${glow} 32%, transparent)`,
+          }}
+        />
+      )}
       {comet && <ProgressSpark key={comet.nonce} trackRef={trackRef} fromPercent={comet.from} toPercent={comet.to} color={comet.color} />}
     </div>
   );

@@ -134,7 +134,7 @@ export function LeaderboardExperience() {
                 className="relative flex min-h-[44px] cursor-pointer items-center justify-center gap-[8px] rounded-[12px] px-[10px] text-[13px] font-bold sm:min-h-[48px] sm:text-[14px]"
                 style={{ color: on ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
               >
-                {on && <motion.span layoutId="lb-tab" className="absolute inset-0 rounded-[12px]" style={{ background: "var(--primary)", boxShadow: "0 14px 30px -14px var(--primary)" }} transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+                {on && <motion.span layoutId="lb-tab" data-fill-light className="absolute inset-0 rounded-[12px]" style={{ background: "var(--primary)", boxShadow: "0 14px 30px -14px var(--primary)" }} transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
                 <Icon className="relative h-[15px] w-[15px] flex-none" aria-hidden />
                 <span className="relative truncate">
                   <span className="md:hidden">{t.short}</span>

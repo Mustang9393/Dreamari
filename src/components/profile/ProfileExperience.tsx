@@ -1096,7 +1096,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             >
               {tab === item.id && (
                 <motion.span
-                  layoutId="profile-tab-pill"
+                  layoutId="profile-tab-pill" data-fill-light
                   className="absolute inset-0 rounded-[var(--radius-md)]"
                   style={{ background: "var(--primary)" }}
                   transition={{ type: "spring", stiffness: 500, damping: 40 }}

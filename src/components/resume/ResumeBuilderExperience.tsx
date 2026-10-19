@@ -210,7 +210,7 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
                    for tabs... animate and slide over when we switch"). */}
                 {isActive && (
                   <motion.span
-                    layoutId="resume-builder-tab-underline"
+                    layoutId="resume-builder-tab-underline" data-tab-ink
                     aria-hidden
                     className="absolute inset-x-0 -bottom-px h-[2px]"
                     style={{ background: "var(--foreground)" }}

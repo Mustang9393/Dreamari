@@ -143,7 +143,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
                      slide over when we switch"). */}
                   {on && (
                     <motion.span
-                      layoutId="global-search-scope-pill"
+                      layoutId="global-search-scope-pill" data-fill-light
                       aria-hidden
                       className="absolute inset-0 rounded-[10px]"
                       style={{ background: "var(--primary)" }}

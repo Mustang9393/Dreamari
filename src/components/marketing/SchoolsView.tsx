@@ -248,7 +248,7 @@ function Chips({ items, value, onChange, label, id }: { items: string[]; value: 
         const selected = value === item;
         return (
           <button key={item} type="button" role="tab" aria-selected={selected} onClick={() => onChange(item)} className="relative cursor-pointer rounded-[10px] px-3.5 py-2 text-[14px] font-semibold transition-colors duration-300" style={{ color: selected ? "var(--primary)" : "var(--foreground)" }}>
-            {selected && <motion.span layoutId={id} aria-hidden className="absolute inset-0 rounded-[10px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))" }} transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
+            {selected && <motion.span layoutId={id} data-fill-light aria-hidden className="absolute inset-0 rounded-[10px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))" }} transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
             <span className="relative">{item}</span>
           </button>
         );

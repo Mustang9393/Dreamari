@@ -132,7 +132,7 @@ export function ExploreSectionTabs({
                tabs... animate and slide over when we switch"). */}
             {isActive && (
               <motion.span
-                layoutId="explore-section-tab-underline"
+                layoutId="explore-section-tab-underline" data-tab-ink
                 aria-hidden
                 className="absolute inset-x-0 -bottom-[5px] h-[2px]"
                 style={{ background: "var(--accent)" }}

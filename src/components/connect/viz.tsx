@@ -47,7 +47,7 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
           >
             {on && (
               <motion.span
-                layoutId={`segmented-pill-${uid}`}
+                layoutId={`segmented-pill-${uid} data-fill-light`}
                 aria-hidden
                 className="absolute inset-0 rounded-[var(--radius-sm)]"
                 style={{ background: "var(--primary)" }}
