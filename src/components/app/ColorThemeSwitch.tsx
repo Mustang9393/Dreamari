@@ -1,9 +1,10 @@
 "use client";
 
-// DEMO-ONLY: the color theme switch for the black-and-blue look
-// (src/app/look-v2.css). A small labelled control fixed to the bottom-left
-// of every student-facing page, so the team can flip Classic / Black & Blue
-// on any screen while reviewing (19 Oct 2026, Chandu: "a small control on the
+// DEMO-ONLY: the color theme switch. Black & Blue (src/app/look-v2.css) is
+// the default; this switch is for Classic (19 Oct 2026, Chandu: "lets have
+// black and blue be the default and the switch to be done for classic").
+// A small control fixed to the bottom-left, so the team can flip themes on
+// any screen while reviewing (19 Oct 2026, Chandu: "a small control on the
 // bottom of the page on the left to toggle the color theme. Remove from the
 // hamburger menu."). Same state as ?look=v2 / ?look=v1. Not on the Counselor
 // Dashboard (its own app and look) and never printed.
@@ -13,7 +14,7 @@ import { setLookV2, useLookV2 } from "./look";
 // One quiet switch, like My Profile's "V2 PROFILE" toggle (19 Oct 2026,
 // Chandu: "the black and blue/classic is too big and sitting over the
 // design... shouldnt be in my face and so prominent"): a muted label and a
-// mini track, no panel, dimmed until hovered or focused. On = Black & Blue.
+// mini track, no panel, dimmed until hovered or focused. On = Classic.
 export function ColorThemeSwitch() {
   const lookV2 = useLookV2();
   const path = usePathname() ?? "";
@@ -22,8 +23,8 @@ export function ColorThemeSwitch() {
     <button
       type="button"
       role="switch"
-      aria-checked={lookV2}
-      aria-label="Black and blue color theme"
+      aria-checked={!lookV2}
+      aria-label="Classic color theme"
       onClick={() => setLookV2(!lookV2)}
       // marketing-v2 themeable: the app's colour variables live in that scope;
       // the fallbacks cover routes that never load tokens.css. Desktop only,
@@ -40,9 +41,9 @@ export function ColorThemeSwitch() {
         minHeight: "auto",
       }}
     >
-      Black &amp; Blue
-      <span aria-hidden className="relative h-[14px] w-[24px] flex-none rounded-full transition-colors" style={{ background: lookV2 ? "var(--primary, #2f6bf2)" : "color-mix(in srgb, var(--foreground, #f4f7ff) 22%, transparent)" }}>
-        <span className="absolute top-[2px] size-[10px] rounded-full bg-white transition-[left] duration-200" style={{ left: lookV2 ? 12 : 2 }} />
+      Classic
+      <span aria-hidden className="relative h-[14px] w-[24px] flex-none rounded-full transition-colors" style={{ background: !lookV2 ? "var(--primary, #2f6bf2)" : "color-mix(in srgb, var(--foreground, #f4f7ff) 22%, transparent)" }}>
+        <span className="absolute top-[2px] size-[10px] rounded-full bg-white transition-[left] duration-200" style={{ left: !lookV2 ? 12 : 2 }} />
       </span>
     </button>
   );

@@ -1,11 +1,11 @@
 "use client";
 
-// DEMO-ONLY: the black-and-blue look preview (src/app/look-v2.css). Turned on
-// by ?look=v2 (layout.tsx, before paint) or the bottom-left Color switch
-// (ColorThemeSwitch.tsx: Classic / Black & Blue); remembered in localStorage.
-// Most of the look is CSS keyed on html.look-v2. The hook is for the few places that need a value in JS
-// (canvas colours). Server and first client render say false, so hydration
-// matches; it follows the class after mount, so the switch applies live.
+// DEMO-ONLY: the colour theme. Black & Blue (src/app/look-v2.css, keyed on
+// html.look-v2) is the default; Classic when chosen with ?look=v1 or the
+// bottom-left Color switch (ColorThemeSwitch.tsx), saved as "v1" in
+// localStorage (layout.tsx applies it before paint). The hook is for the few
+// places that need a value in JS (canvas colours); it follows the class
+// after mount, so the switch applies live.
 import { useSyncExternalStore } from "react";
 
 const KEY = "dreamari-look";
@@ -19,14 +19,15 @@ function subscribe(callback: () => void) {
 const read = () => document.documentElement.classList.contains("look-v2");
 
 export function useLookV2(): boolean {
-  return useSyncExternalStore(subscribe, read, () => false);
+  // Server and first client render assume the default (Black & Blue); a saved
+  // Classic corrects it right after mount.
+  return useSyncExternalStore(subscribe, read, () => true);
 }
 
 export function setLookV2(on: boolean) {
   document.documentElement.classList.toggle("look-v2", on);
   try {
-    if (on) localStorage.setItem(KEY, "v2");
-    else localStorage.removeItem(KEY);
+    localStorage.setItem(KEY, on ? "v2" : "v1");
   } catch {
     // private browsing: this tab only
   }

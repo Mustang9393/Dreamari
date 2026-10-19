@@ -1,3 +1,13 @@
+## 2026-10-19: Black & Blue is the default; the switch is for Classic
+
+**Why (Chandu):** "lets have black and blue be the default and the switch to be done for classic."
+
+- `layout.tsx` (before paint): every visitor gets `html.look-v2` unless Classic was chosen. Classic is saved as `"v1"` in localStorage `dreamari-look` by `?look=v1` or the switch; `?look=v2` saves `"v2"`. Storage that throws (private mode) still gets Black & Blue (before, a blocked read meant no look at all). Anyone whose last choice was the old default (key removed) now lands on Black & Blue, which is the point.
+- `ColorThemeSwitch.tsx` keeps the quiet desktop-only design from main (ad2ccb36) but reads **Classic**: off by default, on means Classic.
+- `look.ts`: `setLookV2(false)` saves `"v1"` (it used to clear the key, which now means Black & Blue); the hook's server snapshot is `true`, so before hydration the switch, the Build canvas, Dreamy's halo and the edge-glow wrapper already assume the default; a saved Classic corrects right after mount.
+- look-v2.css header and HANDOFF_INDEX's Demo vs Production entry updated.
+- Checked: tsc, eslint; in the browser, a fresh visitor (key cleared) gets Black & Blue with Classic off; switching to Classic saves "v1" and survives a reload; `?look=v2` brings Black & Blue back. Disk note: the dev server failed with ENOSPC (the data volume was at 99%, 1.8 GB free); clearing this worktree's own `.next` cache freed ~2.5 GB. Other worktrees' `.next` caches were left alone (other sessions may be running on them); together they hold several GB. Pushed to main on Chandu's go-ahead.
+
 ## 2026-10-19: v1's Explore banner is about exploring only, and arrives as the nudges' last beat
 
 **Why (Chandu):** "the explore banner can now just be about exploring and it can show up after the first sequence of nudges. Since we are already doing the new blue tooltips for reorganizing and removing we can skip that part on the banner."
