@@ -1,3 +1,14 @@
+## 2026-10-20: Black & Blue focal pass (Home, Explore, career, Opportunities, Play)
+
+**Why:** Joshua asked for "stronger visual focal points to give the interface more dimension"; of the options, Chandu liked "bigger hero imagery and type, and more empty space around the one thing that matters" most, with "no glow, no Dreamy". One clear focal point per screen, more room around it, quieter neighbours. All under `html.look-v2`, so Classic is untouched.
+
+- **Home:** the hero banner is taller on laptops (430px, was 360) with 18px more room below it. A Dreamy greeting replacing "HOME" was tried and removed the same day (Chandu: Dreamy "should pop out or break frames... Not be a sticker. If we cant do that there lets just not do that"; no sprite is drawn for a frame-breaking pose, so that would be Codex art).
+- **Explore:** the first, personal rail ("Because you liked...", `data-focal-rail` on Rail when `peek`) is the one bigger row: posters about 14% larger on laptops (row zoom, as the page already uses), its heading 28px (others 24, page title 44), more room above. Later rails unchanged, so they read quieter.
+- **Career page:** Glossary Game keeps its world-colour outline (Chandu, 8 Oct) but loses its tinted fill (`data-secondary-game`), so Play is the one gold action; more room between the header and the facts. The gold key figures are production's own figure style and stay; Play's world glow is an earlier decision and stays.
+- **Opportunities:** "Best fits for you" (`focal` on Shelf) gets the same focal-row treatment: 28px heading, cards 8% larger on laptops, more room above. The filter row is a working control and stays.
+- **Play:** already leads with one billboard (game art, not restyled); only more room after the featured row (`[data-row-id="simulations"]`).
+- Checked: tsc; laptop width (1100px emulated) screenshots `focal-*.png` in docs/reference/look-v2-2026-10-18 (the emulated captures are small). Pushed to main on Chandu's go-ahead.
+
 ## 2026-10-19: Black & Blue, less gloomy: a real night sky, opaque surfaces, fewer glows
 
 **Why (Joshua, after demoing the live look):** the black-and-blue aesthetic "feels slightly gloomy compared to the previous design, which felt more inspirational, vibrant, and engaging"; keep dark mode dark but make it "aspirational, uplifting, and immersive", with "brighter cobalt and sky-blue accents", "stronger visual focal points", and the "dreamy, optimistic feeling" without purple. **Chandu:** "flowy tiny stars sprinkled across the background... Not star shaped... realistic without clashing with the UI"; "I dont want to lift the black directly into navy"; then, on review, "the stars look a little too random... reading more like pixie dust", "no card or surface is transparent to the point that they do not even blur the stars", "the career header etc have too much glow. Lets not do glows for the sake of glows", "think of what this means for light mode, i doubt the stars work there".

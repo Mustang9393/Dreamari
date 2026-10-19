@@ -15,7 +15,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { MUTED, type Enriched } from "./Card";
 
-export function Shelf({ title, line, items, onViewAll, children }: { title: string; line: string; items: Enriched[]; onViewAll: () => void; children: (e: Enriched) => React.ReactNode }) {
+export function Shelf({ title, line, items, onViewAll, children, focal = false }: { title: string; line: string; items: Enriched[]; onViewAll: () => void; children: (e: Enriched) => React.ReactNode; /** the page's focal row (the v2 look enlarges it, look-v2.css) */ focal?: boolean }) {
   const ref = useRef<HTMLUListElement>(null);
   const [edge, setEdge] = useState({ start: true, end: false });
   useEffect(() => {
@@ -37,7 +37,7 @@ export function Shelf({ title, line, items, onViewAll, children }: { title: stri
     </IconTip>
   );
   return (
-    <section aria-label={title} className="flex flex-col gap-[14px]">
+    <section aria-label={title} data-focal-rail={focal || undefined} className="flex flex-col gap-[14px]">
       <div className="flex items-end justify-between gap-[16px]">
         <div className="flex min-w-0 flex-col gap-[3px]">
           <h2 className="text-[19px] leading-[24px] font-bold sm:text-[21px] sm:leading-[26px]">

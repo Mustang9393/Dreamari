@@ -409,6 +409,68 @@ html.look-v2.light [data-focal] {
   box-shadow: 0 14px 34px -20px rgba(16, 42, 80, 0.35) !important;
 }
 
+/* Home's focal block gets more size and more room (20 Oct 2026, Chandu on
+   Joshua's notes: "stronger focal points... bigger hero imagery and type,
+   and more empty space around the one thing that matters" was the part he
+   liked most). Taller on desktop and a wider gap below it, so Next Moves
+   reads as the next thing rather than part of the same block. */
+@media (min-width: 640px) {
+  html.look-v2 section[aria-label="Highlights"][data-focal] {
+    height: 430px;
+  }
+}
+html.look-v2 section[aria-label="Highlights"][data-focal] {
+  margin-bottom: 18px;
+}
+
+/* Explore's focal row: the first, personal rail ("Because you liked ...").
+   Above it sit two tab sets, search and a toggle, and every rail after it
+   had the same size, so nothing led. Under Black & Blue it is the one row
+   that is bigger: posters about 14% larger on laptops (the row-wide zoom
+   this page already uses), a heading a step up (28px, still under the 44px
+   page title), and more room above it. No glow. (20 Oct 2026, the focal
+   pass.) */
+html.look-v2 [data-focal-rail] {
+  margin-top: 14px;
+  margin-bottom: 10px;
+}
+html.look-v2 [data-focal-rail] h2 {
+  font-size: 28px;
+  line-height: 34px;
+}
+@media (min-width: 640px) {
+  html.look-v2 [data-focal-rail] .explore-poster-row {
+    zoom: 1.14;
+  }
+  /* Opportunities' "Best fits for you": the same treatment, a smaller step
+     (its cards carry more text). */
+  html.look-v2 [data-focal-rail] > ul {
+    zoom: 1.08;
+  }
+}
+
+/* Career page: the title and Play are the focal point. Glossary Game stays
+   outlined in the world colour (Chandu, 8 Oct 2026: Glossary Game "outlined
+   in" the world colour, Play filled with its glow) but loses its tinted fill,
+   so it reads as the second action instead of a second gold button beside
+   the first. The gold key figures below are production's own figure style
+   and stay. More room between the header and the facts. (20 Oct, the focal
+   pass.) */
+html.look-v2 [data-secondary-game] {
+  background: transparent !important;
+}
+html.look-v2 section[data-focal] {
+  margin-bottom: 14px;
+}
+
+/* Play already leads with one billboard (the featured simulation, Netflix's
+   16:9). It is game art, so it is not restyled; it only gets room: a wider
+   gap before Glossary Games, so the next row stops reading as part of it.
+   (20 Oct, the focal pass.) */
+html.look-v2 [data-row-id="simulations"] {
+  margin-bottom: 18px;
+}
+
 /* ---------- 4. Controls ---------- */
 /* One lit action per screen (19 Oct 2026): the hero action sits on a small
    pool of light, as reference 3's input sits on its glow. Only these carry
