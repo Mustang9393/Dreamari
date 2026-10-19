@@ -95,7 +95,10 @@ export function CollegeGoalPicker({ careerIds, saved, onPick, onClose }: {
   return createPortal(
     <ThemeProvider>
       <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }} className="marketing-v2 themeable no-print fixed inset-0 z-[60] flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)" }} onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true" aria-labelledby="college-goal-picker-title">
-        <motion.div initial={reduce ? false : { opacity: 0, y: 18, scale: 0.985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 360, damping: 32 }} className="myb-sheet">
+        <motion.div initial={reduce ? false : { opacity: 0, y: 18, scale: 0.985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 360, damping: 32 }} className="myb-sheet"
+          // larger than Edit My Build: school cards need the room (Chandu, 19
+          // Oct 2026: "This modal can be larger")
+          style={{ width: "min(1320px, calc(100% - 2rem))", height: "min(940px, calc(100dvh / var(--vz, 1) - 2rem))" }}>
           <div aria-hidden className="myb-sky">
             <BackgroundSpace />
             <AuroraBackground accent={(lookV2 ? STAGE_ACCENTS_V2 : STAGE_ACCENTS).education} visitedAccents={[]} lightning={false} />
@@ -129,7 +132,10 @@ export function CollegeGoalPicker({ careerIds, saved, onPick, onClose }: {
             <div key={list} className="myb-scroll dm-rise" style={{ justifyContent: "flex-start" }}>
               <p className="pb-[var(--space-3)] text-[14px] leading-[19px]" style={{ color: "var(--myb-mute)" }}>{current.note}</p>
               {lists[list].length ? (
-                <ul className="grid list-none gap-[var(--space-4)] p-0 sm:grid-cols-2 xl:grid-cols-3">
+                // Never narrower than Explore's own cards (~300px): the columns
+                // follow the width, the cards keep their shape (Chandu: "do not
+                // distort the school cards like this")
+                <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] gap-[var(--space-4)] p-0">
                   {lists[list].map(({ college: c, line }) => (
                     <li key={c.slug} className="min-w-0">
                       <SchoolCard c={c} saved={savedSet.has(c.slug)} onSave={() => toggleSaved(c.slug)} compared={false} program={line ? shortProgram(line) : undefined} onOpen={() => setDetail(c)} />
