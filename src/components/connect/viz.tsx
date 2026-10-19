@@ -27,40 +27,82 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
   // once on the same screen, and a shared string would make unrelated
   // pills animate into each other.
   const uid = useId();
+  // A tab set wider than its space becomes a dropdown (Chandu, 19 Oct 2026:
+  // "on mobile the tabs should be a dropdown. Otherwise they get cut off.
+  // This should be the style for every screen where a tab set exceeds
+  // screen width"). A scrolling row hid the last tabs half off the edge with
+  // nothing saying more were there. The row stays mounted (invisible, no
+  // height) so it keeps measuring its own content against the space it is
+  // given, and the dropdown takes its place until the tabs fit again.
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [overflow, setOverflow] = useState(false);
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    const measure = () => setOverflow(row.scrollWidth > row.clientWidth + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(row);
+    if (row.parentElement) ro.observe(row.parentElement);
+    return () => ro.disconnect();
+  }, [options.length]);
   return (
-    // `shrink-0`: a flex item with overflow-x-auto gets a zero automatic
-    // minimum height, so inside a height-constrained flex column the whole
-    // bar collapsed to ~14px and clipped its own pill and labels (found live
-    // on the counselor Student Profile and My Impact, 26 Sept 2026).
-    <div role="tablist" aria-label={ariaLabel} className={`flex max-w-full shrink-0 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] flow-scroll ${grow ? "w-full" : "w-fit"}`} style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-      {options.map((option) => {
-        const on = option.key === value;
-        return (
-          <button
-            key={option.key}
-            type="button"
-            role="tab"
-            aria-selected={on}
-            onClick={() => onChange(option.key)}
-            className={`dm-seg relative flex min-h-[34px] ${on ? "cursor-default" : "cursor-pointer"} items-center justify-center rounded-[var(--radius-sm)] ${dense ? "px-[7px] sm:px-[14px]" : "px-[14px]"} text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}
-            style={{ color: on ? "#FFFFFF" : "var(--muted-foreground)" }}
-          >
-            {on && (
-              <motion.span
-                layoutId={`segmented-pill-${uid} data-fill-light`}
-                aria-hidden
-                className="absolute inset-0 rounded-[var(--radius-sm)]"
-                style={{ background: "var(--primary)" }}
-                transition={{ type: "spring", stiffness: 500, damping: 40 }}
-              />
-            )}
-            <span className="relative flex items-center gap-[6px]">
-              {option.label}
-              {!!option.badge && <span aria-label={`${option.badge} unread`} className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-[4px] text-[10.5px] leading-none font-extrabold tabular-nums" style={{ background: on ? "#FFFFFF" : "var(--primary)", color: on ? "var(--primary)" : "#FFFFFF" }}>{option.badge}</span>}
-            </span>
-          </button>
-        );
-      })}
+    // one box for callers' layouts; min-w-0 lets it shrink below its tabs'
+    // width, which is what lets the row detect that they no longer fit
+    <div className={`flex min-w-0 max-w-full shrink-0 flex-col ${grow ? "w-full" : "w-fit"}`}>
+      {/* `shrink-0`: a flex item with overflow-x-auto gets a zero automatic
+         minimum height, so inside a height-constrained flex column the whole
+         bar collapsed to ~14px and clipped its own pill and labels (found live
+         on the counselor Student Profile and My Impact, 26 Sept 2026). */}
+      <div
+        ref={rowRef}
+        role={overflow ? undefined : "tablist"}
+        aria-label={overflow ? undefined : ariaLabel}
+        aria-hidden={overflow || undefined}
+        className={`flex max-w-full shrink-0 gap-[2px] rounded-[var(--radius-md)] ${overflow ? "invisible h-0 overflow-hidden" : "overflow-x-auto border p-[3px]"} flow-scroll ${grow ? "w-full" : "w-fit"}`}
+        style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
+      >
+        {options.map((option) => {
+          const on = option.key === value;
+          return (
+            <button
+              key={option.key}
+              type="button"
+              role="tab"
+              tabIndex={overflow ? -1 : undefined}
+              aria-selected={on}
+              onClick={() => onChange(option.key)}
+              className={`dm-seg relative flex min-h-[34px] ${on ? "cursor-default" : "cursor-pointer"} items-center justify-center rounded-[var(--radius-sm)] ${dense ? "px-[7px] sm:px-[14px]" : "px-[14px]"} text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}
+              style={{ color: on ? "#FFFFFF" : "var(--muted-foreground)" }}
+            >
+              {on && !overflow && (
+                <motion.span
+                  layoutId={`segmented-pill-${uid} data-fill-light`}
+                  aria-hidden
+                  className="absolute inset-0 rounded-[var(--radius-sm)]"
+                  style={{ background: "var(--primary)" }}
+                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                />
+              )}
+              <span className="relative flex items-center gap-[6px]">
+                {option.label}
+                {!!option.badge && <span aria-label={`${option.badge} unread`} className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-[4px] text-[10.5px] leading-none font-extrabold tabular-nums" style={{ background: on ? "#FFFFFF" : "var(--primary)", color: on ? "var(--primary)" : "#FFFFFF" }}>{option.badge}</span>}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {overflow && (
+        <Listbox
+          ariaLabel={ariaLabel}
+          value={value}
+          onChange={(v) => onChange(v as K)}
+          options={options.map((o) => ({ value: o.key, label: o.badge ? `${o.label} (${o.badge})` : o.label }))}
+          className="dm-quiet h-[42px] w-full shrink-0 rounded-[var(--radius-md)] border pr-[12px] pl-[16px] text-[14px] leading-[20px] font-semibold"
+          style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+          panelClassName="p-[6px]"
+        />
+      )}
     </div>
   );
 }
