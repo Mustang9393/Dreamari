@@ -370,15 +370,15 @@ export function useCollegeGoal(): CollegeGoal {
   }, [colleges, topSlug, buckets, gpa]);
 }
 
-export function CollegeGoalView({ goal, onBack, backLabel }: { goal: CollegeGoal; onBack: () => void; /** where Back returns, when it isn't About Me (v2 opens this from My Plan) */ backLabel?: string }) {
+export function CollegeGoalView({ goal, onBack, backLabel, embedded = false }: { goal: CollegeGoal; onBack?: () => void; /** where Back returns, when it isn't About Me */ backLabel?: string; /** v2: inside Saved > Schools, so no Back and no page title */ embedded?: boolean }) {
   const router = useRouter();
   const allColleges = goal.schools.map((s) => s.c);
   const open = (c: College) => { if (!openSchoolPeek(c, allColleges)) router.push(`/colleges/${c.slug}`); };
   const top = goal.top;
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <BackLink onBack={onBack} label={backLabel} />
-      <h3 className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>College Goal</h3>
+      {!embedded && onBack && <BackLink onBack={onBack} label={backLabel} />}
+      {!embedded && <h3 className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>College Goal</h3>}
 
       {goal.schools.length === 0 ? (
         <EmptyGroup text="No schools yet. Save a school in Explore Schools and it shows up here, ready to sort." cta="Explore schools" href="/colleges" />

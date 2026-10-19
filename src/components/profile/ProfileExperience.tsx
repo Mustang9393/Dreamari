@@ -20,11 +20,11 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { Coachmark, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BuildModal, type BuildSection } from "./PreferencesTab";
-import { AboutMeTab } from "./AboutMeTab";
+import { AboutMeTab, CollegeGoalView, useCollegeGoal } from "./AboutMeTab";
 import { BookCounselorSheet, useMyNextMeeting } from "./BookCounselorSheet";
 import { BOOK_MEETING_ID, careerWindows, SAVE_PROGRAM_ID, SAVE_SCHOOLS_ID, SHARE_REPORT_ID, type CareerStep } from "./careerPlanSteps";
 import { reportHistorySnapshot, serverReportHistorySnapshot, subscribeReportHistory } from "@/lib/reportHistory";
@@ -55,7 +55,7 @@ import { TextTabs } from "@/components/app/TextTabs";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
-import { collegeBySlug, collegeImage } from "@/components/colleges/data";
+import { collegeImage } from "@/components/colleges/data";
 import { useResolvedColleges } from "@/components/colleges/dataset";
 import { SaveButton, tags as collegeTags, useSaved as useSavedColleges } from "@/components/colleges/shared";
 import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
@@ -67,6 +67,7 @@ import { playArrival } from "@/lib/showTheWay";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import { useBackStep } from "@/lib/backStep";
 import { setTop3FlowV2, useTop3FlowV2 } from "@/lib/top3Flow";
+import { togglePlanDone, usePlanDone } from "@/lib/planDone";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -382,9 +383,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // the editor on the right, one Save for all of it.
   const [buildOpen, setBuildOpen] = useState(false);
   const flowV2 = useTop3FlowV2();
+  // v2 has no About Me: an About Me landing (the default, old links) goes to
+  // Top 3; a ?goal= link (a "Saved" or "View saved") goes to that Saved shelf.
+  const goalParam = useSearchParams()?.get("goal");
+  useEffect(() => {
+    if (!flowV2 || tab !== "about") return;
+    if (goalParam === "college" || goalParam === "career") {
+      try { const url = new URL(window.location.href); url.searchParams.set("tab", "locker"); url.searchParams.set("shelf", goalParam === "college" ? "schools" : "careers"); url.searchParams.delete("goal"); window.history.replaceState(window.history.state, "", url.toString()); } catch { /* fine */ }
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the v2 flag is client-only, read after mount
+      setTab("locker");
+    } else setTab("top3");
+  }, [flowV2, tab, goalParam]);
   // v2: My Plan's "Book a meeting with your counselor" step
   const [bookingOpen, setBookingOpen] = useState(false);
-  const meetingBooked = useMyNextMeeting() !== null;
   const [buildSection, setBuildSection] = useState<BuildSection | undefined>(undefined);
   const openBuild = (section?: BuildSection) => {
     setBuildDot(false);
@@ -1049,7 +1060,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = ["about", "top3", "locker", "plan", "report", "resume"];
+            const order: TabId[] = flowV2 ? ["top3", "locker", "plan", "report", "resume"] : ["about", "top3", "locker", "plan", "report", "resume"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -1074,7 +1085,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             // long?"); this is five.
             [
               // About Me leads (19 Oct 2026, Joshua's About Me spec): six tabs.
-              { id: "about", label: "About Me" },
+              // v2 hides it (audit, 19 Oct 2026): its Career Goal is the Top 3
+              // #1, My Build is on the action bar and in Settings, and College
+              // Goal moved into Saved > Schools.
+              ...(flowV2 ? [] : [{ id: "about" as TabId, label: "About Me" }]),
               { id: "top3", label: "Top 3" },
               { id: "locker", label: "Saved", badge: savedTotal || undefined },
               { id: "plan", label: "My Plan" },
@@ -1142,6 +1156,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
               onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
               onPlan={(id) => { reorderTop3([id, ...top3.filter((x) => x !== id)]); setTab("plan"); }}
+              onOpenBuild={() => openBuild()}
+              buildNudge={buildDot}
             />
           </motion.div>
         )}
@@ -1513,88 +1529,37 @@ function useRankHint(): { show: boolean | null; retired: boolean; retire: () => 
   return { show, retired, retire };
 }
 
-// The Top Three banner's one sentence, in two moods (direct idea, 28 Sept
-// 2026: the "change these anytime" nudge lives in the Explore banner, then
-// "the other copy should fade away and this copy should come take its place
-// from where it sat in the sentence"). The two sentences share their key
-// word: the nudge ends on "Explore", the resting line starts with it, and it
-// is the banner's own button label. So the nudge words blur away, "Explore"
-// glides from the end of the line to the start (a layout animation on the
-// same element), and the resting words arrive after it one by one.
-const NUDGE_WORDS = ["Change", "these", "anytime:", "move", "#arrows", "remove", "#x", "or", "add", "more", "from"];
-const REST_WORDS = ["hundreds", "of", "careers", "and", "save", "the", "ones", "that", "interest", "you."];
-// The sweep glints white over currentColor, so the nudge words sit a step
-// below full white for the glint to show (same reason as Cover's label).
-const NUDGE_INK = "color-mix(in srgb, var(--foreground) 76%, transparent)";
-function RankBannerCopy({ nudging, retired }: { nudging: boolean; retired: boolean }) {
-  const reduce = useReducedMotion();
-  // "leaving": the nudge words fade in place first, then the swap.
-  const [swapped, setSwapped] = useState(false);
-  useEffect(() => {
-    if (nudging || !retired) return;
-    const timer = window.setTimeout(() => setSwapped(true), reduce ? 0 : 420);
-    return () => window.clearTimeout(timer);
-  }, [nudging, retired, reduce]);
-  const phase: "nudge" | "leaving" | "rest" = nudging ? "nudge" : retired && !swapped ? "leaving" : "rest";
-  const explore = (
-    <motion.span key="explore" layout="position" transition={{ layout: { duration: reduce ? 0 : 0.65, ease: [0.16, 1, 0.3, 1] } }} className="font-bold" style={{ color: "var(--accent-subtle)" }}>
-      Explore{phase === "rest" ? "" : "."}
-    </motion.span>
-  );
-  return (
-    <span className="flex flex-wrap items-center gap-x-[0.27em]">
-      {phase === "rest" ? (
-        <>
-          {explore}
-          {REST_WORDS.map((word, index) => (
-            <motion.span
-              key={`r-${index}`}
-              initial={retired && !reduce ? { opacity: 0, y: 4, filter: "blur(3px)" } : false}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.34, delay: 0.38 + index * 0.045 }}
-            >
-              {word}
-            </motion.span>
-          ))}
-        </>
-      ) : (
-        <>
-          {NUDGE_WORDS.map((word, index) => (
-            <motion.span
-              key={`n-${index}`}
-              // no word sweep: the faster beam is the one shimmer while it
-              // nudges (Chandu, 2 Oct 2026: "remove one of the shimmers, a
-              // little too much in the first half")
-              className={undefined}
-              style={{ color: NUDGE_INK }}
-              animate={phase === "leaving" ? { opacity: 0, y: -3, filter: "blur(3px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.3, delay: phase === "leaving" ? index * 0.012 : 0 }}
-            >
-              {word === "#arrows" ? (
-                <><HintGlyph><ChevronUp className="h-3 w-3 lg:hidden" /><ChevronDown className="h-3 w-3 lg:hidden" /><ChevronLeft className="hidden h-3 w-3 lg:block" /><ChevronRight className="hidden h-3 w-3 lg:block" /></HintGlyph>,</>
-              ) : word === "#x" ? (
-                <><HintGlyph><X className="h-3 w-3" /></HintGlyph>,</>
-              ) : word}
-            </motion.span>
-          ))}
-          {explore}
-        </>
-      )}
-    </span>
-  );
-}
+// demo: under the welcomes' prefix, so a reload clears it like theirs;
+// otherwise remembered for good
+const TOP3_BAR_CLOSED = "dreamari:welcome:top3-bar-closed";
+const TOP3_BAR_CLOSED_KEEP = "dreamari:top3-bar-closed";
 
-/** A control glyph drawn the way the real control looks, for the hint line. */
-function HintGlyph({ children }: { children: React.ReactNode }) {
+/** One action in Top 3's action bar: an icon and one or two words. Reorder
+ *  and Remove "spot" the cards' own controls (hover/focus to show, tap to
+ *  flash on touch); the rest act or link. */
+function ActionChip({ Icon, label, href, active = false, spark = false, onSpot, onEnter, onLeave, onUse }: {
+  Icon: LucideIcon; label: string; href?: string; active?: boolean; spark?: boolean;
+  onSpot?: () => void; onEnter?: () => void; onLeave?: () => void; onUse?: () => void;
+}) {
+  const cls = "dm-quiet relative flex min-h-[38px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[12px] text-[14px] font-semibold whitespace-nowrap";
+  const style = { color: active ? "var(--foreground)" : "color-mix(in srgb, var(--foreground) 82%, transparent)", background: active ? "color-mix(in srgb, var(--primary) 22%, transparent)" : undefined };
+  const inner = (
+    <>
+      <Icon className="h-[15px] w-[15px] flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden />
+      {label}
+      {spark && <span aria-hidden className="absolute top-[6px] right-[6px] size-[7px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 0 2px var(--inset-surface)" }} />}
+    </>
+  );
+  if (href) return <Link href={href} onClick={onUse} className={cls} style={style}>{inner}</Link>;
   return (
-    <span aria-hidden className="mr-[1px] ml-[3px] inline-flex h-[20px] min-w-[20px] translate-y-[-1px] items-center justify-center gap-[1px] rounded-full border px-[3px] align-middle" style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-      {children}
-    </span>
+    <button type="button" onClick={onSpot} onMouseEnter={onEnter} onMouseLeave={onLeave} onFocus={onEnter} onBlur={onLeave} aria-pressed={onEnter ? active : undefined} className={cls} style={style}>
+      {inner}
+    </button>
   );
 }
 
 export function Top3Tab({
-  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, onPlan, showTour, onTourDone, hintPaused = false,
+  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, onPlan, onOpenBuild, buildNudge = false, showTour, onTourDone, hintPaused = false,
 }: {
   top3: string[];
   focusId: string | null;
@@ -1614,12 +1579,16 @@ export function Top3Tab({
   onGoReport: () => void;
   /** v2 (lib/top3Flow): make this career #1 and open its path in My Plan */
   onPlan?: (id: string) => void;
+  /** the action bar's Redo My Build */
+  onOpenBuild?: () => void;
+  /** My Build never opened: its button carries the spark */
+  buildNudge?: boolean;
   showTour: boolean;
   onTourDone: () => void;
   /** a popup is over the page: the hint's reading clock waits */
   hintPaused?: boolean;
 }) {
-  const { show: hint, retired: hintRetired, retire: retireHint } = useRankHint();
+  const { show: hint, retire: retireHint } = useRankHint();
   // Not permanent, but read (28 Sept 2026: "I don't want the nudge to be
   // permanent. How can we solve but make sure it's read?"): the clock only
   // runs while the banner is fully on screen, nothing covers the page and
@@ -1627,41 +1596,62 @@ export function Top3Tab({
   // move or remove ends the nudge at once: they've got it.
   const nudging = hint !== false && top3.length > 1;
   const flowV2 = useTop3FlowV2();
-  const [holding, setHolding] = useState(false);
-  const [pulse, setPulse] = useState(false);
-  const pulsed = useRef(false);
-  const clockOn = hint === true && top3.length > 1 && !hintPaused && !holding;
+  // The action bar (19 Oct 2026, focus group: redoing the Build, exploring
+  // more careers, moving and removing Top 3 cards "were not clear to some
+  // users"; Chandu: "make it very obvious but not by adding more text").
+  // Show, don't tell: Reorder and Remove light up the real controls on the
+  // cards (hover, focus or tap), and the first time the bar is on screen it
+  // plays that once by itself: the arrows, then the X's, then it settles.
+  const [spot, setSpot] = useState<"move" | "remove" | null>(null);
+  const spotTimer = useRef<number | null>(null);
+  const flash = (which: "move" | "remove") => {
+    setSpot(which);
+    if (spotTimer.current) window.clearTimeout(spotTimer.current);
+    spotTimer.current = window.setTimeout(() => setSpot(null), 2200);
+  };
+  // The bar teaches once, then steps back (19 Oct 2026, Chandu: "is that
+  // banner going to stay permanently there? NO x to close it etc? I feel
+  // like that just adds to more clutter"). It closes with its X or once the
+  // student uses any Top 3 action, and folds into one quiet "Edit Top 3"
+  // under the cards that brings it back. null until storage is read, so a
+  // returning student never sees it flash. DEMO-ONLY: per session in demo
+  // mode, like the welcomes, so a demo shows it again after a reload.
+  const [barOpen, setBarOpen] = useState<boolean | null>(null);
+  useEffect(() => {
+    let closed = false;
+    try { closed = DEMO_ALWAYS_SHOW_SPLASH ? demoSeenThisSession(TOP3_BAR_CLOSED) : window.localStorage.getItem(TOP3_BAR_CLOSED_KEEP) === "1"; } catch { /* no storage: show it */ }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only storage read after mount
+    setBarOpen(!closed);
+  }, []);
+  const closeBar = () => {
+    setBarOpen(false);
+    // closing mid-play stops the show-don't-tell sequence at once
+    stopPlay.current = true;
+    setSpot(null);
+    if (DEMO_ALWAYS_SHOW_SPLASH) markDemoSeenThisSession(TOP3_BAR_CLOSED);
+    else try { window.localStorage.setItem(TOP3_BAR_CLOSED_KEEP, "1"); } catch { /* fine */ }
+  };
+  const played = useRef(false);
+  const stopPlay = useRef(false);
+  const playOn = hint === true && top3.length > 1 && !hintPaused;
   useEffect(() => {
     const el = document.getElementById("top3-rank-row");
-    if (!clockOn || !el) return;
-    // 2.5s of the banner on screen (Chandu, 2 Oct 2026: 3s "was too long",
-    // 1.5s "is short"; ~11 words at a normal reading pace). The clock pauses
-    // when it leaves view and resumes, rather than restarting, and counts
-    // while most of the banner is visible: restarting at full visibility
-    // meant a small scroll reset it, so people never saw the swap to the
-    // Explore line ("people will scroll a bit if it isn't fast enough").
-    const HOLD = 2500;
-    let timer: number | null = null;
-    let shownAt = 0;
-    let spent = 0;
-    const pause = () => {
-      if (timer === null) return;
-      window.clearTimeout(timer);
-      timer = null;
-      spent += performance.now() - shownAt;
-    };
+    if (!playOn || !el || played.current) return;
+    const timers: number[] = [];
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && document.visibilityState === "visible") {
-        // one pulse, the first time the student can actually see it
-        if (!pulsed.current) { pulsed.current = true; setPulse(true); window.setTimeout(() => setPulse(false), 2600); }
-        if (timer === null) { shownAt = performance.now(); timer = window.setTimeout(retireHint, Math.max(0, HOLD - spent)); }
-      } else pause();
+      if (!entry.isIntersecting || played.current || document.visibilityState !== "visible") return;
+      played.current = true;
+      observer.disconnect();
+      const at = (ms: number, fn: () => void) => timers.push(window.setTimeout(() => { if (!stopPlay.current) fn(); }, ms));
+      at(500, () => setSpot("move"));
+      at(2300, () => setSpot("remove"));
+      at(4100, () => { setSpot(null); retireHint(); });
     }, { threshold: 0.6, rootMargin: "-88px 0px -80px 0px" });
     observer.observe(el);
-    return () => { observer.disconnect(); if (timer !== null) window.clearTimeout(timer); };
-    // retireHint is stable in behaviour; re-running on its identity would restart the clock every render
+    return () => { observer.disconnect(); timers.forEach((t) => window.clearTimeout(t)); };
+    // retireHint is stable in behaviour; re-running on its identity would replay
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clockOn]);
+  }, [playOn]);
   const [moved, setMoved] = useState<string | null>(null);
   // Two ways to read the cards (6 Oct 2026, after the production profile's
   // Simple / Detailed): Simple is the poster, the name, one line and a
@@ -1708,6 +1698,7 @@ export function Top3Tab({
     [next[from], next[to]] = [next[to], next[from]];
     onReorder(next);
     retireHint();
+    closeBar();
     if (showTour) onTourDone();
     setMoved(id);
     window.setTimeout(() => setMoved((current) => (current === id ? null : current)), 900);
@@ -1719,6 +1710,7 @@ export function Top3Tab({
   };
   const remove = (id: string) => {
     retireHint();
+    closeBar();
     if (showTour) onTourDone();
     onRemove(id);
   };
@@ -1762,7 +1754,7 @@ export function Top3Tab({
   // Always three columns and three slots (Chandu, 1 Oct 2026: "make sure it
   // shows 3 slots, even when there's only one selected"): the empty ones are
   // the promise of the feature, not dead space.
-  const showHint = nudging;
+  const showHint = nudging && !flowV2;
 
   // One Top 3 card, used by the desktop row and by the phone/tablet deck.
   const buildCard = (id: string, index: number) => {
@@ -1840,7 +1832,8 @@ export function Top3Tab({
                  the star: the career the Report and Plan follow. */}
               <div className="absolute top-[8px] left-[8px] z-[3]">
                 <Coachmark
-                  active={showTour && id === tourCareerId}
+                  // v2: the action bar's play-once highlight teaches this (audit)
+                  active={showTour && !flowV2 && id === tourCareerId}
                   anchorId={id === tourCareerId ? "profile-tour-top3" : undefined}
                   label={top3.length === 1 ? "Your #1 career. Add up to 3, and remove one anytime with the X." : "Use the arrows to change your order. Your #1 leads your Report and Plan."}
                   onDismiss={onTourDone}
@@ -1849,7 +1842,7 @@ export function Top3Tab({
                   align="start"
                 >
                   <div
-                    className="flex h-[36px] items-center rounded-full border"
+                    className={`flex h-[36px] items-center rounded-full border ${spot === "move" && top3.length > 1 ? "dm-spot" : ""}`}
                     style={{ background: "rgba(5,8,20,0.62)", borderColor: isFocus ? `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))` : "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
                   >
                     {top3.length > 1 && (
@@ -1903,7 +1896,7 @@ export function Top3Tab({
                     type="button"
                     aria-label={`Remove ${career.title} from Top 3`}
                     onClick={() => remove(id)}
-                    className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full border"
+                    className={`dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full border ${spot === "remove" ? "dm-spot" : ""}`}
                     style={{ background: "rgba(5,8,20,0.62)", borderColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: "#fff" }}
                   >
                     <X className="h-4 w-4" aria-hidden />
@@ -1924,7 +1917,8 @@ export function Top3Tab({
                 <>
                   <span aria-hidden className="t3s-shade" style={{ ["--t3s-world" as string]: accent }} />
                   <div className="t3s-text pointer-events-none" style={{ ["--t3s-world" as string]: accent }}>
-                    {isFocus && <span className="t3s-primary"><Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My primary" : "Strongest match"}</span>}
+                    {/* v2: the rank pill's star already marks #1 (audit, 19 Oct 2026) */}
+                    {isFocus && !flowV2 && <span className="t3s-primary"><Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My primary" : "Strongest match"}</span>}
                     <span className="t3s-world">{career.world}</span>
                     <button type="button" onClick={() => openPeek(index)} className="t3s-title pointer-events-auto" style={{ ...posterTitleFont(career.world), textShadow: "0 2px 18px rgba(0,0,0,0.5)" }}>{career.title}</button>
                     <p className="t3s-line">{report?.glance.simple ?? careerProfile(id)?.summary ?? ""}</p>
@@ -1943,7 +1937,8 @@ export function Top3Tab({
                       <button type="button" onClick={() => openPeek(index)} className="t3s-toggle" aria-label={`Learn more about ${career.title}`}>
                         Learn more <ChevronRight className="h-4 w-4" aria-hidden />
                       </button>
-                      <button type="button" onClick={() => onPlan?.(id)} aria-label={`Plan for ${career.title}`} className="t3s-play dm-solid">Plan this</button>
+                      {/* #1 is already the plan's career: its button opens the plan (audit) */}
+                      <button type="button" onClick={() => onPlan?.(id)} aria-label={index === 0 ? `My Plan for ${career.title}` : `Plan for ${career.title}`} className="t3s-play dm-solid">{index === 0 ? "My Plan" : "Plan this"}</button>
                     </div>
                     ) : (
                     <div className="t3s-actions pointer-events-auto">
@@ -2068,37 +2063,32 @@ export function Top3Tab({
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* One banner, two moods. While nudging: the "change these anytime"
-         sentence, a faster brighter beam, the wash and a pulsing Explore
-         button, and one soft pulse ring when it first comes into view.
-         Once read: the sentence morphs into the resting Explore line and
-         the banner settles to the calm, slow beam it always had (same
-         treatment as "Do this next", direct feedback 11 Sept 2026). */}
-      <div onPointerEnter={() => setHolding(true)} onPointerLeave={() => setHolding(false)} onFocus={() => setHolding(true)} onBlur={() => setHolding(false)}>
-        <NextStepBanner
-          text={nudging ? "Change these anytime: move, remove, or add more from Explore." : flowV2 ? "Tap Plan this on the career you want to work toward." : "Explore hundreds of careers and save the ones that interest you."}
-          // v2: once the move/remove hint is read, the banner points forward to the plan
-          content={flowV2 && !nudging ? undefined : <RankBannerCopy nudging={nudging} retired={hintRetired} />}
-          ctaLabel={flowV2 ? "My Plan" : "Explore"}
-          href={flowV2 ? "/profile?tab=plan" : "/explore"}
-          Icon={Compass}
-          emphasis="priority"
-          calm={!nudging}
-          // slower ring at rest (direct feedback, 11 Sept 2026: "reduce speed and shimmer")
-          beamDuration={nudging ? 2.4 : 5}
-          // The button waits for the resting line (direct idea, 28 Sept
-          // 2026: "maybe the explore cta only appears after the first
-          // transition"): the nudge is about the cards, so nothing competes
-          // with it; the button arrives once "Explore" has led the new line.
-          ctaHidden={nudging}
-          sizeTo="Explore hundreds of careers and save the ones that interest you."
-          ctaDelayMs={hintRetired ? 1100 : 0}
-          wrapperId="top3-rank-row"
-          wrapperClassName={pulse ? "dm-banner-pulse" : ""}
-          // demo: comes back every visit; remembered once the demo flag is off
-          storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
-        />
+      {/* The action bar: the banner's sentence ("Change these anytime:
+         move, remove, or add more from Explore") became the actions
+         themselves, one or two words each, with the step that matters next
+         (v2: My Plan) on the right. Reorder and Remove point at the cards'
+         own controls instead of describing them. */}
+      {barOpen && (
+      <div id="top3-rank-row" role="toolbar" aria-label="Top 3 actions" className="flex flex-wrap items-center gap-[6px] rounded-[var(--radius-lg)] border p-[6px]" style={{ background: "var(--inset-surface)", borderColor: "var(--inset-border)" }}>
+        {top3.length > 1 && (
+          <ActionChip Icon={ArrowLeftRight} label="Reorder" active={spot === "move"} onSpot={() => flash("move")} onEnter={() => setSpot("move")} onLeave={() => setSpot(null)} />
+        )}
+        {top3.length > 0 && (
+          <ActionChip Icon={X} label="Remove" active={spot === "remove"} onSpot={() => flash("remove")} onEnter={() => setSpot("remove")} onLeave={() => setSpot(null)} />
+        )}
+        {/* the same sheet as the empty slot's Add a career: saved careers
+           first, Explore at its foot (audit: two adds went two places) */}
+        <ActionChip Icon={Plus} label="Add careers" onSpot={() => { closeBar(); onAdd(); }} />
+        <IconTip label="Into something new? Change it here and your matches follow.">
+          <ActionChip Icon={SlidersHorizontal} label="Redo My Build" onSpot={() => { closeBar(); onOpenBuild?.(); }} spark={buildNudge} />
+        </IconTip>
+        <IconTip label="Close" className="ml-auto">
+          <button type="button" onClick={closeBar} aria-label="Close Top 3 actions" className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </IconTip>
       </div>
+      )}
 
       {/* Side by side from md: up (stacked on phones only, where three columns
          would be unreadable), info running vertically inside each column --
@@ -2189,7 +2179,13 @@ export function Top3Tab({
             <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
           </button>
         ) : <span />}
-        <span />
+        {barOpen === false ? (
+          <span className="flex justify-end">
+            <button type="button" onClick={() => setBarOpen(true)} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[8px] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit Top 3
+            </button>
+          </span>
+        ) : <span />}
       </div>
 
       <AnimatePresence>
@@ -3034,6 +3030,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
   const savedOpportunityCount = useSavedOpportunityCount();
   const reportVersions = useSyncExternalStore(subscribeReportHistory, reportHistorySnapshot, serverReportHistorySnapshot);
   const meetingBooked = useMyNextMeeting() !== null;
+  const planDoneList = usePlanDone();
   const defaultGrade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
   // High School | College (Joshua Pierce, Slack, 18 Sept 2026: "expand it
   // so students can continue using it through college"). Same Fall /
@@ -3077,13 +3074,14 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
   const started = (w: GradeWindow) => SEASON_ORDER.indexOf(w.id) <= seasonNow;
   const plan = { ...basePlan, windows: basePlan.windows.map((w) => ({ ...w, steps: [{ id: startId(w), label: "START", inApp: true, title: `Start your ${w.title} ${w.id === "winter" ? "term" : "semester"}` } as GradeStep, ...w.steps] })) };
   const autoDone = new Set(plan.windows.filter(started).map(startId));
+  const planDoneIds = new Set(planDoneList.map((d) => d.id));
   if (flowV2) {
     if (reportVersions.length > 0) autoDone.add(SHARE_REPORT_ID);
     if (meetingBooked) autoDone.add(BOOK_MEETING_ID);
     if (savedSchoolsSet.size >= 3) { autoDone.add(SAVE_SCHOOLS_ID); autoDone.add("g11-fall-explore"); }
     if (savedOpportunityCount > 0) autoDone.add(SAVE_PROGRAM_ID);
   }
-  const isDone = (id: string) => done.has(id) || autoDone.has(id);
+  const isDone = (id: string) => (flowV2 ? planDoneIds.has(id) : done.has(id)) || autoDone.has(id);
   const allSteps = plan.windows.flatMap((w) => w.steps).filter((s) => !s.optional);
   const doneCount = allSteps.filter((s) => isDone(s.id)).length;
   const pct = Math.round((doneCount / Math.max(allSteps.length, 1)) * 100);
@@ -3099,13 +3097,20 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per plan shown
   }, [planKey]);
 
-  const toggle = (id: string) =>
+  // v2 keeps the ticks (lib/planDone) so the Career Report can log them
+  const toggle = (id: string) => {
+    if (flowV2) {
+      const step = plan.windows.flatMap((w) => w.steps).find((x) => x.id === id);
+      if (step) togglePlanDone({ id, title: step.title }, focus?.id ?? null);
+      return;
+    }
     setDone((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
+  };
 
   const chip = (on: boolean, onClick: () => void, label: string, key: string, group: string) => (
     <button key={key} type="button" role="tab" aria-selected={on} onClick={onClick} className="dm-quiet relative flex h-[24px] min-w-[24px] cursor-pointer items-center justify-center rounded-[6px] px-[8px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
@@ -3687,6 +3692,11 @@ export function CompareTable({ routes, selectedId }: { routes: ProfileCareer["ro
 
 // ---- Locker tab: rich poster grid ----
 
+function CollegeGoalSchools() {
+  const goal = useCollegeGoal();
+  return <CollegeGoalView goal={goal} embedded />;
+}
+
 export function SchoolsShelf() {
   const router = useRouter();
   const [saved, toggleSaved] = useSavedColleges();
@@ -3823,6 +3833,7 @@ export function VideosShelf() {
 
 export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = false }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void; /** inside a tab (v2) or under Top 3 (v3): no close button */ embedded?: boolean }) {
   const router = useRouter();
+  const flowV2 = useTop3FlowV2();
   // The locker holds everything a student saves across Dreamari, grouped
   // into the four categories students actually save (direct feedback, 16
   // Sept 2026, Slack): careers, schools, videos (Explore's "Videos Inside
@@ -3891,7 +3902,9 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
       {shelf === "events" ? (
         <EventStubs />
       ) : shelf === "schools" ? (
-        <SchoolsShelf />
+        // v2: the shelf IS College Goal (Reach / Target / Likely, the #1
+        // star), so About Me can go (audit, 19 Oct 2026)
+        flowV2 ? <CollegeGoalSchools /> : <SchoolsShelf />
       ) : shelf === "opportunities" ? (
         <OpportunitiesShelf />
       ) : shelf === "videos" ? (

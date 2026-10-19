@@ -1323,3 +1323,13 @@ html.light .event-card {
   --ev-qr-border: rgba(16, 26, 38, 0.14);
   --ev-qr-ink: #101a26;
 }
+
+/* Top 3 action bar's "spot" (19 Oct 2026): Reorder and Remove light the
+   cards' own controls instead of describing them. A ring inside the
+   element's own shape, no spread halo (hover states follow the shape). */
+@keyframes dm-spot-ring {
+  0%, 100% { box-shadow: 0 0 0 2px var(--primary); }
+  50% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 45%, #ffffff); }
+}
+.dm-spot { box-shadow: 0 0 0 2px var(--primary); animation: dm-spot-ring 1.1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .dm-spot { animation: none; } }

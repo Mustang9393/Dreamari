@@ -1,3 +1,12 @@
+## 2026-10-19: v2 Top 3 action bar and the v2 redundancy audit
+
+**Why (focus group, via Chandu):** redoing the Build, exploring more careers, and moving or removing Top 3 cards "were not clear to some users". Chandu: "make it very obvious but not by adding more text everywhere... the banner we currently have also needs a redesign", then "is that banner going to stay permanently there? NO x to close it etc? I feel like that just adds to more clutter", then "audit v2 for redundancies".
+
+- **Action bar (Top 3, both versions):** the banner's sentence became the actions: Reorder, Remove, Add careers, Redo My Build (keeps My Build's tooltip and spark). Reorder and Remove light the cards' own controls (`.dm-spot`, a ring inside the shape) on hover, focus or tap; the first time the bar is on screen it plays that once (arrows, then X's). It closes with its X or once any Top 3 action is used, and folds into "Edit Top 3" under the cards (demo mode: per session; otherwise remembered, `dreamari:top3-bar-closed`).
+- **v2 audit fixes:** (1) the "Strongest match" chip is gone (the rank pill's star marks #1); (2) the #1 card's button says My Plan, the others Plan this; (3) the bar's Add careers opens the same sheet as the empty slot (saved first, Explore at its foot); (4) the old first-visit coachmark and arrow pulse are off in v2, the bar teaches; (5) About Me is hidden in v2: Saved > Schools is College Goal (Reach / Target / Likely, the #1 star), `?goal=` links land on that Saved shelf, old About Me links open Top 3; (6) My Plan ticks are kept in v2 (`lib/planDone.ts`) and the Career Report's "Logged in Dreamari" lists them (DEMO-ONLY seeds until the first tick).
+- The v2 switch moved from Quick links to a quiet "V2 PROFILE" toggle at the foot of My Profile.
+- **Checked:** full `npx tsc --noEmit` (note: earlier quick checks prefixed with `timeout` never ran; macOS has no `timeout`), eslint on changed files, local :3013 desktop and phone: bar play and fold, Saved > Schools as College Goal, Report log from plan ticks. **Not checked:** light mode, Windows/ChromeOS, tokens:check.
+
 ## 2026-10-19: the look switch moves to a Color control, bottom-left
 
 **Why (Chandu):** "rename the blue thing to be a small control on the bottom of the page on the left to toggle the color theme. Remove from the hamburger menu."
@@ -7,6 +16,7 @@
 - It carries `marketing-v2 themeable` so its colours follow light/dark, with fallbacks for routes that don't load tokens.css. Light mode's tokens.css block gives every `.marketing-v2.themeable` `min-height: 100%` (meant for page roots): the control stretched to the full screen height until an inline `min-height: auto`. Worth knowing for any other small element that borrows that scope.
 - Listed in HANDOFF_INDEX's Demo vs Production section.
 - Checked: tsc, eslint; desktop and 375px phone, dark and light, both options, the menu no longer has the row. In local dev the Next.js "N" badge overlaps the control's label; that badge doesn't exist on Vercel. Pushed to main on Chandu's go-ahead.
+
 
 ## 2026-10-19: v2 look, light that behaves like light (rim, state, data, moments)
 
