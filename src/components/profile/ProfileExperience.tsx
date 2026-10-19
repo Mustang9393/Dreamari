@@ -1176,6 +1176,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <AboutMeTab
               key={aboutStart.n}
               top3={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
+              primary={primaryChosen && chosenPrimaryId ? careerById(chosenPrimaryId) : null}
               saved={savedLocker}
               onAddToTop3={addToTop3}
               onGoTab={setTab}

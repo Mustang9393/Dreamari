@@ -25,13 +25,13 @@ import { Listbox } from "@/components/app/Listbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { openCareerPeek, openSchoolPeek } from "@/components/app/peek";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { collegeImage, type College } from "@/components/colleges/data";
+import { COLLEGES, collegeImage, type College } from "@/components/colleges/data";
 import { useResolvedColleges } from "@/components/colleges/dataset";
+import { CollegePlaceholder } from "@/components/colleges/CollegePlaceholder";
 import { CollegePicture, useGoalBuckets, useSaved as useSavedColleges, useTopSchool, type GoalBucket } from "@/components/colleges/shared";
 import { fitFor, parseGpa } from "@/components/colleges/pathway";
 import { useBackStep } from "@/lib/backStep";
 import { SpotBadge, SpotTip, useSpotSequence } from "./SpotTip";
-import { CollegePlaceholder } from "@/components/colleges/CollegePlaceholder";
 import { flyXp } from "@/components/app/xpFlight";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession } from "@/components/app/WelcomeSplash";
 import { useBuildAnswers } from "@/lib/buildAnswers";
@@ -124,9 +124,11 @@ function useGoalFlag(key: string): [boolean, () => void] {
   return [set, () => writeGoalFlag(key)];
 }
 
-export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 }: {
-  /** Top 3 in rank order; [0] is the primary career */
+export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenBuild, v2 }: {
+  /** Top 3 in rank order */
   top3: ProfileCareer[];
+  /** the #1 career the student picked; null until they pick one (a Top 3 alone doesn't set it) */
+  primary: ProfileCareer | null;
   /** saved careers not in the Top 3, newest first */
   saved: ProfileCareer[];
   onAddToTop3: (id: string) => void;
@@ -207,11 +209,12 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
   if (view === "career") return <CareerGoalView top3={top3} saved={saved} onBack={() => setView("home")} onAddToTop3={onAddToTop3} onGoTab={onGoTab} />;
   if (view === "college") return <CollegeGoalView goal={college} onBack={() => setView("home")} />;
 
-  const primary = top3[0] ?? null;
   if (v2) {
     // Before a goal is set, the card shows the likeliest choice out of
     // focus: the #1 of the Top 3 (else the newest save), the #1 school (else
     // the newest saved school).
+    // the Career Goal, once confirmed, is whatever is #1 in the Top 3
+    const goalCareer = top3[0] ?? null;
     const lead = top3[0] ?? saved[0] ?? null;
     const leadSchool = college.top ?? college.schools[0]?.c ?? null;
     return (
@@ -219,10 +222,10 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
         <section aria-labelledby="about-goals" className="flex flex-col gap-[var(--space-3)]">
           <SectionHead id="about-goals" title="My Goals" />
           <div className="grid gap-[var(--space-3)] md:grid-cols-2">
-            {careerSet && primary ? (
+            {careerSet && goalCareer ? (
               <GoalCard
-                kind="Career Goal" Icon={Briefcase} title={primary.title} accent={WORLD_COLORS[primary.world]}
-                picture={<FacePhoto src={primary.photo} sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" fallback={primary.photoFocus ?? "50% 30%"} />}
+                kind="Career Goal" Icon={Briefcase} title={goalCareer.title} accent={WORLD_COLORS[goalCareer.world]}
+                picture={<FacePhoto src={goalCareer.photo} sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" fallback={goalCareer.photoFocus ?? "50% 30%"} />}
                 onOpen={() => go("career")} openLabel="Open Career Goal"
                 focusIn={justSet === "career"}
               />
@@ -267,7 +270,7 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
           {careerSet && (
             <NextStepRow
               title="See your plan to get there"
-              sub={primary ? `Steps toward ${primary.title}${collegeSet && college.top ? ` and ${college.top.name}` : ""}` : undefined}
+              sub={goalCareer ? `Steps toward ${goalCareer.title}${collegeSet && college.top ? ` and ${college.top.name}` : ""}` : undefined}
               nudge={collegeSet}
               onClick={() => onGoTab("plan")}
             />
@@ -278,6 +281,7 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
       </div>
     );
   }
+  const demoCollegePicture = college.top ?? college.schools.find((s) => collegeImage(s.c))?.c ?? COLLEGES.find((c) => collegeImage(c)) ?? null;
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
       <section aria-labelledby="about-goals" className="flex flex-col gap-[var(--space-3)]">
@@ -286,17 +290,27 @@ export function AboutMeTab({ top3, saved, onAddToTop3, onGoTab, onOpenBuild, v2 
           <GoalCard
             kind="Career Goal"
             Icon={Briefcase}
-            title={primary ? primary.title : "Pick a career you’re working toward"}
-            accent={primary ? WORLD_COLORS[primary.world] : undefined}
-            picture={primary ? <FacePhoto src={primary.photo} sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" fallback={primary.photoFocus ?? "50% 30%"} /> : null}
-            onOpen={() => go("career")}
+            title={primary ? primary.title : top3.length ? "Pick your #1 career" : "Pick a career you’re working toward"}
+            accent={(primary ?? top3[0]) ? WORLD_COLORS[(primary ?? top3[0]).world] : undefined}
+            // No #1 picked yet (Chandu, 19 Oct 2026: "they will already have 3
+            // but will not have fixed a primary"): the top-ranked career's photo
+            // stands in ("careers will have images for sure"), and the card
+            // opens Top 3, where the #1 is set.
+            picture={(primary ?? top3[0]) ? <FacePhoto src={(primary ?? top3[0]).photo} sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" fallback={(primary ?? top3[0]).photoFocus ?? "50% 30%"} /> : null}
+            onOpen={() => (primary || !top3.length ? go("career") : onGoTab("top3"))}
             openLabel="Open Career Goal"
           />
           <GoalCard
             kind="College Goal"
             Icon={GraduationCap}
             title={college.top ? college.top.name : college.schools.length ? "Pick your #1 school" : "Pick a school you’re working toward"}
-            picture={college.top ? <GoalSchoolPicture c={college.top} sizes="(min-width: 768px) 50vw, 100vw" /> : null}
+            // No #1 school yet. Production: the school cards' hall (Chandu, 19
+            // Oct 2026: "this should be used for schools/college goal").
+            // DEMO-ONLY: the demo shows a real campus photo instead, the first
+            // saved school with one, else the first hand-built school with one
+            // (Chandu: "The vercel should not show any using the fallbacks
+            // though. Since its the demo we want pictures everywhere").
+            picture={demoCollegePicture ? <CollegePicture c={demoCollegePicture} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0 h-full w-full" /> : <CollegePlaceholder dark wide className="absolute inset-0" />}
             onOpen={() => go("college")}
             openLabel="Open College Goal"
           />
