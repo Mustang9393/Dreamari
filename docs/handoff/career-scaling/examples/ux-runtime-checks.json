@@ -35,14 +35,15 @@
       "Scoped ESLint, TypeScript, token check and production build",
       "Old three-scene manifest rejected with 85 errors",
       "Generated selected scenes inspected during generation",
-      "First decision and wireframe artifact rendered in local player"
+      "First decision and wireframe artifact rendered in local player",
+      "Midpoint shared component: pass at 75, fail at 50, both Continue actions verified",
+      "Actual UX1-23 form: required-colour and vague-error flags score Best, +5 to 55"
     ],
     "pending": [
-      "Midpoint pass/fail browser checks after full revision",
       "Phone framing after final POV shots",
       "Full end-to-end replay of expanded revision",
       "Human content and visual continuity QA"
     ],
-    "browserInterruption": "Browser unavailable following app restart; release checks will resume where possible"
+    "browserInterruption": "Reconnected after restart; checked both shared midpoint branches and actual form decision"
   }
 }
