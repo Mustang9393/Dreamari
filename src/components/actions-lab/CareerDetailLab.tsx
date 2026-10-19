@@ -636,7 +636,7 @@ export function CareerDetailLab({ slug, live = false, outlook = false }: {
            lower half. */}
         {/* on-dark-media: the hero is a dark photo in both themes, so it keeps
            the bright world colours in light mode too (app.css, 9 Oct 2026). */}
-        <section className="on-dark-media relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+        <section data-focal className="on-dark-media relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
           {/* Faces stay in frame (direct feedback): the poster photos carry the
              subject in their upper part, so the crop anchors near the top. On
              phones the photo runs behind the whole card; from md up it sits on

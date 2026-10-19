@@ -77,6 +77,30 @@ html.look-v2 .marketing-v2 {
   --poster-scrim: linear-gradient(180deg, rgba(0, 1, 5, 0) 0%, rgba(0, 1, 5, 0.55) 30%, rgba(0, 1, 5, 0.86) 51%, #000105 100%);
 }
 
+/* Opaque surfaces over the sky (19 Oct, Chandu: "make sure no card or
+   surface is transparent to the point that they do not even blur the stars
+   in the background. It causes legibility issues"). The dark surface tokens
+   were white tints (3% and 9%), so stars showed through cards at full
+   sharpness behind text. Blurring every panel would cost a recomposite per
+   frame (perf rule: no backdrop-filter on persistent panels), so under
+   Black & Blue they become near-opaque blue-blacks (94-96%), each step
+   lighter than the one below it, so stacked surfaces still lift. */
+html.look-v2:not(.light) .marketing-v2 {
+  --surface: #0d1119;
+  --muted: rgba(16, 20, 28, 0.94);
+  --secondary: rgba(26, 32, 43, 0.95);
+  --glass-surface-1: rgba(16, 20, 28, 0.94);
+  --glass-surface-2: rgba(25, 31, 42, 0.95);
+  --glass-surface-3: rgba(12, 16, 26, 0.96);
+  --inset-surface: rgba(30, 36, 49, 0.94);
+}
+html.look-v2:not(.light) {
+  --color-glass-surface-1: rgba(16, 20, 28, 0.94);
+  --color-glass-surface-2: rgba(25, 31, 42, 0.95);
+  --color-glass-surface-3: rgba(12, 16, 26, 0.96);
+  --color-glass-surface-raised: rgba(30, 37, 50, 0.95);
+}
+
 /* ---------- Light ---------- */
 html.look-v2.light {
   --background: #f3f6f9;
@@ -139,6 +163,10 @@ html.look-v2 [data-app-backdrop] {
     radial-gradient(56% 40% at 50% -6%, rgba(89, 160, 248, 0.42) 0%, rgba(39, 128, 236, 0.16) 46%, transparent 78%),
     radial-gradient(90% 60% at 50% -18%, rgba(23, 106, 207, 0.26) 0%, transparent 72%),
     radial-gradient(80% 34% at 50% 108%, rgba(39, 128, 236, 0.36) 0%, rgba(17, 87, 172, 0.14) 50%, transparent 80%),
+    /* the horizon (19 Oct, Joshua: "slightly gloomy"; Chandu: no navy lift
+       of the black): only the lower sky picks up a deep blue, the way a real
+       night is brighter near the ground. The ground itself stays #000105. */
+    linear-gradient(to top, rgba(14, 52, 110, 0.24) 0%, rgba(10, 36, 80, 0.09) 30%, transparent 58%),
     #000105 !important;
 }
 html.look-v2 [data-app-backdrop]::after {
@@ -352,6 +380,35 @@ html.look-v2 [data-spark-head] {
    a progress step happens. Opacity and scale only; skipped for reduced
    motion. */
 
+/* 5. One focal light per screen (19 Oct, Joshua: "stronger visual focal
+   points to give the interface more dimension"): the screen's hero block
+   (data-focal: Home's highlights banner, a career's header) catches the
+   header light on its top edge, a touch brighter than a card's rim, and
+   sits on a plain dark shadow for depth. No glow around it: a first pass
+   pooled blue light around these blocks and Chandu called it "too much
+   glow. Lets not do glows for the sake of glows. It looks messy." The
+   career header's world-coloured glow is replaced by the same plain
+   shadow. */
+html.look-v2:not(.light) [data-focal] {
+  box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.7) !important;
+}
+html.look-v2:not(.light) [data-focal]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(70% 140% at 50% 0%, rgba(207, 228, 253, 0.85) 0%, rgba(120, 175, 250, 0.25) 40%, transparent 72%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+html.look-v2.light [data-focal] {
+  box-shadow: 0 14px 34px -20px rgba(16, 42, 80, 0.35) !important;
+}
+
 /* ---------- 4. Controls ---------- */
 /* One lit action per screen (19 Oct 2026): the hero action sits on a small
    pool of light, as reference 3's input sits on its glow. Only these carry
@@ -359,7 +416,10 @@ html.look-v2 [data-spark-head] {
    Home's hero banner action, the landing's primary. Every other button is
    flat. The light is outside the fill, so text contrast is unchanged. */
 html.look-v2 [data-lit] {
-  box-shadow: 0 12px 34px -12px rgba(39, 128, 236, 0.85), 0 0 46px -14px rgba(89, 160, 248, 0.55) !important;
+  /* the sky-blue fill already makes it the brightest thing on the screen;
+     a small soft shadow seats it, no halo (19 Oct: "no glows for the sake
+     of glows") */
+  box-shadow: 0 8px 20px -12px rgba(39, 128, 236, 0.55) !important;
   border-radius: var(--radius-md);
 }
 html.look-v2.light [data-lit] {
@@ -369,9 +429,26 @@ html.look-v2 [data-lit]:is(:disabled, [aria-disabled="true"]) {
   box-shadow: none !important;
 }
 
+/* The one lit action is the brightest thing on a dark screen (19 Oct,
+   Joshua: "brighter cobalt and sky-blue accents against the dark surfaces"):
+   sky blue #59a0f8 with near-black ink, 7.0:1, instead of white on cobalt.
+   Every other button stays cobalt, so it never reads as a theme of bright
+   buttons. Light mode keeps cobalt: sky blue on white would fail AA. */
+html.look-v2:not(.light) :is(button, a)[data-lit],
+html.look-v2:not(.light) [data-lit] :is(button, a),
+html.look-v2:not(.light) [data-mkt-btn="primary"] {
+  background: #59a0f8 !important;
+  color: #04101e !important;
+}
+html.look-v2:not(.light) :is(button, a)[data-lit]:hover,
+html.look-v2:not(.light) [data-lit] :is(button, a):hover,
+html.look-v2:not(.light) [data-mkt-btn="primary"]:hover {
+  background: #74b0f8 !important;
+}
+
 html.look-v2 [data-mkt-btn="primary"] {
   background: var(--primary) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 12px 34px -12px rgba(39, 128, 236, 0.85), 0 0 46px -14px rgba(89, 160, 248, 0.55) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 8px 20px -12px rgba(39, 128, 236, 0.55) !important;
 }
 html.look-v2.light [data-flow-space] {
   background: #f3f6f9 !important;
