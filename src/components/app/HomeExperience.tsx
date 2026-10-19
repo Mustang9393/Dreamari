@@ -74,7 +74,13 @@ function CaptionLabel({ color, children }: { color: string; children: React.Reac
  *  carry the type; the text block rises in with a stagger each time the
  *  panel comes round. Eyebrow, big title, one HUD line, one action, all in
  *  one tight block at the foot. */
-const FROST = "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)";
+/* The frost stops at the title's right edge (~44%), not the text column's
+   (64%): ending at 64% laid a 16px blur over any subject standing in the
+   middle of the photo (the nurse, 19 Oct 2026, Chandu: "the character is
+   being blurred too much... on all devices"). The dark scrim, not the
+   blur, is what keeps the type legible past that point. */
+const FROST = "linear-gradient(90deg, black 0%, black 18%, rgba(0,0,0,0.5) 32%, transparent 44%)";
+const FROST_PHONE = "linear-gradient(to top, black 0%, black 12%, rgba(0,0,0,0.5) 24%, transparent 36%)";
 
 export function HeroPanel({
   active,
@@ -136,7 +142,7 @@ export function HeroPanel({
                (not backdrop-filter) because the photo pushes in while the
                panel shows, and backdrop layers re-rasterising over a moving
                image flickered along the card edges. */}
-            <span className="absolute -inset-[3%] sm:hidden" style={{ maskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)", WebkitMaskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)" }}>
+            <span className="absolute -inset-[3%] sm:hidden" style={{ maskImage: FROST_PHONE, WebkitMaskImage: FROST_PHONE }}>
               <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
             </span>
             {!inset && (
