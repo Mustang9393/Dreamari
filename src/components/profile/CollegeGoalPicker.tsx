@@ -132,14 +132,16 @@ export function CollegeGoalPicker({ careerIds, saved, onPick, onClose }: {
             <div key={list} className="myb-scroll dm-rise" style={{ justifyContent: "flex-start" }}>
               <p className="pb-[var(--space-3)] text-[14px] leading-[19px]" style={{ color: "var(--myb-mute)" }}>{current.note}</p>
               {lists[list].length ? (
-                // Never narrower than Explore's own cards (~300px): the columns
-                // follow the width, the cards keep their shape (Chandu: "do not
-                // distort the school cards like this")
-                <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] gap-[var(--space-4)] p-0">
+                // Three across (two on small tablets, one on phones), each card
+                // scaled as a whole to its column so it keeps Explore's exact
+                // shape (Chandu, 19 Oct 2026: "Can we not fit 3 in a row ...
+                // make the cards uniformly and proportionately smaller"; before
+                // that, "do not distort the school cards like this")
+                <ul className="grid list-none grid-cols-1 gap-[var(--space-4)] p-0 min-[520px]:grid-cols-2 md:grid-cols-3">
                   {lists[list].map(({ college: c, line }) => (
-                    <li key={c.slug} className="min-w-0">
+                    <ScaledCard key={c.slug}>
                       <SchoolCard c={c} saved={savedSet.has(c.slug)} onSave={() => toggleSaved(c.slug)} compared={false} program={line ? shortProgram(line) : undefined} onOpen={() => setDetail(c)} />
-                    </li>
+                    </ScaledCard>
                   ))}
                 </ul>
               ) : (
@@ -181,5 +183,38 @@ export function CollegeGoalPicker({ careerIds, saved, onPick, onClose }: {
       </motion.div>
     </ThemeProvider>,
     document.body,
+  );
+}
+
+// Explore's school card is designed at about 310 x 420 (SchoolCard is a fixed
+// 420px tall). Laid out at that width and zoomed to the column, it shrinks or
+// grows as one picture: photo, type, chips and stats keep their proportions.
+const CARD_W = 310;
+
+/** One grid cell that scales its card uniformly to the cell's width. */
+function ScaledCard({ children }: { children: React.ReactNode }) {
+  const cell = useRef<HTMLLIElement>(null);
+  // null: one card per row (phones), which simply fills the row, as Explore does
+  const [scale, setScale] = useState<number | null>(1);
+  useEffect(() => {
+    const el = cell.current;
+    if (!el) return;
+    const fit = () => {
+      // layout widths (clientWidth), not screen ones: the app zooms the whole
+      // page on wide screens, which getBoundingClientRect would count twice
+      const w = el.clientWidth;
+      const row = el.parentElement?.clientWidth ?? w;
+      if (w <= 0) return;
+      setScale(w > row * 0.9 ? null : w / CARD_W);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <li ref={cell} className="min-w-0">
+      {scale === null ? children : <div style={{ width: CARD_W, zoom: scale }}>{children}</div>}
+    </li>
   );
 }
