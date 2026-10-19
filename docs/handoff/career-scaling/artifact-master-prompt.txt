@@ -1,0 +1,20 @@
+DREAMARI · CAREER WORK GRAPHICS
+
+CAREER / PROJECT: {DERIVE_FROM_GAME_BRIEF}
+BEAT IDS / OBJECTIVE: {DERIVE_FROM_SCREEN_MAP}
+PLAYER TASK: {WHAT_THE_PLAYER_MUST_NOTICE_OR_DECIDE}
+SOURCES / FICTIONAL DATA: {SOURCE_LEDGER_AND_PROJECT_RECORD}
+EXISTING COMPONENTS: {INSPECT_CURRENT_ENGINE}
+
+The AI plans, designs, renders, integrates and tests the graphics. Human involvement is QA of the playable result. Fill every field from the game's work and teaching; do not ask a human to design the artifact.
+
+1. Decide whether this beat needs a graphic. If it does, select the most useful family: flow/sequence, interface/prototype, labelled diagram/plan, document/table/chart, or scenario comparison. Use the career's real deliverable and evidence. Do not reuse another career's nouns or add a graphic just to fill a slot.
+2. Create a versioned spec: graphic ID, beat IDs, learning objective, family, what must be noticed, canonical data, labels/values/units/connections, state IDs, related key IDs and supporting evidence, source or fictional status, caption, alt/text equivalent, rendering route, responsive layout and allowed version changes. Keep it in the handoff with the game.
+3. Use one canonical record for both the displayed evidence and the question/key checks. Compute or check values and links before rendering. A before/after comparison keeps the same task and records every intentional change. Teaching may annotate a finding; scored evidence must not silently highlight the answer.
+4. Reuse native document/table/chat/graphic components and shared world tokens. Render task-critical words, values, diagrams and interface labels as native HTML/SVG/text. Make screens and prototypes visibly designed with hierarchy, alignment, states and useful spacing; don't substitute a paragraph or tiny monitor picture for inspectable work.
+5. If there is no suitable generic renderer, implement one small shared data-driven graphic primitive. Keep career content in data and use two materially different career fixtures to test reuse. Do not add career-ID layout branches, custom scoring, a new gameplay type or copied per-career components. A graphic may support an existing interaction without becoming a second interface the student must learn.
+6. Use image generation only where pictorial evidence or illustration helps. Apply the scene art standard when a graphic depicts people or a workplace. Keep key text/numbers out of generated raster pixels. Match any artifact shown inside a scene to the canonical project/state; supply the readable authoritative version beside the task.
+7. Test actual phone and desktop rendering, label/value/connection agreement, before/after differences, keys, text equivalents, keyboard access and image failure states. No colour-only or hover-only evidence, clipped instructions, fake controls, invented professional data or answer-revealing emphasis. Repair failures before human QA.
+8. Deliver the spec, canonical data, renderer/asset, exact generation prompt when used, provenance, coverage map and checks performed. Report unrun checks and unresolved gaps. Never call a proposed graphic implemented or a fixture a validated complete career.
+
+For UX Designer, derive a coherent sign-up journey, research evidence, wireframes and prototype states where the lesson needs them. For any other career, derive its own work artifacts from the assignment; these examples are not a universal graphic checklist.

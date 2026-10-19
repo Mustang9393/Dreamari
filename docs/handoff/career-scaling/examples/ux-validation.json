@@ -1,0 +1,57 @@
+{
+  "career": "ui-ux-designer",
+  "status": "structural checks passed; human and runtime review are separate",
+  "assertions": 281,
+  "levels": [
+    {
+      "id": "ux-l1",
+      "screens": 36,
+      "scored": 10,
+      "questionTypes": [
+        "choice",
+        "match",
+        "bucket",
+        "rapid",
+        "rank",
+        "flags",
+        "chain",
+        "pick"
+      ],
+      "bespoke": []
+    }
+  ],
+  "sceneAssets": {
+    "northline-studio": {
+      "src": "/images/play/ux/studio.png",
+      "fileSha256": "a488d2907ab2d5c6b703a8586fbf15d671009f39d5425914a2da7408e6973192",
+      "pixelSha256": "863fd539ef301538557d618e2eaaf56d1b2250f1fb1151f016f553c2e9671ea2",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "northline-research": {
+      "src": "/images/play/ux/research.png",
+      "fileSha256": "280c6fd8ee55f8eff8c25adac88ff33c9327435a56ad05c2768f8877e0e60857",
+      "pixelSha256": "76d0ed630a647417d0efbbacd8a28ebf29e4491cb2564ea3524ced3e1381ab4f",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "northline-review": {
+      "src": "/images/play/ux/review.png",
+      "fileSha256": "1a0881407545efcc7eb636dc117d3db3d12ecb4feadf00c84eb1d569258341a1",
+      "pixelSha256": "921e50231d75a845c7b7531f119b33db66a8b2322725d3497e0380b72076757f",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    }
+  },
+  "routedBeats": 35,
+  "errors": [],
+  "notCertified": [
+    "Subject-matter correctness",
+    "Aesthetic approval",
+    "All runtime branches",
+    "Windows/Chromebook hardware"
+  ]
+}

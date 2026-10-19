@@ -45,8 +45,8 @@ export type SceneLocation = {
 };
 
 export type CastMember = {
-  /** the face worn before any answer exists */
-  default: string;
+  /** Legacy on-stage sprite; absent when people are already in a full scene. */
+  default?: string;
   /** reaction per answer tier, shown on the feedback card */
   tiers?: Partial<Record<Tier, string>>;
   /** extra named expressions a beat can ask for (Beat.castPose), for a face
@@ -65,8 +65,8 @@ export type CareerArt = {
   career: string;
   /** public/images/play/<folder> */
   folder: string;
-  /** "full-figure-1024x2048" is the standard for every new career */
-  spriteStandard: "full-figure-1024x2048" | "waist-up-legacy";
+  /** New career art uses complete scenes; the other formats preserve legacy games. */
+  spriteStandard: "full-figure-1024x2048" | "waist-up-legacy" | "full-scene";
   notes?: string[];
   locations: Record<string, SceneLocation>;
   cast: Record<string, CastMember>;

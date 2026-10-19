@@ -1172,7 +1172,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               onAddToTop3={addToTop3}
               onGoTab={setTab}
               onOpenBuild={openBuild}
-              buildNudge={buildDot}
               v2={flowV2 ? {
                 top3Slot: top3Cards,
                 onConfirmPrimary: (id) => setEdits({ ids: [id, ...top3.filter((x) => x !== id)], focus: id }),

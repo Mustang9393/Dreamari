@@ -4,6 +4,10 @@
 
 The prototype is the reference implementation. Layout, copy, behavior, timings and feedback logic come from `src/`; token names come from the certified Figma export (see `docs/DESIGN_SYSTEM_ALIGNMENT.md`). Nothing in this SOP is a proposal unless it is labelled as one.
 
+## Current entry point for new careers
+
+Use [Career game production SOP](../career-scaling/README.md) for new simulation work. It consolidates the current reusable mechanics, complete scene art prompts, continuity gates and UX Designer proof. Its complete-scene workflow supersedes the sprite extraction steps below for new careers; existing approved games stay intact.
+
 ## How to use this SOP (reading order for an agent)
 
 1. This README: the pipeline, the design rules and the per-career checklists.

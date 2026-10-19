@@ -1,4 +1,5 @@
-/* DEMO-ONLY: the black-and-blue look (?look=v2, layout.tsx).
+/* DEMO-ONLY: the black-and-blue look, the default since 19 Oct 2026 (html.look-v2,
+   set before paint in layout.tsx; Classic via ?look=v1 or the bottom-left switch).
 
    Why (18 Oct 2026): a Canadian student focus group said the colours and
    gradients feel "vibe-coded". Joshua's direction: deep blacks, luminous
@@ -17,7 +18,7 @@
       frame in ice blue, solid white cards.
    4. Solid primary buttons, no glossy two-stop gradient.
 
-   Nothing outside html.look-v2 changes. Game worlds (glossary, Play
+   Classic (no html.look-v2) is unchanged by this file. Game worlds (glossary, Play
    backdrops, simulations) and career-world colours keep their own palettes.
    When this is approved the values move into Figma and the generated tokens,
    and this file goes away. */

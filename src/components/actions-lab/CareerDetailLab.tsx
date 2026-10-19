@@ -48,6 +48,8 @@ import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { resolveCareer, similarCareers, type ResolvedCareer } from "@/components/career/data";
 import type { FactDetails, ProfileRung } from "@/components/career/profiles";
 import { careerSlug } from "@/components/career/slug";
+import { OutlookTab } from "@/components/outlook-lab/OutlookTab";
+import { count, nationalOutlook, pct } from "@/components/outlook-lab/outlook";
 
 // Career Detail, rebuilt 2026-09-02 around the production page's information
 // (dreamonna.com/explore/<slug>; copy and data transcribed in profiles.ts and
@@ -299,6 +301,41 @@ function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; acc
   );
 }
 
+// Your states / Whole country: one view switch over the same state data.
+// Shared by the live Pay tab and the outlook lab's Pay & Outlook tab.
+function PayViewToggle({ value, onChange }: { value: "states" | "country"; onChange: (v: "states" | "country") => void }) {
+  return (
+    <div role="tablist" aria-label="Pay by state view" className="dm-glass flex items-center gap-[2px] rounded-[13px] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      {([["states", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={value === id}
+          onClick={() => onChange(id)}
+          className="dm-quiet relative min-h-[32px] cursor-pointer rounded-[10px] px-[14px] text-[13px] leading-[16px] font-semibold"
+          style={{ color: value === id ? "var(--background)" : "var(--foreground)" }}
+        >
+          {/* Fill slides between the two views via a shared
+             layoutId instead of snapping (direct feedback: "have
+             whatever highlight we end up keeping for tabs...
+             animate and slide over when we switch"). */}
+          {value === id && (
+            <motion.span
+              layoutId="career-pay-view-pill"
+              aria-hidden
+              className="absolute inset-0 rounded-[10px]"
+              style={{ background: "var(--foreground)" }}
+              transition={{ type: "spring", stiffness: 500, damping: 40 }}
+            />
+          )}
+          <span className="relative">{label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // Which quick fact carries which detail behind its (i).
 function factKey(label: string): keyof FactDetails | null {
   if (/degree/i.test(label)) return "degree";
@@ -430,6 +467,8 @@ function viewModel(career: ResolvedCareer) {
     whatTheyDo,
     facts: facts.filter((f) => f.value && f.value !== PLACEHOLDER && !/people doing|jobs open/i.test(f.label)),
     payByState: p?.payByState,
+    /** every authored fact, before the strip's filter (the outlook lab reads the counts) */
+    allFacts: facts,
     knowAbout: p?.knowAbout ?? [],
     goodAt: p?.goodAt ?? [],
     software: career.software ?? [],
@@ -456,7 +495,15 @@ const CAREER_TABS: { key: CareerTab; label: string }[] = [
   { key: "software", label: "Software" },
 ];
 
-export function CareerDetailLab({ slug, live = false }: { slug: string; /** the live /career route: no lab dock, links stay on the live routes */ live?: boolean }) {
+export function CareerDetailLab({ slug, live = false, outlook = false }: {
+  slug: string;
+  /** the live /career route: no lab dock, links stay on the live routes */
+  live?: boolean;
+  /** DEMO-ONLY: the Career outlook lab (/outlook-lab, hamburger only): the
+   *  Pay tab becomes "Pay & Outlook" and growth joins the quick facts. Off
+   *  everywhere else, so the live page renders exactly as before. */
+  outlook?: boolean;
+}) {
   const router = useRouter();
   const career = resolveCareer(slug);
   // Open at the top. Arriving from a rail deep in Explore or Home kept the
@@ -527,6 +574,27 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
 
   const vm = viewModel(career);
   const pay = statePay(career.slug, pickedStates, vm.payByState);
+  // Outlook lab: the US outlook from the profile's own BLS figures. The live
+  // strip shows degree and pay only; the lab adds growth and yearly openings
+  // back as headline facts (they lead into the tab that explains them)
+  const national = outlook ? nationalOutlook(vm.allFacts, vm.details?.openings?.note) : null;
+  const facts = national
+    ? [...vm.facts, { label: `Job growth by ${national.year}`, value: pct(national.growthPct) }, { label: "Jobs open each year", value: count(national.openings) }]
+    : vm.facts;
+  const tabs = outlook ? CAREER_TABS.map((t) => (t.key === "pay" ? { ...t, label: "Pay & Outlook" } : t)) : CAREER_TABS;
+  // growth and openings open the tab that explains them (they had an (i))
+  const toOutlook = (label: string) => national && /growth|open each year/i.test(label);
+  const openOutlook = () => {
+    setTab("pay");
+    window.requestAnimationFrame(() => {
+      const row = document.getElementById("career-tabs");
+      row?.scrollIntoView({ behavior: "smooth", block: "start" });
+      // on a phone the tab row scrolls sideways: bring the chosen tab into it
+      const on = row?.querySelector<HTMLElement>('[aria-selected="true"]');
+      const strip = on?.closest<HTMLElement>("[role=tablist]") ?? on?.parentElement;
+      if (on && strip) strip.scrollTo({ left: on.offsetLeft - (strip.clientWidth - on.offsetWidth) / 2, behavior: "smooth" });
+    });
+  };
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -617,7 +685,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
            Briefly reversed and reverted same day, 22 Sept 2026, after
            confirming this was a deliberate earlier decision, not a mistake
            -- kept as originally decided. */}
-        {vm.facts.length > 0 && (
+        {facts.length > 0 && (
           // Custom-designed edge case, 22 Sept 2026: a thin catalog-only
           // career (no profile/report) can end up with exactly ONE fact
           // (median salary survives from the catalog; degree/majors fall
@@ -627,12 +695,12 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
           // column inside the same full-bleed bordered panel -- reproduced
           // live with a synthetic thin-career test entry. grid-cols-1 for
           // the single-fact case only; 2/3/4-fact layouts are unchanged.
-          <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] ${vm.facts.length === 1 ? "grid-cols-1" : "grid-cols-2"} rounded-[var(--radius-lg)] border ${vm.facts.length === 1 ? "" : vm.facts.length === 3 ? "sm:grid-cols-3" : vm.facts.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-4"}`} style={PANEL}>
-            {vm.facts.map((fact, i) => (
+          <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] ${facts.length === 1 ? "grid-cols-1" : "grid-cols-2"} rounded-[var(--radius-lg)] border ${facts.length === 1 ? "" : facts.length === 3 ? "sm:grid-cols-3" : facts.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-4"}`} style={PANEL}>
+            {facts.map((fact, i) => (
               <div
                 key={fact.label}
                 data-fact-cell
-                className={`relative flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${vm.facts.length === 3 ? "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
+                className={`relative flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${facts.length === 3 ? "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
                 style={{ borderColor: "var(--glass-border)" }}
               >
                 {/* the (i) always sits top-right of the cell, on the label's
@@ -640,7 +708,8 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                    always sits at the bottom, so figures line up across cells */}
                 <span className="flex items-start justify-between gap-[6px]">
                   <span className={`${LABEL} min-w-0`}>{fact.label}</span>
-                  {factKey(fact.label) && vm.details?.[factKey(fact.label)!] && (
+                  {toOutlook(fact.label) && <ChevronRight className="mt-[3px] h-[16px] w-[16px] flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />}
+                  {!toOutlook(fact.label) && factKey(fact.label) && vm.details?.[factKey(fact.label)!] && (
                     <IconTip label={`About ${fact.label.toLowerCase()}`}>
                       <button
                         type="button"
@@ -659,6 +728,10 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                   )}
                 </span>
                 <span className="mt-auto"><Figure accent={accent}>{fact.value}</Figure></span>
+                {/* outlook lab: the whole cell opens Pay & Outlook */}
+                {toOutlook(fact.label) && (
+                  <button type="button" aria-label={`${fact.label}: see Pay & Outlook`} onClick={openOutlook} className="absolute inset-0 cursor-pointer transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_5%,transparent)]" />
+                )}
                 {openFact === "pay" && factKey(fact.label) === "pay" && vm.details?.pay && (
                   <FactPopover anchor={factAnchor} onClose={() => setOpenFact(null)}>
                     <dl className="flex flex-col gap-[6px]">
@@ -682,43 +755,21 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
           </section>
         )}
 
-        <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={CAREER_TABS} grow />
+        <div id="career-tabs" className="scroll-mt-[96px]">
+          <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={tabs} grow />
+        </div>
 
-        {tab === "pay" && !pay && <TabComingSoon title="Pay" career={career.title} />}
+        {tab === "pay" && !pay && !national && <TabComingSoon title={outlook ? "Pay & Outlook" : "Pay"} career={career.title} />}
 
+        {/* the Pay by state section, the same in the outlook lab as on the
+           live page (Chandu, 19 Oct 2026: "that was approved so lets not
+           edit that too much"); the lab's outlook sections follow it */}
         {tab === "pay" && pay && (
           <Section
             id="pay"
             title={pay.title ?? "Pay by state"}
             action={
-              <div role="tablist" aria-label="Pay by state view" className="dm-glass flex items-center gap-[2px] rounded-[13px] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                {([["states", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    role="tab"
-                    aria-selected={payView === id}
-                    onClick={() => setPayView(id)}
-                    className="dm-quiet relative min-h-[32px] cursor-pointer rounded-[10px] px-[14px] text-[13px] leading-[16px] font-semibold"
-                    style={{ color: payView === id ? "var(--background)" : "var(--foreground)" }}
-                  >
-                    {/* Fill slides between the two views via a shared
-                       layoutId instead of snapping (direct feedback: "have
-                       whatever highlight we end up keeping for tabs...
-                       animate and slide over when we switch"). */}
-                    {payView === id && (
-                      <motion.span
-                        layoutId="career-pay-view-pill"
-                        aria-hidden
-                        className="absolute inset-0 rounded-[10px]"
-                        style={{ background: "var(--foreground)" }}
-                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                      />
-                    )}
-                    <span className="relative">{label}</span>
-                  </button>
-                ))}
-              </div>
+              <PayViewToggle value={payView} onChange={setPayView} />
             }
           >
             {payView === "states" ? (
@@ -746,6 +797,8 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
             )}
           </Section>
         )}
+
+        {tab === "pay" && national && <OutlookTab slug={career.slug} accent={accent} national={national} picked={pickedStates} />}
 
         {tab === "ladder" && vm.ladder.length === 0 && <TabComingSoon title="Career ladder" career={career.title} />}
 
@@ -859,7 +912,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                it just hard-clipped at the container edge (16 Sept 2026). */}
             <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
-                <PosterCard key={c.title} career={c} onClick={() => ((live && openCareerPeek(careerSlug(c.title))) || router.push(careerHref(careerSlug(c.title), live)))} />
+                <PosterCard key={c.title} career={c} onClick={() => (outlook ? router.push(`/outlook-lab/${careerSlug(c.title)}`) : (live && openCareerPeek(careerSlug(c.title))) || router.push(careerHref(careerSlug(c.title), live)))} />
               ))}
             </div>
           </Section>

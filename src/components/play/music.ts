@@ -27,7 +27,7 @@ const SIM_TRACKS: Record<string, Partial<Record<MusicTrack, string>>> = {
 // A career with no song of its own yet plays nothing rather than borrowing
 // another career's (Chandu, 5 Oct 2026, on AMT: "please don't use the same
 // music"). Add its file to SIM_TRACKS and remove it from here when it lands.
-const SILENT_SIMS = new Set(["aviation-maintenance-technician"]);
+const SILENT_SIMS = new Set(["aviation-maintenance-technician", "ui-ux-designer"]);
 
 function trackSrc(track: MusicTrack, simId?: string): string | null {
   if (simId && SILENT_SIMS.has(simId) && !SIM_TRACKS[simId]?.[track]) return null;

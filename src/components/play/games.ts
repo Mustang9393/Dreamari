@@ -1,3 +1,4 @@
+import { UX_LEVEL_1 } from "./ux-level-1";
 import { IB_LEVEL_1 } from "./ib-level-1";
 import { IB_LEVEL_1_V2 } from "./ib-level-1-v2";
 import { IB_LEVEL_2 } from "./ib-level-2";
@@ -107,7 +108,69 @@ export const AVIATION_MAINTENANCE: Simulation = {
   upcoming: ["Technician", "Lead Technician", "Inspector", "Maintenance Manager"],
 };
 
-export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE, AVIATION_MAINTENANCE];
+// AI-authored local draft used to test the scaling SOP.
+export const UX_DESIGNER: Simulation = {
+  "id": "ui-ux-designer",
+  "careerId": "ui-ux-designer",
+  "title": "UX Designer",
+  "world": "Tech & Engineering",
+  "firm": "Northline Studio",
+  "cover": "/images/play/ux/studio.png",
+  "levels": [UX_LEVEL_1],
+  "upcoming": [
+    "UX Designer",
+    "Senior UX Designer",
+    "Lead UX Designer",
+    "Design Manager",
+    "Design Director"
+  ],
+  "trailer": [
+    {
+      "id": "UX-TR-1",
+      "seconds": 4,
+      "text": "A useful design starts with someone trying to do something.",
+      "art": "/images/play/ux/studio.png"
+    },
+    {
+      "id": "UX-TR-2",
+      "seconds": 4,
+      "text": "An attractive page can still get in their way.",
+      "art": "/images/play/ux/research.png"
+    },
+    {
+      "id": "UX-TR-3",
+      "seconds": 4,
+      "text": "Listen before you choose a solution.",
+      "art": "/images/play/ux/research.png"
+    },
+    {
+      "id": "UX-TR-4",
+      "seconds": 4,
+      "text": "Turn the evidence into something people can try.",
+      "art": "/images/play/ux/studio.png"
+    },
+    {
+      "id": "UX-TR-5",
+      "seconds": 4,
+      "text": "One missed detail can stop the whole task.",
+      "art": "/images/play/ux/review.png"
+    },
+    {
+      "id": "UX-TR-6",
+      "seconds": 4,
+      "text": "Your team needs to know what you found.",
+      "art": "/images/play/ux/review.png"
+    },
+    {
+      "id": "UX-TR-7",
+      "seconds": 4,
+      "text": "Junior designer to design director. How far will you get?",
+      "finale": true
+    }
+  ]
+};
+
+export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE, AVIATION_MAINTENANCE, UX_DESIGNER];
 
 /** Careers whose simulation is not built yet. Poster art only, no promises
  *  about when. Cover art here is its OWN `soon-*.png` file per career, not
@@ -165,20 +228,21 @@ export function worldForCareer(slug: string): string | undefined {
 // it consistent" -- the real card's title stood out against the dummy
 // cards' own naming instead of reading as one row of the same thing).
 export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; cover?: string }[] = [
-  // Covers are Chandu's 17 Oct 2026 thumbnails (landscape, 1400 by 788 WebP):
-  // three glossy objects of the subject on a night cloud floor, no Dreamy and
-  // no text, replacing the 16 Oct Dreamy-over-term-cards set (Chandu: "Use
-  // these for the glossary thumbnail in play tab"). The shelf card is portrait
+  // Covers are Chandu's 19 Oct 2026 thumbnails (landscape, 1400 by 788 WebP):
+  // one isometric object of the subject (cash stack, green cross, jet,
+  // laptop) centred on the navy night gradient, no Dreamy and no text. They
+  // replace the 17 Oct three-glossy-objects set (Chandu: "Please use these
+  // images for the glossary game thumbnails"). The shelf card is portrait
   // at rest and 16:9 when it expands, so the landscape frame shows whole
   // when the card is active and crops to Dreamy and the centre cards at rest.
-  { careerSlug: "investment-banking", title: "Finance Terms", sub: "Learn key finance terms", cover: "/images/app/glossary-finance-thumb-oct17b.webp" },
+  { careerSlug: "investment-banking", title: "Finance Terms", sub: "Learn key finance terms", cover: "/images/app/glossary-finance-thumb-oct19.webp" },
   // Medical, Flight and Tech were "Coming soon" dummy cards until their
   // glossaries were built and released (17 Oct 2026); they now open their
   // games like Finance. PlayHub locks any card whose glossary is not in
   // GLOSSARY_HUB_RELEASED.
-  { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/glossary-medical-thumb-oct17b.webp" },
-  { careerSlug: "airline-pilot", title: "Flight Terms", sub: "Learn key aviation terms", cover: "/images/app/glossary-flight-thumb-oct17b.webp" },
-  { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/glossary-tech-thumb-oct17b.webp" },
+  { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/glossary-medical-thumb-oct19.webp" },
+  { careerSlug: "airline-pilot", title: "Flight Terms", sub: "Learn key aviation terms", cover: "/images/app/glossary-flight-thumb-oct19.webp" },
+  { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/glossary-tech-thumb-oct19.webp" },
   // Only glossaries with real thumbnail art sit in this row (Chandu, 17 Oct
   // 2026: "For everything without a thumbnail for the cards, send them to
   // hamburger access only link. Only use games with thumbnail art in the

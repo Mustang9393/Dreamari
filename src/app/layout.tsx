@@ -49,10 +49,13 @@ export default function RootLayout({
         <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
         <script
           dangerouslySetInnerHTML={{
-            // DEMO-ONLY: the black-and-blue look preview (look-v2.css). ?look=v2
-            // turns it on and remembers it, ?look=v1 turns it off. Set before
-            // paint so the old palette never flashes.
-            __html: `try{var q=new URLSearchParams(location.search).get("look");if(q==="v2")localStorage.setItem("dreamari-look","v2");else if(q==="v1")localStorage.removeItem("dreamari-look");if(localStorage.getItem("dreamari-look")==="v2")document.documentElement.classList.add("look-v2")}catch(e){}`,
+            // DEMO-ONLY: the colour theme (look-v2.css). Black & Blue is the
+            // default (19 Oct 2026, Chandu: "lets have black and blue be the
+            // default and the switch to be done for classic"); Classic only
+            // when chosen: ?look=v1 or the bottom-left switch saves "v1",
+            // ?look=v2 saves "v2". Blocked storage still gets Black & Blue.
+            // Set before paint so the other palette never flashes.
+            __html: `(function(){var v2=true;try{var q=new URLSearchParams(location.search).get("look");if(q==="v1"||q==="v2")localStorage.setItem("dreamari-look",q);if(q==="v1"||(!q&&localStorage.getItem("dreamari-look")==="v1"))v2=false}catch(e){}if(v2)document.documentElement.classList.add("look-v2")})()`,
           }}
         />
         <script

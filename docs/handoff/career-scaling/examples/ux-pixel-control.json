@@ -1,0 +1,25 @@
+{
+  "dimensionsMatch": true,
+  "sourceSize": [
+    1672,
+    941
+  ],
+  "candidateSize": [
+    1672,
+    941
+  ],
+  "allowedRegions": [
+    {
+      "x": 690,
+      "y": 232,
+      "width": 80,
+      "height": 55
+    }
+  ],
+  "protectedPixels": 1568952,
+  "changedProtectedPixels": 0,
+  "changedAllowedPixels": 0,
+  "changedProtectedPercent": 0,
+  "maxChannelDifference": 0,
+  "pass": true
+}

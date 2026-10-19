@@ -23,7 +23,11 @@ export type CompanyVideo = {
 // frame from its own clip, swapped for an updated version 9 Sept 2026
 // ("Thumbnails/Mars.png"); WildBrain's is composited from a clean frame of
 // its own office wall logo plus matching "Office Tour" type, since no cover
-// was supplied for either.
+// was supplied for either. EY, AT&T and WildBrain were replaced 19 Oct 2026
+// with updated designed covers (Chandu, "Updated IG Reel Covers (1).zip":
+// "use these for the video thumbnails across the app"); WildBrain's is now
+// a real designed cover too, not the composite. Same file paths, so every
+// surface that reads `poster` / videoPoster() picks them up.
 export const COMPANY_VIDEOS: CompanyVideo[] = [
   // Kellanova was acquired by Mars, so the clip carries the Mars mark.
   { company: "Mars", title: "Meet a Talent Director", video: "/videos/app/reel-kellanova-talent-director.mp4", poster: "/images/videos/reel-kellanova-talent-director-v3.png" },

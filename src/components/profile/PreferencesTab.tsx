@@ -385,6 +385,10 @@ function SectionEditor({ id, prefs, namedCareers, failSaves = false, onClose, on
   );
 }
 
+/** Unique ignoring case, first spelling wins ("Public speaking" and
+ *  "Public Speaking" came from two lists and showed as two chips). */
+const uniqCase = (xs: string[]) => xs.filter((x, i) => xs.findIndex((y) => y.toLowerCase() === x.toLowerCase()) === i);
+
 /** One section's fields over a shared draft. The sheet (SectionEditor) and
  *  the My Build modal both render these. */
 function SectionFields({ id, draft, patch, patchJobs, namedCareers }: { id: Exclude<SectionId, "saved">; draft: Preferences; patch: (next: Partial<Preferences>) => void; patchJobs: (next: Partial<JobPrefs>) => void; namedCareers: string[] }) {
@@ -402,7 +406,7 @@ function SectionFields({ id, draft, patch, patchJobs, namedCareers }: { id: Excl
       <>
         {firstCareer && <p className="text-[11.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>Suggested for {firstCareer}</p>}
         <Multi label="Skills I have" options={suggest.skills} value={draft.skillsHave} onChange={(v) => patch({ skillsHave: v })} initial={8} />
-        <Multi label="Skills I want to build" options={Array.from(new Set([...suggest.skills, ...O.SKILL_OPTIONS]))} value={draft.skillsToBuild} max={LIMITS.skillsToBuild} onChange={(v) => patch({ skillsToBuild: v })} initial={8} />
+        <Multi label="Skills I want to build" options={uniqCase([...suggest.skills, ...O.SKILL_OPTIONS])} value={draft.skillsToBuild} max={LIMITS.skillsToBuild} onChange={(v) => patch({ skillsToBuild: v })} initial={8} />
       </>
     ),
     software: (
@@ -488,14 +492,24 @@ function SectionFields({ id, draft, patch, patchJobs, namedCareers }: { id: Excl
 // answers, the student profile and the preferences), the foot says what
 // moved, and Saved careers rides along as the ninth section.
 
-export type BuildSection = "interests" | "subjects" | "workVibe" | "education" | "cost" | "location" | "profile" | "saved";
+export type BuildSection = "interests" | "subjects" | "workVibe" | "skills" | "software" | "education" | "cost" | "location" | "school" | "jobs" | "profile" | "saved";
+// The sections that edit the Preferences store, not the Build answers. They
+// were the Preferences tab's own (19 Oct 2026, Chandu: "make sure the edit my
+// build has all the data that preferences has, but we dont need a whole
+// preferences tab and then my build in about me. Do all of it in about me").
+// Skills, Software, School and Internships & jobs edit the Preferences
+// store; Work style also edits two of its fields (team size, environment).
 export const BUILD_SECTIONS: { id: BuildSection; title: string; question: string; subtitle?: string; sprite: string; cite?: string }[] = [
   { id: "interests", title: "Career fields", question: "Which career fields interest you?", subtitle: "Choose up to 3", sprite: STAGE_DREAMY.interests.sprite, cite: "Harvard FAS Mignone + O*NET Interest Profiler" },
   { id: "subjects", title: "Subjects", question: "Which subjects do you enjoy?", subtitle: "Choose up to 2", sprite: STAGE_DREAMY.subjects.sprite },
   { id: "workVibe", title: "Work style", question: "Where do you work best?", subtitle: "Pick one from each row.", sprite: STAGE_DREAMY.workVibe.sprite, cite: "MIT CAPD Self Assessment + O*NET Work Styles" },
+  { id: "skills", title: "Skills", question: "What are you good at, and what do you want to build?", sprite: STAGE_DREAMY.subjects.sprite },
+  { id: "software", title: "Software", question: "What software do you know, or want to learn?", sprite: "/images/dreamy/v2/dreamy-glasses.webp" },
   { id: "education", title: "Education", question: "How many years of education are you open to after high school?", sprite: STAGE_DREAMY.education.sprite },
   { id: "cost", title: "Tuition", question: "How much are you comfortable spending on tuition each year?", subtitle: "Choose what feels realistic for you.", sprite: STAGE_DREAMY.cost.sprite },
   { id: "location", title: "Location", question: "Where are you open to going to school?", subtitle: "Choose 1 state, and the kind of path.", sprite: "/images/dreamy/v2/dreamy-explore.webp" },
+  { id: "school", title: "School", question: "What matters in a school?", sprite: STAGE_DREAMY.education.sprite },
+  { id: "jobs", title: "Internships & jobs", question: "What kind of opportunities fit you?", subtitle: "Optional", sprite: STAGE_DREAMY.workVibe.sprite },
   { id: "profile", title: "Profile basics", question: "Profile basics", sprite: "/images/dreamy/v2/dreamy-glasses.webp" },
   { id: "saved", title: "Saved careers", question: "The careers you have saved", sprite: "/images/dreamy/v2/dreamy-heart.webp" },
 ];
@@ -512,7 +526,13 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
   const [section, setSection] = useState<BuildSection>(initialSection);
   const [draft, setDraft] = useState<BuildState>(saved);
   const patch = (next: Partial<BuildState>) => setDraft((d) => ({ ...d, ...next }));
-  const dirty = !sameAnswers(draft, saved);
+  // the Preferences fields edit their own draft, saved alongside the answers
+  const savedPrefs = useSyncExternalStore(subscribePreferences, preferencesSnapshot, serverPreferencesSnapshot);
+  const [prefs, setPrefs] = useState<Preferences>(savedPrefs);
+  const patchPrefs = (next: Partial<Preferences>) => setPrefs((d) => ({ ...d, ...next }));
+  const patchJobs = (next: Partial<JobPrefs>) => setPrefs((d) => ({ ...d, jobs: { ...d.jobs, ...next } }));
+  const prefsDirty = JSON.stringify(prefs) !== JSON.stringify(savedPrefs);
+  const dirty = !sameAnswers(draft, saved) || prefsDirty;
   const [confirming, setConfirming] = useState(false);
   const [proof, setProof] = useState<string | null>(null);
   const [reactionNonce, setReactionNonce] = useState(0);
@@ -538,13 +558,15 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
       case "location": return [draft.state, PATH_OPTIONS.find((p) => p.id === draft.path)?.title].filter(Boolean).join(" · ");
       case "profile": return [draft.grade, draft.gpa ? `${draft.gpa} GPA` : "", draft.zipCode].filter(Boolean).join(" · ");
       case "saved": return savedCareers.length ? `${savedCareers.length} saved` : "";
+      default: return prefSummary(prefs, id);
     }
   };
-  const changed = (id: BuildSection) => id !== "saved" && summary(id) !== summaryOf(saved, id, savedCareers.length);
+  const changed = (id: BuildSection) => id !== "saved" && summary(id) !== summaryOf(saved, id, savedCareers.length, savedPrefs);
   const answered = BUILD_SECTIONS.filter((s) => !!summary(s.id)).length;
   const save = () => {
     const first = BUILD_SECTIONS.find((s) => changed(s.id));
     writeBuildAnswers(draft);
+    if (prefsDirty) writePreferences(prefs);
     setConfirming(true);
     setProof(first ? `${first.title} saved. Explore, your Report and your plan now follow it.` : "Saved.");
     window.setTimeout(() => setConfirming(false), 900);
@@ -560,7 +582,9 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
   // Location closes on the first Back, not after walking back to Career fields.
   const startIdx = BUILD_SECTIONS.findIndex((s) => s.id === initialSection);
   useBackSteps(Math.max(0, idx - startIdx), () => setSection(BUILD_SECTIONS[Math.max(0, idx - 1)].id));
-  const stage: StageId = section === "saved" ? "complete" : section;
+  // the added sections borrow the nearest Build stage's light
+  const stage: StageId = section === "saved" ? "complete" : section === "skills" || section === "software" ? "subjects" : section === "school" ? "location" : section === "jobs" ? "workVibe" : section;
+  const firstCareer = savedCareers.find((c) => picks.ids[0] === c.id)?.title ?? savedCareers[0]?.title;
 
   // 7 Oct 2026: the sheet is dreamonna's My Build, which is the Build screen
   // in a sheet (Chandu: "even the background should match the build style...
@@ -629,6 +653,23 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
                 <div className="flex flex-col gap-3">
                   <VibeButtonRow label="Your Energy" options={ENERGY_OPTIONS} value={draft.energy} onChange={(energy) => { react(); patch({ energy }); }} />
                   <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={draft.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
+                  <div className="mt-3 flex flex-col gap-5">
+                    <Multi label="Preferred team size" options={O.TEAM_SIZE} value={prefs.teamSize} max={LIMITS.teamSize} onChange={(teamSize) => patchPrefs({ teamSize })} />
+                    <Multi label="Preferred work environment" options={O.ENVIRONMENTS} value={prefs.environments} max={LIMITS.environments} onChange={(environments) => patchPrefs({ environments })} />
+                  </div>
+                </div>
+              )}
+              {(section === "skills" || section === "software" || section === "jobs") && (
+                <div className="flex flex-col gap-5">
+                  <SectionFields id={section} draft={prefs} patch={patchPrefs} patchJobs={patchJobs} namedCareers={firstCareer ? [firstCareer] : []} />
+                </div>
+              )}
+              {section === "school" && (
+                <div className="flex flex-col gap-5">
+                  <Multi label="Kind of school" options={O.SCHOOL_TYPES} value={prefs.schoolTypes} max={LIMITS.schoolTypes} onChange={(schoolTypes) => patchPrefs({ schoolTypes })} />
+                  <Multi label="More states you'd consider" options={O.STATES as string[]} value={prefs.states} max={LIMITS.states} onChange={(states) => patchPrefs({ states })} initial={8} />
+                  <Multi label="Campus setting" options={O.CAMPUS} value={prefs.campus} max={LIMITS.campus} onChange={(campus) => patchPrefs({ campus })} />
+                  <Multi label="School size" options={O.SIZES} value={prefs.sizes} max={LIMITS.sizes} onChange={(sizes) => patchPrefs({ sizes })} />
                 </div>
               )}
               {section === "education" && <EducationGrid value={draft.education} onChange={(education) => { react(); patch({ education }); }} />}
@@ -701,7 +742,7 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
 }
 
 /** What a section says in the SAVED answers, for the EDITED tags. */
-export function summaryOf(s: BuildState, id: BuildSection, savedCount: number): string {
+export function summaryOf(s: BuildState, id: BuildSection, savedCount: number, prefs?: Preferences): string {
   switch (id) {
     case "interests": return s.interests.join(" · ");
     case "subjects": return s.subjects.join(" · ");
@@ -711,6 +752,18 @@ export function summaryOf(s: BuildState, id: BuildSection, savedCount: number): 
     case "location": return [s.state, PATH_OPTIONS.find((p) => p.id === s.path)?.title].filter(Boolean).join(" · ");
     case "profile": return [s.grade, s.gpa ? `${s.gpa} GPA` : "", s.zipCode].filter(Boolean).join(" · ");
     case "saved": return savedCount ? `${savedCount} saved` : "";
+    default: return prefs ? prefSummary(prefs, id) : "";
+  }
+}
+
+/** What a Preferences-backed section says, for the rail and About Me. */
+export function prefSummary(p: Preferences, id: BuildSection): string {
+  switch (id) {
+    case "skills": return p.skillsToBuild.join(" · ");
+    case "software": return p.softwareLearn.join(" · ");
+    case "school": return [...p.schoolTypes, ...p.campus, ...p.sizes.map((x) => `${x} school`)].join(" · ");
+    case "jobs": return [...p.jobs.types, ...p.jobs.modes].join(" · ");
+    default: return "";
   }
 }
 

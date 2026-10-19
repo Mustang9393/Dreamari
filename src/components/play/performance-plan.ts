@@ -1,3 +1,4 @@
+import { UX_PERFORMANCE_PLAN } from "./ux-performance-plan";
 // The Performance Improvement Plan, from the Performance Plan tab of the
 // handoff. Fires only when a player racks up three strikes inside one
 // level -- see THE STRIKE RULE in scoring.ts's own comment for the trigger
@@ -51,6 +52,7 @@ export type PerformancePlan = {
 // supervisor voice and step options, but the three plan questions never
 // change across careers (Performance Plan tab).
 export const PERFORMANCE_PLANS: Record<string, Record<1 | 2 | 3, PerformancePlan>> = {
+  "ui-ux-designer": { 1: UX_PERFORMANCE_PLAN, 2: UX_PERFORMANCE_PLAN, 3: UX_PERFORMANCE_PLAN },
   "investment-banking": {
   1: {
     warningSetup: "You made three mistakes this year. Cobalt Capital is putting you on a performance plan. Get 2 of 3 right to keep your job.",

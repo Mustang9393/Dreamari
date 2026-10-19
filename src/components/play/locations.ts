@@ -38,3 +38,8 @@ export function locationFor(beatId: string): LocationArt | undefined {
   const id = BEAT_LOCATION[beatId];
   return id ? LOCATION_ART[id] : undefined;
 }
+
+// Complete scene images contain their people. A shorter phone frame keeps
+// a landscape conversation together instead of cropping to one torso.
+const FULL_SCENE_SOURCES = new Set(CAREER_ART.filter(art => art.spriteStandard === "full-scene").flatMap(art => Object.values(art.locations).map(location => location.src)));
+export function isFullSceneImage(src: string): boolean { return FULL_SCENE_SOURCES.has(src); }

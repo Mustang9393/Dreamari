@@ -1,0 +1,147 @@
+{
+  "career": "ui-ux-designer",
+  "status": "AI-authored draft, human approval pending",
+  "trace": [
+    {
+      "beat": "UX1-05",
+      "teaches": [
+        "user-goal"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-08",
+      "teaches": [],
+      "uses": [
+        "user-goal"
+      ]
+    },
+    {
+      "beat": "UX1-10",
+      "teaches": [
+        "ux-terms"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-11",
+      "teaches": [],
+      "uses": [
+        "ux-terms"
+      ]
+    },
+    {
+      "beat": "UX1-12",
+      "teaches": [
+        "evidence"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-14",
+      "teaches": [],
+      "uses": [
+        "evidence"
+      ]
+    },
+    {
+      "beat": "UX1-15",
+      "teaches": [
+        "neutral-task"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-18",
+      "teaches": [],
+      "uses": [
+        "neutral-task",
+        "evidence"
+      ]
+    },
+    {
+      "beat": "UX1-19",
+      "teaches": [
+        "iterate"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-20",
+      "teaches": [],
+      "uses": [
+        "iterate",
+        "evidence"
+      ]
+    },
+    {
+      "beat": "UX1-21",
+      "teaches": [
+        "accessible-form"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-23",
+      "teaches": [],
+      "uses": [
+        "accessible-form"
+      ]
+    },
+    {
+      "beat": "UX1-25",
+      "teaches": [],
+      "uses": [
+        "neutral-task",
+        "iterate"
+      ]
+    },
+    {
+      "beat": "UX1-26",
+      "teaches": [
+        "design-rationale"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-29",
+      "teaches": [],
+      "uses": [
+        "design-rationale",
+        "evidence",
+        "iterate"
+      ]
+    },
+    {
+      "beat": "UX1-30",
+      "teaches": [
+        "handoff"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-32",
+      "teaches": [],
+      "uses": [
+        "handoff",
+        "accessible-form"
+      ]
+    },
+    {
+      "beat": "UX1-33",
+      "teaches": [
+        "blocker"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-34",
+      "teaches": [],
+      "uses": [
+        "blocker",
+        "handoff",
+        "accessible-form"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "status": "Local draft validated; production gates remain open",
+  "date": "2026-10-19",
+  "passed": [
+    "All ten decisions answered Best in the actual shared player; reputation reached 100",
+    "All eight scored question types exercised: choice, match, bucket, rapid, rank, flags, chain, pick",
+    "Unscored practice mistake left reputation unchanged",
+    "Wrong choice showed option-specific explanation and -5",
+    "Matching corrected after a mistake still recorded Wrong",
+    "Third Wrong opened UX-specific recovery",
+    "Exactly two of three recovery answers correct passed and resumed at reputation 50",
+    "Non-passing final review/outcome preview at 50 showed Start over and Back to Games",
+    "Complete scene artwork reviewed without UI and beneath desktop dialogue",
+    "Phone review framing showed both faces at 390x844 after crop fix",
+    "Production build, scoped eslint, tsc and token check",
+    "Protected-pixel same-file control passed; expression edit candidate failed and was excluded",
+    "IB, nursing and aviation route/HUD/scene-entry regression smoke checks",
+    "SOP desktop/390px phone layout: no horizontal page overflow, anchors resolve, copy button works",
+    "Share ZIP integrity and local HTTP 200 checks"
+  ],
+  "limits": [
+    "Human content/art approval pending",
+    "No higher UX levels built",
+    "Recovery failure and repair branches not exercised in this UX run",
+    "Best ending screen not reached in the first run before a build reload; score 100 was observed",
+    "DEMO_START_FRESH intentionally disables resume in current shared prototype",
+    "Global Color control can overlap the phone CTA",
+    "No Windows/Chromebook hardware QA",
+    "No full multi-career generation study or time-of-day edit test",
+    "Main app and RN update not deployed"
+  ]
+}
