@@ -119,6 +119,12 @@ export const UX_DESIGNER: Simulation = {
   "world": "Tech & Engineering",
   "firm": "Northline Studio",
   "cover": "/images/play/ux/studio.png",
+  // Tile (20 Oct 2026, Chandu: "add the ux designer game to the play tab
+  // under career simulations, use a good art from the game as the
+  // thumbnail"). Arjun sketching wireframe flows says "UX" at a glance, and
+  // its sunset studio light sits with the IB tile beside it.
+  "thumb": "/images/play/ux/v4/thumb-iteration.webp",
+  "thumbFocus": "48% 20%",
   "levels": [UX_LEVEL_1],
   "upcoming": [
     "UX Designer",

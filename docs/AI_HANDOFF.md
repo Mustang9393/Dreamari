@@ -1,3 +1,11 @@
+## 2026-10-20: UX Designer released to the Play tab
+
+**Why (Chandu):** "add the ux designer game to the play tab under career simulations, use a good art from the game as the thumbnail". Until now the game was hamburger-only ("UX Designer · QA draft") with a `DEMO-ONLY` hub exclusion, because it had no tile art (Play tab rule: only games with real thumbnail art go on the hub).
+
+- `PlayHub.tsx`: dropped the `ui-ux-designer` filter, so `HUB_SIMULATIONS` is every built simulation. UX lands in Career Simulations after Aviation Maintenance, before the Coming soon tiles. The hamburger QA link stays.
+- `games.ts`: `UX_DESIGNER.thumb` is the new `public/images/play/ux/v4/thumb-iteration.webp` (WebP of the game's own `iteration.png` scene: Arjun sketching wireframe flows at his desk in the sunset studio), `thumbFocus` "48% 20%". Picked over the studio/closing shots because the wireframes say "UX" at a glance and the warm light matches the IB tile. `cover` (in-game backdrop) unchanged.
+- Checked: on a dev server for this branch (:3071, 1440px, dark), the 4:5 tile and the expanded 16:9 hero both frame Arjun's face and the wireframes; clicking the tile expands it like the others. Not checked: phone width, light mode, Windows/Chromebook. Next: Chandu QA of the game itself remains open (see the UX entries below).
+
 ## 2026-10-20: stars only near the top, fewer and dimmer
 
 **Why (Chandu):** "the stars are a little too much lets tone them down in some places. Lets have it be there near the top but not EVERYWHERE", then "tone it down a little bit more".

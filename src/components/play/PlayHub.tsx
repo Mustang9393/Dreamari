@@ -31,8 +31,9 @@ import type { Simulation } from "./types";
 // (Career Simulations, matching "simulations stay dominant by default").
 const PLAY_ROW_IDS = ["simulations", "glossary", "soon"];
 
-// DEMO-ONLY: UX stays in hamburger Quick Links for discussion before a hub release.
-const HUB_SIMULATIONS = SIMULATIONS.filter((game) => game.id !== "ui-ux-designer");
+// Every built simulation, UX Designer included (released to the hub 20 Oct
+// 2026 once it had tile art; it was hamburger-only before that).
+const HUB_SIMULATIONS = SIMULATIONS;
 
 // TV UX (direct feedback, 21 Sept 2026: "he wants all rows like this" --
 // the row-focus treatment Glossary Games got on hover, but the actual
