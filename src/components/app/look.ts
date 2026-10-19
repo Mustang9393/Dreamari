@@ -1,9 +1,9 @@
 "use client";
 
 // DEMO-ONLY: the black-and-blue look preview (src/app/look-v2.css). Turned on
-// by ?look=v2 (layout.tsx, before paint) or the Quick links menu's "v2 look"
-// switch; remembered in localStorage. Most of the look is CSS keyed on
-// html.look-v2. The hook is for the few places that need a value in JS
+// by ?look=v2 (layout.tsx, before paint) or the bottom-left Color switch
+// (ColorThemeSwitch.tsx: Classic / Black & Blue); remembered in localStorage.
+// Most of the look is CSS keyed on html.look-v2. The hook is for the few places that need a value in JS
 // (canvas colours). Server and first client render say false, so hydration
 // matches; it follows the class after mount, so the switch applies live.
 import { useSyncExternalStore } from "react";

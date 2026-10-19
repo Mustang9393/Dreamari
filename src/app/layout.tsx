@@ -8,6 +8,7 @@ import { OfflineBanner } from "@/components/app/SurfaceState";
 import { SkipLink } from "@/components/app/SkipLink";
 import { ThemeBoot } from "@/components/app/theme";
 import { LightPulse } from "@/components/app/LightPulse";
+import { ColorThemeSwitch } from "@/components/app/ColorThemeSwitch";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import "./globals.css";
 import "./look-v2.css";
@@ -86,6 +87,7 @@ export default function RootLayout({
         <SkipLink />
         <ThemeBoot />
         <LightPulse />
+        <ColorThemeSwitch />
         <ErrorReporter />
         <ScrollReset />
         <HistoryHost />

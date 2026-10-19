@@ -1,3 +1,13 @@
+## 2026-10-19: the look switch moves to a Color control, bottom-left
+
+**Why (Chandu):** "rename the blue thing to be a small control on the bottom of the page on the left to toggle the color theme. Remove from the hamburger menu."
+
+- `src/components/app/ColorThemeSwitch.tsx`, mounted once in the root layout: a labelled segmented control, "Color: Classic | Black & Blue", fixed bottom-left on every student page (above the phone/tablet tab bar, in the corner on desktop). Same state as `?look=v2` / `?look=v1` and localStorage `dreamari-look`; flips live. Not on the Counselor Dashboard, never printed. Text options, so no tooltip needed; the selected option is a radio with the brand fill, which the v2 state light picks up.
+- Removed the "v2 look (black and blue)" row from the ☰ Quick links menu.
+- It carries `marketing-v2 themeable` so its colours follow light/dark, with fallbacks for routes that don't load tokens.css. Light mode's tokens.css block gives every `.marketing-v2.themeable` `min-height: 100%` (meant for page roots): the control stretched to the full screen height until an inline `min-height: auto`. Worth knowing for any other small element that borrows that scope.
+- Listed in HANDOFF_INDEX's Demo vs Production section.
+- Checked: tsc, eslint; desktop and 375px phone, dark and light, both options, the menu no longer has the row. In local dev the Next.js "N" badge overlaps the control's label; that badge doesn't exist on Vercel. Pushed to main on Chandu's go-ahead.
+
 ## 2026-10-19: v2 look, light that behaves like light (rim, state, data, moments)
 
 **Why (Chandu):** "is the blue always only going to be on top and bottom as these radial blurs?", then "lets try 1,2,3,4". Top and bottom glows alone read as decoration; the references feel designed because the light behaves like one real source. Everything here is behind the v2 toggle; blue only, never a fill, never behind text.
