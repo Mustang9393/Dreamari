@@ -50,7 +50,9 @@ export function HeadingControls({ children }: { children: React.ReactNode }) {
   // commit as the page), and null on the server so hydration matches
   const slot = useSyncExternalStore(subscribeNextFrame, headingSlot, () => undefined);
   if (slot === undefined) return null;
-  return slot ? createPortal(children, slot) : <>{children}</>;
+  // on the title row the page's own controls come first, the shell's grade
+  // and group pickers after them
+  return slot ? createPortal(<div className="v4-ph-own">{children}</div>, slot) : <>{children}</>;
 }
 const subscribeNextFrame = (cb: () => void) => { const id = requestAnimationFrame(cb); return () => cancelAnimationFrame(id); };
 const headingSlot = () => document.getElementById("v4-page-controls");

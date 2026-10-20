@@ -24,6 +24,7 @@ import { ALL_CATALOG_CAREERS, BROWSE_MIGHT_NOT_KNOW, BROWSE_PUBLIC_SERVICE, BROW
 import { PosterCard, RankedPosterCard } from "@/components/app/PosterCard";
 import { TextTabs } from "@/components/app/TextTabs";
 import { SubTabs } from "../v4/SubTabs";
+import { HeadingControls } from "../v4/Workspace";
 import { PillSwitch } from "./Switch";
 import { EmptyView } from "@/components/app/states";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -87,15 +88,21 @@ export function V5Explore({ embedded = false, afterCareers, payLabel }: { embedd
   const [path, setPath] = useState<Pathway>("all");
   return (
     <div className={`flex flex-col gap-[var(--space-8)] ${embedded ? "" : "pt-[var(--space-2)] lg:pt-[var(--space-4)]"}`}>
-      <header className="flex flex-col gap-[var(--space-5)]">
+      <header className="flex flex-col gap-[var(--space-5)] empty:hidden">
         {embedded ? (
           // Inside v4 both switches change the page, so both are v4's level 3
           // pill on one row (9 Oct 2026); v4.css restyles the pathway's
           // seg-track to match. v5 keeps its own page nav below.
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <SubTabs ariaLabel="Explore" options={tabs} value={tab} onChange={setTab} />
-            <PathwaySwitch value={path} onChange={setPath} />
-          </div>
+          // ...and on the page title's row in v4 (20 Oct 2026 hierarchy pass:
+          // title, purpose, these switches, the search and the world chips
+          // were five rows before the first career); HeadingControls draws
+          // them in place where a shell has no title row (v7).
+          <HeadingControls>
+            <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+              <SubTabs ariaLabel="Explore" options={tabs} value={tab} onChange={setTab} />
+              <PathwaySwitch value={path} onChange={setPath} />
+            </div>
+          </HeadingControls>
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">

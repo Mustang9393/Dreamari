@@ -19,6 +19,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
+import { HeadingControls } from "./Workspace";
 import { SubTabs } from "./SubTabs";
 import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -75,9 +76,9 @@ export function ReviewDesk() {
 
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
-      <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[var(--space-3)]">
-        {/* the page view switch, level 3 of the tab hierarchy: the same
-           pill as Meetings' and Messages' (9 Oct 2026) */}
+      {/* the queues switch on the title's row, beside the grade picker
+         (20 Oct 2026 hierarchy pass: it was a second control row) */}
+      <HeadingControls>
         <SubTabs ariaLabel="Review queues" value={tab} onChange={setTab}
           options={[{ key: "awaiting", label: "Awaiting me", count: awaitingItems.length }, { key: "progress", label: "In progress", count: progress.length }, { key: "missed", label: "Missed deadline", count: missed.length }]} />
         {chip && (
@@ -88,7 +89,7 @@ export function ReviewDesk() {
             </IconTip>
           </span>
         )}
-      </div>
+      </HeadingControls>
       {tab === "awaiting" && <ReviewSession key={`${gradeFilter}|${chip ?? ""}`} only={only} milestone={fMilestone} />}
       {tab === "progress" && <NudgeSession key={`p|${gradeFilter}|${chip ?? ""}`} rows={progress} kind="progress" />}
       {tab === "missed" && <NudgeSession key={`m|${gradeFilter}|${chip ?? ""}`} rows={missed} kind="missed" />}

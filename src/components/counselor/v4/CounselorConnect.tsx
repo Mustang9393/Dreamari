@@ -109,6 +109,7 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "./chips";
 import { Segmented } from "./viz";
 import { LightPool, ReachFunnel } from "./charts/lit";
+import { HeadingControls } from "./Workspace";
 import { SubTabs } from "./SubTabs";
 import { Avatar, SelectBox, STATUS_COLORS, STATUS_FILLS, StatusChip, StudentLink } from "./chips";
 import { BulkComposer, BulkReplyReview, EmailToggle, fillFirst, markEmailed, reachFor, useEmailed } from "./MessagesBulk";
@@ -1488,6 +1489,9 @@ export function CounselorConnect() {
   };
   return (
     <div className="v4-page v4-connect flex flex-col gap-[var(--space-5)]">
+      {/* Inbox / Sent, the answered count and New message on the title's
+         row (20 Oct 2026 hierarchy pass: they were a second control row) */}
+      <HeadingControls>
       <div className="msg-toolbar">
         {/* the page view switch (level 3): the pill, so it never reads as a
            second row of the shell's underline page nav (9 Oct 2026) */}
@@ -1511,6 +1515,7 @@ export function CounselorConnect() {
           )}
         </div>
       </div>
+      </HeadingControls>
 
       {tab === "inbox" && <InboxPanel initialQuestion={questionParam} initialStudent={studentParam} initialDraft={draftParam} session={session} setSession={setSession} />}
       {tab === "sent" && (

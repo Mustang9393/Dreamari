@@ -1,3 +1,15 @@
+## 2026-10-20: v4 hierarchy pass on Explore, Review, Messages (one control row per page)
+
+**Why (Chandu):** "do whats not done yet" (the typography and hierarchy pass on Explore, Directory, Review, Messages and Assist).
+
+- `Workspace.tsx`: HeadingControls wraps a page's own controls so they come first on the title's row, ahead of the shell's grade and group pickers.
+- Explore (`v5/Explore.tsx`, embedded only; v7 does not pass `embedded`, and its `payLabel` is untouched): Careers / Pay by State and the pathway switch moved onto the title row, and the empty header no longer leaves a gap. The page reads title, search, world chips, first shelf (was five control rows).
+- Review (`ReviewDesk.tsx`): Awaiting me / In progress / Missed deadline sit on the title row beside the grade picker.
+- Messages (`CounselorConnect.tsx`): Inbox / Sent, the answered count and New message sit on the title row; inbox rows get more air.
+- Directory and Assist were already one control row; left as they are.
+
+Checked: tsc, eslint; Explore, Review and Messages at 1440 (headless captures).
+
 ## 2026-10-20: v4 Home in v7's shape; student ID tag v2; Meetings and Explore composition
 
 **Why (Chandu):** "lets try using the same sort of organisation level as v6 and v7 have for the home page of v4. Please include the off UI subtle picker for the character avatars." Then: "the student id component is too cluttered, remove the bar code and the weird serial numbers. Remove the career images. Use the same tag like structure the counsellors have but distinctly different from it." Then: "All pages need a heirarchy, spacing, typography, visual pass and decluttr pass once more. Both v7 and v4."

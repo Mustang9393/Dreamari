@@ -161,3 +161,10 @@ html.dark [data-counselor-version="v4"] .mtg-coming.mtg-coming { background: col
 [data-counselor-version="v4"] .v4-profile-summary li:has(> svg.lucide-flag) { flex-wrap: nowrap !important; align-items: flex-start !important; line-height: 1.5 !important; }
 [data-counselor-version="v4"] .v4-profile-summary li > svg.lucide-flag { margin-top: 4px; }
 [data-counselor-version="v4"] .mtg-coming.mtg-coming { max-width: none !important; width: 100% !important; }
+
+/* the page's own controls on the title row, ahead of the shell's pickers */
+[data-counselor-version="v4"] .v4-page-controls { gap: 12px; }
+[data-counselor-version="v4"] .v4-ph-own { order: -1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+[data-counselor-version="v4"] .v4-ph-own .msg-toolbar { gap: 12px 20px; }
+/* Messages' inbox rows: more air per row */
+[data-counselor-version="v4"] .msg-row.msg-row { padding-block: 14px !important; }
