@@ -59,6 +59,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { useTop3FlowV2 } from "@/lib/top3Flow";
+import { skyMoment } from "@/lib/sky";
 import { MAX_SAVED, buildSignals, careerById, demoFirst, exploreMoreWorlds, mixedForStudent, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
 import { BottomBar, ChipRow, DetailModal, SaveFlight, Field, InterestPicker, LabCard, LabScreen, PicksTray, ProfileTabs, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
@@ -244,7 +245,9 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
   // Functional updates throughout: two quick taps must never double-add.
   const toggleSave = (id: string) => {
     if (!state.saved.includes(id) && state.saved.length >= MAX_SAVED) setToast("Remove one first to save this career.");
-    if (!state.saved.includes(id) && state.saved.length < MAX_SAVED) launch(id, state.saved.length);
+    // a save lights the night sky from the card (21 Oct 2026: "I dont see the
+    // stars and the reactions ... in match flow"); the last slot is big
+    if (!state.saved.includes(id) && state.saved.length < MAX_SAVED) { launch(id, state.saved.length); skyMoment({ big: state.saved.length === MAX_SAVED - 1 }); }
     setState((s) => s.saved.includes(id)
       ? { ...s, saved: s.saved.filter((x) => x !== id), rank: s.rank.filter((x) => x !== id) }
       : s.saved.length >= MAX_SAVED ? s : { ...s, saved: [...s.saved, id] });
@@ -270,6 +273,8 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
   const assign = (id: string) => {
     if (!state.rank.includes(id) && state.rank.length >= 3) { setIncomingRank((cur) => (cur === id ? null : id)); return; }
     setIncomingRank(null);
+    // ranking: a small wave, and the full Top 3 a shooting star
+    if (!state.rank.includes(id)) skyMoment({ big: state.rank.length === 2 });
     if (reassure === "idle") {
       if (state.rank.includes(id)) setReassure("done");
       else if (state.rank.length === 0) {

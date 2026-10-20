@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
+import { NightSky } from "@/components/app/NightSky";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
@@ -46,6 +47,10 @@ export function MiniExploreMatch() {
         <link rel="stylesheet" href={FONT_STYLESHEET_HREF} precedence="default" />
         <BackgroundSpace />
         <AuroraBackground accent="#2f6bf2" visitedAccents={[]} finale={false} lightning={false} />
+        {/* the app's night sky over the aurora, calm, so saves and picks
+            light it (21 Oct 2026; Match drew no sky, so its moments fell
+            on nothing) */}
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10"><NightSky calm /></div>
         {/* The same soft fade the Flow Lab draws behind its floating header
             buttons, so the wordmark and menu stay readable over photos
             without a bar. */}

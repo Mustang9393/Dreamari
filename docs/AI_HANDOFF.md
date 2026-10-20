@@ -1,3 +1,13 @@
+## 2026-10-21: Reactive stars in Build, Match and Edit My Build; every save pulses; smoother Build finish
+
+**Why (Chandu):** "I dont see the stars and the reactions in the BUILD flow, and also in match flow, also in the my build when things are being updated can have that too within the pop up"; "the success animation etc in BUILD loads super slow"; "the stars pulsing on save button doesnt work all the time, i think its mostly when the toast with the undo is present".
+
+- **No sky to light:** Build (`BuildFlowExperience.tsx`) and Match (`MiniExploreMatch.tsx`) drew only the aurora, and the Edit My Build sheet covers the page's sky, so `skyMoment()` fell on nothing. Each now has a calm `NightSky` (still until a moment). `NightSky contained` sizes to its box and offsets moment x for the sheet (`PreferencesTab.tsx`).
+- **Where they fire:** Build: each Next small, halfway and finish big (`steps.tsx`); chip picks don't, or the sky never rests. Match (`V2Flow.tsx`): each save or rank small, the third of either big. Edit My Build: Save changes small, big when it fills the last empty section. List kept in `lib/sky.ts`.
+- **Saves dropped:** `SMALL_GAP` was 5s, about an Undo toast's life, so a second save inside it was swallowed. Now 600ms (only a double fire from one press). Shooting stars still at most every 2s.
+- **Build finish smoothing:** the party sprite is served as is (`PARTY_SPRITE`, `unoptimized`) and preloaded at flow start, so Dreamy is there when the screen opens; the XP count-up writes the number's text, not React state (was a full re-render every frame); sparkles 84+48 to 40+24 and the orbs lost their `blur()` filter (globals.css); the XP trail spawns half as often. Measured ~60fps, no frame over 50ms.
+- Checked on :3018, dark, desktop: event log for Build Next/halfway/finish, Match saves 1s apart, sheet saves 1s apart; sheet sky sized to the sheet. Not checked: light mode, phone width.
+
 ## 2026-10-20 — Release Food Scientist QA and current welcome art to main
 
 **Why:** Chandu: “push into main for QA.” Merge the Food Scientist candidate, native work surfaces and research/SOP changes into latest main. Preserve main's newer UX Play-hub release and thumbnail, counselor/My Build/night-sky changes. Food Scientist stays hamburger → Quick links → Food Scientist · QA draft; no normal-hub promotion requested.

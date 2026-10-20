@@ -48,6 +48,8 @@ import { Button } from "@/components/ui/Button";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
+import { NightSky } from "@/components/app/NightSky";
+import { skyMoment } from "@/lib/sky";
 import { EducationGrid, SelectField, SUBJECT_ICONS, VibeButtonRow } from "@/components/build/steps";
 import { CostSlider } from "@/components/build/CostStep";
 import { STATE_NAMES } from "@/components/build/LocationStep";
@@ -567,6 +569,9 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
     const first = BUILD_SECTIONS.find((s) => changed(s.id));
     writeBuildAnswers(draft);
     if (prefsDirty) writePreferences(prefs);
+    // a wave from Save changes; the save that fills the last empty section
+    // is big, with a shooting star
+    skyMoment({ big: answered === BUILD_SECTIONS.length && BUILD_SECTIONS.some((s) => !summaryOf(saved, s.id, savedCareers.length, savedPrefs)) });
     setConfirming(true);
     setProof(first ? `${first.title} saved. Explore, your Report and your plan now follow it.` : "Saved.");
     window.setTimeout(() => setConfirming(false), 900);
@@ -601,6 +606,10 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
           <div aria-hidden className="myb-sky">
             <BackgroundSpace />
             <AuroraBackground accent={(lookV2 ? STAGE_ACCENTS_V2 : STAGE_ACCENTS)[stage]} visitedAccents={[]} lightning={false} />
+            {/* the night sky inside the sheet, so a save lights it (21 Oct
+               2026, Chandu: "in the my build when things are being updated
+               can have that too within the pop up that opens") */}
+            <NightSky calm contained />
           </div>
           {/* the tooltip's wrapper takes the corner; it was a relative span,
              so the button's own absolute corner landed outside the sheet */}

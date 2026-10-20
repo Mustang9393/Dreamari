@@ -1722,10 +1722,12 @@ body .w-screen { width: calc(100vw / var(--vz)); }
   animation-timing-function: cubic-bezier(0.15, 0.6, 0.2, 1);
   animation-fill-mode: both;
 }
+/* soft by gradient, not a blur filter (a filter on 10+ moving layers cost a
+   repaint each frame; 21 Oct 2026 Build finish smoothing) */
 .magic-orb {
   opacity: 0.55;
-  filter: blur(1.5px);
-  box-shadow: 0 0 10px var(--spark, #fff), 0 0 22px color-mix(in srgb, var(--spark, #fff) 50%, transparent);
+  background: radial-gradient(circle, var(--spark, #fff) 0%, color-mix(in srgb, var(--spark, #fff) 60%, transparent) 45%, transparent 72%);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--spark, #fff) 45%, transparent);
 }
 @keyframes magic-dust {
   0% { transform: translate(0, 0) scale(0.2); opacity: 0; }
