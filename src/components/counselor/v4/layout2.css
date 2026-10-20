@@ -168,3 +168,80 @@ html.dark [data-counselor-version="v4"] .mtg-coming.mtg-coming { background: col
 [data-counselor-version="v4"] .v4-ph-own .msg-toolbar { gap: 12px 20px; }
 /* Messages' inbox rows: more air per row */
 [data-counselor-version="v4"] .msg-row.msg-row { padding-block: 14px !important; }
+
+/* ==== Calm, on Black & Blue (20 Oct 2026) ====
+   Chandu: "v4 is still cluttered like hell. Use our design system, clean
+   it up. It should not overwhelm the users, these are busy people with a
+   huge caseload ... easy and calm and simple to scan and look at without
+   feeling like a bunch of numbers are jumping out at them." Black & Blue
+   (the student app's default look, what v7 is built on) is v4's default
+   now. The rules: v7's surfaces (glass-surface-2 on the glass border, no
+   drop shadow, the 16px radius); labels as small uppercase overlines;
+   figures smaller and in plain foreground ink, never red or amber (state
+   is a dot and a word); no rings, glows or warning lights around numbers. */
+
+/* surfaces: v7's card, in both the box system and the old panels */
+html.dark [data-counselor-version="v4"] .v4-box,
+html.dark [data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] :is(.v4-surface.v4-surface,.v4-focus-sheet,.v4-review-island,.v4-progress-landscape,.v4-pathways-sheet,.v4-destination-sheet,.v4-interest-explorer,.v4-roster-table),
+html.dark [data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] .v4-engagement-stats > *,
+html.dark [data-counselor-version="v4"] .v4-iv-tiles .v4-iv-tile.v4-iv-tile,
+html.dark [data-counselor-version="v4"] .mtg-coming.mtg-coming {
+  background: var(--glass-surface-2) !important;
+  border-color: var(--glass-border) !important;
+  box-shadow: none !important;
+}
+[data-counselor-version="v4"] { --v4-box-radius: 16px; }
+
+/* labels: the small uppercase overline v7 uses */
+[data-counselor-version="v4"] .v4h-label,
+[data-counselor-version="v4"] .v4-iv-tile-label,
+[data-counselor-version="v4"] .v4-engagement-stat > span:first-child,
+[data-counselor-version="v4"] .ev-activity-label,
+[data-counselor-version="v4"] .iv-ledger-text small {
+  font-size: 12px !important; line-height: 16px !important; font-weight: 600 !important; letter-spacing: .08em !important; text-transform: uppercase !important; color: var(--muted-foreground) !important;
+}
+
+/* figures: smaller, plain ink */
+[data-counselor-version="v4"] .v4h-big strong { font-size: 40px; font-weight: 600; }
+[data-counselor-version="v4"] .v4h-big > span { font-size: 18px; color: var(--muted-foreground); }
+[data-counselor-version="v4"] .v4h-dot { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; vertical-align: 1px; background: var(--color-feedback-danger-solid, var(--destructive)); }
+[data-counselor-version="v4"] .v4-engagement-stat-value.v4-engagement-stat-value { font-size: 32px !important; font-weight: 600 !important; }
+[data-counselor-version="v4"] .ev-activity-figure { font-size: 26px !important; font-weight: 600 !important; }
+[data-counselor-version="v4"] .v4-inactive-tile strong { font-size: 28px !important; font-weight: 600 !important; }
+[data-counselor-version="v4"] .ev-warn-light { display: none !important; }
+[data-counselor-version="v4"] .iv-ledger-fig { color: var(--foreground) !important; font-size: 22px !important; }
+[data-counselor-version="v4"] .v4-home-review-fig strong { font-size: 32px; }
+/* Milestones' summary: no amber numeral, no glowing ring */
+[data-counselor-version="v4"] .v4-ms-summary .v4-ms-summary-link span[style] { color: var(--foreground) !important; }
+[data-counselor-version="v4"] .v4-ms-summary .is-hero .msv-ring-glow,
+[data-counselor-version="v4"] .v4-ms-summary .is-hero [class*="glow"] { display: none !important; }
+/* Readiness: the indicator is its number, not a tick ring */
+[data-counselor-version="v4"] .v4-iv-tiles .v4-iv-gauge svg { display: none; }
+[data-counselor-version="v4"] .v4-iv-tiles .v4-iv-gauge { width: auto !important; height: auto !important; }
+[data-counselor-version="v4"] .v4-iv-tiles .v4-iv-gauge-center { position: static !important; font-size: 30px !important; font-weight: 600 !important; }
+[data-counselor-version="v4"] .v4-iv-tiles.is-gauge .v4-iv-tile { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+[data-counselor-version="v4"] .v4-iv-tiles .v4-iv-tile.is-on { box-shadow: inset 0 0 0 1px var(--primary) !important; }
+
+/* section titles: one size everywhere, v7's weight */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-r2-title,.v4-card-head h2,.v4-engagement-chart h2,.v4-readiness h2,.v4-section-head h2,.v4-ms-grade-head h2) { font-size: 22px !important; font-weight: 600 !important; letter-spacing: -.01em; font-family: var(--font-display); }
+
+/* Milestones, calm: the cards wear the same glass as every card; the tick
+   gauge, the grade heads' little rings and the summary's glowing ring go,
+   the percentage stays as plain type (seven rings in a row was a wall of
+   dials) */
+html.dark [data-counselor-version="v4"] .v4-msc.v4-msc { background: var(--glass-surface-2) !important; border: 1px solid var(--glass-border) !important; box-shadow: none !important; }
+html.dark [data-counselor-version="v4"] .v4-msc.v4-msc::before { display: none !important; }
+[data-counselor-version="v4"] .v4-msc .msv-gauge svg { display: none !important; }
+[data-counselor-version="v4"] .v4-msc .msv-gauge { width: auto !important; height: auto !important; }
+[data-counselor-version="v4"] .v4-msc .msv-gauge-center { position: static !important; transform: none !important; }
+[data-counselor-version="v4"] .v4-msc .v4-msc-pct { font-size: 32px !important; }
+[data-counselor-version="v4"] .v4-msc-body.v4-msc-body { min-height: 0 !important; gap: 24px !important; }
+[data-counselor-version="v4"] .v4-ms-grade-pct svg, [data-counselor-version="v4"] .v4-ms-grade-pct .msv-ring { display: none !important; }
+[data-counselor-version="v4"] .v4-ms-summary .msv-ring, [data-counselor-version="v4"] .v4-ms-summary .msv-ring-glow, [data-counselor-version="v4"] .v4-ms-summary svg { display: none !important; }
+[data-counselor-version="v4"] .v4-ms-summary .v4-ms-summary-link svg { display: inline !important; }
+
+/* Engagement and every glow chart, calm: the orbs keep their dot and lose
+   the wide halo; no glowing chips around the readout */
+[data-counselor-version="v4"] .gl-orb-halo { display: none !important; }
+[data-counselor-version="v4"] .v4-status.v4-status-dot { display: inline-flex; align-items: center; gap: 7px; color: var(--foreground) !important; font-weight: 600; }
+[data-counselor-version="v4"] .v4-status.v4-status-dot > i { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--status-color); }

@@ -21,9 +21,11 @@ export const STATUS_FILLS:Record<CaseloadStatus,string>={"On Track":"var(--v4-ok
 // or sent back is red. Each pip still names its milestone and state on
 // hover; the status words keep Maisha's red / amber / green.
 export const MILESTONE_FILLS:Record<MilestoneStatus,string>={Approved:"var(--primary)",Completed:"var(--primary)","Pending Review":"color-mix(in srgb, var(--primary) 45%, transparent)","In Progress":"color-mix(in srgb, var(--primary) 45%, transparent)","Changes Requested":"var(--v4-risk)",Overdue:"var(--v4-risk)","Not Started":"var(--muted-foreground)","Not Applicable":"var(--muted-foreground)"};
-const statusIcon = {"On Track":Check,"Needs Attention":Clock3,"At Risk":AlertTriangle};
 const milestoneIcon = {Approved:Check,Completed:Check,"Pending Review":Clock3,"In Progress":Circle,"Changes Requested":RotateCcw,Overdue:AlertTriangle,"Not Started":Circle,"Not Applicable":Minus};
-export function StatusChip({status}:{status:CaseloadStatus}) {const Icon=statusIcon[status];return <span className="v4-status" style={{"--status-color":STATUS_COLORS[status]} as CSSProperties}><Icon size={13} aria-hidden/>{status}</span>;}
+/** A student's status as v7 says it: a small dot in the status color and
+ *  the word in normal ink (20 Oct 2026 calm pass, Chandu: "without feeling
+ *  like a bunch of numbers are jumping out"). On Track's dot is quiet. */
+export function StatusChip({status}:{status:CaseloadStatus}) {return <span className="v4-status v4-status-dot" style={{"--status-color":status==="On Track"?"color-mix(in srgb, var(--foreground) 35%, transparent)":STATUS_FILLS[status]} as CSSProperties}><i aria-hidden/>{status}</span>;}
 /** `quiet`: only work that is late or sent back keeps its color; every other
  *  state reads in the muted ink (a list of eleven rows in five colors). */
 export function MilestoneChip({status,quiet=false}:{status:MilestoneStatus;quiet?:boolean}) {const Icon=milestoneIcon[status];const color=quiet&&status!=="Overdue"&&status!=="Changes Requested"?"var(--muted-foreground)":MILESTONE_COLORS[status];return <span className="v4-status v4-milestone-status" style={{"--status-color":color} as CSSProperties}><Icon size={13} aria-hidden/>{status}</span>;}

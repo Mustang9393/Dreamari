@@ -8,7 +8,7 @@ import { useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, Clock } from "lucide-react";
-import { useCounselorFilters, type GradeFilter } from "../shell";
+import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
@@ -69,11 +69,10 @@ export function Overview(){
  const router=useRouter();const reviewed=useReviewedRoster();
  const filters=useTodayFilters();
  const account=useSyncExternalStore(subscribeCounselorAccount,counselorAccountSnapshot,serverCounselorAccountSnapshot);
- const {gradeFilter,setGradeFilter,setStatusFilter}=useCounselorFilters();
+ const {gradeFilter,setStatusFilter}=useCounselorFilters();
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
- const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;
- const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
+ const total=roster.length;const atRisk=roster.filter(s=>s.status==="At Risk").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
 
@@ -83,17 +82,13 @@ export function Overview(){
  // real engagement or presence"). Dreamy is the counselor's assistant who
  // reads everything first: three lines under the greeting, each a link,
  // about what changed, not the figures the strip below already shows.
- const missed=roster.filter(s=>Object.values(s.milestones).includes("Overdue")).length;
  // DEMO-ONLY: submissions have no timestamps yet; "since yesterday" is the newest few waiting
  const newToday=Math.min(pendingCount,3);
- const byGrade=[9,10,11,12].map(g=>{const rows=reviewed.filter(s=>s.grade===g);return {g,pct:rows.length?Math.round(rows.filter(s=>s.status==="On Track").length/rows.length*100):100};}).filter(x=>gradeFilter==="All Grades"||x.g===gradeFilter);
- const lowest=byGrade.reduce((a,b)=>b.pct<a.pct?b:a,byGrade[0]);
  // Everyone who needs support, in priority order, not only the first five
  // (9 Oct 2026, Chandu: "the student card row can be scrollable still,
  // right? It's not like there are only 5 students needing attention"). The
  // row scrolls sideways and the next card peeks in at the edge.
  const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank);
- const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
  const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
  const status=(value:"On Track"|"Needs Attention"|"At Risk")=>{setStatusFilter(value);go("students");};
  // v4's four metrics, Title Case, in v5's form: the number first, then the
@@ -107,10 +102,6 @@ export function Overview(){
  // the figures read first (10 Oct 2026, Chandu: "the 85% etc under the 7
  // at risk students need a bit more prominence. It was not read properly
  // when I demoed"): the number in full ink and weight, the words after it
- const pulseLinks=[
-  {label:`${pct(onTrack)}% on track`,value:`${pct(onTrack)}%`,words:"on track",action:()=>go("milestones&mode=student")},
-  {label:`${undecided} still exploring`,value:`${undecided}`,words:"still exploring",action:()=>go("insights")},
- ];
  return <div className="v4-daily v4-sections">
   {/* 9 Oct: Apple's event widget + notification stack hierarchy, adapted to
       Dreamari. Two useful groups; quieter copy without losing an update. */}
@@ -144,15 +135,18 @@ export function Overview(){
     <div className="v4-box v4h-card">
      <span className="v4h-label">Reviews</span>
      <span className="v4h-big"><strong><CountUp value={pendingCount}/></strong><span>waiting for you</span></span>
-     <span className="v4h-sub">{newToday?`${newToday} new since yesterday`:"Nothing new since yesterday"}{missed?` · ${missed} past deadline`:""}</span>
+     <span className="v4h-sub">{newToday?`${newToday} new since yesterday`:"Nothing new since yesterday"}</span>
      <button type="button" className="v4h-foot dm-quiet" onClick={()=>go("review-queue")}>Start reviewing<ArrowUpRight size={14} aria-hidden/></button>
     </div>
     <MeetingsCard roster={reviewed} />
     <div className="v4-box v4h-card">
      <span className="v4h-label">Need you</span>
      <span className="v4h-big"><strong><CountUp value={priority.length}/></strong><span>students</span></span>
-     <span className="v4h-sub"><b className={atRisk?"is-risk":""}>{atRisk} at risk</b>{lowest&&gradeFilter==="All Grades"?<> · <button type="button" className="v4h-link dm-quiet" onClick={()=>{setGradeFilter(lowest.g as GradeFilter);go("milestones");}}>Grade {lowest.g} lowest, {lowest.pct}% on track</button></>:null}</span>
-     <span className="v4h-sub">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden> · </span>}<button type="button" onClick={l.action} className="v4h-link dm-quiet" aria-label={l.label}><b>{l.value}</b> {l.words}</button></span>)}</span>
+     {/* one quiet line, the status said as a dot and a word (20 Oct 2026,
+        Chandu: "without feeling like a bunch of numbers are jumping out";
+        the on-track share, the still-exploring count and the lowest grade
+        live on Insights > Readiness and Milestones) */}
+     <span className="v4h-sub"><i className="v4h-dot is-risk" aria-hidden/>{atRisk} at risk</span>
      <button type="button" className="v4h-foot dm-quiet" onClick={()=>status("At Risk")}>Review students<ArrowUpRight size={14} aria-hidden/></button>
     </div>
    </div>

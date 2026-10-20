@@ -10,7 +10,7 @@ const STORAGE_KEY = "dreamari-theme";
 // The Counselor Dashboard defaults to light. V4 has a separate saved choice
 // so its pearlescent default and optional dark mode do not alter v2/v3.
 const COUNSELOR_KEY = "dreamari-theme:counselor";
-const COUNSELOR_V4_KEY = "dreamari-theme:counselor:v4";
+const COUNSELOR_V4_KEY = "dreamari-theme:counselor:v4b";
 // v5 is built on the student design system, so it has the student light and
 // dark, but its own saved choice (default light, like every counselor build).
 const COUNSELOR_V5_KEY = "dreamari-theme:counselor:v5";
@@ -49,7 +49,9 @@ function themeFor(pathname: string): GlobalTheme {
   } catch {
     // fall through to the default
   }
-  return isCounselorPath(pathname) && !isCounselorV7(pathname) ? "light" : "dark";
+  // v4 and v7 open in Black & Blue (v4 since 20 Oct 2026, a fresh key so an
+  // earlier light choice does not hide the new default)
+  return isCounselorPath(pathname) && !isCounselorV7(pathname) && !isCounselorV4(pathname) ? "light" : "dark";
 }
 
 export type GlobalTheme = "light" | "dark";

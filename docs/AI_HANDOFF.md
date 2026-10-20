@@ -1,3 +1,14 @@
+## 2026-10-20: v4 on Black & Blue, a calm pass
+
+**Why (Chandu):** "v4 is still cluttered like hell. Use our design system, clean it up. It should not overwhelm the users, these are busy people with a huge caseload most of the time. We want everything to be easy and calm and simple to scan and look at without feeling like a bunch of numbers are jumping out at them." Asked which design system: "Black & Blue (like v7)".
+
+- Default theme (`src/app/layout.tsx` theme script, `src/components/app/theme.tsx`, shared files; the v7 session was told): v4 opens dark (Black & Blue), like v7, under a fresh key `dreamari-theme:counselor:v4b` so an earlier light choice does not hide the new default. The toggle still switches to light.
+- Calm rules (`layout2.css`, "Calm, on Black & Blue"): v7's surfaces (glass-surface-2 on the glass border, no drop shadow, 16px radius) for every card, panel, tile and the milestone cards; labels as v7's small uppercase overline; figures smaller and in plain ink (Home 40px, Engagement 32, Readiness 30, activity 26, Inactive 28, Key Wins 22), never red or amber; no tick gauges on Readiness or the milestone cards, no rings on Milestones' grade heads or summary, no orb halos on the glow charts, no warning lights on Inactive; section titles one size (22px display).
+- Status (`chips.tsx` StatusChip): a dot in the status color and the word in normal ink (v7's form), On Track's dot quiet; was a colored word with a warning icon. Every v4 list that shows status takes it.
+- Home (`Overview.tsx`): one number per card and one quiet line. Reviews: 13 waiting, 3 new since yesterday. Meetings: 5 left this week, next student and time. Need you: 18 students, a dot and "7 at risk". The past-deadline count is Review's Missed deadline tab; the on-track share, still-exploring count and lowest grade are on Insights > Readiness and Milestones.
+
+Checked: tsc, eslint; Home, Directory, Milestones, Meetings, Messages, Review, College & Career, Readiness, Engagement, My Impact and the profile at 1440, dark (headless captures).
+
 ## 2026-10-20: Counselor v7, hierarchy, type and declutter pass
 
 **Why (Chandu, relayed by the v4 session):** "All pages need a heirarchy, spacing, typography, visual pass and decluttr pass once more. Both v7 and v4."
