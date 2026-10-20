@@ -15,7 +15,7 @@ import type { CounselorStudent } from "@/lib/counselorRoster";
 import { notify } from "../v5/LogSheet";
 import { StudentFace } from "../v5/StudentFace";
 import { matchesFor, type Opp } from "./oppCatalog";
-import { FIELD, FIELD_STYLE, Modal, MUTED, OVERLINE, PrimaryButton, RULE, SHEET_ACCENT, SheetHero } from "./ui";
+import { moment, FIELD, FIELD_STYLE, Modal, MUTED, OVERLINE, PrimaryButton, RULE, SHEET_ACCENT, SheetHero } from "./ui";
 
 type Open = { kind: "view" | "share"; opp: Opp } | null;
 let current: Open = null;
@@ -88,6 +88,7 @@ function ShareSheet({ opp }: { opp: Opp }) {
     addShare({ kind: "opportunity", title: name, ref: opp.e.item.id, studentIds: to.map((s) => s.id), studentNames: to.map((s) => s.name) });
     logTime({ activity: `Shared ${name}`, minutes: 5, kind: "indirect" });
     notify(`${name} sent to ${to.length} ${to.length === 1 ? "student" : "students"}`);
+    moment(true);
     close();
   };
   return (

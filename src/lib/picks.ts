@@ -1,3 +1,4 @@
+import { skyMoment } from "./sky";
 // What the student carried out of Match: the careers they saved to their Top
 // 3, in their own ranking, and which one they chose to start with in the
 // report chooser. There is no backend in the prototype, so localStorage IS
@@ -89,6 +90,10 @@ export function writePicks(picks: Picks): void {
   try {
     const ids = picks.ids.slice(0, 3);
     const next: Picks = { ids, focus: picks.focus && ids.includes(picks.focus) ? picks.focus : null };
+    // a career joining the Top 3 lights the sky, with a shooting star
+    let before: string[] = [];
+    try { before = (JSON.parse(window.localStorage.getItem(PICKS_KEY) ?? "{}") as Picks).ids ?? []; } catch { /* unreadable: treat as empty */ }
+    if (ids.some((id) => !before.includes(id))) skyMoment({ big: true });
     window.localStorage.setItem(PICKS_KEY, JSON.stringify(next));
   } catch {
     // Private browsing, quota, disabled storage: the flow still works for the

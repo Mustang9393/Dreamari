@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
+import { skyMoment } from "./sky";
 
 /** Saved careers (Career Detail's own bookmark, the Saved page's Careers
  *  shelf) -- same storage idiom as saved colleges (colleges/shared.tsx) and
@@ -40,7 +41,7 @@ export function useSavedCareers(): [Set<string>, (careerId: string) => void] {
   const toggle = (careerId: string) => {
     const next = new Set(saved);
     if (next.has(careerId)) next.delete(careerId);
-    else next.add(careerId);
+    else { next.add(careerId); skyMoment(); }
     try {
       window.localStorage.setItem(KEY, JSON.stringify([...next]));
     } catch {

@@ -37,7 +37,7 @@ import type { CounselorStudent } from "@/lib/counselorRoster";
 import { careerSignal, growthText, money, price, schoolStudents, schoolsTeaching, stepsByGrade, useSavers } from "../v5/exploreData";
 import { openSchool, toggleExploreShortlist, useShortlist, type CareerSheetProps, type SchoolSheetProps } from "../v5/ExploreSheets";
 import { notify } from "../v5/LogSheet";
-import { Modal, MUTED, OVERLINE, PrimaryButton, QuietButton, RULE, SHEET_ACCENT, SheetHero, STATUS_DOT, studentHref } from "./ui";
+import { moment, Modal, MUTED, OVERLINE, PrimaryButton, QuietButton, RULE, SHEET_ACCENT, SheetHero, STATUS_DOT, studentHref } from "./ui";
 
 const PREVIEW = 6;
 
@@ -46,15 +46,14 @@ function Students({ list, title }: { list: CounselorStudent[]; title: string }) 
   if (!list.length) return null;
   const shown = all ? list : list.slice(0, PREVIEW);
   return (
-    <section className="flex flex-col gap-[6px]">
-      <h3 className={OVERLINE} style={MUTED}>{title}</h3>
+    <Section title={title} count={list.length}>
       <ul className="flex flex-col">
         {shown.map((s) => (
           <li key={s.id} className="border-b last:border-b-0" style={{ borderColor: RULE }}>
             <Link href={studentHref(s.id)} className="dm-quiet -mx-[8px] flex items-center gap-[10px] rounded-[var(--radius-md)] px-[8px] py-[9px] text-[14px]">
               <span className="min-w-0 flex-1 truncate font-semibold">{s.name}</span>
               {s.status !== "On Track" && <span className="flex flex-none items-center gap-[6px] text-[13px] font-semibold"><span aria-hidden className="size-[7px] rounded-full" style={{ background: STATUS_DOT[s.status] }} />{s.status}</span>}
-              <span className="w-[64px] flex-none text-right text-[13px]" style={MUTED}>Grade {s.grade}</span>
+              <span className="w-[60px] flex-none text-right text-[13px]" style={MUTED}>Grade {s.grade}</span>
             </Link>
           </li>
         ))}
@@ -62,7 +61,7 @@ function Students({ list, title }: { list: CounselorStudent[]; title: string }) 
       {list.length > PREVIEW && !all && (
         <button type="button" onClick={() => setAll(true)} className="dm-link w-fit cursor-pointer pt-[4px] text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>Show all {list.length}</button>
       )}
-    </section>
+    </Section>
   );
 }
 
@@ -79,12 +78,35 @@ function Rows({ items }: { items: { label: string; value: string }[] }) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+/** A section inside a sheet: a 15px heading (the step under the sheet's
+ *  title and figures), an optional muted count, then its rows. */
+function Section({ title, count, children }: { title: string; count?: number; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-[6px]">
-      <h3 className={OVERLINE} style={MUTED}>{title}</h3>
+    <section className="flex min-w-0 flex-col gap-[8px]">
+      <h3 className="text-[15px] leading-[20px] font-semibold">{title}{typeof count === "number" && <span className="ml-[8px] tabular-nums" style={MUTED}>{count}</span>}</h3>
       {children}
     </section>
+  );
+}
+
+/** Two columns from 640px, one below. */
+function Cols({ children }: { children: React.ReactNode }) {
+  return <div className="grid grid-cols-1 gap-x-[40px] gap-y-[24px] sm:grid-cols-2">{children}</div>;
+}
+
+/** The sheet's figures in one strip: the headline in the gradient numeral,
+ *  then up to two supporting figures, hairlines between. */
+function FactStrip({ hero, rest, accent }: { hero: { label: string; value: string; suffix?: string }; rest: { label: string; value: string }[]; accent: string }) {
+  return (
+    <div className="grid grid-cols-1 gap-y-[16px] border-y py-[16px] sm:grid-cols-[1.4fr_1fr_1fr]" style={{ borderColor: RULE }}>
+      <SheetHero label={hero.label} value={hero.value} suffix={hero.suffix} accent={accent} />
+      {rest.map((f) => (
+        <div key={f.label} className="flex flex-col gap-[4px] sm:border-l sm:pl-[24px]" style={{ borderColor: RULE }}>
+          <span className={OVERLINE} style={MUTED}>{f.label}</span>
+          <span className="text-[24px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{f.value}</span>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -130,25 +152,31 @@ export function V7CareerSheet({ list, index, saves, state, onClose }: CareerShee
     if (!to.length) { notify("No students to send it to yet"); return; }
     addShare({ kind: "career", title: career.title, ref: slug, studentIds: to.map((x) => x.id), studentNames: to.map((x) => x.name) });
     notify(`${career.title} sent to ${to.length} ${to.length === 1 ? "student" : "students"}`);
+    moment(true);
     onClose();
   };
   const shareCount = saved.length || mightFit.length;
   return (
-    <Modal overline={career.world} title={career.title} accent={accent} onClose={onClose}
+    <Modal overline={career.world} title={career.title} accent={accent} onClose={onClose} maxWidth={760}
       footer={<><ShortlistButton id={`career:${slug}`} name={career.title} /><PrimaryButton onClick={share} icon={<Send className="h-4 w-4" aria-hidden />}>{shareCount ? `Share with ${shareCount}` : "Share"}</PrimaryButton></>}>
       {sig
-        ? <SheetHero label={`Pay in ${state}`} value={money(sig.pay)} line={`${growthText(sig.growth)} growth · ${sig.openings.toLocaleString()} jobs a year`} accent={accent} />
-        : typicalPay && <SheetHero label="Typical pay" value={typicalPay} line={degree} accent={accent} />}
+        ? <FactStrip accent={accent} hero={{ label: `Pay in ${state}`, value: money(sig.pay) }} rest={[{ label: "Growth", value: growthText(sig.growth) }, { label: "Jobs a year", value: sig.openings.toLocaleString() }]} />
+        : typicalPay && <FactStrip accent={accent} hero={{ label: "Typical pay", value: typicalPay }} rest={degree ? [{ label: "Education", value: degree }] : []} />}
       <TextTabs items={[{ key: "students", label: "Students" }, { key: "path", label: "Path in" }, { key: "guide", label: "Guide" }]} value={tab} onChange={setTab} ariaLabel="Career sections" layoutId="v7-career-sheet-tabs" soft caps={false} />
       {tab === "students" && (
-        <>
-          {savedCount ? <Students list={saved} title={`${savedCount} saved it`} /> : <p className="text-[14px]" style={MUTED}>None of your students saved it yet.</p>}
-          <Students list={mightFit} title={`Exploring ${career.world}`} />
-        </>
+        savedCount || mightFit.length ? (
+          <Cols>
+            {saved.length ? <Students list={saved} title="Saved it" /> : <Section title="Saved it" count={0}><p className="text-[14px]" style={MUTED}>No one yet.</p></Section>}
+            <Students list={mightFit} title={`Exploring ${career.world}`} />
+          </Cols>
+        ) : <p className="text-[14px]" style={MUTED}>None of your students saved it yet.</p>
       )}
       {tab === "path" && (
-        <>
-          {(degree || major) && <Rows items={[...(degree ? [{ label: "Education", value: degree }] : []), ...(major ? [{ label: "Most study", value: p!.education.studies.slice(0, 2).map((x) => x.name).join(", ") }] : [])]} />}
+        <Cols>
+          <div className="flex min-w-0 flex-col gap-[24px]">
+            {(degree || major) && <Section title="The usual route"><Rows items={[...(degree ? [{ label: "Education", value: degree }] : []), ...(major ? [{ label: "Most study", value: p!.education.studies.slice(0, 2).map((x) => x.name).join(", ") }] : [])]} /></Section>}
+            {p && p.ladder.length > 0 && <Section title="How people move up"><Rows items={p.ladder.map((r) => ({ label: r.jobTitle, value: r.pay }))} /></Section>}
+          </div>
           {schools.length > 0 && (
             <Section title="Schools that teach it">
               <ul className="flex flex-col">
@@ -167,20 +195,17 @@ export function V7CareerSheet({ list, index, saves, state, onClose }: CareerShee
               </ul>
             </Section>
           )}
-          {p && p.ladder.length > 0 && (
-            <Section title="How people move up">
-              <Rows items={p.ladder.map((r) => ({ label: r.jobTitle, value: r.pay }))} />
-            </Section>
-          )}
-        </>
+        </Cols>
       )}
       {tab === "guide" && (
-        <>
+        <Cols>
           {ask.length > 0 && <Section title="Ask them"><Bullets items={ask} /></Section>}
-          {stepsByGrade(career.title, career.world, degree, major).map((g) => (
-            <Section key={g.when} title={g.when}><Bullets items={g.steps} /></Section>
-          ))}
-        </>
+          <div className="flex min-w-0 flex-col gap-[20px]">
+            {stepsByGrade(career.title, career.world, degree, major).map((g) => (
+              <Section key={g.when} title={g.when}><Bullets items={g.steps} /></Section>
+            ))}
+          </div>
+        </Cols>
       )}
     </Modal>
   );
@@ -203,17 +228,19 @@ export function V7SchoolSheet({ list, index, onClose }: SchoolSheetProps) {
     const to = students.length ? students : roster.filter((x) => x.grade >= 11);
     addShare({ kind: "school", title: c.name, ref: c.slug, studentIds: to.map((x) => x.id), studentNames: to.map((x) => x.name) });
     notify(`${c.name} sent to ${to.length} ${to.length === 1 ? "student" : "students"}`);
+    moment(true);
     onClose();
   };
-  const facts = [c.admitRate === null ? "Open admission" : `${c.admitRate} of 100 get in`, c.finish === null ? null : `${c.finish}% finish`].filter(Boolean).join(" · ");
   return (
-    <Modal overline={`${KIND[c.level]} · ${c.city}, ${c.state}`} title={c.name} onClose={onClose}
+    <Modal overline={`${KIND[c.level]} · ${c.city}, ${c.state}`} title={c.name} onClose={onClose} maxWidth={760}
       footer={<><ShortlistButton id={`school:${c.slug}`} name={c.name} /><PrimaryButton onClick={share} icon={<Send className="h-4 w-4" aria-hidden />}>{students.length ? `Share with ${students.length}` : "Share"}</PrimaryButton></>}>
-      <SheetHero label="Net price" value={c.netPrice === null ? "Not listed" : price(c.netPrice)} suffix={c.netPrice === null ? undefined : "a year"} line={facts} accent={SHEET_ACCENT} />
+      <FactStrip accent={SHEET_ACCENT}
+        hero={{ label: "Net price", value: c.netPrice === null ? "Not listed" : price(c.netPrice), suffix: c.netPrice === null ? undefined : "a year" }}
+        rest={[{ label: "Get in", value: c.admitRate === null ? "Open" : `${c.admitRate} of 100` }, { label: "Finish", value: pct(c.finish) }]} />
       <TextTabs items={[{ key: "students", label: "Students" }, { key: "cost", label: "Cost" }, { key: "in", label: "Getting in" }, { key: "results", label: "Results" }]} value={tab} onChange={setTab} ariaLabel="School sections" layoutId="v7-school-sheet-tabs" soft caps={false} />
-      {tab === "students" && (students.length ? <Students list={students} title={`${students.length} looking at it`} /> : <p className="text-[14px]" style={MUTED}>None of your students saved it yet.</p>)}
+      {tab === "students" && (students.length ? <Students list={students} title="Looking at it" /> : <p className="text-[14px]" style={MUTED}>None of your students saved it yet.</p>)}
       {tab === "cost" && (
-        <>
+        <Cols>
           {d && d.bands.length > 0 && <Section title="After grants, by family income"><Rows items={d.bands.map((b) => ({ label: b.label, value: usd(b.pay) }))} /></Section>}
           {d && (
             <Section title="Sticker price">
@@ -225,25 +252,30 @@ export function V7SchoolSheet({ list, index, onClose }: SchoolSheetProps) {
               ]} />
             </Section>
           )}
-        </>
+        </Cols>
       )}
       {tab === "in" && (
-        <>
-          {d && d.require.length > 0 && <Section title="They require"><Bullets items={d.require} /></Section>}
-          {d && d.consider.length > 0 && <Section title="They also look at"><Bullets items={d.consider} /></Section>}
-          {d?.scores && <Section title="Test scores, middle half"><Rows items={[{ label: "SAT", value: d.scores.sat }, ...(d.scores.act ? [{ label: "ACT", value: d.scores.act }] : [])]} /></Section>}
-          {!d && <p className="text-[14px]" style={MUTED}>{c.admission === "open" ? "Anyone with a diploma or GED can enroll." : "No admission details published."}</p>}
-        </>
+        d ? (
+          <Cols>
+            {d.require.length > 0 && <Section title="They require"><Bullets items={d.require} /></Section>}
+            <div className="flex min-w-0 flex-col gap-[24px]">
+              {d.consider.length > 0 && <Section title="They also look at"><Bullets items={d.consider} /></Section>}
+              {d.scores && <Section title="Test scores, middle half"><Rows items={[{ label: "SAT", value: d.scores.sat }, ...(d.scores.act ? [{ label: "ACT", value: d.scores.act }] : [])]} /></Section>}
+            </div>
+          </Cols>
+        ) : <p className="text-[14px]" style={MUTED}>{c.admission === "open" ? "Anyone with a diploma or GED can enroll." : "No admission details published."}</p>
       )}
       {tab === "results" && (
-        <>
-          <Rows items={[
-            { label: "Come back for year two", value: pct(c.retention) },
-            { label: "Paying back loans", value: pct(c.repay) },
-            { label: "Graduates a year", value: c.gradsPerYear.toLocaleString() },
-          ]} />
+        <Cols>
+          <Section title="How students do">
+            <Rows items={[
+              { label: "Come back for year two", value: pct(c.retention) },
+              { label: "Paying back loans", value: pct(c.repay) },
+              { label: "Graduates a year", value: c.gradsPerYear.toLocaleString() },
+            ]} />
+          </Section>
           {d && d.programmes.length > 0 && <Section title="Biggest programs, pay after"><Rows items={[...d.programmes].sort((a, b) => b.grads - a.grads).slice(0, 5).map((p) => ({ label: p.name, value: p.pay }))} /></Section>}
-        </>
+        </Cols>
       )}
     </Modal>
   );

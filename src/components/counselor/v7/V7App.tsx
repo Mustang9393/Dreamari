@@ -29,6 +29,7 @@ import { ExploreSheetHost } from "../v5/ExploreSheets";
 import { LogSheetHost } from "../v5/LogSheet";
 import "../v5/v5.css";
 import "../calm.css";
+import "./v7.css";
 import { V7Home } from "./Home";
 import { V7Students } from "./Students";
 import { V7Explore } from "./Explore";
@@ -73,7 +74,7 @@ export function V7App({ view }: { view: string | undefined }) {
   const navLabel = onProfile ? "Profile" : onReviews ? "Home" : LABEL[active];
   return (
     <div className="marketing-v2 themeable counselor-calm relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
-      <AppBackdrop />
+      <AppBackdrop calmSky />
       <DesktopNavigation
         active={navLabel}
         items={NAV}

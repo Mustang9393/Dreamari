@@ -5,16 +5,18 @@
 // interest, plan, progress and last active. Opening a row opens the
 // student's profile (StudentProfile.tsx).
 //
-// From the Replit, kept: every column. Changed: students who need you come
-// first (standing rule: "always display what needs attention first"); the
-// status is a dot and a word, not a colored pill; no row checkboxes (batch
-// sends live with the review and message tools, Chandu 25 Sept: "the batch
-// thing should be in productivity suite not in the students tab itself");
-// filters are three pickers in the toolbar instead of a panel.
+// Declutter (20 Oct 2026, Chandu: "the lists are too cluttered still, i
+// dont see any declutter happening"): the seven-column table is now three
+// groups (At risk, Needs attention, On track) with one line per student:
+// face, name, the one thing open, last active. Status is the group, not a
+// column (Gestalt proximity); On track starts folded (progressive
+// disclosure: 103 quiet rows a counselor rarely needs first). Grade, career
+// interest and plan left the row; they lead the profile, stay searchable,
+// filterable (grade, plan) and in the export. No row checkboxes (batch sends
+// live with the message tools, Chandu 25 Sept).
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { Download, Search } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -22,13 +24,11 @@ import { attentionRank, lastActiveLabel, type CounselorStudent } from "@/lib/cou
 import { StudentFace } from "../v5/StudentFace";
 import { flagsFor } from "./data";
 import { StudentProfile } from "./StudentProfile";
-import { CARD, CARD_STYLE, MUTED, OVERLINE, PageHead, QuietButton, RULE, Status, studentHref } from "./ui";
+import { ChevronDown } from "lucide-react";
+import { CARD, CARD_STYLE, MUTED, PageHead, QuietButton, RULE, STATUS_DOT, studentHref } from "./ui";
 
-const PAGE = 25;
-const STATUS_ORDER = { "At Risk": 0, "Needs Attention": 1, "On Track": 2 } as const;
 const PICKER = "h-11 min-w-[150px] rounded-[var(--radius-md)] border px-[12px] text-[14px] font-semibold";
 const PICKER_STYLE = { borderColor: "var(--glass-border)", background: "transparent", color: "var(--foreground)" };
-const GRID = "lg:grid-cols-[minmax(0,2.2fr)_70px_150px_minmax(0,1.5fr)_minmax(0,1.2fr)_minmax(0,1.8fr)_100px]";
 
 export function V7Students({ studentId, tab }: { studentId?: string; tab?: string }) {
   if (studentId) return <StudentProfile studentId={studentId} initialTab={tab} />;
@@ -45,25 +45,25 @@ export function progressOf(s: CounselorStudent): string {
   return k ? `${k} in progress` : "All caught up";
 }
 
+const GROUPS: { key: CounselorStudent["status"]; label: string; open: boolean }[] = [
+  { key: "At Risk", label: "At risk", open: true },
+  { key: "Needs Attention", label: "Needs attention", open: true },
+  { key: "On Track", label: "On track", open: false },
+];
+
 function Directory() {
   const roster = useReviewedRoster();
-  const params = useSearchParams();
   const [q, setQ] = useState("");
   const [grade, setGrade] = useState("all");
-  const [status, setStatus] = useState(params.get("status") === "need" ? "need" : "all");
   const [plan, setPlan] = useState("all");
-  const [shown, setShown] = useState(PAGE);
   const plans = useMemo(() => [...new Set(roster.map(planOf))].sort(), [roster]);
-  const list = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    return roster
-      .filter((s) => !needle || s.name.toLowerCase().includes(needle) || interestOf(s).toLowerCase().includes(needle))
-      .filter((s) => grade === "all" || String(s.grade) === grade)
-      .filter((s) => status === "all" || (status === "need" ? s.status !== "On Track" : s.status === status))
-      .filter((s) => plan === "all" || planOf(s) === plan)
-      // status first (At Risk, then Needs Attention), then the most urgent item
-      .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || attentionRank(a, b));
-  }, [roster, q, grade, status, plan]);
+  const needle = q.trim().toLowerCase();
+  const filtering = !!needle || grade !== "all" || plan !== "all";
+  const list = useMemo(() => roster
+    .filter((s) => !needle || s.name.toLowerCase().includes(needle) || interestOf(s).toLowerCase().includes(needle))
+    .filter((s) => grade === "all" || String(s.grade) === grade)
+    .filter((s) => plan === "all" || planOf(s) === plan)
+    .sort(attentionRank), [roster, needle, grade, plan]);
 
   const exportCsv = () => {
     const rows = [["Student", "Grade", "Status", "Career interest", "Plan", "Progress", "Last active"], ...list.map((s) => [s.name, String(s.grade), s.status, interestOf(s), planOf(s), progressOf(s), lastActiveLabel(s.lastActive)])];
@@ -77,69 +77,72 @@ function Directory() {
 
   return (
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
-      <PageHead title="Students" action={list.length !== roster.length ? <span className="text-[14px] font-semibold tabular-nums" style={MUTED}>{list.length} of {roster.length}</span> : undefined} />
-
+      <PageHead title="Students" />
       <div className="flex flex-col gap-[var(--space-3)] lg:flex-row lg:items-center">
         <label className="relative flex min-w-0 flex-1 items-center">
           <Search className="pointer-events-none absolute left-[14px] h-4 w-4" style={MUTED} aria-hidden />
-          <input type="search" value={q} onChange={(e) => { setQ(e.target.value); setShown(PAGE); }} placeholder="Search students or careers" aria-label="Search students"
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search students or careers" aria-label="Search students"
             className="h-11 w-full rounded-[var(--radius-md)] border bg-transparent pr-[12px] pl-[40px] text-[15px] outline-none focus-visible:ring-2" style={{ borderColor: "var(--glass-border)" }} />
         </label>
         <div className="flex flex-wrap items-center gap-[var(--space-2)]">
-          <Listbox ariaLabel="Grade" value={grade} onChange={(v) => { setGrade(v); setShown(PAGE); }} className={PICKER} style={PICKER_STYLE}
+          <Listbox ariaLabel="Grade" value={grade} onChange={setGrade} className={PICKER} style={PICKER_STYLE}
             options={[{ value: "all", label: "All grades" }, ...[9, 10, 11, 12].map((g) => ({ value: String(g), label: `Grade ${g}` }))]} />
-          <Listbox ariaLabel="Status" value={status} onChange={(v) => { setStatus(v); setShown(PAGE); }} className={PICKER} style={PICKER_STYLE}
-            options={[{ value: "all", label: "Any status" }, { value: "need", label: "Need you" }, { value: "At Risk", label: "At risk" }, { value: "Needs Attention", label: "Needs attention" }, { value: "On Track", label: "On track" }]} />
-          <Listbox ariaLabel="Plan" value={plan} onChange={(v) => { setPlan(v); setShown(PAGE); }} className={PICKER} style={PICKER_STYLE}
+          <Listbox ariaLabel="Plan" value={plan} onChange={setPlan} className={PICKER} style={PICKER_STYLE}
             options={[{ value: "all", label: "Any plan" }, ...plans.map((p) => ({ value: p, label: p }))]} />
-          <QuietButton onClick={exportCsv} icon={<Download className="h-4 w-4" aria-hidden />}>Export</QuietButton>
+          <QuietButton onClick={exportCsv} icon={<Download className="h-4 w-4" aria-hidden />} label="Export as CSV" />
         </div>
       </div>
 
-      <section aria-label="Student directory" className={`${CARD} overflow-hidden`} style={CARD_STYLE}>
-        <div className={`hidden gap-[var(--space-4)] border-b px-[var(--space-5)] py-[12px] lg:grid ${GRID}`} style={{ borderColor: RULE }}>
-          {["Student", "Grade", "Status", "Career interest", "Plan", "Progress", "Last active"].map((h) => <span key={h} className={OVERLINE} style={MUTED}>{h}</span>)}
+      {list.length ? (
+        <div className="flex flex-col gap-[var(--space-6)]">
+          {/* a search or filter opens every group, so a match is never folded away */}
+          {GROUPS.map((g) => <Group key={`${g.key}-${filtering}`} label={g.label} status={g.key} open={g.open || filtering} list={list.filter((s) => s.status === g.key)} />)}
         </div>
-        {list.length ? (
-          <ul>
-            {list.slice(0, shown).map((s) => <Row key={s.id} s={s} />)}
-          </ul>
-        ) : (
-          <div className="flex flex-col items-start gap-[var(--space-2)] px-[var(--space-5)] py-[var(--space-8)]">
-            <p className="text-[16px] font-semibold">No students match.</p>
-            <button type="button" onClick={() => { setQ(""); setGrade("all"); setStatus("all"); setPlan("all"); }} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>Clear filters</button>
-          </div>
-        )}
-      </section>
-      {list.length > shown && (
-        <div className="flex justify-center">
-          <QuietButton onClick={() => setShown((n) => n + PAGE)}>Show {Math.min(PAGE, list.length - shown)} more</QuietButton>
+      ) : (
+        <div className="flex flex-col items-start gap-[var(--space-2)] py-[var(--space-6)]">
+          <p className="text-[16px] font-semibold">No students match.</p>
+          <button type="button" onClick={() => { setQ(""); setGrade("all"); setPlan("all"); }} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>Clear filters</button>
         </div>
       )}
     </div>
   );
 }
 
+const PAGE_IN_GROUP = 12;
+
+function Group({ label, status, open: startOpen, list }: { label: string; status: CounselorStudent["status"]; open: boolean; list: CounselorStudent[] }) {
+  const [open, setOpen] = useState(startOpen);
+  const [shown, setShown] = useState(PAGE_IN_GROUP);
+  if (!list.length) return null;
+  return (
+    <section aria-label={label} className="flex flex-col gap-[var(--space-2)]">
+      <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="dm-quiet -mx-[8px] flex w-fit cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[8px] py-[6px]">
+        <span aria-hidden className="size-[9px] rounded-full" style={{ background: STATUS_DOT[status] }} />
+        <span className="text-[16px] font-semibold">{label}</span>
+        <span className="text-[16px] font-semibold tabular-nums" style={MUTED}>{list.length}</span>
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? "" : "-rotate-90"}`} style={MUTED} aria-hidden />
+      </button>
+      {open && (
+        <>
+          <ul className={`${CARD} overflow-hidden`} style={CARD_STYLE}>
+            {list.slice(0, shown).map((s) => <Row key={s.id} s={s} />)}
+          </ul>
+          {list.length > shown && <button type="button" onClick={() => setShown((n) => n + 25)} className="dm-link w-fit cursor-pointer pt-[4px] text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>Show {Math.min(25, list.length - shown)} more</button>}
+        </>
+      )}
+    </section>
+  );
+}
+
+/** One line: face, name, the one thing open, last active. */
 function Row({ s }: { s: CounselorStudent }) {
-  const progress = progressOf(s);
-  const flagged = flagsFor(s).length > 0;
   return (
     <li className="border-b last:border-b-0" style={{ borderColor: RULE }}>
-      <Link href={studentHref(s.id)} className={`dm-quiet dm-row grid grid-cols-[1fr_auto] items-center gap-x-[var(--space-4)] gap-y-[4px] px-[var(--space-5)] py-[12px] lg:grid ${GRID}`}>
-        <span className="flex min-w-0 items-center gap-[12px]">
-          <StudentFace s={s} size={36} />
-          <span className="flex min-w-0 flex-col">
-            <span className="truncate text-[15px] leading-[20px] font-semibold">{s.name}</span>
-            {/* phones: the facts the hidden columns carry, in one line */}
-            <span className="truncate text-[13px] leading-[18px] lg:hidden" style={MUTED}>Grade {s.grade} · {interestOf(s)}</span>
-          </span>
-        </span>
-        <span className="hidden text-[14px] tabular-nums lg:block" style={MUTED}>{s.grade}</span>
-        <span className="justify-self-end lg:justify-self-start"><Status status={s.status} /></span>
-        <span className="hidden truncate text-[14px] lg:block">{interestOf(s)}</span>
-        <span className="hidden truncate text-[14px] lg:block" style={MUTED}>{planOf(s)}</span>
-        <span className="col-span-2 truncate pl-[48px] text-[13px] lg:col-span-1 lg:pl-0 lg:text-[14px]" style={flagged ? undefined : MUTED}>{progress}</span>
-        <span className="hidden text-[13px] lg:block" style={MUTED}>{lastActiveLabel(s.lastActive)}</span>
+      <Link href={studentHref(s.id)} className="dm-quiet group flex items-center gap-[14px] px-[var(--space-5)] py-[11px]">
+        <StudentFace s={s} size={32} />
+        <span className="w-[132px] flex-none truncate text-[15px] font-semibold sm:w-[220px]">{s.name}</span>
+        <span className="min-w-0 flex-1 truncate text-[14px]" style={MUTED}>{progressOf(s)}</span>
+        <span className="hidden w-[96px] flex-none text-right text-[13px] sm:block" style={MUTED}>{lastActiveLabel(s.lastActive)}</span>
       </Link>
     </li>
   );

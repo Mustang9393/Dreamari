@@ -42,7 +42,7 @@ const num = (s: string) => Number(s.replace(/[^0-9.]/g, ""));
  *  above 640px. One frame so the sheets read as one family (Chandu, 20 Oct
  *  2026: "redesign the typical degree (i) popup to be consistent with the
  *  what it pays pop up too"). */
-export function FactSheet({ career, accent, title, more, source, onClose, children, footer, wide = false }: {
+export function FactSheet({ career, accent, title, more, source, onClose, children, footer, wide = false, maxWidth }: {
   career: string;
   /** the world accent, e.g. var(--world-arts-media-sport) */
   accent: string;
@@ -59,6 +59,8 @@ export function FactSheet({ career, accent, title, more, source, onClose, childr
   footer?: React.ReactNode;
   /** a little wider for forms and lists (560px instead of 480px) */
   wide?: boolean;
+  /** wider still for a two-column sheet (counselor v7's Explore sheets, 760px) */
+  maxWidth?: number;
 }) {
   const still = useReducedMotion();
   const titleId = useId();
@@ -81,9 +83,10 @@ export function FactSheet({ career, accent, title, more, source, onClose, childr
         initial={still ? false : { opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 420, damping: 36 }}
-        className={`dm-scroll relative z-[1] flex max-h-[calc(92dvh/var(--vz,1))] w-full flex-col overflow-hidden rounded-t-[24px] border sm:rounded-[20px] ${wide ? "sm:max-w-[560px]" : "sm:max-w-[480px]"}`}
+        className={`dm-scroll relative z-[1] flex max-h-[calc(92dvh/var(--vz,1))] w-full flex-col overflow-hidden rounded-t-[24px] border sm:rounded-[20px] ${maxWidth ? "" : wide ? "sm:max-w-[560px]" : "sm:max-w-[480px]"}`}
         style={{
           borderColor: tint(40),
+          ...(maxWidth ? { maxWidth: `min(${maxWidth}px, 100%)` } : null),
           background: `radial-gradient(120% 70% at 100% 0, ${tint(22)}, transparent 62%), ${surface}`,
           boxShadow: `0 16px 48px -4px rgba(0,0,0,0.62), 0 4px 16px rgba(0,0,0,0.28), 0 24px 60px -30px ${tint(70)}`,
           color: "var(--foreground)",

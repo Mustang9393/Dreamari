@@ -12,5 +12,5 @@
 import { V5Explore } from "../v5/Explore";
 
 export function V7Explore() {
-  return <V5Explore payLabel="Labor Market" />;
+  return <V5Explore payLabel="Labor Market" consolidated />;
 }

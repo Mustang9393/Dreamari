@@ -18,7 +18,7 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { CalendarCheck, Send } from "lucide-react";
+import { ArrowUpRight, CalendarCheck, Send } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { Poster } from "@/components/opportunities/Poster";
@@ -36,7 +36,7 @@ import { catalog, matchesFor } from "./oppCatalog";
 import { openOpp, shareOpp } from "./OppSheets";
 import { SECTIONS, CARD, CARD_STYLE, DISPLAY, FIGURE, MUTED, OVERLINE, PrimaryButton, SectionHead, TITLE, v7 } from "./ui";
 
-const RAIL = "-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
+const RAIL = "-mx-5 flex gap-[24px] sm:gap-[32px] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
 const DAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const subscribeDate = (notify: () => void) => { const t = window.setInterval(notify, 60000); return () => window.clearInterval(t); };
@@ -74,18 +74,19 @@ export function V7Home() {
           <PrimaryButton href={v7("prepare")} icon={<CalendarCheck className="h-4 w-4" aria-hidden />}>Prepare for a meeting</PrimaryButton>
         </div>
 
-        <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-3">
-          <Stat href={v7("reviews")} label="Reviews" value={snap.pendingTotal} line="waiting for you" go="Start reviewing" />
-          <Stat href={v7("prepare")} label="Meetings" value={thisWeekLeft} line="left this week" go="View schedule"
-            extra={nextStudent ? <><span className="font-semibold" style={{ color: "var(--foreground)" }}>Next: {nextStudent.name}</span> · {nextWhen}</> : undefined} />
-          <Stat href={v7("students", "&status=need")} label="Need you" value={snap.needYou.length} line={snap.needYou.length === 1 ? "student" : "students"} go="Review students"
-            extra={snap.atRisk ? <><span aria-hidden className="mr-[6px] inline-block size-[7px] rounded-full align-middle" style={{ background: "var(--color-feedback-danger-solid)" }} />{snap.atRisk} at risk</> : undefined} />
+        <div className="grid grid-cols-1 gap-[var(--space-5)] md:grid-cols-3 lg:gap-[var(--space-6)]">
+          <Stat href={v7("reviews")} label="Reviews" value={snap.pendingTotal} go="Start reviewing"
+            line={snap.pending[0] ? <>Most: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{snap.pending[0].key}</span></> : "All caught up"} />
+          <Stat href={v7("prepare")} label="Meetings this week" value={thisWeekLeft} go="View schedule"
+            line={nextStudent ? <>Next: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{nextStudent.name}</span> · {nextWhen}</> : "Nothing booked"} />
+          <Stat href={v7("students", "&status=need")} label="Students who need you" value={snap.needYou.length} go="Review students"
+            line={snap.atRisk ? <><span aria-hidden className="mr-[7px] inline-block size-[7px] rounded-full align-[1px]" style={{ background: "var(--color-feedback-danger-solid)" }} /><span className="font-semibold" style={{ color: "var(--foreground)" }}>{snap.atRisk}</span> at risk</> : "None at risk"} />
         </div>
       </section>
 
       <section aria-label="Your students' interests" className="flex flex-col gap-[var(--space-5)]">
         <SectionHead title="Your Students' Interests" href={v7("explore")} cta="Explore careers" />
-        <Coverflow mode="row" label="Careers your students save most" items={snap.topSaved.slice(0, 10).map(({ career, students: n }, k) => ({
+        <Coverflow mode="row" roomy label="Careers your students save most" items={snap.topSaved.slice(0, 10).map(({ career, students: n }, k) => ({
           key: career.id, rank: k + 1, title: career.title, world: career.world, photo: career.photo, focus: career.photoFocus,
           stat: { value: String(n), label: n === 1 ? "Student" : "Students" },
           onOpen: () => openCareer({ title: career.title, world: career.world, photo: career.photo }),
@@ -97,23 +98,25 @@ export function V7Home() {
   );
 }
 
-/** One number and the work behind it. The whole card is the link; its
- *  label at the foot says where it goes, so no button competes with the
- *  page's one lit action. */
-function Stat({ href, label, value, line, go, extra }: { href: string; label: string; value: number; line: string; go: string; extra?: React.ReactNode }) {
+/** One number and the one thing to act on (20 Oct 2026, Chandu: "make the
+ *  3 summary cards more aesthetic and simple and useful"). Three parts only:
+ *  the label, the number, one line that says what to do next (the queue that
+ *  is biggest, who is next, how many are at risk). The text link at the foot
+ *  became a corner arrow: the whole card is the link, the arrow says so, and
+ *  no words compete with the page's one lit action. */
+function Stat({ href, label, value, line, go }: { href: string; label: string; value: number; line: React.ReactNode; go: string }) {
   const shown = useCountUp(value);
   return (
     <HoverBeam strength={0.6}>
-      <Link href={href} className={`dm-tap group flex h-full flex-col md:min-h-[188px] gap-[var(--space-3)] p-[var(--space-5)] ${CARD}`} style={CARD_STYLE}>
-        <span className={OVERLINE} style={MUTED}>{label}</span>
-        <span className="flex items-end gap-[10px]">
-          <span className={FIGURE} style={DISPLAY}><span className="sr-only">{value}</span><span aria-hidden>{shown}</span></span>
-          <span className="pb-[4px] text-[14px] font-semibold" style={MUTED}>{line}</span>
+      <Link href={href} aria-label={`${value} ${label.toLowerCase()}. ${go}`} className={`dm-tap group relative flex h-full flex-col gap-[var(--space-2)] p-[var(--space-6)] ${CARD}`} style={CARD_STYLE}>
+        <span className="flex items-center justify-between gap-[var(--space-3)]">
+          <span className="text-[14px] font-semibold" style={MUTED}>{label}</span>
+          <span aria-hidden className="flex size-[32px] flex-none items-center justify-center rounded-full border transition-colors group-hover:border-[color:var(--primary)]" style={{ borderColor: "var(--glass-border)" }}>
+            <ArrowUpRight className="h-[15px] w-[15px] transition-transform group-hover:translate-x-[1px] group-hover:-translate-y-[1px]" />
+          </span>
         </span>
-        <span className="min-h-[20px] text-[13px] leading-[20px]" style={MUTED}>{extra}</span>
-        <span className="mt-auto inline-flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>
-          {go}<span aria-hidden className="transition-transform group-hover:translate-x-[2px]">→</span>
-        </span>
+        <span className={`${FIGURE} pt-[var(--space-2)]`} style={DISPLAY}><span className="sr-only">{value}</span><span aria-hidden>{shown}</span></span>
+        <span className="truncate text-[14px] leading-[20px]" style={MUTED}>{line}</span>
       </Link>
     </HoverBeam>
   );

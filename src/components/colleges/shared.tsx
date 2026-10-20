@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { skyMoment } from "@/lib/sky";
 import { CollegePlaceholder } from "./CollegePlaceholder";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
@@ -40,7 +41,7 @@ export function useSaved(): [Set<string>, (slug: string) => void] {
   const saved = useMemo(() => { try { return new Set(JSON.parse(raw) as string[]); } catch { return new Set<string>(); } }, [raw]);
   const toggle = (slug: string) => {
     const next = new Set(saved);
-    if (next.has(slug)) next.delete(slug); else next.add(slug);
+    if (next.has(slug)) next.delete(slug); else { next.add(slug); skyMoment(); }
     try { window.localStorage.setItem(KEY, JSON.stringify([...next])); } catch { /* private mode */ }
     window.dispatchEvent(new Event(EVENT));
   };

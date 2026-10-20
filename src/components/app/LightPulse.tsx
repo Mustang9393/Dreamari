@@ -10,6 +10,7 @@
 // costs nothing at rest and never repaints the page. Off for reduced motion
 // and outside v2.
 import { useEffect, useRef } from "react";
+import { skyMoment } from "@/lib/sky";
 
 export const LIGHT_EVENT = "dreamari:light";
 
@@ -50,6 +51,9 @@ export function LightPulse() {
       const r = target.getBoundingClientRect();
       const lit = target.hasAttribute("data-lit");
       bloom(r.left + r.width / 2, r.top + r.height / 2, lit ? 1.2 : 0.7);
+      // a main call to action also lights the sky (not every switch: filter
+      // chips are aria-pressed too, and the sky should mean something)
+      if (lit) skyMoment({ from: target });
     };
     const onLight = (e: Event) => {
       const d = (e as CustomEvent<{ x: number; y: number; strength?: number }>).detail;

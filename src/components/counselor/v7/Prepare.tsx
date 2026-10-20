@@ -27,7 +27,7 @@ import { StudentFace } from "../v5/StudentFace";
 import { V5Prepare } from "../v5/Prepare";
 import { STUDENT_ID } from "@/components/profile/BookCounselorSheet";
 import { addDays, answerMeeting, flagsFor, inWeek, markPrepped, mondayOf, prepFor, PREP_DOT, PREP_LABEL, useAllMeetings, useAnswers, usePrepped, type Prep } from "./data";
-import { CARD, CARD_STYLE, DISPLAY, Field, FIELD, FIELD_STYLE, Modal, MUTED, PageHead, PrimaryButton, QuietButton, RULE, TextLink, Toggle, briefHref } from "./ui";
+import { moment, CARD, CARD_STYLE, DISPLAY, Field, FIELD, FIELD_STYLE, Modal, MUTED, PageHead, PrimaryButton, QuietButton, RULE, TextLink, Toggle, briefHref } from "./ui";
 
 const DAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -105,7 +105,7 @@ function Agenda() {
               const today = rows.filter((r) => r.m.day === isoDay(d));
               if (!today.length) return null;
               return (
-                <section key={isoDay(d)} aria-label={DAY[d.getDay()]} className="flex flex-col gap-[var(--space-3)]">
+                <section key={isoDay(d)} id={`day-${isoDay(d)}`} aria-label={DAY[d.getDay()]} className="flex scroll-mt-[96px] flex-col gap-[var(--space-3)]">
                   <h2 className="text-[15px] font-semibold">{DAY[d.getDay()]}, {MON[d.getMonth()]} {d.getDate()}{isoDay(d) === isoDay(now) && <span style={MUTED}> · Today</span>}</h2>
                   <ul className={`${CARD} overflow-hidden`} style={CARD_STYLE}>
                     {today.map((r) => <AgendaRow key={r.m.id} r={r} />)}
@@ -145,28 +145,22 @@ function Agenda() {
 
 function AgendaRow({ r }: { r: Row }) {
   const { m, s, prep } = r;
-  const flags = flagsFor(s);
-  const why = [m.topic || m.type, ...flags.slice(0, 1)].join(" · ");
+  // one line: the open item that makes it need prep, else what the student wrote
+  const why = flagsFor(s)[0] ?? (m.topic || m.type);
   const requested = prep === "requested";
   const body = (
     <>
-      <span className="flex w-[92px] flex-none flex-col">
-        <span className="text-[15px] font-semibold tabular-nums">{timeLabel(m.time)}</span>
-        <span className="text-[13px]" style={MUTED}>{m.minutes} min</span>
-      </span>
-      <span className="flex min-w-0 flex-1 items-center gap-[12px]">
-        <StudentFace s={s} size={36} />
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-[15px] font-semibold">{s.name} <span className="font-normal" style={MUTED}>· Grade {s.grade}</span></span>
-          <span className="truncate text-[13px]" style={MUTED}>{why}</span>
-        </span>
-      </span>
-      <span className="inline-flex w-[132px] flex-none items-center gap-[7px] text-[13px] font-semibold whitespace-nowrap">
-        <span aria-hidden className="size-[8px] rounded-full" style={{ background: PREP_DOT[prep] }} />{PREP_LABEL[prep]}
+      <span className="w-[76px] flex-none text-[15px] font-semibold tabular-nums">{timeLabel(m.time)}</span>
+      <StudentFace s={s} size={32} />
+      <span className="w-[132px] flex-none truncate text-[15px] font-semibold sm:w-[180px]">{s.name}</span>
+      <span className="min-w-0 flex-1 truncate text-[14px]" style={MUTED}>{why}</span>
+      {/* only what needs something is said; a ready meeting stays quiet */}
+      <span className="inline-flex w-[124px] flex-none items-center justify-end gap-[7px] text-[13px] font-semibold whitespace-nowrap">
+        {prep !== "ready" && <><span aria-hidden className="size-[8px] rounded-full" style={{ background: PREP_DOT[prep] }} />{PREP_LABEL[prep]}</>}
       </span>
     </>
   );
-  const row = "flex flex-col gap-[var(--space-3)] px-[var(--space-5)] py-[12px] md:flex-row md:items-center";
+  const row = "flex flex-wrap items-center gap-x-[14px] gap-y-[8px] px-[var(--space-5)] py-[11px] md:flex-nowrap";
   // The row itself opens the brief (the Replit's Prepare button, one per row,
   // repeated seven times down the page); only a request keeps buttons,
   // because it needs an answer.
@@ -176,7 +170,7 @@ function AgendaRow({ r }: { r: Row }) {
         <div className={row}>
           {body}
           <span className="flex flex-none flex-wrap items-center gap-[var(--space-2)]">
-            <QuietButton onClick={() => { answerMeeting(m.id, "confirmed"); notify(`Confirmed with ${s.name.split(" ")[0]}`); }}>Confirm</QuietButton>
+            <QuietButton onClick={() => { answerMeeting(m.id, "confirmed"); notify(`Confirmed with ${s.name.split(" ")[0]}`); moment(true); }}>Confirm</QuietButton>
             <QuietButton onClick={() => notify(`Asked ${s.name.split(" ")[0]} to pick another time`)}>Suggest time</QuietButton>
             <QuietButton label="Decline" icon={<X className="h-4 w-4" aria-hidden />} onClick={() => { answerMeeting(m.id, "declined"); notify(`Declined ${s.name.split(" ")[0]}'s request`); }} />
           </span>
@@ -232,6 +226,7 @@ function AddMeeting({ roster, onClose }: { roster: CounselorStudent[]; onClose: 
     if (!s) return;
     addMeeting({ studentId, type, day, time, minutes, topic: "" });
     notify(`Meeting with ${s.name.split(" ")[0]} added`);
+    moment();
     onClose();
   };
   return (
@@ -271,6 +266,7 @@ function Availability({ hours, onClose }: { hours: OfficeHours; onClose: () => v
   const save = () => {
     setOfficeHours(WEEKDAYS.filter((w) => draft[w].on && draft[w].from < draft[w].to).map((w) => ({ weekday: w, from: draft[w].from, to: draft[w].to })));
     notify("Office hours saved");
+    moment();
     onClose();
   };
   return (

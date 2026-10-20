@@ -6,7 +6,7 @@
 import { PeekHost } from "./peek";
 import { NightSky } from "./NightSky";
 
-export function AppBackdrop() {
+export function AppBackdrop({ calmSky = false }: { /** a still sky that lights up only on skyMoment() (counselor v7, NightSky.tsx) */ calmSky?: boolean } = {}) {
   return (
     <>
     {/* detail pages open as sheets, app-wide (./peek.tsx) */}
@@ -44,7 +44,7 @@ export function AppBackdrop() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
       {/* Black & Blue, dark: drifting points of light (./NightSky.tsx) */}
-      <NightSky />
+      <NightSky calm={calmSky} />
     </div>
     </>
   );

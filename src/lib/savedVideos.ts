@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
+import { skyMoment } from "./sky";
 
 /** Saved "Videos Inside Leading Companies" clips (Explore > Browse), same
  *  storage idiom as saved colleges (src/components/colleges/shared.tsx) --
@@ -37,7 +38,7 @@ export function useSavedVideos(): [Set<string>, (videoPath: string) => void] {
   const toggle = (videoPath: string) => {
     const next = new Set(saved);
     if (next.has(videoPath)) next.delete(videoPath);
-    else next.add(videoPath);
+    else { next.add(videoPath); skyMoment(); }
     try {
       window.localStorage.setItem(KEY, JSON.stringify([...next]));
     } catch {

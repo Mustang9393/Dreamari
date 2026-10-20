@@ -7,6 +7,7 @@
 // the counselor v3 stores; a backend replaces it with an API.
 
 import { createLocalRecord } from "./localRecord";
+import { skyMoment } from "./sky";
 
 export type OpportunityStatus = "saved" | "applied" | "won" | "passed";
 export type FafsaStatus = "not-started" | "in-progress" | "submitted";
@@ -24,6 +25,8 @@ const EMPTY: OpportunityRecord = { status: {}, fafsa: "not-started" };
 export const opportunityStore = createLocalRecord<OpportunityRecord>(OPPORTUNITIES_KEY, EMPTY);
 
 export function setOpportunityStatus(id: string, status: OpportunityStatus | null) {
+  // saving lights the sky; applying or winning adds a shooting star
+  if (status) skyMoment({ big: status === "applied" || status === "won" });
   opportunityStore.update((prev) => {
     const next = { ...prev.status };
     if (status === null) delete next[id];

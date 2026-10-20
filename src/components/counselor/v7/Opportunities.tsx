@@ -33,9 +33,9 @@ import { STUDENT_ID } from "@/components/profile/BookCounselorSheet";
 import { ShareDot } from "./Home";
 import { catalog, matchesFor, SHELVES, type Opp, type ShelfKey } from "./oppCatalog";
 import { openOpp, shareOpp } from "./OppSheets";
-import { DISPLAY, H2, CARD, CARD_STYLE, Field, FIELD, FIELD_STYLE, Modal, MUTED, OVERLINE, PageHead, PrimaryButton, RULE, studentHref } from "./ui";
+import { moment, DISPLAY, H2, CARD, CARD_STYLE, Field, FIELD, FIELD_STYLE, Modal, MUTED, OVERLINE, PageHead, PrimaryButton, RULE, studentHref } from "./ui";
 
-const RAIL = "-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
+const RAIL = "-mx-5 flex gap-[24px] sm:gap-[32px] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
 
 // the counselor's own posts (Add opportunity)
 type Posted = { id: string; name: string; org: string; location: string; shelf: ShelfKey; deadline: string; field: OppField; grades: number[]; about: string };
@@ -183,7 +183,7 @@ function Applications() {
               <span className="truncate text-[15px] font-semibold">{a.s.name}</span>
             </Link>
             <button type="button" onClick={() => openOpp(a.opp)} className="dm-quiet min-w-0 cursor-pointer truncate rounded-[var(--radius-md)] text-left text-[14px]">{a.opp.e.item.name}</button>
-            <Listbox ariaLabel={`Stage for ${a.s.name}`} value={a.stage} onChange={(v) => { stageStore.update((m) => ({ ...m, [a.key]: v as Stage })); notify(`${a.s.name.split(" ")[0]}: ${v}`); }}
+            <Listbox ariaLabel={`Stage for ${a.s.name}`} value={a.stage} onChange={(v) => { stageStore.update((m) => ({ ...m, [a.key]: v as Stage })); notify(`${a.s.name.split(" ")[0]}: ${v}`); if (v === "Accepted" || v === "Completed") moment(true); }}
               className="h-9 w-full rounded-[var(--radius-md)] border px-[10px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--foreground)" }}
               options={STAGES.map((s) => ({ value: s, label: s }))} />
             <span className="truncate text-[14px]" style={MUTED}>{NEXT[a.stage]}</span>
@@ -209,6 +209,7 @@ function AddOpportunity({ onClose }: { onClose: () => void }) {
     if (!ready) return;
     posted.update((l) => [{ id: `posted-${Date.now().toString(36)}`, name: name.trim(), org: org.trim(), location: location.trim() || "Local", shelf, deadline, field, grades: [9, 10, 11, 12], about: about.trim() }, ...l]);
     notify(`${name.trim()} added to ${SHELVES.find((s) => s.key === shelf)?.title}`);
+    moment();
     onClose();
   };
   return (

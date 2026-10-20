@@ -1,3 +1,4 @@
+import { skyMoment } from "./sky";
 // Career Report version history (Slack, 10 Sept 2026): every time a report
 // is shared, printed or saved on purpose, the state that shaped it is kept,
 // so a student can go back, print or share an older version, or restore it.
@@ -105,6 +106,8 @@ export function recordReportVersion(label: string, snapshot: ReportSnapshot): Re
     return refreshed;
   }
   write([version, ...current]);
+  // a new version of the Career Report (not a re-save of the same one)
+  skyMoment({ big: true });
   return version;
 }
 

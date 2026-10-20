@@ -19,6 +19,7 @@ import { goBackOr } from "@/components/app/chrome";
 import { PosterCard } from "@/components/app/PosterCard";
 import { NotFoundView } from "@/components/app/states";
 import { TextTabs } from "@/components/app/TextTabs";
+import { LightRange } from "@/components/app/LightRange";
 import { Listbox } from "@/components/app/Listbox";
 import { pathwayFor, schoolsFor, type SchoolMatch } from "@/components/colleges/pathway";
 import { SchoolCard, type CardBadge } from "@/components/colleges/shared";
@@ -37,7 +38,7 @@ import { StudentFace } from "../v5/StudentFace";
 import { flagsFor, useAllMeetings } from "./data";
 import { interestOf, planOf } from "./Students";
 import { coursesToConsider, prefsFor } from "./studentData";
-import { FIGURE, H2, H3, TITLE, CARD, CARD_STYLE, DISPLAY, FIELD_STYLE, Modal, MUTED, OVERLINE, PrimaryButton, QuietButton, RULE, Status, TextLink, briefHref, v7 } from "./ui";
+import { moment, FIGURE, H2, H3, TITLE, CARD, CARD_STYLE, DISPLAY, FIELD_STYLE, Modal, MUTED, OVERLINE, PrimaryButton, QuietButton, RULE, Status, TextLink, briefHref, v7 } from "./ui";
 
 type Tab = "about" | "postsecondary" | "career" | "courses" | "activity";
 const TABS: { key: Tab; label: string }[] = [
@@ -65,7 +66,8 @@ export function StudentProfile({ studentId, initialTab }: { studentId: string; i
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back
       </button>
 
-      <header className="flex flex-col gap-[var(--space-5)] lg:flex-row lg:items-center lg:justify-between">
+      {/* the screen's one focal block (look-v2 data-focal: a brighter rim, a plain shadow) */}
+      <header data-focal className={`relative flex flex-col gap-[var(--space-5)] p-[var(--space-5)] sm:p-[var(--space-6)] lg:flex-row lg:items-center lg:justify-between ${CARD}`} style={{ ...CARD_STYLE, background: "radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%), var(--glass-surface-2)" }}>
         <div className="flex min-w-0 items-center gap-[var(--space-5)]">
           <StudentFace s={row} size={84} />
           <div className="flex min-w-0 flex-col gap-[6px]">
@@ -304,9 +306,9 @@ function Courses({ row }: { row: CounselorStudent }) {
             <span className={FIGURE} style={DISPLAY}>{sis.credits.earned}</span>
             <span className="pb-[4px] text-[14px] font-semibold" style={MUTED}>of {sis.credits.required} credits · {sis.onTrackToGraduate ? "on track" : "behind"}</span>
           </p>
-          <span aria-hidden className="h-[6px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
-            <span className="block h-full rounded-full" style={{ width: `${pct}%`, background: sis.onTrackToGraduate ? "var(--primary)" : "var(--color-feedback-warning-solid)" }} />
-          </span>
+          {/* a bullet, not a bar (Few; house LightRange): 0 to required, lit at earned */}
+          <LightRange accent={sis.onTrackToGraduate ? "var(--primary)" : "var(--color-feedback-warning-solid)"} at={pct}
+            ariaLabel={`${sis.credits.earned} of ${sis.credits.required} credits`} />
           {remaining.length > 0 && <Lines items={remaining.slice(0, 5).map((r) => ({ label: r.area, value: `${r.required - r.earned} left${r.inProgress ? `, ${r.inProgress} in progress` : ""}` }))} />}
         </Panel>
       </div>
@@ -399,6 +401,7 @@ function NoteSheet({ row, onClose }: { row: CounselorStudent; onClose: () => voi
     if (!text.trim()) return;
     addNote(row.id, text.trim());
     notify(`Note saved for ${row.name.split(" ")[0]}`);
+    moment();
     onClose();
   };
   return (

@@ -13,6 +13,7 @@
 // pages share.
 
 import { useSyncExternalStore } from "react";
+import { skyMoment } from "@/lib/sky";
 import { picksSnapshot, writePicks } from "@/lib/picks";
 
 // "nope" (Not for me) is the only reaction left. Like was removed 8 Oct 2026:
@@ -94,7 +95,8 @@ export const cancelSwap = () => write({ swapFor: null });
 let lastTap: { x: number; y: number } | null = null;
 if (typeof window !== "undefined") window.addEventListener("pointerdown", (e) => { lastTap = { x: e.clientX, y: e.clientY }; }, { capture: true });
 let landSeq = 0;
-const land = (kind: "saved" | "top3", career: string) => write({ landed: { id: ++landSeq, kind, career, from: lastTap } });
+// a save lands in Saved: the sky lights up (the Top 3 star fires from writePicks)
+const land = (kind: "saved" | "top3", career: string) => { if (kind === "saved") skyMoment(); write({ landed: { id: ++landSeq, kind, career, from: lastTap } }); };
 
 // Every action goes through here: optimistic when the network is normal; a
 // spinner on the tapped control (and taps ignored) when slow; a revert and a

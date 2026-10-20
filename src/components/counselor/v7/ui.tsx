@@ -14,6 +14,7 @@
 import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { FactSheet } from "@/components/career/PaySheet";
+import { skyMoment } from "@/components/app/NightSky";
 import { PAGE_TITLE_CLASS as PAGE_TITLE_CLASS_LOCAL } from "@/components/app/chrome";
 export { SheetHero } from "@/components/career/PaySheet";
 import { IconTip } from "@/components/app/IconTip";
@@ -105,7 +106,7 @@ export function QuietButton({ href, onClick, children, icon, label }: { href?: s
 }
 
 /** One quiet surface. No tints, no glow: the rim light comes from look-v2. */
-export const CARD = "rounded-[var(--radius-lg)] border";
+export const CARD = "v7-glass rounded-[var(--radius-lg)] border";
 export const CARD_STYLE = { background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" } as const;
 
 export function ChevronGo() {
@@ -119,9 +120,9 @@ export function ChevronGo() {
  *  all the pop ups with dreamari's design standards like we did for what
  *  it pays"). The counselor accent is the brand blue. */
 export const SHEET_ACCENT = "var(--color-brand-400, var(--primary))";
-export function Modal({ title, overline, onClose, children, footer, wide = false, accent = SHEET_ACCENT }: { title: string; overline?: string; onClose: () => void; children: React.ReactNode; footer?: React.ReactNode; wide?: boolean; accent?: string }) {
+export function Modal({ title, overline, onClose, children, footer, wide = false, maxWidth, accent = SHEET_ACCENT }: { title: string; overline?: string; onClose: () => void; children: React.ReactNode; footer?: React.ReactNode; wide?: boolean; maxWidth?: number; accent?: string }) {
   return (
-    <FactSheet career={overline ?? ""} accent={accent} title={title} onClose={onClose} footer={footer} wide={wide}>
+    <FactSheet career={overline ?? ""} accent={accent} title={title} onClose={onClose} footer={footer} wide={wide} maxWidth={maxWidth}>
       {children}
     </FactSheet>
   );
@@ -155,4 +156,12 @@ export function Toggle<K extends string>({ options, value, onChange, label }: { 
       })}
     </div>
   );
+}
+
+/** A valuable action landed: the sky lights up from where it happened
+ *  (NightSky skyMoment). `big` (something reached students, a meeting was
+ *  confirmed) adds a shooting star. Call it before closing a sheet, so the
+ *  pressed button still gives the origin. */
+export function moment(big = false): void {
+  skyMoment({ from: typeof document !== "undefined" ? document.activeElement : null, big });
 }

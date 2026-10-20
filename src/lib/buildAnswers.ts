@@ -6,6 +6,7 @@
 // Explore, the Report and the plan all move with it.
 
 import { useSyncExternalStore } from "react";
+import { skyMoment } from "./sky";
 import { INITIAL_BUILD_STATE, INTEREST_WORLDS, type BuildState } from "@/components/build/types";
 import { readStudentProfile, writeStudentProfile } from "@/lib/studentProfile";
 import { preferencesSnapshot, writePreferences } from "@/lib/preferences";
@@ -61,6 +62,10 @@ export function readBuildAnswers(): BuildState {
 }
 
 export function writeBuildAnswers(next: BuildState): void {
+  // Build finished: the profile gains its interests and subjects for the
+  // first time (later edits do not re-fire)
+  const prior = readStudentProfile();
+  if (!(prior.interests.length && prior.subjects.length) && next.interests.length && next.subjects.length) skyMoment({ big: true });
   cache = next;
   try { window.localStorage.setItem(KEY, JSON.stringify(next)); window.localStorage.setItem(AT_KEY, String(Date.now())); } catch { /* no storage */ }
   // the rest of the app reads these two stores

@@ -10,6 +10,7 @@
 // live. Used by the v2 fork of the dashboard (see counselor/version.tsx).
 
 import { useMemo, useSyncExternalStore } from "react";
+import { skyMoment } from "./sky";
 import { getRosterWithLive, getStudentById, MILESTONE_KEYS, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "./counselorRoster";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "./counselorAccount";
 import { scopeRosterForRole } from "./counselorOrg";
@@ -86,6 +87,9 @@ export function decideReview(studentId: string, milestone: MilestoneKey, status:
   const all = { ...readAll() };
   all[reviewItemId(studentId, milestone)] = { studentId, milestone, status, feedback: feedback.trim(), decidedAt: new Date().toISOString() };
   writeAll(all);
+  // the night sky lights up for a decision (NightSky's skyMoment event, read
+  // by whichever build has the sky; a shooting star for an approval)
+  skyMoment({ big: status === "Approved" });
 }
 
 export function undoReview(studentId: string, milestone: MilestoneKey): void {
