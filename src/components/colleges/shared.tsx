@@ -318,6 +318,7 @@ export function SchoolCard({
   onDismiss,
   extraChip,
   onOpen,
+  actions,
 }: {
   c: College;
   saved: boolean;
@@ -340,6 +341,9 @@ export function SchoolCard({
   extraChip?: CardBadge;
   /** open somewhere other than the school page (the counselor's school sheet) */
   onOpen?: () => void;
+  /** the card's own buttons, in place of Compare / Not for me (About Me's
+   *  College Goal picker: Learn more and Make my goal, as the Top 3 cards) */
+  actions?: React.ReactNode;
 }) {
   const [showWhy, setShowWhy] = useState(false);
   const img = collegeImage(c);
@@ -510,7 +514,8 @@ export function SchoolCard({
            and when there's no "Not for me" to pair with it, Compare goes
            full width instead of floating alone at one edge (direct
            feedback, 21 Sept 2026). */}
-        {(onCompare || onDismiss) && (
+        {actions && <div className="pointer-events-auto relative z-20">{actions}</div>}
+        {!actions && (onCompare || onDismiss) && (
           <div className="pointer-events-auto relative z-20 flex items-center justify-between gap-[8px]">
             {onDismiss && (
               <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); announce(`Hidden ${c.name}`); }} className="dm-link -my-[12px] cursor-pointer py-[12px] text-[12.5px] font-bold" style={{ color: "var(--pc-ink-2, rgba(255,255,255,0.75))" }}>Not for me</button>

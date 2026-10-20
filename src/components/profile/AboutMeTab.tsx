@@ -293,9 +293,17 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
               careerIds={top3.map((c) => c.id)}
               saved={college.schools.map((s) => s.c)}
               onClose={() => setPicking(false)}
+              // the Career Goal's beat: the XP flies from the button now, the
+              // card says My goal, then the sheet closes and the College Goal
+              // card comes into focus where the student can see it
               onPick={(c, from) => {
-                chooseSchool(c.slug, from);
-                setPicking(false);
+                const first = !college.top;
+                if (first) flyXp({ from, amount: COLLEGE_GOAL_XP, milestone: `profile:college-goal${DEMO_RUN}` });
+                window.setTimeout(() => {
+                  college.setTop(c.slug);
+                  setPicking(false);
+                  if (first) { focusIn("college"); skyMoment({ big: true, from: null }); }
+                }, 1100);
               }}
             />
           )}

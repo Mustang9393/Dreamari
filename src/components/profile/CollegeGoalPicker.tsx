@@ -13,13 +13,26 @@
 // this sheet with a Back button (Chandu, same day: "Use the same card designs
 // from explore here. Also make sure when they are clicked the whole
 // thing/details page appears with a back button in the same large modal").
-// The page's "Choose this school" makes it the College Goal.
+// The page's "Make my goal" makes it the College Goal.
+//
+// Chosen on the cards themselves, the Career Goal's way (20 Oct 2026,
+// Chandu: "let student save their colleges and also set one as their goal
+// from the cards itself. How can we match the Interaction and flow of the
+// career goal here?"). Each card carries the Top 3 card's two buttons,
+// Learn more and Make my goal, in the same .t3s-* styles, and keeps its
+// heart for saving. Once in a visit the first card teaches them (Make my
+// goal, then the heart), as Top 3 teaches its arrows and X. Choosing plays
+// the same beat as the Career Goal: the XP flies from the button, the card
+// says My goal with a burst of stars, then the sheet closes and About Me's
+// College Goal card comes into focus.
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, Check, ChevronRight, X } from "lucide-react";
+import { StarBurst } from "@/components/app/Constellation";
+import { SpotTip, useSpotSequence } from "./SpotTip";
 import { InSheet } from "@/components/app/inSheet";
 import { CollegeDetailExperience } from "@/components/colleges/CollegeDetailExperience";
 import { useBackStep } from "@/lib/backStep";
@@ -51,7 +64,7 @@ export function CollegeGoalPicker({ careerIds, saved, onPick, onClose }: {
   careerIds: string[];
   /** saved schools, newest first */
   saved: College[];
-  /** make this school the College Goal */
+  /** make this school the College Goal (the sheet then shows it chosen; the caller closes it) */
   onPick: (c: College, from: Element | null) => void;
   onClose: () => void;
 }) {
@@ -83,6 +96,17 @@ export function CollegeGoalPicker({ careerIds, saved, onPick, onClose }: {
   useBackStep(detail !== null, () => setDetail(null));
   const scroller = useRef<HTMLDivElement>(null);
   useEffect(() => { scroller.current?.scrollTo({ top: 0 }); }, [detail]);
+  // the school just chosen: its card says so while the sheet closes
+  const [chosen, setChosen] = useState<string | null>(null);
+  const pick = (c: College, from: Element | null) => {
+    if (chosen) return;
+    setChosen(c.slug);
+    setDetail(null);
+    onPick(c, from);
+  };
+  // teach the card's two controls once: Make my goal, then the heart
+  const grid = useRef<HTMLUListElement>(null);
+  const [spot, stopSpot] = useSpotSequence("dreamari:nudge:college-goal-cards", ["goal", "save"] as const, grid, true, 2600);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key !== "Escape") return; if (detail) setDetail(null); else onClose(); };
@@ -110,7 +134,7 @@ export function CollegeGoalPicker({ careerIds, saved, onPick, onClose }: {
           <aside className="myb-stage">
             <div className="flex flex-col gap-[6px] pr-[40px]">
               <h2 id="college-goal-picker-title" className="myb-title">Choose your college goal</h2>
-              <p className="myb-lede">Schools for {careerTitle(careerId)}, sorted by your {profile.gpa} GPA. Pick one to make it your goal.</p>
+              <p className="myb-lede">Schools for {careerTitle(careerId)}, sorted by your {profile.gpa} GPA. Tap Make my goal on the school you want most.</p>
             </div>
             <nav aria-label="School lists" role="tablist" className="myb-nav">
               {shown.map((l) => {
@@ -137,12 +161,34 @@ export function CollegeGoalPicker({ careerIds, saved, onPick, onClose }: {
                 // shape (Chandu, 19 Oct 2026: "Can we not fit 3 in a row ...
                 // make the cards uniformly and proportionately smaller"; before
                 // that, "do not distort the school cards like this")
-                <ul className="grid list-none grid-cols-1 gap-[var(--space-4)] p-0 min-[520px]:grid-cols-2 md:grid-cols-3">
-                  {lists[list].map(({ college: c, line }) => (
-                    <ScaledCard key={c.slug}>
-                      <SchoolCard c={c} saved={savedSet.has(c.slug)} onSave={() => toggleSaved(c.slug)} compared={false} program={line ? shortProgram(line) : undefined} onOpen={() => setDetail(c)} />
-                    </ScaledCard>
-                  ))}
+                <ul ref={grid} className="grid list-none grid-cols-1 gap-[var(--space-4)] p-0 min-[520px]:grid-cols-2 md:grid-cols-3">
+                  {lists[list].map(({ college: c, line }, i) => {
+                    const isChosen = chosen === c.slug;
+                    const taught = i === 0 ? spot : null;
+                    return (
+                      <ScaledCard key={c.slug} lit={taught === "save"}>
+                        <SchoolCard
+                          c={c} saved={savedSet.has(c.slug)} onSave={() => { stopSpot(); toggleSaved(c.slug); }} compared={false}
+                          program={line ? shortProgram(line) : undefined} onOpen={() => setDetail(c)}
+                          actions={
+                            <div className="t3s-actions relative" style={{ ["--t3s-world" as string]: "#4a8df6", marginTop: 0 }}>
+                              <button type="button" onClick={() => setDetail(c)} className="t3s-toggle" aria-label={`Learn more about ${c.name}`}>
+                                Learn more <ChevronRight className="h-4 w-4" aria-hidden />
+                              </button>
+                              {isChosen ? (
+                                <span role="status" className="t3s-play" style={{ background: "#9ec6fa" }}><Check className="h-[13px] w-[13px]" strokeWidth={3} aria-hidden /> My goal</span>
+                              ) : (
+                                <button type="button" onClick={(e) => { stopSpot(); pick(c, e.currentTarget); }} disabled={!!chosen} aria-label={`Make ${c.name} my College Goal`} className={`t3s-play dm-solid cursor-pointer disabled:opacity-50 ${taught === "goal" ? "dm-spot" : ""}`}>Make my goal</button>
+                              )}
+                              {taught === "goal" && <SpotTip side="right" top={-48}>Make it your goal</SpotTip>}
+                              {isChosen && <StarBurst className="inset-x-0 -top-[24px] h-[70px]" />}
+                            </div>
+                          }
+                        />
+                        {taught === "save" && <span className="absolute top-[58px] right-[8px] z-[30]"><SpotTip side="right" top={0}>Save it for later</SpotTip></span>}
+                      </ScaledCard>
+                    );
+                  })}
                 </ul>
               ) : (
                 <p className="py-[var(--space-6)] text-center text-[14px]" style={{ color: "var(--myb-mute)" }}>No schools here for this career yet.</p>
@@ -158,8 +204,9 @@ export function CollegeGoalPicker({ careerIds, saved, onPick, onClose }: {
                   <ArrowLeft className="h-4 w-4" aria-hidden /> Back to schools
                 </button>
                 <span className="flex items-center gap-[var(--space-2)]">
-                  <button type="button" onClick={(e) => onPick(detail, e.currentTarget)} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-                    <Check className="h-4 w-4" aria-hidden /> Choose this school
+                  {/* the cards' word, so the choice reads the same everywhere */}
+                  <button type="button" onClick={(e) => pick(detail, e.currentTarget)} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+                    <Check className="h-4 w-4" aria-hidden /> Make my goal
                   </button>
                   <IconTip label="Close">
                     <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--myb-ink)" }}><X className="h-4 w-4" aria-hidden /></button>
@@ -192,7 +239,7 @@ export function CollegeGoalPicker({ careerIds, saved, onPick, onClose }: {
 const CARD_W = 310;
 
 /** One grid cell that scales its card uniformly to the cell's width. */
-function ScaledCard({ children }: { children: React.ReactNode }) {
+function ScaledCard({ children, lit = false }: { children: React.ReactNode; /** the first-visit nudge is on this card's heart */ lit?: boolean }) {
   const cell = useRef<HTMLLIElement>(null);
   // null: one card per row (phones), which simply fills the row, as Explore does
   const [scale, setScale] = useState<number | null>(1);
@@ -213,8 +260,8 @@ function ScaledCard({ children }: { children: React.ReactNode }) {
     return () => ro.disconnect();
   }, []);
   return (
-    <li ref={cell} className="min-w-0">
-      {scale === null ? children : <div style={{ width: CARD_W, zoom: scale }}>{children}</div>}
+    <li ref={cell} className={`relative min-w-0 ${lit ? "college-goal-save-lit" : ""}`}>
+      {scale === null ? children : <div className="relative" style={{ width: CARD_W, zoom: scale }}>{children}</div>}
     </li>
   );
 }
