@@ -243,7 +243,7 @@ export function V6App({
     // 2026: "tweak that to use our design system... keep the spacing and
     // calmness and layout in v6").
     <div className="six-app marketing-v2 themeable counselor-calm">
-      <AppBackdrop />
+      <AppBackdrop calmSky />
       <header className="six-nav">
         <span className="six-brand"><Wordmark href={href("Home")} /></span>
         <nav aria-label="Counselor workspace" className="dm-scroll">

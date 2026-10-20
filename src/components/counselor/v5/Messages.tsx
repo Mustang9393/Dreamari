@@ -62,11 +62,16 @@ function fmtDate(iso: string): string {
 
 /** A face for a row, even when the asker is outside this role's roster. */
 function Face({ row, size }: { row: Row; size: number }) {
-  const s = row.student ?? { id: row.key, avatarIndex: avatarIndexForName(row.name) ?? -1 };
-  return <StudentFace s={s} size={size} />;
+  const idx = row.student ? row.student.avatarIndex : avatarIndexForName(row.name);
+  // someone outside the roster with no portrait: their initials, never an empty circle
+  if (!row.student && (idx === undefined || idx < 0)) {
+    const initials = row.name.split(" ").map((p) => p[0]).slice(0, 2).join("");
+    return <span aria-hidden className="flex flex-none items-center justify-center rounded-full font-semibold" style={{ width: size, height: size, fontSize: Math.round(size * 0.36), background: "color-mix(in srgb, var(--primary) 18%, var(--card))", color: "var(--pc-link, var(--color-brand-300))" }}>{initials}</span>;
+  }
+  return <StudentFace s={row.student ?? { id: row.key, avatarIndex: idx ?? -1 }} size={size} />;
 }
 
-export function V5Messages() {
+export function V5Messages({ desk = false }: { /** v7: the Documents desk's shape, a list panel beside one stage card (20 Oct 2026, Chandu: "Reviews and messages are still messy and hard to follow... I like the documents space. Use more of that here") */ desk?: boolean } = {}) {
   const roster = useReviewedRoster();
   const params = useSearchParams();
   const { replies, threads } = useMessages();
@@ -175,30 +180,30 @@ export function V5Messages() {
   const first = selected.name.split(" ")[0];
 
   return (
-    <div className="grid grid-cols-1 gap-[var(--space-8)] lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-[var(--space-10)]">
-      <section aria-label="Student questions" className="flex min-w-0 flex-col gap-[var(--space-6)]">
-        <div className="flex items-baseline justify-between gap-[var(--space-3)]">
+    <div className={desk ? "grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-[360px_minmax(0,1fr)]" : "grid grid-cols-1 gap-[var(--space-8)] lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-[var(--space-10)]"}>
+      <section aria-label="Student questions" className={desk ? "v7-glass flex min-w-0 flex-col gap-[var(--space-5)] self-start rounded-[var(--radius-lg)] border p-[var(--space-4)] lg:sticky lg:top-[96px] lg:max-h-[calc(100dvh-120px)] lg:overflow-y-auto" : "flex min-w-0 flex-col gap-[var(--space-6)]"} style={desk ? { background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" } : undefined}>
+        {!desk && <div className="flex items-baseline justify-between gap-[var(--space-3)]">
           <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[24px]" style={{ fontFamily: "var(--font-display)" }}>Questions</h2>
           <span className="text-[14px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{toAnswer.length} to answer</span>
-        </div>
+        </div>}
         {toAnswer.length > 0 ? (
-          <QuestionList label="To answer" rows={toAnswer} selectedKey={selected.key} onPick={pick} />
+          <QuestionList label={desk ? `To answer · ${toAnswer.length}` : "To answer"} rows={toAnswer} selectedKey={selected.key} onPick={pick} desk={desk} />
         ) : (
           <p className="flex items-center gap-[8px] text-[15px] font-semibold v5-ok"><Check className="h-4 w-4" aria-hidden />All answered</p>
         )}
-        {started.length > 0 && <QuestionList label="Your messages" rows={started} selectedKey={selected.key} onPick={pick} />}
-        {answered.length > 0 && <QuestionList label="Answered" rows={answered} selectedKey={selected.key} onPick={pick} />}
+        {started.length > 0 && <QuestionList label="Your messages" rows={started} selectedKey={selected.key} onPick={pick} desk={desk} />}
+        {answered.length > 0 && <QuestionList label="Answered" rows={answered} selectedKey={selected.key} onPick={pick} desk={desk} />}
       </section>
 
-      <aside ref={panel} aria-label="Open conversation" className="flex min-w-0 scroll-mt-[var(--space-8)] flex-col gap-[var(--space-5)] lg:sticky lg:top-[100px] lg:self-start">
-        <Detail row={selected} reply={selected.kind === "question" ? replies[selected.q.id]?.text : undefined} />
+      <aside ref={panel} aria-label="Open conversation" className={desk ? "v7-glass flex min-h-[420px] min-w-0 scroll-mt-[var(--space-8)] flex-col gap-[var(--space-6)] self-start rounded-[var(--radius-lg)] border p-[var(--space-6)] lg:sticky lg:top-[96px] lg:p-[var(--space-8)]" : "flex min-w-0 scroll-mt-[var(--space-8)] flex-col gap-[var(--space-5)] lg:sticky lg:top-[100px] lg:self-start"} style={desk ? { background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" } : undefined}>
+        <Detail row={selected} reply={selected.kind === "question" ? replies[selected.q.id]?.text : undefined} desk={desk} />
         {canWrite ? (
-          <div className="flex flex-col gap-[var(--space-3)]">
+          <div className={`flex flex-col gap-[var(--space-3)] ${desk ? "mt-auto border-t pt-[var(--space-5)]" : ""}`} style={desk ? { borderColor: RULE } : undefined}>
             <label className="flex flex-col gap-[var(--space-2)]">
-              <span className="text-[14px] font-semibold">{selected.kind === "question" ? "Reply" : "Message"}</span>
-              <textarea ref={box} value={draft} onChange={(e) => setDraft(e.target.value)} rows={5} placeholder={`Write to ${first}`} className="w-full resize-y rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-[15px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" }} />
+              <span className={desk ? "sr-only" : "text-[14px] font-semibold"}>{selected.kind === "question" ? "Reply" : "Message"}</span>
+              <textarea ref={box} value={draft} onChange={(e) => setDraft(e.target.value)} rows={desk ? 4 : 5} placeholder={`Write to ${first}`} className="w-full resize-y rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-[15px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" }} />
             </label>
-            <button type="button" disabled={!draft.trim()} onClick={send} className="dm-solid inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+            <button type="button" disabled={!draft.trim()} onClick={send} className={`dm-solid inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold ${desk ? "self-end" : ""} disabled:cursor-not-allowed disabled:opacity-50`} style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
               <Send className="h-4 w-4" aria-hidden /> Send
             </button>
           </div>
@@ -214,7 +219,34 @@ export function V5Messages() {
   );
 }
 
-function QuestionList({ label, rows, selectedKey, onPick }: { label: string; rows: Row[]; selectedKey: string; onPick: (key: string) => void }) {
+function QuestionList({ label, rows, selectedKey, onPick, desk = false }: { label: string; rows: Row[]; selectedKey: string; onPick: (key: string) => void; desk?: boolean }) {
+  if (desk) {
+    // the Documents desk's list: compact two-line items, the open one outlined
+    return (
+      <div className="flex flex-col gap-[var(--space-2)]">
+        <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>{label}</span>
+        <ul className="flex flex-col gap-[4px]">
+          {rows.map((r) => {
+            const on = r.key === selectedKey;
+            const isNew = r.kind === "question" && r.open && r.q.status === "new";
+            const line = r.kind === "question" ? r.q.question : r.messages[r.messages.length - 1]?.text ?? "Write your first message";
+            return (
+              <li key={r.key}>
+                <button type="button" onClick={() => onPick(r.key)} aria-current={on ? "true" : undefined} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] rounded-[14px] border px-[10px] py-[10px] text-left"
+                  style={on ? { borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : { borderColor: "transparent" }}>
+                  <Face row={r} size={34} />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="flex items-center gap-[6px] truncate text-[14px] leading-[18px] font-semibold">{r.name}{isNew && <span className="size-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} role="img" aria-label="New" />}</span>
+                    <span className="truncate text-[13px]" style={{ color: r.open ? "var(--foreground)" : "var(--muted-foreground)", opacity: r.open ? 0.8 : 1 }}>{line}</span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-[var(--space-2)]">
       <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>{label}</span>
@@ -248,14 +280,14 @@ function QuestionList({ label, rows, selectedKey, onPick }: { label: string; row
   );
 }
 
-function Detail({ row, reply }: { row: Row; reply?: string }) {
+function Detail({ row, reply, desk = false }: { row: Row; reply?: string; desk?: boolean }) {
   const key = row.kind === "question" && row.q.milestone ? MILESTONE_OF[row.q.milestone] : undefined;
   const Icon = key ? MILESTONE_ICON[key] : row.kind === "thread" ? MessageCircle : MessageSquare;
   const who = (
     <>
-      <Face row={row} size={48} />
+      <Face row={row} size={desk ? 56 : 48} />
       <span className="flex min-w-0 flex-col">
-        <span className="truncate text-[20px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>{row.name}</span>
+        <span className={`truncate ${desk ? "text-[24px] leading-[30px] font-extrabold" : "text-[20px] leading-[24px] font-semibold"}`} style={{ fontFamily: "var(--font-display)" }}>{row.name}</span>
         {row.grade > 0 && <span className="text-[14px] font-medium" style={{ color: "var(--muted-foreground)" }}>Grade {row.grade}</span>}
       </span>
     </>
@@ -274,7 +306,7 @@ function Detail({ row, reply }: { row: Row; reply?: string }) {
             <span aria-hidden>·</span>
             <span className={row.open ? undefined : "v5-ok"}>{reply ? "Answered" : STATUS_LABEL[row.q.status] ?? row.q.status}</span>
           </div>
-          <p className="text-[17px] leading-[26px]">{row.q.question}</p>
+          <p className={desk ? "text-[20px] leading-[30px]" : "text-[17px] leading-[26px]"}>{row.q.question}</p>
           {reply && (
             <div className="flex flex-col gap-[var(--space-1)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
               <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>Your reply</span>

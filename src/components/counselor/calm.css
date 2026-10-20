@@ -38,3 +38,101 @@
 .counselor-calm .cc-figure:hover .cc-num { color: var(--accent) !important; }
 .counselor-calm .cc-figure .cc-go { opacity: 0.55; transition: transform 160ms ease, opacity 160ms ease; }
 .counselor-calm .cc-figure:hover .cc-go { opacity: 1; transform: translateX(2px); }
+
+/* One surface for every counselor dashboard in dark mode (20 Oct 2026,
+   Chandu: "the surface materials and colors are very inconsistent, please
+   make sure we have it uniform. The three hero cards in home are the
+   blueprint for the material").
+   Before: v7's Home cards were a translucent blue-black with a blur, while
+   every other panel (all versions) used look-v2's near-opaque grey-blues
+   (glass-surface-1 #10141c at 94%, glass-surface-2 #191f2a at 95%, --card
+   #0e1219), so a page mixed three or four different darks.
+   Now, inside every counselor root (v4, v5, v6, v7):
+   - every surface token is the blueprint colour, so whatever a panel was
+     built with, it lands on one material;
+   - a top-level surface (one not sitting inside another) also gets the
+     blueprint's blur, hairline edge, top highlight and lift, so the stars
+     behind are blurred, never sharp behind text (look-v2.css, 19 Oct);
+   - a surface inside a surface (a field, a row, a chip, a document well) is
+     one faint lighter tint of that material, never a second dark, so
+     nesting reads as elevation;
+   - dialogs and menus (--card) stay opaque, in the blueprint's own hue, so
+     nothing behind ever bleeds into text.
+   Every counselor shell keeps a still sky (AppBackdrop calmSky) so the blur
+   never redraws over a moving layer (the Glossary Lab GPU rule).
+   `:not(#cc)` matches every page; it is there for its id weight, so these
+   rules beat the older per-version card rules (v4's visual-refresh.css and
+   layout2.css stack !important at high specificity) without editing them. */
+html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version][data-counselor-version], :is(.counselor-calm, [data-counselor-version]) .marketing-v2) {
+  --cc-glass: rgba(10, 14, 24, 0.52);
+  --cc-edge: rgba(255, 255, 255, 0.09);
+  --glass-surface-1: var(--cc-glass);
+  --glass-surface-2: var(--cc-glass);
+  --glass-surface-3: var(--cc-glass);
+  --inset-surface: var(--cc-glass);
+  --glass-border: var(--cc-edge);
+  --card: #0a0e17;
+  --six-surface: var(--cc-glass);
+}
+/* the surfaces: any panel painted with a surface token, plus the v4 and v6
+   card classes that paint theirs in a stylesheet. Inside one, the tokens
+   become the faint tint. */
+html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version]) :is(
+  [style*="var(--glass-surface-1)"], [style*="var(--glass-surface-2)"], [style*="var(--glass-surface-3)"], [style*="var(--inset-surface)"], .v7-glass,
+  .six-nav, .six-secondary, .six-meeting-note, .six-shortlist, .six-search, .six-status, .six-brief-panel,
+  .v4-box, .v4-surface, .v4-focus-sheet, .v4-review-island, .v4-progress-landscape, .v4-pathways-sheet, .v4-destination-sheet, .v4-interest-explorer, .v4-roster-table, .v4-iv-tile, .mtg-coming, .v4-msc, .as-panel, .msg-composer,
+  [role="dialog"], [role="menu"], [role="listbox"]
+) > * {
+  --glass-surface-1: rgba(255, 255, 255, 0.035);
+  --glass-surface-2: rgba(255, 255, 255, 0.05);
+  --glass-surface-3: rgba(255, 255, 255, 0.035);
+  --inset-surface: rgba(255, 255, 255, 0.035);
+  --six-surface: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
+/* a top-level surface wears the full material. The tints above are set on
+   its children, so the surface itself still resolves its token to the
+   blueprint, whichever stylesheet paints it. */
+html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version]) :is(
+  [style*="var(--glass-surface-1)"], [style*="var(--glass-surface-2)"], [style*="var(--glass-surface-3)"], [style*="var(--inset-surface)"], .v7-glass,
+  .six-nav, .six-secondary, .six-meeting-note, .six-shortlist, .six-search, .six-status, .six-brief-panel,
+  .v4-box, .v4-surface, .v4-focus-sheet, .v4-review-island, .v4-progress-landscape, .v4-pathways-sheet, .v4-destination-sheet, .v4-interest-explorer, .v4-roster-table, .v4-iv-tile, .mtg-coming, .v4-msc, .as-panel, .msg-composer
+):not(:is(
+  [style*="var(--glass-surface-1)"], [style*="var(--glass-surface-2)"], [style*="var(--glass-surface-3)"], [style*="var(--inset-surface)"], .v7-glass,
+  .six-nav, .six-secondary, .six-meeting-note, .six-shortlist, .six-search, .six-status, .six-brief-panel,
+  .v4-box, .v4-surface, .v4-focus-sheet, .v4-review-island, .v4-progress-landscape, .v4-pathways-sheet, .v4-destination-sheet, .v4-interest-explorer, .v4-roster-table, .v4-iv-tile, .mtg-coming, .v4-msc, .as-panel, .msg-composer,
+  [role="dialog"], [role="menu"], [role="listbox"]
+) *) {
+  background-color: var(--cc-glass) !important;
+  border-color: var(--cc-edge) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(140%) !important;
+  backdrop-filter: blur(22px) saturate(140%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 40px -24px rgba(0, 0, 0, 0.7) !important;
+}
+/* no per-card tinted gradients (v4's old card tint): one fill everywhere,
+   except the screen's one focal block (data-focal), which keeps its light */
+html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version]) :is(.v4-surface, .v4-roster-table, .v4-box, .six-secondary, .six-shortlist):not([data-focal]) {
+  background-image: none !important;
+}
+/* a surface inside a surface: the faint tint, no second blur or lift */
+html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version]) :is(
+  [style*="var(--glass-surface-1)"], [style*="var(--glass-surface-2)"], [style*="var(--glass-surface-3)"], [style*="var(--inset-surface)"], .v7-glass,
+  .six-nav, .six-secondary, .six-meeting-note, .six-shortlist, .six-search, .six-status, .six-brief-panel,
+  .v4-box, .v4-surface, .v4-focus-sheet, .v4-review-island, .v4-progress-landscape, .v4-pathways-sheet, .v4-destination-sheet, .v4-interest-explorer, .v4-roster-table, .v4-iv-tile, .mtg-coming, .v4-msc, .as-panel, .msg-composer
+) :is(.v7-glass, .six-secondary, .six-meeting-note, .six-shortlist, .six-search, .six-status, .v4-box, .v4-surface, .v4-iv-tile, .mtg-coming, .v4-msc, .as-panel, .msg-composer) {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+/* Windows high contrast and anyone who asks for less transparency: solid */
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version][data-counselor-version]) {
+    --cc-glass: #0a0e17;
+  }
+  html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version]) * {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}

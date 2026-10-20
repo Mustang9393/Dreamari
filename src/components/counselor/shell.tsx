@@ -619,7 +619,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
     <div className="marketing-v2 themeable relative" data-counselor-version="v4">
       {/* v5's ground, the same component (8 Oct 2026: "make it 1:1 v5's
          background"); the workspace sits above it */}
-      <AppBackdrop />
+      <AppBackdrop calmSky />
       {/* v5's log sheet (walk-ins, booking, family, time), used by v4's Overview */}
       <LogSheetHost />
       <ExploreSheetHost />
