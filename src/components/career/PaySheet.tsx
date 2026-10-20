@@ -23,7 +23,7 @@
 //   the point of the whole note ("so students can trust the information").
 // - Phones get a bottom sheet; wider screens a centred card.
 
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronRight, X } from "lucide-react";
@@ -36,19 +36,26 @@ const MUTED = { color: "var(--muted-foreground)" } as const;
 
 const num = (s: string) => Number(s.replace(/[^0-9.]/g, ""));
 
-export function PaySheet({ career, accent, pay, source, onMore, moreLabel = "Pay by state", onClose }: {
+/** The frame both Career Detail fact sheets share (What it pays, What you
+ *  need to get in): scrim, accent-lit card, the career as an eyebrow, the
+ *  title, a close button, a bottom sheet on phones and a centred card
+ *  above 640px. One frame so the sheets read as one family (Chandu, 20 Oct
+ *  2026: "redesign the typical degree (i) popup to be consistent with the
+ *  what it pays pop up too"). */
+export function FactSheet({ career, accent, title, more, source, onClose, children }: {
   career: string;
   /** the world accent, e.g. var(--world-arts-media-sport) */
   accent: string;
-  pay: { starting: string; typical: string; top: string };
+  title: string;
+  /** the last row: closes the sheet and opens the tab that goes deeper */
+  more?: { label: string; onClick: () => void };
   /** who publishes the figures, e.g. "U.S. Bureau of Labor Statistics" */
   source?: string;
-  /** closes the sheet and opens Pay & Outlook */
-  onMore?: () => void;
-  moreLabel?: string;
   onClose: () => void;
+  children: React.ReactNode;
 }) {
   const still = useReducedMotion();
+  const titleId = useId();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -56,19 +63,13 @@ export function PaySheet({ career, accent, pay, source, onMore, moreLabel = "Pay
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-
-  // where Typical sits between the two ends; no marker when a figure is missing
-  const lo = num(pay.starting);
-  const hi = num(pay.top);
-  const mid = num(pay.typical);
-  const at = hi > lo && mid >= lo && mid <= hi ? ((mid - lo) / (hi - lo)) * 100 : null;
   const tint = (p: number) => `color-mix(in srgb, ${accent} ${p}%, transparent)`;
   const light = `color-mix(in srgb, ${accent} 70%, #ffffff)`;
   const surface = "color-mix(in srgb, var(--background) 95%, var(--foreground))";
 
   if (typeof document === "undefined") return null;
   return createPortal(
-    <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="pay-sheet-title" style={{ fontFamily: "var(--font-body)", background: "transparent", minHeight: 0 }}>
+    <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby={titleId} style={{ fontFamily: "var(--font-body)", background: "transparent", minHeight: 0 }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.72)" }} />
       <motion.div
         initial={still ? false : { opacity: 0, y: 24 }}
@@ -98,41 +99,20 @@ export function PaySheet({ career, accent, pay, source, onMore, moreLabel = "Pay
 
         <header className="flex flex-col gap-[4px] pt-[22px] pr-[64px] pl-[24px]">
           <p className="text-[12px] leading-[16px] font-bold uppercase tracking-[0.08em]" style={{ color: light }}>{career}</p>
-          <h2 id="pay-sheet-title" className="text-[24px] leading-[28px] font-extrabold" style={DISPLAY}>What it pays</h2>
+          <h2 id={titleId} className="text-[24px] leading-[28px] font-extrabold" style={DISPLAY}>{title}</h2>
         </header>
 
         <div className="flex flex-col gap-[24px] px-[24px] pt-[18px] pb-[24px]">
-          <div className="flex flex-col gap-[4px]">
-            <span className={LABEL} style={MUTED}>Typical pay</span>
-            <span className="flex flex-wrap items-baseline gap-x-[8px]">
-              <span
-                className="text-[40px] leading-[44px] font-extrabold tabular-nums"
-                style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 55%, #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
-              >
-                {pay.typical}
-              </span>
-              <span className="text-[15px] leading-[22px] font-semibold" style={MUTED}>a year</span>
-            </span>
-            <span className="text-[14px] leading-[20px]" style={MUTED}>Half of people in this job earn more.</span>
-          </div>
-
-          <LightRange
-            accent={accent}
-            at={at}
-            from={{ label: "Starting out", value: pay.starting }}
-            to={{ label: "Top earners", value: pay.top }}
-            ariaLabel={`Starting out ${pay.starting}, typical ${pay.typical}, top earners ${pay.top}`}
-          />
-
-          {(source || onMore) && (
+          {children}
+          {(source || more) && (
             <div className="-mb-[8px] flex flex-col gap-[4px] border-t pt-[14px]" style={{ borderColor: "var(--glass-border)" }}>
-              {onMore && (
+              {more && (
                 <button
                   type="button"
-                  onClick={onMore}
+                  onClick={more.onClick}
                   className="dm-quiet -mx-[12px] flex min-h-[44px] cursor-pointer items-center justify-between gap-[12px] rounded-[12px] px-[12px] text-left text-[15px] leading-[22px] font-semibold"
                 >
-                  <span>{moreLabel}</span>
+                  <span>{more.label}</span>
                   <ChevronRight className="size-[18px] flex-none" style={{ color: light }} aria-hidden />
                 </button>
               )}
@@ -143,5 +123,54 @@ export function PaySheet({ career, accent, pay, source, onMore, moreLabel = "Pay
       </motion.div>
     </div>,
     document.body,
+  );
+}
+
+/** A sheet's headline figure: small label, gradient display value, an
+ *  optional suffix and one plain line under it. */
+export function SheetHero({ label, value, suffix, line, accent }: { label: string; value: React.ReactNode; suffix?: string; line?: string; accent: string }) {
+  return (
+    <div className="flex flex-col gap-[4px]">
+      <span className={LABEL} style={MUTED}>{label}</span>
+      <span className="flex flex-wrap items-baseline gap-x-[8px]">
+        <span
+          className="text-[34px] leading-[40px] font-extrabold tabular-nums sm:text-[40px] sm:leading-[44px]"
+          style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 55%, #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+        >
+          {value}
+        </span>
+        {suffix && <span className="text-[15px] leading-[22px] font-semibold" style={MUTED}>{suffix}</span>}
+      </span>
+      {line && <span className="text-[14px] leading-[20px]" style={MUTED}>{line}</span>}
+    </div>
+  );
+}
+
+export function PaySheet({ career, accent, pay, source, onMore, moreLabel = "Pay by state", onClose }: {
+  career: string;
+  accent: string;
+  pay: { starting: string; typical: string; top: string };
+  source?: string;
+  /** closes the sheet and opens Pay & Outlook */
+  onMore?: () => void;
+  moreLabel?: string;
+  onClose: () => void;
+}) {
+  // where Typical sits between the two ends; no marker when a figure is missing
+  const lo = num(pay.starting);
+  const hi = num(pay.top);
+  const mid = num(pay.typical);
+  const at = hi > lo && mid >= lo && mid <= hi ? ((mid - lo) / (hi - lo)) * 100 : null;
+  return (
+    <FactSheet career={career} accent={accent} title="What it pays" source={source} more={onMore ? { label: moreLabel, onClick: onMore } : undefined} onClose={onClose}>
+      <SheetHero label="Typical pay" value={pay.typical} suffix="a year" line="Half of people in this job earn more." accent={accent} />
+      <LightRange
+        accent={accent}
+        at={at}
+        from={{ label: "Starting out", value: pay.starting }}
+        to={{ label: "Top earners", value: pay.top }}
+        ariaLabel={`Starting out ${pay.starting}, typical ${pay.typical}, top earners ${pay.top}`}
+      />
+    </FactSheet>
   );
 }

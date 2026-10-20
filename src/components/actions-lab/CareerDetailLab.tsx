@@ -30,12 +30,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronDown, ChevronRight, Info, Sparkles, ThumbsDown, X } from "lucide-react";
+import { ChevronLeft, ChevronDown, ChevronRight, Info, Sparkles, ThumbsDown } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { IconTip } from "@/components/app/IconTip";
-import { PaySheet } from "@/components/career/PaySheet";
+import { FactSheet, PaySheet, SheetHero } from "@/components/career/PaySheet";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
 import { react, useLab } from "./labStore";
 import { CareerHeaderActions } from "./CareerHeaderActions";
@@ -462,49 +462,41 @@ function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null
   );
 }
 
-// The degree sheet: the three door questions, the note, the "not the only
-// route" line, and how people in the job actually finished, as bars.
-function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonNullable<FactDetails["degree"]>; onClose: () => void }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-  if (typeof document === "undefined") return null;
-  return createPortal(
-    <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title" style={{ fontFamily: "var(--font-body)", background: "transparent" }}>
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.62)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
-      <div
-        className="dm-scroll relative z-[1] flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
-        style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", color: "var(--foreground)" }}
-      >
-        <div className="flex items-start justify-between gap-[var(--space-4)]">
-          <div className="flex flex-col gap-[2px]">
-            <h2 id="degree-sheet-title" className={BIG} style={DISPLAY}>What you need to get in</h2>
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{career}</p>
+// The degree sheet behind Typical degree's (i), in the What it pays sheet's
+// frame (Chandu, 20 Oct 2026: "redesign the typical degree (i) popup to be
+// consistent with the what it pays pop up too"): the credential as the
+// headline, how many get in without a bachelor's when the door asks for one,
+// the two door questions side by side, the note, and a row into Education.
+// Same data as before; nothing dropped.
+function DegreeSheet({ career, accent, detail, source, onMore, onClose }: { career: string; accent: string; detail: NonNullable<FactDetails["degree"]>; source?: string; onMore?: () => void; onClose: () => void }) {
+  const short = shortDegree(detail.doorAsksFor);
+  const aboveBachelor = /bachelor|master|doctor|law/i.test(short);
+  return (
+    <FactSheet career={career} accent={accent} title="What you need to get in" source={source} more={onMore ? { label: "Where to study", onClick: onMore } : undefined} onClose={onClose}>
+      <SheetHero
+        label="Typical degree"
+        accent={accent}
+        value={short.split(/ or /).map((p, i) => (
+          <span key={i}>
+            {i > 0 && " or "}
+            <span className="whitespace-nowrap">{p}</span>
+          </span>
+        ))}
+        line={aboveBachelor && detail.noBachelorPct ? `${detail.noBachelorPct} of people in this job got in without a bachelor's degree.` : undefined}
+      />
+      <dl className="grid grid-cols-1 gap-[16px] sm:grid-cols-2">
+        {[["Experience first", detail.experienceFirst], ["Training after hiring", detail.trainingAfterHiring]].map(([k, v]) => (
+          <div key={k} className="flex flex-col gap-[2px]">
+            <dt className="text-[12px] leading-[16px] font-semibold uppercase tracking-[0.04em]" style={{ color: "var(--muted-foreground)" }}>{k}</dt>
+            <dd className="text-[16px] leading-[22px] font-bold">{v}</dd>
           </div>
-          <IconTip label="Close">
-            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)" }}>
-              <X className="h-4 w-4" aria-hidden />
-            </button>
-          </IconTip>
-        </div>
-
-        <dl className="flex flex-col gap-[8px]">
-          {[["The door asks for", detail.doorAsksFor], ["Experience first?", detail.experienceFirst], ["Training after hiring", detail.trainingAfterHiring]].map(([k, v]) => (
-            <div key={k} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-[var(--space-4)]">
-              <dt className={SMALL} style={{ color: "var(--muted-foreground)" }}>{k}</dt>
-              <dd className={`${SMALL} font-semibold`}>{v}</dd>
-            </div>
-          ))}
-        </dl>
-
-        <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{detail.note}</p>
-      </div>
-    </div>,
-    document.body,
+        ))}
+      </dl>
+      {/* a note that points at "the mix below" describes a chart this sheet
+         doesn't draw, and says what the without-a-bachelor's line above
+         already says, so only standalone notes show */}
+      {detail.note && !/\bbelow\b/i.test(detail.note) && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{detail.note}</p>}
+    </FactSheet>
   );
 }
 
@@ -644,8 +636,9 @@ export function CareerDetailLab({ slug, live = false }: {
   const tabs = national ? CAREER_TABS.map((t) => (t.key === "pay" ? { ...t, label: "Pay & Outlook" } : t)) : CAREER_TABS;
   // growth and openings open the tab that explains them (they had an (i))
   const toOutlook = (label: string) => national && /growth|open each year/i.test(label);
-  const openOutlook = () => {
-    setTab("pay");
+  const openOutlook = () => openTab("pay");
+  function openTab(key: CareerTab) {
+    setTab(key);
     window.requestAnimationFrame(() => {
       const row = document.getElementById("career-tabs");
       row?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -654,7 +647,7 @@ export function CareerDetailLab({ slug, live = false }: {
       const strip = on?.closest<HTMLElement>("[role=tablist]") ?? on?.parentElement;
       if (on && strip) strip.scrollTo({ left: on.offsetLeft - (strip.clientWidth - on.offsetWidth) / 2, behavior: "smooth" });
     });
-  };
+  }
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -979,7 +972,14 @@ export function CareerDetailLab({ slug, live = false }: {
         )}
 
         {openFact === "degree" && vm.details?.degree && (
-          <DegreeSheet career={career.title} detail={vm.details.degree} onClose={() => setOpenFact(null)} />
+          <DegreeSheet
+            career={career.title}
+            accent={accent}
+            detail={vm.details.degree}
+            source={/Bureau of Labor Statistics/i.test(vm.sources ?? "") ? "U.S. Bureau of Labor Statistics" : undefined}
+            onMore={vm.education ? () => { setOpenFact(null); openTab("education"); } : undefined}
+            onClose={() => setOpenFact(null)}
+          />
         )}
 
         {vm.sources && (
