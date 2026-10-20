@@ -18,6 +18,7 @@
 // on the brightest only. Twinkle is brightness only, never a scale.
 
 import { useSyncExternalStore } from "react";
+import "./constellation.css";
 
 type Star = [x: number, y: number, mag: number, tint: number];
 type Figure = { stars: Star[]; lines: [number, number][] };
@@ -29,6 +30,9 @@ export const FIGURES = {
   meetings: { stars: [[24, 40, 0.8, 1], [60, 92, 0.5, 2], [96, 54, 1, 3], [134, 98, 0.45, 0], [176, 34, 0.7, 2]], lines: [[0, 1], [1, 2], [2, 3], [3, 4]] },
   // a small figure gathering others round it: the students who need you
   people: { stars: [[104, 22, 0.55, 2], [104, 62, 1, 1], [58, 44, 0.45, 3], [150, 44, 0.6, 0], [72, 104, 0.4, 2], [136, 106, 0.5, 1]], lines: [[0, 1], [1, 2], [1, 3], [1, 4], [1, 5]] },
+  // a path climbing to one bright star, with a side step: My Build, the
+  // answers that lead to the student's matches (student About Me)
+  build: { stars: [[22, 100, 0.4, 2], [62, 78, 0.6, 1], [98, 90, 0.35, 3], [130, 50, 0.7, 0], [178, 22, 1, 1], [156, 92, 0.3, 2]], lines: [[0, 1], [1, 2], [2, 3], [3, 4], [3, 5]] },
 } satisfies Record<string, Figure>;
 
 // warm white, white, ice, pale blue (rgb)
@@ -88,13 +92,18 @@ function getSprites(): string[] | null {
 }
 const noop = () => () => {};
 
-export function Constellation({ figure }: { figure: keyof typeof FIGURES }) {
+/** The cached star sprites (client only), index = tint * 2 + (spikes ? 1 : 0). */
+export function useStarSprites(): string[] | null {
+  return useSyncExternalStore(noop, getSprites, () => null);
+}
+
+export function Constellation({ figure, className = "right-[-22px] bottom-[-26px] w-[52%] max-w-[230px]" }: { figure: keyof typeof FIGURES; /** where it sits in its card (default: off the bottom-right corner) */ className?: string }) {
   // client only: the sprites need a canvas; nothing shows at rest anyway
-  const art = useSyncExternalStore(noop, getSprites, () => null);
+  const art = useStarSprites();
   if (!art) return null;
   const f: Figure = FIGURES[figure];
   return (
-    <svg aria-hidden viewBox="0 0 200 120" className="v7-const pointer-events-none absolute right-[-22px] bottom-[-26px] h-auto w-[52%] max-w-[230px]">
+    <svg aria-hidden viewBox="0 0 200 120" className={`dm-const pointer-events-none absolute h-auto ${className}`}>
       {f.lines.map(([a, b], i) => {
         const [x1, y1] = f.stars[a];
         const [x2, y2] = f.stars[b];
@@ -113,8 +122,53 @@ export function Constellation({ figure }: { figure: keyof typeof FIGURES }) {
         const spikes = m >= 0.8;
         return (
           <image key={i} href={art[t * 2 + (spikes ? 1 : 0)]} x={x - size / 2} y={y - size / 2} width={size} height={size}
-            className={`v7-const-star${m >= 0.7 ? " v7-const-twinkle" : ""}`} preserveAspectRatio="xMidYMid meet"
+            className={`dm-const-star${m >= 0.7 ? " dm-const-twinkle" : ""}`} preserveAspectRatio="xMidYMid meet"
             style={{ ["--sd" as string]: `${i * 0.07}s`, ["--m" as string]: m, ["--tw" as string]: `${2.6 + i * 0.8}s` }} />
+        );
+      })}
+    </svg>
+  );
+}
+
+/** A small fixed constellation as an icon (My Build's mark, 20 Oct 2026;
+ *  Chandu: "lose the AI icon. Use something better or some starry hover
+ *  stuff we did for the v7 cards"). Lit at rest, unlike the hover figure;
+ *  inside a `.group` its bright star scintillates while hovered. */
+export function StarGlyph({ className = "h-[22px] w-[22px]" }: { className?: string }) {
+  const art = useStarSprites();
+  const stars: Star[] = [[5, 19, 0.45, 2], [10, 11, 0.7, 1], [15.5, 14.5, 0.4, 3], [19.5, 4.5, 1, 1]];
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" className={`dm-const-glyph overflow-visible ${className}`}>
+      {[[0, 1], [1, 2], [2, 3]].map(([a, b], i) => (
+        <line key={i} x1={stars[a][0]} y1={stars[a][1]} x2={stars[b][0]} y2={stars[b][1]} />
+      ))}
+      {art && stars.map(([x, y, m, t], i) => {
+        const size = 7 + m * 9;
+        return (
+          <image key={i} href={art[t * 2 + (m >= 0.8 ? 1 : 0)]} x={x - size / 2} y={y - size / 2} width={size} height={size}
+            className={m >= 0.7 ? "dm-const-glyph-tw" : undefined} style={{ ["--m" as string]: m, ["--tw" as string]: `${2.2 + i * 0.7}s` }} />
+        );
+      })}
+    </svg>
+  );
+}
+
+/** A success moment on one spot: a few stars flare and fade where something
+ *  just changed (a My Build answer saved). Mount it with a fresh `key` to
+ *  play it again; it plays once and leaves nothing behind. */
+export function StarBurst({ className = "" }: { className?: string }) {
+  const art = useStarSprites();
+  if (!art) return null;
+  // around a point at the middle of the box, a scatter that reads as stars
+  // catching light, not confetti: few, uneven, mostly small
+  const pts: Star[] = [[18, 30, 1, 1], [70, 14, 0.55, 2], [118, 34, 0.75, 3], [168, 18, 0.4, 0], [92, 48, 0.35, 1]];
+  return (
+    <svg aria-hidden viewBox="0 0 200 60" preserveAspectRatio="none" className={`dm-const-burst pointer-events-none absolute ${className}`}>
+      {pts.map(([x, y, m, t], i) => {
+        const size = 12 + m * 26;
+        return (
+          <image key={i} href={art[t * 2 + (m >= 0.8 ? 1 : 0)]} x={x - size / 2} y={y - size / 2} width={size} height={size}
+            preserveAspectRatio="xMidYMid meet" style={{ ["--d" as string]: `${i * 0.09}s`, ["--m" as string]: m }} />
         );
       })}
     </svg>

@@ -33,7 +33,7 @@ import { Coverflow } from "../v5/Coverflow";
 import { openCareer } from "../v5/ExploreSheets";
 import { mondayOf, useAllMeetings, inWeek } from "./data";
 import { catalog, matchesFor } from "./oppCatalog";
-import { Constellation, FIGURES } from "./Constellation";
+import { Constellation, FIGURES } from "@/components/app/Constellation";
 import { openOpp, shareOpp } from "./OppSheets";
 import { SECTIONS, CARD, CARD_STYLE, DISPLAY, FIGURE, MUTED, OVERLINE, PrimaryButton, SectionHead, TITLE, v7 } from "./ui";
 

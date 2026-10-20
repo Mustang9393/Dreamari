@@ -15,7 +15,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, ChevronDown, ChevronRight, Sparkles, GraduationCap, Briefcase, Pencil, Plus, Star, Compass, Check } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, GraduationCap, Briefcase, Pencil, Plus, Star, Compass, Check } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FacePhoto } from "@/components/app/FacePhoto";
@@ -32,6 +32,8 @@ import { CollegePicture, useGoalBuckets, useSaved as useSavedColleges, useTopSch
 import { fitFor, parseGpa } from "@/components/colleges/pathway";
 import { useBackStep } from "@/lib/backStep";
 import { SpotBadge, SpotTip, useSpotSequence } from "./SpotTip";
+import { Constellation, StarBurst, StarGlyph } from "@/components/app/Constellation";
+import { skyMoment } from "@/lib/sky";
 import { CollegeGoalPicker } from "./CollegeGoalPicker";
 import { flyXp } from "@/components/app/xpFlight";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession } from "@/components/app/WelcomeSplash";
@@ -354,30 +356,45 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
 }
 
 function BuildBlock({ onOpenBuild }: { onOpenBuild: (section?: BuildSection) => void }) {
-  // Folded to one small blue row until the student asks for it (20 Oct
-  // 2026, Chandu: "maybe the my build can be collapsed in some way and only
-  // open when its clicked on So we can make the my build stuff be very small
-  // and simplified with the blue color. Right now its very noisy"). Open,
-  // it is the same answers, each opening its own section of the editor, on
-  // a flat blue tint instead of Build's aurora sky.
+  // Folded to one small row until the student asks for it (20 Oct 2026,
+  // Chandu: "maybe the my build can be collapsed in some way and only open
+  // when its clicked on ... Right now its very noisy"). Open, it is the same
+  // answers, each opening its own section of the editor.
+  // Build's blue-black sky is back behind the fold and the panel (20 Oct
+  // 2026: "when collapsed on open should still have that gradient blue black
+  // look we used to have"); the flat blue tint read as a plain box. The
+  // noise that the fold fixed was the always-open answers, not the sky.
+  // The mark is a small constellation, not the AI sparkle ("lose the AI
+  // icon ... some starry hover stuff we did for the v7 cards"), and the
+  // fold's hover draws the v7 constellation, nothing at rest.
+  const lookV2 = useLookV2();
   const [open, setOpen] = useState(false);
   return (
-    <section aria-label="My Build" className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "color-mix(in srgb, var(--primary) 8%, transparent)", borderColor: "color-mix(in srgb, var(--primary) 30%, var(--glass-border))" }}>
+    <section aria-label="My Build" className="relative isolate flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "color-mix(in srgb, var(--primary) 30%, var(--glass-border))" }}>
+      <ThemeProvider>
+        <div aria-hidden className="myb-sky">
+          <BackgroundSpace />
+          <AuroraBackground accent={(lookV2 ? STAGE_ACCENTS_V2 : STAGE_ACCENTS).interests} visitedAccents={[]} lightning={false} />
+        </div>
+      </ThemeProvider>
       <button
         type="button"
         aria-expanded={open}
         aria-controls="about-build-panel"
         onClick={() => setOpen((o) => !o)}
-        className="dm-quiet group flex min-h-[56px] w-full cursor-pointer items-center gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-3)] text-left"
+        // its own hover: the house grey fill (dm-quiet) hid the sky
+        className="group relative flex min-h-[60px] w-full cursor-pointer items-center gap-[var(--space-3)] overflow-hidden px-[var(--space-4)] py-[var(--space-3)] text-left transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--primary)_10%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--primary)_10%,transparent)]"
       >
-        <span aria-hidden className="flex size-[32px] flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--accent-subtle)" }}>
-          <Sparkles className="h-4 w-4" />
+        <span aria-hidden className="flex size-[36px] flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, rgba(0,0,0,0.25))", border: "1px solid color-mix(in srgb, var(--primary) 35%, transparent)" }}>
+          <StarGlyph className="h-[26px] w-[26px]" />
         </span>
-        <span className="flex min-w-0 flex-1 flex-col">
+        <span className="relative z-[1] flex min-w-0 flex-1 flex-col">
           <span className="text-[16px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Build</span>
           <span className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>What Dreamari uses to pick your matches</span>
         </span>
-        <ChevronDown aria-hidden className="h-5 w-5 flex-none transition-transform duration-200" style={{ color: "var(--accent-subtle)", transform: open ? "rotate(180deg)" : "none" }} />
+        {/* closed only: open, the panel below is the thing to look at */}
+        {!open && <Constellation figure="build" className="top-[-10px] right-[44px] w-[160px]" />}
+        <ChevronDown aria-hidden className="relative z-[1] h-5 w-5 flex-none transition-transform duration-200" style={{ color: "var(--accent-subtle)", transform: open ? "rotate(180deg)" : "none" }} />
       </button>
       {open && (
         <div id="about-build-panel" className="border-t" style={{ borderColor: "color-mix(in srgb, var(--primary) 22%, var(--glass-border))" }}>
@@ -616,10 +633,52 @@ function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
   const valueOf = (id: BuildSection): string => {
     return summaryOf(answers, id, 0) || prefSummary(prefs, id);
   };
+  // Success moments (20 Oct 2026, Chandu: "the success moments could look
+  // really nice with the stars pulse and shooting star stuff ... without it
+  // being always playing"). Only on a real change, never at rest: an answer
+  // saved in the editor flares a few stars on its own line and sends a small
+  // wave through the night sky; the last empty line filled sends a shooting
+  // star across the panel and a big sky moment. The first moment after
+  // mounting is skipped, so the demo's seeded answers don't set it off.
+  const values = BUILD_GROUPS.flatMap((g) => g.lines.map((l) => [l.id, valueOf(l.id)] as const));
+  const sig = values.map(([, v]) => v).join("\u0001");
+  const prev = useRef<{ sig: string; at: number; vals: Map<BuildSection, string> } | null>(null);
+  const [flash, setFlash] = useState<{ id: BuildSection; n: number } | null>(null);
+  const [shoot, setShoot] = useState(0);
+  useEffect(() => {
+    const now = Date.now();
+    const p = prev.current;
+    prev.current = { sig, at: p?.at ?? now, vals: new Map(values) };
+    if (!p || p.sig === sig || now - p.at < 1000) return;
+    const changed = values.find(([id, v]) => v.trim() && v !== p.vals.get(id));
+    if (!changed) return;
+    const wasMissing = [...p.vals.values()].some((v) => !v.trim());
+    const complete = values.every(([, v]) => v.trim());
+    // answers are saved inside the editor sheet, which covers this panel:
+    // hold the moment until the sheet closes, so the student sees it land
+    const play = () => {
+      const row = panel.current?.querySelector(`[data-build-line="${changed[0]}"]`) ?? null;
+      if (wasMissing && complete) {
+        setShoot((n) => n + 1);
+        skyMoment({ from: row, big: true });
+      } else {
+        skyMoment({ from: row });
+      }
+      setFlash((f) => ({ id: changed[0], n: (f?.n ?? 0) + 1 }));
+    };
+    const wait = window.setInterval(() => {
+      if (document.querySelector('[aria-modal="true"]')) return;
+      window.clearInterval(wait);
+      window.setTimeout(play, 250);
+    }, 200);
+    return () => window.clearInterval(wait);
+    // values is derived from sig
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sig]);
   return (
-    // flat, inside BuildBlock's blue fold: the aurora sky it used to wear
-    // was the noise (20 Oct 2026, "Right now its very noisy")
-    <div ref={panel} className="relative isolate grid sm:grid-cols-3">
+    // on BuildBlock's blue-black sky
+    <div ref={panel} className="relative isolate grid overflow-hidden sm:grid-cols-3">
+      {shoot > 0 && <span key={shoot} aria-hidden className="dm-shoot" />}
       <div className="px-[var(--space-5)] pt-[var(--space-5)] sm:hidden">
         <Segmented ariaLabel="My Build group" value={String(shown)} onChange={(v) => setShown(Number(v))} options={BUILD_GROUPS.map((g, i) => ({ key: String(i), label: g.short }))} grow />
       </div>
@@ -635,14 +694,15 @@ function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
             const empty = !value.trim();
             const lit = spot === "edit" && gi === shown && li === 0;
             return (
-              <span key={line.id} className="relative flex flex-col">
+              <span key={line.id} data-build-line={line.id} className="relative flex flex-col">
+              {flash?.id === line.id && <StarBurst key={flash.n} className="inset-x-[-6px] top-[2px] h-[52px]" />}
               {/* below the line: above it, the tip covered the phone's group switch */}
               {lit && <SpotTip side="left" top={84}>Tap any line to change it</SpotTip>}
               <button
                 type="button"
                 onClick={() => { stopSpot(); onOpen(line.id); }}
                 aria-label={`${line.label}: edit`}
-                className={`dm-quiet group -mx-[10px] flex cursor-pointer items-start gap-[var(--space-2)] rounded-[var(--radius-md)] px-[10px] py-[8px] text-left ${lit ? "dm-spot-ring" : ""}`}
+                className={`group -mx-[10px] flex cursor-pointer items-start gap-[var(--space-2)] rounded-[var(--radius-md)] px-[10px] py-[8px] text-left transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] ${lit ? "dm-spot-soft" : ""}`}
               >
                 <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
                   <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{line.label}</span>
@@ -650,7 +710,7 @@ function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
                 </span>
                 {/* always there, brighter on hover: says the row edits
                    ("its not clear that the different sections are clickable") */}
-                <Pencil className="mt-[3px] h-[14px] w-[14px] flex-none opacity-45 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" style={{ color: "var(--accent-subtle)" }} aria-hidden />
+                <Pencil className={`mt-[3px] h-[14px] w-[14px] flex-none opacity-45 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 ${lit ? "dm-pencil-write" : ""}`} style={{ color: "var(--accent-subtle)" }} aria-hidden />
               </button>
               </span>
             );

@@ -1729,6 +1729,8 @@ export function Top3Tab({
         const report = reportV2(id);
         const route = chosenRoute(career);
         const isFocus = index === 0;
+        // the one card that teaches (it carries the tip): lighting every card at once was noise
+        const taught = index === (wide ? 1 : 0);
         const sim = simulationFor(id);
         const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
         const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 3).map((c) => c.name) : [];
@@ -1809,7 +1811,7 @@ export function Top3Tab({
                   align="start"
                 >
                   <div
-                    className={`flex h-[36px] items-center rounded-full border ${spot === "move" && top3.length > 1 ? "dm-spot" : ""}`}
+                    className={`flex h-[36px] items-center rounded-full border ${taught && spot === "move" && top3.length > 1 ? "dm-spot" : ""}`}
                     style={{ background: "rgba(5,8,20,0.62)", borderColor: isFocus ? `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))` : "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
                   >
                     {top3.length > 1 && (
@@ -1822,8 +1824,8 @@ export function Top3Tab({
                           className={`dm-quiet flex size-[34px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30 ${showHint && index === 1 ? "dm-slot-pulse-faint" : ""}`}
                           style={{ color: "#fff" }}
                         >
-                          <ChevronUp className="h-4 w-4 lg:hidden" aria-hidden />
-                          <ChevronLeft className="hidden h-4 w-4 lg:block" aria-hidden />
+                          <ChevronUp className={`h-4 w-4 lg:hidden ${taught && spot === "move" && index > 0 ? "dm-lean-up" : ""}`} aria-hidden />
+                          <ChevronLeft className={`hidden h-4 w-4 lg:block ${taught && spot === "move" && index > 0 ? "dm-lean-left" : ""}`} aria-hidden />
                         </button>
                       </IconTip>
                     )}
@@ -1846,15 +1848,15 @@ export function Top3Tab({
                           className="dm-quiet flex size-[34px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30"
                           style={{ color: "#fff" }}
                         >
-                          <ChevronDown className="h-4 w-4 lg:hidden" aria-hidden />
-                          <ChevronRight className="hidden h-4 w-4 lg:block" aria-hidden />
+                          <ChevronDown className={`h-4 w-4 lg:hidden ${taught && spot === "move" && index === 0 ? "dm-lean-down" : ""}`} aria-hidden />
+                          <ChevronRight className={`hidden h-4 w-4 lg:block ${taught && spot === "move" && index === 0 ? "dm-lean-right" : ""}`} aria-hidden />
                         </button>
                       </IconTip>
                     )}
                   </div>
                 </Coachmark>
                 {/* side by side: the #2 card says it; stacked (only the top card shows): #1 does */}
-                {spot === "move" && index === (wide ? 1 : 0) && <SpotTip side="left">{index === 0 ? "Move to #2" : "Move to #1"}</SpotTip>}
+                {taught && spot === "move" && <SpotTip side="left">{index === 0 ? "Move to #2" : "Move to #1"}</SpotTip>}
               </div>
               {/* Remove, in plain sight on the photo's other corner (testers
                  missed it inside the old ... menu). No confirm: it goes back
@@ -1865,13 +1867,13 @@ export function Top3Tab({
                     type="button"
                     aria-label={`Remove ${career.title} from Top 3`}
                     onClick={() => remove(id)}
-                    className={`dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full border ${spot === "remove" ? "dm-spot" : ""}`}
+                    className={`dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full border ${taught && spot === "remove" ? "dm-spot" : ""}`}
                     style={{ background: "rgba(5,8,20,0.62)", borderColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: "#fff" }}
                   >
                     <X className="h-4 w-4" aria-hidden />
                   </button>
                 </IconTip>
-                {spot === "remove" && index === (wide ? 1 : 0) && <SpotTip side="right">Remove from Top 3</SpotTip>}
+                {taught && spot === "remove" && <SpotTip side="right">Remove from Top 3</SpotTip>}
               </div>
 
               {view === "simple" && (
