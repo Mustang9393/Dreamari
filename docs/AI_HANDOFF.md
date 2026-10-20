@@ -1,3 +1,12 @@
+## 2026-10-20: Career Detail's redesign moves behind a v2 switch; the page is back to this morning's
+
+**Why (Chandu):** "put the new career detail under a v2 toggle. Revert the default view to how it was before?" then "and push that."
+
+- Default (v1): `actions-lab/CareerDetailLab.tsx` restored from 87c005e9, the page before the day's Career Detail commits (42a66ae2, 3c42b8c9, f0948c38, ba443c65, 1e036b8f, 0345d2a6). Its exported `CareerDetailLab` is now a small wrapper that picks the version, so the route, the peek and the lab need no changes. It needs the old `outlook-lab/OutlookTab.tsx` (restored) for its outlook mode; that mode is unreachable because the `/outlook-lab` route and menu link stay removed.
+- v2: today's page, unchanged, as `actions-lab/CareerDetailLabV2.tsx` (`career/OutlookTab.tsx` now imports its constants from there). On with `?cd=v2` or the "v2 career page" switch at the foot of either version; `?cd=v1` turns it off. Listed in HANDOFF_INDEX's Demo vs Production.
+- Left in place, harmless on v1: LightRange, PaySheet, WhereToStudy, the Explore Schools `?career=&level=` filter (only v2 links to it).
+- Checked: tsc, eslint; v1 and v2 on Registered Nurse and Investment Banking, dark, 1280; the switch flips both ways.
+
 ## 2026-10-20: My Profile v2 is the default; no My Plan CTAs; My Build folds away
 
 **Why (Chandu):** "lets push v2 of the my profile as the default without having the part about it leading to my plan. Just move top 3 into the career thing. Keep the start here etc. We wont do the my plan ctas, keep the ctas we have now, Play and report. And the next step should be to lead students to explore. Change the my plan to what it was before too. The content in it i mean." Then: "After career goal > go to set the college goal and then explore careers/schools in general." And: "maybe the my build can be collapsed in some way and only open when its clicked on ... very small and simplified with the blue color. Right now its very noisy."

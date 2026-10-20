@@ -34,7 +34,7 @@
 // Sparse state data (Usman): a tile with no forecast says "No forecast yet";
 // a career whose states publish none says so in one line instead of a list.
 
-import { DISPLAY, LABEL, MEDIUM, PayViewToggle, SMALL, Section } from "@/components/actions-lab/CareerDetailLab";
+import { DISPLAY, LABEL, MEDIUM, PayViewToggle, SMALL, Section } from "@/components/actions-lab/CareerDetailLabV2";
 import { PayMap } from "./PayMap";
 import { Listbox } from "@/components/app/Listbox";
 import { LightPoint } from "@/components/app/LightRange";
