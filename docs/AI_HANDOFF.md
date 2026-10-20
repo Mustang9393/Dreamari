@@ -1,3 +1,38 @@
+## 2026-10-21: WCAG 2.2 AA, step 2 (Play: timers off, card deck buttons)
+
+**Why.** These were the next two serious items in the audit:
+
+- **2.2.1, timing.** A timed sim question that runs out is scored Wrong. A slow reader, a screen-reader or switch user, or an English learner has no way to stop the clock.
+- **2.5.7 and 2.1.1, dragging.** The phone card deck (Play hub, Profile Top 3) only moved by swiping.
+
+Chandu: "go" (the audit's recommended order).
+
+**What changed.**
+- **Timers.**
+  - New `play/timers.ts` holds a per-browser "timers off" setting.
+  - SimulationPlayer shows a Timers switch in the HUD (Timer/TimerOff icons) when the level has any `timer` beat.
+  - When off, the stage clock never runs and `remaining` stays at full, so RapidBody, FlagsBody and PickBody never auto-submit.
+  - The Clock and DrainBar are hidden, the default prompt drops the "before the timer runs out" wording, and the music no longer muffles.
+- **CardDeck (PlayHub).**
+  - Previous and Next IconTip buttons sit under the deck, with a polite live "N of M".
+  - ArrowLeft and ArrowRight move the deck, and focus follows the front card when the move came from it.
+  - Back cards are `inert`, so Tab only reaches the front card.
+  - The caller's `className` now goes on an outer wrapper.
+
+**Validation.**
+- tsc and eslint are clean.
+- At 390px on /play: Next and Previous move the counter (1 of 6, 2 of 6, 1 of 6), ArrowRight moves focus from the IB card to the RN card, and the back cards are inert.
+- On /play/investment-banking?screen=L1-18: with timers on, the rapid set timed out at 45s ("Not quite", -6). With timers off it was still on question 1 after 52s.
+
+**Next.**
+- The remaining ~50 dialogs.
+- Signup and resume forms.
+- Resume bullet reorder buttons.
+- Nested interactive cards.
+- Tab arrow keys.
+- XP announcements.
+- Captions.
+
 ## 2026-10-21: WCAG 2.2 AA, step 1 (shared sheets, skip link, tooltips, contrast)
 
 **Why.** Districts will ask whether students with disabilities can use Dreamari, and for documentation. Chandu asked for a full WCAG 2.2 AA audit of dreamari.vercel.app. The result is docs/WCAG_2_2_AA_AUDIT_2026-10-21.md, with its scanners in docs/reference/wcag-audit-2026-10-21. Then: "Start step 1 of the recommended order: focus management in PageSheet/PeekSheet, skip link + main id, IconTip Escape, and the contrast fixes." Out of scope, per Chandu: the PIN gate ("thats for private demo purposes", it stays), and the Classic toggle and other demo-only toggles.

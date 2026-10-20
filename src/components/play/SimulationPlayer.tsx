@@ -7,7 +7,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronRight, Briefcase, ChevronLeft, CircleHelp, DollarSign, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X, Clock3 } from "lucide-react";
+import { Check, ChevronRight, Briefcase, ChevronLeft, CircleHelp, DollarSign, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X, Clock3, Timer, TimerOff } from "lucide-react";
 
 import { IconTip } from "@/components/app/IconTip";
 import { goBackOr } from "@/components/app/chrome";
@@ -49,6 +49,7 @@ import { TickerTapeStorm } from "./BagSecured";
 import { CareerSeal, EndingBackdrop } from "./Celebrations";
 import { HeroCamera } from "./HeroCamera";
 import { TorqueBody } from "./TorqueBody";
+import { setTimersOff, useTimersOff } from "./timers";
 import { musicFailedSnapshot, musicMutedSnapshot, playMusic, retryMusic, serverMusicFailedSnapshot, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicFailed, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import {
@@ -1687,6 +1688,9 @@ function BeatStage({
   const portrait = speaker && !sceneCharacterVisible && !cinematicStage ? cast?.[speaker] : undefined;
 
   const seconds = "timer" in beat && typeof beat.timer === "number" ? beat.timer : 0;
+  // Timers off (timers.ts): the clock keeps its full allowance and never
+  // runs, so nothing times out; `remaining` stays above 0 for the bodies.
+  const timersOff = useTimersOff();
   const [remaining, setRemaining] = useState(seconds);
   // The clock survives a pause (the feedback card) by remembering where it got
   // to, rather than restarting the beat's full allowance.
@@ -1699,7 +1703,7 @@ function BeatStage({
   useEffect(() => {
     // A timed beat must not burn its clock while the player is still reading
     // the situation. The timer starts when the question does.
-    if (!seconds || paused || locked || !revealed || clockHeld) return;
+    if (!seconds || timersOff || paused || locked || !revealed || clockHeld) return;
     const deadline = Date.now() + remainingRef.current * 1000;
     const tick = window.setInterval(() => {
       const left = Math.max(0, (deadline - Date.now()) / 1000);
@@ -1725,9 +1729,9 @@ function BeatStage({
       }
     }, 100);
     return () => window.clearInterval(tick);
-  }, [seconds, paused, locked, revealed, clockHeld, beat, onResolve]);
+  }, [seconds, timersOff, paused, locked, revealed, clockHeld, beat, onResolve]);
 
-  const timerActive = seconds > 0 && !paused && revealed;
+  const timerActive = seconds > 0 && !timersOff && !paused && revealed;
   useEffect(() => {
     onTimerActive?.(timerActive);
     return () => onTimerActive?.(false);
@@ -1763,7 +1767,7 @@ function BeatStage({
   const centered = !lowQuestion && (interactive || beat.kind === "review" || (beat.kind === "card" && (beat.system === true || actCard || (directed && beat.center === true))));
   return (
     <>
-      {seconds > 0 && !paused && revealed && !cinematicStage && <Clock remaining={remaining} total={seconds} accent={accent} />}
+      {timerActive && !cinematicStage && <Clock remaining={remaining} total={seconds} accent={accent} />}
       <div
         aria-hidden={hidden || undefined}
         className={`relative z-10 flex min-h-0 flex-1 justify-center px-3 pb-3 transition-opacity duration-300 sm:px-5 sm:pb-5 ${centered ? "items-center" : "items-end"}`}
@@ -1796,7 +1800,7 @@ function BeatStage({
           }`}
         >
           {/* v3: the clock drains along the question box's own top edge. */}
-          {cinematicStage && seconds > 0 && !paused && revealed && <DrainBar remaining={remaining} total={seconds} accent={accent} large={beat.kind === "rapid"} />}
+          {cinematicStage && timerActive && <DrainBar remaining={remaining} total={seconds} accent={accent} large={beat.kind === "rapid"} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
             <DialogueBox speaker={speaker} portrait={portrait} setup={stageable && revealed ? undefined : beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} annotate={annotate} onAdvance={() => setRevealed(true)}>
               <BossOverlay beat={beat} onResolve={onResolve} locked={locked} accent={accent} />
@@ -1837,17 +1841,17 @@ function BeatStage({
 
 /** The fallback Action Prompt per mechanic, in the sheet's own wording --
  *  used whenever a beat doesn't author its own `prompt`. */
-function DEFAULT_PROMPT(beat: Beat): string | undefined {
+function DEFAULT_PROMPT(beat: Beat, timersOff = false): string | undefined {
   switch (beat.kind) {
     case "choice":
       if (beat.layout === "blank" || beat.layout === "tiles") return "Drag or tap the right word into the space.";
       if (beat.layout === "document") return "Tap the line with the mistake.";
       if (beat.layout === "boss") return "Choose one.";
-      return "timer" in beat && beat.timer ? "Tap one before the timer runs out." : "Tap one.";
+      return "timer" in beat && beat.timer && !timersOff ? "Tap one before the timer runs out." : "Tap one.";
     case "match":
       return "Tap a quote, then tap its match.";
     case "rapid":
-      return beat.timer ? "Quick questions, one timer. Tap fast." : "Quick questions. Tap fast.";
+      return beat.timer && !timersOff ? "Quick questions, one timer. Tap fast." : "Quick questions. Tap fast.";
     case "slider":
       return "Slide to your answer, then confirm.";
     case "flags":
@@ -1895,6 +1899,7 @@ function BeatBody({
   // derive one from their mechanic, so no screen ships without one. Cards
   // and the review are exempt -- there the button label IS the prompt.
   const { directed } = usePresentation();
+  const timersOff = useTimersOff();
   // Directed levels (doc screens 11 and 27): no "Tap one." over plain
   // options and no second instruction over the document -- the question
   // already says what to do, once. The drag designs carry their own cues.
@@ -1910,7 +1915,7 @@ function BeatBody({
   const promptText =
     beat.kind === "card" || beat.kind === "review"
       ? undefined
-      : (beat.prompt ?? (silentPrompt ? undefined : DEFAULT_PROMPT(beat)));
+      : (beat.prompt ?? (silentPrompt ? undefined : DEFAULT_PROMPT(beat, timersOff)));
   const prompt = promptText && (
     <p className="text-[12px] font-bold tracking-[0.04em] whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>
       {promptText}
@@ -3046,6 +3051,7 @@ export function Hud({
               </button>
             </IconTip>
           )}
+          {level.beats.some((b) => "timer" in b && b.timer) && <TimersToggle />}
           <MusicToggle />
           <MuteToggle />
         </span>
@@ -3141,6 +3147,27 @@ function MusicToggle() {
         style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: musicMuted ? "var(--muted-foreground)" : "var(--foreground)" }}
       >
         <Music className="h-[16px] w-[16px]" aria-hidden />
+      </button>
+    </IconTip>
+  );
+}
+
+/** Timers on/off (timers.ts), shown only on levels that have a timed
+ *  question. Struck through when off, like the sound switch's muted icon. */
+function TimersToggle() {
+  const off = useTimersOff();
+  const label = off ? "Turn timers on" : "Turn timers off";
+  return (
+    <IconTip label={label}>
+      <button
+        type="button"
+        onClick={() => setTimersOff(!off)}
+        aria-pressed={off}
+        aria-label={label}
+        className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+        style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: off ? "var(--muted-foreground)" : "var(--foreground)" }}
+      >
+        {off ? <TimerOff className="h-[17px] w-[17px]" aria-hidden /> : <Timer className="h-[17px] w-[17px]" aria-hidden />}
       </button>
     </IconTip>
   );

@@ -54,6 +54,10 @@ Three things should not be assumed:
 - **M1, mostly.** Brand blue used as text now uses `--color-text-brand` (173 places), so it is `#59a0f8` in dark and unchanged in light. Counselor past days, faded rows and inactive tabs were raised. The Opportunities card scrim is darker. A re-scan of Counselor Meetings, Insights and Students shows 0 contrast fails.
 - **M11, partly.** The sim "decisions made" counter has `role="img"`.
 
+**Step 2 done on the same branch (Play):**
+- **S2.** A Timers switch sits in the sim HUD, beside Music and Sound, on levels that have a timed question. When it's off, no clock shows, nothing times out, and the prompt drops "before the timer runs out". The setting is kept per browser. Tested on IB L1-18: with timers on, the question times out at 45s; with them off, it waits.
+- **S4.** The card deck (Play hub on phones, Profile Top 3) has Previous/Next buttons, an "N of M" counter that is announced, and arrow keys. Only the front card is in the Tab order. When you use the arrow keys, focus follows to the new front card.
+
 ## Serious issues (fix before any claim)
 
 | # | WCAG SC | Issue | Where | Fix |
