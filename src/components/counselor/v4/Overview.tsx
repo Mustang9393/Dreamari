@@ -4,10 +4,11 @@
 // reminders hierarchy, open on the page (no widget boxes), v5's cleaner
 // conversation cards and review column, shorter copy, and all content kept.
 
-import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Clock } from "lucide-react";
+import { ArrowUpRight, Clock, Footprints } from "lucide-react";
+import { IconTip } from "@/components/app/IconTip";
 import { useCounselorFilters, type GradeFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
@@ -15,14 +16,13 @@ import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { attentionRank, attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { ConversationAvatar } from "./ConversationAvatar";
-import { AvatarStylePicker, useCounselorAvatarStyle } from "./avatarStyle";
-import { ReviewDeck } from "./ReviewDeck";
-import { ReminderCarousel } from "./ReminderCarousel";
+import { useCounselorAvatarStyle } from "./avatarStyle";
 import { reviewHref } from "./milestonesModel";
 import { CountUp, DreamyMoment } from "./overviewShared";
 import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
-import { Coverflow } from "../v5/Coverflow";
+import { RankedPosterCard } from "@/components/app/PosterCard";
+import "./insights2.css";
 import { MostPlayedSimulations } from "../v5/HomeExtras";
 import { useMeetings } from "../v5/Prepare";
 import { openCareer } from "../v5/ExploreSheets";
@@ -70,25 +70,13 @@ export function Overview(){
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
  const [avatarStyle]=useCounselorAvatarStyle();
- const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
+ const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;
  const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
- // Pending Reviews' "See all": every milestone with something waiting,
- // the fullest first.
- // every submission waiting, most in need first, for Pending Reviews' deck
- const waitingDocs=useMemo(()=>[...roster].sort(attentionRank).flatMap(st=>MILESTONE_KEYS.filter(m=>st.milestones[m]==="Pending Review").map(k=>({s:st,k}))),[roster]);
- // Pending Reviews mirrors a card's bands, so it needs the card picture's
- // height, which follows the cards' width; measured, not guessed.
- const railRef=useRef<HTMLDivElement>(null);
- const [picH,setPicH]=useState<number|null>(null);
- useLayoutEffect(()=>{
-  const pic=railRef.current?.querySelector<HTMLElement>(".v4-conversation-portrait");
-  if(!pic) return;
-  const ro=new ResizeObserver(()=>setPicH(Math.round(pic.getBoundingClientRect().height)));
-  ro.observe(pic);
-  return ()=>ro.disconnect();
- },[]);
+ const [showAllPeople,setShowAllPeople]=useState(false);
+ // each milestone with submissions waiting, the fullest first, with who
+ const pendingByMilestone=useMemo(()=>MILESTONE_KEYS.map(key=>({key,ids:[...roster].sort(attentionRank).filter(st=>st.milestones[key]==="Pending Review").map(st=>st.id)})).filter(r=>r.ids.length).sort((x,y)=>y.ids.length-x.ids.length),[roster]);
 
  const saved=useMemo(()=>schoolSnapshot(roster.map(toV5)).topSaved.slice(0,10),[roster]);
  // Dreamy's briefing (9 Oct 2026, Chandu: "incorporate dreamy more in the
@@ -150,7 +138,10 @@ export function Overview(){
       one at a time, and the reminders beside them already rotate. */}
    <div className="v4-home-widgets">
     <NextMeeting roster={reviewed} />
-    <ReminderCarousel items={brief}/>
+    {/* the reminders as a short list, not a rotating carousel (20 Oct
+       2026, Chandu: "change the carousel to a row type everywhere that
+       appears"): all of them at once, one line each */}
+    <section className="v4-reminder-stack v4-reminder-list" aria-label="Reminders">{brief.map(b=><button key={b.title} type="button" className="v4-reminder-line dm-quiet" onClick={b.go}><strong>{b.title}</strong><small>{b.detail}</small><ArrowUpRight size={13} aria-hidden/></button>)}</section>
     <section className="v4-pulse-widget" aria-label="Caseload pulse">
      <button type="button" onClick={()=>status("At Risk")} className={`v4-pulse-lead dm-quiet ${atRisk?"is-risk":""}`}><strong><CountUp value={atRisk}/></strong><span>{atRisk===1?"student at risk":"students at risk"}<ArrowUpRight size={14} aria-hidden/></span></button>
      <div className="v4-pulse-links">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden className="v4-pulse-dot">·</span>}<button type="button" onClick={l.action} className="dm-quiet" aria-label={l.label}><b>{l.value}</b> {l.words}</button></span>)}</div>
@@ -165,52 +156,45 @@ export function Overview(){
      promising to do") */}
   <CoverageBanner />
 
-  <div className="v4-daily-grid v4-home-work">
-   <section className="v4-focus-sheet">
+  {/* Two plain lists (20 Oct 2026, Chandu: "Lets not do the student cards
+     + review stack. Do something much simpler"). The portrait cards and
+     the stacked-document carousel are gone; the same facts read as rows.
+     Left: who needs a conversation, most in need first, one line each
+     (face, name, grade and the reason, the status word, Book, and a quiet
+     walk-in icon), five open and the rest a click away. Right: the review
+     count as the one figure, how many are new, then each milestone with
+     submissions waiting, the fullest first, each opening its queue. */}
+  <div className="v4-home-lists">
+   <section className="v4-home-list" aria-label="My next conversations">
     <header className="v4-section-head"><h2>My Next Conversations</h2><Jump onClick={()=>go("students")}>View students</Jump></header>
-    <div className="v4-conversation-meta"><span>{attention+atRisk} need support · By milestone priority</span>{/* thirteen styles to compare (two house styles and eleven DiceBear
-       ones), so the two-button switch became a dropdown (9 Oct 2026) */}<AvatarStylePicker quiet/></div>
-    <div ref={railRef} className="v4-conversation-rail dm-scroll" role="group" aria-label="Students needing a conversation">{priority.length?priority.map(s=><article key={s.id} className="v4-conversation-card">
-     <button type="button" className="v4-conversation-profile dm-quiet" onClick={()=>openStudent(s.id)}><span className="v4-conversation-portrait" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={160}/></span><span className="v4-conversation-copy"><strong>{s.name}</strong><span className="v4-conversation-grade">Grade {s.grade}<span className={`v4-conversation-status ${s.status==="At Risk"?"is-risk":""}`}>{s.status}</span></span><span className="v4-conversation-reason">{attentionReason(s)}</span></span></button>
-     <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
-    </article>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
+    {priority.length?<>
+    <ul className="v4-home-rows">{(showAllPeople?priority:priority.slice(0,5)).map(s=><li key={s.id} className="v4-home-row">
+     <button type="button" className="v4-home-row-who dm-quiet" onClick={()=>openStudent(s.id)}>
+      <span className="v4-home-row-face" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={40}/></span>
+      <span className="v4-home-row-copy"><strong>{s.name}</strong><span>Grade {s.grade} · {attentionReason(s)}</span></span>
+     </button>
+     <span className={`v4-home-row-status ${s.status==="At Risk"?"is-risk":"is-warn"}`}>{s.status}</span>
+     <span className="v4-home-row-actions">
+      <IconTip label={`Log a walk-in with ${s.name.split(" ")[0]}`}><button type="button" className="v4-home-row-icon dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}><Footprints size={15} aria-hidden/></button></IconTip>
+      <button type="button" className="v4-home-row-book dm-quiet" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button>
+     </span>
+    </li>)}</ul>
+    {priority.length>5&&<button type="button" className="v4-home-more dm-quiet" onClick={()=>setShowAllPeople(v=>!v)}>{showAllPeople?"Show fewer":`Show all ${priority.length}`}</button>}
+    </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}
    </section>
-   {/* (superseded 10 Oct: see the three bands below) Pending Reviews beside the student row: an overview, not a list
-      (10 Oct 2026, Chandu: "Just show a big stat number and then some other
-      details as an overview, not the full student list", then "please
-      avoid the bar charts too"). The number starts on the cards' top edge;
-      under it, how many are new, and a "See all" disclosure with each
-      milestone's queue. The group is centred in the card row's height
-      (Chandu: "just show 13 submissions waiting, 3 new since yesterday,
-      have a see all accordion or something, centre it in its height,
-      leaving the title and CTA where they are"). One number on the column:
-      the bars, then number tiles, were too many figures competing. "Review
-      all" in the heading row opens everything. */}
-   <section className="v4-review-column" aria-label="Pending reviews">
-    <header className="v4-section-head"><h2>Pending Reviews</h2>{pendingCount?<Jump onClick={()=>go("review-queue")}>Review all</Jump>:null}</header>
-    {/* the meta row stays (it is the row that lines up with "18 need
-       support" opposite) but says nothing: "Across 7 milestones" repeated
-       See all (10 Oct 2026, Chandu: "too cluttered, so much text to read") */}
-    <div className="v4-conversation-meta v4-review-meta" aria-hidden><span /></div>
-    {/* Three bands, a card's own (10 Oct 2026, Chandu: "the middle
-       alignment still feels off ... anything else that won't introduce
-       clutter but solves the problem?"). Centring matched nothing in the
-       cards beside it. Now the column has their bands: the picture band
-       (the cards' picture height, measured) holds a small stack of the
-       documents waiting; the count starts on the
-       names' line with "new since yesterday" on the grade line; and See
-       all sits on the buttons' line, its list opening upward over the
-       column so nothing moves. */}
-    <div className="v4-review-body" style={picH?{["--review-pic-h" as string]:`${picH}px`}:undefined}>
+   <section className="v4-home-list" aria-label="Pending reviews">
+    <header className="v4-section-head"><h2>Pending Reviews</h2></header>
     {pendingCount?<>
-     {/* a carousel of the submissions waiting, on the cards' three bands
-        (10 Oct 2026, Chandu: "we can have 1 additional caption or detail
-        under the doc and then 13 waiting, and we can have controls to move
-        through them and make it a carousel like the reminders"); the
-        reasoning for each part is in ReviewDeck.tsx */}
-     <ReviewDeck docs={waitingDocs} total={pendingCount} onOpen={(d)=>router.push(reviewHref(d.k,[d.s.id]))}/>
+     <p className="v4-home-review-fig"><strong><CountUp value={pendingCount}/></strong><span>waiting{newToday?` · ${newToday} new since yesterday`:""}</span></p>
+     <ul className="v4-home-rows">{pendingByMilestone.slice(0,5).map(r=><li key={r.key}>
+      <button type="button" className="v4-home-row v4-home-row-link dm-quiet" onClick={()=>router.push(reviewHref(r.key,r.ids))}>
+       <span className="v4-home-row-copy"><strong>{r.key}</strong></span>
+       <span className="v4-home-row-count">{r.ids.length}</span>
+       <ArrowUpRight size={14} aria-hidden className="v4-home-row-go"/>
+      </button>
+     </li>)}</ul>
+     {pendingByMilestone.length>5&&<button type="button" className="v4-home-more dm-quiet" onClick={()=>go("review-queue")}>All {pendingByMilestone.length} milestones</button>}
     </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
-    </div>
    </section>
   </div>
 
@@ -224,7 +208,10 @@ export function Overview(){
      "Keep the V4 carousel design displaying the top 10 most-saved careers"). */}
   <section className="v4-today-rail" aria-label="What my students are saving">
    <header className="v4-section-head"><div><h2>What My Students Are Saving</h2></div><Jump onClick={()=>go("explore")}>Explore</Jump></header>
-   <Coverflow mode="cover" label="Most saved careers" items={saved.map(({career,students:n},k)=>({key:career.id,rank:k+1,title:career.title,world:career.world,photo:career.photo,focus:career.photoFocus,stat:{value:String(n),label:n===1?"Student":"Students"},onOpen:()=>openCareer({title:career.title,world:career.world,photo:career.photo},saved.map(x=>({title:x.career.title,world:x.career.world,photo:x.career.photo})))}))}/>
+   {/* a row, like Explore's and Insights' shelves, not a coverflow
+      (20 Oct 2026, Chandu: "change the carousel to a row type everywhere
+      that appears"); the same ten careers, rank and student count */}
+   <div className="v4-cc-rail flow-scroll" role="list" aria-label="Most saved careers">{saved.map(({career,students:n},k)=><div role="listitem" key={career.id} className={`v4-iv-poster ${k+1>=10?"is-two":""}`}><RankedPosterCard career={career} rank={k+1} chip={`${n} saved`} onClick={()=>openCareer({title:career.title,world:career.world,photo:career.photo},saved.map(x=>({title:x.career.title,world:x.career.world,photo:x.career.photo})))}/></div>)}</div>
   </section>
   {/* v5's simulation cards in place of Most Watched (Maisha, 9 Oct 2026:
      "Replace V4's 'Most Watched by My Students' section with V5's 'Most

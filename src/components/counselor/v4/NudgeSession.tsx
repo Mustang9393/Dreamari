@@ -26,7 +26,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, Check, ChevronLeft, ChevronRight, Send, X } from "lucide-react";
-import { IconTip } from "@/components/app/IconTip";
+import { IconTip, Tip } from "@/components/app/IconTip";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { LocalBurst } from "@/components/build/ui";
 import { playFanfare, playSelect } from "@/components/play/sound";
@@ -63,6 +63,9 @@ export function NudgeSession({ rows, kind }: { rows: Row[]; kind: "progress" | "
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [reviewing, setReviewing] = useState(false);
   const [allBurst, setAllBurst] = useState(0);
+  // the first 12 cards, then "Show all" (20 Oct 2026 declutter: 34 cards
+  // open at once); sorted most in need first, so the top 12 are the work
+  const [showAll, setShowAll] = useState(false);
 
   const isToday = (r?: Reminder) => !!r && new Date(r.at).toDateString() === today;
   const nudgedToday = (g: Group) => g.ks.every((k) => isToday(lastReminder(reminders, g.s.id, k)));
@@ -123,7 +126,6 @@ export function NudgeSession({ rows, kind }: { rows: Row[]; kind: "progress" | "
         <LocalBurst nonce={allBurst} />
         <div className="v4-ns-hero-copy">
           <h2 className="v4-ns-title">{left === 0 ? "Everyone has a nudge" : missed ? "Help them catch up" : "Give them a nudge to send"}</h2>
-          <p className="v4-ns-sub">{left === 0 ? "Dreamy will tell you who sends next." : "Dreamy drafts each note. You read it before it sends."}</p>
         </div>
         <div className="v4-ns-progress" role="status" aria-live="polite">
           <span><b>{done} of {sorted.length}</b> nudged today</span>
@@ -133,10 +135,9 @@ export function NudgeSession({ rows, kind }: { rows: Row[]; kind: "progress" | "
       </section>
 
       <ul className="v4-ns-grid">
-        {sorted.map((g) => {
+        {(showAll ? sorted : sorted.slice(0, 12)).map((g) => {
           const on = nudgedToday(g);
           const latest = g.ks.flatMap((k) => { const r = lastReminder(reminders, g.s.id, k); return r ? [r] : []; }).sort((a, b) => (a.at < b.at ? 1 : -1))[0];
-          const shown = g.ks.slice(0, 3);
           return (
             <li key={g.s.id} className={`v4-ns-card ${on ? "is-done" : ""}`}>
               <LocalBurst nonce={bursts[g.s.id] ?? 0} />
@@ -160,12 +161,11 @@ export function NudgeSession({ rows, kind }: { rows: Row[]; kind: "progress" | "
                   </span>
                 </div>
               ) : (<>
-              <span className="v4-ns-chips">
-                {shown.map((k) => <span key={k} className={`v4-ns-chip ${missed ? "is-missed" : ""}`}>{k}</span>)}
-                {g.ks.length > shown.length && <span className="v4-ns-chip is-more">+{g.ks.length - shown.length}</span>}
-              </span>
+              {/* the drafts as one quiet line, not a chip each; the whole
+                 list on hover when it runs long */}
+              <Tip label={g.ks.join(", ")} className="min-w-0"><span className="v4-ns-drafts">{g.ks.join(", ")}</span></Tip>
               <span className="v4-ns-foot">
-                <span className="v4-ns-when">{on ? <><Check className="h-[14px] w-[14px]" aria-hidden />Nudged today</> : latest ? `Last nudge ${reminderDate(latest)}` : "No nudge yet"}</span>
+                <span className="v4-ns-when">{on ? <><Check className="h-[14px] w-[14px]" aria-hidden />Nudged today</> : latest ? `Last nudge ${reminderDate(latest)}` : null}</span>
                 {on
                   ? <button type="button" onClick={() => setComposing(g.s.id)} className="v4-ns-again dm-link">Nudge again</button>
                   : <button type="button" onClick={() => setComposing(g.s.id)} className="v4-ns-btn dm-quiet"><Bell className="h-[14px] w-[14px]" aria-hidden />Nudge</button>}
@@ -175,6 +175,11 @@ export function NudgeSession({ rows, kind }: { rows: Row[]; kind: "progress" | "
           );
         })}
       </ul>
+      {!showAll && sorted.length > 12 && (
+        <button type="button" onClick={() => setShowAll(true)} className="dm-quiet mx-auto -mt-[var(--space-4)] flex h-10 cursor-pointer items-center gap-[6px] rounded-full border px-[18px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)" }}>
+          Show all {sorted.length}
+        </button>
+      )}
       {reviewing && <BulkReview groups={sorted.filter((g) => !nudgedToday(g))} kind={kind} onCancel={() => setReviewing(false)} onSend={sendAll} />}
     </div>
   );

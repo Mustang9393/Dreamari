@@ -138,6 +138,7 @@ export function StudentsRoster() {
     });
   }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, counselorFilter, showCounselor, stepFilter, sortKey, sortDir]);
 
+  const gradeTotal = gradeFilter === "All Grades" ? reviewed.length : reviewed.filter((s) => s.grade === gradeFilter).length;
   // One way to move through the list: it grows in place (direct feedback:
   // the bounded, self-scrolling box plus Previous/Next pages "does not read
   // like a scrollable list... make it intuitive").
@@ -185,8 +186,11 @@ export function StudentsRoster() {
   return (
     <div className="v4-page v4-roster flex flex-col gap-[var(--space-4)]">
       <div className="v4-roster-toolbar flex flex-wrap items-center justify-between gap-[10px]">
+        {/* the count only when a filter narrows the grade picker's own
+           count (20 Oct 2026 declutter: "121 students" here repeated
+           "All grades · 121" in the heading) */}
         <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · my caseload, ${myCounselor(account).range}` : ""}
+          {roster.length !== gradeTotal ? `${roster.length} of ${gradeTotal} student${gradeTotal === 1 ? "" : "s"}` : ""}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? `${roster.length !== gradeTotal ? " · " : ""}my caseload, ${myCounselor(account).range}` : ""}
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
           <SubTabs ariaLabel="Directory display" value={display} onChange={setDisplay} options={[{ key: "list", label: "List" }, { key: "cards", label: "Cards" }]} />

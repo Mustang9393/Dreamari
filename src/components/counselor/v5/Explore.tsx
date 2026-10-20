@@ -105,7 +105,7 @@ export function V5Explore({ embedded = false, afterCareers }: { embedded?: boole
           </>
         )}
       </header>
-      {tab === "careers" && <Careers key={path} path={path} onOpen={openCareer} after={afterCareers} />}
+      {tab === "careers" && <Careers key={path} path={path} onOpen={openCareer} after={afterCareers} compact={embedded} />}
       {tab === "schools" && <Schools key={path} path={path} />}
       {tab === "pay" && <Pay path={path} onOpen={openCareer} />}
     </div>
@@ -127,10 +127,13 @@ type OpenCareer = (c: CatalogCareer, row?: CatalogCareer[]) => void;
 
 // Careers: world pills, then that world's curated rows (or the whole
 // catalog's with nothing picked), then every career in it.
-function Careers({ path, onOpen, after }: { path: Pathway; onOpen: OpenCareer; /** v4's extra section under the curated rows (opt-in) */ after?: React.ReactNode }) {
+function Careers({ path, onOpen, after, compact = false }: { path: Pathway; onOpen: OpenCareer; /** v4's extra section under the curated rows (opt-in) */ after?: React.ReactNode; /** v4: fewer shelves and grid rows open at once (see CuratedCareerRows) */ compact?: boolean }) {
+  // v4 opens the grid two rows deep, not six (20 Oct 2026 declutter);
+  // "Show more" grows it the same way
+  const page = compact ? 12 : PAGE;
   const [query, setQuery] = useState("");
   const [world, setWorld] = useState("All");
-  const [shown, setShown] = useState(PAGE);
+  const [shown, setShown] = useState(page);
   const list = useMemo(() => {
     const q = query.trim().toLowerCase();
     const subjectWorlds = SUBJECTS[q];
@@ -147,12 +150,12 @@ function Careers({ path, onOpen, after }: { path: Pathway; onOpen: OpenCareer; /
     // and a wide gap between the shelves; v5 renders exactly as before.
     <section aria-label="Careers" className="v4-sections flex flex-col gap-[var(--space-6)]">
       <div className="v4-section-lead flex flex-col gap-[var(--space-6)]">
-        <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A career, a world, or a subject like Math" />
-        <WorldPills value={world} trades={path === "trades"} onChange={(w) => { setWorld(w); setShown(PAGE); }} />
+        <SearchField value={query} onChange={(v) => { setQuery(v); setShown(page); }} placeholder="A career, a world, or a subject like Math" />
+        <WorldPills value={world} trades={path === "trades"} onChange={(w) => { setWorld(w); setShown(page); }} />
       </div>
 
       {browsing && world === "All" && <ShortlistCareers onOpen={onOpen} />}
-      {browsing && <CuratedCareerRows key={world} world={world} onOpen={onOpen} trades={path === "trades"} />}
+      {browsing && <CuratedCareerRows key={world} world={world} onOpen={onOpen} trades={path === "trades"} fold={compact ? 3 : undefined} />}
       {browsing && after}
 
       <div className="flex flex-col gap-[var(--space-4)]">
@@ -166,7 +169,7 @@ function Careers({ path, onOpen, after }: { path: Pathway; onOpen: OpenCareer; /
             <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fill,minmax(176px,1fr))] sm:gap-[var(--space-5)]">
               {list.slice(0, shown).map((c) => <PosterCard key={c.title} fill career={c} onClick={() => onOpen(c, list)} />)}
             </div>
-            {list.length > shown && <MoreButton left={list.length - shown} onClick={() => setShown((n) => n + PAGE)} />}
+            {list.length > shown && <MoreButton left={list.length - shown} onClick={() => setShown((n) => n + page)} />}
           </>
         )}
       </div>
@@ -217,8 +220,9 @@ type CareerRow = { title: string; list: CatalogCareer[]; chip: (c: CatalogCareer
  *  trend and each card carries that trend's figure. Ranked rows (the
  *  Top 10 numerals) alternate with poster rows so the page keeps a rhythm.
  *  Shared with v6. */
-export function CuratedCareerRows({ onOpen, trades = false, world = "All" }: { onOpen: OpenCareer; trades?: boolean; world?: string }) {
+export function CuratedCareerRows({ onOpen, trades = false, world = "All", fold }: { onOpen: OpenCareer; trades?: boolean; world?: string; /** v4 only: open this many shelves, the rest behind "More lists" */ fold?: number }) {
   const savers = useSavers();
+  const [more, setMore] = useState(false);
   const rows = useMemo<CareerRow[]>(() => {
     const inWorld = (c: CatalogCareer) => (world === "All" || c.world === world) && (!trades || isTradeCareer(c));
     const sig = payRows(HOME_STATE, trades).filter((r) => world === "All" || r.career.world === world);
@@ -253,15 +257,31 @@ export function CuratedCareerRows({ onOpen, trades = false, world = "All" }: { o
       { title: "Public Service", list: keep(BROWSE_PUBLIC_SERVICE), chip: pays },
     ];
   }, [savers, trades, world]);
+  // v4 (20 Oct 2026 declutter, Chandu: "too cluttered, messy, and A LOT in
+  // the user's face"): seven poster shelves open at once was most of the
+  // page. The first few stay open; the rest are one "More lists" away,
+  // nothing removed. What students are saving leads the folded set, since
+  // Home and Insights both show it already. v5 and v6 pass no fold.
+  const ready = rows.filter((r) => r.list.length >= 3);
+  const saving = ready.find((r) => r.title === "Your Students Are Saving");
+  const rest = ready.filter((r) => r !== saving);
+  const open = fold ? rest.slice(0, fold) : ready;
+  const folded = fold ? [...(saving ? [saving] : []), ...rest.slice(fold)] : [];
+  const visible = more ? [...open, ...folded] : open;
   return (
     <div className="v4-sections flex flex-col gap-[var(--space-8)]">
-      {rows.filter((r) => r.list.length >= 3).map((r) => (
+      {visible.map((r) => (
         <Row key={r.title} title={r.title}>
           {r.list.map((c, i) => r.ranked
             ? <RankedPosterCard key={c.title} career={c} rank={i + 1} chip={r.chip(c)} onClick={() => onOpen(c, r.list)} />
             : <PosterCard key={c.title} career={{ ...c, salary: r.chip(c) }} onClick={() => onOpen(c, r.list)} />)}
         </Row>
       ))}
+      {fold && !more && folded.length > 0 && (
+        <button type="button" onClick={() => setMore(true)} className="dm-quiet mx-auto flex h-10 cursor-pointer items-center gap-[6px] rounded-full border px-[18px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)" }}>
+          More lists <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {folded.length}</span>
+        </button>
+      )}
     </div>
   );
 }

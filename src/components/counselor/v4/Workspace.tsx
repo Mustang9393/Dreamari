@@ -36,10 +36,6 @@ export type WorkspaceArea = { label: string; views: CounselorView[] };
 // Start reviewing, instead of on a line of its own (8 Oct 2026: "too
 // cluttered in tablet mode").
 const FiltersSlot = createContext<React.ReactNode>(null);
-// The screens that show student faces carry the avatar style picker in their
-// heading (10 Oct 2026, Chandu: "make sure the dropdown is there for every
-// screen that has them"); Home has its own beside the conversation cards.
-const AVATAR_VIEWS = new Set<string>(["students", "milestones", "progress", "review-queue", "meetings", "connect", "productivity", "engagement", "readiness", "insights"]);
 export const useTodayFilters = () => useContext(FiltersSlot);
 export const LEADER_AREAS: Record<"School Leader" | "District Leader", WorkspaceArea[]> = {
   "School Leader": [
@@ -86,7 +82,8 @@ const purposes: Partial<Record<CounselorView,string>> = {
   readiness:"Readiness, gaps, and students needing support.",
   productivity:"Generate high-quality first drafts for routine counseling tasks. Review, edit, and approve before use.",
   insights:"Student interests. Ideas for speakers, visits, and programs.",
-  explore:"What's in demand in my state, what's rising, and what my students love, so I can answer them on the spot.",
+  // shortened to one line (20 Oct 2026 declutter); same three things
+  explore:"What's in demand, what's rising, and what my students love.",
   engagement:"Student activity and who to reach out to.",
   impact:"The progress and impact of my work.",
   "school-impact":"The difference our counseling team is making, ready to share with leadership.",
@@ -142,9 +139,12 @@ export function Workspace({active,items,children,search,filters,account,org,them
    <div className="v4-nav-context"><nav className="v4-secondary-nav dm-scroll" aria-label="Tools in this area">{area && area.items.length>1?area.items.map(i=><Link key={i.view} href={`/counselor?view=${i.view}&v=4`} aria-current={active===i.view?"page":undefined}>{names[i.view]??i.label}</Link>):org?<span className="v4-org">{org}</span>:null}</nav><div className="v4-search">{search}</div></div>
   </header>
   <main id="main" className={`v4-main v4-view-${active}`}>
-   {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div><h1>{title}</h1>{purposes[active]&&<p className="v4-page-purpose">{purposes[active]}</p>}</div><div className="v4-page-controls">{AVATAR_VIEWS.has(active)&&<AvatarStylePicker/>}{filters}</div></div>}
+   {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div><h1>{title}</h1>{purposes[active]&&<p className="v4-page-purpose">{purposes[active]}</p>}</div><div className="v4-page-controls">{filters}</div></div>}
    <div className="v4-content"><AvatarStyleProvider><FiltersSlot.Provider value={active==="overview"?filters:null}>{children}</FiltersSlot.Provider></AvatarStyleProvider></div>
-   <footer className="v4-workspace-footer"><span>Dreamari</span></footer>
+   {/* the avatar style, off the main UI until the faces are settled
+      (20 Oct 2026, Chandu: "let the picker be there but somewhere off the
+      main ui. and very subtle"): one small line in the footer, every page */}
+   <footer className="v4-workspace-footer"><span>Dreamari</span><span className="v4-footer-avatar"><span aria-hidden>Faces</span><AvatarStylePicker subtle/></span></footer>
   </main>
  </div>;
 }

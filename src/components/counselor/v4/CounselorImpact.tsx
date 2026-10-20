@@ -394,6 +394,13 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
   const [report, setReport] = useState<false | "impact" | "principal">(false);
   const [drill, setDrill] = useState<StudentsDrill | null>(null);
   const [goalLit, setGoalLit] = useState<string | null>(null);
+  // ASCA Alignment and District Goals start folded (20 Oct 2026 declutter,
+  // Chandu: "A LOT in the user's face"). Their figures are the hero's and
+  // Key Wins' own (85% on track showed four times on this page, 79% plans
+  // three); folded, each still says its verdict in one line, and both stay
+  // whole in the exported reports.
+  const [ascaOpen, setAscaOpen] = useState(false);
+  const [goalsOpen, setGoalsOpen] = useState(false);
   // The Insights grade and group filters scope the live period (9 Oct 2026);
   // the fixed history periods are whole-caseload figures.
   const scope = useInsightsScope();
@@ -457,7 +464,7 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
       </div>
       {/* 2. Student Progress: the hero, unchanged (it matches her image). */}
       <section className="v4-impact-cover" aria-label="Student Progress">
-        <div className="v4-impact-story"><span className="v4-overline">Student Progress</span><h2>Moving Toward<br/><em>What’s Next</em></h2><p>{v.onTrack} of {live && scope.scopeLabel ? `these ${v.caseload}` : `${our} ${v.caseload}`} students are on track.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
+        <div className="v4-impact-story"><span className="v4-overline">Student Progress</span><h2>Moving Toward<br/><em>What’s Next</em></h2><p>{v.onTrack} of {live && scope.scopeLabel ? `these ${v.caseload}` : `${our} ${v.caseload}`} students are on track{v.onTrackPct !== SCHOOL_AVG_ON_TRACK ? `, ${Math.abs(v.onTrackPct - SCHOOL_AVG_ON_TRACK)} points ${v.onTrackPct > SCHOOL_AVG_ON_TRACK ? "above" : "below"} the school's ${SCHOOL_AVG_ON_TRACK}%` : ", the same as the school"}.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
         {/* One dot per student, the on-track ones lit clockwise (the page's one glow). */}
         <IconTip label={live ? `See the ${notOnTrack.length} students not on track` : "See the breakdown"} className="justify-self-center w-full max-w-[300px] justify-center">
         <button className="iv-orbit dm-quiet" onClick={() => open(drills.onTrack())} aria-label={`On-track rate ${v.onTrackPct} percent, ${v.onTrack} of ${v.caseload} students. Open details`}>
@@ -475,36 +482,39 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
       <AscaAlignment
         academic={v.asca.academic.map((a) => ({ ...a, tip: ascaTip(forAsca[a.key]()), onOpen: () => open(forAsca[a.key]()) }))}
         career={v.asca.career.map((a) => ({ ...a, tip: ascaTip(forAsca[a.key]()), onOpen: () => open(forAsca[a.key]()) }))}
-        onAbout={() => open(drills.asca())} />
+        onAbout={() => open(drills.asca())} fold={{ open: ascaOpen, onToggle: () => setAscaOpen((o) => !o) }} />
 
-      {/* 4. Key Wins: a bento of six cards, each a hero figure, a
-         micro-chart matched to the win and its sentence cut short. Every
-         card opens the students or the detail behind it. */}
+      {/* 4. Key Wins as a ledger (20 Oct 2026, Chandu on the bento: "The key
+         win cards: i dont know what to do please help"). Six cards, each with
+         its own kind of micro-chart and a sentence cut short, read as six
+         different widgets. Now one row per win: the figure, then her whole
+         sentence, then the arrow to its students; two columns, so it reads
+         like a report. The on-track win was the hero's 85% again, so its one
+         new fact (points above the school) joined the hero's line above and
+         the row left; the other five are her sentences word for word. */}
       <section className={`${FLAT_CARD_CLASS} flex flex-col gap-[var(--space-4)]`} style={FLAT_CARD} aria-label="Key Wins">
         <SectionTitle title="Key Wins" info="What moved this period. Select a win to see the students behind it." />
-        <div className="iv-wins">
-          {v.wins.map((w) => {
-            const card = winCard(w.key, v);
-            return (
-              <button key={w.key} type="button" onClick={() => open(forWin[w.key]())} className={`iv-win iv-win-${w.key} dm-quiet group`} aria-label={`${w.text} Show details`}>
-                <span className="iv-win-top"><span className="iv-win-kicker">{card.kicker}</span><ChevronRight size={14} aria-hidden className="transition-transform group-hover:translate-x-[3px]" /></span>
-                <span className="iv-win-viz">{card.viz}</span>
-                <strong className="iv-win-hero">{card.hero}</strong>
-                <span className="iv-win-caption">{card.caption}</span>
+        <ul className="iv-ledger">
+          {v.wins.filter((w) => w.key !== "onTrack").map((w) => (
+            <li key={w.key}>
+              <button type="button" onClick={() => open(forWin[w.key]())} className="iv-ledger-row dm-quiet group" aria-label={`${w.text} Show details`}>
+                <strong className="iv-ledger-fig">{winCard(w.key, v).hero}</strong>
+                <span className="iv-ledger-text">{w.text}</span>
+                <ChevronRight size={14} aria-hidden className="iv-ledger-go transition-transform group-hover:translate-x-[3px]" />
               </button>
-            );
-          })}
-        </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* 5. District Goals & Reporting: result, target, status; a row opens
          its students. Compact cards on phones (insights2.css). */}
       <section className={`${FLAT_CARD_CLASS} flex flex-col gap-[var(--space-4)]`} style={FLAT_CARD} aria-label="District Goals and Reporting">
         <div className="flex flex-wrap items-center justify-between gap-[10px]">
-          <SectionTitle title="District Goals & Reporting" info="Each district measure against its target. Met is a threshold check for this period, not a change over time. In the rose, each petal is a result as a share of its target; the ring is 100%." unit={`${v.goals.filter((g) => g.met).length} of ${v.goals.length} met`} />
-          <button type="button" onClick={() => setReport("principal")} className="v4-r2-link">View full report<ChevronRight size={14} aria-hidden /></button>
+          <SectionTitle title="District Goals & Reporting" info="Each district measure against its target. Met is a threshold check for this period, not a change over time. In the rose, each petal is a result as a share of its target; the ring is 100%." unit={`${v.goals.filter((g) => g.met).length} of ${v.goals.length} met`}  fold={{ open: goalsOpen, onToggle: () => setGoalsOpen((o) => !o), id: "iv-goals-body" }} />
+          {goalsOpen && <button type="button" onClick={() => setReport("principal")} className="v4-r2-link">View full report<ChevronRight size={14} aria-hidden /></button>}
         </div>
-        <div className="iv-goals-layout">
+        {goalsOpen && <div id="iv-goals-body" className="iv-goals-layout">
         <figure className="iv-rose-wrap">
           <GoalRose lit={goalLit} onLit={setGoalLit} onOpen={(k) => open(forGoal[k as GoalKey]())}
             goals={v.goals.map((g) => ({ key: g.key, short: g.metric, met: g.met, value: g.key === "turnaround" ? `${g.value.toFixed(1)}d` : g.result, ratio: g.key === "turnaround" ? g.goal / Math.max(0.1, g.value) : g.value / Math.max(1, g.goal) }))} />
@@ -523,7 +533,7 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
             </button>
           ))}
         </div>
-        </div>
+        </div>}
       </section>
 
       {/* 6. Use of Time: the counselor's week, so the live period only. */}

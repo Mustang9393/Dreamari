@@ -30,7 +30,7 @@
 // seeded until semester snapshots are stored.
 
 import { useState } from "react";
-import { ChevronRight, Clock, Info } from "lucide-react";
+import { ChevronDown, ChevronRight, Clock, Info } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { ASCA_TARGET_PCT, hoursLabel, type TimeEntry, type TimeSummary } from "@/lib/counselorTimeLog";
 import { openLog } from "../v5/LogSheet";
@@ -68,10 +68,12 @@ const CARD = "v4-surface rounded-[var(--radius-md)] border p-[var(--space-4)] sm
 const CARD_STYLE = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
 
 /** A section title with its (i). */
-export function SectionTitle({ title, info, unit }: { title: string; info: string; unit?: string }) {
+export function SectionTitle({ title, info, unit, fold }: { title: string; info: string; unit?: string; /** a folding section: the title opens and closes it */ fold?: { open: boolean; onToggle: () => void; id: string } }) {
   return (
     <h2 className="v4-r2-title" style={{ fontSize: 14, fontWeight: 600 }}>
-      {title}
+      {fold
+        ? <button type="button" aria-expanded={fold.open} aria-controls={fold.id} onClick={fold.onToggle} className="dm-quiet inline-flex cursor-pointer items-center gap-[6px]">{title}<ChevronDown size={15} aria-hidden className="transition-transform" style={{ transform: fold.open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} /></button>
+        : title}
       <IconTip label={info}><button type="button" aria-label={`About ${title}`} className="v4-r2-info dm-quiet"><Info size={14} aria-hidden /></button></IconTip>
       {unit && <span className="ml-[4px] text-[12px] font-normal" style={{ color: "var(--muted-foreground)" }}>{unit}</span>}
     </h2>
@@ -135,7 +137,12 @@ export type AscaItem = { key: string; short: string; tip: string; pct: number; l
 
 /** ASCA Alignment: Academic and Career, two rings each, the change since
  *  last semester under each. */
-export function AscaAlignment({ academic, career, onAbout }: { academic: AscaItem[]; career: AscaItem[]; onAbout: () => void }) {
+export function AscaAlignment({ academic, career, onAbout, fold }: { academic: AscaItem[]; career: AscaItem[]; onAbout: () => void; fold?: { open: boolean; onToggle: () => void } }) {
+  const open = !fold || fold.open;
+  // folded, the section is one line: how far the four measures moved
+  const deltas = [...academic, ...career].map((it) => it.delta);
+  const lo_ = Math.min(...deltas), hi_ = Math.max(...deltas);
+  const moved = lo_ === hi_ ? `${lo_ >= 0 ? "Up" : "Down"} ${Math.abs(lo_)} points since last semester` : lo_ >= 0 ? `Up ${lo_} to ${hi_} points since last semester` : `${lo_} to +${hi_} points since last semester`;
   // One shared scale for both groups, cropped to the decade below the
   // lowest value (and said so under the charts).
   const all = [...academic, ...career].flatMap((it) => [it.pct, it.pct - it.delta]);
@@ -147,13 +154,14 @@ export function AscaAlignment({ academic, career, onAbout }: { academic: AscaIte
   return (
     <section className={`${CARD} flex flex-col gap-[var(--space-5)]`} style={CARD_STYLE}>
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
-        <SectionTitle title="ASCA Alignment" info="How the caseload lines up with the ASCA National Model's academic and career domains. The change is since last semester." />
-        <button type="button" onClick={onAbout} className="v4-r2-link">About these metrics<ChevronRight size={14} aria-hidden /></button>
+        <SectionTitle title="ASCA Alignment" info="How the caseload lines up with the ASCA National Model's academic and career domains. The change is since last semester." unit={open ? undefined : moved} fold={fold && { ...fold, id: "iv-asca-body" }} />
+        {open && <button type="button" onClick={onAbout} className="v4-r2-link">About these metrics<ChevronRight size={14} aria-hidden /></button>}
       </div>
+      {open && <>
       {/* Two slopegraphs on one shared scale: last semester on the left
          axis, now on the right, each line labelled at its end. A label
          opens the students behind it. */}
-      <div className="iv-asca">
+      <div id="iv-asca-body" className="iv-asca">
         {domains.map((d) => (
           <div key={d.title} className="iv-asca-group">
             <span className="iv-asca-domain">{d.title}</span>
@@ -162,6 +170,7 @@ export function AscaAlignment({ academic, career, onAbout }: { academic: AscaIte
         ))}
       </div>
       <p className="iv-asca-note">Change in points since last semester. Scale starts at {lo}%.</p>
+      </>}
     </section>
   );
 }

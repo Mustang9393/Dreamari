@@ -61,7 +61,7 @@
 // All, and a grade row opens that grade's students, needs support first.
 
 import { useMemo, useState } from "react";
-import { ChevronRight, Info, Users } from "lucide-react";
+import { ChevronDown, ChevronRight, Info, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { sisFor } from "@/lib/counselorSis";
@@ -139,6 +139,10 @@ export function Readiness() {
   const list = useMemo(() => measures(), []);
   const [pick, setPick] = useState(0);
   const [show, setShow] = useState<"support" | "done">("support");
+  // Gaps starts folded (20 Oct 2026 declutter): its three counts are the
+  // tiles' own "See N missing" above it, so open it is a second look at the
+  // same numbers; one click shows the rings
+  const [gapsOpen, setGapsOpen] = useState(false);
   const [drill, setDrill] = useState<StudentsDrill | null>(null);
   // Readiness by Grade shows one milestone at a time; null = the biggest gap
   const [gradeKey, setGradeKey] = useState<string | null>(null);
@@ -268,16 +272,16 @@ export function Readiness() {
       <section className="v4-surface flex min-w-0 flex-col gap-[var(--space-4)] border p-[var(--space-5)]">
         <header className="v4-r2-head">
           <div className="v4-r2-lead">
-            <h2 className="v4-r2-title">Gaps
+            <h2 className="v4-r2-title">
+              <button type="button" aria-expanded={gapsOpen} aria-controls="v4-iv-gaps" onClick={() => setGapsOpen((o) => !o)} className="dm-quiet inline-flex cursor-pointer items-center gap-[8px]">Gaps<ChevronDown size={16} aria-hidden className="transition-transform" style={{ transform: gapsOpen ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} /></button>
               <IconTip label="Each dot is one student the indicator covers. The bright dots still miss it."><button type="button" aria-label="About Gaps" className="v4-r2-info dm-quiet"><Info size={14} aria-hidden /></button></IconTip>
             </h2>
-            <span className="v4-r2-sub">Students missing each milestone.</span>
           </div>
-          <span className="v4-r2-tools">
+          {gapsOpen && <span className="v4-r2-tools">
             <span className="v4-iv-legend" aria-hidden><span><i className="is-lit" />Missing</span><span><i />Met</span></span>
-          </span>
+          </span>}
         </header>
-          <div className="v4-iv-donuts" ref={donutRef}>
+          {gapsOpen && <div id="v4-iv-gaps" className="v4-iv-donuts" ref={donutRef}>
             {gaps.map((r) => (
               <IconTip key={r.m.key} label={`See the ${n(r.support.length)} ${MISSING[r.m.key]}`} className="w-full">
               <button type="button" onClick={() => openGap(r)} className="v4-iv-donut w-full" aria-label={`${r.m.gap}: ${r.support.length} of ${r.eligible.length} students. Show them`}>
@@ -288,7 +292,7 @@ export function Readiness() {
               </button>
               </IconTip>
             ))}
-          </div>
+          </div>}
       </section>
 
       {/* Readiness by Grade: one milestone at a time (the switch in the

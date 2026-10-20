@@ -37,13 +37,11 @@ import { Go, STATUS_COLORS } from "./chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
 import { PRIMARY } from "./palette";
 
-function Head({ icon: Icon, title, aside }: { icon: React.ComponentType<{ className?: string }>; title: string; aside?: React.ReactNode }) {
+function Head({ title, aside }: { icon?: React.ComponentType<{ className?: string }>; title: string; aside?: React.ReactNode }) {
   return (
     <span className="flex flex-wrap items-center justify-between gap-[8px]">
-      <span className="flex items-center gap-[10px]">
-        <span className="flex size-[30px] items-center justify-center rounded-[8px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)" }}><Icon className="h-[15px] w-[15px]" /></span>
-        <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
-      </span>
+      {/* title only, like StudentProfile's CardHead (20 Oct 2026 declutter) */}
+      <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
       {aside}
     </span>
   );

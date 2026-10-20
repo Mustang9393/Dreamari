@@ -1,3 +1,46 @@
+## 2026-10-20: Counselor v4 declutter pass, round 2 (Chandu's review)
+
+**Why (Chandu, after the first round's screenshots):** "lets default to the voxel art for student pictures. Keep the one line page descriptions. the busy toolbar: Please refine as you see fit without losing content or control. Lets change the carousel to a row type everywhere that appears. Increase spacing and breathing room 2x everywhere. The key win cards: i dont know what to do please help. And push." Then: "Lets not do the student cards + review stack. Do something much simpler. Since the avatars arent freezed yet let the picker be there but somewhere off the main ui. and very subtle." Then: "lets do the student profiles with the id tag thing we did for counselors but make it distinctly different id card design for students and counselors."
+
+- **Faces** (`avatarStyle.tsx`, `ConversationAvatar.tsx`, `Workspace.tsx`, `v4.css`): Voxel Art is the default (a new storage key, so an old Portraits pick does not hide it) and first in the list. The picker left every page heading and Home; it is one small "Faces" line in the page footer on every page.
+- **Home** (`Overview.tsx`, `today.css`): the portrait cards and the stacked-document review carousel are two plain lists. My Next Conversations: one line per student (face, name, grade and reason, status word, a walk-in icon, Book), five then "Show all 18". Pending Reviews: the count as the one figure with "N new since yesterday", then each milestone with submissions waiting, fullest first, each opening its queue. The reminders are a short list, not a rotating carousel. What My Students Are Saving is a poster row (Insights' shelf), not a coverflow.
+- **Spacing** (`visual-refresh.css`, `milestones.css`, `prepare.css`): the section rhythm doubled (128 / 56px desktop, 144 wide, 80 / 40 phone), the profile bento gutter 24 to 48, milestone and nudge card grids 16 to 32.
+- **Milestones toolbar** (`Milestones.tsx`, `milestones.css`): Charts, List and Export are one quiet icon cluster (names on hover) instead of a text switch plus a heavy bordered button; grade pills and By Milestone / By Student unchanged.
+- **Key Wins** (`CounselorImpact.tsx`, `insights2.css`): my call, since Chandu asked for help. The bento of six differently charted cards read as six widgets; it is now a two-column ledger, one row per win (figure, her full sentence, arrow to its students). The on-track win repeated the hero's 85%, so its one new fact (points above the school's 71%) joined the hero's sentence and the row left. The micro-charts are gone from the page; every number and sentence remains.
+- **Student ID card** (`StudentProfile.tsx`, `today.css`): the profile's identity row is a school ID card, built to read differently from the counselor's badge (tall, dark, photo cover, lanyard): landscape, light card stock, a solid school band ("Lincoln High School · Student ID"), passport photo, name, grade and class year, pathway, status, a barcode drawn from the student number, last active, the top career match's poster faded in, a foil corner. What needs you sits in its own card under it.
+
+Checked: tsc, eslint; Home, Milestones, My Impact, the profile at 1280 light; the profile in a narrow pane.
+
+## 2026-10-20: Counselor v4 declutter pass (branch counselor-v4-declutter)
+
+**Why (Chandu):** "Right now it's too cluttered, messy, and A LOT in the user's face." A density pass over every v4 screen under the standing rules: cut copy and chrome, never a data point (Maisha's rule); one hue plus status colors; no chips on rows; progressive disclosure; the same figure shown once. Audited at 1280, light (v4's default), dark spot-checked. Nothing below is deleted content: every fold opens with one click and every moved figure is still reachable.
+
+Removed or folded, screen by screen, and why:
+- **Home** (`Overview.tsx`, `today.css`): "· By milestone priority" cut (sort explanation). Pending Reviews' "Review all" removed: the hero's Start Reviewing opens the same queue one row up. Most Played sims are one row of four at 1200+ (the 4th card sat alone on a second row), the count drops under the title so long titles clear the rank badge; a sideways rail below 1200.
+- **Students > Directory** (`StudentsRoster.tsx`, `chips.tsx`, `v4.css`): the filter toolbar is a plain row, not a second bordered band. "121 students" only shows when a filter narrows the grade picker's own count (it repeated "All grades · 121"). Milestone pips are blue + red (done full blue, under way pale blue, not started faint, overdue / sent back red; was green, amber, purple, red, grey); each pip still names its milestone and state on hover. The word "complete" after each count is gone (the column says Milestones).
+- **Students > Milestones** (`milestones.css`, `Milestones.tsx`): one hue on the gauges, keys and waffle: Done deep blue, In Progress pale blue (was green + blue); amber stays for Needs Attention only. A grade's "N waiting for you" shows only while the grade is folded (open, each card says its own). Three cards across below 1440 so "Needs Attention" no longer truncates.
+- **Explore** (`v5/Explore.tsx`, gated on v4's `embedded`, so v5 and v6 are unchanged; `Workspace.tsx`): three shelves open (Most in Demand, Growing Fastest, Top Paying); "More lists · 4" opens Your Students Are Saving (Home and Insights already show it), Skilled Trades, Careers They Might Not Know, Public Service. All Careers opens two rows deep (12, was 36), Show more grows it. Purpose line shortened to one line.
+- **Prepare > Review** (`ReviewSession.tsx`, `NudgeSession.tsx`, `prepare.css`): BUG FIX, the faces rail spilled all 13 faces past the rail and the page footer (a percentage height under a max-height-only flex parent); it now scrolls inside the rail with its "N more" button. The reply pane's two filled tags are one line of words (due, status), colored only when late / not on track. In progress / Missed: drafts as one quiet line (full list on hover) instead of a chip each, "No nudge yet" removed (Last nudge / Nudged today still show), the hero's explainer line cut, 12 cards then "Show all N".
+- **Prepare > Messages** (`CounselorConnect.tsx`, `messages.css`): the thread's three bordered pills are one line under the name (Grade · topic · milestone) plus the status word with its dot. The "J / K" hint chip left the toolbar; the keys still work.
+- **Prepare > Meetings**: left as is (already one card, one list).
+- **Insights > College & Career** (`CareerCollegeInsights.tsx`): the share meter under each poster ("18% of students") is gone: it restated "22 saved" as a percent; the click-through drill still shows the percent. How-to lines under section titles cut; the "At their schools" majors view keeps its line (the tab name alone is unclear). "· by grade" cut from Postsecondary Direction.
+- **Insights > Readiness** (`Readiness.tsx`): Gaps (Maisha's section) starts folded: its three rings were the tiles' own "See 25 / 42 / 12 missing" directly above. One click opens it, same drills.
+- **Insights > Engagement** (`PlatformEngagement.tsx`): "Right now · 7 students · select a grade" is "7 students".
+- **Insights > My Impact** (`CounselorImpact.tsx`, `ImpactSections.tsx`): 85% on track showed four times (hero, ASCA, Key Wins, District Goals), 79% plans three. ASCA Alignment and District Goals & Reporting start folded with a one-line verdict ("Up 8 to 15 points since last semester", "4 of 6 met"); the title opens them. Both stay whole in the Principal and Impact reports.
+- **Student profile** (`StudentProfile.tsx`, `Casefile.tsx`, `chips.tsx`): milestone statuses muted except Overdue / Changes Requested (new `MilestoneChip quiet`); the tinted icon badge before every card title is gone.
+
+Kept, listed for Chandu to decide (unsure if clutter or content):
+- The Portraits avatar-style picker on every face screen (his 10 Oct ask: "make sure the dropdown is there for every screen that has them").
+- The one-line page purposes under each title (Maisha's explicit ask); only Explore's was shortened.
+- Students' Milestones toolbar: grade pills + Charts/List + export + By Milestone/By Student on one row.
+- Insights' four header pickers (Portraits, grade, group, year).
+- Explore's opportunity posters' colored cost words ("Free", "Pays you"): the student app's shared poster component.
+- Engagement's chart readout repeats the tiles at rest (it changes as you scrub, so it stays).
+- My Impact's Key Wins "On track to graduate 85%" still repeats the hero (it carries the only "vs school" comparator on the page).
+- The profile's side card repeats the overdue items from the milestones grid (it carries Send a reminder).
+
+Checked: tsc, eslint on touched files, no new `title=`, no em dashes, scrollbar pairs unchanged; 1280 light on every screen, dark on Milestones and Directory; Explore's More lists, the Gaps / ASCA / District folds open and close. Committed and pushed with round 2 above.
+
 ## 2026-10-20: Career Detail's redesign moves behind a v2 switch; the page is back to this morning's
 
 **Why (Chandu):** "put the new career detail under a v2 toggle. Revert the default view to how it was before?" then "and push that."

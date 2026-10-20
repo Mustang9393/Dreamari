@@ -718,13 +718,15 @@ html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-c
      a tight gap above it with no line; a trailing data note does too.
    No overflow is set anywhere here, so chart glows still spill freely. */
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] {
-  --v4-section-gap: 64px;
-  --v4-section-tight: 28px;
+  /* doubled 20 Oct 2026 (Chandu: "Increase spacing and breathing room 2x
+     everywhere"); was 64 / 28, 72 wide, 40 / 20 on phones */
+  --v4-section-gap: 128px;
+  --v4-section-tight: 56px;
   --v4-section-rule: color-mix(in srgb, var(--foreground) 16%, transparent);
 }
 html:not(.dark) [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-rule: color-mix(in srgb, var(--foreground) 18%, transparent); }
-@media (min-width: 1800px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-gap: 72px; } }
-@media (max-width: 767px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-gap: 40px; --v4-section-tight: 20px; } }
+@media (min-width: 1800px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-gap: 144px; } }
+@media (max-width: 767px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-gap: 80px; --v4-section-tight: 40px; } }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections { gap: 0 !important; row-gap: 0 !important; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > * { margin-top: 0 !important; margin-bottom: 0 !important; }
 /* the rhythm owns the space between sections, so the open sections that
@@ -759,9 +761,9 @@ html:not(.dark) [data-counselor-version="v4"] .v4-workspace[data-visual-refresh]
 /* The student profile is a bento of cards: the card edges already part
    them, so they keep a card gutter (24px, both ways) instead of the page
    gap, which would leave a 64px canyon between neighbouring cards. */
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile { row-gap: 24px !important; column-gap: 24px !important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile { row-gap: 48px !important; column-gap: 48px !important; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile-stack,
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile-stack > .grid { gap: 24px !important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile-stack > .grid { gap: 48px !important; }
 
 /* the row's horizontal scroll clips anything outside it, shadows included
    (10 Oct 2026: "the shadows in the next conversations row's cards are

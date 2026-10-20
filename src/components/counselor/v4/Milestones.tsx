@@ -85,7 +85,7 @@
 
 import { createElement, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, Download } from "lucide-react";
+import { ChevronDown, Download, LayoutGrid, List } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
@@ -94,7 +94,6 @@ import { createLocalRecord } from "@/lib/localRecord";
 import { useCounselorFilters, type GradeFilter } from "../shell";
 import { Listbox } from "./Listbox";
 import { Go } from "./chips";
-import { Segmented } from "./viz";
 import { CheckpointWaffle, HeroRing, PillTrack, seeLine } from "./milestoneViz";
 import { DrillPanel, type Drill } from "./Drill";
 import { Tip } from "@/components/app/IconTip";
@@ -231,8 +230,19 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
           {showCounselor && <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All Counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} />}
         </span>
         <span className="flex items-center gap-[8px]">
-          {mode === "milestone" && <Segmented ariaLabel="Milestone view" value={viz} onChange={setViz} options={VIZ_OPTIONS} />}
-          <IconTip label="Export CSV"><button type="button" onClick={exportCsv} aria-label="Export CSV" className="v4-ms-icon is-bordered"><Download className="h-[15px] w-[15px]" aria-hidden /></button></IconTip>
+          {/* the view's tools as one quiet icon cluster (20 Oct 2026, Chandu:
+             "refine as you see fit without losing content or control"):
+             Charts, List and Export were a text switch and a heavy bordered
+             button competing with the two pill rows; same three controls,
+             now small icons with their names on hover */}
+          <span className="v4-ms-tools" role="group" aria-label="View tools">
+            {mode === "milestone" && VIZ_OPTIONS.map((o) => (
+              <IconTip key={o.key} label={o.key === "charts" ? "Charts" : "List"}>
+                <button type="button" aria-pressed={viz === o.key} aria-label={o.label} onClick={() => setViz(o.key)} className="v4-ms-icon">{o.key === "charts" ? <LayoutGrid className="h-[15px] w-[15px]" aria-hidden /> : <List className="h-[15px] w-[15px]" aria-hidden />}</button>
+              </IconTip>
+            ))}
+            <IconTip label="Export CSV"><button type="button" onClick={exportCsv} aria-label="Export CSV" className="v4-ms-icon"><Download className="h-[15px] w-[15px]" aria-hidden /></button></IconTip>
+          </span>
           {/* two page view switches share one row, both the level 3 pill */}
           <SubTabs ariaLabel="View" value={mode} onChange={setMode} options={[{ key: "milestone", label: "By Milestone" }, { key: "student", label: "By Student" }]} />
         </span>
@@ -311,7 +321,9 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
                       </Tip>
                       <button type="button" tabIndex={-1} aria-hidden onClick={() => toggleGrade(g)} className="v4-ms-grade-chev dm-quiet"><ChevronDown className="h-[16px] w-[16px] flex-none transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden /></button>
                     </span>
-                    {waitingIds.length > 0 && <button type="button" onClick={() => router.push(reviewHrefIds(waitingIds))} className="v4-ms-wait">{waitingIds.length} waiting for you</button>}
+                    {/* the grade's total only while it is folded: open, each card
+                       already says its own "N waiting" (20 Oct 2026 declutter) */}
+                    {!open && waitingIds.length > 0 && <button type="button" onClick={() => router.push(reviewHrefIds(waitingIds))} className="v4-ms-wait">{waitingIds.length} waiting for you</button>}
                   </div>
                   {open && list}
                 </section>
