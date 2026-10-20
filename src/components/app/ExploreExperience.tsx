@@ -1754,6 +1754,7 @@ function DesktopSearchToggle({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onFocus={() => setSearchOpen(true)}
+          aria-label="Search careers"
           placeholder="Search careers, skills, worlds..."
           aria-hidden={!searchOpen}
           tabIndex={searchOpen ? 0 : -1}
@@ -2015,6 +2016,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
+              aria-label="Search careers"
               placeholder="Search careers, skills, worlds..."
               className="dm-beam-input min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none placeholder:text-[color:var(--muted-foreground)]"
               style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}

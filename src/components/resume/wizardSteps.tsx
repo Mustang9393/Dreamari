@@ -105,17 +105,17 @@ export function PersonalInfoStep({ resume, onNext, onFieldFocus }: { resume: Res
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
         <Field label="First Name" htmlFor="rb-first" required>
-          <TextInput id="rb-first" value={p.firstName} onChange={(v) => set({ firstName: v })} onFocus={track("profile:name")} placeholder="Jordan" />
+          <TextInput id="rb-first" autoComplete="given-name" required value={p.firstName} onChange={(v) => set({ firstName: v })} onFocus={track("profile:name")} placeholder="Jordan" />
         </Field>
         <Field label="Last Name" htmlFor="rb-last" required>
-          <TextInput id="rb-last" value={p.lastName} onChange={(v) => set({ lastName: v })} onFocus={track("profile:name")} placeholder="Rivers" />
+          <TextInput id="rb-last" autoComplete="family-name" required value={p.lastName} onChange={(v) => set({ lastName: v })} onFocus={track("profile:name")} placeholder="Rivers" />
         </Field>
       </div>
       <Field label="Email" htmlFor="rb-email">
-        <TextInput id="rb-email" type="email" value={p.email} onChange={(v) => set({ email: v })} onFocus={track("profile:contact")} placeholder="you@school.org" />
+        <TextInput id="rb-email" autoComplete="email" type="email" value={p.email} onChange={(v) => set({ email: v })} onFocus={track("profile:contact")} placeholder="you@school.org" />
       </Field>
       <Field label="Phone (optional)" htmlFor="rb-phone">
-        <TextInput id="rb-phone" type="tel" value={p.phone} onChange={(v) => set({ phone: v })} onFocus={track("profile:contact")} placeholder="(555) 123-4567" />
+        <TextInput id="rb-phone" autoComplete="tel" type="tel" value={p.phone} onChange={(v) => set({ phone: v })} onFocus={track("profile:contact")} placeholder="(555) 123-4567" />
       </Field>
       <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
         <Field label="Country" htmlFor="rb-country">
@@ -127,11 +127,11 @@ export function PersonalInfoStep({ resume, onNext, onFieldFocus }: { resume: Res
           />
         </Field>
         <Field label="State / Province / Region" htmlFor="rb-state">
-          <TextInput id="rb-state" value={p.state} onChange={(v) => set({ state: v })} onFocus={track("profile:contact")} placeholder="California" />
+          <TextInput id="rb-state" autoComplete="address-level1" value={p.state} onChange={(v) => set({ state: v })} onFocus={track("profile:contact")} placeholder="California" />
         </Field>
       </div>
       <Field label="City" htmlFor="rb-city">
-        <TextInput id="rb-city" value={p.city} onChange={(v) => set({ city: v })} onFocus={track("profile:contact")} placeholder="San Jose" />
+        <TextInput id="rb-city" autoComplete="address-level2" value={p.city} onChange={(v) => set({ city: v })} onFocus={track("profile:contact")} placeholder="San Jose" />
       </Field>
       {/* No bio field here in v1 -- the reference's own Personal
          Information step only ever asks for name/email/phone/address,

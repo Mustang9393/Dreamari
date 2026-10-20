@@ -170,7 +170,11 @@ function SignupDreamy({ sprite, line, reactionNonce = 0, accent }: { sprite: str
 // app's usual bold display type.
 // -----------------------------------------------------------------------
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+// Errors are tied to their field (WCAG 3.3.1, 1.3.1; audit 21 Oct 2026): the
+// input carries aria-invalid and aria-describedby pointing at this message,
+// and a failed submit moves focus to the first field in error, so a screen
+// reader hears the label, "invalid" and the fix together.
+function Field({ label, error, errorId, children }: { label: string; error?: string; errorId?: string; children: React.ReactNode }) {
   return (
     <label className="flex w-full flex-col gap-[7px]">
       <span className="text-[14px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
@@ -178,7 +182,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
       </span>
       {children}
       {error && (
-        <span className="text-[12px] leading-[16px] font-medium" style={{ color: "var(--destructive)" }}>
+        <span id={errorId} className="text-[12px] leading-[16px] font-medium" style={{ color: "var(--destructive)" }}>
           {error}
         </span>
       )}
@@ -305,6 +309,8 @@ export function SignupExperience() {
       if (!agreed) next.agreed = "Agree to the Terms to continue.";
     }
     setErrors(next);
+    const first = ["name", "guardianEmail", "email", "password", "agreed"].find((k) => next[k]);
+    if (first) window.setTimeout(() => document.getElementById(`signup-${first}`)?.focus(), 0);
     return Object.keys(next).length === 0;
   }
 
@@ -437,7 +443,7 @@ export function SignupExperience() {
                   </Field>
                 </div>
                 {birthdateError && (
-                  <p className="text-[12px] leading-[16px] font-medium" style={{ color: "var(--destructive)" }}>
+                  <p role="alert" className="text-[12px] leading-[16px] font-medium" style={{ color: "var(--destructive)" }}>
                     {birthdateError}
                   </p>
                 )}
@@ -453,8 +459,13 @@ export function SignupExperience() {
                   {isStudent && underAge ? "Almost set up" : "Create your account"}
                 </h2>
 
-                <Field label={isStudent && underAge ? "Your first name" : "Your name"} error={errors.name}>
+                <Field label={isStudent && underAge ? "Your first name" : "Your name"} error={errors.name} errorId="signup-name-error">
                   <input
+                    id="signup-name"
+                    autoComplete={isStudent && underAge ? "given-name" : "name"}
+                    required
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? "signup-name-error" : undefined}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={isStudent && underAge ? "First name" : "Full name"}
@@ -464,8 +475,12 @@ export function SignupExperience() {
                 </Field>
 
                 {isStudent && underAge ? (
-                  <Field label="A parent or guardian's email" error={errors.guardianEmail}>
+                  <Field label="A parent or guardian's email" error={errors.guardianEmail} errorId="signup-guardianEmail-error">
                     <input
+                      id="signup-guardianEmail"
+                      required
+                      aria-invalid={!!errors.guardianEmail}
+                      aria-describedby={errors.guardianEmail ? "signup-guardianEmail-error" : undefined}
                       type="email"
                       value={guardianEmail}
                       onChange={(e) => setGuardianEmail(e.target.value)}
@@ -476,12 +491,17 @@ export function SignupExperience() {
                   </Field>
                 ) : (
                   <>
-                    <Field label="Email" error={errors.email}>
-                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={INPUT_CLASS} style={inputStyle(!!errors.email)} />
+                    <Field label="Email" error={errors.email} errorId="signup-email-error">
+                      <input id="signup-email" autoComplete="email" required aria-invalid={!!errors.email} aria-describedby={errors.email ? "signup-email-error" : undefined} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={INPUT_CLASS} style={inputStyle(!!errors.email)} />
                     </Field>
-                    <Field label="Password" error={errors.password}>
+                    <Field label="Password" error={errors.password} errorId="signup-password-error">
                       <div className="relative">
                         <input
+                          id="signup-password"
+                          autoComplete="new-password"
+                          required
+                          aria-invalid={!!errors.password}
+                          aria-describedby={errors.password ? "signup-password-error" : undefined}
                           type={showPassword ? "text" : "password"}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
@@ -501,7 +521,7 @@ export function SignupExperience() {
                       </div>
                     </Field>
                     <label className="flex cursor-pointer items-start gap-[10px]">
-                      <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="peer sr-only" />
+                      <input id="signup-agreed" type="checkbox" required aria-invalid={!!errors.agreed} aria-describedby={errors.agreed ? "signup-agreed-error" : undefined} checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="peer sr-only" />
                       <span
                         aria-hidden
                         className="mt-[1px] flex h-[20px] w-[20px] flex-none items-center justify-center rounded-[6px] border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2"
@@ -514,7 +534,7 @@ export function SignupExperience() {
                       </span>
                     </label>
                     {errors.agreed && (
-                      <p className="-mt-[8px] text-[12px] leading-[16px] font-medium" style={{ color: "var(--destructive)" }}>
+                      <p id="signup-agreed-error" className="-mt-[8px] text-[12px] leading-[16px] font-medium" style={{ color: "var(--destructive)" }}>
                         {errors.agreed}
                       </p>
                     )}

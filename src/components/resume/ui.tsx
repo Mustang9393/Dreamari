@@ -36,7 +36,8 @@ export function Field({ label, htmlFor, children, required }: { label: string; h
     <div className="flex flex-col gap-[6px]">
       <label className={LABEL_CLASS} htmlFor={htmlFor} style={{ color: "var(--muted-foreground)" }}>
         {label}
-        {required && <span style={{ color: "var(--accent-subtle)" }}> *</span>}
+        {/* the star is the sighted cue; screen readers hear "required" (WCAG 3.3.2) */}
+        {required && <><span aria-hidden style={{ color: "var(--accent-subtle)" }}> *</span><span className="sr-only"> (required)</span></>}
       </label>
       {children}
     </div>
@@ -51,6 +52,7 @@ export function TextInput({ id, value, onChange, placeholder, type = "text", inv
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
+      aria-invalid={invalid || undefined}
       className={FIELD_CLASS}
       style={{ ...FIELD_STYLE, borderColor: invalid ? DANGER : FIELD_STYLE.borderColor }}
       {...rest}

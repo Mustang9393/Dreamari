@@ -206,6 +206,7 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
         <textarea
           value={draft.jobDescription}
           onChange={(e) => setDraft({ ...draft, jobDescription: e.target.value })}
+          aria-label="Job description"
           placeholder="Paste the full job description here…"
           rows={5}
           className="w-full rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-[14px] font-semibold outline-none focus:border-[var(--primary)]"

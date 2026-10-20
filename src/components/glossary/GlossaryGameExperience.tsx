@@ -989,6 +989,7 @@ export function TypeTermCard({ question, onAnswer }: { question: Extract<Glossar
         value={value}
         disabled={checked !== null}
         onChange={(e) => setValue(e.target.value)}
+        aria-label="Type your answer"
         placeholder="Or type your answer…"
         className="w-full rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-4)] text-[15px] font-semibold outline-none disabled:opacity-100"
         style={{

@@ -58,6 +58,15 @@ Three things should not be assumed:
 - **S2.** A Timers switch sits in the sim HUD, beside Music and Sound, on levels that have a timed question. When it's off, no clock shows, nothing times out, and the prompt drops "before the timer runs out". The setting is kept per browser. Tested on IB L1-18: with timers on, the question times out at 45s; with them off, it waits.
 - **S4.** The card deck (Play hub on phones, Profile Top 3) has Previous/Next buttons, an "N of M" counter that is announced, and arrow keys. Only the front card is in the Tab order. When you use the arrow keys, focus follows to the new front card.
 
+**Step 3 done on the same branch (forms):**
+- **M7, signup.**
+  - Every field has `autoComplete` (`name`/`given-name`, `email`, `new-password`), `required`, `aria-invalid`, and `aria-describedby` pointing to its error.
+  - A failed submit moves focus to the first field in error.
+  - The birthdate error is `role="alert"`.
+- **M7, resume.** The contact fields autofill (`given-name`, `family-name`, `email`, `tel`, `address-level1`/`address-level2`). Required labels say "(required)" to screen readers. `TextInput` passes `aria-invalid`.
+- **S5.** Resume bullets have Move up / Move down buttons next to the drag handle. Focus follows the line.
+- **M8.** The Explore search (×2), the Glossary typed answer and the Tailor job description have labels.
+
 ## Serious issues (fix before any claim)
 
 | # | WCAG SC | Issue | Where | Fix |

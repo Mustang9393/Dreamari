@@ -1,3 +1,42 @@
+## 2026-10-21: WCAG 2.2 AA, step 3 (forms)
+
+**Why.** These were the audit's form items:
+
+- **3.3.1 and 1.3.1.** Signup errors were red text that nothing tied to the field. Screen readers never heard them, and focus stayed on the button.
+- **1.3.5.** Name, email, phone and password fields had no autofill.
+- **3.3.2.** The resume's required `*` was visual only.
+- **2.5.7 and 2.1.1.** Resume bullets reordered by HTML drag only, which works with neither keyboard nor touch.
+- **1.3.1.** Four inputs were labelled by their placeholder alone.
+
+Chandu: "go".
+
+**What changed.**
+- **SignupExperience.**
+  - `Field` takes an `errorId`.
+  - Inputs have ids (`signup-name`, `signup-guardianEmail`, `signup-email`, `signup-password`, `signup-agreed`), plus `autoComplete`, `required`, `aria-invalid` and `aria-describedby`.
+  - `validateAccount` focuses the first field in error.
+  - The birthdate error is `role="alert"`.
+- **Resume.**
+  - The wizard contact fields have `autoComplete`.
+  - `ui.tsx` Field marks the star `aria-hidden` and adds an sr-only "(required)".
+  - `TextInput` sets `aria-invalid`.
+  - `ExperienceModal` lines have Move up / Move down IconTip buttons (28px, disabled at the ends). Focus follows the moved line, or lands on the usable button at an end.
+  - Each line textarea is labelled "Line N".
+- **Labels.** `aria-label` added to the Explore search (×2), the Glossary typed answer and the Tailor job description.
+
+**Validation.**
+- tsc and eslint are clean.
+- /signup: Sign up with empty fields focuses `signup-name` (aria-invalid true, described by "Enter your name.", autocomplete name). All four fields are flagged.
+- /resume-builder: `#rb-first` has autocomplete given-name. In Experience lines A/B/C, Move up on C gives A,C,B with focus on the new row's Move up. Pressed again it gives C,A,B, with focus on Move down because Move up is disabled at the top.
+
+**Next.**
+- The remaining ~50 dialogs.
+- Nested interactive cards (Connect, Explore, Profile).
+- Tab arrow keys.
+- XP announcements.
+- Video captions.
+- A screen-reader pass.
+
 ## 2026-10-21: WCAG 2.2 AA, step 2 (Play: timers off, card deck buttons)
 
 **Why.** These were the next two serious items in the audit:
