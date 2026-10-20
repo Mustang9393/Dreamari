@@ -1,3 +1,12 @@
+## 2026-10-20: Outlook's jobs chart drawn as a line of light, quieter fill
+
+**Why (Chandu):** "the same graph improvement we did for what it pays popup applies everywhere including the outlook sections here, and tone down the color/brightness of the area highlight under the line."
+
+- `OutlookTab.tsx` JobsChart: the counselor glow kit's `GlowStroke` (white core plus bloom band, the look Chandu called "metallic" on What it pays) and `Orb` points are replaced by LightRange's treatment: a 3px line from a 30% tint to the full accent, two soft wide strokes as its glow (no blur filter), and LightRange's points of light. The bright `Aurora` fill under the line is now a faint wash (12% at the line, fading to nothing at the floor).
+- `LightRange.tsx` exports its point as `LightPoint` (with a `y`), so the chart reuses it instead of a copy.
+- Scope: outside the counselor dashboard, the old glow kit was only in this chart and the United Way board. United Way was left alone (it stays local until Chandu says otherwise).
+- Checked: tsc, eslint; Registered Nurse Pay & Outlook, dark, 1280.
+
 ## 2026-10-20: Career Detail Education tab works like dreamari.com, with a real button per credential (branch only, not pushed)
 
 **Why (Chandu):** first, "Right now it shows bachelors/masters as accordions but i think its not obvious that there is a drill down there." Then, after a card-and-sheet pass: "refer how the education tab and the interactions and how things are displayed look in dreamari.com and try to incorporate the same behaviours. IT shows number of colleges and when you click on it it should take you to that curated list of colleges", "lets not do the boxes for education section", and "make it evident that clicking bachelors degree/etc is a doable action or has a proper cta and not just mimic dreamari exactly with the long lines of text."

@@ -75,11 +75,16 @@ export function LightRange({ accent, at, from, to, ariaLabel }: {
 }
 
 // A point of light: a bright centre falling off into the accent, and (for
-// the marked value) a wide soft halo. All radial gradients.
-function Glint({ x, accent, dim }: { x: string; accent: string; dim?: boolean }) {
+// the marked value) a wide soft halo. All radial gradients. Exported as
+// LightPoint for charts that mark values the same way (Outlook's jobs line).
+export function LightPoint({ x, y = "50%", accent, dim }: { x: string; y?: string; accent: string; dim?: boolean }) {
+  return <Glint x={x} y={y} accent={accent} dim={dim} />;
+}
+
+function Glint({ x, y = "50%", accent, dim }: { x: string; y?: string; accent: string; dim?: boolean }) {
   const core = dim ? 8 : 14;
   return (
-    <span className="pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: x }}>
+    <span className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2" style={{ left: x, top: y }}>
       {!dim && (
         <span
           className="absolute top-1/2 left-1/2 size-[72px] -translate-x-1/2 -translate-y-1/2 rounded-full"

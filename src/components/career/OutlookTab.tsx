@@ -37,10 +37,10 @@
 import { DISPLAY, LABEL, MEDIUM, PayViewToggle, SMALL, Section } from "@/components/actions-lab/CareerDetailLab";
 import { PayMap } from "./PayMap";
 import { Listbox } from "@/components/app/Listbox";
-import { Aurora, GlowStroke, Orb } from "@/components/counselor/v4/charts/glow";
+import { LightPoint } from "@/components/app/LightRange";
 import { DEMO_HOME_STATE } from "@/components/career/statePay";
 import { US_STATES } from "@/lib/studentProfile";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { count, pct, stateOutlook, type NationalOutlook } from "./outlook";
 
@@ -217,6 +217,13 @@ function yTicks(lo: number, hi: number, roomBelow = false) {
 // data (not from zero, or a 5% change is a flat line), x ticks are years.
 // BLS publishes the two ends; the line between them is the straight path
 // a ten-year projection implies, so it is drawn straight, not curved.
+// Drawn as LightRange draws a range (20 Oct 2026, Chandu: "the same graph
+// improvement we did for what it pays popup applies everywhere including
+// the outlook sections here, and tone down the color/brightness of the
+// area highlight under the line"): a thin gradient line, dim at the start
+// and full at the end, with a soft glow and points of light, no white core
+// or bloom band (the glow kit's tube read metallic). The fill under it is a
+// faint wash that fades to nothing at the floor, not the bright aurora.
 function JobsChart({ national, accent }: { national: NationalOutlook; accent: string }) {
   const from = national.year - 10;
   const now = national.employment;
@@ -235,6 +242,8 @@ function JobsChart({ national, accent }: { national: NationalOutlook; accent: st
   const area = `${line} L ${W} ${H} L 0 ${H} Z`;
   const years = [from, from + 5, national.year];
   const pctY = (y: number) => `${(y / H) * 100}%`;
+  const tint = (p: number) => `color-mix(in srgb, ${accent} ${p}%, transparent)`;
+  const gid = useId().replace(/:/g, "");
   return (
     <figure className="flex flex-col gap-[var(--space-2)]" aria-label={`People doing this job: ${count(now)} in ${from}, about ${count(later)} by ${national.year}`}>
       <div className="flex">
@@ -245,19 +254,31 @@ function JobsChart({ national, accent }: { national: NationalOutlook; accent: st
           ))}
         </div>
         <div className="relative h-[180px] min-w-0 flex-1">
-          {/* the glow kit's light tokens are scoped to this attribute
-             (glow.css); borrowing the scope keeps one kit, not a copy */}
-          <svg data-counselor-version="v4" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
+          <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
             {ticks.map((t) => (
               <line key={t} x1={0} x2={W} y1={Y(t)} y2={Y(t)} stroke="var(--glass-border)" strokeWidth={1} vectorEffect="non-scaling-stroke" strokeDasharray={t === yMin ? undefined : "3 5"} />
             ))}
-            <Aurora d={area} box={{ x: 0, y: Math.min(y0, y1), w: W, h: H - Math.min(y0, y1) }} colors={[accent]} strength={0.4} />
-            <GlowStroke d={line} color={accent} width={3} />
+            <defs>
+              <linearGradient id={`wash-${gid}`} gradientUnits="userSpaceOnUse" x1="0" y1={Math.min(y0, y1)} x2="0" y2={H}>
+                <stop offset="0%" stopColor={accent} stopOpacity={0.12} />
+                <stop offset="100%" stopColor={accent} stopOpacity={0} />
+              </linearGradient>
+              {/* userSpaceOnUse: a bounding-box gradient paints nothing on a flat line */}
+              <linearGradient id={`line-${gid}`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2={W} y2="0">
+                <stop offset="0%" stopColor={tint(30)} />
+                <stop offset="100%" stopColor={accent} />
+              </linearGradient>
+            </defs>
+            <path d={area} fill={`url(#wash-${gid})`} />
+            {/* the glow: two soft, wide strokes (LightRange's box-shadow, in SVG), no blur filter */}
+            <path d={line} fill="none" stroke={accent} strokeOpacity={0.1} strokeWidth={22} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <path d={line} fill="none" stroke={accent} strokeOpacity={0.22} strokeWidth={8} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <path d={line} fill="none" stroke={`url(#line-${gid})`} strokeWidth={3} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
           </svg>
           {/* the two published points, in square boxes so the stretched
              plot can't squash them, each with its figure */}
-          <Point x="0%" y={pctY(y0)} accent={accent} dim />
-          <Point x="100%" y={pctY(y1)} accent={accent} />
+          <LightPoint x="0%" y={pctY(y0)} accent={accent} dim />
+          <LightPoint x="100%" y={pctY(y1)} accent={accent} />
           {/* the start figure sits on the side away from the line, the end
              figure on the open side above (or below, when it falls) */}
           <span className={`absolute left-[10px] text-left ${up ? "translate-y-[12px]" : "-translate-y-[calc(100%+12px)]"}`} style={{ top: pctY(y0) }}>
@@ -277,14 +298,6 @@ function JobsChart({ national, accent }: { national: NationalOutlook; accent: st
       </div>
       <figcaption className={TINY} style={{ color: "var(--muted-foreground)" }}>People doing this job in the US</figcaption>
     </figure>
-  );
-}
-
-function Point({ x, y, accent, dim }: { x: string; y: string; accent: string; dim?: boolean }) {
-  return (
-    <svg data-counselor-version="v4" viewBox="-42 -42 84 84" className="pointer-events-none absolute h-[84px] w-[84px] -translate-x-1/2 -translate-y-1/2 overflow-visible" style={{ left: x, top: y, opacity: dim ? 0.6 : 1 }} aria-hidden>
-      <Orb cx={0} cy={0} r={dim ? 4 : 6} color={accent} />
-    </svg>
   );
 }
 
