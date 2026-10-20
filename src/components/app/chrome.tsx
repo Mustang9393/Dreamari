@@ -250,10 +250,9 @@ const COUNSELOR_LINKS = [{ label: "Counselor Dashboard", href: "/counselor" }] a
 // Joshua's proposal, v3 = the team's counter-proposal), isolated from the
 // live demo's Match and Profile and replayable (direct instruction, 24 Sept
 // 2026). Remove once a flow is chosen and built for real. See
-// docs/HANDOFF_INDEX.md. The Career outlook lab (19 Oct 2026) lives only
-// here too: Career Detail with "Pay & Outlook" in place of Pay, for Joshua
-// and Usman to judge before it touches /career.
-const LAB_LINKS = [{ label: "Flow lab", href: "/flow-lab" }, { label: "Career actions lab", href: "/actions-lab/explore" }, { label: "Career outlook lab", href: "/outlook-lab/software-engineer" }, { label: "Component library", href: "/component-lab" }, { label: "Scene review", href: "/play-tools/scene-review" }, { label: "Glossary QA", href: "/play-tools/glossary-qa" }, { label: "Dreamy 3D", href: "/dreamy-lab/3d" }] as const;
+// docs/HANDOFF_INDEX.md. (The Career outlook lab left this list on 20 Oct
+// 2026: its Pay & Outlook tab is the live /career page now.)
+const LAB_LINKS = [{ label: "Flow lab", href: "/flow-lab" }, { label: "Career actions lab", href: "/actions-lab/explore" }, { label: "Component library", href: "/component-lab" }, { label: "Scene review", href: "/play-tools/scene-review" }, { label: "Glossary QA", href: "/play-tools/glossary-qa" }, { label: "Dreamy 3D", href: "/dreamy-lab/3d" }] as const;
 
 /** One step back, never a jump. Every Back control in the app goes to the
  *  screen the student actually came from (Chandu, 6 Oct 2026: "Every BACK

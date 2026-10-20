@@ -35,6 +35,7 @@ import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordma
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { IconTip } from "@/components/app/IconTip";
+import { PaySheet } from "@/components/career/PaySheet";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
 import { react, useLab } from "./labStore";
 import { CareerHeaderActions } from "./CareerHeaderActions";
@@ -48,8 +49,8 @@ import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { resolveCareer, similarCareers, type ResolvedCareer } from "@/components/career/data";
 import type { FactDetails, ProfileRung } from "@/components/career/profiles";
 import { careerSlug } from "@/components/career/slug";
-import { OutlookTab } from "@/components/outlook-lab/OutlookTab";
-import { count, nationalOutlook, pct } from "@/components/outlook-lab/outlook";
+import { OutlookTab } from "@/components/career/OutlookTab";
+import { count, nationalOutlook, pct } from "@/components/career/outlook";
 
 // Career Detail, rebuilt 2026-09-02 around the production page's information
 // (dreamonna.com/explore/<slug>; copy and data transcribed in profiles.ts and
@@ -123,6 +124,57 @@ function HeroPhoto({ photo, sizes, className, objectPosition }: { photo: string;
   // header's title covers the lower part, so the face sits higher there
   const phone = className.includes("md:hidden");
   return <FacePhoto src={photo} sizes={sizes} className={className.replace("md:hidden", "").trim()} wrapperClassName={phone ? "md:hidden" : ""} target={phone ? 0.3 : 0.36} fallback={objectPosition} onError={() => setFailed(true)} />;
+}
+
+// The degree fact as the degree alone (20 Oct 2026, Chandu, on "Bachelor's
+// degree for most school and college jobs": "Make it concise and one thing.
+// Say bachelors degree, if theres one more degree list that too, no full
+// sentences"). Up to two credentials, joined with "or"; qualifiers,
+// licences and "+ apprenticeship" tails stay in the degree sheet behind (i).
+const DEGREES: [RegExp, string][] = [
+  [/doctoral|doctorate|ph\.?d|professional degree/i, "Doctorate"],
+  [/law degree|j\.d\./i, "Law degree"],
+  [/master/i, "Master's degree"],
+  [/bachelor/i, "Bachelor's degree"],
+  [/associate/i, "Associate's degree"],
+  [/certificate|certification/i, "Certificate"],
+  [/high school/i, "High school diploma"],
+  [/some college/i, "Some college"],
+  [/no formal|no specific|no degree/i, "No degree needed"],
+];
+export function shortDegree(value: string) {
+  const found = DEGREES.map(([re, name]) => ({ name, at: value.search(re) })).filter((d) => d.at >= 0).sort((x, y) => x.at - y.at);
+  // "Doctoral or professional degree" is one credential, not two
+  const all = [...new Set(found.map((d) => d.name))];
+  // "Some college, no degree" and "No formal degree; a forklift
+  // certification" each name one path, not two choices
+  const names = /^(Some college|No degree needed)$/.test(all[0] ?? "") ? all.slice(0, 1) : all.slice(0, 2);
+  return names.length ? names.join(" or ") : value.split(/[;(,+]| for /)[0].trim();
+}
+
+// ---- Fact strip figure ------------------------------------------------------
+// The quick-fact strip's figure (20 Oct 2026, Chandu: "The numbers are too
+// small in the 4 column header stats. Awkward blank spaces are there too").
+// The figure is the cell's headline, so it outranks its label: the label
+// became a small muted line and the figure a display numeral, set right
+// under the label instead of pinned to the cell's bottom (which left a gap
+// whenever a neighbour's degree line wrapped). "/year" drops to a small
+// suffix, and a long written value (a degree sentence) steps down a size.
+function StripFigure({ value, accent }: { value: string; accent: string }) {
+  const m = value.match(/^(.*?)(\/year)$/);
+  const main = m ? m[1] : value;
+  const long = main.length > 22;
+  return (
+    <span className="flex flex-wrap items-baseline gap-x-[4px]">
+      <span
+        className={`${long ? "text-[17px] leading-[23px] sm:text-[18px] sm:leading-[24px]" : "text-[24px] leading-[28px] sm:text-[28px] sm:leading-[32px]"} font-extrabold tabular-nums`}
+        style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 55%, #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+      >
+        {main}
+      </span>
+      {m && <span className="text-[14px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>a year</span>}
+    </span>
+  );
 }
 
 // ---- Key figure: production's gradient numeral, in the world accent -------
@@ -302,10 +354,10 @@ function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; acc
 }
 
 // Your states / Whole country: one view switch over the same state data.
-// Shared by the live Pay tab and the outlook lab's Pay & Outlook tab.
-function PayViewToggle({ value, onChange }: { value: "states" | "country"; onChange: (v: "states" | "country") => void }) {
+// Shared by the Pay & Outlook tab and careers without an outlook (Pay only).
+export function PayViewToggle({ value, onChange, label = "Pay by state view", pill = "career-pay-view-pill" }: { value: "states" | "country"; onChange: (v: "states" | "country") => void; label?: string; pill?: string }) {
   return (
-    <div role="tablist" aria-label="Pay by state view" className="dm-glass flex items-center gap-[2px] rounded-[13px] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+    <div role="tablist" aria-label={label} className="dm-glass flex items-center gap-[2px] rounded-[13px] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
       {([["states", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
         <button
           key={id}
@@ -322,7 +374,7 @@ function PayViewToggle({ value, onChange }: { value: "states" | "country"; onCha
              animate and slide over when we switch"). */}
           {value === id && (
             <motion.span
-              layoutId="career-pay-view-pill"
+              layoutId={pill}
               aria-hidden
               className="absolute inset-0 rounded-[10px]"
               style={{ background: "var(--foreground)" }}
@@ -467,7 +519,7 @@ function viewModel(career: ResolvedCareer) {
     whatTheyDo,
     facts: facts.filter((f) => f.value && f.value !== PLACEHOLDER && !/people doing|jobs open/i.test(f.label)),
     payByState: p?.payByState,
-    /** every authored fact, before the strip's filter (the outlook lab reads the counts) */
+    /** every authored fact, before the strip's filter (Pay & Outlook reads the counts) */
     allFacts: facts,
     knowAbout: p?.knowAbout ?? [],
     goodAt: p?.goodAt ?? [],
@@ -495,14 +547,10 @@ const CAREER_TABS: { key: CareerTab; label: string }[] = [
   { key: "software", label: "Software" },
 ];
 
-export function CareerDetailLab({ slug, live = false, outlook = false }: {
+export function CareerDetailLab({ slug, live = false }: {
   slug: string;
   /** the live /career route: no lab dock, links stay on the live routes */
   live?: boolean;
-  /** DEMO-ONLY: the Career outlook lab (/outlook-lab, hamburger only): the
-   *  Pay tab becomes "Pay & Outlook" and growth joins the quick facts. Off
-   *  everywhere else, so the live page renders exactly as before. */
-  outlook?: boolean;
 }) {
   const router = useRouter();
   const career = resolveCareer(slug);
@@ -574,14 +622,16 @@ export function CareerDetailLab({ slug, live = false, outlook = false }: {
 
   const vm = viewModel(career);
   const pay = statePay(career.slug, pickedStates, vm.payByState);
-  // Outlook lab: the US outlook from the profile's own BLS figures. The live
-  // strip shows degree and pay only; the lab adds growth and yearly openings
-  // back as headline facts (they lead into the tab that explains them)
-  const national = outlook ? nationalOutlook(vm.allFacts, vm.details?.openings?.note) : null;
+  // Pay & Outlook (live 20 Oct 2026, from the outlook lab): the US outlook
+  // from the profile's own BLS figures. Growth and yearly openings join
+  // degree and pay as headline facts and lead into the tab that explains
+  // them, instead of sitting inside the pay sheet (Maisha's Slack note)
+  const national = nationalOutlook(vm.allFacts, vm.details?.openings?.note);
+  const strip = vm.facts.map((f) => (/degree/i.test(f.label) ? { ...f, value: shortDegree(f.value) } : f));
   const facts = national
-    ? [...vm.facts, { label: `Job growth by ${national.year}`, value: pct(national.growthPct) }, { label: "Jobs open each year", value: count(national.openings) }]
-    : vm.facts;
-  const tabs = outlook ? CAREER_TABS.map((t) => (t.key === "pay" ? { ...t, label: "Pay & Outlook" } : t)) : CAREER_TABS;
+    ? [...strip, { label: `Job growth by ${national.year}`, value: pct(national.growthPct) }, { label: "Jobs open each year", value: count(national.openings) }]
+    : strip;
+  const tabs = national ? CAREER_TABS.map((t) => (t.key === "pay" ? { ...t, label: "Pay & Outlook" } : t)) : CAREER_TABS;
   // growth and openings open the tab that explains them (they had an (i))
   const toOutlook = (label: string) => national && /growth|open each year/i.test(label);
   const openOutlook = () => {
@@ -707,8 +757,8 @@ export function CareerDetailLab({ slug, live = false, outlook = false }: {
                    first line, whether the label wraps or not; the figure
                    always sits at the bottom, so figures line up across cells */}
                 <span className="flex items-start justify-between gap-[6px]">
-                  <span className={`${LABEL} min-w-0`}>{fact.label}</span>
-                  {toOutlook(fact.label) && <ChevronRight className="mt-[3px] h-[16px] w-[16px] flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />}
+                  <span className="min-w-0 text-[14px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.label}</span>
+                  {toOutlook(fact.label) && <ChevronRight className="mt-[2px] h-[16px] w-[16px] flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />}
                   {!toOutlook(fact.label) && factKey(fact.label) && vm.details?.[factKey(fact.label)!] && (
                     <IconTip label={`About ${fact.label.toLowerCase()}`}>
                       <button
@@ -727,23 +777,23 @@ export function CareerDetailLab({ slug, live = false, outlook = false }: {
                     </IconTip>
                   )}
                 </span>
-                <span className="mt-auto"><Figure accent={accent}>{fact.value}</Figure></span>
-                {/* outlook lab: the whole cell opens Pay & Outlook */}
+                <StripFigure accent={accent} value={fact.value} />
+                {/* the whole cell opens Pay & Outlook */}
                 {toOutlook(fact.label) && (
                   <button type="button" aria-label={`${fact.label}: see Pay & Outlook`} onClick={openOutlook} className="absolute inset-0 cursor-pointer transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_5%,transparent)]" />
                 )}
+                {/* pay only: growth and openings lead the strip and own the
+                   Pay & Outlook tab, so the sheet's last row goes there */}
                 {openFact === "pay" && factKey(fact.label) === "pay" && vm.details?.pay && (
-                  <FactPopover anchor={factAnchor} onClose={() => setOpenFact(null)}>
-                    <dl className="flex flex-col gap-[6px]">
-                      {[["Starting out", vm.details.pay.starting], ["Typical", vm.details.pay.typical], ["Top earners", vm.details.pay.top]].map(([k, v]) => (
-                        <div key={k} className="flex items-baseline justify-between gap-[var(--space-4)]">
-                          <dt className={SMALL} style={{ color: "var(--muted-foreground)" }}>{k}</dt>
-                          <dd><Figure accent={accent}>{v}</Figure></dd>
-                        </div>
-                      ))}
-                    </dl>
-                    {vm.details.pay.note && <p className={`${TINY} mt-[10px]`} style={{ color: "var(--muted-foreground)" }}>{vm.details.pay.note}</p>}
-                  </FactPopover>
+                  <PaySheet
+                    career={career.title}
+                    accent={accent}
+                    pay={vm.details.pay}
+                    source={/Bureau of Labor Statistics/i.test(vm.sources ?? "") ? "U.S. Bureau of Labor Statistics" : undefined}
+                    onMore={national || pay ? () => { setOpenFact(null); openOutlook(); } : undefined}
+                    moreLabel={national ? "Pay by state and job outlook" : "Pay by state"}
+                    onClose={() => setOpenFact(null)}
+                  />
                 )}
                 {openFact === "openings" && factKey(fact.label) === "openings" && vm.details?.openings && (
                   <FactPopover anchor={factAnchor} onClose={() => setOpenFact(null)}>
@@ -759,11 +809,11 @@ export function CareerDetailLab({ slug, live = false, outlook = false }: {
           <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={tabs} grow />
         </div>
 
-        {tab === "pay" && !pay && !national && <TabComingSoon title={outlook ? "Pay & Outlook" : "Pay"} career={career.title} />}
+        {tab === "pay" && !pay && !national && <TabComingSoon title="Pay" career={career.title} />}
 
-        {/* the Pay by state section, the same in the outlook lab as on the
+        {/* the Pay by state section, the same as before Pay & Outlook (it was on the
            live page (Chandu, 19 Oct 2026: "that was approved so lets not
-           edit that too much"); the lab's outlook sections follow it */}
+           edit that too much"); the outlook sections follow it */}
         {tab === "pay" && pay && (
           <Section
             id="pay"
@@ -912,7 +962,7 @@ export function CareerDetailLab({ slug, live = false, outlook = false }: {
                it just hard-clipped at the container edge (16 Sept 2026). */}
             <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
-                <PosterCard key={c.title} career={c} onClick={() => (outlook ? router.push(`/outlook-lab/${careerSlug(c.title)}`) : (live && openCareerPeek(careerSlug(c.title))) || router.push(careerHref(careerSlug(c.title), live)))} />
+                <PosterCard key={c.title} career={c} onClick={() => (live && openCareerPeek(careerSlug(c.title))) || router.push(careerHref(careerSlug(c.title), live))} />
               ))}
             </div>
           </Section>

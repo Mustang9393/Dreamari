@@ -1,8 +1,11 @@
 "use client";
 
-// DEMO-ONLY: the Career outlook lab's "Pay & Outlook" tab (19 Oct 2026),
-// reached only from the hamburger's lab links (/outlook-lab/<slug>). The live
-// Career Detail page and its Pay tab are untouched.
+// Career Detail's "Pay & Outlook" tab. Built 19 Oct 2026 as the hamburger-only
+// Career outlook lab; live on /career since 20 Oct 2026, when Maisha's Slack
+// review of dreamari.com asked for People Doing It, Jobs Open Each Year and
+// Projected Growth to get their own place instead of the pay pop-up, and
+// Chandu: "lets push it to main. Not in a hamburger link". The state
+// projections below are still seeded (DEMO-ONLY in outlook.ts).
 //
 // Why one tab and not a sixth "Job Outlook" tab (Chandu's recommendation in
 // Slack, same day): pay by state and growth by state answer the same
@@ -16,10 +19,13 @@
 //   0. Pay by state: the approved live section, unchanged, rendered by
 //      CareerDetailLab ("where did our pay by state/whole country map go?
 //      ... that was approved so lets not edit that too much").
-//   1. Outlook by state (this file): two tiles for the chosen state, growth
-//      and openings, each said against the US; then the top five states for
-//      one of them at a time ("the table looks very cluttered and hard to
-//      read": no list shows more than one figure per row).
+//   1. Outlook by state (this file): the same Your states / Whole country
+//      switch as Pay by state (20 Oct 2026). Your states: growth and openings
+//      tiles per state, said against the US, then the top five states for
+//      one figure at a time ("the table looks very cluttered and hard to
+//      read": no list shows more than one figure per row). Whole country:
+//      PayMap shaded by growth or openings. Growth carries the usual up/down
+//      trend arrow wherever it shows (Chandu: "just a representative icon").
 //   2. Job outlook (US): the verdict and jobs over the projection years as
 //      the lit line, now with real axes ("use the pretty sparkline graph we
 //      did before but give it an x and y axis and more visual detail without
@@ -28,12 +34,14 @@
 // Sparse state data (Usman): a tile with no forecast says "No forecast yet";
 // a career whose states publish none says so in one line instead of a list.
 
-import { DISPLAY, LABEL, SMALL, Section } from "@/components/actions-lab/CareerDetailLab";
+import { DISPLAY, LABEL, MEDIUM, PayViewToggle, SMALL, Section } from "@/components/actions-lab/CareerDetailLab";
+import { PayMap } from "./PayMap";
 import { Listbox } from "@/components/app/Listbox";
 import { Aurora, GlowStroke, Orb } from "@/components/counselor/v4/charts/glow";
 import { DEMO_HOME_STATE } from "@/components/career/statePay";
 import { US_STATES } from "@/lib/studentProfile";
 import { useState } from "react";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { count, pct, stateOutlook, type NationalOutlook } from "./outlook";
 
 const TINY = "text-[14px] leading-[20px]";
@@ -65,11 +73,13 @@ export function OutlookTab({ slug, accent, national, picked }: {
 // ---- 1. Outlook by state ---------------------------------------------------
 
 function OutlookByState({ slug, accent, national, picked }: { slug: string; accent: string; national: NationalOutlook; picked: string[] }) {
-  const [state, setState] = useState(picked[0] ?? DEMO_HOME_STATE);
+  // the same two views as Pay by state just above it (Chandu, 20 Oct 2026:
+  // "For outlook by state please have the same your states/map views"); the
+  // state picker went with it, since the map now reaches every state
+  const [view, setView] = useState<"states" | "country">("states");
   const [metric, setMetric] = useState<Metric>("growth");
-  const o = stateOutlook(slug, state, national);
+  const mine = (picked.length ? picked : [DEMO_HOME_STATE]).slice(0, 3);
   const any = US_STATES.some((s) => stateOutlook(slug, s, national));
-  const growVs = o ? (Math.abs(o.growthPct - national.growthPct) < 1 ? "About the same as the US" : o.growthPct > national.growthPct ? "Faster than the US" : "Slower than the US") : undefined;
 
   const value = (s: string) => {
     const so = stateOutlook(slug, s, national);
@@ -77,78 +87,92 @@ function OutlookByState({ slug, accent, national, picked }: { slug: string; acce
   };
   const show = (n: number) => (metric === "growth" ? pct(n) : count(n));
   const ranked = US_STATES.map((s) => ({ s, v: value(s) })).filter((r): r is { s: string; v: number } => r.v !== undefined).sort((a, b) => b.v - a.v);
-  const at = ranked.findIndex((r) => r.s === state);
-  const pinned = at >= 5 ? ranked[at] : null;
 
   const row = (r: { s: string; v: number }, rank: number) => {
-    const mine = r.s === state;
+    const yours = mine.includes(r.s);
     return (
       <li key={r.s} className="flex min-w-0 items-center gap-[var(--space-3)] border-t py-[12px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
         <span className="w-[28px] flex-none text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>#{rank}</span>
-        <span className={`${SMALL} min-w-0 flex-1 truncate ${mine ? "font-semibold" : ""}`}>{r.s}</span>
-        <span className={CELL} style={mine ? { color: accent } : undefined}>{show(r.v)}</span>
+        <span className={`${SMALL} min-w-0 flex-1 truncate ${yours ? "font-semibold" : ""}`}>{r.s}</span>
+        <span className={`${CELL} flex items-center gap-[6px]`} style={yours ? { color: accent } : undefined}>{metric === "growth" && <Trend pct={r.v} accent={accent} size={16} />}{show(r.v)}</span>
       </li>
     );
   };
 
-  return (
-    <Section
-      id="outlook-states"
-      title="Outlook by state"
-      action={
-        <Listbox
-          ariaLabel="State"
-          value={state}
-          onChange={setState}
-          options={US_STATES.map((s) => ({ value: s, label: s }))}
-          className={`${PICKER} w-[176px]`}
-          style={PICKER_STYLE}
-          panelClassName="p-[6px]"
-        />
-      }
-    >
-      <div className="grid grid-cols-2 gap-[var(--space-2)] sm:gap-[var(--space-3)]">
-        <Stat label={`Growth by ${national.year}`} accent={accent} value={o ? pct(o.growthPct) : undefined} note={growVs} />
-        <Stat label="Openings" accent={accent} value={o ? count(o.openings) : undefined} note={o ? "Each year" : undefined} />
-      </div>
+  const metricPicker = (
+    <Listbox
+      ariaLabel="Show states by"
+      value={metric}
+      onChange={(v) => setMetric(v as Metric)}
+      options={[
+        { value: "growth", label: "By growth" },
+        { value: "openings", label: "By openings" },
+      ]}
+      className={`${PICKER} w-[140px]`}
+      style={PICKER_STYLE}
+      panelClassName="p-[6px]"
+    />
+  );
 
-      {any ? (
-        <div className="flex flex-col gap-[var(--space-2)]">
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <h3 className={LABEL} style={{ ...DISPLAY, color: accent }}>Top states</h3>
-            <Listbox
-              ariaLabel="Rank states by"
-              value={metric}
-              onChange={(v) => setMetric(v as Metric)}
-              options={[
-                { value: "growth", label: "By growth" },
-                { value: "openings", label: "By openings" },
-              ]}
-              className={`${PICKER} w-[140px]`}
-              style={PICKER_STYLE}
-              panelClassName="p-[6px]"
-            />
+  return (
+    <Section id="outlook-states" title="Outlook by state" action={any ? <PayViewToggle value={view} onChange={setView} label="Outlook by state view" pill="career-outlook-view-pill" /> : undefined}>
+      {!any ? (
+        <p className={TINY} style={{ color: "var(--muted-foreground)" }}>States haven&apos;t shared job forecasts for this career yet.</p>
+      ) : view === "states" ? (
+        <div className="flex flex-col gap-[var(--space-6)]">
+          <div className="flex flex-col gap-[var(--space-3)]">
+            <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Your states</h3>
+            {mine.map((st) => {
+              const o = stateOutlook(slug, st, national);
+              const growVs = o ? (Math.abs(o.growthPct - national.growthPct) < 1 ? "About the same as the US" : o.growthPct > national.growthPct ? "Faster than the US" : "Slower than the US") : undefined;
+              return (
+                <div key={st} className="flex flex-col gap-[var(--space-2)]">
+                  {mine.length > 1 && <span className={`${SMALL} font-semibold`}>{st}</span>}
+                  <div className="grid grid-cols-2 gap-[var(--space-2)] sm:gap-[var(--space-3)]">
+                    <Stat label={`Growth by ${national.year}${mine.length > 1 ? "" : ` in ${st}`}`} accent={accent} value={o ? pct(o.growthPct) : undefined} trend={o?.growthPct} note={growVs} />
+                    <Stat label="Openings each year" accent={accent} value={o ? count(o.openings) : undefined} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <ol className="flex flex-col">{ranked.slice(0, 5).map((r, i) => row(r, i + 1))}</ol>
-          {pinned && (
-            <ol className="flex flex-col border-t border-dashed pt-[var(--space-1)]" style={{ borderColor: "var(--glass-border)" }}>
-              {row(pinned, at + 1)}
-            </ol>
-          )}
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+              <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Top states</h3>
+              {metricPicker}
+            </div>
+            <ol className="flex flex-col">{ranked.slice(0, 5).map((r, i) => row(r, i + 1))}</ol>
+          </div>
         </div>
       ) : (
-        <p className={TINY} style={{ color: "var(--muted-foreground)" }}>States haven&apos;t shared job forecasts for this career yet.</p>
+        <div className="flex flex-col gap-[var(--space-3)]">
+          {metricPicker}
+          <PayMap
+            typical=""
+            rows={[]}
+            accent={accent}
+            seed={slug}
+            yourState={mine[0]}
+            figures={{
+              values: Object.fromEntries(ranked.map((r) => [r.s, r.v])),
+              format: show,
+              prompt: metric === "growth" ? "Tap or hover a state to see its job growth" : "Tap or hover a state to see its openings",
+              label: metric === "growth" ? `Job growth by ${national.year} by state` : "Job openings each year by state",
+              icon: metric === "growth" ? (n) => <Trend pct={n} accent={accent} size={24} /> : undefined,
+            }}
+          />
+        </div>
       )}
     </Section>
   );
 }
 
-function Stat({ label, value, note, accent }: { label: string; value?: string; note?: string; accent: string }) {
+function Stat({ label, value, note, accent, trend }: { label: string; value?: string; note?: string; accent: string; trend?: number }) {
   return (
     <div className="flex min-w-0 flex-col gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-3)] sm:p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 3%, transparent)" }}>
       <span className={`${TINY} font-semibold`} style={{ color: "var(--muted-foreground)" }}>{label}</span>
       {value ? (
-        <span className={STAT} style={{ ...DISPLAY, color: accent }}>{value}</span>
+        <span className={`${STAT} flex items-center gap-[8px]`} style={{ ...DISPLAY, color: accent }}>{value}{trend !== undefined && <Trend pct={trend} accent={accent} size={22} />}</span>
       ) : (
         <span className={`${SMALL} font-semibold`} style={{ color: "var(--muted-foreground)" }}>No forecast yet</span>
       )}
@@ -262,4 +286,12 @@ function Point({ x, y, accent, dim }: { x: string; y: string; accent: string; di
       <Orb cx={0} cy={0} r={dim ? 4 : 6} color={accent} />
     </svg>
   );
+}
+
+// Growth's direction as the usual trend arrow (20 Oct 2026, Chandu: "just a
+// representative icon ... Up or down or however its usually shown"): up in
+// the accent, down muted, flat for under half a percent either way.
+function Trend({ pct, accent, size }: { pct: number; accent: string; size: number }) {
+  const Icon = Math.abs(pct) < 0.5 ? Minus : pct > 0 ? TrendingUp : TrendingDown;
+  return <Icon aria-label={Math.abs(pct) < 0.5 ? "Flat" : pct > 0 ? "Growing" : "Shrinking"} strokeWidth={2.5} style={{ width: size, height: size, flex: "none", color: pct > 0 ? accent : "var(--muted-foreground)" }} />;
 }
