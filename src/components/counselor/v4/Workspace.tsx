@@ -11,6 +11,7 @@ import type { CounselorView } from "../roles";
 import "./visual-refresh.css";
 import "./layout2.css";
 import { AvatarStylePicker, AvatarStyleProvider } from "./avatarStyle";
+import { QuickLinksMenu } from "@/components/app/chrome";
 
 const areas: WorkspaceArea[] = [
   // "Rename the 'Today' tab to Home" (Maisha, 9 Oct 2026).
@@ -141,6 +142,10 @@ export function Workspace({active,items,children,search,filters,account,org,them
  const pages=(area?.items??[]).filter(i=>i.view!=="progress");
  const lit=active==="progress"?"milestones":active;
  return <div className="v4-workspace" data-visual-refresh="calm">
+  {/* DEMO-ONLY: the nav tools end with the site-wide quick links
+      hamburger, the way back to the rest of the demo (Chandu, 20 Oct
+      2026: "When i get to there i cant naviagte back to other parts of
+      the app"). Same as v5, v7 and shell.tsx. */}
   <header className="v4-navigation">
    <div className="v4-nav-main">
     {/* The real Dreamari mark and wordmark (4 Oct 2026, Chandu: "add the
@@ -158,7 +163,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
           </span>
         </Link>
     <nav className="v4-primary-nav dm-scroll" aria-label="Workspace areas">{available.map(a=><Link key={a.label} href={`/counselor?view=${a.items[0].view}&v=4`} aria-current={area?.label===a.label?"page":undefined}>{a.label}</Link>)}</nav>
-    <div className="v4-nav-tools"><IconTip label={`Switch to ${theme==="dark"?"light":"dark"} mode`}><button className="v4-round" onClick={onTheme} aria-label={`Switch to ${theme==="dark"?"light":"dark"} mode`}>{theme==="dark"?<Sun size={18}/>:<Moon size={18}/>}</button></IconTip>{items.some(i=>i.view==="settings")&&<IconTip label="Preferences"><Link className="v4-round" href="/counselor?view=settings&v=4" aria-label="Preferences"><SlidersHorizontal size={18}/></Link></IconTip>}<div className="v4-account">{account}</div></div>
+    <div className="v4-nav-tools"><IconTip label={`Switch to ${theme==="dark"?"light":"dark"} mode`}><button className="v4-round" onClick={onTheme} aria-label={`Switch to ${theme==="dark"?"light":"dark"} mode`}>{theme==="dark"?<Sun size={18}/>:<Moon size={18}/>}</button></IconTip>{items.some(i=>i.view==="settings")&&<IconTip label="Preferences"><Link className="v4-round" href="/counselor?view=settings&v=4" aria-label="Preferences"><SlidersHorizontal size={18}/></Link></IconTip>}<div className="v4-account">{account}</div><QuickLinksMenu /></div>
    </div>
    {/* the area's pages left this row for the page title (20 Oct 2026,
        Chandu: "the tab row on top like directory/milestones is very hard to

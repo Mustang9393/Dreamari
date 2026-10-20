@@ -1,3 +1,11 @@
+## 2026-10-20: Counselor dashboard: the quick links hamburger on every version
+
+**Why (Chandu, 20 Oct):** "please include the quicklinks hamburger menu in the counselor dashboard screens everywhere in all versions. When i get to there i cant naviagte back to other parts of the app." v5, v7 and the old shell already had it; v4 (the default) and v6 did not, so a demo that opened the counselor dashboard was stuck there.
+- `v4/Workspace.tsx`: `QuickLinksMenu` at the end of the nav tools, after the account avatar. Covers every v4 role and screen, since they all share this header.
+- `v6/V6App.tsx`: `QuickLinksMenu` after the profile photo in the top bar, which shows at every width.
+- Both tagged DEMO-ONLY, like the shell's own copy.
+- **Checked:** `/counselor?v=4` and `?v=6` on :3061 at desktop and 375 wide: the hamburger shows and opens the quick links panel. eslint clean.
+
 ## 2026-10-20: Match: Business & Finance is always the first tab again (demo)
 
 **Why (Chandu, 20 Oct):** a demo run on Vercel picked Tech in Build and Match showed only Tech & Engineering: "Business and finance should be there", "it alters the demo." The 15 Oct rule (`96468c60`) showed Business & Finance only when it was picked in Build, so any Build without it hid the demo's Investment Banking path.
