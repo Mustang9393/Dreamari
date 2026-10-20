@@ -7,6 +7,7 @@ import { LiveRegion } from "@/components/app/LiveRegion";
 import { OfflineBanner } from "@/components/app/SurfaceState";
 import { SkipLink } from "@/components/app/SkipLink";
 import { TabKeys } from "@/components/app/TabKeys";
+import { DialogFocusHost } from "@/components/app/DialogFocusHost";
 import { ThemeBoot } from "@/components/app/theme";
 import { LightPulse } from "@/components/app/LightPulse";
 import { ColorThemeSwitch } from "@/components/app/ColorThemeSwitch";
@@ -91,6 +92,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <SkipLink />
         <TabKeys />
+        <DialogFocusHost />
         <ThemeBoot />
         <LightPulse />
         <ColorThemeSwitch />

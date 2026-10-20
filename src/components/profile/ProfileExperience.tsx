@@ -1,5 +1,7 @@
 "use client";
 
+import { useDialogFocus } from "@/components/app/useDialogFocus";
+
 import { createPortal } from "react-dom";
 import { openCareerPeek, openSchoolPeek } from "@/components/app/peek";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -579,6 +581,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // about once.
   const coverNudge = !coverOpen;
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  // the cover and picture pickers: focus in, Tab kept inside, Escape closes (WCAG 2.4.3 / 2.1.2)
+  const coverDialog = useRef<HTMLDivElement>(null);
+  const avatarDialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(coverOpen, coverDialog, () => setCoverOpen(false));
+  useDialogFocus(avatarPickerOpen, avatarDialog, () => setAvatarPickerOpen(false));
   const avatarSeed = STUDENT.name.split(" ")[0] || STUDENT.name;
   const avatarSrc = useStudentAvatarSrc(avatarSeed);
   const pickAvatar = (src: string) => {
@@ -853,7 +860,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   /* a sheet through the portal: the header clips and the blurred
                      cluster would otherwise contain a fixed child */
                   <Portal>
-                  <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
+                  <div ref={coverDialog} tabIndex={-1} className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
                     {/* the page stays visible behind a frosted overlay, never a black screen */}
                     <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
                     <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
@@ -1001,7 +1008,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                 </IconTip>
                 {avatarPickerOpen && (
                   <Portal>
-                    <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose your picture" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
+                    <div ref={avatarDialog} tabIndex={-1} className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose your picture" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
                       <button type="button" aria-label="Close" onClick={() => setAvatarPickerOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
                       <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
                         <div className="flex items-center justify-between gap-[var(--space-3)]">
@@ -2186,6 +2193,9 @@ export function Top3Tab({
 // document, and stacking three of them in it made it read as a bundle.
 
 function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[]; focusId: string; onClose: () => void }) {
+  // focus in, Tab kept inside, Escape closes, focus back to the opener (WCAG 2.4.3 / 2.1.2)
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   // Highlights first (6 Oct 2026): one story per slide (pay, growth, what
   // each asks, where each leads, the work, what is the same); Original is
   // the thirteen-row table for the student who wants every cell.
@@ -2209,7 +2219,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
     };
   });
   return (
-    <div className="no-print fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="compare-sheet-title">
+    <div ref={dialogRef} tabIndex={-1} className="no-print fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="compare-sheet-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(28px)" }} />
       <div className="relative mx-auto flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -2596,6 +2606,9 @@ function EvidenceSheet({
   onHide: (id: string) => void;
   onClose: () => void;
 }) {
+  // focus in, Tab kept inside, Escape closes, focus back to the opener (WCAG 2.4.3 / 2.1.2)
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   const [scope, setScope] = useState<"all" | "career">("all");
   const items = EVIDENCE.filter((item) => !hidden.has(item.id)).filter((item) => (scope === "all" ? true : item.careerId === focus?.id));
   const grouped = items.reduce<Record<string, EvidenceItem[]>>((acc, item) => {
@@ -2604,7 +2617,7 @@ function EvidenceSheet({
   }, {});
 
   return (
-    <div className="no-print fixed inset-0 z-[120] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="evidence-intro">
+    <div ref={dialogRef} tabIndex={-1} className="no-print fixed inset-0 z-[120] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="evidence-intro">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 76%, transparent)", backdropFilter: "blur(28px)" }} />
       <div className="dm-scroll relative flex w-full max-w-[560px] flex-col gap-[var(--space-4)] overflow-y-auto border-l p-5 pb-[calc(env(safe-area-inset-bottom)+var(--space-6))] pt-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex items-start justify-between gap-[var(--space-3)]">
@@ -2858,9 +2871,12 @@ function RouteDetailModal({ route, majors, selected, onSelect, onGoPlan, onClose
   onGoPlan: () => void;
   onClose: () => void;
 }) {
+  // focus in, Tab kept inside, Escape closes, focus back to the opener (WCAG 2.4.3 / 2.1.2)
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   return (
     <Portal>
-    <div className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`${route.short} details`}>
+    <div ref={dialogRef} tabIndex={-1} className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`${route.short} details`}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(28px)" }} />
       <div className="relative flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[920px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <IconTip label="Close" className="absolute top-[10px] right-[10px] z-10">

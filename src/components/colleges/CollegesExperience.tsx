@@ -1,9 +1,11 @@
 "use client";
 
+import { useDialogFocus } from "@/components/app/useDialogFocus";
+
 import type { CareerPick } from "./careerSchools";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeftRight, ChevronDown, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -204,6 +206,9 @@ function Option({ on, onToggle, children, count, radio = false }: { on: boolean;
 }
 
 export function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filters; set: (p: Partial<Filters>) => void; count: number; onClose: () => void; onClear: () => void }) {
+  // focus in, Tab kept inside, Escape closes, focus back to the opener (WCAG 2.4.3 / 2.1.2)
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   const [statesOpen, setStatesOpen] = useState(false);
   if (typeof document === "undefined") return null;
   return createPortal(
@@ -215,7 +220,7 @@ export function FilterTray({ filters, set, count, onClose, onClear }: { filters:
     // viewport bottom, so the un-scrollable footer landed right where the
     // nav bar sits (same bug as the other sheets on this pass, direct
     // feedback 9 Sept 2026).
-    <div className="marketing-v2 themeable fixed inset-0 z-[110] flex items-end justify-end pb-[calc(76px+env(safe-area-inset-bottom))] md:items-stretch md:pb-0" role="dialog" aria-modal="true" aria-label="Filters" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
+    <div ref={dialogRef} tabIndex={-1} className="marketing-v2 themeable fixed inset-0 z-[110] flex items-end justify-end pb-[calc(76px+env(safe-area-inset-bottom))] md:items-stretch md:pb-0" role="dialog" aria-modal="true" aria-label="Filters" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
       {/* Was deliberately kept to blur(3px) so "the results stay visible
          behind: dimmed and softened, never black" (11 Sept 2026, a narrow
          exception for this one drawer). Superseded 21 Sept 2026 by an

@@ -78,6 +78,13 @@ Three things should not be assumed:
   - Explore search announces only "N careers found", once typing settles.
 - **S1, more.** `useDialogFocus` now also covers GlobalSearch, the weekly check-in, Book a counselor, the pro cover picker and the phone notifications sheet. The hook keeps an autoFocus field's focus and retries focus a frame later for portals that mount late.
 
+**Step 5 done on the same branch (every dialog, roving tabindex):**
+- **S1, finished.**
+  - A new app-wide `DialogFocusHost` watches every `[role=dialog][aria-modal]`, the way HistoryHost gives each one a Back step. It moves focus in, wraps Tab inside the topmost dialog, and returns focus to the opener when the dialog goes. Dialogs that run `useDialogFocus` mark themselves `data-focus-managed` and are skipped.
+  - The dialogs that had no Escape now run `useDialogFocus`: Colleges FilterTray, Profile CompareSheet, EvidenceSheet, RouteDetailModal, the cover picker and the picture picker, and Connect AskSheet, ReportSheet and JoinSheet.
+  - Tested: Career "Ask a professional" (host) and the Profile cover and picture pickers (hook). Steps 1 and 4 still pass.
+- **M6, finished.** TextTabs and Segmented use roving tabindex: one Tab stop per row, with the arrows moving between tabs. Custom tablists elsewhere still get the arrows from TabKeys.
+
 ## Serious issues (fix before any claim)
 
 | # | WCAG SC | Issue | Where | Fix |

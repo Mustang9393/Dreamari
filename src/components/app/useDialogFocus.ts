@@ -15,6 +15,7 @@ export function useDialogFocus(open:boolean, ref:RefObject<HTMLElement|null>, on
  const [opener]=useState(()=>typeof document==="undefined"?null:document.activeElement as HTMLElement|null);
  useEffect(()=>{
   if(!open || (mobileOnly && window.matchMedia("(min-width: 1024px)").matches))return;
+  ref.current?.setAttribute("data-focus-managed","");
   const active=document.activeElement as HTMLElement|null;
   const previous=active && !ref.current?.contains(active) ? active : opener;
   const overflow=document.body.style.overflow;

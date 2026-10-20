@@ -74,7 +74,8 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
               key={option.key}
               type="button"
               role="tab"
-              tabIndex={overflow ? -1 : undefined}
+              // roving: only the selected tab is a Tab stop; the arrows (TabKeys) move between them
+              tabIndex={overflow ? -1 : on || (!options.some((o) => o.key === value) && option === options[0]) ? 0 : -1}
               aria-selected={on}
               onClick={() => onChange(option.key)}
               className={`dm-seg relative flex min-h-[34px] ${on ? "cursor-default" : "cursor-pointer"} items-center justify-center rounded-[var(--radius-sm)] ${dense ? "px-[7px] sm:px-[14px]" : "px-[14px]"} text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}

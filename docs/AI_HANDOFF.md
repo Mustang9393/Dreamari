@@ -1,3 +1,30 @@
+## 2026-10-21: WCAG 2.2 AA, step 5 (every modal dialog, roving tabindex)
+
+**Why.** The audit counted 85 modal dialogs. Steps 1 and 4 fixed the shared ones, and about 30 hand-built ones still left focus behind them. Nine of those had no Escape at all. Chandu: "go: finish the remaining dialogs (Connect, Profile, Preferences, resume sheets, PaySheet) and roving tabindex."
+
+Wiring all 30 by hand would leave the next new dialog broken again. So this follows the precedent HistoryHost set for Back: one host watches every modal.
+
+**What changed.**
+- **`app/DialogFocusHost.tsx`**, mounted in layout:
+  - A MutationObserver on childList plus role, aria-modal, hidden and open. Style and class changes are left out for performance, because framer animations change style every frame.
+  - It remembers the opener, moves focus in (unless something inside already has it), wraps Tab in the topmost shown dialog, and refocuses the opener when focus was lost on close.
+  - It skips `data-focus-managed`, which `useDialogFocus` now sets on its dialog.
+  - Escape stays each dialog's own job. The nine that had none got `useDialogFocus`: CollegesExperience FilterTray; ProfileExperience CompareSheet, EvidenceSheet, RouteDetailModal and the cover and avatar pickers; ConnectExperience AskSheet, ReportSheet and JoinSheet.
+  - PreferencesTab, the resume sheets and PaySheet already close on Escape, so the host covers their focus. PaySheet is only used in actions-lab.
+- **Roving tabindex.** TextTabs and the Segmented in connect/viz give `tabIndex` 0 only to the selected tab (or the first, if none is selected). TabKeys' arrows select as they move, so the stop follows.
+
+**Validation.**
+- tsc is clean. eslint has no errors.
+- Career "Ask a professional" (host), and the Profile cover and picture pickers (hook): focus moves in, Tab and Shift+Tab stay inside, and Escape closes and returns focus to the opener.
+- Step 1's sheets and step 4's 390px bell sheet still pass.
+- Career section tabs have tabIndex 0,-1,-1,-1,-1.
+- Not exercised live: Connect Ask, Report and Join, and Profile Compare, Evidence and Route. They use the same hook, but I couldn't reach their triggers by script.
+
+**Next.**
+- Video captions, if the clips have speech.
+- A real screen-reader pass (NVDA + Chrome on Windows, ChromeVox on a Chromebook).
+- A light-mode contrast re-check.
+
 ## 2026-10-21: WCAG 2.2 AA, step 4 (nested cards, tab keys, announcements, dialogs)
 
 **Why.** These were the audit's remaining keyboard and screen-reader items:
