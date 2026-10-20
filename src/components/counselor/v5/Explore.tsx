@@ -77,11 +77,12 @@ export function PathwaySwitch({ value, onChange }: { value: Pathway; onChange: (
  *  `afterCareers`: an opt-in section v4 places under the curated career
  *  rows (its "Turn Interest into Opportunity", 9 Oct 2026); v5 passes
  *  nothing and renders exactly as before. */
-export function V5Explore({ embedded = false, afterCareers }: { embedded?: boolean; afterCareers?: React.ReactNode } = {}) {
+export function V5Explore({ embedded = false, afterCareers, payLabel }: { embedded?: boolean; afterCareers?: React.ReactNode; /** v7 names the third tab after the Replit ("Labor Market") */ payLabel?: string } = {}) {
   // v4 takes only what it lacks (8 Oct 2026: "we can add whatever is useful
   // from v5 to v4 but not all of it"): careers and pay by state; v4 has its
   // own school views, so Schools stays out.
-  const tabs = embedded ? TABS.filter((t) => t.key !== "schools") : TABS;
+  const named = payLabel ? TABS.map((t) => (t.key === "pay" ? { ...t, label: payLabel } : t)) : TABS;
+  const tabs = embedded ? named.filter((t) => t.key !== "schools") : named;
   const [tab, setTab] = useState<Tab>("careers");
   const [path, setPath] = useState<Pathway>("all");
   return (
@@ -101,7 +102,7 @@ export function V5Explore({ embedded = false, afterCareers }: { embedded?: boole
               <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
               <PathwaySwitch value={path} onChange={setPath} />
             </div>
-            <TextTabs soft items={TABS} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
+            <TextTabs soft items={tabs} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
           </>
         )}
       </header>

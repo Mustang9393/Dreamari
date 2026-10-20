@@ -9,6 +9,7 @@ import { useV3Extras } from "./v3Extras";
 import { ScreenStateProvider, StateGate, readStateParam, type ScreenState } from "./v4/states";
 import { CounselorVersionProvider, useCounselorVersion } from "./version";
 import { V6App } from "./v6/V6App";
+import { V7App } from "./v7/V7App";
 import { CounselorVersionChip } from "./version";
 import { V5App } from "./v5/V5App";
 import { roleOrDefault } from "./roles";
@@ -160,7 +161,7 @@ function RoutedView({ requestedView, initialStudentId, role }: { requestedView: 
   const view: CounselorView = allowed ? known : "overview";
 
   useEffect(() => {
-    if (ready && !allowed && version !== "v5" && version !== "v6") router.replace("/counselor?view=overview");
+    if (ready && !allowed && version !== "v5" && version !== "v6" && version !== "v7") router.replace("/counselor?view=overview");
   }, [ready, allowed, router, version]);
 
   // DEMO-ONLY: `?state=loading|empty|error` previews a screen's state (see
@@ -175,6 +176,7 @@ function RoutedView({ requestedView, initialStudentId, role }: { requestedView: 
   if (!ready) return null;
   // v5 is its own app on the student chrome (v5/V5App.tsx), not a view in
   // the v4 shell, so it skips the v4 role menus entirely.
+  if (version === "v7") return <V7App view={requestedView} />;
   if (version === "v6") return <V6App view={requestedView} studentId={initialStudentId} />;
   if (version === "v5") return <V5App view={requestedView} />;
   return (

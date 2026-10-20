@@ -42,7 +42,7 @@ const num = (s: string) => Number(s.replace(/[^0-9.]/g, ""));
  *  above 640px. One frame so the sheets read as one family (Chandu, 20 Oct
  *  2026: "redesign the typical degree (i) popup to be consistent with the
  *  what it pays pop up too"). */
-export function FactSheet({ career, accent, title, more, source, onClose, children }: {
+export function FactSheet({ career, accent, title, more, source, onClose, children, footer, wide = false }: {
   career: string;
   /** the world accent, e.g. var(--world-arts-media-sport) */
   accent: string;
@@ -53,6 +53,12 @@ export function FactSheet({ career, accent, title, more, source, onClose, childr
   source?: string;
   onClose: () => void;
   children: React.ReactNode;
+  /** actions pinned under the body (counselor v7's Send, Save, Schedule;
+   *  20 Oct 2026, Chandu: "design all the pop ups with dreamari's design
+   *  standards like we did for what it pays") */
+  footer?: React.ReactNode;
+  /** a little wider for forms and lists (560px instead of 480px) */
+  wide?: boolean;
 }) {
   const still = useReducedMotion();
   const titleId = useId();
@@ -75,7 +81,7 @@ export function FactSheet({ career, accent, title, more, source, onClose, childr
         initial={still ? false : { opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 420, damping: 36 }}
-        className="dm-scroll relative z-[1] max-h-[calc(92dvh/var(--vz,1))] w-full overflow-x-hidden overflow-y-auto rounded-t-[24px] border sm:max-w-[480px] sm:rounded-[20px]"
+        className={`dm-scroll relative z-[1] flex max-h-[calc(92dvh/var(--vz,1))] w-full flex-col overflow-hidden rounded-t-[24px] border sm:rounded-[20px] ${wide ? "sm:max-w-[560px]" : "sm:max-w-[480px]"}`}
         style={{
           borderColor: tint(40),
           background: `radial-gradient(120% 70% at 100% 0, ${tint(22)}, transparent 62%), ${surface}`,
@@ -97,6 +103,7 @@ export function FactSheet({ career, accent, title, more, source, onClose, childr
           </IconTip>
         </div>
 
+        <div className="dm-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
         <header className="flex flex-col gap-[4px] pt-[22px] pr-[64px] pl-[24px]">
           <p className="text-[12px] leading-[16px] font-bold uppercase tracking-[0.08em]" style={{ color: light }}>{career}</p>
           <h2 id={titleId} className="text-[24px] leading-[28px] font-extrabold" style={DISPLAY}>{title}</h2>
@@ -120,6 +127,10 @@ export function FactSheet({ career, accent, title, more, source, onClose, childr
             </div>
           )}
         </div>
+        </div>
+        {footer && (
+          <footer className="flex flex-none items-center justify-end gap-[10px] border-t px-[24px] py-[14px]" style={{ borderColor: "var(--glass-border)" }}>{footer}</footer>
+        )}
       </motion.div>
     </div>,
     document.body,
