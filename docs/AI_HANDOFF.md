@@ -1,3 +1,9 @@
+## 2026-10-20: Match: Business & Finance is always the first tab again (demo)
+
+**Why (Chandu, 20 Oct):** a demo run on Vercel picked Tech in Build and Match showed only Tech & Engineering: "Business and finance should be there", "it alters the demo." The 15 Oct rule (`96468c60`) showed Business & Finance only when it was picked in Build, so any Build without it hid the demo's Investment Banking path.
+- `V2Flow.tsx` `businessFirst` (DEMO-ONLY): always puts Business & Finance first and opens on it; the student's own worlds follow, nothing dropped. No-Build path unchanged (Business & Finance alone).
+- **Checked:** `/match-grid` on :3061 with Build seeded to Tech & Engineering only: tabs read Business & Finance, Tech & Engineering, Explore all; Investment Banking first. eslint clean.
+
 ## 2026-10-20: v4 on Black & Blue, a calm pass
 
 **Why (Chandu):** "v4 is still cluttered like hell. Use our design system, clean it up. It should not overwhelm the users, these are busy people with a huge caseload most of the time. We want everything to be easy and calm and simple to scan and look at without feeling like a bunch of numbers are jumping out at them." Asked which design system: "Black & Blue (like v7)".

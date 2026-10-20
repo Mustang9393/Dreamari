@@ -114,16 +114,14 @@ type State = {
   saved: string[];
   rank: string[];
 };
-// DEMO-ONLY: see the mount effect. Business & Finance leads the tabs when
-// the student picked it in Build; it is never added to picks that left it
-// out (Chandu, 15 Oct 2026: "if they pick other things in build dont show
-// it. Joshua will always pick business and finance in build so make sure
-// in that case business and finance is always there"). Until then this
-// prepended it to every set of picks, which is how a two-world Build
-// showed three tabs.
+// DEMO-ONLY: see the mount effect. Business & Finance always leads the tabs,
+// whatever was picked in Build (Chandu, 20 Oct 2026, after a demo run on
+// Vercel showed only Tech & Engineering: "Business and finance should be
+// there"). This undoes the 15 Oct rule that showed it only when picked:
+// the demo is built around Investment Banking, so a Build without it must
+// not hide it. The student's own worlds follow; nothing they chose is dropped.
 const BF = "Business & Finance";
 function businessFirst(s: State): State {
-  if (!s.worlds.includes(BF)) return s;
   return { ...s, worlds: [BF, ...s.worlds.filter((w) => w !== BF)], activeTab: BF };
 }
 
