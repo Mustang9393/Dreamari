@@ -64,14 +64,17 @@
    rules beat the older per-version card rules (v4's visual-refresh.css and
    layout2.css stack !important at high specificity) without editing them. */
 html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version][data-counselor-version], :is(.counselor-calm, [data-counselor-version]) .marketing-v2) {
-  --cc-glass: rgba(10, 14, 24, 0.52);
-  --cc-edge: rgba(255, 255, 255, 0.09);
+  /* navy glass on the dusk sky (21 Oct 2026, Chandu: "the color has to
+     cascade everywhere. Including counselor dashboards"); was a blue-black
+     rgba(10, 14, 24, 0.52) on the old black sky */
+  --cc-glass: rgba(19, 33, 58, 0.58);
+  --cc-edge: rgba(148, 194, 249, 0.14);
   --glass-surface-1: var(--cc-glass);
   --glass-surface-2: var(--cc-glass);
   --glass-surface-3: var(--cc-glass);
   --inset-surface: var(--cc-glass);
   --glass-border: var(--cc-edge);
-  --card: #0a0e17;
+  --card: #12203a;
   --six-surface: var(--cc-glass);
 }
 /* the surfaces: any panel painted with a surface token, plus the v4 and v6
@@ -129,7 +132,7 @@ html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version])
 /* Windows high contrast and anyone who asks for less transparency: solid */
 @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
   html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version][data-counselor-version]) {
-    --cc-glass: #0a0e17;
+    --cc-glass: #13213a;
   }
   html.look-v2:not(.light):not(#cc) :is(.counselor-calm, [data-counselor-version]) * {
     -webkit-backdrop-filter: none !important;

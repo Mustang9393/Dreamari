@@ -279,9 +279,11 @@ html.look-v2:not(.light) .event-card {
    the input sits on its light). Still opaque at the top edge, so labels
    keep their contrast. */
 html.look-v2 [data-tabbar] {
+  /* navy like the cards (21 Oct): the near-black slab looked heavy on the
+     dusk sky; it still carries the horizon light from below */
   background:
-    radial-gradient(70% 160% at 50% 170%, rgba(39, 128, 236, 0.38) 0%, rgba(17, 87, 172, 0.12) 55%, transparent 80%),
-    #03060c !important;
+    radial-gradient(70% 160% at 50% 170%, rgba(120, 170, 230, 0.3) 0%, rgba(110, 160, 220, 0.1) 55%, transparent 80%),
+    #12203a !important;
 }
 html.look-v2.light [data-tabbar] {
   background:
@@ -295,7 +297,15 @@ html.look-v2.light [data-tabbar] {
    to the same near-black. AuroraBackground's canvas paints its step accent
    as a bloom from the same point. */
 html.look-v2.dark [data-flow-space] {
-  background: #000105 !important;
+  /* the same dusk sky as the app (21 Oct): dark overhead, brighter toward
+     the horizon; the top nebula (light from above) is off in dark */
+  background:
+    radial-gradient(42% 18% at 50% 104%, rgba(190, 220, 252, 0.14) 0%, transparent 70%),
+    radial-gradient(78% 44% at 50% 108%, rgba(120, 170, 230, 0.34) 0%, rgba(110, 160, 220, 0.16) 42%, transparent 76%),
+    linear-gradient(180deg, #0f1c31 0%, #132440 32%, #1a3051 62%, #22406a 100%) !important;
+}
+html.look-v2.dark [data-flow-space] [data-nebula="1"] {
+  display: none;
 }
 html.look-v2 [data-flow-space] [data-nebula="2"],
 html.look-v2 [data-flow-space] [data-nebula="3"] {
@@ -469,6 +479,107 @@ html.look-v2 section[data-focal] {
    (20 Oct, the focal pass.) */
 html.look-v2 [data-row-id="simulations"] {
   margin-bottom: 18px;
+}
+
+/* ---------- 6. Dusk, not underwater (21 Oct 2026) ----------
+   Chandu, with the team's reference (the DREAMARI title slide): "the new
+   blue and black looks too gloomy and like its underwater. How can we make
+   it brighter? more inspirational?... This is the style of gradient the team
+   likes... incorporate reliably without using radial ones exclusively. Also
+   keep in mind contrast WCAG AA 2.2, usability". The reference is a plain
+   vertical gradient, deep navy at the top (#111f36) to soft sky blue at the
+   bottom (#4a7aab), one hue (212-217deg). Why ours read as underwater: light
+   fell from above onto near-black, which is what you see looking up from
+   deep water; a sky is darkest overhead and brightest at the horizon.
+
+   The sky everywhere, counselor dashboards included (21 Oct, Chandu: "the
+   color has to cascade everywhere. Including counselor dashboards"): the
+   same gradient, capped where text can still sit on it. Text lands directly on
+   this fixed backdrop (page titles, row headings, captions, links), so the
+   brightest point (the horizon bloom, below) stops at about #3c608f:
+   white 6.4:1, captions at 82% white about 5:1, page links in #cbe0fb
+   about 4.9:1 (the old #59a0f8 would be 2.4:1 there). The full
+   reference brightness is used only where the text is controlled: the
+   landing hero. No radial light from above. Stars stay near the top, where
+   a dusk sky has them. */
+html.look-v2:not(.light) [data-app-backdrop] {
+  /* the horizon bloom (21 Oct, Chandu: "can we have brighter glow on the
+     gradient where it gets lighter?... the whole light bloom thing isnt
+     there anymore"): the reference's brightest point is a glow low in the
+     sky behind Dreamy, so the bloom comes back there, centred just below
+     the screen edge so its brightest part meets the bottom and fades up.
+     Its peak on screen is about #3c608f, the brightest text-safe sky:
+     white 6.4:1, captions at 82% white about 5:1, page links #cbe0fb
+     about 4.9:1. */
+  background:
+    radial-gradient(42% 18% at 50% 104%, rgba(190, 220, 252, 0.14) 0%, transparent 70%),
+    radial-gradient(78% 44% at 50% 108%, rgba(120, 170, 230, 0.34) 0%, rgba(110, 160, 220, 0.16) 42%, transparent 76%),
+    linear-gradient(180deg, #0f1c31 0%, #132440 32%, #1a3051 62%, #22406a 100%) !important;
+}
+html.look-v2:not(.light) body {
+  background: #0f1c31;
+}
+html.look-v2:not(.light) {
+  --background: #0f1c31;
+  --color-surface-page: #0f1c31;
+  --color-surface-card: #13213a;
+  --color-text-brand: #cbe0fb;
+  --color-match-toast-link: #cbe0fb;
+  --color-match-toast-link-dark: #cbe0fb;
+  --color-glass-surface-1: rgba(21, 36, 60, 0.94);
+  --color-glass-surface-2: rgba(30, 48, 78, 0.95);
+  --color-glass-surface-3: rgba(16, 28, 48, 0.96);
+  --color-glass-surface-raised: rgba(34, 53, 85, 0.95);
+}
+/* Navy surfaces on a navy sky (near-black cards read as holes there), each
+   step lighter than the one below; still near-opaque so stars never show
+   through. */
+html.look-v2:not(.light) .marketing-v2 {
+  --background: #0f1c31;
+  --card: #13213a;
+  --surface: #142338;
+  --muted: rgba(21, 36, 60, 0.94);
+  --secondary: rgba(30, 48, 78, 0.95);
+  --glass-surface-1: rgba(21, 36, 60, 0.94);
+  --glass-surface-2: rgba(30, 48, 78, 0.95);
+  --glass-surface-3: rgba(16, 28, 48, 0.96);
+  --inset-surface: rgba(34, 53, 85, 0.94);
+  --glass-border: rgba(148, 194, 249, 0.14);
+  --border: rgba(148, 194, 249, 0.14);
+  --muted-foreground: rgba(255, 255, 255, 0.82);
+  --accent-subtle: #cbe0fb;
+  --poster-scrim: linear-gradient(180deg, rgba(9, 17, 32, 0) 0%, rgba(9, 17, 32, 0.55) 30%, rgba(9, 17, 32, 0.86) 51%, #091120 100%);
+}
+html.look-v2:not(.light) .event-card {
+  --ev-ground: #0e1a2e;
+}
+
+/* The landing: the page is navy; the hero carries the team's gradient at
+   full strength (deep navy to #4a7aab behind Dreamy), fading into the page
+   below so there is no seam. Its text is the big white wordmark, one line of
+   body copy high up (on #1e375a, 5.7:1 at 74%) and the sky-blue button
+   (3.6:1 against the light behind it). */
+html.look-v2 [data-landing-wash] {
+  background: #0f1c31 !important;
+}
+html.look-v2 [data-hero-surface] {
+  display: block !important;
+  opacity: 1 !important;
+  background: linear-gradient(180deg, #111f36 0%, #172a46 22%, #1e375a 45%, #2b4b78 62%, #3a6290 76%, #4a7aab 88%, rgba(74, 122, 171, 0) 100%) !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+html.look-v2 [data-hero-glow] {
+  display: none;
+}
+
+/* Build's quiet lines (the footnote under the step, "Skip"): 62% white at
+   60% opacity is effectively 37% white, about 2.8:1 on the dusk sky (and
+   3.2:1 on the old black, so failing AA either way). At full opacity they
+   are 62% white, 5.3:1 on the lowest part of the sky, still quieter than
+   the actions. (21 Oct 2026.) */
+html.look-v2:not(.light) [data-quiet-flow-text] {
+  opacity: 1 !important;
 }
 
 /* ---------- 4. Controls ---------- */

@@ -1,3 +1,18 @@
+## 2026-10-21: Black & Blue becomes a dusk sky (the team's gradient), not underwater
+
+**Why (Chandu, with the team's DREAMARI title slide):** "the new blue and black looks too gloomy and like its underwater. How can we make it brighter? more inspirational? This is the style of gradient the team likes... incorporate reliably without using radial ones exclusively. Also keep in mind contrast WCAG AA 2.2, usability". The reference is one vertical gradient, #111f36 at the top to #4a7aab at the bottom (212-217deg). Ours read as underwater because the light fell from above onto near-black; a sky is darkest overhead and brightest at the horizon.
+
+- **Student app sky** (look-v2.css section 6): the app backdrop is a linear gradient #0f1c31 to #27446e, no radial light from above. It is capped there because text sits directly on the fixed backdrop: white 9.8:1, captions now 74% white (6.3:1; 62% would fail near the bottom), on-page links #94c2f9 (5.1:1; the old #59a0f8 was 3.65:1 there). Stars stay near the top.
+- **Navy surfaces:** cards, glass and inset surfaces move from near-black to navy (#13213a and up), still near-opaque and each step lighter; borders become a faint sky-blue line. Poster scrims and event tickets follow. Page `--background` is #0f1c31.
+- **Landing hero:** the team's gradient at full strength (#111f36 to #4a7aab behind Dreamy), fading into the navy page below; the radial hero glow is off.
+- **Splash dialogs and Build/Match:** the same dusk direction, capped at #27446e because they carry small text and the sky-blue button (3.6:1 against it). Build's canvas now raises the step accent from the horizon instead of from above; the top nebula is off in dark.
+- **Build's quiet lines** (footnote, Skip) were 62% white at 60% opacity, about 2.8:1 (3.2:1 even on the old black); now full opacity, 5.3:1.
+- **Horizon bloom** (Chandu: "can we have brighter glow on the gradient where it gets lighter?... the whole light bloom thing isnt there anymore"): a glow centred just below the screen edge, brightest where it meets the bottom, peaking about #3c608f on screen (the brightest text-safe sky). Captions went to 82% white and on-page links to #cbe0fb to keep about 5:1 there.
+- **Everywhere, counselor dashboards included** (Chandu: "the color has to cascade everywhere. Including counselor dashboards"): the counselor's calm sky gets the same dusk gradient and bloom (still still, so its blur stays cheap), and its glass (calm.css, v7.css) moves from blue-black to navy rgba(19, 33, 58, 0.58), menus and dialogs #12203a. The phone/tablet tab bar is navy too.
+- **Not changed:** light mode, Classic.
+- Noted, not changed: on Explore at laptop width, content scrolling up shows behind the DREAMARI logo at top-left (that corner of the header has no background); to check against Classic.
+- Checked: tsc; landing, Home, Explore, Build and the counselor dashboard (v4) in dark (`dusk-*.jpg`). Pushed to main on Chandu's go-ahead.
+
 ## 2026-10-21: merge note, v4 Review and Messages follow v7's new desks
 
 The other session's push (6a3dc7e7) rebuilt v7's Reviews as a readable document desk and gave `V5Messages` a `desk` layout, the same asks Chandu made of v4. When rebasing, v4 took theirs: the Review tab renders v7's `Reviews` (exported, still narrowed by v4's grade picker and milestone links through `only` and `milestone`), with v4's "N of M reviewed today" bar above it. Messages renders `<V5Messages desk />`. The `docFirst` and `docBar` props and the `calm` inbox mode described below were dropped in favor of those.

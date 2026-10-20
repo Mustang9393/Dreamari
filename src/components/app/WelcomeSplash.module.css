@@ -159,10 +159,8 @@
 :global(html.look-v2) .scrim {
   --t1: 89, 160, 248 !important;
   --t2: 39, 128, 236 !important;
-  background:
-    radial-gradient(46% 38% at 50% 30%, rgba(158, 198, 250, 0.2), transparent 70%),
-    radial-gradient(70% 62% at 50% 34%, rgba(39, 128, 236, 0.42), rgba(17, 87, 172, 0.16) 48%, transparent 78%),
-    color-mix(in srgb, #000105 74%, transparent);
+  /* dusk, not underwater (21 Oct 2026): the page dims to the navy sky */
+  background: color-mix(in srgb, #0f1c31 78%, transparent);
 }
 :global(html.look-v2) .scrim::before {
   content: "";
@@ -182,12 +180,13 @@
    by the button, as reference 1's screen is lit from within. White text over
    the brightest part stays above 10:1. */
 :global(html.look-v2) .dialog {
-  background:
-    radial-gradient(36% 22% at 50% 12%, rgba(158, 198, 250, 0.42), transparent 75%),
-    radial-gradient(62% 40% at 50% 8%, rgba(89, 160, 248, 0.62), rgba(39, 128, 236, 0.26) 52%, transparent 82%),
-    radial-gradient(100% 70% at 50% 0%, rgba(23, 106, 207, 0.3), transparent 78%),
-    #03060c;
-  border-color: rgba(89, 160, 248, 0.22);
+  /* The team's gradient (21 Oct 2026, "too gloomy and like its
+     underwater"): dark navy at the top, brightening toward the button, the
+     way the reference brightens toward Dreamy. Capped at #27446e at the
+     bottom so the sky-blue button keeps 3.6:1 against it and the small text
+     stays AA. */
+  background: linear-gradient(180deg, #111f36 0%, #172a46 35%, #1e375a 68%, #27446e 100%);
+  border-color: rgba(148, 194, 249, 0.2);
 }
 :global(html.look-v2.light) .dialog {
   background:

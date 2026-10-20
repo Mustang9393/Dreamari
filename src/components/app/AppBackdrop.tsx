@@ -14,6 +14,7 @@ export function AppBackdrop({ calmSky = false }: { /** a still sky that lights u
     <div
       aria-hidden
       data-app-backdrop
+      data-calm-sky={calmSky || undefined}
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       style={{
         // the app's own field (the one the screens had before), quieter than the

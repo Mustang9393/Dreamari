@@ -304,6 +304,7 @@ export function QuestionHeading({
 export function Citation({ children }: { children: ReactNode }) {
   return (
     <p
+      data-quiet-flow-text
       className="mt-2 bg-transparent text-center text-[11px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] opacity-60"
       style={{ background: "transparent" }}
     >
@@ -368,6 +369,7 @@ export function StepFooter({
         <button
           type="button"
           onClick={onSkip}
+          data-quiet-flow-text
           className="dm-link cursor-pointer text-[13px] font-semibold text-[var(--color-night-muted-foreground)] opacity-60 transition-opacity hover:opacity-90"
         >
           Skip
