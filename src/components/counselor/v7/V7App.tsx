@@ -24,7 +24,6 @@ import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordma
 import { IconTip } from "@/components/app/IconTip";
 import { setCounselorBase } from "@/lib/counselorBase";
 import { V5Profile } from "../v5/Profile";
-import { V5Workspace } from "../v5/Workspace";
 import { ExploreSheetHost } from "../v5/ExploreSheets";
 import { LogSheetHost } from "../v5/LogSheet";
 import "../v5/v5.css";
@@ -36,6 +35,7 @@ import { V7Explore } from "./Explore";
 import { V7Prepare } from "./Prepare";
 import { V7Opportunities } from "./Opportunities";
 import { V7Analytics } from "./Analytics";
+import { V7Workspace } from "./Workspace";
 import { OppSheetHost } from "./OppSheets";
 import { V7CareerSheet, V7SchoolSheet } from "./ExploreFactSheets";
 import { v7 } from "./ui";
@@ -71,7 +71,8 @@ export function V7App({ view }: { view: string | undefined }) {
   const onProfile = view === "profile";
   const onReviews = view === "reviews" || view === "workspace";
   const active: V7View = V7_VIEWS.includes(view as V7View) ? (view as V7View) : onReviews ? "home" : "home";
-  const navLabel = onProfile ? "Profile" : onReviews ? "Home" : LABEL[active];
+  // the workspace is not a tab: no tab claims it (it said Home before)
+  const navLabel = onProfile ? "Profile" : onReviews ? "" : LABEL[active];
   return (
     <div className="marketing-v2 themeable counselor-calm relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
       <AppBackdrop calmSky />
@@ -102,7 +103,7 @@ export function V7App({ view }: { view: string | undefined }) {
         {onProfile ? (
           <V5Profile />
         ) : onReviews ? (
-          <V5Workspace key={tab} initial={tab ?? "reviews"} />
+          <V7Workspace key={tab} initial={tab ?? "reviews"} />
         ) : active === "home" ? (
           <V7Home />
         ) : active === "students" ? (

@@ -1,3 +1,11 @@
+## 2026-10-20: Counselor v7, Reviews focus mode and hero card constellations
+
+**Why (Chandu):** "the reviews workspace... The UI needs to be much more premium, cleaner, calmer and useable"; on the Home summary cards: "better hover states... maybe some stars align into a constellation... Subtly but there? More magical", then "keep them more off frame bottom right, but better stars, not flat dots and lines, more like real stars".
+
+- **Workspace (`v7/Workspace.tsx`, replaces v5's in v7):** the title is the place (Reviews, Messages, Documents) with one switch on the title row; the top bar no longer marks Home on these pages. Reviews is a focus mode: the document, sized to the screen, and one frosted panel: "1 of N" with previous/next (the full queue opens from it), the student, their note (and your last ask on a second try), sent and due on one line, feedback, Approve / Ask for changes, Undo. Status and top career left the panel (they lead the profile). Same review store as every build. Messages and Documents are still v5's inside the new shell (next).
+- **Constellations (`v7/Constellation.tsx`, v7.css):** each Home summary card has a figure (check mark, Cassiopeia's W, a gathering figure) rising off its bottom-right edge, cropped by the card. Stars drawn like the night sky's: white core, blue halo, four-point glints on the brightest, each with its own magnitude. Dim and loose at rest; on hover or focus they drift into place, brighten, the faint lines fade in and the bright stars twinkle. Radial gradients only, no blur; no drift or twinkle for reduced motion; blue stars without glints in light mode.
+- Checked: tsc clean; browser at desktop (and Reviews at phone width).
+
 ## 2026-10-20: Reactive night sky, app-wide; counselor v7 round 4 (lists, Explore, sheets, cards, glass)
 
 **Why (Chandu):** "can we make the stars move or react in a cool way somehow when there is a valuable interaction made?", then "lets add the reactive stars to the student app as well and push live please. Saves, add to top 3 etc stuff like that and main ctas", "identify candidates... fire in a lot of places just not so much that it gets boring and overused", "after the build, match, top 3, etc etc. Maybe even when pages load up?"

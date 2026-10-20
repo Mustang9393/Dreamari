@@ -33,6 +33,7 @@ import { Coverflow } from "../v5/Coverflow";
 import { openCareer } from "../v5/ExploreSheets";
 import { mondayOf, useAllMeetings, inWeek } from "./data";
 import { catalog, matchesFor } from "./oppCatalog";
+import { Constellation, FIGURES } from "./Constellation";
 import { openOpp, shareOpp } from "./OppSheets";
 import { SECTIONS, CARD, CARD_STYLE, DISPLAY, FIGURE, MUTED, OVERLINE, PrimaryButton, SectionHead, TITLE, v7 } from "./ui";
 
@@ -75,11 +76,11 @@ export function V7Home() {
         </div>
 
         <div className="grid grid-cols-1 gap-[var(--space-5)] md:grid-cols-3 lg:gap-[var(--space-6)]">
-          <Stat href={v7("reviews")} label="Reviews" value={snap.pendingTotal} go="Start reviewing"
+          <Stat figure="reviews" href={v7("reviews")} label="Reviews" value={snap.pendingTotal} go="Start reviewing"
             line={snap.pending[0] ? <>Most: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{snap.pending[0].key}</span></> : "All caught up"} />
-          <Stat href={v7("prepare")} label="Meetings this week" value={thisWeekLeft} go="View schedule"
+          <Stat figure="meetings" href={v7("prepare")} label="Meetings this week" value={thisWeekLeft} go="View schedule"
             line={nextStudent ? <>Next: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{nextStudent.name}</span> · {nextWhen}</> : "Nothing booked"} />
-          <Stat href={v7("students", "&status=need")} label="Students who need you" value={snap.needYou.length} go="Review students"
+          <Stat figure="people" href={v7("students", "&status=need")} label="Students who need you" value={snap.needYou.length} go="Review students"
             line={snap.atRisk ? <><span aria-hidden className="mr-[7px] inline-block size-[7px] rounded-full align-[1px]" style={{ background: "var(--color-feedback-danger-solid)" }} /><span className="font-semibold" style={{ color: "var(--foreground)" }}>{snap.atRisk}</span> at risk</> : "None at risk"} />
         </div>
       </section>
@@ -104,11 +105,11 @@ export function V7Home() {
  *  is biggest, who is next, how many are at risk). The text link at the foot
  *  became a corner arrow: the whole card is the link, the arrow says so, and
  *  no words compete with the page's one lit action. */
-function Stat({ href, label, value, line, go }: { href: string; label: string; value: number; line: React.ReactNode; go: string }) {
+function Stat({ href, label, value, line, go, figure }: { href: string; label: string; value: number; line: React.ReactNode; go: string; /** the card's hover constellation */ figure: keyof typeof FIGURES }) {
   const shown = useCountUp(value);
   return (
     <HoverBeam strength={0.6}>
-      <Link href={href} aria-label={`${value} ${label.toLowerCase()}. ${go}`} className={`dm-tap group relative flex h-full flex-col gap-[var(--space-2)] p-[var(--space-6)] ${CARD}`} style={CARD_STYLE}>
+      <Link href={href} aria-label={`${value} ${label.toLowerCase()}. ${go}`} className={`dm-tap group relative flex h-full flex-col gap-[var(--space-2)] overflow-hidden p-[var(--space-6)] ${CARD}`} style={CARD_STYLE}>
         <span className="flex items-center justify-between gap-[var(--space-3)]">
           <span className="text-[14px] font-semibold" style={MUTED}>{label}</span>
           <span aria-hidden className="flex size-[32px] flex-none items-center justify-center rounded-full border transition-colors group-hover:border-[color:var(--primary)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -116,7 +117,8 @@ function Stat({ href, label, value, line, go }: { href: string; label: string; v
           </span>
         </span>
         <span className={`${FIGURE} pt-[var(--space-2)]`} style={DISPLAY}><span className="sr-only">{value}</span><span aria-hidden>{shown}</span></span>
-        <span className="truncate text-[14px] leading-[20px]" style={MUTED}>{line}</span>
+        <span className="relative z-[1] truncate text-[14px] leading-[20px]" style={MUTED}>{line}</span>
+        <Constellation figure={figure} />
       </Link>
     </HoverBeam>
   );
