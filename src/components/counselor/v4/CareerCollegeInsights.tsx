@@ -86,7 +86,7 @@ import type { ProfileCareer } from "@/components/profile/data";
 import type { CatalogCareer } from "@/components/app/catalog";
 import { majorPoster, programmeMajor, savedMajorsFor } from "./majors";
 import { useChartColors } from "./ChartColors";
-import { Treemap } from "./charts/insightViz";
+
 import { FlowSankey } from "./charts/ivFlow";
 import "./insights.css";
 import "./insights2.css";
@@ -234,6 +234,7 @@ function InterestRows() {
   const scope = useInsightsScope();
   const { roster, all, back, scopeLabel, year } = scope;
   const [majorMode, setMajorMode] = useState<"saved" | "schools">("saved");
+  const [allMajors, setAllMajors] = useState(false);
   const [allSchools, setAllSchools] = useState(false);
   const router = useRouter();
   const [drill, setDrill] = useState<StudentsDrill | null>(null);
@@ -379,7 +380,20 @@ function InterestRows() {
           </header>
           {(majorMode === "saved" ? savedMajors : exploredMajors).length === 0
             ? <p className="v4-cc-empty">{majorMode === "saved" ? `No saved majors for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet.`}</p>
-            : <Treemap items={majorItems} onOpen={(open) => open()} />}
+            : <>
+              {/* ranked rows, the same as Top Schools beside it (21 Oct
+                 2026, Chandu: "declutter a lot more"): the treemap's wall of
+                 tiles read as noise; each row still opens its students */}
+              <ol className="v4-iv-schools">
+                {(allMajors ? majorItems : majorItems.slice(0, 5)).map((m) => (
+                  <li key={m.key}><IconTip label={m.tip} className="w-full"><button type="button" onClick={() => m.data()} className="v4-iv-school is-major" aria-label={m.aria}>
+                    <span className="v4-iv-school-copy"><strong>{m.label}</strong></span>
+                    <span className="v4-iv-school-who" aria-hidden><b>{m.value}</b><small>{majorMode === "saved" ? "saved" : "exploring"}</small></span>
+                  </button></IconTip></li>
+                ))}
+              </ol>
+              <ShowAll total={majorItems.length} shown={5} open={allMajors} onToggle={() => setAllMajors((v) => !v)} />
+            </>}
         </div>
       </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />

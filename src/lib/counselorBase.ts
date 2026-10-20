@@ -20,10 +20,12 @@ export function setCounselorBaseV4(): void {
 function v4View(view: string, extra: string): [string, string] {
   if (view === "profile") return ["settings", ""];
   if (view === "prepare") {
-    if (/studentId=/.test(extra)) return ["students", extra.replace(/&tab=[^&]*/, "")];
+    // a student's meeting brief, v7's Prepare (20 Oct 2026: v4's Prepare
+    // matches v7's, so Prepare on a meeting opens the same brief)
+    if (/studentId=/.test(extra)) return ["meetings", extra.replace(/&tab=[^&]*/, "")];
     // v5's This Week and Needs a Meeting are v4's Prepare > Meetings (9 Oct 2026)
     if (/tab=(week|needs)/.test(extra)) return ["meetings", extra.replace(/&tab=week/, "").replace(/&tab=needs/, "&tab=outreach")];
-    return ["overview", extra.replace(/&tab=[^&]*/, "")];
+    return ["meetings", extra.replace(/&tab=[^&]*/, "")];
   }
   if (view === "students" && /tab=(progress|milestones)/.test(extra)) return ["milestones", extra.replace(/&tab=progress/, "&mode=student").replace(/&tab=milestones/, "")];
   if (view === "students" && /tab=checkins/.test(extra)) return ["overview", ""];

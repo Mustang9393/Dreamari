@@ -105,7 +105,7 @@ export function V7Home() {
  *  is biggest, who is next, how many are at risk). The text link at the foot
  *  became a corner arrow: the whole card is the link, the arrow says so, and
  *  no words compete with the page's one lit action. */
-function Stat({ href, label, value, line, go, figure }: { href: string; label: string; value: number; line: React.ReactNode; go: string; /** the card's hover constellation */ figure: keyof typeof FIGURES }) {
+export function Stat({ href, label, value, line, go, figure }: { href: string; label: string; value: number; line: React.ReactNode; go: string; /** the card's hover constellation */ figure: keyof typeof FIGURES }) {
   const shown = useCountUp(value);
   return (
     <HoverBeam strength={0.6}>

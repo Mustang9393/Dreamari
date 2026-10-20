@@ -59,7 +59,6 @@
 // filters scope the live period; the fixed history periods are the Replit's
 // whole-caseload figures (their drills show the breakdown without a list).
 
-import { CountUp } from "./InsightCharts";
 import { ImpactPublication } from "./ImpactPublication";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { CheckCircle2, ChevronRight, FileBarChart, Mail, Copy } from "lucide-react";
@@ -76,11 +75,10 @@ import { HeadingControls } from "./Workspace";
 import { useRouter } from "next/navigation";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { Listbox } from "./Listbox";
-import { IconTip } from "@/components/app/IconTip";
 import { useInsightsScope } from "./insightsScope";
 import { InsightStudentsPanel, type StudentsDrill } from "./InsightStudents";
 import { AscaAlignment, SectionTitle, UseOfTime, timeGroups, TIME_CATEGORIES, TIME_SHADE } from "./ImpactSections";
-import { DotConstellation, GoalRose, MarginMarker, TimeFlow, WinClock, WinFlow, WinGauge, WinLiftTrack, WinPath, WinStep } from "./charts/impactViz";
+import { GoalRose, MarginMarker, TimeFlow, WinClock, WinFlow, WinGauge, WinLiftTrack, WinPath, WinStep } from "./charts/impactViz";
 import { ASCA_TARGET_PCT } from "@/lib/counselorTimeLog";
 import "./insights2.css";
 
@@ -462,24 +460,34 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
          and group pickers, not a second control row (20 Oct 2026
          composition pass); the date range moved to the hero's overline */}
       <HeadingControls>
-        <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={periods.map((p) => ({ value: p.key, label: p.current ? `This semester (${p.label})` : p.label }))} className="v4-period-select" />
-        <button className="v4-secondary-action" onClick={() => setReport("principal")}>Principal Report</button>
-        <button className="v4-primary-action" onClick={() => setReport("impact")}><FileBarChart size={15}/>Export Impact Report</button>
+        <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={periods.map((p) => ({ value: p.key, label: p.current ? `${p.label} (now)` : p.label }))} className="v4-period-select" />
       </HeadingControls>
-      {/* 2. Student Progress: the hero, unchanged (it matches her image). */}
-      <section className="v4-impact-cover" aria-label="Student Progress">
-        <div className="v4-impact-story"><span className="v4-overline">Student Progress · {v.range} · {who_ === "school" ? `Prepared by ${name}` : who}</span><h2>Moving Toward<br/><em>What’s Next</em></h2><p>{v.onTrack} of {live && scope.scopeLabel ? `these ${v.caseload}` : `${our} ${v.caseload}`} students are on track{v.onTrackPct !== SCHOOL_AVG_ON_TRACK ? `, ${Math.abs(v.onTrackPct - SCHOOL_AVG_ON_TRACK)} points ${v.onTrackPct > SCHOOL_AVG_ON_TRACK ? "above" : "below"} the school's ${SCHOOL_AVG_ON_TRACK}%` : ", the same as the school"}.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
-        {/* One dot per student, the on-track ones lit clockwise (the page's one glow). */}
-        <IconTip label={live ? `See the ${notOnTrack.length} students not on track` : "See the breakdown"} className="justify-self-center w-full max-w-[300px] justify-center">
-        <button className="iv-orbit dm-quiet" onClick={() => open(drills.onTrack())} aria-label={`On-track rate ${v.onTrackPct} percent, ${v.onTrack} of ${v.caseload} students. Open details`}>
-          <span className="iv-orbit-disc">
-            <DotConstellation lit={v.onTrack} total={v.caseload} />
-            <span className="iv-orbit-center"><strong><CountUp value={v.onTrackPct}/><small>%</small></strong></span>
-          </span>
-          <em className="iv-orbit-caption">on track · {v.onTrack} students</em>
-        </button>
-        </IconTip>
-        <div className="v4-impact-priority"><span className="v4-overline">Next step</span><strong><CountUp value={v.exploring}/></strong><p className="v4-impact-priority-label">students still exploring<br/>their next step</p><button className="v4-text-action" onClick={() => open(drills.exploring())}>View student list <Go/></button></div>
+      {/* 2. Student Progress as one sentence (20 Oct 2026 reinvention,
+         Chandu: "drastically change the amount of information and cognitive
+         overload without causing confusion or losing valuable data ...
+         Reduce copy as much as possible"). The serif title, the dot flower
+         and the Next Step column said the on-track share three ways; now
+         the share leads, the school comparison sits beside it, and the
+         count, the exploring students and the period are one line of facts.
+         Every figure still opens its students. The two reports moved here
+         from the title row, so the title row holds only filters. */}
+      <section className="v4r-hero v4r-impact-hero" aria-label="Student Progress">
+        <div className="v4r-say">
+          <p className="v4r-hello">{v.range} · {who_ === "school" ? `Prepared by ${name}` : who}</p>
+          <h2 className="v4r-say-line">
+            <button type="button" className="v4r-say-fig" onClick={() => open(drills.onTrack())} aria-label={`On-track rate ${v.onTrackPct} percent, ${v.onTrack} of ${v.caseload} students. Open details`}><b>{v.onTrackPct}%</b></button> of {live && scope.scopeLabel ? "these" : our} students on track
+            <span className={`v4r-trend${v.onTrackPct >= SCHOOL_AVG_ON_TRACK ? " is-up" : ""}`}>{v.onTrackPct === SCHOOL_AVG_ON_TRACK ? `Same as the school's ${SCHOOL_AVG_ON_TRACK}%` : `${v.onTrackPct > SCHOOL_AVG_ON_TRACK ? "↗" : "↘"} ${Math.abs(v.onTrackPct - SCHOOL_AVG_ON_TRACK)} pts vs school's ${SCHOOL_AVG_ON_TRACK}%`}</span>
+          </h2>
+          <p className="v4r-say-facts">
+            <button type="button" onClick={() => open(drills.onTrack())}><b>{v.onTrack}</b> of {v.caseload} students</button>
+            <span aria-hidden>·</span>
+            <button type="button" onClick={() => open(drills.exploring())}><b>{v.exploring}</b> still exploring their next step</button>
+          </p>
+        </div>
+        <div className="v4r-hero-actions">
+          <button className="v4-secondary-action" onClick={() => setReport("principal")}>Principal Report</button>
+          <button className="v4-primary-action" onClick={() => setReport("impact")}><FileBarChart size={15}/>Export Impact Report</button>
+        </div>
       </section>
 
       {/* 3. ASCA Alignment */}

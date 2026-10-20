@@ -51,12 +51,16 @@ export function V7Workspace({ initial }: { initial?: string }) {
 type Item = { student: CounselorStudent; milestone: MilestoneKey };
 const URGENCY = { "At Risk": 0, "Needs Attention": 1, "On Track": 2 } as const;
 
-function Reviews() {
+/** `only` and `milestone` narrow the queue (v4 borrows this desk for its
+ *  Review tab, 20 Oct 2026, with its grade picker and milestone links);
+ *  v7 passes neither. */
+export function Reviews({ only, milestone }: { only?: (s: CounselorStudent) => boolean; milestone?: MilestoneKey } = {}) {
   const roster = useReviewedRoster();
   // every submission waiting, students who need the most support first
   const queue = useMemo<Item[]>(() => roster
-    .flatMap((s) => MILESTONE_KEYS.filter((k) => s.milestones[k] === "Pending Review").map((k) => ({ student: s, milestone: k })))
-    .sort((a, b) => URGENCY[a.student.status] - URGENCY[b.student.status]), [roster]);
+    .filter((s) => !only || only(s))
+    .flatMap((s) => MILESTONE_KEYS.filter((k) => s.milestones[k] === "Pending Review" && (!milestone || k === milestone)).map((k) => ({ student: s, milestone: k })))
+    .sort((a, b) => URGENCY[a.student.status] - URGENCY[b.student.status]), [roster, only, milestone]);
   // a link can open one submission: &studentId=, &milestone=, or both
   const params = useSearchParams();
   const [current, setCurrent] = useState(() => {

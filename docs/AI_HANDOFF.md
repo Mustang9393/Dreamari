@@ -1,3 +1,145 @@
+## 2026-10-21: merge note, v4 Review and Messages follow v7's new desks
+
+The other session's push (6a3dc7e7) rebuilt v7's Reviews as a readable document desk and gave `V5Messages` a `desk` layout, the same asks Chandu made of v4. When rebasing, v4 took theirs: the Review tab renders v7's `Reviews` (exported, still narrowed by v4's grade picker and milestone links through `only` and `milestone`), with v4's "N of M reviewed today" bar above it. Messages renders `<V5Messages desk />`. The `docFirst` and `docBar` props and the `calm` inbox mode described below were dropped in favor of those.
+
+## 2026-10-21: v4 declutter, round 2 (right-aligned controls, rows everywhere, folded sections quiet)
+
+**Why.** Chandu: "the tabs everything are also aligned right for some reason. Please declutter a lot more whatever im seeing on the preview is still horrible." His preview pane is about 1186px wide, so the page controls wrapped to a second line and `margin-left:auto` pushed them right.
+
+**What changed.**
+- **Title row.** The tabs take the rest of their line, so controls sit at the right when they fit and start at the left when they wrap.
+- **Directory.** Rows went from 80px to 64px. The per-milestone pips are hidden; the "1 / 11" count stays, and each milestone's state is on the profile.
+- **Milestones.**
+  - The List view (one row a milestone) is the default. The record key is now `dreamari:milestones-view-2`, so returning visitors land on rows too.
+  - Charts stays one click away in the view tools.
+  - The toolbar moved onto the title row.
+- **College & Career.** The Top Majors treemap became ranked rows like Top Schools: five shown, "Show all 10", and each row still opens its students.
+- **Home.** The Most Played sims run four across from 1000px (was 1200px), so they are no longer two huge cards at laptop width.
+- **Meetings.** Past meetings to log moved under the week's agenda.
+- **Review.** The decision panel is 300px below 1280px, so the document keeps its width.
+- **Messages** (`V5Messages` calm mode):
+  - One line a row: face, name, question, date.
+  - Eight rows show, with "Show all N to answer".
+  - The Reply label is hidden; the field's placeholder says it.
+- **Assist.** The progress bar never starts at 0. DEMO-ONLY: `DONE_EARLIER = 2` in AssistSession.
+- **Folded sections** (ASCA Alignment, District Goals and the like) render as quiet header lines, not empty cards. This is a `:has()` rule in reinvent.css that catches any card whose only child holds a collapsed toggle.
+- **Run bars.** All are a compact 200px.
+
+**Validation.** tsc and eslint are clean (the one known warning: the unused `InboxPanel`). Checked in the browser pane at about 1186px on Milestones, Directory, Messages, My Impact and College & Career. Nothing is committed or pushed.
+
+## 2026-10-21: v4 title row, type scale and Messages density
+
+**Why.** Chandu on the Review title row: "This is badly laid out. Please fix. Also things are still super dense on the v4 side. Please do better hierarchy, scale some things down." Then: "especially messages is super messed up and dense and really A LOT of information on a screen."
+
+The root of the layout bug: his screen runs the app-wide 125% zoom (globals.css, at 1800px and wider). The 34px page tabs drew at about 42px, and the page's controls fell onto a second row of their own, right-aligned under empty space.
+
+**What changed.**
+- **One type ladder** (reinvent.css): page tabs 26px, section titles 19px, body 14px. Home's greeting is 28 to 34px and the headline sentences are 24 to 30px. Cards are 26px padded (was 32).
+- **Page tabs and controls share one row.** The controls (segmented, pickers and buttons) are a compact 36px and 13px. Meetings' toolbar moved onto the title row too (HeadingControls).
+- **Review.** The progress bar sits left of Full screen above the document, through the new `docBar` prop on v7's `Reviews`. The repeated "Academic Plan · Lily Santos" line is gone.
+- **Readiness.** The folded Gaps card (an empty box) is now "Show gaps" at the end of the facts line, and the card renders only when open.
+- **Messages.** `V5Messages` gained a `calm` prop; v5 and v7 render as before. In v4:
+  - The "Questions / N to answer" header and the "To answer" label are gone; the bar counts them.
+  - Six questions show, with "Show all N to answer".
+  - Rows drop the grade, which the open panel shows.
+  - Answered and Your messages fold behind "Show answered (N)".
+
+**Validation.** tsc and eslint are clean. Checked at 1800 wide (125% zoom) on Review, Readiness, Meetings and Messages. Nothing is committed or pushed.
+
+## 2026-10-21: v4 Home back, v7's hero cards, Prepare matched to v7, a readable review document
+
+**Why.** Chandu, on the reinvented Home: "Lets revert to what the home page was before this. I dont like the new design." Then: "match the prepare stuff to the v7 as much as possible. I think its better done there. keep the progress bar, never start at 0 though." Then: "lets use the same hero cards from v7 in v4." On Review he said: "it should obvious that the preview can be opened or zoomed ... its too zoomed out to be valuable ... make the canvas large and zoom in so its readable and make the message smaller ... Right now the preview is just visual noise."
+
+**What changed.**
+- **Home.** Overview.tsx is back to the committed version (the greeting, cards, saved careers and Most Played sims). Most Played left Engagement again so it is not shown twice. The three cards are now v7's own `Stat` (exported from v7/Home.tsx), fed by v4's numbers, which the grade filter still narrows:
+  - Reviews, with the biggest queue named.
+  - Meetings this week, with who is next.
+  - Students who need you, with the at-risk count. This card still opens Students on the At Risk filter.
+
+  The "N new since yesterday" line left with v4's old card. It was a DEMO-ONLY stand-in.
+- **Meetings.** Upcoming is v7's agenda (`V7Prepare`): the week by day, prep status, requests to confirm or suggest a time, Agenda or Calendar, and availability. v4 keeps the tools v7 has no place for:
+  - Past meetings to log (`ToLog`, now exported) above the agenda.
+  - Needs Outreach.
+  - Book and Log a walk-in.
+
+  Prepare on a meeting opens the v5 brief, as it does in v7. In v4, `prepare&studentId` now routes to `meetings&studentId` in counselorBase's v4View, and plain `prepare` goes to Meetings.
+- **v7 links inside v4.** v7/ui's `v7()` now goes through `cv()`. In v7 the address is unchanged; inside v4 the links stay in v4.
+- **Review.** Awaiting me is v7's review desk (`Reviews`, now exported). It takes optional `only` and `milestone` props, so v4's grade picker and milestone links still narrow it. In progress and Missed deadline are unchanged.
+  - The new `docFirst` prop makes the document the work surface. It fills the column, zooms up to 125% so it is readable, and scrolls with the page. A labelled Full screen button sits above it. The decision panel is a slim 340px sticky column.
+  - v7 is unchanged unless it passes `docFirst`.
+  - A progress bar reads "4 of 17 reviewed today". DEMO-ONLY: `REVIEWED_EARLIER = 4` stands in for today's earlier reviews, so it never starts at 0.
+- **Messages.** The Inbox is v7's (`V5Messages`). v4 keeps Inbox/Sent, New message and the whole Sent tab. The progress bar counts every answered question ("5 of 15 answered"), so it never starts at 0. Not carried over, because v7's inbox has no place for them: v4's Dreamy reply chips and Mark resolved. `InboxPanel` is kept, unused (one eslint warning), in case Chandu wants them back.
+- **Assist.** Unchanged. v7 has no matching screen; its Documents tab is a different tool.
+
+**Shared files touched (v7 is the other session's).** All changes are additive or address-neutral:
+- v7/ui.tsx (`v7()` via `cv()`).
+- v7/Home.tsx (`export Stat`).
+- v7/Workspace.tsx (`export Reviews`, plus the `only`, `milestone` and `docFirst` props).
+- lib/counselorBase.ts (v4View prepare routes).
+
+**Validation.** tsc and eslint are clean (one warning: the unused `InboxPanel`). Home, Meetings, Review (including Full screen) and Messages were checked in the browser at 1440.
+
+**Next.** Show Chandu. Ask whether the Dreamy reply chips and Mark resolved should return to Messages. Nothing is committed or pushed.
+
+## 2026-10-20: v4 reinvention: headline sentences, a pill-track nav, less on every page
+
+**Why.** Chandu sent 14 reference dashboards (Eduvo, Filko, Stay on Track, Xylo, NexUX and others). His words: "These are still cluttered, but see what we can learn from them and apply to our v4 design ... we need to drastically change the amount of information and cognitive overload without causing confusion or losing valuable data ... make the UI super intuitive and navigation obvious. Reduce copy as much as possible ... we can reinvent the wheel if we have to."
+
+**Research behind the rules.**
+- The 3 to 5 top destinations always visible in one track, with an obvious active state (NN/g on navigation, Material on tabs).
+- The most important thing goes top left.
+- A sentence with one number reads faster than a grid of KPI tiles (the references' headlines; Stephen Few on dashboards).
+- Lists as rows.
+- Detail no more than 2 to 3 clicks deep (progressive disclosure).
+- One lit element per chart, no decorative charts.
+
+**Rule kept throughout.** No data point was dropped. Every figure removed from view is one click away, and every figure in a sentence opens the students it counts.
+
+**What changed** (all in src/components/counselor/v4/; the new reinvent.css holds the shared patterns):
+- **Header.** One row. The five destinations sit in a pill track with a solid blue active pill, and search is inline. Page descriptions are hidden, and each page's filters sit on its title-tab row.
+- **Home** (Overview.tsx, rewritten):
+  - A headline: "N reviews waiting, N students need you", with Log time and Start reviewing beside it.
+  - This week as a Mon to Fri timeline, today lit, each meeting a chip that opens the student.
+  - "Needs you": five rows with a Book button, and the rest behind "N more students".
+  - Where the removed pieces went:
+    - Saved careers: College & Career.
+    - Most Played sims: Engagement.
+    - On-track, exploring and lowest-grade figures: Readiness and Milestones.
+    - Review breakdown: the Review queue.
+- **Engagement.** Four stat tiles became "N students active in {month}" with the trend. This week, today and logins each are one facts line. Most Played Career Simulations now sits at the foot.
+- **Milestones.** The summary strip became "66% of milestones done, 18 students need attention", with students and milestones counts as facts. The summary lost its card surface; it is page text now.
+- **Readiness.** The four gauge tiles became "95% on track to graduate · 6 missing", plus one facts line for academic, postsecondary and career, each with its missing count. Each fact's tooltip carries the definition and the N of M. The foot list picks its indicator from a dropdown in its header, replacing the tiles.
+- **My Impact.**
+  - Why: the hero said 85% three ways (serif title, dot flower, Next Step column).
+  - Now: "85% of my students on track ↗ 14 pts vs school's 71%", with "103 of 121 students · 42 still exploring" as facts.
+  - Principal Report and Export moved into the hero.
+  - The period picker reads "Fall 2026 (now)" so all filters fit on the title row.
+  - DotConstellation is no longer used here.
+- **Student profile.** The milestone grid shows the six most urgent rows (already sorted by urgency). "Show all 11" opens the rest.
+- **Explore header.** Chandu saw it on main and wrote: "Please fix this whats happening??" The header had a title, a subtitle, Careers/Pay by State, a pathway switch, a search and nine world pills.
+  - v4 now turns on v7's `consolidated` mode on the embed in CounselorApp.
+  - The pathway switch is gone; Skilled trades is an option in the world picker.
+  - The nine world pills became one "All worlds" picker beside the search.
+  - The subtitle is hidden.
+  - v5/Explore.tsx was taken verbatim from v7's commit 6c934a23, plus one line: the embedded branch hides PathwaySwitch when consolidated.
+- **Top bar.** Chandu: "why is there a solid black header dont do that" and "the top navbar should be like what we have in the student section, same design and width etc."
+  - On lg and up, Workspace.tsx now renders the student app's DesktopNavigation (the same one v7 uses), transparent over the sky until scrolled.
+  - The areas sit in its centered pill. Search, theme, Preferences and the account menu are in its right slot, and the quick links come with it.
+  - The "COUNSELOR" caption is gone.
+  - Search is an icon that opens one field under the bar's right edge. "/" still opens it, and Escape or a click outside closes it.
+  - v4's own bar remains only below lg. It is see-through, with the tools on one line.
+  - Page content now uses the student column: 1440 wide with 56px sides.
+- **Left as they were, already calm:** Directory, College & Career, Meetings, Review, Messages, Assist.
+
+**Validation.**
+- tsc is clean. eslint is clean on every touched file.
+- Each page was screenshotted at 1440 in dark mode and sent to Chandu.
+
+**Not done.**
+- Light mode was not rechecked.
+- The phone width of the new header was not checked; it wraps under 1180px.
+
+**Next.** Wait for Chandu's go-ahead. Nothing is committed or pushed.
 ## 2026-10-21: Counselor surfaces, one material in every build; v7 Reviews readable; Messages desk; Prepare agenda and calendar
 
 **Why (Chandu):** "the surface materials and colors are very inconsistent, please make sure we have it uniform. The three hero cards in home are the blueprint"; on Reviews: "this preview isn't valuable if it's so zoomed out... How can we make sure everything is 100% valuable and usable?" (before that: "forces the content and message to sit below a tiny preview"); "Reviews and messages are still messy... I like the documents space"; "the trail of finished meetings... looks like cotton balls"; the Prepare brief: "redo the meeting agenda and calendar views to be much more engaging and premium... starry element stuff".

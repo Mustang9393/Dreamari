@@ -5,7 +5,6 @@
 // conversation cards and review column, shorter copy, and all content kept.
 
 import { useMemo, useSyncExternalStore } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, Clock } from "lucide-react";
 import { useCounselorFilters } from "../shell";
@@ -14,7 +13,6 @@ import { MILESTONE_KEYS } from "@/lib/counselorRoster";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { attentionRank } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { CountUp } from "./overviewShared";
 import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
 import { RankedPosterCard } from "@/components/app/PosterCard";
@@ -27,6 +25,8 @@ import { useTodayFilters } from "./Workspace";
 import "../v5/v5.css";
 import "./today.css";
 import "./layout2.css";
+import "../v7/v7.css";
+import { Stat } from "../v7/Home";
 
 const subscribeDate = (notify: () => void) => { const timer = window.setInterval(notify, 60000); return () => window.clearInterval(timer); };
 const dateSnapshot = () => new Intl.DateTimeFormat("en", {weekday:"long",month:"long",day:"numeric"}).format(new Date());
@@ -42,7 +42,7 @@ function MeetingsCard({ roster }: { roster: Parameters<typeof useMeetings>[0] })
  const mounted = useSyncExternalStore(noop, () => true, () => false);
  const meetings = useMeetings(roster);
  const done = useMeetingsDone();
- if (!mounted) return <div className="v4-box v4h-card" aria-hidden />;
+ if (!mounted) return <div aria-hidden />;
  const now = new Date();
  const weekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (7 - now.getDay()));
  const left = meetings.filter((m) => !isPast(m, now) && !done[m.id] && m.day <= iso(weekEnd));
@@ -55,14 +55,8 @@ function MeetingsCard({ roster }: { roster: Parameters<typeof useMeetings>[0] })
   const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
  }
- return <div className="v4-box v4h-card">
-  <span className="v4h-label">Meetings</span>
-  <span className="v4h-big"><strong>{left.length}</strong><span>left this week</span></span>
-  <span className="v4h-sub">{next ? <>Next: <b>{student?.name ?? "a student"}</b> · {when} · {timeLabel(next.time)}</> : "Nothing booked yet"}</span>
-  {next
-   ? <Link href="/counselor?view=meetings&v=4" className="v4h-foot dm-quiet">View schedule<ArrowUpRight size={14} aria-hidden /></Link>
-   : <button type="button" className="v4h-foot dm-quiet" onClick={() => openLog({ mode: "book" })}>Book a meeting<ArrowUpRight size={14} aria-hidden /></button>}
- </div>;
+ return <Stat figure="meetings" href="/counselor?view=meetings&v=4" label="Meetings this week" value={left.length} go="View schedule"
+  line={next ? <>Next: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{student?.name ?? "a student"}</span> · {when} · {timeLabel(next.time)}</> : "Nothing booked yet"} />;
 }
 
 export function Overview(){
@@ -75,6 +69,7 @@ export function Overview(){
  const total=roster.length;const atRisk=roster.filter(s=>s.status==="At Risk").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
+ const topPending=[...pending].sort((x,y)=>y.count-x.count).find(r=>r.count>0);
 
  const saved=useMemo(()=>schoolSnapshot(roster.map(toV5)).topSaved.slice(0,10),[roster]);
  // Dreamy's briefing (9 Oct 2026, Chandu: "incorporate dreamy more in the
@@ -82,15 +77,12 @@ export function Overview(){
  // real engagement or presence"). Dreamy is the counselor's assistant who
  // reads everything first: three lines under the greeting, each a link,
  // about what changed, not the figures the strip below already shows.
- // DEMO-ONLY: submissions have no timestamps yet; "since yesterday" is the newest few waiting
- const newToday=Math.min(pendingCount,3);
  // Everyone who needs support, in priority order, not only the first five
  // (9 Oct 2026, Chandu: "the student card row can be scrollable still,
  // right? It's not like there are only 5 students needing attention"). The
  // row scrolls sideways and the next card peeks in at the edge.
  const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank);
  const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
- const status=(value:"On Track"|"Needs Attention"|"At Risk")=>{setStatusFilter(value);go("students");};
  // v4's four metrics, Title Case, in v5's form: the number first, then the
  // label, hairlines between, no third line (Maisha, 9 Oct 2026: "Keep the
  // existing metrics from V4 ... Use V5's cleaner layout"). The numbers roll
@@ -132,22 +124,17 @@ export function Overview(){
       Home; their facts are on these cards and the full lists are one click
       away (Students, Review). */}
    <div className="v4h-cards">
-    <div className="v4-box v4h-card">
-     <span className="v4h-label">Reviews</span>
-     <span className="v4h-big"><strong><CountUp value={pendingCount}/></strong><span>waiting for you</span></span>
-     <span className="v4h-sub">{newToday?`${newToday} new since yesterday`:"Nothing new since yesterday"}</span>
-     <button type="button" className="v4h-foot dm-quiet" onClick={()=>go("review-queue")}>Start reviewing<ArrowUpRight size={14} aria-hidden/></button>
-    </div>
+    {/* v7's three hero cards (20 Oct 2026, Chandu: "lets use the same hero
+       cards from v7 in v4"): v7's own Stat, the label, one number, one
+       line, the whole card the link, a constellation on hover; v4's
+       numbers (the grade filter applies) and v4's pages behind them */}
+    <Stat figure="reviews" href="/counselor?view=review-queue&v=4" label="Reviews" value={pendingCount} go="Start reviewing"
+     line={topPending ? <>Most: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{topPending.key}</span></> : "All caught up"} />
     <MeetingsCard roster={reviewed} />
-    <div className="v4-box v4h-card">
-     <span className="v4h-label">Need you</span>
-     <span className="v4h-big"><strong><CountUp value={priority.length}/></strong><span>students</span></span>
-     {/* one quiet line, the status said as a dot and a word (20 Oct 2026,
-        Chandu: "without feeling like a bunch of numbers are jumping out";
-        the on-track share, the still-exploring count and the lowest grade
-        live on Insights > Readiness and Milestones) */}
-     <span className="v4h-sub"><i className="v4h-dot is-risk" aria-hidden/>{atRisk} at risk</span>
-     <button type="button" className="v4h-foot dm-quiet" onClick={()=>status("At Risk")}>Review students<ArrowUpRight size={14} aria-hidden/></button>
+    {/* the card opens Students on the At Risk filter, as the old card did */}
+    <div className="contents" onClickCapture={()=>setStatusFilter("At Risk")}>
+     <Stat figure="people" href="/counselor?view=students&v=4" label="Students who need you" value={priority.length} go="Review students"
+      line={atRisk ? <><span aria-hidden className="mr-[7px] inline-block size-[7px] rounded-full align-[1px]" style={{ background: "var(--color-feedback-danger-solid)" }} /><span className="font-semibold" style={{ color: "var(--foreground)" }}>{atRisk}</span> at risk</> : "None at risk"} />
     </div>
    </div>
   </section>

@@ -128,6 +128,9 @@ import { logTime } from "@/lib/counselorTimeLog";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { COLLEGES } from "@/components/colleges/data";
 import { openCareer, openSchool } from "../v5/ExploreSheets";
+import { V5Messages } from "../v5/Messages";
+// the statuses v7's inbox counts as still owing a reply (v5/Messages.tsx)
+const V5_OPEN = ["new", "viewed", "in-progress", "follow-up"];
 
 function fmtDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
@@ -1456,7 +1459,6 @@ export function CounselorConnect() {
   const initialIds = (params.get("ids") ?? "").split(",").filter(Boolean);
   const questionParam = params.get("question");
   const studentParam = params.get("studentId");
-  const draftParam = params.get("draft");
   const tabParam = OLD_TAB[params.get("tab") ?? ""];
   const [tab, setTab] = useState<MessagesTab>(composeParam ? "sent" : (questionParam || studentParam) ? "inbox" : tabParam ?? "inbox");
   const live = useConnectLive();
@@ -1473,9 +1475,9 @@ export function CounselorConnect() {
   for (const r of sentRows) sentCounts[r.kind]++;
   const current = announcements.find((a) => a.id === openAnnouncement) ?? announcements[0];
   const message = (ids: string[]) => { setDrill(null); setTab("sent"); setCompose({ kind: "private", ids, n: Date.now() }); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  // the inbox run (InboxPanel), kept here so a trip to Sent keeps it
-  const [session, setSession] = useState<InboxSession>(() => ({ cleared: 0, startedAt: Date.now(), finishedAt: null, keys: [] }));
-  const remaining = QUESTIONS.filter((q) => OWES.includes(live.statusOf(q.id))).length;
+  // v7's inbox keeps replies in counselorMessages, so count from there
+  const { replies } = useMessages();
+  const answeredAll = QUESTIONS.filter((q) => !V5_OPEN.includes(q.status) || replies[q.id]).length;
   // below 1024px: the announcement list, or one announcement
   const [annOpen, setAnnOpen] = useState(false);
   // a just-published announcement lands with a burst
@@ -1505,7 +1507,9 @@ export function CounselorConnect() {
           ]}
         />
         <div className="msg-toolbar-end">
-          {tab === "inbox" && session.cleared + remaining > 0 && <InboxBar cleared={session.cleared} remaining={remaining} />}
+          {/* answered of every question, so the bar never starts at 0 (20 Oct
+             2026, Chandu: "keep the progress bar, never start at 0") */}
+          {tab === "inbox" && <InboxBar cleared={answeredAll} remaining={QUESTIONS.length - answeredAll} />}
           {/* bulk sending (10 Oct 2026): one note to many, the page's primary
              action on both tabs; it opens on Sent, where sends are tracked */}
           {!(tab === "sent" && compose) && (
@@ -1517,7 +1521,11 @@ export function CounselorConnect() {
       </div>
       </HeadingControls>
 
-      {tab === "inbox" && <InboxPanel initialQuestion={questionParam} initialStudent={studentParam} initialDraft={draftParam} session={session} setSession={setSession} />}
+      {/* the inbox is v7's (20 Oct 2026, Chandu: "match the prepare stuff to
+         the v7 as much as possible"): the questions as wide rows, unanswered
+         first, the open one and the reply box in a panel beside them; it
+         follows &studentId= and &draft= itself */}
+      {tab === "inbox" && <V5Messages desk />}
       {tab === "sent" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           {compose && <MessageComposer key={compose.n} initialKind={compose.kind} initialPathway={compose.n === 0 ? initialPathway : null} initialIds={compose.ids} onCancel={() => setCompose(null)} onSendAnnouncement={(a) => { addAnnouncement(a); setCompose(null); setSentKind("announcement"); openAnn(a.id); setPublished({ id: a.id, n: Date.now() }); playCorrect(); }} />}

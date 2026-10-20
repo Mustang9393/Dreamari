@@ -25,11 +25,15 @@ import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { useCounselorFilters } from "../shell";
-import { ReviewSession } from "./ReviewSession";
+import { Reviews as V7Reviews } from "../v7/Workspace";
+import { SparkBar } from "@/components/flow/SparkBar";
 import { NudgeSession } from "./NudgeSession";
 import "./prepare.css";
+import "./messages.css";
 
 type Tab = "awaiting" | "progress" | "missed";
+// DEMO-ONLY: reviews already done today before the demo opens the desk
+const REVIEWED_EARLIER = 4;
 
 export function ReviewDesk() {
   const roster = useReviewedRoster();
@@ -56,6 +60,13 @@ export function ReviewDesk() {
   const awaitingItems = items("Pending Review");
   const progress = items("In Progress");
   const missed = items("Overdue");
+  // the run's progress bar (20 Oct 2026, Chandu: "keep the progress bar,
+  // never start at 0 though"): reviewed of all that were waiting when the
+  // page opened. DEMO-ONLY: REVIEWED_EARLIER stands in for the reviews the
+  // counselor already finished today; production counts today's decisions.
+  const [startCount] = useState(() => awaitingItems.length);
+  const reviewed = REVIEWED_EARLIER + Math.max(0, startCount - awaitingItems.length);
+  const reviewTotal = REVIEWED_EARLIER + Math.max(startCount, awaitingItems.length);
   const [tab, setTab] = useState<Tab>(() => {
     const st = roster.find((s) => s.id === want)?.milestones[wantK as MilestoneKey];
     return st === "In Progress" ? "progress" : st === "Overdue" ? "missed" : "awaiting";
@@ -90,7 +101,18 @@ export function ReviewDesk() {
           </span>
         )}
       </HeadingControls>
-      {tab === "awaiting" && <ReviewSession key={`${gradeFilter}|${chip ?? ""}`} only={only} milestone={fMilestone} />}
+      {/* Awaiting me is v7's review focus mode (20 Oct 2026, Chandu: "match
+         the prepare stuff to the v7 as much as possible"): the document
+         large, one panel beside it, "1 of N" with the list on demand */}
+      {tab === "awaiting" && (
+        <>
+          <div className="msg-bar" role="status" aria-live="polite">
+            <span className="msg-bar-copy"><b>{reviewed} of {reviewTotal}</b> reviewed today</span>
+            <SparkBar percent={reviewTotal ? Math.round((reviewed / reviewTotal) * 100) : 100} min={2} height={6} fill="linear-gradient(90deg, color-mix(in srgb, var(--primary) 70%, #7fd1ff), var(--primary))" glow="var(--primary)" memoryKey="v4-review-session" />
+          </div>
+          <V7Reviews key={`${gradeFilter}|${chip ?? ""}`} only={only} milestone={fMilestone} />
+        </>
+      )}
       {tab === "progress" && <NudgeSession key={`p|${gradeFilter}|${chip ?? ""}`} rows={progress} kind="progress" />}
       {tab === "missed" && <NudgeSession key={`m|${gradeFilter}|${chip ?? ""}`} rows={missed} kind="missed" />}
     </div>
