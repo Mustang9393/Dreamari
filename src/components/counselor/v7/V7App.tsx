@@ -17,13 +17,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BarChart3, Briefcase, ClipboardList, Compass, House, Users } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, type MobileNavItem, type NavItem } from "@/components/app/chrome";
 import { IconTip } from "@/components/app/IconTip";
 import { setCounselorBase } from "@/lib/counselorBase";
-import { V5Profile } from "../v5/Profile";
+import { CounselorProfileSheet } from "../v4/CounselorProfileSheet";
 import { ExploreSheetHost } from "../v5/ExploreSheets";
 import { LogSheetHost } from "../v5/LogSheet";
 import "../v5/v5.css";
@@ -66,6 +66,7 @@ export function V7App({ view }: { view: string | undefined }) {
   // shared v5 pieces (sheets, the review desk, the brief) link inside v7
   setCounselorBase("/counselor?v=7");
   const params = useSearchParams();
+  const router = useRouter();
   const studentId = params.get("studentId") ?? undefined;
   const tab = params.get("tab") ?? undefined;
   const onProfile = view === "profile";
@@ -101,7 +102,11 @@ export function V7App({ view }: { view: string | undefined }) {
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8">
         {onProfile ? (
-          <V5Profile />
+          // the counselor's ID card profile (v4's, with the lanyard), over Home
+          <>
+            <V7Home />
+            <CounselorProfileSheet open name={COUNSELOR.name} role="School Counselor" onClose={() => router.push(v7("home"))} />
+          </>
         ) : onReviews ? (
           <V7Workspace key={tab} initial={tab ?? "reviews"} />
         ) : active === "home" ? (
