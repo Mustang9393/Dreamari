@@ -42,7 +42,7 @@ import { DraftTools } from "./ProductivitySuite";
 import { Disclosure } from "./Disclosure";
 import { FamilyCard, MeetingsCard, MessagesCard, PlanSignoffCard, TodosCard } from "./Casefile";
 import { GLASS_INSET } from "../surfaces";
-import { careerArtFor, DreamyMoment } from "./overviewShared";
+import { DreamyMoment } from "./overviewShared";
 
 
 
@@ -87,38 +87,33 @@ function ActionButton({ icon: Icon, label, onClick }: { icon: typeof Bell; label
  *  (20 Oct 2026 declutter: six colored badges on one profile, saying
  *  nothing the title does not); `icon` and `accent` stay in the signature
  *  so callers need no change. */
-/** The student's ID card: a school ID, landscape and light, so it reads as
- *  a different object from the counselor's tall dark lanyard badge. The
- *  barcode is drawn from the student number, so each card's is its own. */
-function StudentIdCard({ student, art }: { student: CounselorStudent; /** the top career match's poster art, faded into the card (Maisha's ask, 7 Oct 2026) */ art?: { src: string; position?: string } | null }) {
+/** The student's ID tag (20 Oct 2026, Chandu: "the student id component is
+ *  too cluttered, remove the bar code and the weird serial numbers. Remove
+ *  the career images. Use the same tag like structure the counsellors have
+ *  but distinctly different from it"). The counselor's badge hangs from a
+ *  woven lanyard strap and is a tall dark card with a photo cover and a
+ *  square photo. The student's hangs from a round retractable badge reel on
+ *  a short cord, and is a light card: the school band, a round photo in the
+ *  middle, the name, grade and class year, pathway, status and when they
+ *  were last active. Nothing else. */
+function StudentIdCard({ student }: { student: CounselorStudent }) {
   const classOf = 2027 + (12 - student.grade);
-  const bars = useMemo(() => {
-    const seed = student.tag.replace(/\W/g, "");
-    let x = 0;
-    const out: number[] = [];
-    for (let i = 0; i < 34; i++) { x = (x * 31 + seed.charCodeAt(i % seed.length) + i) % 97; out.push(1 + (x % 3)); }
-    return out;
-  }, [student.tag]);
   return (
-    <section className="v4-sid" aria-label={`${student.name}, student ID`}>
-      {art && <span aria-hidden className="v4-sid-art" style={{ backgroundImage: `url(${art.src})`, backgroundPosition: art.position }} />}
-      <span className="v4-sid-foil" aria-hidden />
-      <header className="v4-sid-band"><span>{student.school}</span><span>Student ID</span></header>
-      <div className="v4-sid-body">
-        <span className="v4-sid-photo"><Avatar name={student.name} size={84} index={student.avatarIndex} /></span>
-        <div className="v4-sid-who">
+    <div className="v4-sid-wrap">
+      <div className="v4-sid-reel" aria-hidden><span className="v4-sid-reel-disc"><i /></span><span className="v4-sid-cord" /><span className="v4-sid-clip" /></div>
+      <section className="v4-sid" aria-label={`${student.name}, student ID`}>
+        <span className="v4-sid-slot" aria-hidden />
+        <header className="v4-sid-band"><span>{student.school}</span><span>Student</span></header>
+        <div className="v4-sid-body">
+          <span className="v4-sid-photo"><Avatar name={student.name} size={96} index={student.avatarIndex} /></span>
           <h1>{student.name}</h1>
           <p>Grade {student.grade} · Class of {classOf}</p>
           <p>{student.careerTrack}</p>
           <span className={`v4-sid-status ${student.status === "At Risk" ? "is-risk" : student.status === "Needs Attention" ? "is-warn" : ""}`}>{student.status}</span>
+          <span className="v4-sid-active">Active {fmtDate(student.lastActive).toLowerCase()}</span>
         </div>
-      </div>
-      <footer className="v4-sid-foot">
-        <span className="v4-sid-bars" aria-hidden>{bars.map((w, i) => <i key={i} style={{ width: w }} />)}</span>
-        <span className="v4-sid-num">{student.tag}</span>
-        <span className="v4-sid-active">Active {fmtDate(student.lastActive).toLowerCase()}</span>
-      </footer>
-    </section>
+      </section>
+    </div>
   );
 }
 
@@ -221,8 +216,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const actions = needsYou(student, gradeKeys);
   const signals = signalsFor(student);
   const orderedKeys = [...gradeKeys].sort((a, b) => MILESTONE_RANK[student.milestones[a]] - MILESTONE_RANK[student.milestones[b]]);
-  const topMatch = student.topMatches[0]?.title;
-  const art = careerArtFor(topMatch);
 
   // The reference's eight On Dreamari tiles, live from the student app
   // where a live signal exists, then v2's three extra signals folded below.
@@ -280,7 +273,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
          identity row did (name, grade, pathway, status, last active) plus
          the student number; what they need from you sits under it. */}
       <div className="v4-profile-identity flex flex-col gap-[var(--space-5)]">
-        <StudentIdCard student={student} art={art} />
+        <StudentIdCard student={student} />
         {(actions.length > 0 || student.supportFlagReason) && (
         <HoverBeam strength={0.6}>
         <div className="v4-profile-summary v4-surface relative flex flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>

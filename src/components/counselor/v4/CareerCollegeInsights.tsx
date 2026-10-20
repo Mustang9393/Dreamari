@@ -353,7 +353,7 @@ function InterestRows() {
          The Saved | At their schools switch keeps the majors at the schools
          students are exploring. Every item still opens its students. */}
       <section className="v4-cc-split" aria-label="Schools and majors">
-        <div className="v4-cc-col">
+        <div className="v4-box v4-cc-col">
           <header className="v4-r2-head">
             <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Schools Students Are Exploring</h2></div>
             <span className="v4-r2-tools"><button type="button" onClick={() => router.push(EXPLORE)} className="v4-r2-link">Explore all schools<ArrowUpRight size={14} aria-hidden /></button></span>
@@ -372,7 +372,7 @@ function InterestRows() {
             <ShowAll total={schools.length} shown={5} open={allSchools} onToggle={() => setAllSchools((v) => !v)} />
           </>}
         </div>
-        <div className="v4-cc-col">
+        <div className="v4-box v4-cc-col">
           <header className="v4-r2-head">
             <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Majors</h2>{majorMode !== "saved" && <span className="v4-r2-sub">{sub("Students exploring a school that offers it.")}</span>}</div>
             <span className="v4-r2-tools"><Segmented ariaLabel="Saved majors or majors at their schools" value={majorMode} onChange={setMajorMode} options={[{ key: "saved", label: "Saved" }, { key: "schools", label: "At their schools" }]} /><button type="button" onClick={() => router.push(EXPLORE)} className="v4-r2-link">Explore all majors<ArrowUpRight size={14} aria-hidden /></button></span>
@@ -427,7 +427,7 @@ function PostsecondaryRibbon() {
   if (roster.length === 0) return null;
   return (
     <>
-      <section className="v4-iv-direction" aria-label="Postsecondary Direction" {...planColors.attrs}>
+      <section className="v4-box v4-iv-direction" aria-label="Postsecondary Direction" {...planColors.attrs}>
         <header className="v4-r2-head">
           <div className="v4-r2-lead"><h2 className="v4-r2-title">Postsecondary Direction</h2><span className="v4-r2-sub">{decided} of {roster.length} have chosen a direction</span></div>
           <span className="v4-r2-tools">{planColors.toggle}</span>

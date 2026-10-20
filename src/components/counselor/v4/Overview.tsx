@@ -4,21 +4,17 @@
 // reminders hierarchy, open on the page (no widget boxes), v5's cleaner
 // conversation cards and review column, shorter copy, and all content kept.
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Clock, Footprints } from "lucide-react";
-import { IconTip } from "@/components/app/IconTip";
+import { ArrowUpRight, Clock } from "lucide-react";
 import { useCounselorFilters, type GradeFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
-import { attentionRank, attentionReason } from "./studentAttention";
+import { attentionRank } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { ConversationAvatar } from "./ConversationAvatar";
-import { useCounselorAvatarStyle } from "./avatarStyle";
-import { reviewHref } from "./milestonesModel";
-import { CountUp, DreamyMoment } from "./overviewShared";
+import { CountUp } from "./overviewShared";
 import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
 import { RankedPosterCard } from "@/components/app/PosterCard";
@@ -30,36 +26,43 @@ import { schoolSnapshot, toV5 } from "@/lib/counselorV5";
 import { useTodayFilters } from "./Workspace";
 import "../v5/v5.css";
 import "./today.css";
+import "./layout2.css";
 
 const subscribeDate = (notify: () => void) => { const timer = window.setInterval(notify, 60000); return () => window.clearInterval(timer); };
 const dateSnapshot = () => new Intl.DateTimeFormat("en", {weekday:"long",month:"long",day:"numeric"}).format(new Date());
 const serverDateSnapshot = () => "Today";
 const noop = () => () => {};
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-const studentHref = (id: string) => `/counselor?view=students&studentId=${encodeURIComponent(id)}&v=4`;
 
 function Jump({children,onClick}:{children:React.ReactNode;onClick:()=>void}) {return <button className="v4-text-action" onClick={onClick}>{children}<ArrowUpRight size={16}/></button>;}
 
-/** A glanceable calendar widget; seeds depend on the client clock. */
-function NextMeeting({ roster }: { roster: Parameters<typeof useMeetings>[0] }) {
+/** Home's meetings card (v7's shape): how many are left this week, the
+ *  next one, and the way to the schedule. */
+function MeetingsCard({ roster }: { roster: Parameters<typeof useMeetings>[0] }) {
  const mounted = useSyncExternalStore(noop, () => true, () => false);
  const meetings = useMeetings(roster);
  const done = useMeetingsDone();
- if (!mounted) return <div className="v4-calendar-widget" aria-hidden />;
+ if (!mounted) return <div className="v4-box v4h-card" aria-hidden />;
  const now = new Date();
+ const weekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (7 - now.getDay()));
+ const left = meetings.filter((m) => !isPast(m, now) && !done[m.id] && m.day <= iso(weekEnd));
  const next = meetings.find((m) => !isPast(m, now) && !done[m.id]);
- if (!next) return <button type="button" className="v4-calendar-widget dm-quiet" onClick={() => openLog({ mode: "book" })}><strong>Nothing booked yet</strong><span className="v4-widget-detail">Book a meeting <ArrowUpRight size={14} aria-hidden /></span></button>;
- const student = roster.find((s) => s.id === next.studentId);
- const [y, mo, d] = next.day.split("-").map(Number);
- const day = new Date(y, mo - 1, d);
- const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
- const when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "long" });
- const date = day.toLocaleDateString("en-US", { month: "short", day: "numeric" });
- return <Link href="/counselor?view=meetings&v=4" className="v4-calendar-widget dm-quiet" aria-label={`Next meeting: ${timeLabel(next.time)}, ${when}, ${date}, ${student?.name ?? "a student"}, ${next.type}. Open Meetings`}>
-  {/* one headline and one quiet line, like the band's other columns
-     (9 Oct 2026: the band "might look a little cluttered") */}
-  <span className="v4-calendar-event"><span className="v4-calendar-time"><strong>{when}, {date} · {timeLabel(next.time)}<ArrowUpRight size={14} aria-hidden/></strong></span><small className="v4-widget-detail">{student?.name ?? "Student meeting"} · {next.type}, {next.minutes} min</small></span>
- </Link>;
+ const student = next ? roster.find((s) => s.id === next.studentId) : undefined;
+ let when = "";
+ if (next) {
+  const [y, mo, d] = next.day.split("-").map(Number);
+  const day = new Date(y, mo - 1, d);
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+ }
+ return <div className="v4-box v4h-card">
+  <span className="v4h-label">Meetings</span>
+  <span className="v4h-big"><strong>{left.length}</strong><span>left this week</span></span>
+  <span className="v4h-sub">{next ? <>Next: <b>{student?.name ?? "a student"}</b> · {when} · {timeLabel(next.time)}</> : "Nothing booked yet"}</span>
+  {next
+   ? <Link href="/counselor?view=meetings&v=4" className="v4h-foot dm-quiet">View schedule<ArrowUpRight size={14} aria-hidden /></Link>
+   : <button type="button" className="v4h-foot dm-quiet" onClick={() => openLog({ mode: "book" })}>Book a meeting<ArrowUpRight size={14} aria-hidden /></button>}
+ </div>;
 }
 
 export function Overview(){
@@ -69,14 +72,10 @@ export function Overview(){
  const {gradeFilter,setGradeFilter,setStatusFilter}=useCounselorFilters();
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
- const [avatarStyle]=useCounselorAvatarStyle();
  const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;
  const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
- const [showAllPeople,setShowAllPeople]=useState(false);
- // each milestone with submissions waiting, the fullest first, with who
- const pendingByMilestone=useMemo(()=>MILESTONE_KEYS.map(key=>({key,ids:[...roster].sort(attentionRank).filter(st=>st.milestones[key]==="Pending Review").map(st=>st.id)})).filter(r=>r.ids.length).sort((x,y)=>y.ids.length-x.ids.length),[roster]);
 
  const saved=useMemo(()=>schoolSnapshot(roster.map(toV5)).topSaved.slice(0,10),[roster]);
  // Dreamy's briefing (9 Oct 2026, Chandu: "incorporate dreamy more in the
@@ -89,12 +88,6 @@ export function Overview(){
  const newToday=Math.min(pendingCount,3);
  const byGrade=[9,10,11,12].map(g=>{const rows=reviewed.filter(s=>s.grade===g);return {g,pct:rows.length?Math.round(rows.filter(s=>s.status==="On Track").length/rows.length*100):100};}).filter(x=>gradeFilter==="All Grades"||x.g===gradeFilter);
  const lowest=byGrade.reduce((a,b)=>b.pct<a.pct?b:a,byGrade[0]);
- const lateStudent=[...roster].filter(s=>/overdue/i.test(attentionReason(s))).sort(attentionRank)[0];
- const brief:{title:string;detail:string;go:()=>void}[]=[
-  newToday>0?{title:`${newToday} new submission${newToday===1?"":"s"}`,detail:`Since yesterday${missed?` · ${missed} past deadline`:""}`,go:()=>go("review-queue")}:{title:"All caught up",detail:"Nothing new waiting for review",go:()=>go("review-queue")},
-  ...(lowest&&gradeFilter==="All Grades"?[{title:`Grade ${lowest.g} needs support`,detail:`${lowest.pct}% on track · Lowest grade`,go:()=>{setGradeFilter(lowest.g as GradeFilter);go("milestones");}}]:[]),
-  ...(lateStudent?[{title:`${lateStudent.name.split(" ")[0]}'s ${attentionReason(lateStudent).replace(/ overdue$/i,"")}`,detail:"Overdue",go:()=>openStudent(lateStudent.id)}]:[]),
- ];
  // Everyone who needs support, in priority order, not only the first five
  // (9 Oct 2026, Chandu: "the student card row can be scrollable still,
  // right? It's not like there are only 5 students needing attention"). The
@@ -102,7 +95,6 @@ export function Overview(){
  const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank);
  const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
  const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
- const openStudent=(id:string)=>router.push(studentHref(id));
  const status=(value:"On Track"|"Needs Attention"|"At Risk")=>{setStatusFilter(value);go("students");};
  // v4's four metrics, Title Case, in v5's form: the number first, then the
  // label, hairlines between, no third line (Maisha, 9 Oct 2026: "Keep the
@@ -122,30 +114,47 @@ export function Overview(){
  return <div className="v4-daily v4-sections">
   {/* 9 Oct: Apple's event widget + notification stack hierarchy, adapted to
       Dreamari. Two useful groups; quieter copy without losing an update. */}
-  <section className="v4-welcome v4-home-hero v4-home-lockscreen">
-   <div className="v4-home-lead"><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1></div>
-   <div className="v4-home-side"><div className="v4-welcome-actions">
-    {filters&&<div className="v4-home-scope">{filters}</div>}
-    <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log Time</button>
-    <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start Reviewing":"Open Students"}<ArrowUpRight size={18}/></button>
-   </div></div>
-   {/* Three glanceable columns (9 Oct 2026). Chandu: "the 85 on track, 7 at
-      risk, 42 exploring can also be one of those columns next to the
-      meeting and reminders ... At risk can be highlighted". The full-width
-      figures strip is gone (it cost a band and pushed the work down); the
-      pulse is a third column, At Risk as its headline, the other two as
-      quiet links under it. Not a carousel: these are compared, not read
-      one at a time, and the reminders beside them already rotate. */}
-   <div className="v4-home-widgets">
-    <NextMeeting roster={reviewed} />
-    {/* the reminders as a short list, not a rotating carousel (20 Oct
-       2026, Chandu: "change the carousel to a row type everywhere that
-       appears"): all of them at once, one line each */}
-    <section className="v4-reminder-stack v4-reminder-list" aria-label="Reminders">{brief.map(b=><button key={b.title} type="button" className="v4-reminder-line dm-quiet" onClick={b.go}><strong>{b.title}</strong><small>{b.detail}</small><ArrowUpRight size={13} aria-hidden/></button>)}</section>
-    <section className="v4-pulse-widget" aria-label="Caseload pulse">
-     <button type="button" onClick={()=>status("At Risk")} className={`v4-pulse-lead dm-quiet ${atRisk?"is-risk":""}`}><strong><CountUp value={atRisk}/></strong><span>{atRisk===1?"student at risk":"students at risk"}<ArrowUpRight size={14} aria-hidden/></span></button>
-     <div className="v4-pulse-links">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden className="v4-pulse-dot">·</span>}<button type="button" onClick={l.action} className="dm-quiet" aria-label={l.label}><b>{l.value}</b> {l.words}</button></span>)}</div>
-    </section>
+  {/* The hero, rebuilt (20 Oct 2026, Chandu: "the hero is still cluttered
+     ... things are all tight and crowded everywhere. We need to seriously
+     rethink the design. If we need to use boxes to organise stuff where
+     needed try that too"). Research-led: group by enclosure (one card per
+     glance question) instead of hairline columns, the most important figure
+     top-left, hierarchy from type size not color, generous padding inside
+     the cards and a steady gutter between them. The greeting and the day's
+     actions share one line; under it three equal cards, each one label, one
+     large line and one quiet line: who is at risk, the next meeting, and
+     what changed. Every figure and link the band had is still here. */}
+  <section className="v4h" aria-label="Today">
+   <div className="v4h-top">
+    <div className="v4h-hello"><span className="v4h-date">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1></div>
+    <div className="v4h-actions">
+     {filters&&<div className="v4h-scope">{filters}</div>}
+     <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log Time</button>
+     <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start Reviewing":"Open Students"}<ArrowUpRight size={18}/></button>
+    </div>
+   </div>
+   {/* Home in v7's shape (20 Oct 2026, Chandu: "lets try using the same
+      sort of organisation level as v6 and v7 have for the home page of
+      v4"): three summary cards, each one label, one big number with its
+      words, one quiet line and one way in, then the picture rows. The
+      student list and the review breakdown that sat under the band left
+      Home; their facts are on these cards and the full lists are one click
+      away (Students, Review). */}
+   <div className="v4h-cards">
+    <div className="v4-box v4h-card">
+     <span className="v4h-label">Reviews</span>
+     <span className="v4h-big"><strong><CountUp value={pendingCount}/></strong><span>waiting for you</span></span>
+     <span className="v4h-sub">{newToday?`${newToday} new since yesterday`:"Nothing new since yesterday"}{missed?` · ${missed} past deadline`:""}</span>
+     <button type="button" className="v4h-foot dm-quiet" onClick={()=>go("review-queue")}>Start reviewing<ArrowUpRight size={14} aria-hidden/></button>
+    </div>
+    <MeetingsCard roster={reviewed} />
+    <div className="v4-box v4h-card">
+     <span className="v4h-label">Need you</span>
+     <span className="v4h-big"><strong><CountUp value={priority.length}/></strong><span>students</span></span>
+     <span className="v4h-sub"><b className={atRisk?"is-risk":""}>{atRisk} at risk</b>{lowest&&gradeFilter==="All Grades"?<> · <button type="button" className="v4h-link dm-quiet" onClick={()=>{setGradeFilter(lowest.g as GradeFilter);go("milestones");}}>Grade {lowest.g} lowest, {lowest.pct}% on track</button></>:null}</span>
+     <span className="v4h-sub">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden> · </span>}<button type="button" onClick={l.action} className="v4h-link dm-quiet" aria-label={l.label}><b>{l.value}</b> {l.words}</button></span>)}</span>
+     <button type="button" className="v4h-foot dm-quiet" onClick={()=>status("At Risk")}>Review students<ArrowUpRight size={14} aria-hidden/></button>
+    </div>
    </div>
   </section>
 
@@ -155,48 +164,6 @@ export function Overview(){
      mental-health monitoring is not something our platform is currently
      promising to do") */}
   <CoverageBanner />
-
-  {/* Two plain lists (20 Oct 2026, Chandu: "Lets not do the student cards
-     + review stack. Do something much simpler"). The portrait cards and
-     the stacked-document carousel are gone; the same facts read as rows.
-     Left: who needs a conversation, most in need first, one line each
-     (face, name, grade and the reason, the status word, Book, and a quiet
-     walk-in icon), five open and the rest a click away. Right: the review
-     count as the one figure, how many are new, then each milestone with
-     submissions waiting, the fullest first, each opening its queue. */}
-  <div className="v4-home-lists">
-   <section className="v4-home-list" aria-label="My next conversations">
-    <header className="v4-section-head"><h2>My Next Conversations</h2><Jump onClick={()=>go("students")}>View students</Jump></header>
-    {priority.length?<>
-    <ul className="v4-home-rows">{(showAllPeople?priority:priority.slice(0,5)).map(s=><li key={s.id} className="v4-home-row">
-     <button type="button" className="v4-home-row-who dm-quiet" onClick={()=>openStudent(s.id)}>
-      <span className="v4-home-row-face" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={40}/></span>
-      <span className="v4-home-row-copy"><strong>{s.name}</strong><span>Grade {s.grade} · {attentionReason(s)}</span></span>
-     </button>
-     <span className={`v4-home-row-status ${s.status==="At Risk"?"is-risk":"is-warn"}`}>{s.status}</span>
-     <span className="v4-home-row-actions">
-      <IconTip label={`Log a walk-in with ${s.name.split(" ")[0]}`}><button type="button" className="v4-home-row-icon dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}><Footprints size={15} aria-hidden/></button></IconTip>
-      <button type="button" className="v4-home-row-book dm-quiet" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button>
-     </span>
-    </li>)}</ul>
-    {priority.length>5&&<button type="button" className="v4-home-more dm-quiet" onClick={()=>setShowAllPeople(v=>!v)}>{showAllPeople?"Show fewer":`Show all ${priority.length}`}</button>}
-    </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}
-   </section>
-   <section className="v4-home-list" aria-label="Pending reviews">
-    <header className="v4-section-head"><h2>Pending Reviews</h2></header>
-    {pendingCount?<>
-     <p className="v4-home-review-fig"><strong><CountUp value={pendingCount}/></strong><span>waiting{newToday?` · ${newToday} new since yesterday`:""}</span></p>
-     <ul className="v4-home-rows">{pendingByMilestone.slice(0,5).map(r=><li key={r.key}>
-      <button type="button" className="v4-home-row v4-home-row-link dm-quiet" onClick={()=>router.push(reviewHref(r.key,r.ids))}>
-       <span className="v4-home-row-copy"><strong>{r.key}</strong></span>
-       <span className="v4-home-row-count">{r.ids.length}</span>
-       <ArrowUpRight size={14} aria-hidden className="v4-home-row-go"/>
-      </button>
-     </li>)}</ul>
-     {pendingByMilestone.length>5&&<button type="button" className="v4-home-more dm-quiet" onClick={()=>go("review-queue")}>All {pendingByMilestone.length} milestones</button>}
-    </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
-   </section>
-  </div>
 
   {/* Milestone Completion, Career Interests and Plans After Graduation
      moved to Insights whole (8 Oct 2026, Chandu: "the today tab seems

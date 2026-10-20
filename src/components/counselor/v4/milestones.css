@@ -359,3 +359,6 @@ html.dark .v4-ms,html.dark .v4-ms-drawer {
 /* the view's tools: one quiet cluster of icons (20 Oct 2026) */
 .v4-ms-tools {display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:color-mix(in srgb,var(--foreground) 5%,transparent)}
 .v4-ms-tools .v4-ms-icon[aria-pressed="true"] {background:var(--card);color:var(--foreground);box-shadow:0 1px 3px rgba(20,30,70,.14)}
+/* the counts start on one line across a row of cards (composition pass):
+   centred, a two-state card's "Done" sat lower than a four-state card's */
+.v4-msc-body {align-items:start}

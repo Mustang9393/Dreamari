@@ -336,7 +336,6 @@ html.dark [data-counselor-version="v4"] .v4-rs-scrim {--rs-scrim:rgb(14 19 38 / 
 [data-counselor-version="v4"] .v4-rs-cv-icon {display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--glass-border);background:var(--card);color:var(--foreground);cursor:pointer}
 
 /* Review's desktop layout needs the height: on this page the heading drops its subtitle (the tabs say what the page is) */
-@media (min-width:1024px) { [data-counselor-version="v4"] .v4-main.v4-view-review-queue .v4-page-purpose {display:none} }
 [data-counselor-version="v4"] .v4-rs-cv-doc .v4-rs-stamp {padding:6px 14px;border-width:3px;font-size:clamp(16px,6cqw,26px);white-space:nowrap}
 [data-counselor-version="v4"] .v4-rs-cv-doc .v4-rs-page {container-type:inline-size}
 

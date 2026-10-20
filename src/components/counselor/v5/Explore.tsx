@@ -279,7 +279,7 @@ export function CuratedCareerRows({ onOpen, trades = false, world = "All", fold 
         </Row>
       ))}
       {fold && !more && folded.length > 0 && (
-        <button type="button" onClick={() => setMore(true)} className="dm-quiet mx-auto flex h-10 cursor-pointer items-center gap-[6px] rounded-full border px-[18px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)" }}>
+        <button type="button" onClick={() => setMore(true)} className="v4-data-note dm-quiet mx-auto flex h-10 cursor-pointer items-center gap-[6px] rounded-full border px-[18px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)" }}>
           More lists <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {folded.length}</span>
         </button>
       )}

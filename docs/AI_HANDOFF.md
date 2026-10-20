@@ -1,3 +1,47 @@
+## 2026-10-20: v4 Home in v7's shape; student ID tag v2; Meetings and Explore composition
+
+**Why (Chandu):** "lets try using the same sort of organisation level as v6 and v7 have for the home page of v4. Please include the off UI subtle picker for the character avatars." Then: "the student id component is too cluttered, remove the bar code and the weird serial numbers. Remove the career images. Use the same tag like structure the counsellors have but distinctly different from it." Then: "All pages need a heirarchy, spacing, typography, visual pass and decluttr pass once more. Both v7 and v4."
+
+- Home (`Overview.tsx`): v7's structure. Greeting and actions, then three cards: Reviews (13 waiting for you; 3 new since yesterday, 8 past deadline; Start reviewing), Meetings (N left this week; next student, day and time; View schedule, or Book a meeting when none), Need you (18 students; 7 at risk, the lowest grade as a link to Milestones; 85% on track and 42 still exploring as links; Review students). Then What My Students Are Saving and Most Played Career Simulations. The student list and the review breakdown left Home: their students are the Students list (most in need first) and the Review queue, one click from the cards. The Faces picker stays as the small footer line.
+- Student ID tag (`StudentProfile.tsx`, `today.css`): no barcode, serial or career art. Hangs from a round retractable badge reel (the counselor's hangs from a woven strap), a light card (theirs is dark with a photo cover), the school band with a round photo over its edge (theirs is square, left), name, grade and class year, pathway, status pill, last active.
+- Meetings: only Coming up is boxed (the first try boxed the whole agenda, a card around cards), full width. Explore: "More lists" no longer takes a section's padding.
+- v7: asked the parent session (which owns `.worktrees/counselor-v7`) before touching it; no v7 edits from this session yet.
+
+## 2026-10-20: Counselor v4 layout 2: a card system, a new Home hero
+
+**Why (Chandu):** "the hero is still cluttered and the spacing isnt improving anywhere, things are all tight and crowded everywhere. We need to seriously rethink the design. If we need to use boxes to organise stuff where needed try that too. Use best practices and your own judgement. Research heavily."
+
+**Research** (sources in the session): NN/g on cards (group a few related facts into one unit; cards suit dashboards of mixed content; top-left gets the most attention) and on dashboards (glanceable; group with enclosure and proximity, color only as a secondary cue); PatternFly's dashboard guidelines (a grid of cards, uniform gutters, cards ranked by importance, anatomy title / body / optional filter top right / footer link); Gestalt common region vs proximity (an enclosure overrides proximity; never a card inside a card); spacing in tiers (tight 4-8 inside a pair, 12-24 inside a card, 32-64 between groups), and "even gaps everywhere blur the groups"; Stripe's dashboard (about five primary numbers, hierarchy from type and whitespace, color only for status). Diagnosis: the 2x pass made every gap between sections huge while the insides stayed cramped, and the analytics pages had deliberately dropped their boxes, so nothing was grouped.
+
+- `layout2.css` (new, imported by Workspace and Overview): one card (opaque card surface, 20px radius, hairline edge, soft lift, 32px padding at 1280+, 28 below, 20 on phones), a 24px card gutter, 32px between stacked cards, 96px between unboxed groups (was 128). Every existing panel (`.v4-surface` and the named sheets) takes the same card; the analytics sections boxed again (Readiness, Engagement, My Impact); Engagement's four figures and Readiness' four indicators are small cards; College & Career's Schools and Majors are two cards, Postsecondary Direction a card; Meetings' week list a card; folded sections are even one-row cards; profile milestone rows are hairline rows, not a shadowed box each.
+- Home hero (`Overview.tsx`): greeting and the day's actions on one line, then three equal cards: Caseload (7 students at risk, 85% on track, 42 still exploring, "See who is at risk"), Next meeting (when, who, type, "Open meetings"), Since yesterday (the three updates). Each card is one label, one large line, one quiet line, and a footer link pinned to the bottom so short cards are balanced. My Next Conversations and Pending Reviews are cards side by side with a 24px gutter.
+- Student profile: identity column 300 to 360px; "active N days ago" moved into the ID card body (it was cut off in the footer); card gaps 24 / 32.
+
+Checked: tsc; full-size 1440 captures of every v4 page (headless Chrome over CDP, `scratchpad/cap.mjs`).
+
+## 2026-10-20: Counselor v4 composition pass
+
+**Why (Chandu):** "the composition of the v4 pages needs more design work. There are awkward gaps and misaligned elements and text everywhere. Also the tabs switch fonts when i select them vs not."
+
+- Title tabs: the selected tab is the page h1 and took the display face, the others the body face. Now all use the display face, same weight and tracking (`visual-refresh.css`).
+- One control row per page: new `HeadingControls` (`Workspace.tsx`) portals a page's own controls onto the title's second row beside the shell's filters. Directory (List / Cards, status, plan) and My Impact (period, Principal Report, Export) no longer stack a second control row. My Impact's date range moved to the hero's overline. Level-3 pill styles now also apply on that row (`v4.css`).
+- Gaps that broke relationships: a folded section (Readiness Gaps, ASCA, District Goals) takes the tight gap on both sides instead of a full section gap. Milestones' summary strip sits a tight gap above its grades. The 2x rhythm is kept between unrelated sections.
+- Alignment: Home's two lists each open with the same big figure line ("18 need support" restored, "13 waiting"), so their rows start level. Both list heads are the same height. The header search keeps the right edge. Milestone cards top-align their counts, so "Done" sits on one line across a row. Messages' answered count and bar sit on one line, centred on New message.
+- Key Wins rows showed each figure twice (big figure + sentence starting with it): now figure, a small label, and the rest of the sentence (career pathways shows its % instead of "11-12").
+
+Checked: tsc, eslint; Home, Directory, Milestones, Messages, Readiness, My Impact at 1280 light.
+
+## 2026-10-20: Counselor v4 page hierarchy: the sub-pages become the page title
+
+**Why (Chandu):** "on v4, the tab row on top like directory/milestones is very hard to see. Nobody notices them. So the information heirarchy on each page needs a lot of work. We need to make it as intuitive as possible."
+
+- `Workspace.tsx`, `visual-refresh.css`: an area's pages (Directory / Milestones; Meetings / Review / Messages / Assist; College & Career / Readiness / Engagement / My Impact) left the 12px row under the header and are now the page title. Every page of the area sits at title size in a fixed order. The current one is in full ink with a blue underline (it is the page's h1), the others are muted links that darken on hover. This also removes the old title that only repeated the tab name. Under the title is one row: the purpose line on the left, the page's filters on the right. On phones the title is a picker, per the tabs-overflow rule. The header's second row keeps the school name and the search.
+- `v4.css`: the page's own view switch (Awaiting me / In progress, grade pills, By Milestone / By Student, Explore's Careers / Pay by State and pathway switch) shows the selected option as a raised white pill in full ink, no longer a blue fill. A filled blue pill under the title was louder than the title. Blue now only marks where you are: the area pill and the title underline. Explore's world chips show the chosen one in ink.
+- `assist.css`, `prepare.css`: Review and Assist show their one-line description again on desktop (Chandu: keep the descriptions). This also stops Review's grade picker from sitting alone on a row.
+
+Hierarchy, top down: 1 area pills (blue) > 2 page title tabs (title size, blue underline) > 3 view switch (white pill) > 4 in-card switch (small underline).
+Checked: tsc; Students, Prepare (Review, Assist), Insights and Explore at 1280; Insights at 375.
+
 ## 2026-10-20: Counselor v7, Joshua's official Replit direction on Black & Blue (pushed to main, opt-in ?v=7)
 
 **Why (Joshua, Slack, 20 Oct 2026):** "I've now created the official Counselor Dashboard direction in Replit. Please use this as the version to replicate moving forward" (https://dceeai.replit.app/dreamari-counselor-dashboard). Ready: Home, Students, Explore, Prepare, Opportunities. Not yet: the individual meeting brief ("do not update that screen yet"), Opportunities' Applications ("still needs some refinement"), Analytics ("do not build that section yet"). **Chandu:** "build this but with our new design system and colors and borrowing UI elements from the other versions", and v4 is "too cluttered, messy, and A LOT in the user's face" (the v4 declutter runs separately on branch counselor-v4-declutter). Mid-build: "design all the pop ups with dreamari's design standards like we did for what it pays", then "declutter the pop ups. Eliminate all redundant and repeating information and all copy that is not valuable and intentional."

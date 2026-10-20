@@ -380,3 +380,11 @@ html:not(.dark) [data-counselor-version="v4"] :is(.msg-stat,.msg-list-col,.msg-l
   [data-counselor-version="v4"] :is(.msg-thread,.msg-thread>*,.msg-line,.msg-stamp,.msg-list li,.msg-read,.msg-sent-note,.msg-typing i,.msg-draft,.msg-tick,.msg-zero-faces li,.msg-next,.msg-bulkbar,.msg-bulkpane,.msg-review) {animation:none!important}
   [data-counselor-version="v4"] :is(.msg-check-tip,.msg-row-face,.msg-switch-track,.msg-switch-track i) {transition:none}
 }
+/* the answered count and its bar on one line, centred on the New message
+   button beside it (composition pass, 20 Oct 2026: label-over-bar floated
+   above the button's centre line) */
+@media (min-width:768px){
+ [data-counselor-version="v4"] .msg-toolbar-end .msg-bar {flex-direction:row;align-items:center;gap:12px;width:auto}
+ [data-counselor-version="v4"] .msg-toolbar-end .msg-bar>:not(.msg-bar-copy) {width:160px;flex:none}
+ [data-counselor-version="v4"] .msg-bar-copy {white-space:nowrap}
+}

@@ -165,18 +165,31 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
    .v4-tabs. :where() keeps these at .v4-content's own specificity so those
    two still win. The row scrolls sideways on a phone, scrollbar hidden. */
 .v4-content [role="tablist"]:where(:not([data-text-tabs])) {display:flex;align-items:center;gap:3px;width:fit-content;max-width:100%;flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-radius:99px!important;padding:4px!important;background:var(--glass-surface-1)!important;border:1px solid var(--v4-edge)!important;}
+.v4-page-controls [role="tablist"]:where(:not([data-text-tabs])) {display:flex;align-items:center;gap:3px;width:fit-content;max-width:100%;flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-radius:99px!important;padding:4px!important;background:var(--glass-surface-1)!important;border:1px solid var(--v4-edge)!important;}
 .v4-content [role="tablist"]:where(:not([data-text-tabs]))::-webkit-scrollbar {display:none;}
+.v4-page-controls [role="tablist"]:where(:not([data-text-tabs]))::-webkit-scrollbar {display:none;}
 .v4-content :where([role="tablist"]:not([data-text-tabs])) [role="tab"] {display:inline-flex;align-items:center;gap:5px;flex:none;height:34px;padding:0 15px!important;border-radius:99px!important;font-size:13px!important;font-weight:600;line-height:1;color:var(--muted-foreground);white-space:nowrap;cursor:pointer;transition:color .15s,background .15s;}
+.v4-page-controls :where([role="tablist"]:not([data-text-tabs])) [role="tab"] {display:inline-flex;align-items:center;gap:5px;flex:none;height:34px;padding:0 15px!important;border-radius:99px!important;font-size:13px!important;font-weight:600;line-height:1;color:var(--muted-foreground);white-space:nowrap;cursor:pointer;transition:color .15s,background .15s;}
 .v4-content :where([role="tablist"]:not([data-text-tabs])) [role="tab"]:hover {color:var(--foreground);}
-.v4-content :where([role="tablist"]:not([data-text-tabs])) [role="tab"][aria-selected="true"] {background:var(--v4-action)!important;color:var(--v4-action-fg)!important;box-shadow:0 3px 14px #0000000b!important;}
+.v4-page-controls :where([role="tablist"]:not([data-text-tabs])) [role="tab"]:hover {color:var(--foreground);}
+/* the selected view is a raised white pill in full ink, not a blue fill
+   (20 Oct 2026, page hierarchy pass: a filled blue pill under the page
+   title out-shouted the title itself; blue now marks only where you are,
+   the area pill and the page title's underline) */
+.v4-content :where([role="tablist"]:not([data-text-tabs])) [role="tab"][aria-selected="true"] {background:var(--card)!important;color:var(--foreground)!important;box-shadow:0 1px 3px rgba(20,30,70,.16),0 0 0 1px var(--v4-edge)!important;}
+.v4-page-controls :where([role="tablist"]:not([data-text-tabs])) [role="tab"][aria-selected="true"] {background:var(--card)!important;color:var(--foreground)!important;box-shadow:0 1px 3px rgba(20,30,70,.16),0 0 0 1px var(--v4-edge)!important;}
 .v4-content :where([role="tablist"]:not([data-text-tabs])) [role="tab"] small {font-size:12px;font-weight:600;opacity:.8;font-variant-numeric:tabular-nums;}
+.v4-page-controls :where([role="tablist"]:not([data-text-tabs])) [role="tab"] small {font-size:12px;font-weight:600;opacity:.8;font-variant-numeric:tabular-nums;}
 /* v5's grey segmented switch (seg-track, Explore's All pathways / Skilled
    trades) rendered inside v4 takes the same level 3 pill, so one page never
    shows two pill designs. v5's own rendering is untouched. */
 [data-counselor-version="v4"] .v4-content .seg-track {height:auto;gap:3px;padding:4px;border-radius:99px;background:var(--glass-surface-1)!important;border:1px solid var(--v4-edge);box-shadow:none!important;}
 [data-counselor-version="v4"] .v4-content .seg-item {height:34px;padding:0 15px;border-radius:99px;font-size:13px;font-weight:600;background:transparent!important;color:var(--muted-foreground)!important;box-shadow:none!important;}
 [data-counselor-version="v4"] .v4-content .seg-item:hover {color:var(--foreground)!important;}
-[data-counselor-version="v4"] .v4-content .seg-item[aria-pressed="true"] {background:var(--v4-action)!important;color:var(--v4-action-fg)!important;}
+[data-counselor-version="v4"] .v4-content .seg-item[aria-pressed="true"] {background:var(--card)!important;color:var(--foreground)!important;box-shadow:0 1px 3px rgba(20,30,70,.16),0 0 0 1px var(--v4-edge)!important;}
+/* Explore's career-world filter chips inside v4: the chosen one in ink, not
+   blue (same pass) */
+[data-counselor-version="v4"] .v4-content [aria-label="Career world"] button[aria-pressed="true"] {background:var(--foreground)!important;border-color:var(--foreground)!important;color:var(--background)!important;}
 .v4-content table {border-collapse:separate!important;border-spacing:0 5px;}
 .v4-content thead {background:transparent!important;}
 .v4-content th {font-size:11px!important;text-transform:uppercase;letter-spacing:1px;padding:15px 18px!important;}

@@ -72,6 +72,7 @@ import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCoun
 import { Go } from "./chips";
 import { FullScreenDocument, printDocumentPage } from "./DocumentDesk";
 import { useConnectLive } from "./CounselorConnect";
+import { HeadingControls } from "./Workspace";
 import { useRouter } from "next/navigation";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { Listbox } from "./Listbox";
@@ -457,14 +458,17 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
     // previews the states this always-populated demo data never reaches.
     <SurfaceState id={62} isEmpty={v.caseload === 0} onEmptyAction={() => router.push("/counselor?view=schools")}>
     <div className="v4-page v4-impact-report v4-sections flex flex-col">
-      <div className="v4-impact-toolbar">
+      {/* the period and the two reports on the title's row beside the grade
+         and group pickers, not a second control row (20 Oct 2026
+         composition pass); the date range moved to the hero's overline */}
+      <HeadingControls>
         <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={periods.map((p) => ({ value: p.key, label: p.current ? `This semester (${p.label})` : p.label }))} className="v4-period-select" />
-        <span className="v4-source-note">{v.range} · {who_ === "school" ? `Prepared by ${name}` : who}</span>
-        <div><button className="v4-secondary-action" onClick={() => setReport("principal")}>Principal Report</button><button className="v4-primary-action" onClick={() => setReport("impact")}><FileBarChart size={15}/>Export Impact Report</button></div>
-      </div>
+        <button className="v4-secondary-action" onClick={() => setReport("principal")}>Principal Report</button>
+        <button className="v4-primary-action" onClick={() => setReport("impact")}><FileBarChart size={15}/>Export Impact Report</button>
+      </HeadingControls>
       {/* 2. Student Progress: the hero, unchanged (it matches her image). */}
       <section className="v4-impact-cover" aria-label="Student Progress">
-        <div className="v4-impact-story"><span className="v4-overline">Student Progress</span><h2>Moving Toward<br/><em>What’s Next</em></h2><p>{v.onTrack} of {live && scope.scopeLabel ? `these ${v.caseload}` : `${our} ${v.caseload}`} students are on track{v.onTrackPct !== SCHOOL_AVG_ON_TRACK ? `, ${Math.abs(v.onTrackPct - SCHOOL_AVG_ON_TRACK)} points ${v.onTrackPct > SCHOOL_AVG_ON_TRACK ? "above" : "below"} the school's ${SCHOOL_AVG_ON_TRACK}%` : ", the same as the school"}.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
+        <div className="v4-impact-story"><span className="v4-overline">Student Progress · {v.range} · {who_ === "school" ? `Prepared by ${name}` : who}</span><h2>Moving Toward<br/><em>What’s Next</em></h2><p>{v.onTrack} of {live && scope.scopeLabel ? `these ${v.caseload}` : `${our} ${v.caseload}`} students are on track{v.onTrackPct !== SCHOOL_AVG_ON_TRACK ? `, ${Math.abs(v.onTrackPct - SCHOOL_AVG_ON_TRACK)} points ${v.onTrackPct > SCHOOL_AVG_ON_TRACK ? "above" : "below"} the school's ${SCHOOL_AVG_ON_TRACK}%` : ", the same as the school"}.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
         {/* One dot per student, the on-track ones lit clockwise (the page's one glow). */}
         <IconTip label={live ? `See the ${notOnTrack.length} students not on track` : "See the breakdown"} className="justify-self-center w-full max-w-[300px] justify-center">
         <button className="iv-orbit dm-quiet" onClick={() => open(drills.onTrack())} aria-label={`On-track rate ${v.onTrackPct} percent, ${v.onTrack} of ${v.caseload} students. Open details`}>
@@ -498,8 +502,10 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
           {v.wins.filter((w) => w.key !== "onTrack").map((w) => (
             <li key={w.key}>
               <button type="button" onClick={() => open(forWin[w.key]())} className="iv-ledger-row dm-quiet group" aria-label={`${w.text} Show details`}>
-                <strong className="iv-ledger-fig">{winCard(w.key, v).hero}</strong>
-                <span className="iv-ledger-text">{w.text}</span>
+                {/* the figure once, then what it is and the rest of her
+                   sentence (the full sentence repeated the figure) */}
+                <strong className="iv-ledger-fig">{w.key === "pathway" ? `${v.upperPct}%` : winCard(w.key, v).hero}</strong>
+                <span className="iv-ledger-text"><small>{winCard(w.key, v).kicker}{w.key === "pathway" ? ", grades 11–12" : ""}</small>{w.key === "pathway" ? (v.upperPct >= GOAL_PCT ? `Above the ${GOAL_PCT}% school target.` : `School target: ${GOAL_PCT}%.`) : winCard(w.key, v).caption.replace(/^./, (c) => c.toUpperCase())}</span>
                 <ChevronRight size={14} aria-hidden className="iv-ledger-go transition-transform group-hover:translate-x-[3px]" />
               </button>
             </li>
