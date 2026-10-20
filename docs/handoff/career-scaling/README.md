@@ -1,12 +1,14 @@
 # Dreamari career game production SOP
 
-Version 1.4 · 20 October 2026 · AI production workflow; UX and Food Scientist QA drafts.
+Version 1.5 · 20 October 2026 · AI production workflow; UX and Food Scientist QA drafts.
 
 **Outcome:** turn a career name (and an optional source brief) into a playable, reviewable simulation using the existing IB, nursing and aviation engine. The reusable unit is a decision with evidence, choices and consequences. A new career supplies data and art; it does not get a new gameplay implementation.
 
 This is the entry point for **new career simulation production**. It updates the older Play SOP for complete scene images and distinguishes current shared rules from demo-specific choices. Existing approved games are not rewritten. The glossary has its own SOP and is a different product.
 
 Files in this folder:
+
+- `work-graphics-research-prompt.txt`: source-backed research and task/surface selection before graphics production.
 
 - `game-build-prompt.txt`: paste-ready prompt to execute this workflow.
 - `art-master-prompt.txt`: complete-scene generation/edit prompt.
@@ -51,7 +53,35 @@ Use the portable [visual reference library](references/README.md) before any gen
 
 **Required review record:** for each scene record PASS / REPAIR / NOT CHECKED for (1) anime drawing, (2) identity, (3) workplace function, (4) interior design, (5) controlled environment detail, (6) room/exterior continuity, (7) light/time, (8) player eyeline, (9) UI/crop. Document the observation and repair, not a made-up quality percentage. Any repair item blocks that candidate from release; missing human QA remains explicit even when AI checks pass. Keep rejected candidates out of runtime routes. Review one finished scene in the real game before propagating its environment across the shot list.
 
-**Career work graphics:** derive each graphic from what the player actually inspects. Food science uses formulation strips, sample trays, test counts, held-sample records and panel plans. UX uses wireframes, prototypes and research evidence; Nursing uses relevant monitoring and records; IB uses deal evidence and tables. A row of text cards with different nouns is insufficient where the task needs visual comparison. Render readable values and labels natively from the same project record as the question. Preserve units, denominators and unknown states; neither an illustration nor colour alone can carry the key. Use shared instrument/document primitives styled to their medium, keeping game actions distinct.
+**Career work graphics:** derive each graphic from what the player actually inspects. Food science uses formulation drafts, sample registers, test readouts, held-sample records and panel plans. UX uses wireframes, prototypes and research evidence; Nursing uses relevant monitoring and records; IB uses deal evidence and tables. A row of text cards with different nouns is insufficient where the task needs visual comparison. Render readable values and labels natively from the same project record as the question. Preserve units, denominators and unknown states; neither an illustration nor colour alone can carry the key. Use shared instrument/document primitives styled to their medium, keeping game actions distinct.
+
+## 1b. Reuse the mechanics; design the career work
+
+Shared choice, matching, ordering, inspection and handover mechanics are intentional. They provide consistent keyboard/touch behaviour, scoring, feedback and recovery. A new career must not inherit UX Designer’s sequence, card layouts or graphical objects by default. Choose the mechanic from the real decision, not from a quota of question types or an existing script to reskin.
+
+**Research gate:** run `work-graphics-research-prompt.txt` before writing the graphics plan. Browse primary sources for the career’s actual software, documents, records, communications and relevant devices. Record source URL/title, the task it supports, useful fields/units/states, what an entry-level player may do, and what must not be inferred. Use official documentation, professional bodies and manufacturer guides; distinguish verified facts from fictional teaching data. Do not copy proprietary UI or use search results as artwork. Choose only surfaces needed by the authored decisions; do not add a phone or monitor just to meet a variety quota. If research cannot support a reading or interaction, simplify it to a documented reference/file state and record the limitation. Humans QA the finished game; the AI performs this research and production.
+
+Before building, save a **work-surface plan** for each task: what the player physically inspects/manipulates, why that mechanic fits, the authoritative evidence/state, the visual medium, organisation/material/world tokens, selected/locked/feedback states, phone layout and keyboard alternative. Keep the original professional meaning while making evidence concrete. Ask whether the work is recognisable when the career title is hidden. Changing a heading, nouns, icons or accent colour alone does not pass.
+
+| Career work | Useful visual interaction | Shared mechanics underneath |
+|---|---|---|
+| Food science | Edit a formulation draft; compare experiment files; inspect sample records; read a coded sensory protocol | Local unscored arithmetic practice; choice; flags; matching/pick |
+| UX design | Try a prototype; inspect a wireframe; compare research observations and form states | Local prototype; choice; flags; bucket/chain |
+| Nursing | Read relevant patient monitoring/observations; prioritise changes; assemble a handover | Shared relevant instrument; rank; choice/pick |
+| IB | Inspect deal evidence, numbers and document versions before recommending | Native table/document; choice; flags/chain |
+| Architecture / trades | Inspect plans, dimensions, revision records and work order | Native drawing/register; flags; rank/choice |
+
+Use existing semantic tokens and scalable **medium + content** primitives. A lab work console, drawing register, clinical monitor and prototype should have different hierarchy, geometry and physical cues. A branded header is not sufficient without an appropriate representation of the work. Do not add career-ID branches or copy a scoring engine. Add a small shared representation if needed and verify it with an unrelated career fixture.
+
+Interaction evidence can live **inside** the selectable object. A trial choice may contain method/formulation fields; a flagged row may be a sample record; a matching tile may name a method and its output. The existing control still owns keyboard input, selection, locks and scoring. Evidence must come from canonical project data, remain readable without colour, and never reveal the key through preselection, correctness adjectives or pre-answer red/green styling. Do not repeat the same evidence above and inside the answer.
+
+**Default to professional work surfaces, not equipment illustrations.** Use notepads, files, document registers, actual software screens, messages, phone/radio interfaces and relevant device readouts. The Nursing ECG is a reference for a purposeful monitoring surface, not permission to add a waveform to another career. Never draw decorative vector balances, apparatus, sample foods or tool silhouettes as a substitute for the work. A device belongs only where the script calls for its information or action. Phone/radio messages need a sender, context and truthful state; do not invent urgency, unread counts or fake outcomes. A readout needs canonical values, units, denominators and the correct time/state. Without readings, show a reference, blank field or pending state. Never invent a moving trace to make a screen feel active. Use layout, typography and restrained state transitions for engagement; preserve readable text and a distinct game CTA.
+
+Use local practice controls where they teach the work. Give them a clear practice/draft label, meaningful bounded state, reset, and a distinct small control style. They cannot submit work externally, award points, overwrite canonical results or advance the game. Check invariants and boundary states. Food Scientist’s 5 g transfer keeps the batch at 100 g, changes 60/30/10 to 55/35/10 and leaves reputation unchanged. The subsequent scored decision concerns a fair test method, not clicking the practice control.
+
+**Asset-entry gate:** the welcome screen, Play tile, trailer, lessons, scene manifest, portraits and outcomes must all resolve to the selected cast/art version. Reuse the level’s canonical cover rather than maintaining another stale path. Verify the first screen of each updated career in the browser and inspect the actual image source, not just the level manifest.
+
+**Acceptance:** review each distinct surface and its actual task at desktop and phone widths. Test keyboard selection, incorrect/correct outcomes and progression. Compare two career screenshots side by side: both should look like Dreamari, while the objects, information hierarchy and work actions clearly belong to their careers. A shared mechanic is not a defect; an interchangeable work experience is. Record actual checks and remaining QA separately. Do not claim every existing career was redesigned because one proof changed.
 
 ## 2. Source hierarchy and scope
 
@@ -106,7 +136,7 @@ All items below already exist. Use only those needed by the assignment; the refe
 | Apply several related checks | `rapid` | One scored block, clear per-item answers. Timer optional, never required merely for variety. |
 | Close a level | `review` | Last beat, followed by the shared outcome flow. |
 
-`choice` can also use the existing boss layout if an actual reviewer challenge warrants it. It is not a new question type. Avoid `inspect`, `torque`, `world`, `board`, `briefing`, `artFrame`, career-specific document styling, radio instruments, hand-placed hotspots and custom zone/move layouts in new careers. `bespokeIn(level)` must return an empty list. Never build a custom instrument just to illustrate a fact that a normal card can state. Career-specific graphic content is allowed and required where it supports the work; use the reusable artifact workflow below. A new graphic is not a new scoring mechanic.
+`choice` can also use the existing boss layout if an actual reviewer challenge warrants it. It is not a new question type. Avoid `inspect`, `torque`, `world`, `board`, `briefing`, `artFrame`, legacy bespoke document/radio scoring components, hand-placed hotspots and custom zone/move layouts in new careers. `bespokeIn(level)` must return an empty list. Never build a custom instrument just to illustrate a fact that a normal card can state. Career-specific graphic content is allowed and required where it supports the work; use the reusable artifact workflow below. A new graphic is not a new scoring mechanic. Native professional file styling and relevant phone/radio/message surfaces are allowed through shared data-driven renderers; keep their decisions in the shared controls.
 
 ### Choosing a question
 

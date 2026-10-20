@@ -279,7 +279,7 @@
       "beat": "FS1-08",
       "scene": "fs-tools",
       "shotGroup": "tools",
-      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+      "artifact": "fs-toolkit"
     },
     {
       "beat": "FS1-TOOLS",
@@ -327,7 +327,7 @@
       "beat": "FS1-15",
       "scene": "fs-weighing",
       "shotGroup": "weighing",
-      "artifact": "fs-plan"
+      "noArtifactReason": "The selectable trial/sample records contain native structured evidence; a separate duplicate graphic is unnecessary."
     },
     {
       "beat": "FS1-16",
@@ -363,7 +363,7 @@
       "beat": "FS1-20",
       "scene": "fs-records",
       "shotGroup": "records",
-      "artifact": "fs-log"
+      "noArtifactReason": "The selectable trial/sample records contain native structured evidence; a separate duplicate graphic is unnecessary."
     },
     {
       "beat": "FS1-21",

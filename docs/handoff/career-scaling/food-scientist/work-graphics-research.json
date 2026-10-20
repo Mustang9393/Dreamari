@@ -1,0 +1,65 @@
+{
+  "career": "food-scientist",
+  "date": "2026-10-20",
+  "scope": "Work-surface research; fictional training records, not approved professional procedures",
+  "sources": [
+    {
+      "id": "texture",
+      "title": "Stable Micro Systems \u2014 TA.XTplusC Texture Analyser",
+      "url": "https://www.stablemicrosystems.com/products/taxtplusc-texture-analyser/",
+      "finding": "Instrumental texture testing measures physical properties under defined test methods.",
+      "appliesTo": [
+        "FS1-08",
+        "FS1-09"
+      ],
+      "design": "Reference console describes method/output; no invented force curve or instrument reading."
+    },
+    {
+      "id": "formulation",
+      "title": "Stable Micro Systems \u2014 Applications",
+      "url": "https://www.stablemicrosystems.com/applications",
+      "finding": "Texture analysis can support studying formulation or process changes.",
+      "appliesTo": [
+        "FS1-14",
+        "FS1-15"
+      ],
+      "design": "Native formulation draft and comparison files. Counts and recipes come from fictional project, not this source."
+    },
+    {
+      "id": "controlled",
+      "title": "NIST/SEMATECH e-Handbook \u2014 One variable at a time",
+      "url": "https://www.itl.nist.gov/div898/handbook/pri/section2/pri212.htm",
+      "finding": "Introductory controlled contrast has limits when factors interact.",
+      "appliesTo": [
+        "FS1-15",
+        "FS1-27"
+      ],
+      "design": "Show same-method fields and limited handling counts, not optimisation or shelf-life claims."
+    },
+    {
+      "id": "allergens",
+      "title": "FDA \u2014 Food Allergies",
+      "url": "https://www.fda.gov/food/nutrition-food-labeling-and-critical-foods/food-allergies",
+      "finding": "Allergen cross-contact requires controls.",
+      "appliesTo": [
+        "FS1-20",
+        "FS1-23",
+        "FS1-25"
+      ],
+      "design": "Sample files show known/missing fields and approval state. No safe thresholds or release inference."
+    }
+  ],
+  "authoredTeachingData": [
+    "Sprout Lab organisation and dialogue",
+    "100 g A/B formulations",
+    "7/10 and 2/10 breakage counts",
+    "Record IDs, fields and hold states",
+    "Codes 318/742 and blank sensory response protocol"
+  ],
+  "limitations": [
+    "No actual lab software UI is replicated or endorsed.",
+    "The console is an educational method reference, not instrument operation.",
+    "No force, temperature, safety or shelf-life readings exist; none are fabricated.",
+    "Sensory protocol layout and dialogue are authored, not a validated study design."
+  ]
+}

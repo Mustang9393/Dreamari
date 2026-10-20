@@ -1,3 +1,13 @@
+## 2026-10-20 — Native work surfaces, research gate and current welcome art
+
+**Why:** Chandu: “the vector art ... really bad ... notepads, files, UI, screens ... Not drawing equipments”; “SOP should have ... prompts to research and include relevant graphics ... any new career”; “welcome image ... outdated ... food scientist and UX designer.”
+
+**Changed:** removed apparatus/sample illustrations. Native tabbed method reference, recorded-count readout, coded blank sensory response file, sample registers and evidence inside existing answer controls; bounded/resettable 5 g formulation draft. Medium/content shared representations, no career-ID scoring engine. Canonical project records drive sample flags and visible fields. Shortened repeated setup text. Food/UX simulation covers reuse canonical level cover; food thumb and UX trailer use current v4 assets. SOP v1.5 includes a separate work-graphics research prompt, source/task/state plan, no decorative equipment-vector rule, relevant device/message/readout gates, and all-entry-art checks. Art/cast/rooms unchanged.
+
+**Checks:** five retained tests and 555 structural assertions pass; ten scored decisions retain tiers/keys/reasons/scoring; build/TypeScript/scoped ESLint/508 tokens pass. New native surfaces checked on phone/desktop; all 19 food/reuse fixtures fit 390/1280; keyboard tabs and bounded transfer/reset; actual trial correct/incorrect and record flags exercised. Both welcome dialogs load selected v4 assets. See `docs/handoff/career-scaling/food-scientist/QA-workbench.md` for exact scope and remaining checks.
+
+**Status:** local game only at port3081; no main push/app deployment. Public SOP v1.5 published through Sites: version9 / source5201aab606874eec26352ba3e5ee66a656ca7b47 / deployment appgdep_6ad7a9bbf5b48191bada78b126cc04e0 succeeded. Public page verified with four copyable prompts and native work examples. Human QA pending; no universal generation or pixel-perfect claims. Rejected equipment drawings are excluded from deliverables. Current user wants useful professional screens/files/devices, not illustrations of apparatus.
+
 ## 2026-10-20 — Food Scientist anime, Japanese cast and designed lab revision
 
 **Why:** Chandu: “we've strayed from the anime character designs”, “lets go japanese”, “backgrounds are also being too detailed”, then “these look too simple and dont have the opulent interior design … exactly like the work environment.” The first redraw fixed faces but retained photographic room detail; the simplified room then lost workplace specificity. Selected v4 restores the food-development lab's preparation/testing functions and architectural design with selective painted anime surfaces.

@@ -26,5 +26,47 @@
     "tasting": "Not authorised"
   },
   "shelfLife": "Not studied",
-  "method": "Same mixing, shaping, storage interval and break test for A and B; replace 5 g oats with 5 g binder in each 100 g trial."
+  "method": "Same mixing, shaping, storage interval and break test for A and B; replace 5 g oats with 5 g binder in each 100 g trial.",
+  "records": [
+    {
+      "id": "A",
+      "ingredients": "Recorded",
+      "method": "Recorded",
+      "state": "Ready for review",
+      "followup": false
+    },
+    {
+      "id": "B",
+      "ingredients": "Recorded",
+      "method": "Not recorded",
+      "state": "Draft",
+      "followup": true
+    },
+    {
+      "id": "C",
+      "ingredients": "Not confirmed",
+      "method": "Recorded",
+      "state": "Held",
+      "followup": true
+    },
+    {
+      "id": "D",
+      "ingredients": "Recorded",
+      "method": "Recorded",
+      "state": "Held for review",
+      "followup": false
+    }
+  ],
+  "panel": {
+    "codes": [
+      "318",
+      "742"
+    ],
+    "question": "How firm does each sample feel?",
+    "controls": [
+      "Same serving conditions",
+      "Independent responses",
+      "C stays off the tray"
+    ]
+  }
 }

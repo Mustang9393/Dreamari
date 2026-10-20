@@ -15,3 +15,5 @@ Shared native flow, notes, wireframe, interface and comparison renderers use can
 See ux-runtime-checks.json for checks actually run and open QA. Later levels are unbuilt. Resume remains disabled by the prototype's DEMO_START_FRESH setting.
 
 Edition 1.4 adds a separate reference-library.zip (actual IB, Nursing, UX drawing references and the selected Food Scientist lab). Download it beside this source ZIP. Four food-scientist-v4-art archives contain all 12 new complete scenes. Food Scientist is a local QA candidate, not an app deployment.
+
+Edition 1.5 adds work-graphics-research-prompt.txt and native work surfaces: method consoles, record files, result readouts and bounded formulation practice. Research and choose career-relevant screens/documents/messages before implementation. Decorative equipment/sample vector drawings are excluded. Welcome/trailer/tile art must use the selected canonical cast/version. Human QA remains separate.

@@ -27,7 +27,7 @@ const artPath=process.argv[5]??path.join(root,'src/components/play/art',sim.care
 const art=JSON.parse(fs.readFileSync(artPath,'utf8'));
 const coveragePath=path.join(root,'docs/handoff/career-scaling/examples',sim.careerId+'-coverage.json');
 const coverage=fs.existsSync(coveragePath)?JSON.parse(fs.readFileSync(coveragePath,'utf8')):null;
-const {artifactProblems}=load(path.join(root,'src/components/play/work-artifacts.ts'));
+const {artifactProblems,decisionEvidenceProblems}=load(path.join(root,'src/components/play/work-artifacts.ts'));
 const traceFile=process.argv[4]??path.join(root,'docs/handoff/career-scaling/examples',sim.careerId+'-trace.json');
 const trace=fs.existsSync(traceFile)?JSON.parse(fs.readFileSync(traceFile,'utf8')).trace:[];
 const errors=[];let count=0;
@@ -97,6 +97,7 @@ for(const level of sim.levels){
    check(b.artifact?row?.artifact===b.artifact.id:Boolean(row?.noArtifactReason),b.id+': missing artifact or no-artifact rationale');
   }
   if(b.artifact)for(const problem of artifactProblems(b.artifact))check(false,b.id+': '+problem);
+  for(const item of [...(b.choices??[]),...(b.rows??[])])if(item.evidence)check(decisionEvidenceProblems(item.evidence).length===0,b.id+': invalid decision evidence');
   if(b.speaker&&!['Narrator','System'].includes(b.speaker))check(art.cast[b.speaker],b.id+': unknown speaker');
   check(!JSON.stringify(b).includes('—'),b.id+': student copy contains em dash');
   const tr=trace.find(t=>t.beat===b.id);

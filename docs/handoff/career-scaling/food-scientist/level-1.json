@@ -80,6 +80,9 @@
       "cta": "Continue",
       "artifact": {
         "id": "fs-brief",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "notes",
         "layout": "handover",
         "title": "Project card · Sprout oat snack",
@@ -132,6 +135,9 @@
       "cta": "Continue",
       "artifact": {
         "id": "fs-brief",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "notes",
         "layout": "handover",
         "title": "Project card · Sprout oat snack",
@@ -223,10 +229,68 @@
       "kind": "card",
       "variant": "chapter",
       "title": "Use the tool that answers the question.",
-      "body": "A balance measures ingredient mass. A texture test compares physical firmness. A sensory panel collects people’s responses under an agreed method.",
+      "body": "Balance: mass. Texture test: physical firmness. Sensory panel: people’s responses.",
       "speaker": "System",
       "system": true,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": {
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
+        "id": "fs-toolkit",
+        "kind": "work-screen",
+        "title": "Measurement reference",
+        "recordId": "FS / work console",
+        "caption": "Select a method to see what it measures. This reference contains no live readings.",
+        "provenance": "Fictional lab method reference, no measurements invented.",
+        "tabs": [
+          {
+            "label": "Mass",
+            "heading": "Ingredient weighing",
+            "detail": "Use a balance to record ingredient mass before mixing.",
+            "fields": [
+              {
+                "label": "Tool",
+                "value": "Balance"
+              },
+              {
+                "label": "Record",
+                "value": "Mass in g"
+              }
+            ]
+          },
+          {
+            "label": "Firmness",
+            "heading": "Physical texture test",
+            "detail": "A texture analyser measures a physical property under a defined method.",
+            "fields": [
+              {
+                "label": "Tool",
+                "value": "Texture analyser"
+              },
+              {
+                "label": "Record",
+                "value": "Physical firmness"
+              }
+            ]
+          },
+          {
+            "label": "Sensory",
+            "heading": "People’s responses",
+            "detail": "A sensory panel records how people perceive a sample.",
+            "fields": [
+              {
+                "label": "Method",
+                "value": "Sensory panel"
+              },
+              {
+                "label": "Record",
+                "value": "Independent responses"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "FS1-TOOLS",
@@ -359,6 +423,9 @@
       "cta": "Continue",
       "artifact": {
         "id": "fs-example",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "notes",
         "layout": "handover",
         "title": "Example · a different cracker test",
@@ -385,15 +452,25 @@
       "kind": "card",
       "variant": "chapter",
       "title": "Your team’s trial plan.",
-      "body": "Ren proposes replacing 5 g oats with 5 g binder in each 100 g trial. Keep mixing, shaping, storage interval and the test method unchanged.",
+      "body": "Keep mixing, shaping, storage interval and the break test unchanged.",
       "speaker": "Ren",
       "system": false,
       "cta": "Continue",
       "artifact": {
         "id": "fs-plan",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "mixture",
         "title": "Formulation bench · 100 g trials",
         "unit": "g",
+        "practice": {
+          "from": "Oats",
+          "to": "Binder",
+          "step": 5,
+          "max": 5,
+          "instruction": "Move 5 g from oats to binder. Keep seeds and total mass fixed."
+        },
         "caption": "Replace 5 g oats with 5 g binder; same mixing, shaping, storage interval and break test.",
         "provenance": "Fictional training formulations, not validated recipes.",
         "batches": [
@@ -438,7 +515,7 @@
       "id": "FS1-15",
       "kind": "choice",
       "speaker": "Ren",
-      "question": "You are testing the planned oats-to-binder adjustment. Which comparison best isolates it?",
+      "question": "Which plan tests the recipe change fairly?",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -448,66 +525,88 @@
       "progress": 0.4,
       "planLineIfFailed": "you decided before checking the evidence",
       "layout": "options",
-      "artifact": {
-        "id": "fs-plan",
-        "kind": "mixture",
-        "title": "Formulation bench · 100 g trials",
-        "unit": "g",
-        "caption": "Replace 5 g oats with 5 g binder; same mixing, shaping, storage interval and break test.",
-        "provenance": "Fictional training formulations, not validated recipes.",
-        "batches": [
-          {
-            "label": "Batch A",
-            "ingredients": [
-              {
-                "label": "Oats",
-                "amount": 60
-              },
-              {
-                "label": "Binder",
-                "amount": 30
-              },
-              {
-                "label": "Seeds",
-                "amount": 10
-              }
-            ]
-          },
-          {
-            "label": "Batch B",
-            "ingredients": [
-              {
-                "label": "Oats",
-                "amount": 55
-              },
-              {
-                "label": "Binder",
-                "amount": 35
-              },
-              {
-                "label": "Seeds",
-                "amount": 10
-              }
-            ]
-          }
-        ]
-      },
       "choices": [
         {
           "id": "a",
-          "label": "Use A and B as planned, keeping all other conditions the same",
+          "evidence": {
+            "code": "TRIAL 01",
+            "medium": "laboratory",
+            "fields": [
+              {
+                "label": "Control · oats/binder/seeds",
+                "value": "A · 60/30/10 g"
+              },
+              {
+                "label": "Trial · oats/binder/seeds",
+                "value": "B · 55/35/10 g"
+              },
+              {
+                "label": "Mixing + shape",
+                "value": "Same method"
+              },
+              {
+                "label": "Comparison",
+                "value": "Make and test both"
+              }
+            ]
+          },
+          "label": "Matched pair",
           "tier": "best",
           "why": "This tests the planned ingredient balance while holding the method steady."
         },
         {
           "id": "b",
-          "label": "Change the binder, mixing time and shape together",
+          "evidence": {
+            "code": "TRIAL 02",
+            "medium": "laboratory",
+            "fields": [
+              {
+                "label": "Control · oats/binder/seeds",
+                "value": "A · 60/30/10 g"
+              },
+              {
+                "label": "Trial · oats/binder/seeds",
+                "value": "B · 55/35/10 g"
+              },
+              {
+                "label": "Mixing + shape",
+                "value": "Different mixing + shape"
+              },
+              {
+                "label": "Comparison",
+                "value": "Make and test both"
+              }
+            ]
+          },
+          "label": "Recipe + process",
           "tier": "wrong",
           "why": "Several changes make it harder to tell which one affected the result."
         },
         {
           "id": "c",
-          "label": "Make only B and compare it with a memory of A",
+          "evidence": {
+            "code": "TRIAL 03",
+            "medium": "laboratory",
+            "fields": [
+              {
+                "label": "Control · oats/binder/seeds",
+                "value": "A · remembered"
+              },
+              {
+                "label": "Trial · oats/binder/seeds",
+                "value": "B · 55/35/10 g"
+              },
+              {
+                "label": "Mixing + shape",
+                "value": "Not verified"
+              },
+              {
+                "label": "Comparison",
+                "value": "Only B made and tested"
+              }
+            ]
+          },
+          "label": "Historical control",
           "tier": "wrong",
           "why": "A remembered result is a weak comparison with no consistent control."
         }
@@ -524,6 +623,9 @@
       "cta": "Continue",
       "artifact": {
         "id": "fs-flow",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "flow",
         "title": "From question to evidence",
         "caption": "Prepare the comparison before making a conclusion.",
@@ -633,7 +735,7 @@
       "id": "FS1-20",
       "kind": "flags",
       "speaker": "Ren",
-      "question": "Find the two record problems that need follow-up.",
+      "question": "Which two records have missing information?",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -642,52 +744,98 @@
       ],
       "progress": 0.6,
       "planLineIfFailed": "you decided before checking the evidence",
-      "artifact": {
-        "id": "fs-log",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Sample record · draft for review",
-        "caption": "Read each record as written. Missing information must be checked against verified records, never guessed.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
-          {
-            "label": "A",
-            "text": "Ingredient amounts and test method recorded."
-          },
-          {
-            "label": "B",
-            "text": "Test method omitted from the draft record."
-          },
-          {
-            "label": "C",
-            "text": "Ingredient identity missing; tasting not authorised."
-          },
-          {
-            "label": "D",
-            "text": "Held separately while the record is checked."
-          }
-        ]
-      },
       "rows": [
         {
-          "label": "A has ingredient amounts and its test method recorded.",
+          "label": "Sample A",
           "flag": false,
-          "why": "Those records support identifying and repeating the trial."
+          "why": "Those records support identifying and repeating the trial.",
+          "evidence": {
+            "code": "A",
+            "medium": "laboratory",
+            "fields": [
+              {
+                "label": "Ingredients",
+                "value": "Recorded"
+              },
+              {
+                "label": "Test method",
+                "value": "Recorded"
+              },
+              {
+                "label": "Sample state",
+                "value": "Ready for review"
+              }
+            ]
+          }
         },
         {
-          "label": "B’s draft record omits the test method.",
+          "label": "Sample B",
           "flag": true,
-          "why": "The team must restore the verified method record so the result can be interpreted."
+          "why": "The team must restore the verified method record so the result can be interpreted.",
+          "evidence": {
+            "code": "B",
+            "medium": "laboratory",
+            "fields": [
+              {
+                "label": "Ingredients",
+                "value": "Recorded"
+              },
+              {
+                "label": "Test method",
+                "value": "Not recorded"
+              },
+              {
+                "label": "Sample state",
+                "value": "Draft"
+              }
+            ]
+          }
         },
         {
-          "label": "C has no confirmed ingredient identity.",
+          "label": "Sample C",
           "flag": true,
-          "why": "Unknown ingredients must be checked before this sample can be used."
+          "why": "Unknown ingredients must be checked before this sample can be used.",
+          "evidence": {
+            "code": "C",
+            "medium": "laboratory",
+            "fields": [
+              {
+                "label": "Ingredients",
+                "value": "Not confirmed"
+              },
+              {
+                "label": "Test method",
+                "value": "Recorded"
+              },
+              {
+                "label": "Sample state",
+                "value": "Held"
+              }
+            ]
+          }
         },
         {
-          "label": "D is held separately while its record is checked.",
+          "label": "Sample D",
           "flag": false,
-          "why": "Holding an uncertain sample protects against using it by mistake."
+          "why": "Holding an uncertain sample protects against using it by mistake.",
+          "evidence": {
+            "code": "D",
+            "medium": "laboratory",
+            "fields": [
+              {
+                "label": "Ingredients",
+                "value": "Recorded"
+              },
+              {
+                "label": "Test method",
+                "value": "Recorded"
+              },
+              {
+                "label": "Sample state",
+                "value": "Held for review"
+              }
+            ]
+          }
         }
       ],
       "whenRight": "You identified missing evidence without treating a sensible hold as a defect.",
@@ -714,6 +862,9 @@
       "cta": "Continue",
       "artifact": {
         "id": "fs-hold",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "sample-hold",
         "title": "Sample control · tasting tray",
         "caption": "Appearance cannot confirm ingredients or allergen status.",
@@ -752,6 +903,9 @@
       "layout": "options",
       "artifact": {
         "id": "fs-hold",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "sample-hold",
         "title": "Sample control · tasting tray",
         "caption": "Appearance cannot confirm ingredients or allergen status.",
@@ -808,34 +962,30 @@
       "kind": "card",
       "variant": "chapter",
       "title": "The panel has a clear boundary.",
-      "body": "Yuki has confirmed that A and B meet the panel protocol. C remains held. You are helping compare texture, not proving a health benefit.",
+      "body": "A and B are approved; C stays held. Compare texture, not health benefits.",
       "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
       "artifact": {
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "id": "fs-sensory",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Panel plan · approved samples A and B",
-        "caption": "This is an educational plan, not permission to taste unknown food or run a panel yourself.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
-          {
-            "label": "Readiness",
-            "text": "Yuki has confirmed the approved panel protocol and sample checks."
-          },
-          {
-            "label": "Method",
-            "text": "Use neutral sample codes; same serving conditions; separate responses."
-          },
-          {
-            "label": "Question",
-            "text": "How firm does each sample feel?"
-          },
-          {
-            "label": "Scope",
-            "text": "Describe this panel. Do not claim everyone prefers one batch."
-          }
+        "kind": "panel-plan",
+        "title": "Sensory panel / serving plan",
+        "recordId": "FS / coded panel",
+        "caption": "A blank response protocol, not panel results. Yuki has approved A and B; C remains held.",
+        "provenance": "Fictional approved-sample teaching setup; codes are illustrative.",
+        "legend": "Approved samples · response sheet",
+        "codes": [
+          "318",
+          "742"
+        ],
+        "question": "How firm does each sample feel?",
+        "controls": [
+          "Same serving conditions",
+          "Independent responses",
+          "C stays off the tray"
         ]
       }
     },
@@ -883,12 +1033,15 @@
       "kind": "card",
       "variant": "chapter",
       "title": "The handling results are ready.",
-      "body": "Ren brings the recorded counts. Read the two results and the limits of the test before recommending the next step.",
+      "body": "Compare the recorded counts before recommending the next step.",
       "speaker": "Ren",
       "system": false,
       "cta": "Continue",
       "artifact": {
         "id": "fs-results",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "sample-results",
         "title": "Handling test · broken pieces",
         "caption": "This test measures breakage only, not safety or shelf life.",
@@ -919,6 +1072,9 @@
       "cta": "Continue",
       "artifact": {
         "id": "fs-example",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "notes",
         "layout": "handover",
         "title": "Example · a different cracker test",
@@ -975,6 +1131,9 @@
       "planLineIfFailed": "you decided before checking the evidence",
       "artifact": {
         "id": "fs-results",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "sample-results",
         "title": "Handling test · broken pieces",
         "caption": "This test measures breakage only, not safety or shelf life.",
@@ -1061,6 +1220,9 @@
       "cta": "Continue",
       "artifact": {
         "id": "fs-results",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "sample-results",
         "title": "Handling test · broken pieces",
         "caption": "This test measures breakage only, not safety or shelf life.",
@@ -1126,6 +1288,9 @@
       "cta": "Continue",
       "artifact": {
         "id": "fs-handover",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
         "kind": "notes",
         "layout": "handover",
         "title": "Project handover · version 1",

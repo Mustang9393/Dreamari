@@ -1,6 +1,9 @@
 {
   "brief": {
     "id": "fs-brief",
+    "world": "Farming, Animals & Nature",
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
     "kind": "notes",
     "layout": "handover",
     "title": "Project card · Sprout oat snack",
@@ -21,11 +24,79 @@
       }
     ]
   },
+  "toolkit": {
+    "world": "Farming, Animals & Nature",
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
+    "id": "fs-toolkit",
+    "kind": "work-screen",
+    "title": "Measurement reference",
+    "recordId": "FS / work console",
+    "caption": "Select a method to see what it measures. This reference contains no live readings.",
+    "provenance": "Fictional lab method reference, no measurements invented.",
+    "tabs": [
+      {
+        "label": "Mass",
+        "heading": "Ingredient weighing",
+        "detail": "Use a balance to record ingredient mass before mixing.",
+        "fields": [
+          {
+            "label": "Tool",
+            "value": "Balance"
+          },
+          {
+            "label": "Record",
+            "value": "Mass in g"
+          }
+        ]
+      },
+      {
+        "label": "Firmness",
+        "heading": "Physical texture test",
+        "detail": "A texture analyser measures a physical property under a defined method.",
+        "fields": [
+          {
+            "label": "Tool",
+            "value": "Texture analyser"
+          },
+          {
+            "label": "Record",
+            "value": "Physical firmness"
+          }
+        ]
+      },
+      {
+        "label": "Sensory",
+        "heading": "People’s responses",
+        "detail": "A sensory panel records how people perceive a sample.",
+        "fields": [
+          {
+            "label": "Method",
+            "value": "Sensory panel"
+          },
+          {
+            "label": "Record",
+            "value": "Independent responses"
+          }
+        ]
+      }
+    ]
+  },
   "plan": {
     "id": "fs-plan",
+    "world": "Farming, Animals & Nature",
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
     "kind": "mixture",
     "title": "Formulation bench · 100 g trials",
     "unit": "g",
+    "practice": {
+      "from": "Oats",
+      "to": "Binder",
+      "step": 5,
+      "max": 5,
+      "instruction": "Move 5 g from oats to binder. Keep seeds and total mass fixed."
+    },
     "caption": "Replace 5 g oats with 5 g binder; same mixing, shaping, storage interval and break test.",
     "provenance": "Fictional training formulations, not validated recipes.",
     "batches": [
@@ -67,6 +138,9 @@
   },
   "example": {
     "id": "fs-example",
+    "world": "Farming, Animals & Nature",
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
     "kind": "notes",
     "layout": "handover",
     "title": "Example · a different cracker test",
@@ -89,6 +163,9 @@
   },
   "flow": {
     "id": "fs-flow",
+    "world": "Farming, Animals & Nature",
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
     "kind": "flow",
     "title": "From question to evidence",
     "caption": "Prepare the comparison before making a conclusion.",
@@ -118,6 +195,9 @@
   },
   "results": {
     "id": "fs-results",
+    "world": "Farming, Animals & Nature",
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
     "kind": "sample-results",
     "title": "Handling test · broken pieces",
     "caption": "This test measures breakage only, not safety or shelf life.",
@@ -137,33 +217,60 @@
     "scope": "Small trial · no repeat batch yet · safety and shelf life not measured"
   },
   "log": {
+    "world": "Farming, Animals & Nature",
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
     "id": "fs-log",
-    "kind": "notes",
-    "layout": "handover",
-    "title": "Sample record · draft for review",
-    "caption": "Read each record as written. Missing information must be checked against verified records, never guessed.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-    "entries": [
+    "kind": "register",
+    "title": "Sample traceability register",
+    "recordId": "FS / sample log",
+    "caption": "Read the draft as written. Confirm missing information; never guess.",
+    "provenance": "Fictional training records.",
+    "columns": [
+      "Ingredients",
+      "Test method",
+      "Sample state"
+    ],
+    "records": [
       {
-        "label": "A",
-        "text": "Ingredient amounts and test method recorded."
+        "id": "A",
+        "values": [
+          "Recorded",
+          "Recorded",
+          "Ready for review"
+        ]
       },
       {
-        "label": "B",
-        "text": "Test method omitted from the draft record."
+        "id": "B",
+        "values": [
+          "Recorded",
+          "Not recorded",
+          "Draft"
+        ]
       },
       {
-        "label": "C",
-        "text": "Ingredient identity missing; tasting not authorised."
+        "id": "C",
+        "values": [
+          "Not confirmed",
+          "Recorded",
+          "Held"
+        ]
       },
       {
-        "label": "D",
-        "text": "Held separately while the record is checked."
+        "id": "D",
+        "values": [
+          "Recorded",
+          "Recorded",
+          "Held for review"
+        ]
       }
     ]
   },
   "hold": {
     "id": "fs-hold",
+    "world": "Farming, Animals & Nature",
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
     "kind": "sample-hold",
     "title": "Sample control · tasting tray",
     "caption": "Appearance cannot confirm ingredients or allergen status.",
@@ -185,33 +292,32 @@
     ]
   },
   "sensory": {
+    "world": "Farming, Animals & Nature",
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
     "id": "fs-sensory",
-    "kind": "notes",
-    "layout": "handover",
-    "title": "Panel plan · approved samples A and B",
-    "caption": "This is an educational plan, not permission to taste unknown food or run a panel yourself.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-    "entries": [
-      {
-        "label": "Readiness",
-        "text": "Yuki has confirmed the approved panel protocol and sample checks."
-      },
-      {
-        "label": "Method",
-        "text": "Use neutral sample codes; same serving conditions; separate responses."
-      },
-      {
-        "label": "Question",
-        "text": "How firm does each sample feel?"
-      },
-      {
-        "label": "Scope",
-        "text": "Describe this panel. Do not claim everyone prefers one batch."
-      }
+    "kind": "panel-plan",
+    "title": "Sensory panel / serving plan",
+    "recordId": "FS / coded panel",
+    "caption": "A blank response protocol, not panel results. Yuki has approved A and B; C remains held.",
+    "provenance": "Fictional approved-sample teaching setup; codes are illustrative.",
+    "legend": "Approved samples · response sheet",
+    "codes": [
+      "318",
+      "742"
+    ],
+    "question": "How firm does each sample feel?",
+    "controls": [
+      "Same serving conditions",
+      "Independent responses",
+      "C stays off the tray"
     ]
   },
   "handover": {
     "id": "fs-handover",
+    "world": "Farming, Animals & Nature",
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
     "kind": "notes",
     "layout": "handover",
     "title": "Project handover · version 1",

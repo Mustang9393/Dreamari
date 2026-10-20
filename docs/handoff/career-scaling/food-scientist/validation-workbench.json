@@ -1,0 +1,130 @@
+{
+  "career": "food-scientist",
+  "coverageGroups": 12,
+  "artifactBeats": 14,
+  "status": "structural checks passed; human and runtime review are separate",
+  "assertions": 555,
+  "levels": [
+    {
+      "id": "fs-l1",
+      "screens": 38,
+      "scored": 10,
+      "questionTypes": [
+        "choice",
+        "match",
+        "bucket",
+        "rank",
+        "flags",
+        "pick",
+        "chain"
+      ],
+      "bespoke": []
+    }
+  ],
+  "sceneAssets": {
+    "fs-arrival": {
+      "src": "/images/play/fs/v4/arrival.png",
+      "fileSha256": "1f667cf7c7abec8dc5d0b88877af5312d4963978b546dcf5c8dd7c806858addd",
+      "pixelSha256": "16a8a8485df4d2c28960b5cb7d8dba49fba083b918247aa32711104c3dfc8fff",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-brief": {
+      "src": "/images/play/fs/v4/brief.png",
+      "fileSha256": "e7afbbd88671dc470df040722d6817702ed8918d5fad318f277628c6789eefab",
+      "pixelSha256": "7af26388295973241c6242724e2f9e785c1cd41ae870df6c4e04d5025eb933bf",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-tools": {
+      "src": "/images/play/fs/v4/tools.png",
+      "fileSha256": "6f4f78243b71be5b03d9b9700f4a2e8723636cc7bc8ba8233c5037bd6cf00bfd",
+      "pixelSha256": "cfd5741cbd376f93e836a8b26605f4d0ca461440f4afe692b63bba4a4062188d",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-observation": {
+      "src": "/images/play/fs/v4/observation.png",
+      "fileSha256": "1600d7db5f1535b303833b8b9b77209ddc04f3265e3b4ec92d6e9af5db1e62f0",
+      "pixelSha256": "18bbfbb1e760df861958b0f9cbc68c6ca1f119e253fa65e9335c2383bf3e65bc",
+      "width": 1671,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-weighing": {
+      "src": "/images/play/fs/v4/weighing.png",
+      "fileSha256": "0799e04de4b29b72f7ed9ee4522d88a6023e192f15c19e4c06add17b120833c2",
+      "pixelSha256": "d5ff6d9e656a16626b8591b450109f46f13fcb94c9ff7cc575b9ccce10d6e17e",
+      "width": 1671,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-midpoint": {
+      "src": "/images/play/fs/v4/midpoint.png",
+      "fileSha256": "e3ee4e5c9477cf74d8a3bb08a888c3b8e564bb03f5fdc259cdede407f5ab8c27",
+      "pixelSha256": "0ec1c435a141cdc1ccf5f50651bdd7b739bfd2c538d963fb1b68bdd38cafc2ab",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-records": {
+      "src": "/images/play/fs/v4/records.png",
+      "fileSha256": "e473f89efe90b3fdeb5854d2b83e0f6abd3808aedbcac17f77383c0615b7c654",
+      "pixelSha256": "08ebb125b65259686d3effda8e6a0dbc3b0ba109f77d375ec6baef0186ed3e68",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-hold": {
+      "src": "/images/play/fs/v4/hold.png",
+      "fileSha256": "33ed76d4a1aee2afe2e5b7e9d0dd00140a06a166aae49919b0a40d6218bae42d",
+      "pixelSha256": "5184e9c45be4b58eea6b3ad6446a378e6528086d35198e64c1172a895b4637c8",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-sensory": {
+      "src": "/images/play/fs/v4/sensory.png",
+      "fileSha256": "162fadf5382ad9d5be166598fe034f131ba648a97e7d6c91f48f69ca048836c2",
+      "pixelSha256": "7516f8b147316d330bf5f0bbe41413cb559b5a52e8f5904508d5a07ab1935bd1",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-results": {
+      "src": "/images/play/fs/v4/results.png",
+      "fileSha256": "d945462456c26f39dfb46f7c97fada2935a48455c0b3de8776cc7f88f5cea4a3",
+      "pixelSha256": "84aa50796e4e58b8efe1a18b856a611bd62837ff200764f11a238510462504c3",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-handover": {
+      "src": "/images/play/fs/v4/handover.png",
+      "fileSha256": "10b838d7ae1546fb17a8822b10e45083057ac842bdff4af98337e31972301201",
+      "pixelSha256": "654075306476a17bde6bdc0d6dc9f21836436560db1dd103617de11c290ce09d",
+      "width": 1671,
+      "height": 941,
+      "opaque": true
+    },
+    "fs-closing": {
+      "src": "/images/play/fs/v4/closing.png",
+      "fileSha256": "cc6380706521f04f84754fa92262fd11c9ca8b00e74c525fdf6e3c66e9f4e4a8",
+      "pixelSha256": "c147b7e68395ad9fea3e5cc031dd15eabf89d6f841bdf76d7e51d4cd376feb85",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    }
+  },
+  "routedBeats": 37,
+  "errors": [],
+  "notCertified": [
+    "Subject-matter correctness",
+    "Aesthetic approval",
+    "All runtime branches",
+    "Windows/Chromebook hardware"
+  ]
+}

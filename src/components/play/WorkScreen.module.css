@@ -1,0 +1,14 @@
+.console { background:var(--color-neutral-900); color:var(--color-neutral-50); padding:12px; }
+.bar { display:flex; justify-content:space-between; gap:8px; font:600 9px/1.4 var(--font-body),sans-serif; letter-spacing:.08em; color:var(--color-neutral-400); }
+.tabs { display:flex; gap:4px; margin-top:14px; border-bottom:1px solid var(--color-neutral-700); }
+.tabs button { flex:1; min-width:0; padding:9px 7px; color:var(--color-neutral-400); border-bottom:2px solid transparent; font-size:11px; font-weight:650; cursor:pointer; }
+.tabs button[aria-selected="true"] { border-color:var(--color-neutral-50); color:var(--color-neutral-50); background:var(--color-neutral-800); }
+.tabs button:focus-visible,.panel:focus-visible { outline:2px solid var(--color-neutral-50); outline-offset:2px; }
+.panel { padding:14px 3px 3px; }
+.panel[hidden] { display:none; }
+.panel h4 { font-size:14px; font-weight:650; margin:0 0 12px; }
+.panel dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.panel dl > div { padding:10px; background:var(--color-neutral-800); border:1px solid var(--color-neutral-700); border-radius:4px; }
+.panel dt { font-size:9px; color:var(--color-neutral-400); margin-bottom:5px; }
+.panel dd { font-size:13px; font-weight:600; }
+.panel p { color:var(--color-neutral-300); font-size:11px; line-height:1.5; margin-top:12px; }

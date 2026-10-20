@@ -3,9 +3,11 @@ import project from "./food-scientist-project.json";
 // Both rendered trial evidence and keys derive from the canonical project record.
 export const FS_PROJECT = project;
 export const FS_BEST_TRIAL = project.batches.reduce((a,b) => a.broken/a.tested < b.broken/b.tested ? a : b).id;
+const lab = { world:"Farming, Animals & Nature", medium:"laboratory", organisation:"Sprout Lab / product development" } as const;
 export const FS_ARTIFACTS = {
   "brief": {
     "id": "fs-brief",
+    ...lab,
     "kind": "notes",
     "layout": "handover",
     "title": "Project card \u00b7 Sprout oat snack",
@@ -26,14 +28,25 @@ export const FS_ARTIFACTS = {
       }
     ]
   },
+  "toolkit": {
+    ...lab,id:"fs-toolkit",kind:"work-screen",title:"Measurement reference",recordId:"FS / work console",
+    caption:"Select a method to see what it measures. This reference contains no live readings.",provenance:"Fictional lab method reference, no measurements invented.",
+    tabs:[
+      {label:"Mass",heading:"Ingredient weighing",detail:"Use a balance to record ingredient mass before mixing.",fields:[{label:"Tool",value:"Balance"},{label:"Record",value:"Mass in g"}]},
+      {label:"Firmness",heading:"Physical texture test",detail:"A texture analyser measures a physical property under a defined method.",fields:[{label:"Tool",value:"Texture analyser"},{label:"Record",value:"Physical firmness"}]},
+      {label:"Sensory",heading:"People’s responses",detail:"A sensory panel records how people perceive a sample.",fields:[{label:"Method",value:"Sensory panel"},{label:"Record",value:"Independent responses"}]}
+    ]
+  },
   "plan": {
-    id:"fs-plan", kind:"mixture", title:"Formulation bench · 100 g trials", unit:"g",
+    id:"fs-plan", ...lab, kind:"mixture", title:"Formulation bench · 100 g trials", unit:"g",
+    practice:{from:"Oats",to:"Binder",step:5,max:5,instruction:"Move 5 g from oats to binder. Keep seeds and total mass fixed."},
     caption:"Replace 5 g oats with 5 g binder; same mixing, shaping, storage interval and break test.",
     provenance:"Fictional training formulations, not validated recipes.",
     batches:project.batches.map(b=>({label:`Batch ${b.id}`,ingredients:[{label:"Oats",amount:b.oats},{label:"Binder",amount:b.binder},{label:"Seeds",amount:b.seeds}]}))
   },
   "example": {
     "id": "fs-example",
+    ...lab,
     "kind": "notes",
     "layout": "handover",
     "title": "Example \u00b7 a different cracker test",
@@ -56,6 +69,7 @@ export const FS_ARTIFACTS = {
   },
   "flow": {
     "id": "fs-flow",
+    ...lab,
     "kind": "flow",
     "title": "From question to evidence",
     "caption": "Prepare the comparison before making a conclusion.",
@@ -84,72 +98,31 @@ export const FS_ARTIFACTS = {
     ]
   },
   "results": {
-    id:"fs-results", kind:"sample-results", title:"Handling test · broken pieces",
+    id:"fs-results", ...lab, kind:"sample-results", title:"Handling test · broken pieces",
     caption:"This test measures breakage only, not safety or shelf life.",
     provenance:"Fictional training counts from the canonical project record.",
     samples:project.batches.map(b=>({label:`Batch ${b.id}`,broken:b.broken,tested:b.tested})),
     scope:"Small trial · no repeat batch yet · safety and shelf life not measured"
   },
   "log": {
-    "id": "fs-log",
-    "kind": "notes",
-    "layout": "handover",
-    "title": "Sample record \u00b7 draft for review",
-    "caption": "Read each record as written. Missing information must be checked against verified records, never guessed.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-    "entries": [
-      {
-        "label": "A",
-        "text": "Ingredient amounts and test method recorded."
-      },
-      {
-        "label": "B",
-        "text": "Test method omitted from the draft record."
-      },
-      {
-        "label": "C",
-        "text": "Ingredient identity missing; tasting not authorised."
-      },
-      {
-        "label": "D",
-        "text": "Held separately while the record is checked."
-      }
-    ]
+    ...lab,id:"fs-log",kind:"register",title:"Sample traceability register",recordId:"FS / sample log",
+    caption:"Read the draft as written. Confirm missing information; never guess.",provenance:"Fictional training records.",
+    columns:["Ingredients","Test method","Sample state"],records:project.records.map(r=>({id:r.id,values:[r.ingredients,r.method,r.state]}))
   },
   "hold": {
-    id:"fs-hold", kind:"sample-hold", title:"Sample control · tasting tray",
+    id:"fs-hold", ...lab, kind:"sample-hold", title:"Sample control · tasting tray",
     caption:"Appearance cannot confirm ingredients or allergen status.",
     provenance:"Fictional sample-control training record.", sampleId:project.heldSample.id,
     checks:[{label:"Ingredient record",value:project.heldSample.ingredientRecord},{label:"Allergen review",value:project.heldSample.allergenReview},{label:"Tasting",value:project.heldSample.tasting}]
   },
   "sensory": {
-    "id": "fs-sensory",
-    "kind": "notes",
-    "layout": "handover",
-    "title": "Panel plan \u00b7 approved samples A and B",
-    "caption": "This is an educational plan, not permission to taste unknown food or run a panel yourself.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-    "entries": [
-      {
-        "label": "Readiness",
-        "text": "Yuki has confirmed the approved panel protocol and sample checks."
-      },
-      {
-        "label": "Method",
-        "text": "Use neutral sample codes; same serving conditions; separate responses."
-      },
-      {
-        "label": "Question",
-        "text": "How firm does each sample feel?"
-      },
-      {
-        "label": "Scope",
-        "text": "Describe this panel. Do not claim everyone prefers one batch."
-      }
-    ]
+    ...lab,id:"fs-sensory",kind:"panel-plan",title:"Sensory panel / serving plan",recordId:"FS / coded panel",
+    caption:"A blank response protocol, not panel results. Yuki has approved A and B; C remains held.",provenance:"Fictional approved-sample teaching setup; codes are illustrative.",
+    legend:"Approved samples · response sheet",codes:project.panel.codes,question:project.panel.question,controls:project.panel.controls
   },
   "handover": {
     "id": "fs-handover",
+    ...lab,
     "kind": "notes",
     "layout": "handover",
     "title": "Project handover \u00b7 version 1",

@@ -1,0 +1,114 @@
+{
+  "version": "FS-workbench-1",
+  "status": "local QA candidate",
+  "mechanicsPolicy": "Reuse shared engine. Choose mechanics by professional reasoning; do not copy UX sequence/layout.",
+  "surfaces": [
+    {
+      "beat": "FS1-08",
+      "object": "Tabbed measurement-method reference console",
+      "mechanic": "teaching card",
+      "medium": "Native read-only work software",
+      "sourceRefs": [
+        "texture"
+      ],
+      "data": "src/components/play/food-scientist-project.json; methods/protocol prose are authored teaching material"
+    },
+    {
+      "beat": "FS1-09",
+      "object": "Method names matched to evidence types",
+      "mechanic": "shared matching",
+      "reason": "Distinguish mass, physical firmness and reported response",
+      "sourceRefs": [
+        "texture"
+      ],
+      "data": "src/components/play/food-scientist-project.json; methods/protocol prose are authored teaching material"
+    },
+    {
+      "beat": "FS1-14",
+      "object": "100 g formulation draft with a 5 g transfer",
+      "mechanic": "local practice, unscored",
+      "invariants": [
+        "100 g total",
+        "Seeds remain 10 g",
+        "Canonical trial records unchanged",
+        "No reputation or progression change",
+        "Reset restores A"
+      ],
+      "sourceRefs": [
+        "formulation",
+        "controlled"
+      ],
+      "data": "src/components/play/food-scientist-project.json; methods/protocol prose are authored teaching material"
+    },
+    {
+      "beat": "FS1-15",
+      "object": "Three selectable experiment records",
+      "mechanic": "shared choice",
+      "reason": "Select controlled comparison, not a preferred-looking product",
+      "sourceRefs": [
+        "formulation",
+        "controlled"
+      ],
+      "data": "src/components/play/food-scientist-project.json; methods/protocol prose are authored teaching material"
+    },
+    {
+      "beat": "FS1-20",
+      "object": "Four selectable sample traceability records",
+      "mechanic": "shared flags",
+      "reason": "Find missing ingredients/method without treating a hold as a defect",
+      "sourceRefs": [
+        "allergens"
+      ],
+      "data": "src/components/play/food-scientist-project.json; methods/protocol prose are authored teaching material"
+    },
+    {
+      "beat": "FS1-25",
+      "object": "Coded sensory protocol and blank response file",
+      "mechanic": "teaching before shared pick",
+      "state": "Approved A/B sample codes; no responses entered",
+      "sourceRefs": [
+        "allergens"
+      ],
+      "data": "src/components/play/food-scientist-project.json; methods/protocol prose are authored teaching material"
+    },
+    {
+      "beat": "FS1-27 / FS1-30 / FS1-32",
+      "object": "Recorded-count results screen",
+      "mechanic": "Shared teaching/choice/rank",
+      "sourceRefs": [
+        "controlled"
+      ],
+      "data": "project.batches broken/tested counts",
+      "state": "Recorded small-trial counts, not live; no force/time series exists",
+      "limits": "No safety/shelf-life inference"
+    }
+  ],
+  "theme": {
+    "medium": "laboratory",
+    "organisation": "Sprout Lab / product development",
+    "world": "Farming, Animals & Nature",
+    "cues": [
+      "Native method console, not equipment drawings",
+      "Bounded local formulation draft/readout",
+      "Sample IDs and traceability fields",
+      "Coded protocol file with pending responses",
+      "Laboratory notepad and results screen"
+    ]
+  },
+  "otherCareerFixtures": [
+    "ceramics material work console",
+    "architectural drawing register",
+    "textile sensory panel"
+  ],
+  "notChanged": [
+    "Art/cast/rooms",
+    "Ten scored decisions and original tiers/keys/reasons",
+    "Shared score/recovery/feedback engine"
+  ],
+  "notClaimed": [
+    "All existing careers redesigned",
+    "Full game branch replay or hardware QA",
+    "Professional approval of fictional lab records"
+  ],
+  "researchBrief": "work-graphics-research.json"
+}

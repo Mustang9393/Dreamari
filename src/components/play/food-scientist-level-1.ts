@@ -1,5 +1,7 @@
 import type { Level } from "./types";
 import { FS_ARTIFACTS, FS_PROJECT, FS_BEST_TRIAL } from "./food-scientist-artifacts";
+const formula = (i:number) => { const b=FS_PROJECT.batches[i]; return `${b.id} · ${b.oats}/${b.binder}/${b.seeds} g`; };
+const trialEvidence = (code:string,control:string,trial:string,method:string,comparison:string) => ({code,medium:"laboratory" as const,fields:[{label:"Control · oats/binder/seeds",value:control},{label:"Trial · oats/binder/seeds",value:trial},{label:"Mixing + shape",value:method},{label:"Comparison",value:comparison}]});
 // AI-authored fictional educational project; professional and human QA pending.
 export const FOOD_SCIENTIST_LEVEL_1: Level = {
   "id": "fs-l1",
@@ -184,10 +186,11 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "kind": "card",
       "variant": "chapter",
       "title": "Use the tool that answers the question.",
-      "body": "A balance measures ingredient mass. A texture test compares physical firmness. A sensory panel collects people’s responses under an agreed method.",
+      "body": "Balance: mass. Texture test: physical firmness. Sensory panel: people’s responses.",
       "speaker": "System",
       "system": true,
-      "cta": "Continue"
+      "cta": "Continue",
+      "artifact": FS_ARTIFACTS.toolkit
     },
     {
       "id": "FS1-TOOLS",
@@ -325,7 +328,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "kind": "card",
       "variant": "chapter",
       "title": "Your team’s trial plan.",
-      "body": "Ren proposes replacing 5 g oats with 5 g binder in each 100 g trial. Keep mixing, shaping, storage interval and the test method unchanged.",
+      "body": "Keep mixing, shaping, storage interval and the break test unchanged.",
       "speaker": "Ren",
       "system": false,
       "cta": "Continue",
@@ -335,7 +338,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "id": "FS1-15",
       "kind": "choice",
       "speaker": "Ren",
-      "question": "You are testing the planned oats-to-binder adjustment. Which comparison best isolates it?",
+      "question": "Which plan tests the recipe change fairly?",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -345,23 +348,25 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "progress": 0.4,
       "planLineIfFailed": "you decided before checking the evidence",
       "layout": "options",
-      "artifact": FS_ARTIFACTS.plan,
       "choices": [
         {
           "id": "a",
-          "label": "Use A and B as planned, keeping all other conditions the same",
+          "evidence": trialEvidence("TRIAL 01",formula(0),formula(1),"Same method","Make and test both"),
+          "label": "Matched pair",
           "tier": "best",
           "why": "This tests the planned ingredient balance while holding the method steady."
         },
         {
           "id": "b",
-          "label": "Change the binder, mixing time and shape together",
+          "evidence": trialEvidence("TRIAL 02",formula(0),formula(1),"Different mixing + shape","Make and test both"),
+          "label": "Recipe + process",
           "tier": "wrong",
           "why": "Several changes make it harder to tell which one affected the result."
         },
         {
           "id": "c",
-          "label": "Make only B and compare it with a memory of A",
+          "evidence": trialEvidence("TRIAL 03","A · remembered",formula(1),"Not verified","Only B made and tested"),
+          "label": "Historical control",
           "tier": "wrong",
           "why": "A remembered result is a weak comparison with no consistent control."
         }
@@ -459,7 +464,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "id": "FS1-20",
       "kind": "flags",
       "speaker": "Ren",
-      "question": "Find the two record problems that need follow-up.",
+      "question": "Which two records have missing information?",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -468,7 +473,6 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       ],
       "progress": 0.6,
       "planLineIfFailed": "you decided before checking the evidence",
-      "artifact": FS_ARTIFACTS.log,
       "rows": [
         {
           "label": "A has ingredient amounts and its test method recorded.",
@@ -490,7 +494,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
           "flag": false,
           "why": "Holding an uncertain sample protects against using it by mistake."
         }
-      ],
+      ].map((row,i)=>({ ...row,label:`Sample ${FS_PROJECT.records[i].id}`,flag:FS_PROJECT.records[i].followup,evidence:{code:FS_PROJECT.records[i].id,medium:"laboratory" as const,fields:[{label:"Ingredients",value:FS_PROJECT.records[i].ingredients},{label:"Test method",value:FS_PROJECT.records[i].method},{label:"Sample state",value:FS_PROJECT.records[i].state}]} })),
       "whenRight": "You identified missing evidence without treating a sensible hold as a defect.",
       "whenWrong": "The problems are B’s missing method and C’s missing ingredient identity."
     },
@@ -567,7 +571,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "kind": "card",
       "variant": "chapter",
       "title": "The panel has a clear boundary.",
-      "body": "Yuki has confirmed that A and B meet the panel protocol. C remains held. You are helping compare texture, not proving a health benefit.",
+      "body": "A and B are approved; C stays held. Compare texture, not health benefits.",
       "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
@@ -617,7 +621,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "kind": "card",
       "variant": "chapter",
       "title": "The handling results are ready.",
-      "body": "Ren brings the recorded counts. Read the two results and the limits of the test before recommending the next step.",
+      "body": "Compare the recorded counts before recommending the next step.",
       "speaker": "Ren",
       "system": false,
       "cta": "Continue",

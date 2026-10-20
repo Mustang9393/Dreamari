@@ -1,0 +1,224 @@
+{
+  "sourceCommit": "27cda72689c9ecf50a279e92dd2fec21277baeea",
+  "purpose": "Protected scoring baseline, not current presentation",
+  "beats": [
+    {
+      "id": "FS1-07",
+      "kind": "choice",
+      "skills": [
+        "Critical Thinking",
+        "Problem-Solving"
+      ],
+      "progress": 0.1,
+      "choices": [
+        {
+          "id": "a",
+          "label": "How much the snack breaks in a consistent handling test",
+          "tier": "best",
+          "why": "A repeatable observation connects directly to the project problem."
+        },
+        {
+          "id": "b",
+          "label": "Which wrapper colour looks most exciting",
+          "tier": "wrong",
+          "why": "The wrapper colour does not measure snack breakage."
+        },
+        {
+          "id": "c",
+          "label": "How to promise the longest shelf life",
+          "tier": "wrong",
+          "why": "Shelf life is a different question and has not been studied."
+        }
+      ]
+    },
+    {
+      "id": "FS1-09",
+      "kind": "match",
+      "skills": [
+        "Reading Comprehension",
+        "Active Learning"
+      ],
+      "progress": 0.2,
+      "pairs": [
+        {
+          "term": "Balance",
+          "def": "Ingredient mass"
+        },
+        {
+          "term": "Texture test",
+          "def": "Physical firmness"
+        },
+        {
+          "term": "Sensory panel",
+          "def": "People\u2019s responses to a sample"
+        }
+      ],
+      "whenRight": "Different questions need different evidence.",
+      "whenWrong": "Mass, physical firmness and people\u2019s responses are different measurements."
+    },
+    {
+      "id": "FS1-12",
+      "kind": "bucket",
+      "skills": [
+        "Attention to Detail",
+        "Critical Thinking"
+      ],
+      "progress": 0.3,
+      "whenRight": "You kept recorded events separate from ideas to investigate.",
+      "whenWrong": "What you saw or measured is evidence. A proposed cause still needs a test."
+    },
+    {
+      "id": "FS1-15",
+      "kind": "choice",
+      "skills": [
+        "Decision-Making",
+        "Quality Control"
+      ],
+      "progress": 0.4,
+      "choices": [
+        {
+          "id": "a",
+          "label": "Use A and B as planned, keeping all other conditions the same",
+          "tier": "best",
+          "why": "This tests the planned ingredient balance while holding the method steady."
+        },
+        {
+          "id": "b",
+          "label": "Change the binder, mixing time and shape together",
+          "tier": "wrong",
+          "why": "Several changes make it harder to tell which one affected the result."
+        },
+        {
+          "id": "c",
+          "label": "Make only B and compare it with a memory of A",
+          "tier": "wrong",
+          "why": "A remembered result is a weak comparison with no consistent control."
+        }
+      ]
+    },
+    {
+      "id": "FS1-17",
+      "kind": "rank",
+      "skills": [
+        "Time Management",
+        "Quality Control"
+      ],
+      "progress": 0.5,
+      "whenRight": "The plan defines the samples; the records connect the measurement to the recommendation.",
+      "whenWrong": "You need a defined plan and identified samples before a result can support a conclusion."
+    },
+    {
+      "id": "FS1-20",
+      "kind": "flags",
+      "skills": [
+        "Attention to Detail",
+        "Written Communication"
+      ],
+      "progress": 0.6,
+      "rows": [
+        {
+          "label": "A has ingredient amounts and its test method recorded.",
+          "flag": false,
+          "why": "Those records support identifying and repeating the trial."
+        },
+        {
+          "label": "B\u2019s draft record omits the test method.",
+          "flag": true,
+          "why": "The team must restore the verified method record so the result can be interpreted."
+        },
+        {
+          "label": "C has no confirmed ingredient identity.",
+          "flag": true,
+          "why": "Unknown ingredients must be checked before this sample can be used."
+        },
+        {
+          "label": "D is held separately while its record is checked.",
+          "flag": false,
+          "why": "Holding an uncertain sample protects against using it by mistake."
+        }
+      ],
+      "whenRight": "You identified missing evidence without treating a sensible hold as a defect.",
+      "whenWrong": "The problems are B\u2019s missing method and C\u2019s missing ingredient identity."
+    },
+    {
+      "id": "FS1-23",
+      "kind": "choice",
+      "skills": [
+        "Safety Awareness",
+        "Teamwork & Collaboration"
+      ],
+      "progress": 0.7,
+      "choices": [
+        {
+          "id": "a",
+          "label": "Keep C out of tasting and ask Yuki to confirm the checks",
+          "tier": "best",
+          "why": "Unknown ingredient and allergen status must be resolved before tasting is considered."
+        },
+        {
+          "id": "b",
+          "label": "Taste a tiny piece to see whether it seems safe",
+          "tier": "wrong",
+          "why": "A small taste cannot establish allergen status or safety."
+        },
+        {
+          "id": "c",
+          "label": "Offer C without mentioning the missing record",
+          "tier": "wrong",
+          "why": "The colleague would be deciding without essential information."
+        }
+      ]
+    },
+    {
+      "id": "FS1-26",
+      "kind": "pick",
+      "skills": [
+        "Quality Control",
+        "Active Listening"
+      ],
+      "progress": 0.8,
+      "whenRight": "You reduced expectation and group-pressure clues while keeping the comparison consistent.",
+      "whenWrong": "Use neutral codes, consistent conditions and independent responses."
+    },
+    {
+      "id": "FS1-30",
+      "kind": "chain",
+      "skills": [
+        "Persuasive Communication",
+        "Professional Judgment"
+      ],
+      "progress": 0.9,
+      "whenRight": "You connected the real question, the measured result and a proportionate next test.",
+      "whenWrong": "Keep the recommendation within the handling evidence: less breakage in this trial, then a repeat comparison."
+    },
+    {
+      "id": "FS1-33",
+      "kind": "choice",
+      "skills": [
+        "Professional Judgment",
+        "Written Communication"
+      ],
+      "progress": 1,
+      "choices": [
+        {
+          "id": "a",
+          "label": "Record that shelf life is unknown and ask the quality team to plan the required study",
+          "tier": "best",
+          "why": "The handling evidence does not answer the shelf-life question. A qualified team must define the appropriate work."
+        },
+        {
+          "id": "b",
+          "label": "Promise months of safe storage because B broke less",
+          "tier": "wrong",
+          "why": "Mechanical breakage is not evidence of safe storage life."
+        },
+        {
+          "id": "c",
+          "label": "Use the panel\u2019s texture response as a safety certificate",
+          "tier": "wrong",
+          "why": "People\u2019s texture responses do not establish product safety."
+        }
+      ]
+    }
+  ]
+}

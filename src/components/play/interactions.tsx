@@ -14,6 +14,8 @@ import { VOICE_PITCH } from "./expressions";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { LocalBurst } from "@/components/build/ui";
 import { InboxHeader, LightsBoard, PenCircle, ReportSheet, WorldPanel, Wristband, isClockTitle, useWorld } from "./WorldUi";
+import { DecisionRecord } from "./WorkEvidence";
+import type { DecisionEvidence } from "./work-artifacts";
 import { Balloons } from "./BagSecured";
 import type {
   InspectBeat,
@@ -231,6 +233,7 @@ function tierSound(tier: Tier) {
 
 export function OptionButton({
   label,
+  evidence,
   index,
   disabled,
   picked,
@@ -242,6 +245,7 @@ export function OptionButton({
   onClick,
 }: {
   label: string;
+  evidence?:DecisionEvidence;
   index: number;
   disabled?: boolean;
   picked?: boolean;
@@ -293,7 +297,7 @@ export function OptionButton({
       >
         {mark === "wrong" ? <X className="h-[15px] w-[15px]" /> : mark ? <Check className="h-[15px] w-[15px]" /> : index + 1}
       </span>}
-      {label}
+      {evidence ? <span className="min-w-0 flex-1"><span className="block text-[14px]">{label}</span><DecisionRecord evidence={evidence}/></span> : label}
     </button>
   );
 }
@@ -1465,6 +1469,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
             key={choice.id}
             index={index}
             label={choice.label}
+            evidence={choice.evidence}
             disabled={locked !== null}
             picked={locked === choice.id}
             tier={choice.tier}
@@ -3456,7 +3461,7 @@ export function FlagsBody({ beat, onResolve, remaining }: { beat: FlagsBeat; onR
       <p className="text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
         {marked.length} of {total} red flags marked
       </p>
-      <ul className="m-0 flex list-none flex-col gap-[7px] p-0">
+      <ul className={beat.rows.every(row=>row.evidence) ? "m-0 grid list-none grid-cols-1 gap-2 p-0 sm:grid-cols-2" : "m-0 flex list-none flex-col gap-[7px] p-0"}>
         {beat.rows.map((row, index) => {
           const on = marked.includes(index);
           return (
@@ -3468,7 +3473,7 @@ export function FlagsBody({ beat, onResolve, remaining }: { beat: FlagsBeat; onR
                   setMarked((current) => (current.includes(index) ? current.filter((i) => i !== index) : [...current, index]));
                 }}
                 aria-pressed={on}
-                className="flex w-full cursor-pointer items-center gap-[10px] rounded-[12px] border-2 px-[12px] py-[11px] text-left text-[14.5px] font-semibold transition-[border-color,background] duration-150 motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
+                className="flex h-full w-full cursor-pointer items-center gap-[10px] rounded-[12px] border-2 px-[12px] py-[11px] text-left text-[14.5px] font-semibold transition-[border-color,background] duration-150 motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
                 style={{
                   animationDelay: `${index * 40}ms`,
                   background: on ? "color-mix(in srgb, var(--destructive) 18%, var(--glass-surface-1))" : "var(--glass-surface-1)",
@@ -3483,7 +3488,7 @@ export function FlagsBody({ beat, onResolve, remaining }: { beat: FlagsBeat; onR
                 >
                   {on ? <Flag className="h-[13px] w-[13px]" /> : null}
                 </span>
-                {row.label}
+                {row.evidence ? <span className="min-w-0 flex-1"><span className="block text-[13px]">{row.label}</span><DecisionRecord evidence={row.evidence}/></span> : row.label}
               </button>
             </li>
           );

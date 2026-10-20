@@ -127,6 +127,94 @@
           "value": "Not authorised"
         }
       ]
+    },
+    {
+      "caption": "Synthetic renderer fixture only; no actual professional process or test results.",
+      "provenance": "Cross-career rendering fixture.",
+      "id": "ceramic-work-screen",
+      "kind": "work-screen",
+      "medium": "operations",
+      "organisation": "Workshop / material trials",
+      "title": "Material trial console",
+      "tabs": [
+        {
+          "label": "Mass",
+          "heading": "Trial material record",
+          "detail": "Read the approved method before recording a measurement.",
+          "fields": [
+            {
+              "label": "Record",
+              "value": "Not entered"
+            },
+            {
+              "label": "Unit",
+              "value": "g"
+            }
+          ]
+        },
+        {
+          "label": "Review",
+          "heading": "Supervisor review",
+          "detail": "No release has been authorised.",
+          "fields": [
+            {
+              "label": "State",
+              "value": "Pending review"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caption": "Synthetic renderer fixture only; no actual professional process or test results.",
+      "provenance": "Cross-career rendering fixture.",
+      "id": "drawing-register",
+      "kind": "register",
+      "medium": "drawing",
+      "organisation": "Studio / document control",
+      "title": "Drawing issue register",
+      "columns": [
+        "Revision",
+        "Review",
+        "Issue"
+      ],
+      "records": [
+        {
+          "id": "D1",
+          "values": [
+            "03",
+            "Recorded",
+            "For review"
+          ]
+        },
+        {
+          "id": "D2",
+          "values": [
+            "02",
+            "Pending",
+            "Held"
+          ]
+        }
+      ]
+    },
+    {
+      "caption": "Synthetic renderer fixture only; no actual professional process or test results.",
+      "provenance": "Cross-career rendering fixture.",
+      "id": "textile-panel",
+      "kind": "panel-plan",
+      "medium": "operations",
+      "organisation": "Textile studio / samples",
+      "title": "Fabric hand-feel session",
+      "codes": [
+        "P21",
+        "P48"
+      ],
+      "question": "Describe the feel of each coded swatch.",
+      "controls": [
+        "Same preparation",
+        "Separate responses"
+      ],
+      "legend": "Coded swatches \u00b7 independent descriptions"
     }
   ]
 }

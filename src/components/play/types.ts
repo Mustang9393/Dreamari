@@ -1,3 +1,4 @@
+import type { DecisionEvidence } from "./work-artifacts";
 import type { WorkArtifact } from "./work-artifacts";
 // The simulation engine's vocabulary. Every career simulation is DATA in this
 // shape -- adding Level 2, or the other 24 careers, means writing beats, not
@@ -35,6 +36,7 @@ export const TIER_HEADLINE: Record<Tier, string> = {
 };
 
 export type Choice = {
+  evidence?: DecisionEvidence;
   id: string;
   label: string;
   tier: Tier;
@@ -578,7 +580,7 @@ export type SliderBeat = BeatBase & {
 export type FlagsBeat = BeatBase & {
   kind: "flags";
   question: string;
-  rows: { label: string; flag: boolean; why: string }[];
+  rows: { label: string; flag: boolean; why: string; evidence?:DecisionEvidence }[];
   whenRight: string;
   whenWrong: string;
   feedback: string;

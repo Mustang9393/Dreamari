@@ -119,7 +119,7 @@ export const UX_DESIGNER: Simulation = {
   "title": "UX Designer",
   "world": "Tech & Engineering",
   "firm": "Northline Studio",
-  "cover": "/images/play/ux/studio.png",
+  "cover": UX_LEVEL_1.cover!,
   "levels": [UX_LEVEL_1],
   "upcoming": [
     "UX Designer",
@@ -133,37 +133,37 @@ export const UX_DESIGNER: Simulation = {
       "id": "UX-TR-1",
       "seconds": 4,
       "text": "A useful design starts with someone trying to do something.",
-      "art": "/images/play/ux/studio.png"
+      "art": "/images/play/ux/v4/studio.png"
     },
     {
       "id": "UX-TR-2",
       "seconds": 4,
       "text": "An attractive page can still get in their way.",
-      "art": "/images/play/ux/research.png"
+      "art": "/images/play/ux/v4/research.png"
     },
     {
       "id": "UX-TR-3",
       "seconds": 4,
       "text": "Listen before you choose a solution.",
-      "art": "/images/play/ux/research.png"
+      "art": "/images/play/ux/v4/research.png"
     },
     {
       "id": "UX-TR-4",
       "seconds": 4,
       "text": "Turn the evidence into something people can try.",
-      "art": "/images/play/ux/studio.png"
+      "art": "/images/play/ux/v4/studio.png"
     },
     {
       "id": "UX-TR-5",
       "seconds": 4,
       "text": "One missed detail can stop the whole task.",
-      "art": "/images/play/ux/review.png"
+      "art": "/images/play/ux/v4/review.png"
     },
     {
       "id": "UX-TR-6",
       "seconds": 4,
       "text": "Your team needs to know what you found.",
-      "art": "/images/play/ux/review.png"
+      "art": "/images/play/ux/v4/review.png"
     },
     {
       "id": "UX-TR-7",
@@ -177,7 +177,7 @@ export const UX_DESIGNER: Simulation = {
 export const FOOD_SCIENTIST: Simulation = {
   id: "food-scientist", careerId: "food-scientist", title: "Food Scientist",
   world: "Farming, Animals & Nature", firm: "Sprout Lab",
-  cover: "/images/play/fs/v1/arrival.png", thumb: "/images/play/fs/v1/arrival.png", thumbFocus: "48% 25%",
+  cover: FOOD_SCIENTIST_LEVEL_1.cover!, thumb: FOOD_SCIENTIST_LEVEL_1.cover!, thumbFocus: "48% 25%",
   levels: [FOOD_SCIENTIST_LEVEL_1],
   upcoming: ["Planned: repeatability study", "Planned: process scale-up", "Planned: product review"],
 };

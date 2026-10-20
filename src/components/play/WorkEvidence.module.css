@@ -1,0 +1,11 @@
+.record { display:flex; gap:12px; padding:10px; width:100%; border:1px solid var(--color-neutral-300); border-radius:7px; background:var(--color-neutral-50); color:var(--color-neutral-900); margin-top:8px; }
+.record[data-medium="laboratory"] { border-left:3px solid var(--world-farming-animals-nature); }
+.record[data-medium="drawing"] { border-left:3px solid var(--world-building-construction); }
+.code { align-self:flex-start; font:700 10px/1.3 var(--font-body),sans-serif; padding:6px; background:var(--color-neutral-200); border-radius:4px; white-space:nowrap; }
+.fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); flex:1; min-width:0; gap:7px 12px; }
+.field { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.field > span { font-size:9px; line-height:1.3; font-weight:500; color:var(--color-neutral-600); }
+.field strong { font-size:11px; font-weight:650; line-height:1.3; overflow-wrap:anywhere; }
+@media(max-width:480px) { .record { gap:8px; padding:8px; } .fields { gap:6px; } }
+
+.record[data-fields="3"] .fields { grid-template-columns:repeat(3,minmax(0,1fr)); }
