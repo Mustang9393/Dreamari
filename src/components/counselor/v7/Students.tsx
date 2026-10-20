@@ -77,7 +77,7 @@ function Directory() {
 
   return (
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
-      <PageHead title="Students" line="Find a student and see who needs you." action={<span className="text-[14px] font-semibold tabular-nums" style={MUTED}>{list.length} of {roster.length}</span>} />
+      <PageHead title="Students" action={list.length !== roster.length ? <span className="text-[14px] font-semibold tabular-nums" style={MUTED}>{list.length} of {roster.length}</span> : undefined} />
 
       <div className="flex flex-col gap-[var(--space-3)] lg:flex-row lg:items-center">
         <label className="relative flex min-w-0 flex-1 items-center">
@@ -138,8 +138,8 @@ function Row({ s }: { s: CounselorStudent }) {
         <span className="justify-self-end lg:justify-self-start"><Status status={s.status} /></span>
         <span className="hidden truncate text-[14px] lg:block">{interestOf(s)}</span>
         <span className="hidden truncate text-[14px] lg:block" style={MUTED}>{planOf(s)}</span>
-        <span className="col-span-2 truncate pl-[48px] text-[13.5px] lg:col-span-1 lg:pl-0 lg:text-[14px]" style={flagged ? undefined : MUTED}>{progress}</span>
-        <span className="hidden text-[13.5px] lg:block" style={MUTED}>{lastActiveLabel(s.lastActive)}</span>
+        <span className="col-span-2 truncate pl-[48px] text-[13px] lg:col-span-1 lg:pl-0 lg:text-[14px]" style={flagged ? undefined : MUTED}>{progress}</span>
+        <span className="hidden text-[13px] lg:block" style={MUTED}>{lastActiveLabel(s.lastActive)}</span>
       </Link>
     </li>
   );

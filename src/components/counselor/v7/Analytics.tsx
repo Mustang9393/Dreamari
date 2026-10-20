@@ -6,7 +6,7 @@
 // say what it will hold and point at what works today.
 
 import { BarChart3 } from "lucide-react";
-import { MUTED, PageHead, TextLink, v7 } from "./ui";
+import { H2, MUTED, PageHead, TextLink, v7 } from "./ui";
 
 export function V7Analytics() {
   return (
@@ -14,8 +14,8 @@ export function V7Analytics() {
       <PageHead title="Analytics" />
       <div className="flex max-w-[520px] flex-col items-start gap-[var(--space-4)]">
         <span className="flex size-12 items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)" }}><BarChart3 className="h-5 w-5" aria-hidden /></span>
-        <h2 className="text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Coming soon</h2>
-        <p className="text-[15.5px] leading-[24px]" style={MUTED}>Your school&apos;s numbers will live here. For now, see who needs you on Students.</p>
+        <h2 className={H2} style={{ fontFamily: "var(--font-display)" }}>Coming soon</h2>
+        <p className="text-[15px] leading-[24px]" style={MUTED}>Your school&apos;s numbers will live here. For now, see who needs you on Students.</p>
         <TextLink href={v7("students")}>Open Students</TextLink>
       </div>
     </div>

@@ -33,7 +33,7 @@ import { STUDENT_ID } from "@/components/profile/BookCounselorSheet";
 import { ShareDot } from "./Home";
 import { catalog, matchesFor, SHELVES, type Opp, type ShelfKey } from "./oppCatalog";
 import { openOpp, shareOpp } from "./OppSheets";
-import { CARD, CARD_STYLE, Field, FIELD, FIELD_STYLE, Modal, MUTED, OVERLINE, PageHead, PrimaryButton, RULE, studentHref } from "./ui";
+import { DISPLAY, H2, CARD, CARD_STYLE, Field, FIELD, FIELD_STYLE, Modal, MUTED, OVERLINE, PageHead, PrimaryButton, RULE, studentHref } from "./ui";
 
 const RAIL = "-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
 
@@ -58,7 +58,7 @@ export function V7Opportunities() {
   const [adding, setAdding] = useState(false);
   return (
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
-      <PageHead title="Opportunities" line="Find, share and track what fits your students." action={<PrimaryButton onClick={() => setAdding(true)} icon={<Plus className="h-4 w-4" aria-hidden />}>Add opportunity</PrimaryButton>} />
+      <PageHead title="Opportunities" action={<PrimaryButton onClick={() => setAdding(true)} icon={<Plus className="h-4 w-4" aria-hidden />}>Add opportunity</PrimaryButton>} />
       <TextTabs items={[{ key: "discover", label: "Discover" }, { key: "applications", label: "Applications" }]} value={tab} onChange={setTab} ariaLabel="Opportunities sections" layoutId="v7-opp-tabs" soft caps={false} />
       {tab === "discover" ? <Discover /> : <Applications />}
       {adding && <AddOpportunity onClose={() => setAdding(false)} />}
@@ -82,7 +82,7 @@ function Discover() {
   const showShelves = shelf === "all" && !needle;
   const flat = list.filter((o) => shelf === "all" || o.shelf === shelf);
   return (
-    <div className="flex flex-col gap-[var(--space-8)]">
+    <div className="flex flex-col gap-[48px]">
       <div className="flex flex-col gap-[var(--space-3)] md:flex-row md:items-center">
         <label className="relative flex min-w-0 flex-1 items-center">
           <Search className="pointer-events-none absolute left-[14px] h-4 w-4" style={MUTED} aria-hidden />
@@ -99,7 +99,7 @@ function Discover() {
           return (
             <section key={s.key} aria-label={s.title} className="flex flex-col gap-[var(--space-4)]">
               <div className="flex items-end justify-between gap-[var(--space-4)]">
-                <h2 className="text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{s.title}</h2>
+                <h2 className={H2} style={DISPLAY}>{s.title}</h2>
                 {row.length > 6 && <button type="button" onClick={() => setShelf(s.key)} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>See all {row.length}</button>}
               </div>
               <div className={`poster-row ${RAIL}`} style={{ touchAction: "pan-x pan-y" }}>
@@ -114,7 +114,7 @@ function Discover() {
         </div>
       ) : (
         <div className="flex flex-col items-start gap-[var(--space-2)] py-[var(--space-6)]">
-          <p className="text-[17px] font-semibold">Nothing matches.</p>
+          <p className="text-[16px] font-semibold">Nothing matches.</p>
           <button type="button" onClick={() => { setQ(""); setShelf("all"); }} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>Clear search</button>
         </div>
       )}
@@ -169,7 +169,7 @@ function Applications() {
   }, [roster, todayIso, stages, live]);
   // earliest stage first: those are the ones that need a push
   const sorted = [...apps].sort((a, b) => STAGES.indexOf(a.stage) - STAGES.indexOf(b.stage) || a.s.name.localeCompare(b.s.name));
-  if (!sorted.length) return <p className="py-[var(--space-6)] text-[17px] font-semibold">No applications yet. Share an opportunity to get students started.</p>;
+  if (!sorted.length) return <p className="py-[var(--space-6)] text-[16px] font-semibold">No applications yet. Share an opportunity to get students started.</p>;
   return (
     <section aria-label="Applications" className={`${CARD} overflow-hidden`} style={CARD_STYLE}>
       <div className="hidden gap-[var(--space-4)] border-b px-[var(--space-5)] py-[12px] lg:grid lg:grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_170px_minmax(0,1.2fr)]" style={{ borderColor: RULE }}>
@@ -182,9 +182,9 @@ function Applications() {
               <StudentFace s={a.s} size={32} />
               <span className="truncate text-[15px] font-semibold">{a.s.name}</span>
             </Link>
-            <button type="button" onClick={() => openOpp(a.opp)} className="dm-quiet min-w-0 cursor-pointer truncate rounded-[var(--radius-md)] text-left text-[14.5px]">{a.opp.e.item.name}</button>
+            <button type="button" onClick={() => openOpp(a.opp)} className="dm-quiet min-w-0 cursor-pointer truncate rounded-[var(--radius-md)] text-left text-[14px]">{a.opp.e.item.name}</button>
             <Listbox ariaLabel={`Stage for ${a.s.name}`} value={a.stage} onChange={(v) => { stageStore.update((m) => ({ ...m, [a.key]: v as Stage })); notify(`${a.s.name.split(" ")[0]}: ${v}`); }}
-              className="h-9 w-full rounded-[var(--radius-md)] border px-[10px] text-[13.5px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--foreground)" }}
+              className="h-9 w-full rounded-[var(--radius-md)] border px-[10px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--foreground)" }}
               options={STAGES.map((s) => ({ value: s, label: s }))} />
             <span className="truncate text-[14px]" style={MUTED}>{NEXT[a.stage]}</span>
           </li>

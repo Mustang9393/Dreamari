@@ -51,10 +51,10 @@ function Students({ list, title }: { list: CounselorStudent[]; title: string }) 
       <ul className="flex flex-col">
         {shown.map((s) => (
           <li key={s.id} className="border-b last:border-b-0" style={{ borderColor: RULE }}>
-            <Link href={studentHref(s.id)} className="dm-quiet -mx-[8px] flex items-center gap-[10px] rounded-[var(--radius-md)] px-[8px] py-[9px] text-[14.5px]">
+            <Link href={studentHref(s.id)} className="dm-quiet -mx-[8px] flex items-center gap-[10px] rounded-[var(--radius-md)] px-[8px] py-[9px] text-[14px]">
               <span className="min-w-0 flex-1 truncate font-semibold">{s.name}</span>
               {s.status !== "On Track" && <span className="flex flex-none items-center gap-[6px] text-[13px] font-semibold"><span aria-hidden className="size-[7px] rounded-full" style={{ background: STATUS_DOT[s.status] }} />{s.status}</span>}
-              <span className="w-[64px] flex-none text-right text-[13.5px]" style={MUTED}>Grade {s.grade}</span>
+              <span className="w-[64px] flex-none text-right text-[13px]" style={MUTED}>Grade {s.grade}</span>
             </Link>
           </li>
         ))}
@@ -71,8 +71,8 @@ function Rows({ items }: { items: { label: string; value: string }[] }) {
     <ul className="flex flex-col">
       {items.map((it) => (
         <li key={it.label} className="flex items-baseline justify-between gap-[var(--space-4)] border-b py-[9px] last:border-b-0" style={{ borderColor: RULE }}>
-          <span className="text-[14.5px]" style={MUTED}>{it.label}</span>
-          <span className="text-right text-[14.5px] font-semibold tabular-nums">{it.value}</span>
+          <span className="text-[14px]" style={MUTED}>{it.label}</span>
+          <span className="text-right text-[14px] font-semibold tabular-nums">{it.value}</span>
         </li>
       ))}
     </ul>
@@ -91,7 +91,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Bullets({ items }: { items: string[] }) {
   return (
     <ul className="flex flex-col gap-[6px]">
-      {items.map((t) => <li key={t} className="flex gap-[10px] text-[14.5px] leading-[21px]"><span aria-hidden className="mt-[8px] size-[5px] flex-none rounded-full" style={{ background: "var(--muted-foreground)" }} />{t}</li>)}
+      {items.map((t) => <li key={t} className="flex gap-[10px] text-[14px] leading-[21px]"><span aria-hidden className="mt-[8px] size-[5px] flex-none rounded-full" style={{ background: "var(--muted-foreground)" }} />{t}</li>)}
     </ul>
   );
 }
@@ -142,7 +142,7 @@ export function V7CareerSheet({ list, index, saves, state, onClose }: CareerShee
       <TextTabs items={[{ key: "students", label: "Students" }, { key: "path", label: "Path in" }, { key: "guide", label: "Guide" }]} value={tab} onChange={setTab} ariaLabel="Career sections" layoutId="v7-career-sheet-tabs" soft caps={false} />
       {tab === "students" && (
         <>
-          {savedCount ? <Students list={saved} title={`${savedCount} saved it`} /> : <p className="text-[14.5px]" style={MUTED}>None of your students saved it yet.</p>}
+          {savedCount ? <Students list={saved} title={`${savedCount} saved it`} /> : <p className="text-[14px]" style={MUTED}>None of your students saved it yet.</p>}
           <Students list={mightFit} title={`Exploring ${career.world}`} />
         </>
       )}
@@ -156,10 +156,10 @@ export function V7CareerSheet({ list, index, saves, state, onClose }: CareerShee
                   <li key={c.slug} className="border-b last:border-b-0" style={{ borderColor: RULE }}>
                     <button type="button" onClick={() => openSchool(c, schools.map((x) => x.c))} className="dm-quiet -mx-[8px] flex w-[calc(100%+16px)] cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[8px] py-[9px] text-left">
                       <span className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate text-[14.5px] font-semibold">{c.name}</span>
-                        <span className="truncate text-[12.5px]" style={MUTED}>{program}</span>
+                        <span className="truncate text-[14px] font-semibold">{c.name}</span>
+                        <span className="truncate text-[13px]" style={MUTED}>{program}</span>
                       </span>
-                      {c.netPrice !== null && <span className="flex-none text-[13.5px] font-semibold tabular-nums">{price(c.netPrice)}/yr</span>}
+                      {c.netPrice !== null && <span className="flex-none text-[13px] font-semibold tabular-nums">{price(c.netPrice)}/yr</span>}
                       <ChevronRight className="h-4 w-4 flex-none" style={MUTED} aria-hidden />
                     </button>
                   </li>
@@ -211,7 +211,7 @@ export function V7SchoolSheet({ list, index, onClose }: SchoolSheetProps) {
       footer={<><ShortlistButton id={`school:${c.slug}`} name={c.name} /><PrimaryButton onClick={share} icon={<Send className="h-4 w-4" aria-hidden />}>{students.length ? `Share with ${students.length}` : "Share"}</PrimaryButton></>}>
       <SheetHero label="Net price" value={c.netPrice === null ? "Not listed" : price(c.netPrice)} suffix={c.netPrice === null ? undefined : "a year"} line={facts} accent={SHEET_ACCENT} />
       <TextTabs items={[{ key: "students", label: "Students" }, { key: "cost", label: "Cost" }, { key: "in", label: "Getting in" }, { key: "results", label: "Results" }]} value={tab} onChange={setTab} ariaLabel="School sections" layoutId="v7-school-sheet-tabs" soft caps={false} />
-      {tab === "students" && (students.length ? <Students list={students} title={`${students.length} looking at it`} /> : <p className="text-[14.5px]" style={MUTED}>None of your students saved it yet.</p>)}
+      {tab === "students" && (students.length ? <Students list={students} title={`${students.length} looking at it`} /> : <p className="text-[14px]" style={MUTED}>None of your students saved it yet.</p>)}
       {tab === "cost" && (
         <>
           {d && d.bands.length > 0 && <Section title="After grants, by family income"><Rows items={d.bands.map((b) => ({ label: b.label, value: usd(b.pay) }))} /></Section>}
@@ -232,7 +232,7 @@ export function V7SchoolSheet({ list, index, onClose }: SchoolSheetProps) {
           {d && d.require.length > 0 && <Section title="They require"><Bullets items={d.require} /></Section>}
           {d && d.consider.length > 0 && <Section title="They also look at"><Bullets items={d.consider} /></Section>}
           {d?.scores && <Section title="Test scores, middle half"><Rows items={[{ label: "SAT", value: d.scores.sat }, ...(d.scores.act ? [{ label: "ACT", value: d.scores.act }] : [])]} /></Section>}
-          {!d && <p className="text-[14.5px]" style={MUTED}>{c.admission === "open" ? "Anyone with a diploma or GED can enroll." : "No admission details published."}</p>}
+          {!d && <p className="text-[14px]" style={MUTED}>{c.admission === "open" ? "Anyone with a diploma or GED can enroll." : "No admission details published."}</p>}
         </>
       )}
       {tab === "results" && (

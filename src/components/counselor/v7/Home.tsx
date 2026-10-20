@@ -18,7 +18,7 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { CalendarCheck, ClipboardCheck, Send, Users } from "lucide-react";
+import { CalendarCheck, Send } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { Poster } from "@/components/opportunities/Poster";
@@ -34,7 +34,7 @@ import { openCareer } from "../v5/ExploreSheets";
 import { mondayOf, useAllMeetings, inWeek } from "./data";
 import { catalog, matchesFor } from "./oppCatalog";
 import { openOpp, shareOpp } from "./OppSheets";
-import { CARD, CARD_STYLE, DISPLAY, MUTED, OVERLINE, PrimaryButton, SectionHead, v7 } from "./ui";
+import { SECTIONS, CARD, CARD_STYLE, DISPLAY, FIGURE, MUTED, OVERLINE, PrimaryButton, SectionHead, TITLE, v7 } from "./ui";
 
 const RAIL = "-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
 const DAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -62,12 +62,12 @@ export function V7Home() {
   const thisWeekLeft = week.filter((m) => m.day >= todayIso).length;
 
   return (
-    <div className="flex flex-col gap-[48px] pt-[var(--space-2)] lg:gap-[64px] lg:pt-[var(--space-4)]">
+    <div className={SECTIONS}>
       <section className="flex flex-col gap-[var(--space-8)]">
         <div className="flex flex-col gap-[var(--space-5)] sm:flex-row sm:items-end sm:justify-between">
           <div className="flex min-w-0 flex-col gap-[var(--space-3)]">
             <span className={OVERLINE} style={MUTED}>{date}</span>
-            <h1 className="text-[36px] leading-[1.02] font-extrabold text-balance sm:text-[52px]" style={DISPLAY}>
+            <h1 className={TITLE} style={DISPLAY}>
               Welcome back{first ? `, ${first}` : ""}.
             </h1>
           </div>
@@ -75,10 +75,10 @@ export function V7Home() {
         </div>
 
         <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-3">
-          <Stat href={v7("reviews")} Icon={ClipboardCheck} label="Reviews" value={snap.pendingTotal} line="waiting for you" go="Start reviewing" />
-          <Stat href={v7("prepare")} Icon={CalendarCheck} label="Meetings" value={thisWeekLeft} line="left this week" go="View schedule"
+          <Stat href={v7("reviews")} label="Reviews" value={snap.pendingTotal} line="waiting for you" go="Start reviewing" />
+          <Stat href={v7("prepare")} label="Meetings" value={thisWeekLeft} line="left this week" go="View schedule"
             extra={nextStudent ? <><span className="font-semibold" style={{ color: "var(--foreground)" }}>Next: {nextStudent.name}</span> · {nextWhen}</> : undefined} />
-          <Stat href={v7("students", "&status=need")} Icon={Users} label="Need you" value={snap.needYou.length} line={snap.needYou.length === 1 ? "student" : "students"} go="Review students"
+          <Stat href={v7("students", "&status=need")} label="Need you" value={snap.needYou.length} line={snap.needYou.length === 1 ? "student" : "students"} go="Review students"
             extra={snap.atRisk ? <><span aria-hidden className="mr-[6px] inline-block size-[7px] rounded-full align-middle" style={{ background: "var(--color-feedback-danger-solid)" }} />{snap.atRisk} at risk</> : undefined} />
         </div>
       </section>
@@ -100,17 +100,17 @@ export function V7Home() {
 /** One number and the work behind it. The whole card is the link; its
  *  label at the foot says where it goes, so no button competes with the
  *  page's one lit action. */
-function Stat({ href, Icon, label, value, line, go, extra }: { href: string; Icon: typeof Users; label: string; value: number; line: string; go: string; extra?: React.ReactNode }) {
+function Stat({ href, label, value, line, go, extra }: { href: string; label: string; value: number; line: string; go: string; extra?: React.ReactNode }) {
   const shown = useCountUp(value);
   return (
     <HoverBeam strength={0.6}>
       <Link href={href} className={`dm-tap group flex h-full flex-col md:min-h-[188px] gap-[var(--space-3)] p-[var(--space-5)] ${CARD}`} style={CARD_STYLE}>
-        <span className={`${OVERLINE} flex items-center gap-[8px]`} style={MUTED}><Icon className="h-[15px] w-[15px]" aria-hidden />{label}</span>
+        <span className={OVERLINE} style={MUTED}>{label}</span>
         <span className="flex items-end gap-[10px]">
-          <span className="text-[52px] leading-[0.95] font-extrabold tabular-nums" style={DISPLAY}><span className="sr-only">{value}</span><span aria-hidden>{shown}</span></span>
-          <span className="pb-[4px] text-[14.5px] font-semibold" style={MUTED}>{line}</span>
+          <span className={FIGURE} style={DISPLAY}><span className="sr-only">{value}</span><span aria-hidden>{shown}</span></span>
+          <span className="pb-[4px] text-[14px] font-semibold" style={MUTED}>{line}</span>
         </span>
-        <span className="min-h-[20px] text-[13.5px] leading-[20px]" style={MUTED}>{extra}</span>
+        <span className="min-h-[20px] text-[13px] leading-[20px]" style={MUTED}>{extra}</span>
         <span className="mt-auto inline-flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>
           {go}<span aria-hidden className="transition-transform group-hover:translate-x-[2px]">→</span>
         </span>

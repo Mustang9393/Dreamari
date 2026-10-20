@@ -1,3 +1,12 @@
+## 2026-10-20: Counselor v7, hierarchy, type and declutter pass
+
+**Why (Chandu, relayed by the v4 session):** "All pages need a heirarchy, spacing, typography, visual pass and decluttr pass once more. Both v7 and v4."
+
+- One type scale in `v7/ui.tsx` (TITLE, H2, H3, FIGURE, SECTIONS): page titles 32/44 in the student app's caps style (greeting and student names same size, no caps), sections 22/24, card titles 18, body 15/14/13 only (was nine sizes), labels 12 caps.
+- Filler subtitles under Students, Prepare and Opportunities removed. Students' "121 of 121" shows only while filtering.
+- Prepare: the row opens the brief; the Replit's per-row Prepare button (seven identical buttons down the page) is gone. Requests keep Confirm / Suggest time / Decline.
+- Decorative icons off Home's three cards and the profile's goal cards. One section gap on every page, Opportunities' shelves included.
+- Checked: tsc clean for v7; desktop 1440 dark (Students, profile, Prepare).
 ## 2026-10-20: v4 hierarchy pass on Explore, Review, Messages (one control row per page)
 
 **Why (Chandu):** "do whats not done yet" (the typography and hierarchy pass on Explore, Directory, Review, Messages and Assist).

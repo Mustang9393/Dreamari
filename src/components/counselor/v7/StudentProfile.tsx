@@ -14,7 +14,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, GraduationCap, Briefcase, MessageCircle, NotebookPen, CalendarCheck } from "lucide-react";
+import { ArrowLeft, MessageCircle, NotebookPen, CalendarCheck } from "lucide-react";
 import { goBackOr } from "@/components/app/chrome";
 import { PosterCard } from "@/components/app/PosterCard";
 import { NotFoundView } from "@/components/app/states";
@@ -37,7 +37,7 @@ import { StudentFace } from "../v5/StudentFace";
 import { flagsFor, useAllMeetings } from "./data";
 import { interestOf, planOf } from "./Students";
 import { coursesToConsider, prefsFor } from "./studentData";
-import { CARD, CARD_STYLE, DISPLAY, FIELD_STYLE, Modal, MUTED, OVERLINE, PrimaryButton, QuietButton, RULE, Status, TextLink, briefHref, v7 } from "./ui";
+import { FIGURE, H2, H3, TITLE, CARD, CARD_STYLE, DISPLAY, FIELD_STYLE, Modal, MUTED, OVERLINE, PrimaryButton, QuietButton, RULE, Status, TextLink, briefHref, v7 } from "./ui";
 
 type Tab = "about" | "postsecondary" | "career" | "courses" | "activity";
 const TABS: { key: Tab; label: string }[] = [
@@ -69,7 +69,7 @@ export function StudentProfile({ studentId, initialTab }: { studentId: string; i
         <div className="flex min-w-0 items-center gap-[var(--space-5)]">
           <StudentFace s={row} size={84} />
           <div className="flex min-w-0 flex-col gap-[6px]">
-            <h1 className="text-[32px] leading-[1.05] font-extrabold text-balance sm:text-[40px]" style={DISPLAY}>{row.name}</h1>
+            <h1 className={TITLE} style={DISPLAY}>{row.name}</h1>
             <p className="flex flex-wrap items-center gap-x-[10px] gap-y-[2px] text-[15px] leading-[20px]" style={MUTED}>
               <Status status={row.status} /><span aria-hidden>·</span>Grade {row.grade}
             </p>
@@ -119,8 +119,8 @@ function Lines({ items }: { items: { label: string; value: React.ReactNode; mute
     <dl className="flex flex-col">
       {items.map((it) => (
         <div key={it.label} className="flex items-baseline justify-between gap-[var(--space-4)] border-t py-[10px] first:border-t-0 first:pt-0" style={{ borderColor: RULE }}>
-          <dt className="flex-none text-[14.5px] whitespace-nowrap" style={MUTED}>{it.label}</dt>
-          <dd className="text-right text-[14.5px] font-semibold" style={it.muted ? MUTED : undefined}>{it.value}</dd>
+          <dt className="flex-none text-[14px] whitespace-nowrap" style={MUTED}>{it.label}</dt>
+          <dd className="text-right text-[14px] font-semibold" style={it.muted ? MUTED : undefined}>{it.value}</dd>
         </div>
       ))}
     </dl>
@@ -138,8 +138,8 @@ function MilestoneLines({ row, keys }: { row: CounselorStudent; keys: MilestoneK
         return (
           <li key={k} className="flex items-center gap-[var(--space-3)] border-t py-[10px] first:border-t-0 first:pt-0" style={{ borderColor: RULE }}>
             <span className="w-[22px] text-[13px] font-semibold tabular-nums" style={MUTED}>{String(i + 1).padStart(2, "0")}</span>
-            <span className="min-w-0 flex-1 truncate text-[14.5px] font-semibold">{k}</span>
-            <span className="text-[13.5px] font-semibold" style={{ color: STATUS_INK[st] ?? "var(--muted-foreground)" }}>{STATUS_WORD[st]}</span>
+            <span className="min-w-0 flex-1 truncate text-[14px] font-semibold">{k}</span>
+            <span className="text-[13px] font-semibold" style={{ color: STATUS_INK[st] ?? "var(--muted-foreground)" }}>{STATUS_WORD[st]}</span>
           </li>
         );
       })}
@@ -165,17 +165,17 @@ function AboutMe({ row, onTab }: { row: CounselorStudent; onTab: (t: Tab) => voi
     <div className="flex flex-col gap-[var(--space-8)]">
       <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
         <Panel title="Postsecondary goal" action={<TextLink onClick={() => onTab("postsecondary")}>View postsecondary plan</TextLink>}>
-          <span className="flex items-center gap-[10px]"><GraduationCap className="h-5 w-5" style={MUTED} aria-hidden /><span className="text-[24px] leading-[30px] font-extrabold" style={DISPLAY}>{planOf(row)}</span></span>
+          <span className={H3} style={DISPLAY}>{planOf(row)}</span>
           <Lines items={[{ label: "Schools saved", value: row.engagement.collegesSaved }, { label: "Applications", value: STATUS_WORD[row.milestones.Applications] }]} />
         </Panel>
         <Panel title="Career goal" action={<TextLink onClick={() => onTab("career")}>View career plan</TextLink>}>
-          <span className="flex items-center gap-[10px]"><Briefcase className="h-5 w-5" style={MUTED} aria-hidden /><span className="text-[24px] leading-[30px] font-extrabold" style={DISPLAY}>{top[0]?.title ?? interestOf(row)}</span></span>
+          <span className={H3} style={DISPLAY}>{top[0]?.title ?? interestOf(row)}</span>
           <Lines items={[{ label: "Also in Top 3", value: top.length > 1 ? top.slice(1).map((c) => c.title).join(" · ") : "Not picked yet", muted: top.length < 2 }, { label: "Careers saved", value: row.engagement.careersSaved }]} />
         </Panel>
       </div>
       <section className="flex flex-col gap-[var(--space-4)]">
         <div className="flex flex-col gap-[4px]">
-          <h2 className="text-[22px] leading-[28px] font-extrabold" style={DISPLAY}>Preferences</h2>
+          <h2 className={H2} style={DISPLAY}>Preferences</h2>
         </div>
         <dl className={`${CARD} grid grid-cols-1 overflow-hidden sm:grid-cols-2 lg:grid-cols-3`} style={CARD_STYLE}>
           {[
@@ -218,7 +218,7 @@ function Postsecondary({ row }: { row: CounselorStudent }) {
     <div className="flex flex-col gap-[var(--space-8)]">
       <section className="flex flex-col gap-[var(--space-4)]">
         <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
-          <h2 className="text-[22px] leading-[28px] font-extrabold" style={DISPLAY}>Schools That Fit</h2>
+          <h2 className={H2} style={DISPLAY}>Schools That Fit</h2>
           {career && <span className="text-[14px] font-semibold" style={MUTED}>For {career.title} · GPA {gpa.toFixed(1)}</span>}
         </div>
         {schools.length ? (
@@ -248,7 +248,7 @@ function CareerPlan({ row }: { row: CounselorStudent }) {
   return (
     <div className="flex flex-col gap-[var(--space-8)]">
       <section className="flex flex-col gap-[var(--space-4)]">
-        <h2 className="text-[22px] leading-[28px] font-extrabold" style={DISPLAY}>Top 3 Careers</h2>
+        <h2 className={H2} style={DISPLAY}>Top 3 Careers</h2>
         {top.length ? (
           <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-3 lg:max-w-[720px]">
             {top.map((c) => <PosterCard key={c.id} fill career={{ title: c.title, world: c.world, photo: c.photo }} onClick={() => openCareer({ title: c.title, world: c.world, photo: c.photo })} />)}
@@ -260,10 +260,10 @@ function CareerPlan({ row }: { row: CounselorStudent }) {
           {saved.length ? (
             <div className="flex flex-wrap gap-[8px]">
               {saved.slice(0, 8).map((c) => (
-                <button key={c.id} type="button" onClick={() => openCareer({ title: c.title, world: c.world, photo: c.photo })} className="dm-quiet inline-flex h-9 cursor-pointer items-center rounded-full border px-[14px] text-[13.5px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>{c.title}</button>
+                <button key={c.id} type="button" onClick={() => openCareer({ title: c.title, world: c.world, photo: c.photo })} className="dm-quiet inline-flex h-9 cursor-pointer items-center rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>{c.title}</button>
               ))}
             </div>
-          ) : <p className="text-[14.5px]" style={MUTED}>Nothing saved beyond the Top 3.</p>}
+          ) : <p className="text-[14px]" style={MUTED}>Nothing saved beyond the Top 3.</p>}
         </Panel>
         <Panel title="Learning and next steps">
           <Lines items={[
@@ -292,17 +292,17 @@ function Courses({ row }: { row: CounselorStudent }) {
           <ul className="flex flex-col">
             {sis.courses.map((c) => (
               <li key={c.id} className="flex items-center gap-[var(--space-3)] border-t py-[10px] first:border-t-0 first:pt-0" style={{ borderColor: RULE }}>
-                <span className="min-w-0 flex-1 truncate text-[14.5px] font-semibold">{c.name}</span>
+                <span className="min-w-0 flex-1 truncate text-[14px] font-semibold">{c.name}</span>
                 <span className="text-[13px]" style={MUTED}>{c.level === "Regular" ? "" : c.level}</span>
-                <span className="w-[28px] text-right text-[14.5px] font-extrabold tabular-nums" style={{ color: c.letter === "D" || c.letter === "F" ? "var(--color-feedback-danger-solid)" : undefined }}>{c.letter}</span>
+                <span className="w-[28px] text-right text-[14px] font-extrabold tabular-nums" style={{ color: c.letter === "D" || c.letter === "F" ? "var(--color-feedback-danger-solid)" : undefined }}>{c.letter}</span>
               </li>
             ))}
           </ul>
         </Panel>
         <Panel title="Graduation progress">
           <p className="flex items-end gap-[10px]">
-            <span className="text-[44px] leading-[0.95] font-extrabold tabular-nums" style={DISPLAY}>{sis.credits.earned}</span>
-            <span className="pb-[4px] text-[14.5px] font-semibold" style={MUTED}>of {sis.credits.required} credits · {sis.onTrackToGraduate ? "on track" : "behind"}</span>
+            <span className={FIGURE} style={DISPLAY}>{sis.credits.earned}</span>
+            <span className="pb-[4px] text-[14px] font-semibold" style={MUTED}>of {sis.credits.required} credits · {sis.onTrackToGraduate ? "on track" : "behind"}</span>
           </p>
           <span aria-hidden className="h-[6px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
             <span className="block h-full rounded-full" style={{ width: `${pct}%`, background: sis.onTrackToGraduate ? "var(--primary)" : "var(--color-feedback-warning-solid)" }} />
@@ -312,9 +312,9 @@ function Courses({ row }: { row: CounselorStudent }) {
       </div>
       <Panel title={`Courses to consider for ${interestOf(row)}`}>
         <div className="flex flex-wrap gap-[8px]">
-          {coursesToConsider(row).map((c) => <span key={c} className="inline-flex h-9 items-center rounded-full border px-[14px] text-[13.5px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>{c}</span>)}
+          {coursesToConsider(row).map((c) => <span key={c} className="inline-flex h-9 items-center rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>{c}</span>)}
         </div>
-        <p className="text-[13.5px]" style={MUTED}>Ideas to talk through together, not requirements.</p>
+        <p className="text-[13px]" style={MUTED}>Ideas to talk through together, not requirements.</p>
       </Panel>
     </div>
   );
@@ -351,14 +351,14 @@ function Activity({ row, roster }: { row: CounselorStudent; roster: CounselorStu
         {stats.map((s) => (
           <div key={s.label} className="flex flex-col gap-[2px] border-b p-[var(--space-5)] sm:border-r" style={{ borderColor: RULE }}>
             <dd className="text-[24px] leading-[30px] font-extrabold tabular-nums" style={DISPLAY}>{s.value}</dd>
-            <dt className="text-[13.5px] font-semibold" style={MUTED}>{s.label}</dt>
+            <dt className="text-[13px] font-semibold" style={MUTED}>{s.label}</dt>
           </div>
         ))}
       </dl>
       <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
         <Panel title="Worth a conversation">
-          <p className="text-[18px] leading-[24px] font-extrabold" style={DISPLAY}>{talk.title}</p>
-          <p className="text-[14.5px] leading-[22px]" style={MUTED}>{talk.line}</p>
+          <p className={H3} style={DISPLAY}>{talk.title}</p>
+          <p className="text-[14px] leading-[22px]" style={MUTED}>{talk.line}</p>
         </Panel>
         <Panel title="Meetings">
           {mine.length ? (
@@ -367,14 +367,14 @@ function Activity({ row, roster }: { row: CounselorStudent; roster: CounselorStu
                 const d = new Date(`${m.day}T12:00:00`);
                 return (
                   <li key={m.id} className="flex items-center gap-[var(--space-3)] border-t py-[10px] first:border-t-0 first:pt-0" style={{ borderColor: RULE }}>
-                    <span className="w-[96px] flex-none text-[13.5px] font-semibold tabular-nums" style={MUTED}>{DAY[d.getDay()]} {MON[d.getMonth()]} {d.getDate()}</span>
-                    <span className="min-w-0 flex-1 truncate text-[14.5px] font-semibold">{m.type}</span>
-                    <span className="text-[13.5px]" style={MUTED}>{isPast(m, now) ? "Done" : timeLabel(m.time)}</span>
+                    <span className="w-[96px] flex-none text-[13px] font-semibold tabular-nums" style={MUTED}>{DAY[d.getDay()]} {MON[d.getMonth()]} {d.getDate()}</span>
+                    <span className="min-w-0 flex-1 truncate text-[14px] font-semibold">{m.type}</span>
+                    <span className="text-[13px]" style={MUTED}>{isPast(m, now) ? "Done" : timeLabel(m.time)}</span>
                   </li>
                 );
               })}
             </ul>
-          ) : <p className="text-[14.5px]" style={MUTED}>No meetings yet.</p>}
+          ) : <p className="text-[14px]" style={MUTED}>No meetings yet.</p>}
         </Panel>
       </div>
       {notes.length > 0 && (
@@ -383,7 +383,7 @@ function Activity({ row, roster }: { row: CounselorStudent; roster: CounselorStu
             {notes.slice(0, 5).map((n) => (
               <li key={n.id} className="flex flex-col gap-[2px] border-t py-[10px] first:border-t-0 first:pt-0" style={{ borderColor: RULE }}>
                 <span className="text-[13px]" style={MUTED}>{new Date(n.createdAt).toLocaleDateString("en", { month: "short", day: "numeric" })}</span>
-                <span className="text-[14.5px] leading-[21px]">{n.text}</span>
+                <span className="text-[14px] leading-[21px]">{n.text}</span>
               </li>
             ))}
           </ul>

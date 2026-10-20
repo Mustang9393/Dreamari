@@ -48,14 +48,14 @@ function ViewSheet({ opp }: { opp: Opp }) {
   return (
     <Modal overline={opp.kindLabel ?? (item.type === "program" ? "Program" : "Scholarship")} title={item.name} onClose={close}
       footer={<PrimaryButton onClick={() => shareOpp(opp)} icon={<Send className="h-4 w-4" aria-hidden />}>Share</PrimaryButton>}>
-      <p className="-mt-[14px] text-[14.5px]" style={MUTED}>{[who, where].filter(Boolean).join(" · ")}</p>
+      <p className="-mt-[14px] text-[14px]" style={MUTED}>{[who, where].filter(Boolean).join(" · ")}</p>
       {fits.length > 0 && <SheetHero label="Fits" value={fits.length} suffix="of your students" accent={SHEET_ACCENT} />}
       <p className="text-[15px] leading-[23px]">{opp.about}</p>
       <dl className="grid grid-cols-2 gap-x-[var(--space-5)]">
         {facts.map((f) => (
           <div key={f.label} className={`flex flex-col gap-[2px] border-t py-[10px] ${f.label === "How to apply" ? "col-span-2" : ""}`} style={{ borderColor: RULE }}>
             <dt className={OVERLINE} style={MUTED}>{f.label}</dt>
-            <dd className="text-[14.5px] leading-[20px] font-semibold">{f.value}</dd>
+            <dd className="text-[14px] leading-[20px] font-semibold">{f.value}</dd>
           </div>
         ))}
       </dl>
@@ -98,7 +98,7 @@ function ShareSheet({ opp }: { opp: Opp }) {
           const on = a.key === aud;
           return (
             <button key={a.key} type="button" role="radio" aria-checked={on} onClick={() => setAud(a.key)}
-              className={`${on ? "" : "dm-quiet cursor-pointer "}inline-flex h-9 items-center rounded-full border px-[14px] text-[13.5px] font-semibold`}
+              className={`${on ? "" : "dm-quiet cursor-pointer "}inline-flex h-9 items-center rounded-full border px-[14px] text-[13px] font-semibold`}
               style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)" }}>
               {a.label}{a.key === "fits" ? ` · ${fits.length}` : ""}
             </button>
@@ -126,7 +126,7 @@ function ShareSheet({ opp }: { opp: Opp }) {
                   <button type="button" aria-pressed={on} onClick={() => setPicked((p) => { const n = new Set(p); if (on) n.delete(s.id); else n.add(s.id); return n; })}
                     className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[6px] py-[7px] text-left">
                     <StudentFace s={s} size={30} />
-                    <span className="min-w-0 flex-1 truncate text-[14.5px] font-semibold">{s.name}</span>
+                    <span className="min-w-0 flex-1 truncate text-[14px] font-semibold">{s.name}</span>
                     <span className="text-[13px]" style={MUTED}>Grade {s.grade}</span>
                     <span aria-hidden className="flex size-[20px] items-center justify-center rounded-[6px] border" style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)" }}>{on && <Check className="h-3 w-3" strokeWidth={3} />}</span>
                   </button>

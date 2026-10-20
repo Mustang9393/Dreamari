@@ -14,6 +14,7 @@
 import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { FactSheet } from "@/components/career/PaySheet";
+import { PAGE_TITLE_CLASS as PAGE_TITLE_CLASS_LOCAL } from "@/components/app/chrome";
 export { SheetHero } from "@/components/career/PaySheet";
 import { IconTip } from "@/components/app/IconTip";
 import type { CaseloadStatus } from "@/lib/counselorRoster";
@@ -22,6 +23,19 @@ export const OVERLINE = "text-[12px] leading-[16px] font-semibold tracking-[0.08
 export const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 export const MUTED = { color: "var(--muted-foreground)" } as const;
 export const DISPLAY = { fontFamily: "var(--font-display)" } as const;
+
+// One type scale for every v7 screen (Chandu, 20 Oct 2026: "All pages need a
+// hierarchy, spacing, typography, visual pass"; standing rule: heading >
+// subheading > body by size, top-down, never by perceived importance).
+//   page title 32/44 · section 22/24 · card title 18 · body 15 / 14 / 13 ·
+//   label 12 caps. Figures: hero 48, stat 24.
+/** a page-level title that is a name or a greeting, not a place: same size, no caps */
+export const TITLE = "text-[32px] leading-[1.05] font-extrabold text-balance sm:text-[44px]";
+export const H2 = "min-w-0 text-[22px] leading-[28px] font-extrabold text-balance sm:text-[24px] sm:leading-[30px]";
+export const H3 = "text-[18px] leading-[24px] font-extrabold";
+export const FIGURE = "text-[48px] leading-[0.95] font-extrabold tabular-nums";
+/** the gap between a page's sections, the same on every page */
+export const SECTIONS = "flex flex-col gap-[48px] pt-[var(--space-2)] lg:gap-[56px] lg:pt-[var(--space-4)]";
 
 /** v7 links stay inside v7. */
 export const v7 = (view: string, extra = "") => `/counselor?v=7&view=${view}${extra}`;
@@ -45,13 +59,10 @@ export function Status({ status, label }: { status: CaseloadStatus; label?: stri
 }
 
 /** A page's title block: the heading, one short line, and at most one action. */
-export function PageHead({ title, line, action }: { title: string; line?: string; action?: React.ReactNode }) {
+export function PageHead({ title, action }: { title: string; action?: React.ReactNode }) {
   return (
     <header className="flex flex-col gap-[var(--space-5)] sm:flex-row sm:items-end sm:justify-between">
-      <div className="flex min-w-0 flex-col gap-[var(--space-2)]">
-        <h1 className="text-[34px] leading-[1.05] font-extrabold text-balance sm:text-[44px]" style={DISPLAY}>{title}</h1>
-        {line && <p className="text-[15px] leading-[22px]" style={MUTED}>{line}</p>}
-      </div>
+      <h1 className={PAGE_TITLE_CLASS_LOCAL} style={DISPLAY}>{title}</h1>
       {action && <div className="flex flex-none items-center gap-[var(--space-3)]">{action}</div>}
     </header>
   );
@@ -61,7 +72,7 @@ export function PageHead({ title, line, action }: { title: string; line?: string
 export function SectionHead({ title, href, cta }: { title: string; href?: string; cta?: string }) {
   return (
     <div className="flex items-end justify-between gap-[var(--space-4)]">
-      <h2 className="min-w-0 text-[22px] leading-[28px] font-extrabold text-balance sm:text-[24px] sm:leading-[30px]" style={DISPLAY}>{title}</h2>
+      <h2 className={H2} style={DISPLAY}>{title}</h2>
       {href && cta && <TextLink href={href}>{cta}</TextLink>}
     </div>
   );
@@ -136,7 +147,7 @@ export function Toggle<K extends string>({ options, value, onChange, label }: { 
         const on = o.key === value;
         return (
           <button key={o.key} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.key)}
-            className={`dm-seg h-[34px] rounded-full px-[14px] text-[13.5px] font-semibold ${on ? "" : "cursor-pointer"}`}
+            className={`dm-seg h-[34px] rounded-full px-[14px] text-[13px] font-semibold ${on ? "" : "cursor-pointer"}`}
             style={on ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>
             {o.label}
           </button>
