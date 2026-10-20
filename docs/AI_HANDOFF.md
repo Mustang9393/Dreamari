@@ -1,3 +1,12 @@
+## 2026-10-21: buttons and the primary blue match the dusk sky
+
+**Why (Chandu):** "align the CTA colors and primary color token to match this new blue". The old blues (#176acf fills, #59a0f8 for the one lit button) were the electric blues of the black look and sat outside the dusk family.
+
+- **Primary token** (brand-600, action-primary, `--primary`, text-brand in light, every fill with white text, both modes): #2f5fb1, a dusk cobalt at the sky's hue. White text 6.2:1; as text 5.7:1 on the light page and 4.9:1 on its strongest tint, so one blue serves both modes. Hover: #284f93 (light) / #3d6fc4 (dark, 4.9:1 white). Deep shades #284f93.
+- **The one lit button** (data-lit, the landing primary): #8fb3f5 periwinkle with #0b1a33 ink (8.2:1), a step lighter than the team slide's #7aa2ff so it keeps 3:1 against the brightest sky; hover #a3c1f7; its seating shadow in the same periwinkle.
+- **The landing's "DREAM"** is the slide's own #7aa2ff (6.6:1 on the hero top).
+- Checked: computed values in the browser; Home (lit Play) and the counselor dashboard (Start Reviewing, the active tab) in dark (`cta-*.jpg`). Pushed to main on Chandu's go-ahead.
+
 ## 2026-10-21: Black & Blue becomes a dusk sky (the team's gradient), not underwater
 
 **Why (Chandu, with the team's DREAMARI title slide):** "the new blue and black looks too gloomy and like its underwater. How can we make it brighter? more inspirational? This is the style of gradient the team likes... incorporate reliably without using radial ones exclusively. Also keep in mind contrast WCAG AA 2.2, usability". The reference is one vertical gradient, #111f36 at the top to #4a7aab at the bottom (212-217deg). Ours read as underwater because the light fell from above onto near-black; a sky is darkest overhead and brightest at the horizon.

@@ -30,20 +30,25 @@ html.look-v2 {
   --color-brand-300: #94c2f9;
   --color-brand-400: #59a0f8;
   --color-brand-500: #2780ec;
-  --color-brand-600: #176acf; /* 5.25:1 white text on it; 4.9:1 as text on the light page */
-  --color-brand-700: #1157ac;
+  /* the dusk cobalt (21 Oct 2026, Chandu: "align the CTA colors and primary
+     color token to match this new blue"): was the electric #2f5fb1 from the
+     black look; #2f5fb1 sits at the sky's hue, white text 6.2:1, and as text
+     5.7:1 on the light page, 4.9:1 on its strongest tint, so one blue serves
+     both modes */
+  --color-brand-600: #2f5fb1;
+  --color-brand-700: #284f93;
   --color-brand-900: #0b2f5b;
   --color-brand-950: #061c37;
-  --color-accent-deep: #1157ac;
+  --color-accent-deep: #284f93;
   --color-accent-navy: #0e4281;
   /* Purple and pink become the light end of the blue ramp. They are only used
      for glows, sparks and gradient stops, never for text. */
   --color-accent-purple: #59a0f8;
   --color-decorative-pink-glow: #94c2f9;
-  --color-action-primary: #176acf;
-  --color-action-primary-hover: #1157ac;
-  --color-text-brand: #176acf;
-  --color-match-accent: #176acf;
+  --color-action-primary: #2f5fb1;
+  --color-action-primary-hover: #284f93;
+  --color-text-brand: #2f5fb1;
+  --color-match-accent: #2f5fb1;
   --color-match-accent-dark: #59a0f8;
   --color-surface-feature: #eaf3fd;
   --color-surface-feature-strong: #d4e6fb;
@@ -54,8 +59,8 @@ html.look-v2.dark {
   --background: #000105;
   --color-surface-page: #000105;
   --color-surface-card: #10151d;
-  --color-action-primary: #176acf;
-  --color-action-primary-hover: #1e74dc; /* 4.6:1 white text */
+  --color-action-primary: #2f5fb1;
+  --color-action-primary-hover: #3d6fc4; /* 4.9:1 white text */
   --color-text-brand: #59a0f8; /* 7.0:1 on dark cards */
   --color-match-toast-link: #59a0f8;
   --color-match-toast-link-dark: #59a0f8;
@@ -66,8 +71,8 @@ html.look-v2.dark {
 html.look-v2 .marketing-v2 {
   --background: #000105;
   --card: #0e1219; /* neutral blue-black, was indigo #151829 */
-  --primary: #176acf;
-  --accent: #176acf;
+  --primary: #2f5fb1;
+  --accent: #2f5fb1;
   --accent-subtle: #59a0f8;
   --primary-ghost: #94c2f9;
   --hero-accent-purple: #0b2f5b;
@@ -104,12 +109,12 @@ html.look-v2:not(.light) {
 /* ---------- Light ---------- */
 html.look-v2.light {
   --background: #f3f6f9;
-  /* Light text/fill blue sits one step deeper than dark's #176acf: links on
-     the pale blue tints measured 4.1:1 at #176acf. #1460c0 is 6.1:1 on
+  /* Light text/fill blue sits one step deeper than dark's #2f5fb1: links on
+     the pale blue tints measured 4.1:1 at #2f5fb1. #2f5fb1 is 6.1:1 on
      white, 5.6:1 on the page, 4.8:1 on the strongest tint (#d4e6fb). */
-  --color-action-primary: #1460c0;
-  --color-text-brand: #1460c0;
-  --color-match-accent: #1460c0;
+  --color-action-primary: #2f5fb1;
+  --color-text-brand: #2f5fb1;
+  --color-match-accent: #2f5fb1;
 }
 
 html.look-v2.light .marketing-v2.themeable {
@@ -118,9 +123,9 @@ html.look-v2.light .marketing-v2.themeable {
   --muted-foreground: #4b5664 !important; /* 7.0:1 on white, 6.6:1 on the page */
   --card: #ffffff !important;
   --border: #d5dde7 !important;
-  --primary: #1460c0 !important;
-  --accent: #1460c0 !important;
-  --accent-subtle: #1460c0 !important;
+  --primary: #2f5fb1 !important;
+  --accent: #2f5fb1 !important;
+  --accent-subtle: #2f5fb1 !important;
   --hero-accent-purple: #d3e4f8 !important; /* ice blue */
   --hero-accent-teal: #eaf1f9 !important; /* was blush pink */
   --hero-accent-pink: #eaf1f9 !important;
@@ -132,8 +137,8 @@ html.look-v2.light .marketing-v2.themeable {
   --glass-border: rgba(16, 42, 80, 0.12) !important;
   --inset-surface: #f3f6f9 !important;
   --inset-border: rgba(16, 42, 80, 0.1) !important;
-  --row-active-ink: #1460c0 !important;
-  --tier-color: #1157ac !important;
+  --row-active-ink: #2f5fb1 !important;
+  --tier-color: #284f93 !important;
 }
 
 /* ---------- 2/3. Atmosphere ---------- */
@@ -226,7 +231,7 @@ html.look-v2 [data-hero-glow] {
 
 /* The landing's "DREAM" was a periwinkle literal (#7aa2ff, 225deg). */
 html.look-v2 .marketing-v2 {
-  --primary-tint: #59a0f8; /* 7.8:1 on the black ground */
+  --primary-tint: #7aa2ff; /* the team slide's own "DREAM" blue, 6.6:1 on the hero's top */
 }
 
 /* Schools' one display flourish: blue to violet to purple becomes blue to sky
@@ -236,7 +241,7 @@ html.look-v2 [data-grad-text] {
 }
 html.look-v2.light .themeable [data-grad-text],
 html.look-v2 .theme-light [data-grad-text] {
-  background-image: linear-gradient(92deg, #176acf 0%, #1157ac 100%) !important;
+  background-image: linear-gradient(92deg, #2f5fb1 0%, #284f93 100%) !important;
 }
 html.look-v2 [data-drift-violet] {
   background: radial-gradient(circle, rgba(39, 128, 236, 0.16), transparent 70%) !important;
@@ -251,14 +256,14 @@ html.look-v2 .xp-shimmer-ink {
    becomes one blue climbing toward light. Each stop keeps 3:1 against its
    ground as a graphic (WCAG 1.4.11): dark climbs to sky, light deepens. */
 html.look-v2 {
-  --build-bar-a: #176acf;
+  --build-bar-a: #2f5fb1;
   --build-bar-b: #59a0f8;
   --build-bar-c: #9ec6fa;
 }
 html.look-v2.light {
   --build-bar-a: #2780ec;
-  --build-bar-b: #176acf;
-  --build-bar-c: #1157ac;
+  --build-bar-b: #2f5fb1;
+  --build-bar-c: #284f93;
 }
 
 /* The Report's paper: warm cream and beige rules become cool neutrals, in
@@ -592,7 +597,7 @@ html.look-v2 [data-lit] {
   /* the sky-blue fill already makes it the brightest thing on the screen;
      a small soft shadow seats it, no halo (19 Oct: "no glows for the sake
      of glows") */
-  box-shadow: 0 8px 20px -12px rgba(39, 128, 236, 0.55) !important;
+  box-shadow: 0 8px 20px -12px rgba(143, 179, 245, 0.45) !important;
   border-radius: var(--radius-md);
 }
 html.look-v2.light [data-lit] {
@@ -610,18 +615,20 @@ html.look-v2 [data-lit]:is(:disabled, [aria-disabled="true"]) {
 html.look-v2:not(.light) :is(button, a)[data-lit],
 html.look-v2:not(.light) [data-lit] :is(button, a),
 html.look-v2:not(.light) [data-mkt-btn="primary"] {
-  background: #59a0f8 !important;
-  color: #04101e !important;
+  /* the slide's periwinkle, a step lighter than its #7aa2ff so it keeps
+     3:1 against the brightest sky; dark ink 8.2:1 (21 Oct) */
+  background: #8fb3f5 !important;
+  color: #0b1a33 !important;
 }
 html.look-v2:not(.light) :is(button, a)[data-lit]:hover,
 html.look-v2:not(.light) [data-lit] :is(button, a):hover,
 html.look-v2:not(.light) [data-mkt-btn="primary"]:hover {
-  background: #74b0f8 !important;
+  background: #a3c1f7 !important;
 }
 
 html.look-v2 [data-mkt-btn="primary"] {
   background: var(--primary) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 8px 20px -12px rgba(39, 128, 236, 0.55) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 8px 20px -12px rgba(143, 179, 245, 0.45) !important;
 }
 html.look-v2.light [data-flow-space] {
   background: #f3f6f9 !important;
