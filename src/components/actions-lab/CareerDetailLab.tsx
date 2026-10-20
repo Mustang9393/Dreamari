@@ -159,20 +159,30 @@ export function shortDegree(value: string) {
 // became a small muted line and the figure a display numeral, set right
 // under the label instead of pinned to the cell's bottom (which left a gap
 // whenever a neighbour's degree line wrapped). "/year" drops to a small
-// suffix, and a long written value (a degree sentence) steps down a size.
+// suffix. Same day, second pass: the size came down so all four sit on one
+// line ("Bachelor's degree" wrapped at the bigger size).
 function StripFigure({ value, accent }: { value: string; accent: string }) {
   const m = value.match(/^(.*?)(\/year)$/);
   const main = m ? m[1] : value;
-  const long = main.length > 22;
+  // one size for every cell, so all four figures share one line (Chandu,
+  // 20 Oct 2026: "everything on that row is the same text line ... fix
+  // alignment so everything is consistent"); a single credential never
+  // wraps, only "A or B" may break, and only at the "or"
+  const parts = main.split(/ or /);
   return (
-    <span className="flex flex-wrap items-baseline gap-x-[4px]">
+    <span className="flex flex-wrap items-baseline gap-x-[6px]">
       <span
-        className={`${long ? "text-[17px] leading-[23px] sm:text-[18px] sm:leading-[24px]" : "text-[24px] leading-[28px] sm:text-[28px] sm:leading-[32px]"} font-extrabold tabular-nums`}
+        className="text-[15px] leading-[22px] font-extrabold tabular-nums sm:text-[20px] sm:leading-[26px] xl:text-[22px] xl:leading-[28px]"
         style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 55%, #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
       >
-        {main}
+        {parts.map((p, i) => (
+          <span key={i}>
+            {i > 0 && " or "}
+            <span className="whitespace-nowrap">{p}</span>
+          </span>
+        ))}
       </span>
-      {m && <span className="text-[14px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>a year</span>}
+      {m && <span className="text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>a year</span>}
     </span>
   );
 }
@@ -745,20 +755,20 @@ export function CareerDetailLab({ slug, live = false }: {
           // column inside the same full-bleed bordered panel -- reproduced
           // live with a synthetic thin-career test entry. grid-cols-1 for
           // the single-fact case only; 2/3/4-fact layouts are unchanged.
-          <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] ${facts.length === 1 ? "grid-cols-1" : "grid-cols-2"} rounded-[var(--radius-lg)] border ${facts.length === 1 ? "" : facts.length === 3 ? "sm:grid-cols-3" : facts.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-4"}`} style={PANEL}>
+          <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] ${facts.length === 1 ? "grid-cols-1" : "grid-cols-2"} rounded-[var(--radius-lg)] border ${facts.length === 1 ? "" : facts.length === 3 ? "sm:grid-cols-3" : facts.length <= 2 ? "sm:grid-cols-2" : "lg:grid-cols-4"}`} style={PANEL}>
             {facts.map((fact, i) => (
               <div
                 key={fact.label}
                 data-fact-cell
-                className={`relative flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${facts.length === 3 ? "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
+                className={`relative flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${facts.length >= 4 ? "lg:border-t-0 lg:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
                 style={{ borderColor: "var(--glass-border)" }}
               >
-                {/* the (i) always sits top-right of the cell, on the label's
-                   first line, whether the label wraps or not; the figure
-                   always sits at the bottom, so figures line up across cells */}
-                <span className="flex items-start justify-between gap-[6px]">
+                {/* label row is one fixed height whether it ends in an (i) or
+                   a chevron, and every figure is one size, so all figures
+                   share one line across the strip */}
+                <span className="flex min-h-[24px] items-center justify-between gap-[6px]">
                   <span className="min-w-0 text-[14px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.label}</span>
-                  {toOutlook(fact.label) && <ChevronRight className="mt-[2px] h-[16px] w-[16px] flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />}
+                  {toOutlook(fact.label) && <ChevronRight className="h-[16px] w-[16px] flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />}
                   {!toOutlook(fact.label) && factKey(fact.label) && vm.details?.[factKey(fact.label)!] && (
                     <IconTip label={`About ${fact.label.toLowerCase()}`}>
                       <button
@@ -769,7 +779,7 @@ export function CareerDetailLab({ slug, live = false }: {
                           setFactAnchor(e.currentTarget);
                           setOpenFact((v) => (v === factKey(fact.label) ? null : factKey(fact.label)));
                         }}
-                        className="dm-quiet -mr-[4px] -mt-[1px] flex size-6 flex-none cursor-pointer items-center justify-center rounded-full"
+                        className="dm-quiet -mr-[4px] flex size-6 flex-none cursor-pointer items-center justify-center rounded-full"
                         style={{ color: "var(--muted-foreground)" }}
                       >
                         <Info className="h-[15px] w-[15px]" aria-hidden />
