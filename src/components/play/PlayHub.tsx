@@ -31,8 +31,8 @@ import type { Simulation } from "./types";
 // (Career Simulations, matching "simulations stay dominant by default").
 const PLAY_ROW_IDS = ["simulations", "glossary", "soon"];
 
-// DEMO-ONLY: UX stays in hamburger Quick Links for discussion before a hub release.
-const HUB_SIMULATIONS = SIMULATIONS.filter((game) => game.id !== "ui-ux-designer" && game.id !== "food-scientist");
+// Food Scientist remains in hamburger Quick Links for QA; UX stays released.
+const HUB_SIMULATIONS = SIMULATIONS.filter((game) => game.id !== "food-scientist");
 
 // TV UX (direct feedback, 21 Sept 2026: "he wants all rows like this" --
 // the row-focus treatment Glossary Games got on hover, but the actual

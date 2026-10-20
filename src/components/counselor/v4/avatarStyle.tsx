@@ -18,8 +18,11 @@ export const AvatarStyleContext = createContext<ConversationAvatarStyle | null>(
 export const useAvatarStyleContext = () => useContext(AvatarStyleContext);
 
 export function useCounselorAvatarStyle(): [ConversationAvatarStyle, (v: ConversationAvatarStyle) => void] {
-  const [picked, set] = useAB<ConversationAvatarStyle>("v4-home-conversation-avatar", "portrait");
-  return [isAvatarStyle(picked) ? picked : "portrait", set];
+  // Voxel Art is the default (20 Oct 2026, Chandu: "lets default to the
+  // voxel art for student pictures"). A new key, so a pick saved while
+  // Portraits was the default does not hide the new default.
+  const [picked, set] = useAB<ConversationAvatarStyle>("v4-avatar-style-2", "voxel-art");
+  return [isAvatarStyle(picked) ? picked : "voxel-art", set];
 }
 
 export function AvatarStyleProvider({ children }: { children: ReactNode }) {
@@ -29,9 +32,9 @@ export function AvatarStyleProvider({ children }: { children: ReactNode }) {
 
 /** `quiet`: Home's small inline version beside the conversation cards; in a
  *  page heading it is a normal select, matching the filters beside it. */
-export function AvatarStylePicker({ className = "", quiet = false }: { className?: string; quiet?: boolean }) {
+export function AvatarStylePicker({ className = "", quiet = false, subtle = false }: { className?: string; quiet?: boolean; /** the footer's small text-only version */ subtle?: boolean }) {
   const [style, set] = useCounselorAvatarStyle();
-  return <Listbox ariaLabel="Avatar style" value={style} onChange={(v) => { if (isAvatarStyle(v)) set(v); }} options={AVATAR_STYLE_OPTIONS} className={`${quiet ? "v4-avatar-picker" : "v4-grade-picker"} ${className}`} panelStyle={{ background: "var(--card)", color: "var(--foreground)" }} />;
+  return <Listbox ariaLabel="Avatar style" value={style} onChange={(v) => { if (isAvatarStyle(v)) set(v); }} options={AVATAR_STYLE_OPTIONS} className={`${subtle ? "v4-avatar-subtle" : quiet ? "v4-avatar-picker" : "v4-grade-picker"} ${className}`} panelStyle={{ background: "var(--card)", color: "var(--foreground)" }} />;
 }
 
 /** A round face in the picked style, for lists and chips. */

@@ -1,3 +1,4 @@
+import { skyMoment } from "@/lib/sky";
 // Autosave for a simulation run. The Interaction Rules tab is explicit about
 // why this exists: "Save at the last completed screen. Reopening returns the
 // player there with reputation intact. Students play in short bursts between
@@ -135,6 +136,9 @@ export function readRun(store: Store, gameId: string, level: number): RunSave | 
 
 export function saveRun(save: Omit<RunSave, "at">): void {
   const store = { ...progressSnapshot() };
+  // finishing a simulation's ten scored beats is a big moment for the sky
+  const before = store[slot(save.gameId, save.level)]?.scored ?? 0;
+  if (before < 10 && save.scored >= 10) skyMoment({ big: true });
   store[slot(save.gameId, save.level)] = { ...save, at: Date.now() };
   commit(store);
 }

@@ -34,7 +34,7 @@ import { Aurora, GlowStroke, Orb } from "@/components/counselor/v4/charts/glow";
 import { DEMO_HOME_STATE } from "@/components/career/statePay";
 import { US_STATES } from "@/lib/studentProfile";
 import { useState } from "react";
-import { count, pct, stateOutlook, type NationalOutlook } from "./outlook";
+import { count, pct, stateOutlook, type NationalOutlook } from "@/components/career/outlook";
 
 const TINY = "text-[14px] leading-[20px]";
 const AXIS = "text-[12px] leading-[16px] tabular-nums";

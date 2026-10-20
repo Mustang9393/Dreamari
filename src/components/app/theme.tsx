@@ -10,7 +10,7 @@ const STORAGE_KEY = "dreamari-theme";
 // The Counselor Dashboard defaults to light. V4 has a separate saved choice
 // so its pearlescent default and optional dark mode do not alter v2/v3.
 const COUNSELOR_KEY = "dreamari-theme:counselor";
-const COUNSELOR_V4_KEY = "dreamari-theme:counselor:v4";
+const COUNSELOR_V4_KEY = "dreamari-theme:counselor:v4b";
 // v5 is built on the student design system, so it has the student light and
 // dark, but its own saved choice (default light, like every counselor build).
 const COUNSELOR_V5_KEY = "dreamari-theme:counselor:v5";
@@ -19,6 +19,14 @@ function isCounselorV5(pathname: string) {
   const selected = new URLSearchParams(window.location.search).get("v");
   if (selected) return selected === "5";
   try { return localStorage.getItem("dreamari:counselor-version") === "v5"; } catch { return false; }
+}
+// v7 is the Black & Blue counselor app: dark by default, its own saved choice.
+const COUNSELOR_V7_KEY = "dreamari-theme:counselor:v7";
+function isCounselorV7(pathname: string) {
+  if (!isCounselorPath(pathname) || typeof window === "undefined") return false;
+  const selected = new URLSearchParams(window.location.search).get("v");
+  if (selected) return selected === "7";
+  try { return localStorage.getItem("dreamari:counselor-version") === "v7"; } catch { return false; }
 }
 function isCounselorPath(pathname: string) {
   return pathname === "/counselor" || pathname.startsWith("/counselor/");
@@ -30,7 +38,7 @@ function isCounselorV4(pathname: string) {
   try { return localStorage.getItem("dreamari:counselor-version") === "v4"; } catch { return false; }
 }
 function keyFor(pathname: string) {
-  return isCounselorV5(pathname) ? COUNSELOR_V5_KEY : isCounselorV4(pathname) ? COUNSELOR_V4_KEY : isCounselorPath(pathname) ? COUNSELOR_KEY : STORAGE_KEY;
+  return isCounselorV7(pathname) ? COUNSELOR_V7_KEY : isCounselorV5(pathname) ? COUNSELOR_V5_KEY : isCounselorV4(pathname) ? COUNSELOR_V4_KEY : isCounselorPath(pathname) ? COUNSELOR_KEY : STORAGE_KEY;
 }
 /** The theme a page should open in: the saved choice for its surface, or
  *  that surface's default (light on the Counselor Dashboard, dark elsewhere). */
@@ -41,7 +49,9 @@ function themeFor(pathname: string): GlobalTheme {
   } catch {
     // fall through to the default
   }
-  return isCounselorPath(pathname) ? "light" : "dark";
+  // v4 and v7 open in Black & Blue (v4 since 20 Oct 2026, a fresh key so an
+  // earlier light choice does not hide the new default)
+  return isCounselorPath(pathname) && !isCounselorV7(pathname) && !isCounselorV4(pathname) ? "light" : "dark";
 }
 
 export type GlobalTheme = "light" | "dark";

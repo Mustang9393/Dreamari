@@ -12,6 +12,7 @@ import { AreaChart, BarChart as ConnectBarChart, Ring, SegmentedRing, Meter, Met
 import { Donut, SplitBar, RangeBar, Ladder } from "@/components/colleges/viz";
 import { BarChart as MentorshipBarChart, Sparkline as MentorshipSparkline, GoalTrack, Histogram, ShareBar } from "@/components/connect/mentorship/charts";
 import { PayMap } from "@/components/career/PayMap";
+import { LightRange } from "@/components/app/LightRange";
 import { Ring as PlanMapRing } from "@/components/counselor/v4/PlanMap";
 import { RankBar } from "@/components/counselor/v4/overviewShared";
 import { RankedBars } from "@/components/counselor/v4/CareerCollegeInsights";
@@ -113,7 +114,16 @@ export function ChartsSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="PayMap" file="src/components/career/PayMap.tsx" purpose="Whole-country pay by state for a career, shaded in the career's world accent, hover/focus/tap a state for its figure." when="Career detail's Pay tab.">
+      <Specimen name="LightRange" file="src/components/app/LightRange.tsx" purpose="The house range bar: a line of light from a low end to a high end, dim where it starts and brightest at the top, with one bright point where a value falls. Light, not a solid: a gradient line with a soft glow, points made of radial gradients, no white core, rim or shine (the glow kit's lit tube read metallic here). Chandu, 20 Oct 2026: 'this bar direction is what is to be used app wide wherever something like this appears'." when="Any low-to-high range with a marked value: pay ranges (Career Detail's What it pays sheet), score bands, a value against a scale. New work uses this instead of a flat slider or filled track; RangeBar, GoalTrack and the other range strips above move to it as their screens are touched.">
+        <StateGrid min={300}>
+          <StateCell label="Pay range (What it pays)"><LightRange accent="var(--color-world-arts-media-sport)" at={33} from={{ label: "Starting out", value: "$23,000" }} to={{ label: "Top earners", value: "$99,000+" }} /></StateCell>
+          <StateCell label="Primary accent"><LightRange accent="var(--primary)" at={62} from={{ label: "Starting out", value: "$63,180" }} to={{ label: "Top earners", value: "$171,210" }} /></StateCell>
+          <StateCell label="Mark at an end" note="The value sits on the top of the range; the mark clamps to the line."><LightRange accent="var(--primary)" at={100} from={{ label: "Low", value: "1180" }} to={{ label: "High", value: "1380" }} /></StateCell>
+          <StateCell label="No marked value" note="A missing or out-of-range figure: the range alone, no point."><LightRange accent="var(--primary)" at={null} from={{ label: "Starting out", value: "$41,000" }} to={{ label: "Top earners", value: "$88,000" }} /></StateCell>
+        </StateGrid>
+      </Specimen>
+
+      <Specimen name="PayMap" file="src/components/career/PayMap.tsx" purpose="Whole-country map for a career, shaded in the career's world accent: pay by state, or (with `figures`) job growth or openings by state. The readout sits in its own row above the map, never over it, and shows the student's state until another is hovered or tapped." when="Career detail's Pay & Outlook tab, both Pay by state and Outlook by state.">
         <StateGrid min={320}>
           <StateCell label="Default" pad={false} minH={220}>
             <PayMap typical="$96,000/year" rows={[{ state: "California", pay: "$118,000" }, { state: "Texas", pay: "$91,000" }, { state: "New York", pay: "$112,000" }]} yourState="New Jersey" accent="var(--primary)" seed="software-engineer" />

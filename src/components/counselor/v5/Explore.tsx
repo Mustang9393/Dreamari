@@ -23,7 +23,9 @@ import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { ALL_CATALOG_CAREERS, BROWSE_MIGHT_NOT_KNOW, BROWSE_PUBLIC_SERVICE, BROWSE_TRADES, type CatalogCareer } from "@/components/app/catalog";
 import { PosterCard, RankedPosterCard } from "@/components/app/PosterCard";
 import { TextTabs } from "@/components/app/TextTabs";
+import { Listbox } from "@/components/app/Listbox";
 import { SubTabs } from "../v4/SubTabs";
+import { HeadingControls } from "../v4/Workspace";
 import { PillSwitch } from "./Switch";
 import { EmptyView } from "@/components/app/states";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -77,36 +79,43 @@ export function PathwaySwitch({ value, onChange }: { value: Pathway; onChange: (
  *  `afterCareers`: an opt-in section v4 places under the curated career
  *  rows (its "Turn Interest into Opportunity", 9 Oct 2026); v5 passes
  *  nothing and renders exactly as before. */
-export function V5Explore({ embedded = false, afterCareers }: { embedded?: boolean; afterCareers?: React.ReactNode } = {}) {
+export function V5Explore({ embedded = false, afterCareers, payLabel, consolidated = false }: { embedded?: boolean; afterCareers?: React.ReactNode; /** v7 names the third tab after the Replit ("Labor Market") */ payLabel?: string; /** v7 (20 Oct 2026, Chandu: "too many things happening here... consolidate and keep only valuable things open"): no pathway switch, the world pills become one picker beside the search (Skilled trades is one of its options), shelves fold to three */ consolidated?: boolean } = {}) {
   // v4 takes only what it lacks (8 Oct 2026: "we can add whatever is useful
   // from v5 to v4 but not all of it"): careers and pay by state; v4 has its
   // own school views, so Schools stays out.
-  const tabs = embedded ? TABS.filter((t) => t.key !== "schools") : TABS;
+  const named = payLabel ? TABS.map((t) => (t.key === "pay" ? { ...t, label: payLabel } : t)) : TABS;
+  const tabs = embedded ? named.filter((t) => t.key !== "schools") : named;
   const [tab, setTab] = useState<Tab>("careers");
   const [path, setPath] = useState<Pathway>("all");
   return (
     <div className={`flex flex-col gap-[var(--space-8)] ${embedded ? "" : "pt-[var(--space-2)] lg:pt-[var(--space-4)]"}`}>
-      <header className="flex flex-col gap-[var(--space-5)]">
+      <header className="flex flex-col gap-[var(--space-5)] empty:hidden">
         {embedded ? (
           // Inside v4 both switches change the page, so both are v4's level 3
           // pill on one row (9 Oct 2026); v4.css restyles the pathway's
           // seg-track to match. v5 keeps its own page nav below.
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <SubTabs ariaLabel="Explore" options={tabs} value={tab} onChange={setTab} />
-            <PathwaySwitch value={path} onChange={setPath} />
-          </div>
+          // ...and on the page title's row in v4 (20 Oct 2026 hierarchy pass:
+          // title, purpose, these switches, the search and the world chips
+          // were five rows before the first career); HeadingControls draws
+          // them in place where a shell has no title row (v7).
+          <HeadingControls>
+            <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+              <SubTabs ariaLabel="Explore" options={tabs} value={tab} onChange={setTab} />
+              <PathwaySwitch value={path} onChange={setPath} />
+            </div>
+          </HeadingControls>
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
               <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
-              <PathwaySwitch value={path} onChange={setPath} />
+              {!consolidated && <PathwaySwitch value={path} onChange={setPath} />}
             </div>
-            <TextTabs soft items={TABS} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
+            <TextTabs soft items={tabs} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
           </>
         )}
       </header>
-      {tab === "careers" && <Careers key={path} path={path} onOpen={openCareer} after={afterCareers} />}
-      {tab === "schools" && <Schools key={path} path={path} />}
+      {tab === "careers" && <Careers key={path} path={path} onOpen={openCareer} after={afterCareers} compact={embedded || consolidated} picker={consolidated} />}
+      {tab === "schools" && <Schools key={path} path={path} picker={consolidated} />}
       {tab === "pay" && <Pay path={path} onOpen={openCareer} />}
     </div>
   );
@@ -125,20 +134,37 @@ function SearchField({ value, onChange, placeholder }: { value: string; onChange
 
 type OpenCareer = (c: CatalogCareer, row?: CatalogCareer[]) => void;
 
+const TRADES_OPTION = "__trades";
+/** v7's one picker in place of a row of pills */
+function PickerBox({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
+  return (
+    <Listbox ariaLabel={label} value={value} onChange={onChange} options={options}
+      className="h-12 w-full rounded-[var(--radius-lg)] border px-[var(--space-4)] text-[15px] font-semibold sm:w-[260px]"
+      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+  );
+}
+
 // Careers: world pills, then that world's curated rows (or the whole
 // catalog's with nothing picked), then every career in it.
-function Careers({ path, onOpen, after }: { path: Pathway; onOpen: OpenCareer; /** v4's extra section under the curated rows (opt-in) */ after?: React.ReactNode }) {
+function Careers({ path: pathProp, onOpen, after, compact = false, picker = false }: { path: Pathway; onOpen: OpenCareer; /** v4's extra section under the curated rows (opt-in) */ after?: React.ReactNode; /** v4: fewer shelves and grid rows open at once (see CuratedCareerRows) */ compact?: boolean; /** v7: the worlds (and Skilled trades) as one picker beside the search */ picker?: boolean }) {
+  // v4 opens the grid two rows deep, not six (20 Oct 2026 declutter);
+  // "Show more" grows it the same way
+  const page = compact ? 12 : PAGE;
   const [query, setQuery] = useState("");
-  const [world, setWorld] = useState("All");
-  const [shown, setShown] = useState(PAGE);
+  const [world, setWorldRaw] = useState("All");
+  // the picker's "Skilled trades" option is the pathway switch, folded in
+  const path: Pathway = picker && world === TRADES_OPTION ? "trades" : pathProp;
+  const setWorld = setWorldRaw;
+  const worldShown = world === TRADES_OPTION ? "All" : world;
+  const [shown, setShown] = useState(page);
   const list = useMemo(() => {
     const q = query.trim().toLowerCase();
     const subjectWorlds = SUBJECTS[q];
     return ALL_CATALOG_CAREERS.filter((c) =>
       (path === "all" || isTradeCareer(c)) &&
-      (world === "All" || c.world === world) &&
+      (worldShown === "All" || c.world === worldShown) &&
       (!q || (subjectWorlds ? subjectWorlds.includes(c.world) : `${c.title} ${c.world}`.toLowerCase().includes(q))));
-  }, [query, path, world]);
+  }, [query, path, worldShown]);
   const subject = SUBJECTS[query.trim().toLowerCase()];
   const browsing = !query.trim();
   return (
@@ -147,18 +173,28 @@ function Careers({ path, onOpen, after }: { path: Pathway; onOpen: OpenCareer; /
     // and a wide gap between the shelves; v5 renders exactly as before.
     <section aria-label="Careers" className="v4-sections flex flex-col gap-[var(--space-6)]">
       <div className="v4-section-lead flex flex-col gap-[var(--space-6)]">
-        <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A career, a world, or a subject like Math" />
-        <WorldPills value={world} trades={path === "trades"} onChange={(w) => { setWorld(w); setShown(PAGE); }} />
+        {picker ? (
+          <div className="flex flex-col gap-[var(--space-3)] sm:flex-row sm:items-center">
+            <SearchField value={query} onChange={(v) => { setQuery(v); setShown(page); }} placeholder="A career or a subject like Math" />
+            <PickerBox label="Career world" value={world} onChange={(w) => { setWorld(w); setShown(page); }}
+              options={[{ value: "All", label: "All worlds" }, { value: TRADES_OPTION, label: "Skilled trades" }, ...WORLD_COUNTS.map(([w]) => ({ value: w, label: w }))]} />
+          </div>
+        ) : (
+          <>
+            <SearchField value={query} onChange={(v) => { setQuery(v); setShown(page); }} placeholder="A career, a world, or a subject like Math" />
+            <WorldPills value={world} trades={path === "trades"} onChange={(w) => { setWorld(w); setShown(page); }} />
+          </>
+        )}
       </div>
 
-      {browsing && world === "All" && <ShortlistCareers onOpen={onOpen} />}
-      {browsing && <CuratedCareerRows key={world} world={world} onOpen={onOpen} trades={path === "trades"} />}
+      {browsing && worldShown === "All" && <ShortlistCareers onOpen={onOpen} />}
+      {browsing && <CuratedCareerRows key={world} world={worldShown} onOpen={onOpen} trades={path === "trades"} fold={compact ? 3 : undefined} roomy={picker} />}
       {browsing && after}
 
       <div className="flex flex-col gap-[var(--space-4)]">
         {browsing
-          ? <h2 className={H2} style={{ fontFamily: "var(--font-display)" }}>{world === "All" ? "All Careers" : `All of ${world}`}</h2>
-          : <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{list.length} careers{subject ? ` where ${query.trim()} matters` : world !== "All" ? ` in ${world}` : ""}</p>}
+          ? <h2 className={H2} style={{ fontFamily: "var(--font-display)" }}>{world === TRADES_OPTION ? "All Skilled Trades" : worldShown === "All" ? "All Careers" : `All of ${worldShown}`}</h2>
+          : <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{list.length} careers{subject ? ` where ${query.trim()} matters` : worldShown !== "All" ? ` in ${worldShown}` : ""}</p>}
         {list.length === 0 ? (
           <div className="py-[var(--space-8)]"><EmptyView tier={5} query={query} line="Try a subject, a world or another career." cta="Clear search" onAction={() => { setQuery(""); setWorld("All"); }} /></div>
         ) : (
@@ -166,7 +202,7 @@ function Careers({ path, onOpen, after }: { path: Pathway; onOpen: OpenCareer; /
             <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fill,minmax(176px,1fr))] sm:gap-[var(--space-5)]">
               {list.slice(0, shown).map((c) => <PosterCard key={c.title} fill career={c} onClick={() => onOpen(c, list)} />)}
             </div>
-            {list.length > shown && <MoreButton left={list.length - shown} onClick={() => setShown((n) => n + PAGE)} />}
+            {list.length > shown && <MoreButton left={list.length - shown} onClick={() => setShown((n) => n + page)} />}
           </>
         )}
       </div>
@@ -217,8 +253,9 @@ type CareerRow = { title: string; list: CatalogCareer[]; chip: (c: CatalogCareer
  *  trend and each card carries that trend's figure. Ranked rows (the
  *  Top 10 numerals) alternate with poster rows so the page keeps a rhythm.
  *  Shared with v6. */
-export function CuratedCareerRows({ onOpen, trades = false, world = "All" }: { onOpen: OpenCareer; trades?: boolean; world?: string }) {
+export function CuratedCareerRows({ onOpen, trades = false, world = "All", fold, roomy = false }: { onOpen: OpenCareer; trades?: boolean; world?: string; /** v4 only: open this many shelves, the rest behind "More lists" */ fold?: number; /** v7: ranked rows get room so a numeral never meets the card before it */ roomy?: boolean }) {
   const savers = useSavers();
+  const [more, setMore] = useState(false);
   const rows = useMemo<CareerRow[]>(() => {
     const inWorld = (c: CatalogCareer) => (world === "All" || c.world === world) && (!trades || isTradeCareer(c));
     const sig = payRows(HOME_STATE, trades).filter((r) => world === "All" || r.career.world === world);
@@ -253,26 +290,42 @@ export function CuratedCareerRows({ onOpen, trades = false, world = "All" }: { o
       { title: "Public Service", list: keep(BROWSE_PUBLIC_SERVICE), chip: pays },
     ];
   }, [savers, trades, world]);
+  // v4 (20 Oct 2026 declutter, Chandu: "too cluttered, messy, and A LOT in
+  // the user's face"): seven poster shelves open at once was most of the
+  // page. The first few stay open; the rest are one "More lists" away,
+  // nothing removed. What students are saving leads the folded set, since
+  // Home and Insights both show it already. v5 and v6 pass no fold.
+  const ready = rows.filter((r) => r.list.length >= 3);
+  const saving = ready.find((r) => r.title === "Your Students Are Saving");
+  const rest = ready.filter((r) => r !== saving);
+  const open = fold ? rest.slice(0, fold) : ready;
+  const folded = fold ? [...(saving ? [saving] : []), ...rest.slice(fold)] : [];
+  const visible = more ? [...open, ...folded] : open;
   return (
     <div className="v4-sections flex flex-col gap-[var(--space-8)]">
-      {rows.filter((r) => r.list.length >= 3).map((r) => (
-        <Row key={r.title} title={r.title}>
+      {visible.map((r) => (
+        <Row key={r.title} title={r.title} roomy={roomy && !!r.ranked}>
           {r.list.map((c, i) => r.ranked
             ? <RankedPosterCard key={c.title} career={c} rank={i + 1} chip={r.chip(c)} onClick={() => onOpen(c, r.list)} />
             : <PosterCard key={c.title} career={{ ...c, salary: r.chip(c) }} onClick={() => onOpen(c, r.list)} />)}
         </Row>
       ))}
+      {fold && !more && folded.length > 0 && (
+        <button type="button" onClick={() => setMore(true)} className="v4-data-note dm-quiet mx-auto flex h-10 cursor-pointer items-center gap-[6px] rounded-full border px-[18px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)" }}>
+          More lists <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {folded.length}</span>
+        </button>
+      )}
     </div>
   );
 }
 
 /** A curated row, the student Browse rail's shape: cards bleed past the
  *  page margin and the last one peeks. */
-function Row({ title, children }: { title: string; children: React.ReactNode }) {
+function Row({ title, children, roomy = false }: { title: string; children: React.ReactNode; roomy?: boolean }) {
   return (
     <section aria-label={title} className="flex flex-col gap-[var(--space-2)]">
       <h2 className={H2} style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
-      <div className="poster-row -mx-5 flex gap-[var(--space-5)] overflow-x-auto px-5 py-4 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]">{children}</div>
+      <div className={`poster-row -mx-5 flex ${roomy ? "gap-[48px] sm:gap-[72px]" : "gap-[var(--space-5)]"} overflow-x-auto px-5 py-4 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]`}>{children}</div>
     </section>
   );
 }
@@ -292,7 +345,7 @@ const inKind = (c: College, k: SchoolKind) =>
 /** Schools, the careers page's shape: a type as pills, that type's
  *  curated rows, then every school in it. Trades keeps trade schools and
  *  two-year colleges. */
-function Schools({ path }: { path: Pathway }) {
+function Schools({ path, picker = false }: { path: Pathway; /** v7: the school types as one picker beside the search */ picker?: boolean }) {
   const [kind, setKind] = useState<SchoolKind>("All");
   const [query, setQuery] = useState("");
   const [shown, setShown] = useState(PAGE);
@@ -303,10 +356,19 @@ function Schools({ path }: { path: Pathway }) {
     .sort((a, b) => (collegeImage(b) ? 1 : 0) - (collegeImage(a) ? 1 : 0));
   return (
     <section aria-label="Schools" className="flex flex-col gap-[var(--space-6)]">
-      <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A school, a city or a state" />
-      <Pills label="School type" items={[...kinds]} value={kind} onChange={(k) => { setKind(k as SchoolKind); setShown(PAGE); }} />
+      {picker ? (
+        <div className="flex flex-col gap-[var(--space-3)] sm:flex-row sm:items-center">
+          <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A school, a city or a state" />
+          <PickerBox label="School type" value={kind} onChange={(k) => { setKind(k as SchoolKind); setShown(PAGE); }} options={kinds.map((k) => ({ value: k, label: k === "All" ? "All schools" : k }))} />
+        </div>
+      ) : (
+        <>
+          <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A school, a city or a state" />
+          <Pills label="School type" items={[...kinds]} value={kind} onChange={(k) => { setKind(k as SchoolKind); setShown(PAGE); }} />
+        </>
+      )}
       {!q && kind === "All" && <ShortlistSchools />}
-      {!q && <CuratedSchoolRows key={kind} kind={kind} trades={trades} onOpen={openSchool} />}
+      {!q && <CuratedSchoolRows key={kind} kind={kind} trades={trades} onOpen={openSchool} roomy={picker} />}
       <div className="flex flex-col gap-[var(--space-4)]">
         {!q
           ? <h2 className={H2} style={{ fontFamily: "var(--font-display)" }}>{kind === "All" ? "All Schools" : `All ${kind}`}</h2>
@@ -329,7 +391,7 @@ function Schools({ path }: { path: Pathway }) {
 type SchoolRow = { title: string; list: College[]; chip: (c: College) => string | undefined; ranked?: boolean };
 
 /** Curated school rows for all schools or one type. Shared with v6. */
-export function CuratedSchoolRows({ trades = false, kind = "All", onOpen }: { trades?: boolean; kind?: string; onOpen: (c: College, row: College[]) => void }) {
+export function CuratedSchoolRows({ trades = false, kind = "All", onOpen, roomy = false }: { trades?: boolean; kind?: string; onOpen: (c: College, row: College[]) => void; /** v7: see CuratedCareerRows */ roomy?: boolean }) {
   const roster = useReviewedRoster();
   const rows = useMemo<SchoolRow[]>(() => {
     const pool = COLLEGES.filter((c) => (!trades || isTradeSchool(c)) && inKind(c, kind as SchoolKind))
@@ -362,7 +424,7 @@ export function CuratedSchoolRows({ trades = false, kind = "All", onOpen }: { tr
   return (
     <div className="flex flex-col gap-[var(--space-8)]">
       {rows.filter((r) => r.list.length >= 3).map((r) => (
-        <Row key={r.title} title={r.title}>
+        <Row key={r.title} title={r.title} roomy={roomy && !!r.ranked}>
           {r.list.map((c, i) => r.ranked
             ? <RankedSchoolPoster key={c.slug} c={c} rank={i + 1} chip={r.chip(c)} onClick={() => onOpen(c, r.list)} />
             : <SchoolPoster key={c.slug} c={c} chip={r.chip(c)} onClick={() => onOpen(c, r.list)} />)}

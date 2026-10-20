@@ -1,0 +1,25 @@
+/* Counselor v7 surfaces (20 Oct 2026, Chandu: "can we have a more
+   translucent/blurred background type surfaces for dark mode?").
+   Dark Black & Blue only: a translucent blue-black with a real backdrop blur,
+   so the night sky shows through softly instead of sharp. This is safe only
+   because v7's sky is calm (AppBackdrop calmSky, NightSky.tsx): a still layer
+   behind the blur costs nothing frame to frame; it animates only for a
+   skyMoment's ~2s. A thin top highlight gives the glass an edge without a
+   glow. Light mode keeps its surfaces. */
+html.look-v2:not(.light) .v7-glass {
+  background: rgba(10, 14, 24, 0.52) !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  backdrop-filter: blur(22px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 40px -24px rgba(0, 0, 0, 0.7);
+}
+/* Windows high contrast and anyone who asks for less transparency: solid */
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  html.look-v2:not(.light) .v7-glass {
+    background: var(--glass-surface-2) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Hero card constellations: src/components/app/constellation.css */

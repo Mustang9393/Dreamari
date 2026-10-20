@@ -38,6 +38,9 @@ const shortlist = createLocalRecord<string[]>("dreamari:counselor-explore-shortl
 /** The counselor's Explore shortlist ("career:<slug>" / "school:<slug>"),
  *  shown as a row on Explore (8 Oct 2026 audit: saved but never shown). */
 export const useShortlist = () => shortlist.useValue();
+export function toggleExploreShortlist(id: string): void {
+  shortlist.update((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
+}
 const DOT: Record<CounselorStudent["status"], string> = {
   "On Track": "var(--color-feedback-success-solid)",
   "Needs Attention": "var(--color-feedback-warning-solid)",
@@ -353,7 +356,11 @@ export function openSchool(c: College, row?: College[]): void {
 }
 
 /** One per app shell (v4, v5, v6), beside LogSheetHost. */
-export function ExploreSheetHost({ state = HOME_STATE }: { state?: string }) {
+export type CareerSheetProps = { list: CatalogCareer[]; index: number; saves?: Record<string, number>; state: string; onIndex: (i: number) => void; onClose: () => void };
+export type SchoolSheetProps = { list: College[]; index: number; onIndex: (i: number) => void; onClose: () => void };
+/** `career` / `school` swap in a build's own sheet (counselor v7 uses the
+ *  Career Detail fact-sheet frame, 20 Oct 2026); v4/v5/v6 keep these. */
+export function ExploreSheetHost({ state = HOME_STATE, career: CareerOverride, school: SchoolOverride }: { state?: string; career?: (p: CareerSheetProps) => React.ReactNode; school?: (p: SchoolSheetProps) => React.ReactNode }) {
   const s = useSyncExternalStore(subscribe, () => current, () => null);
   const onIndex = (index: number) => current && setOpen({ ...current, index } as Open);
   const onClose = () => setOpen(null);
@@ -364,8 +371,8 @@ export function ExploreSheetHost({ state = HOME_STATE }: { state?: string }) {
     <DeadlineHost />
     <SendCheckInHost />
     <AnimatePresence>
-      {s?.kind === "career" && <CareerSheet key="career-sheet" list={s.list} index={s.index} saves={s.saves} state={state} onIndex={onIndex} onClose={onClose} />}
-      {s?.kind === "school" && <SchoolSheet key="school-sheet" list={s.list} index={s.index} onIndex={onIndex} onClose={onClose} />}
+      {s?.kind === "career" && (CareerOverride ? <CareerOverride key="career-sheet" list={s.list} index={s.index} saves={s.saves} state={state} onIndex={onIndex} onClose={onClose} /> : <CareerSheet key="career-sheet" list={s.list} index={s.index} saves={s.saves} state={state} onIndex={onIndex} onClose={onClose} />)}
+      {s?.kind === "school" && (SchoolOverride ? <SchoolOverride key="school-sheet" list={s.list} index={s.index} onIndex={onIndex} onClose={onClose} /> : <SchoolSheet key="school-sheet" list={s.list} index={s.index} onIndex={onIndex} onClose={onClose} />)}
     </AnimatePresence>
     </>
   );

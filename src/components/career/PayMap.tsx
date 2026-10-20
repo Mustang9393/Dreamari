@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import usaMapModule from "@svg-maps/usa";
 
 // "Whole country" view of Pay by state (production reference, 2026-09-03): the
@@ -70,6 +70,7 @@ export function PayMap({
   accent,
   seed,
   complete = false,
+  figures,
 }: {
   /** the career's typical pay, e.g. "$60,580/year" */
   typical: string;
@@ -81,6 +82,10 @@ export function PayMap({
   /** rows hold every state BLS published (statePay.ts): a state missing from
    *  them is left blank, never filled with a made-up figure */
   complete?: boolean;
+  /** Pay & Outlook (20 Oct 2026): shade by another per-state figure (job
+   *  growth or openings) instead of pay. A state missing from `values` reads
+   *  NA, as an unpublished pay state does. `rows`/`typical` are ignored. */
+  figures?: { values: Record<string, number>; format: (n: number) => string; prompt: string; label: string; icon?: (n: number) => ReactNode };
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [active, setActive] = useState<string | null>(null);
@@ -108,10 +113,16 @@ export function PayMap({
   const values = new Map<string, number>();
   for (const location of USA.locations) {
     const name = displayName(location.name);
+    if (figures) {
+      const v = figures.values[name];
+      if (v !== undefined) values.set(name, v);
+      continue;
+    }
     const real = known.get(name);
     if (real !== undefined) values.set(name, real);
     else if (!complete) values.set(name, base * (0.78 + 0.44 * hash01(`${seed}:${name}`)));
   }
+  const fmt = figures?.format ?? formatPay;
   const all = [...values.values()];
   const min = Math.min(...all);
   const max = Math.max(...all);
@@ -127,32 +138,34 @@ export function PayMap({
   // as the hover text"): a mid tone from the same palette, read as NA.
   const NA = "NA";
   const missingFill = shade((min + max) / 2);
-  const activeValue = active ? values.get(active) : undefined;
 
   return (
     <div className="relative">
-      {/* readout: the hovered or chosen state and what it pays there */}
-      <div className="absolute top-0 right-0 z-10 flex min-h-[44px] flex-col items-end text-right">
-        {active && !activeValue ? (
-          <>
-            <span className="text-[15px] leading-[22px] font-semibold">{active}</span>
-            <span className="text-[15px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--muted-foreground)" }}>{NA}</span>
-          </>
-        ) : active && activeValue ? (
-          <>
-            <span className="text-[15px] leading-[22px] font-semibold">{active}</span>
-            <span className="text-[15px] leading-[22px] font-bold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }}>{formatPay(activeValue)}</span>
-          </>
-        ) : (
-          <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Hover a state to see what it pays there</span>
-        )}
-      </div>
+      {/* readout (20 Oct 2026, Chandu: the hover stat was "hard to see,
+         especially on tablet and mobile it overlaps the map"): its own row
+         above the map, never on it, at display size. It shows the student's
+         state until another is hovered or tapped, so it is never empty. */}
+      {(() => {
+        const shown = active ?? yourState ?? null;
+        const v = shown ? values.get(shown) : undefined;
+        return (
+          <div className="mb-[var(--space-3)] flex min-h-[56px] flex-wrap items-end justify-between gap-x-[var(--space-4)] gap-y-[4px] border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }} aria-live="polite">
+            {shown ? (
+              <span className="flex min-w-0 flex-col">
+                <span className="text-[14px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{shown}{!active && shown === yourState ? " (your state)" : ""}</span>
+                <span className="flex items-center gap-[8px] text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: v === undefined ? "var(--muted-foreground)" : accent }}>{v === undefined ? NA : fmt(v)}{v !== undefined && figures?.icon?.(v)}</span>
+              </span>
+            ) : <span />}
+            <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{figures?.prompt ?? "Tap or hover a state to see what it pays there"}</span>
+          </div>
+        );
+      })()}
 
-      <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Pay by state across the United States" className="w-full" style={{ maxHeight: 560 }} onMouseLeave={() => setActive(null)}>
+      <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label={figures?.label ?? "Pay by state across the United States"} className="w-full" style={{ maxHeight: 560 }} onMouseLeave={() => setActive(null)}>
         {USA.locations.map((location) => {
           const name = displayName(location.name);
           const value = values.get(name);
-          const label = value === undefined ? `${name}: ${NA}` : `${name}: ${formatPay(value)}`;
+          const label = value === undefined ? `${name}: ${NA}` : `${name}: ${fmt(value)}`;
           const isActive = active === name;
           const isYours = yourState === name;
           const move = REPOSITION[location.name];

@@ -27,7 +27,7 @@ import {
 import { COLLEGES } from "@/components/colleges/data";
 import { useGlobalTheme } from "@/components/app/theme";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { MobileNav, Wordmark } from "@/components/app/chrome";
+import { MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { PosterCard } from "@/components/app/PosterCard";
 import { TextTabs } from "@/components/app/TextTabs";
 import { Listbox } from "../v4/Listbox";
@@ -265,6 +265,10 @@ export function V6App({
         <Link className="six-identity" aria-label="Sarah Chen, your profile" href="/counselor?v=6&view=profile" style={{ overflow: "hidden", padding: 0 }}>
           <img src="/images/connect/avatars/pro-tanaka.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 20%" }} />
         </Link>
+        {/* DEMO-ONLY: the site-wide quick links hamburger, the way back to
+           the rest of the demo (Chandu, 20 Oct 2026: "When i get to there i
+           cant naviagte back to other parts of the app"). */}
+        <QuickLinksMenu />
       </header>
       {/* Phones and tablets get the student app's bottom bar (the pill nav
          wrapped to two rows there). With Workspace separate it gets its own

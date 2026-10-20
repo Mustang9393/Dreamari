@@ -74,7 +74,7 @@ function Leaf({ e }: { e: Enriched }) {
   );
 }
 
-export function Poster({ e, status, onOpen, onSave, action, cue }: { e: Enriched; status: OpportunityStatus | null; onOpen: () => void; onSave?: () => void; /** replaces Save in the corner (the counselor's Send, 8 Oct 2026) */ action?: React.ReactNode; /** replaces the fit signal (the counselor's "21 students exploring Health") */ cue?: string }) {
+export function Poster({ e, status, onOpen, onSave, action, cue, kindLabel }: { e: Enriched; status: OpportunityStatus | null; onOpen: () => void; onSave?: () => void; /** replaces Save in the corner (the counselor's Send, 8 Oct 2026) */ action?: React.ReactNode; /** replaces the fit signal (the counselor's "21 students exploring Health") */ cue?: string; /** replaces the kind label (counselor v7's part-time jobs, volunteering and career events, 20 Oct 2026) */ kindLabel?: string }) {
   const { item, time, fit } = e;
   const who = item.type === "scholarship" ? item.provider : item.org;
   const art = OFFICIAL_ART[item.id];
@@ -93,7 +93,7 @@ export function Poster({ e, status, onOpen, onSave, action, cue }: { e: Enriched
   } else {
     // Always a figure, even "Pay not listed", so every card's footer is the
     // same height (Chandu, 6 Oct 2026: "Every card should be consistent").
-    label = PROGRAM_KIND[item.kind].label;
+    label = kindLabel ?? PROGRAM_KIND[item.kind].label;
     const tone = costTone(item.paid);
     figure = PAID[item.paid];
     if (tone === "plain") tint = INK;

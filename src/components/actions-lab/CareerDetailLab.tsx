@@ -49,7 +49,10 @@ import { resolveCareer, similarCareers, type ResolvedCareer } from "@/components
 import type { FactDetails, ProfileRung } from "@/components/career/profiles";
 import { careerSlug } from "@/components/career/slug";
 import { OutlookTab } from "@/components/outlook-lab/OutlookTab";
-import { count, nationalOutlook, pct } from "@/components/outlook-lab/outlook";
+import { count, nationalOutlook, pct } from "@/components/career/outlook";
+import { CareerDetailLabV2 } from "./CareerDetailLabV2";
+import { CareerDetailV2Switch } from "@/components/career/CareerDetailV2Switch";
+import { useCareerDetailV2 } from "@/lib/careerDetailV2";
 
 // Career Detail, rebuilt 2026-09-02 around the production page's information
 // (dreamonna.com/explore/<slug>; copy and data transcribed in profiles.ts and
@@ -495,7 +498,17 @@ const CAREER_TABS: { key: CareerTab; label: string }[] = [
   { key: "software", label: "Software" },
 ];
 
-export function CareerDetailLab({ slug, live = false, outlook = false }: {
+// The live page picks its version (lib/careerDetailV2, DEMO-ONLY): this
+// file is the page as it was on the morning of 20 Oct 2026, the default;
+// CareerDetailLabV2 is that day's redesign, behind the v2 switch (Chandu:
+// "put the new career detail under a v2 toggle. Revert the default view to
+// how it was before"). A wrapper, so each version keeps its own hooks.
+export function CareerDetailLab(props: { slug: string; live?: boolean; outlook?: boolean }) {
+  const v2 = useCareerDetailV2();
+  return v2 && !props.outlook ? <CareerDetailLabV2 slug={props.slug} live={props.live} /> : <CareerDetailLabV1 {...props} />;
+}
+
+function CareerDetailLabV1({ slug, live = false, outlook = false }: {
   slug: string;
   /** the live /career route: no lab dock, links stay on the live routes */
   live?: boolean;
@@ -925,6 +938,7 @@ export function CareerDetailLab({ slug, live = false, outlook = false }: {
         {vm.sources && (
           <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{vm.sources}</p>
         )}
+        {!inSheet && <CareerDetailV2Switch />}
       </main>
 
       {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}

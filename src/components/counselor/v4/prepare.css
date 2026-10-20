@@ -242,11 +242,12 @@ html.dark [data-counselor-version="v4"] .v4-rs-scrim {--rs-scrim:rgb(14 19 38 / 
 [data-counselor-version="v4"] .v4-ns-btn {display:inline-flex;height:40px;flex:none;align-items:center;gap:6px;padding:0 16px;border-radius:999px;border:1px solid var(--glass-border);font-size:14px;font-weight:600;color:var(--foreground);cursor:pointer;white-space:nowrap}
 [data-counselor-version="v4"] .v4-ns-btn.is-solid {height:44px;padding:0 20px;border-color:transparent;background:var(--primary);color:var(--primary-foreground)}
 [data-counselor-version="v4"] .v4-ns-card .v4-ns-btn {height:36px;padding:0 14px;font-size:13.5px;border-color:color-mix(in srgb,var(--primary) 45%,var(--glass-border));color:var(--primary)}
-[data-counselor-version="v4"] .v4-ns-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;list-style:none;margin:0;padding:0}
+[data-counselor-version="v4"] .v4-ns-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:32px;list-style:none;margin:0;padding:0}
 [data-counselor-version="v4"] .v4-ns-card {position:relative;display:flex;min-width:0;flex-direction:column;gap:14px;padding:18px;border-radius:var(--radius-lg);border:1px solid var(--glass-border);background:var(--glass-surface-1);transition:opacity .3s}
 [data-counselor-version="v4"] .v4-ns-card.is-done {opacity:.72}
 [data-counselor-version="v4"] .v4-ns-who {display:flex;min-width:0;align-items:center;gap:12px;border-radius:var(--radius-md)}
 [data-counselor-version="v4"] .v4-ns-chips {display:flex;flex-wrap:wrap;gap:6px}
+[data-counselor-version="v4"] .v4-ns-drafts {display:block;overflow:hidden;font-size:13px;font-weight:500;line-height:18px;white-space:nowrap;text-overflow:ellipsis;color:var(--muted-foreground)}
 [data-counselor-version="v4"] .v4-ns-chip {display:inline-flex;height:26px;align-items:center;padding:0 10px;border-radius:999px;background:var(--glass-surface-2);font-size:12.5px;font-weight:600;color:var(--foreground)}
 [data-counselor-version="v4"] .v4-ns-chip.is-missed {color:var(--color-feedback-danger)}
 [data-counselor-version="v4"] .v4-ns-chip.is-more {color:var(--muted-foreground)}
@@ -310,8 +311,12 @@ html.dark [data-counselor-version="v4"] .v4-rs-scrim {--rs-scrim:rgb(14 19 38 / 
 [data-counselor-version="v4"] .v4-rs-rail-ring {position:relative;display:grid;flex:none;width:52px;height:52px;place-items:center}
 [data-counselor-version="v4"] .v4-rs-rail-ring b {font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--foreground)}
 [data-counselor-version="v4"] .v4-rs-rail-ring small {font-size:10.5px;font-weight:500;color:var(--muted-foreground)}
-[data-counselor-version="v4"] .v4-rs-rail-scroll {position:relative;width:100%;min-height:0;flex:1}
-[data-counselor-version="v4"] .v4-rs-rail-list {display:flex;height:100%;flex-direction:column;align-items:center;gap:8px;margin:0;padding:6px 0;overflow-y:auto;list-style:none;scrollbar-width:none}
+/* the list scrolls inside the rail: a percentage height under a
+   max-height-only flex parent resolved to auto, so all 13 faces spilled
+   past the rail and the page footer (20 Oct 2026); flex all the way down
+   lets it shrink and scroll instead */
+[data-counselor-version="v4"] .v4-rs-rail-scroll {position:relative;display:flex;width:100%;min-height:0;flex:0 1 auto;flex-direction:column}
+[data-counselor-version="v4"] .v4-rs-rail-list {display:flex;min-height:0;flex:0 1 auto;flex-direction:column;align-items:center;gap:8px;margin:0;padding:6px 0;overflow-y:auto;list-style:none;scrollbar-width:none}
 [data-counselor-version="v4"] .v4-rs-rail-list::-webkit-scrollbar {display:none}
 [data-counselor-version="v4"] .v4-rs-rail-scroll.is-fade-top .v4-rs-rail-list {-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 28px);mask-image:linear-gradient(to bottom,transparent 0,#000 28px)}
 [data-counselor-version="v4"] .v4-rs-rail-scroll.is-fade-bottom .v4-rs-rail-list {-webkit-mask-image:linear-gradient(to top,transparent 0,#000 36px);mask-image:linear-gradient(to top,transparent 0,#000 36px)}
@@ -331,7 +336,6 @@ html.dark [data-counselor-version="v4"] .v4-rs-scrim {--rs-scrim:rgb(14 19 38 / 
 [data-counselor-version="v4"] .v4-rs-cv-icon {display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--glass-border);background:var(--card);color:var(--foreground);cursor:pointer}
 
 /* Review's desktop layout needs the height: on this page the heading drops its subtitle (the tabs say what the page is) */
-@media (min-width:1024px) { [data-counselor-version="v4"] .v4-main.v4-view-review-queue .v4-page-purpose {display:none} }
 [data-counselor-version="v4"] .v4-rs-cv-doc .v4-rs-stamp {padding:6px 14px;border-width:3px;font-size:clamp(16px,6cqw,26px);white-space:nowrap}
 [data-counselor-version="v4"] .v4-rs-cv-doc .v4-rs-page {container-type:inline-size}
 
@@ -342,7 +346,7 @@ html.dark [data-counselor-version="v4"] .v4-rs-scrim {--rs-scrim:rgb(14 19 38 / 
 [data-counselor-version="v4"] .v4-rp-who b {font-size:15px;font-weight:600;line-height:19px}
 [data-counselor-version="v4"] .v4-rp-who small {font-size:12.5px;line-height:16px;color:var(--muted-foreground)}
 @media (hover:hover) { [data-counselor-version="v4"] .v4-rp-who:hover b {text-decoration:underline;text-underline-offset:3px} }
-[data-counselor-version="v4"] .v4-rp-tags {display:flex;flex-wrap:wrap;margin-left:auto;gap:6px}
+[data-counselor-version="v4"] .v4-rp-tags {display:flex;flex-wrap:wrap;margin-left:auto;gap:6px;font-size:12.5px;font-weight:600;color:var(--muted-foreground)}
 [data-counselor-version="v4"] .v4-rp-tag {display:inline-flex;height:24px;align-items:center;padding:0 9px;border-radius:999px;font-size:12px;font-weight:600;color:var(--muted-foreground);background:color-mix(in srgb,currentColor 13%,transparent)}
 [data-counselor-version="v4"] .v4-rp-thread {display:flex;min-height:0;flex:1;flex-direction:column;gap:14px;padding:18px 16px 12px;overflow-y:auto}
 [data-counselor-version="v4"] .v4-rp-msg {display:flex;max-width:88%;flex-direction:column;gap:4px}

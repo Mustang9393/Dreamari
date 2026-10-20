@@ -10,6 +10,7 @@
 // with a backend this is the signed-in student's id.
 
 import { useMemo, useState } from "react";
+import { skyMoment } from "@/lib/sky";
 import { CalendarCheck, Check, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { addMeeting, timeLabel, useAddedMeetings, useOfficeHours, type MeetingType } from "@/lib/counselorMeetings";
@@ -63,6 +64,7 @@ export function BookCounselorSheet({ onClose }: { onClose: () => void }) {
     const s = slots[slot];
     if (!s) return;
     addMeeting({ studentId: STUDENT_ID, type, day: s.day, time: s.time, minutes: MINUTES, topic: topic.trim() });
+    skyMoment({ big: true });
     setBooked(s);
   };
 

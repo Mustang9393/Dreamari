@@ -1,3 +1,4 @@
+import { skyMoment } from "@/lib/sky";
 // Glossary Game save state. Same shape as src/components/play/progress.ts —
 // localStorage read through useSyncExternalStore, since the repo lints the
 // useState-in-an-effect version as an error. Deliberately lighter than the
@@ -111,6 +112,8 @@ export function readLesson(store: Store, careerSlug: string, lessonId: string): 
 export function saveLessonComplete(careerSlug: string, lessonId: string, masteredTermIds: string[], scoreGain: number): void {
   const store = { ...glossaryProgressSnapshot() };
   const existing = store[careerSlug] ?? { dreamScore: 0, lessons: {} };
+  // a first finish of a lesson lights the sky (a replay does not)
+  if (!existing.lessons[lessonId]?.completed) skyMoment({ big: true });
   store[careerSlug] = {
     dreamScore: existing.dreamScore + Math.max(0, Math.floor(scoreGain)),
     lessons: { ...existing.lessons, [lessonId]: { masteredTermIds, completed: true } },

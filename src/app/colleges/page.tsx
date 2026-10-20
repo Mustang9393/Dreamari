@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { CollegesExperience } from "@/components/colleges/CollegesExperience";
+import { degreeOf, majorWords, type CareerPick } from "@/components/colleges/careerSchools";
+import { resolveCareer } from "@/components/career/data";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
@@ -14,15 +16,23 @@ export const metadata: Metadata = {
 // and ?school= (a college name from the report) preselect. ?view= (foryou |
 // browse) restores the For you/Browse all toggle across a refresh -- see
 // CollegesExperience's own comment on why this needs to be explicit.
+// ?career= (a career slug) and ?level= (a credential, "Bachelor's degree")
+// come from a Career Detail credential row: Browse all opens filtered to
+// the schools that row counted, under one removable chip.
 export default async function CollegesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const pick = (k: string) => (Array.isArray(params[k]) ? (params[k] as string[])[0] : (params[k] as string | undefined)) ?? "";
   const view = pick("view");
+  const career = pick("career") ? resolveCareer(pick("career")) : null;
+  const level = pick("level");
+  const degree = degreeOf(level);
+  const words = majorWords(career?.profile?.education.studies ?? []);
+  const careerPick: CareerPick | undefined = career && degree && words.length ? { slug: career.slug, name: career.title, degree, levelName: level, words } : undefined;
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <CollegesExperience initialQuery={pick("school") || pick("q")} initialType={pick("type")} initialView={view === "foryou" || view === "browse" ? view : undefined} />
+      <CollegesExperience initialQuery={pick("school") || pick("q")} initialType={pick("type")} initialView={view === "foryou" || view === "browse" ? view : undefined} initialCareer={careerPick} />
     </>
   );
 }

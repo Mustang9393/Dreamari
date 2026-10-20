@@ -587,7 +587,7 @@ export function PlatformEngagement() {
          not as lengths. Each tile is the number, the grade, and Open. */}
       <section className="v4-engagement-checkins h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]">
-          <header className="v4-card-head"><h2>Inactive 7+ Days</h2><span>Right now · {inactive.length} {inactive.length === 1 ? "student" : "students"} · select a grade</span></header>
+          <header className="v4-card-head"><h2>Inactive 7+ Days</h2><span>{inactive.length} {inactive.length === 1 ? "student" : "students"}</span></header>
           {inactive.length === 0 ? (
             <div className="v4-progress-empty"><Dreamy mood="celebrate" size={64}/><p><strong>Every student logged in this week.</strong><span>No one to reach out to right now.</span></p></div>
           ) : (

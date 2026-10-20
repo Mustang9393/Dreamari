@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { skyMoment } from "@/lib/sky";
 import { Fragment, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, ImagePlus, Medal, PenLine, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X, MessagesSquare } from "lucide-react";
@@ -141,6 +142,7 @@ export type Follows = Record<string, boolean>;
 export function FollowButton({ following, onToggle, compact = false, dense = false, className = "", tone }: { following: boolean; onToggle: () => void; compact?: boolean; /** smaller still, for a Follow button sharing a line with a name and other badges */ dense?: boolean; className?: string; /** the company's colours on a branded card, instead of the app's blue */ tone?: { background: string; color: string; border?: string } }) {
   const press = () => {
     dispatchAuroraPulse(following ? "select" : "cta");
+    if (!following) skyMoment();
     onToggle();
   };
   const size = dense ? "xs" : compact ? "sm" : "md";

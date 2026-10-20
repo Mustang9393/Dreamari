@@ -97,7 +97,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Plus, Send, Check, Bell, Briefcase, ClipboardList, Landmark, MessageSquare, Mail, ChevronLeft, RotateCcw, Sparkles, CheckCheck, ArrowRight, Minus, X, Flag } from "lucide-react";
+import { Plus, Send, Check, Bell, Briefcase, ClipboardList, Landmark, MessageSquare, Mail, ChevronLeft, RotateCcw, Sparkles, CheckCheck, ArrowRight, Minus, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { LocalBurst } from "@/components/build/ui";
@@ -109,6 +109,7 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "./chips";
 import { Segmented } from "./viz";
 import { LightPool, ReachFunnel } from "./charts/lit";
+import { HeadingControls } from "./Workspace";
 import { SubTabs } from "./SubTabs";
 import { Avatar, SelectBox, STATUS_COLORS, STATUS_FILLS, StatusChip, StudentLink } from "./chips";
 import { BulkComposer, BulkReplyReview, EmailToggle, fillFirst, markEmailed, reachFor, useEmailed } from "./MessagesBulk";
@@ -902,7 +903,8 @@ function InboxPanel({ initialQuestion, initialStudent, initialDraft, session, se
               className={LIST_FIELD}
               style={FIELD_STYLE}
             />
-            {!zero && <IconTip label="J and K move, X selects"><span className="msg-keys">J / K</span></IconTip>}
+            {/* the J / K keys still work; their hint chip left the toolbar
+               (20 Oct 2026 declutter) */}
           </div>
           <ul className="msg-list dm-scroll" aria-label="Messages">
             {/* a dense list mid-flow: one muted line (COMPONENT_STATES_PLAYBOOK.md, tier 3) */}
@@ -1140,12 +1142,11 @@ function QuestionThread({ row, status, reply, response, setResponse, onReply, on
   const mine = settled?.kind === "replied";
   return (
     <div className="msg-thread is-arriving">
-      <ThreadHead backRef={backRef} onBack={onBack} id={row.studentId} name={q.name} index={row.avatarIndex} meta={`Grade ${q.grade}`}
-        tags={<>
-          <span className="msg-tag-pill is-status" style={{ color: STATUS_STYLE[status].color }}><i style={{ background: STATUS_STYLE[status].fill }} />{STATUS_STYLE[status].label}</span>
-          <span className="msg-tag-pill">{q.tag}</span>
-          {q.milestone && <span className="msg-tag-pill"><Flag className="h-[12px] w-[12px]" aria-hidden />{q.milestone}</span>}
-        </>} />
+      {/* grade, topic and milestone as one quiet line under the name; the
+         status as one word with its dot (20 Oct 2026 declutter: three
+         bordered pills on every thread) */}
+      <ThreadHead backRef={backRef} onBack={onBack} id={row.studentId} name={q.name} index={row.avatarIndex} meta={`Grade ${q.grade} · ${q.tag}${q.milestone ? ` · ${q.milestone}` : ""}`}
+        tags={<span className="msg-status-word" style={{ color: STATUS_STYLE[status].color }}><i style={{ background: STATUS_STYLE[status].fill }} />{STATUS_STYLE[status].label}</span>} />
       <div className="msg-chat dm-scroll">
         <span className="msg-day">{fmtDate(q.date)}</span>
         <div className="msg-line is-them"><BubbleFace id={row.studentId} name={q.name} index={row.avatarIndex} /><p className="msg-bubble">{q.question}</p></div>
@@ -1488,6 +1489,9 @@ export function CounselorConnect() {
   };
   return (
     <div className="v4-page v4-connect flex flex-col gap-[var(--space-5)]">
+      {/* Inbox / Sent, the answered count and New message on the title's
+         row (20 Oct 2026 hierarchy pass: they were a second control row) */}
+      <HeadingControls>
       <div className="msg-toolbar">
         {/* the page view switch (level 3): the pill, so it never reads as a
            second row of the shell's underline page nav (9 Oct 2026) */}
@@ -1511,6 +1515,7 @@ export function CounselorConnect() {
           )}
         </div>
       </div>
+      </HeadingControls>
 
       {tab === "inbox" && <InboxPanel initialQuestion={questionParam} initialStudent={studentParam} initialDraft={draftParam} session={session} setSession={setSession} />}
       {tab === "sent" && (

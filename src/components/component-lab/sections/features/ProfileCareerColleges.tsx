@@ -302,8 +302,8 @@ export function ProfileCareerCollegesModules() {
           </StateCell>
           <StateCell label="Next step row" minH={160}>
             <div className="flex w-full flex-col gap-[var(--space-3)]">
-              <NextStepRow title="See your plan to get there" sub={`Steps toward ${IB.title}`} nudge={false} onClick={noop} />
-              <NextStepRow title="See your plan to get there" sub={`Steps toward ${IB.title} and ${PHOTO_SCHOOLS[0]?.name ?? "your school"}`} nudge onClick={noop} />
+              <NextStepRow title="Keep exploring" sub="Find more careers and schools" nudge={false} links={[{ label: "Careers", href: "/explore" }, { label: "Schools", href: "/colleges" }]} />
+              <NextStepRow title="Keep exploring" sub="Find more careers and schools" nudge links={[{ label: "Careers", href: "/explore" }, { label: "Schools", href: "/colleges" }]} />
             </div>
           </StateCell>
         </StateGrid>
@@ -512,10 +512,10 @@ export function ProfileCareerCollegesModules() {
 
       <SubHead>Career</SubHead>
 
-      <Specimen name="OutlookTab (Career outlook lab)" file="src/components/outlook-lab/OutlookTab.tsx" purpose="DEMO-ONLY lab: Career Detail's Pay tab as 'Pay & Outlook'. The approved pay by state map, then outlook by state for the chosen state (growth and openings, each against the US) and the top states. One tab, not a sixth 'Job Outlook' tab: pay and growth by state answer the same question, and six tabs no longer fit a phone tab row." when="Only from the hamburger's lab links (/outlook-lab/[slug]); the live Career Detail is untouched.">
+      <Specimen name="OutlookTab (Pay & Outlook) and PaySheet" file="src/components/career/OutlookTab.tsx" purpose="Career Detail's Pay tab as 'Pay & Outlook' (live since 20 Oct 2026). The approved pay by state map, then outlook by state for the chosen state (growth and openings, each against the US) and the top states. One tab, not a sixth 'Job Outlook' tab: pay and growth by state answer the same question, and six tabs no longer fit a phone tab row. Typical pay's (i) opens PaySheet (src/components/career/PaySheet.tsx): pay only, the range as the lit line, a source line, and a row into this tab." when="Every /career/[slug] whose profile carries BLS outlook figures; careers without them keep a plain Pay tab.">
         <StateGrid min={360}>
           <StateCell label="Software Engineer (live page)" minH={460} pad={false}>
-            <LiveRoute href="/outlook-lab/software-engineer" height={440} />
+            <LiveRoute href="/career/software-engineer" height={440} />
           </StateCell>
         </StateGrid>
       </Specimen>

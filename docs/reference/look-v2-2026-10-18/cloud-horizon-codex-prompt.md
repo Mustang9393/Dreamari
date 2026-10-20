@@ -1,3 +1,5 @@
+> **Parked (20 Oct 2026).** Chandu: "i dont wanna do the cloud horizon it will be too much. and codex is busy right now. maybe later." Not pending work; kept for later.
+
 # Cloud horizon for the Black & Blue sky: Codex prompt
 
 **Why (19 Oct 2026).** Joshua: the Black & Blue look "feels slightly gloomy" and should keep "the dreamy, optimistic feeling of our previous design". Glows alone are generic; a soft bank of clouds at the bottom of the night sky is ownable, because clouds are the brand (Dreamy is a cloud). This is a graphic, so it is made by Codex, not faked in CSS.

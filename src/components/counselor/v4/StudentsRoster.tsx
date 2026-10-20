@@ -30,6 +30,7 @@ import { StatusChip, MilestonesMini, Avatar, Go } from "./chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
 import { EmptyView } from "@/components/app/states";
 import { SubTabs } from "./SubTabs";
+import { HeadingControls } from "./Workspace";
 
 const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
 const STATUS_OPTIONS: StatusRosterFilter[] = ["All", "At Risk", "Needs Attention", "On Track"];
@@ -138,6 +139,7 @@ export function StudentsRoster() {
     });
   }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, counselorFilter, showCounselor, stepFilter, sortKey, sortDir]);
 
+  const gradeTotal = gradeFilter === "All Grades" ? reviewed.length : reviewed.filter((s) => s.grade === gradeFilter).length;
   // One way to move through the list: it grows in place (direct feedback:
   // the bounded, self-scrolling box plus Previous/Next pages "does not read
   // like a scrollable list... make it intuitive").
@@ -184,25 +186,32 @@ export function StudentsRoster() {
 
   return (
     <div className="v4-page v4-roster flex flex-col gap-[var(--space-4)]">
-      <div className="v4-roster-toolbar flex flex-wrap items-center justify-between gap-[10px]">
-        <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · my caseload, ${myCounselor(account).range}` : ""}
-        </span>
+      {/* Directory's own controls sit on the title's row beside the grade
+         picker, not on a second row of their own (20 Oct 2026 composition
+         pass); the narrowed count keeps a quiet line above the table */}
+      <HeadingControls>
         <div className="flex flex-wrap items-center gap-[8px]">
-          <SubTabs ariaLabel="Directory display" value={display} onChange={setDisplay} options={[{ key: "list", label: "List" }, { key: "cards", label: "Cards" }]} />
-          {stepFilter && (
-            <button type="button" onClick={() => setStepFilter(null)} className="flex h-9 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--foreground)" }}>
-              Not done: {stepFilter.title} <X className="h-[13px] w-[13px]" aria-hidden />
-            </button>
-          )}
-          {showCounselor && (
-            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className={PICKER} style={pickerStyle} />
-          )}
-          <Listbox ariaLabel="Status" value={statusFilter} onChange={(v) => setStatusFilter(v as StatusRosterFilter)} options={STATUS_OPTIONS.map((o) => ({ value: o, label: o === "All" ? "All statuses" : o }))} className={PICKER} style={pickerStyle} />
-          <Listbox ariaLabel="Postsecondary plan" value={planValue} onChange={setPlan} options={[{ value: "All", label: "All plans" }, { value: "With Plan", label: "Has a plan" }, ...INTENT_OPTIONS.map((o) => ({ value: o, label: o }))]} className={PICKER} style={pickerStyle} />
-        </div>
-      </div>
-
+            <SubTabs ariaLabel="Directory display" value={display} onChange={setDisplay} options={[{ key: "list", label: "List" }, { key: "cards", label: "Cards" }]} />
+            {stepFilter && (
+              <button type="button" onClick={() => setStepFilter(null)} className="flex h-9 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--foreground)" }}>
+                Not done: {stepFilter.title} <X className="h-[13px] w-[13px]" aria-hidden />
+              </button>
+            )}
+            {showCounselor && (
+              <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className={PICKER} style={pickerStyle} />
+            )}
+            <Listbox ariaLabel="Status" value={statusFilter} onChange={(v) => setStatusFilter(v as StatusRosterFilter)} options={STATUS_OPTIONS.map((o) => ({ value: o, label: o === "All" ? "All statuses" : o }))} className={PICKER} style={pickerStyle} />
+            <Listbox ariaLabel="Postsecondary plan" value={planValue} onChange={setPlan} options={[{ value: "All", label: "All plans" }, { value: "With Plan", label: "Has a plan" }, ...INTENT_OPTIONS.map((o) => ({ value: o, label: o }))]} className={PICKER} style={pickerStyle} />
+          </div>
+      </HeadingControls>
+      {(roster.length !== gradeTotal || (!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD)) && <div className="v4-roster-toolbar flex flex-wrap items-center justify-between gap-[10px]">
+        {/* the count only when a filter narrows the grade picker's own
+           count (20 Oct 2026 declutter: "121 students" here repeated
+           "All grades · 121" in the heading) */}
+        <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {roster.length !== gradeTotal ? `${roster.length} of ${gradeTotal} student${gradeTotal === 1 ? "" : "s"}` : ""}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? `${roster.length !== gradeTotal ? " · " : ""}my caseload, ${myCounselor(account).range}` : ""}
+        </span>
+      </div>}
       {roster.length === 0 ? (
         // Playbook tier 5: a filter returned nothing. Names the actual
         // active filters (not a generic placeholder) and offers the one

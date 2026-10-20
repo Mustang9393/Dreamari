@@ -1,0 +1,970 @@
+"use client";
+
+// DEMO-ONLY: Career actions lab copy of the real career page
+// (src/components/career/CareerDetailExperience.tsx, forked 26 Sept 2026).
+// Identical except for the action controls, their feedback, and links that
+// stay inside the lab. Reads and writes the lab's own store (labStore.ts),
+// never the real saved careers or Top 3. The proposal, in the user's words
+// (26 Sept 2026): Save, Top 3, Like and Not for me "need to be somehow taught
+// to the student without coachmarks", in exact context, not a mockup.
+//
+// What changed from the real page:
+// - One primary action on every career: Play Game when a game exists,
+//   otherwise Add to Top 3 (the step every career has).
+// - Top 3 and Save are labeled pills that say their state ("#2 in Top 3",
+//   "Saved"); Top 3's glyph is a "3", not a bare +/-.
+// - Like and Not for me moved below the overview as "Is this career for
+//   you?", after the student has read about it. Like trains recommendations;
+//   Save builds the list Top 3 is picked from.
+// - No coachmarks and no first-time tip toasts: the feedback bar says what
+//   happened, where it went, and how to undo it.
+
+import { openCareerPeek } from "@/components/app/peek";
+import { FacePhoto } from "@/components/app/FacePhoto";
+import { useOpenAtTop } from "@/components/app/peekStore";
+import { useInSheet } from "@/components/app/inSheet";
+import { heroFocus } from "@/components/career/heroFocus";
+import { AppBackdrop } from "@/components/app/AppBackdrop";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronDown, ChevronRight, Info, Sparkles, ThumbsDown } from "lucide-react";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { HeaderActions } from "@/components/app/Inbox";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
+import { IconTip } from "@/components/app/IconTip";
+import { FactSheet, PaySheet, SheetHero } from "@/components/career/PaySheet";
+import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
+import { react, useLab } from "./labStore";
+import { CareerHeaderActions } from "./CareerHeaderActions";
+import { careerHref, LabLayer, LabPill } from "./labUi";
+import { PosterCard } from "@/components/app/PosterCard";
+import { Segmented } from "@/components/connect/viz";
+import { PayMap } from "@/components/career/PayMap";
+import { WhereToStudy } from "@/components/career/WhereToStudy";
+import { CareerDetailV2Switch } from "@/components/career/CareerDetailV2Switch";
+import { statePay } from "@/components/career/statePay";
+import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
+import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
+import { resolveCareer, similarCareers, type ResolvedCareer } from "@/components/career/data";
+import type { FactDetails, ProfileRung } from "@/components/career/profiles";
+import { careerSlug } from "@/components/career/slug";
+import { OutlookTab } from "@/components/career/OutlookTab";
+import { count, nationalOutlook, pct } from "@/components/career/outlook";
+
+// Career Detail, rebuilt 2026-09-02 around the production page's information
+// (dreamonna.com/explore/<slug>; copy and data transcribed in profiles.ts and
+// never rewritten here) for readers who skim: US high schoolers.
+//
+// What the reader sees first, and only that:
+//   the header card (title, one line on what it is, one line to imagine it),
+//   four quick facts, pay by state as bars, and the career ladder as three
+//   compact rows (title + pay). Everything below the ladder is folded behind
+//   its heading and opens on tap. Nothing is hidden, but nothing is thrown at
+//   the reader at once either.
+//
+// Type scale, five steps, strictly descending down the page and inside every
+// block (a value never outsizes the heading above it; labels never masquerade
+// as headings; sections open with their heading, not an eyebrow):
+//   Large    career title       Bricolage 800, 40/44 -> clamp(56..72) from sm
+//   Big      section heading    Bricolage 700, 22/26 -> 26/30 from sm
+//   Medium   sub-heading, rung title/pay  18/24 semibold (figures in Bricolage)
+//   Label    the name over a value        16/22 semibold  (facts, states, dt)
+//   Small    body, values                 15/22
+//   Tiny     dd under a Small dt          14/20
+//   (Chrome such as tab labels stays at 13px and is not part of the scale.)
+//
+// Spacing uses the marketing token scale (tokens.css defines 1-6, 8, 10, 12,
+// 13, 14 -- there is no --space-7, which is what silently zeroed the first
+// pass of this layout) or explicit px where a step in between is needed.
+export const DISPLAY = { fontFamily: "var(--font-display)" } as const;
+export const BIG = "text-[22px] leading-[26px] font-bold tracking-[-0.01em] sm:text-[26px] sm:leading-[30px]";
+export const MEDIUM = "text-[18px] leading-[24px] font-semibold";
+const FIGURE = "text-[18px] leading-[24px] font-bold tabular-nums";
+export const LABEL = "text-[16px] leading-[22px] font-semibold";
+export const SMALL = "text-[15px] leading-[22px]";
+const TINY = "text-[14px] leading-[20px]";
+// The frosted panel every info box on this page sits in (direct feedback:
+// more contrast, frostier): a stronger glass fill, a real backdrop blur and a
+// brighter hairline than the page's default glass-surface-1.
+export const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, transparent)", backdropFilter: "blur(16px) saturate(1.65)", WebkitBackdropFilter: "blur(16px) saturate(1.65)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
+
+// Per-career photo focal point for the header panel (most posters carry the
+// subject in the upper half; the exceptions are listed here).
+// Checked poster by poster against the phone header box (335x300, 2026-09-03):
+// the default keeps heads in frame for portraits shot at chest height; these
+// are the exceptions (heads at the very top edge, or a top-down shot with the
+// face low in the frame).
+// Hand-set crops from before 4 Oct 2026. Every photo now has a measured
+// crop in career/heroFocus.ts (face detection, desktop and phone apart),
+// which wins; these are the fallback for a photo it does not cover.
+const HERO_FOCUS: Record<string, string> = {
+  "asset-management": "center 68%",
+  "sports-medicine-doctor": "50% 0%",
+  animator: "50% 0%",
+  "game-designer": "50% 0%",
+  "video-game-designer": "50% 0%",
+  "pediatric-surgeon": "50% 0%",
+  electrician: "50% 0%",
+  quant: "50% 48%",
+};
+
+// Custom-designed edge case, 22 Sept 2026: the header photo had no
+// `onError` handling -- unlike Match's grid, this hero already sits on a
+// solid dark base (`#0e0c20`) with its own gradient/blur scrims layered as
+// separate elements, so a failed photo doesn't need a new placeholder
+// graphic; it just needs to stop trying to paint a broken image on top of
+// an already-complete backdrop. On failure this renders nothing, and the
+// existing base + scrims (plus the title, which never depended on the
+// photo) carry the header exactly as designed.
+function HeroPhoto({ photo, sizes, className, objectPosition }: { photo: string; sizes: string; className: string; objectPosition: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  // face-aware for the box it is actually in (8 Oct 2026); the phone
+  // header's title covers the lower part, so the face sits higher there
+  const phone = className.includes("md:hidden");
+  return <FacePhoto src={photo} sizes={sizes} className={className.replace("md:hidden", "").trim()} wrapperClassName={phone ? "md:hidden" : ""} target={phone ? 0.3 : 0.36} fallback={objectPosition} onError={() => setFailed(true)} />;
+}
+
+// The degree fact as the degree alone (20 Oct 2026, Chandu, on "Bachelor's
+// degree for most school and college jobs": "Make it concise and one thing.
+// Say bachelors degree, if theres one more degree list that too, no full
+// sentences"). Up to two credentials, joined with "or"; qualifiers,
+// licences and "+ apprenticeship" tails stay in the degree sheet behind (i).
+const DEGREES: [RegExp, string][] = [
+  [/doctoral|doctorate|ph\.?d|professional degree/i, "Doctorate"],
+  [/law degree|j\.d\./i, "Law degree"],
+  [/master/i, "Master's degree"],
+  [/bachelor/i, "Bachelor's degree"],
+  [/associate/i, "Associate's degree"],
+  [/certificate|certification/i, "Certificate"],
+  [/high school/i, "High school diploma"],
+  [/some college/i, "Some college"],
+  [/no formal|no specific|no degree/i, "No degree needed"],
+];
+export function shortDegree(value: string) {
+  const found = DEGREES.map(([re, name]) => ({ name, at: value.search(re) })).filter((d) => d.at >= 0).sort((x, y) => x.at - y.at);
+  // "Doctoral or professional degree" is one credential, not two
+  const all = [...new Set(found.map((d) => d.name))];
+  // "Some college, no degree" and "No formal degree; a forklift
+  // certification" each name one path, not two choices
+  const names = /^(Some college|No degree needed)$/.test(all[0] ?? "") ? all.slice(0, 1) : all.slice(0, 2);
+  return names.length ? names.join(" or ") : value.split(/[;(,+]| for /)[0].trim();
+}
+
+// ---- Fact strip figure ------------------------------------------------------
+// The quick-fact strip's figure (20 Oct 2026, Chandu: "The numbers are too
+// small in the 4 column header stats. Awkward blank spaces are there too").
+// The figure is the cell's headline, so it outranks its label: the label
+// became a small muted line and the figure a display numeral, set right
+// under the label instead of pinned to the cell's bottom (which left a gap
+// whenever a neighbour's degree line wrapped). "/year" drops to a small
+// suffix. Same day, second pass: the size came down so all four sit on one
+// line ("Bachelor's degree" wrapped at the bigger size).
+function StripFigure({ value, accent }: { value: string; accent: string }) {
+  const m = value.match(/^(.*?)(\/year)$/);
+  const main = m ? m[1] : value;
+  // one size for every cell, so all four figures share one line (Chandu,
+  // 20 Oct 2026: "everything on that row is the same text line ... fix
+  // alignment so everything is consistent"); a single credential never
+  // wraps, only "A or B" may break, and only at the "or"
+  const parts = main.split(/ or /);
+  return (
+    <span className="flex flex-wrap items-baseline gap-x-[6px]">
+      <span
+        className="text-[15px] leading-[22px] font-extrabold tabular-nums sm:text-[20px] sm:leading-[26px] xl:text-[22px] xl:leading-[28px]"
+        style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 55%, #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+      >
+        {parts.map((p, i) => (
+          <span key={i}>
+            {i > 0 && " or "}
+            <span className="whitespace-nowrap">{p}</span>
+          </span>
+        ))}
+      </span>
+      {m && <span className="text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>a year</span>}
+    </span>
+  );
+}
+
+// ---- Key figure: production's gradient numeral, in the world accent -------
+// Used sparingly (direct feedback): typical pay, pay by state, ladder pay.
+// Same size tier as the body value it replaces, so it never outsizes the
+// label above it; the gradient carries the emphasis, not the size.
+export function Figure({ children, accent }: { children: React.ReactNode; accent: string }) {
+  return (
+    <span
+      className={`${SMALL} font-bold tabular-nums`}
+      // Two colored stops, no white start: a white-to-accent ramp stretched
+      // across the element made short figures read white and long ones read
+      // colored (direct feedback). Now every figure carries the same amount
+      // of color whatever its length.
+      style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} var(--figure-share, 55%), #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+    >
+      {children}
+    </span>
+  );
+}
+
+// ---- Section shells -------------------------------------------------------
+
+// Always-open section: heading row (with an optional control) over content.
+export function Section({ id, title, action, children }: { id?: string; title: string; action?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section id={id} className="flex w-full scroll-mt-[124px] flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
+      {/* the title row is ruled off edge to edge (direct feedback): the line
+         runs through the panel's padding to touch both borders */}
+      <div className="-mx-[var(--space-5)] flex flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]" style={{ borderColor: "var(--glass-border)" }}>
+        <h2 className={BIG} style={DISPLAY}>{title}</h2>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+// Custom-designed edge case, 22 Sept 2026: ~150 of ~200 catalog careers
+// have no authored profile or report yet (a real, common gap, not rare --
+// see COMPONENT_STATES_DESIGN_LOG.md), and every tab below used to render
+// nothing at all when its data was missing -- straight from the tab bar to
+// "Careers like this one" with a dead gap in between, reading as a broken
+// page rather than a career whose detail just isn't written yet. Verified
+// live with a synthetic catalog-only test career (no profile, no report).
+// Not wrapped in the same bordered `Section` panel real content uses --
+// deliberately lighter, so it reads as "nothing here yet," not "here's
+// real content in a panel that happens to be short."
+function TabComingSoon({ title, career }: { title: string; career: string }) {
+  return (
+    <div className="flex flex-col items-center gap-[var(--space-2)] px-[var(--space-5)] py-[var(--space-10)] text-center">
+      <Sparkles className="h-6 w-6" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+      <p className={`${MEDIUM}`} style={{ color: "var(--foreground)" }}>{title} coming soon</p>
+      <p className={`${SMALL} max-w-[42ch]`} style={{ color: "var(--muted-foreground)" }}>
+        We don&apos;t have this written up for {career} yet. Check back soon, or explore a similar career below.
+      </p>
+    </div>
+  );
+}
+
+// One marker, one line per item. The marker is the world accent so the list
+// reads as this career's without a second color system. Shared by College
+// Detail too (CollegeDetailExperience.tsx imports this directly).
+export function DotList({ items, accent, leading }: { items: string[]; accent: string; leading?: (item: string) => React.ReactNode }) {
+  // Custom-designed edge case, 22 Sept 2026: field-level gaps, not just a
+  // whole section missing -- direct report: "sometimes a few points inside
+  // a section or 1 point inside a section will be missing." An authored
+  // array with one blank/whitespace-only string in it (a partial content
+  // edit, a generation gap) used to render a bullet marker with nothing
+  // after it. Filtered here once, so every caller (Career Detail's Know
+  // About/Good At, College Detail's admissions factor lists) gets it for
+  // free rather than each needing its own filter.
+  const clean = items.filter((item) => item.trim().length > 0);
+  // The rarer case: every item in the array was blank (not just one), so
+  // filtering leaves nothing -- callers gate on the RAW array's length
+  // before rendering the section heading above this list, so without this
+  // the heading would show with an empty <ul> under it. One line, matching
+  // the same "not authored yet" convention as everywhere else.
+  if (clean.length === 0) {
+    return <p className={`${SMALL} italic`} style={{ color: "var(--muted-foreground)" }}>Not written up yet.</p>;
+  }
+  return (
+    <ul className="flex flex-col gap-[var(--space-3)]">
+      {clean.map((item) => (
+        <li key={item} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
+          {leading ? leading(item) : <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />}
+          <span className="min-w-0">{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// ---- Career ladder --------------------------------------------------------
+
+// Three compact rows first: number, title, pay, and a bar under the title
+// showing how far up the pay climb this rung sits. The paragraph and the
+// "What you do" / "To get here" lines open per rung on tap.
+function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: string; open: boolean; onToggle: () => void }) {
+  const hasDetail = !!rung.description || rung.whatYouDo.length > 0 || rung.toGetHere.length > 0;
+  return (
+    <li className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+      <button
+        type="button"
+        onClick={hasDetail ? onToggle : undefined}
+        aria-expanded={hasDetail ? open : undefined}
+        className={`${hasDetail ? "dm-quiet cursor-pointer" : ""} -mx-[8px] grid w-[calc(100%+16px)] grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-x-[var(--space-4)] rounded-[var(--radius-sm)] px-[8px] py-[var(--space-4)] text-left`}
+      >
+        <span
+          className={`${FIGURE} text-center`}
+          style={{ ...DISPLAY, backgroundImage: `linear-gradient(180deg, ${accent}, color-mix(in srgb, ${accent} 60%, #000))`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+        >
+          {rung.number}
+        </span>
+        <span className={`${MEDIUM} min-w-0 text-balance sm:truncate`}>{rung.jobTitle}</span>
+        <span className="flex items-center gap-[var(--space-3)]">
+          {rung.pay && <Figure accent={accent}>{rung.pay}</Figure>}
+          {hasDetail && <ChevronDown className="h-5 w-5 flex-none transition-transform duration-200" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />}
+        </span>
+      </button>
+      {hasDetail && open && (
+        <div className="flex flex-col gap-[var(--space-3)] pb-[var(--space-5)] pl-[48px]">
+          {rung.description && <p className="max-w-[62ch] text-[16px] leading-[24px]">{rung.description}</p>}
+          {/* two short lists, one under the other, so what each level asks
+             for reads at a glance and the climb between levels is visible */}
+          {(rung.whatYouDo.length > 0 || rung.toGetHere.length > 0) && (
+            <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
+              {[["What you do", rung.whatYouDo], ["What you need", rung.toGetHere]].map(([label, items]) => (items as string[]).length > 0 && (
+                <div key={label as string} className="flex flex-col gap-[6px]">
+                  <h4 className={`${SMALL} font-semibold`} style={{ color: accent }}>{label as string}</h4>
+                  <ul className="m-0 flex list-none flex-col gap-[4px] p-0">
+                    {(items as string[]).map((item) => (
+                      <li key={item} className={`${SMALL} flex gap-[8px]`} style={{ color: "var(--foreground)" }}>
+                        <span aria-hidden className="mt-[9px] size-[5px] flex-none rounded-full" style={{ background: accent }} />
+                        <span className="min-w-0">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
+// ---- Pay by state: production's tiles, no chart (direct feedback: fewer
+// graphs). State on the left, the figure on the right; a label like "more
+// than usual" stays plain text, a pay figure gets the accent gradient. ----
+
+function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; accent: string }) {
+  // Custom-designed edge case, 22 Sept 2026: a `payByState` object can
+  // exist (so the tab doesn't fall back to TabComingSoon) while its own
+  // `best` array is empty -- a partial-content gap one level down, same
+  // class as DotList's blank-item fallback. Without this, "Best states"
+  // rendered as either a bare heading over nothing, or (with no
+  // `yourStates` either) a section with a tab toggle and no content
+  // beneath it at all.
+  if (rows.length === 0) {
+    return <p className={`${SMALL} italic`} style={{ color: "var(--muted-foreground)" }}>Pay data coming soon.</p>;
+  }
+  return (
+    <ul className="flex flex-col">
+      {rows.map((row) => {
+        const isFigure = /\d/.test(row.pay);
+        return (
+          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+            <span className={`${SMALL} min-w-0 truncate`} style={{ color: "var(--foreground)" }}>{row.state}</span>
+            {isFigure ? <Figure accent={accent}>{row.pay}</Figure> : <span className={`${SMALL} flex-none`} style={{ color: "var(--muted-foreground)" }}>{row.pay}</span>}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+// Your states / Whole country: one view switch over the same state data.
+// Shared by the Pay & Outlook tab and careers without an outlook (Pay only).
+export function PayViewToggle({ value, onChange, label = "Pay by state view", pill = "career-pay-view-pill" }: { value: "states" | "country"; onChange: (v: "states" | "country") => void; label?: string; pill?: string }) {
+  return (
+    <div role="tablist" aria-label={label} className="dm-glass flex items-center gap-[2px] rounded-[13px] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      {([["states", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={value === id}
+          onClick={() => onChange(id)}
+          className="dm-quiet relative min-h-[32px] cursor-pointer rounded-[10px] px-[14px] text-[13px] leading-[16px] font-semibold"
+          style={{ color: value === id ? "var(--background)" : "var(--foreground)" }}
+        >
+          {/* Fill slides between the two views via a shared
+             layoutId instead of snapping (direct feedback: "have
+             whatever highlight we end up keeping for tabs...
+             animate and slide over when we switch"). */}
+          {value === id && (
+            <motion.span
+              layoutId={pill}
+              aria-hidden
+              className="absolute inset-0 rounded-[10px]"
+              style={{ background: "var(--foreground)" }}
+              transition={{ type: "spring", stiffness: 500, damping: 40 }}
+            />
+          )}
+          <span className="relative">{label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Which quick fact carries which detail behind its (i).
+function factKey(label: string): keyof FactDetails | null {
+  if (/degree/i.test(label)) return "degree";
+  if (/pay/i.test(label)) return "pay";
+  if (/open/i.test(label)) return "openings";
+  return null;
+}
+
+// Small popover next to a fact's (i): pay bands, or what "openings" counts.
+// Rendered through a portal at the body and positioned from the icon's own
+// rect, so no panel, blur layer or overflow can clip it; clamped to the
+// viewport with a 16px margin. Closes on a tap anywhere else or Escape.
+function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null; children: React.ReactNode; onClose: () => void }) {
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  useEffect(() => {
+    const place = () => {
+      if (!anchor) return;
+      const r = anchor.getBoundingClientRect();
+      const width = Math.min(320, window.innerWidth - 32);
+      const left = Math.min(Math.max(16, r.left - 12), window.innerWidth - width - 16);
+      setPos({ top: r.bottom + 8, left, width });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [anchor, onClose]);
+  if (!pos || typeof document === "undefined") return null;
+  return createPortal(
+    <>
+      <button type="button" aria-label="Close" onClick={onClose} className="fixed inset-0 z-[80] cursor-default" />
+      <div
+        role="dialog"
+        className="marketing-v2 themeable fixed z-[81] rounded-[var(--radius-md)] border p-[var(--space-4)]"
+        // minHeight: 0 -- same fix as FlowChrome.tsx: `.theme-light` (tokens.css)
+        // sets `min-height: 100%` for full-page themeable surfaces, but this
+        // small floating popover only wants the class for its CSS variables.
+        // Cancels the ambient "proportional wide-screen scaling"
+        // (globals.css, body { zoom: 1.1/1.25 } above 1441px/1800px):
+        // pos.top/pos.left above are already TRUE post-zoom screen
+        // coordinates from anchor.getBoundingClientRect(), so left unreset
+        // they get zoomed a second time on render. `zoom: 1` alone is NOT
+        // enough -- zoom compounds down the tree, it doesn't reset to 1; the
+        // reciprocal of the ambient factor does. --vz is the same custom
+        // property globals.css sets alongside body's zoom for exactly this
+        // purpose. Same fix as xpFlight.ts and the shared
+        // profile/CareerReport.tsx Portal.
+        style={{ top: pos.top, left: pos.left, width: pos.width, minHeight: 0, zoom: "calc(1 / var(--vz, 1))", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 24px 48px -24px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+      >
+        {children}
+      </div>
+    </>,
+    document.body,
+  );
+}
+
+// The degree sheet behind Typical degree's (i), in the What it pays sheet's
+// frame (Chandu, 20 Oct 2026: "redesign the typical degree (i) popup to be
+// consistent with the what it pays pop up too"): the credential as the
+// headline, how many get in without a bachelor's when the door asks for one,
+// the two door questions side by side, the note, and a row into Education.
+// Same data as before; nothing dropped.
+function DegreeSheet({ career, accent, detail, source, onMore, onClose }: { career: string; accent: string; detail: NonNullable<FactDetails["degree"]>; source?: string; onMore?: () => void; onClose: () => void }) {
+  const short = shortDegree(detail.doorAsksFor);
+  const aboveBachelor = /bachelor|master|doctor|law/i.test(short);
+  return (
+    <FactSheet career={career} accent={accent} title="What you need to get in" source={source} more={onMore ? { label: "Where to study", onClick: onMore } : undefined} onClose={onClose}>
+      <SheetHero
+        label="Typical degree"
+        accent={accent}
+        value={short.split(/ or /).map((p, i) => (
+          <span key={i}>
+            {i > 0 && " or "}
+            <span className="whitespace-nowrap">{p}</span>
+          </span>
+        ))}
+        line={aboveBachelor && detail.noBachelorPct ? `${detail.noBachelorPct} of people in this job got in without a bachelor's degree.` : undefined}
+      />
+      <dl className="grid grid-cols-1 gap-[16px] sm:grid-cols-2">
+        {[["Experience first", detail.experienceFirst], ["Training after hiring", detail.trainingAfterHiring]].map(([k, v]) => (
+          <div key={k} className="flex flex-col gap-[2px]">
+            <dt className="text-[12px] leading-[16px] font-semibold uppercase tracking-[0.04em]" style={{ color: "var(--muted-foreground)" }}>{k}</dt>
+            <dd className="text-[16px] leading-[22px] font-bold">{v}</dd>
+          </div>
+        ))}
+      </dl>
+      {/* a note that points at "the mix below" describes a chart this sheet
+         doesn't draw, and says what the without-a-bachelor's line above
+         already says, so only standalone notes show */}
+      {detail.note && !/\bbelow\b/i.test(detail.note) && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{detail.note}</p>}
+    </FactSheet>
+  );
+}
+
+// Every career gets the same page shape. Careers without a full profile map
+// what the app already knows into it; sections with nothing to say are
+// skipped, never rendered empty or as a placeholder.
+const PLACEHOLDER = "Coming soon";
+function viewModel(career: ResolvedCareer) {
+  const p = career.profile;
+  const facts = p?.facts ?? [
+    { label: "Median salary", value: career.medianSalary },
+    { label: "Degree required", value: career.degreeRequired },
+    { label: "Common majors", value: career.commonMajors },
+  ];
+  const ladder: ProfileRung[] =
+    p?.ladder ??
+    (career.ladder ?? []).map((r) => ({ number: r.number, jobTitle: r.jobTitle, pay: r.salary, description: r.oneLiner, whatYouDo: r.skills, toGetHere: [] }));
+  const whatTheyDo = !p && career.whatTheyActuallyDo && career.whatTheyActuallyDo !== PLACEHOLDER ? career.whatTheyActuallyDo : null;
+  return {
+    summary: p?.summary ?? career.description,
+    scenario: p?.scenario ?? career.realLifeExample,
+    whatTheyDo,
+    facts: facts.filter((f) => f.value && f.value !== PLACEHOLDER && !/people doing|jobs open/i.test(f.label)),
+    payByState: p?.payByState,
+    /** every authored fact, before the strip's filter (Pay & Outlook reads the counts) */
+    allFacts: facts,
+    knowAbout: p?.knowAbout ?? [],
+    goodAt: p?.goodAt ?? [],
+    software: career.software ?? [],
+    ladder,
+    education: p?.education,
+    sources: p?.sources,
+    details: p?.factDetails,
+    typicalPay: p?.facts.find((f) => f.label === "Typical pay")?.value ?? career.medianSalary,
+  };
+}
+
+// Horizontal tabs (15 Sept 2026 direct feedback: match the Explore School
+// detail page's own tab structure -- "once a student understands how to
+// navigate one detail page, they should immediately understand the other").
+// The header's summary/scenario line and the Typical Degree/Typical Pay
+// facts stay outside the tab system, always visible above it, the same way
+// College Detail keeps its photo header and action row above its own tabs.
+type CareerTab = "overview" | "education" | "ladder" | "pay" | "software";
+const CAREER_TABS: { key: CareerTab; label: string }[] = [
+  { key: "overview", label: "Overview" },
+  { key: "education", label: "Education" },
+  { key: "ladder", label: "Career Ladder" },
+  { key: "pay", label: "Pay" },
+  { key: "software", label: "Software" },
+];
+
+export function CareerDetailLabV2({ slug, live = false }: {
+  slug: string;
+  /** the live /career route: no lab dock, links stay on the live routes */
+  live?: boolean;
+}) {
+  const router = useRouter();
+  const career = resolveCareer(slug);
+  // Open at the top. Arriving from a rail deep in Explore or Home kept the
+  // previous page's scroll position, so the page opened mid-way (direct
+  // feedback, 4 Sept 2026). A hash link to a section is left alone.
+  useOpenAtTop(slug);
+  const inSheet = useInSheet();
+  const [openRung, setOpenRung] = useState<string | null>(null);
+  const [openFact, setOpenFact] = useState<keyof FactDetails | null>(null);
+  // Pay by state: the list of your states and the best states, or the whole
+  // country as a shaded map. A view switch over the same data.
+  const [payView, setPayView] = useState<"states" | "country">("states");
+  // the (i) that opened the popover, kept in state (not a ref) so render can read it
+  const [factAnchor, setFactAnchor] = useState<HTMLElement | null>(null);
+  const [tab, setTab] = useState<CareerTab>("overview");
+  // ?tab=education (optionally &section=good-at) opens that tab and scrolls
+  // to it (19 Oct 2026, Chandu: My Plan steps like "see the school or
+  // training this career needs" go "to the career detail page and scroll to
+  // the relevant section (and expand if it's collapsed)"). The page only:
+  // inside a peek sheet the host page's own ?tab= is not ours. Read after
+  // mount, not useSearchParams, so the route needs no Suspense wrapper.
+  useEffect(() => {
+    if (inSheet) return;
+    const q = new URLSearchParams(window.location.search);
+    const want = q.get("tab") as CareerTab | null;
+    if (!want || !CAREER_TABS.some((t) => t.key === want)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time URL read after mount
+    setTab(want);
+    const target = q.get("section") ?? want;
+    // a hand-rolled ease in instant steps: a smooth scroll here is cancelled
+    // before it moves (the same finding as Profile's easeScrollTo)
+    const t = window.setTimeout(() => {
+      const el = document.getElementById(target);
+      if (!el) return;
+      const from = window.scrollY;
+      const to = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 96);
+      const start = performance.now();
+      const step = (now: number) => {
+        const p = Math.min(1, (now - start) / 520);
+        window.scrollTo({ top: from + (to - from) * (1 - Math.pow(1 - p, 3)), behavior: "instant" as ScrollBehavior });
+        if (p < 1) window.requestAnimationFrame(step);
+      };
+      window.requestAnimationFrame(step);
+    }, 450);
+    return () => window.clearTimeout(t);
+  }, [inSheet]);
+  const lab = useLab();
+  const [connectOpen, setConnectOpen] = useState(false);
+  // The states the student picked in Build: Pay by state shows those as
+  // "Your states", New Jersey for the demo when none is picked, from real
+  // OEWS figures (career/statePay.ts).
+  const pickedStates = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot).states;
+
+  if (!career) {
+    return (
+      <div className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col items-center justify-center gap-[var(--space-4)] overflow-hidden px-5 text-center" style={{ background: "transparent", color: "var(--foreground)" }}>
+        <p className="relative z-10 text-[20px] font-bold">We don&apos;t have that career yet.</p>
+        <Link href={live ? "/explore?tab=browse" : "/actions-lab/explore?tab=browse"} className="dm-solid relative z-10 flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+          Back to Explore
+        </Link>
+      </div>
+    );
+  }
+
+  const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+  const similar = similarCareers(career);
+  const reaction = lab.reaction[career.slug] ?? null;
+
+  const vm = viewModel(career);
+  const pay = statePay(career.slug, pickedStates, vm.payByState);
+  // Pay & Outlook (live 20 Oct 2026, from the outlook lab): the US outlook
+  // from the profile's own BLS figures. Growth and yearly openings join
+  // degree and pay as headline facts and lead into the tab that explains
+  // them, instead of sitting inside the pay sheet (Maisha's Slack note)
+  const national = nationalOutlook(vm.allFacts, vm.details?.openings?.note);
+  const strip = vm.facts.map((f) => (/degree/i.test(f.label) ? { ...f, value: shortDegree(f.value) } : f));
+  const facts = national
+    ? [...strip, { label: `Job growth by ${national.year}`, value: pct(national.growthPct) }, { label: "Jobs open each year", value: count(national.openings) }]
+    : strip;
+  const tabs = national ? CAREER_TABS.map((t) => (t.key === "pay" ? { ...t, label: "Pay & Outlook" } : t)) : CAREER_TABS;
+  // growth and openings open the tab that explains them (they had an (i))
+  const toOutlook = (label: string) => national && /growth|open each year/i.test(label);
+  const openOutlook = () => openTab("pay");
+  function openTab(key: CareerTab) {
+    setTab(key);
+    window.requestAnimationFrame(() => {
+      const row = document.getElementById("career-tabs");
+      row?.scrollIntoView({ behavior: "smooth", block: "start" });
+      // on a phone the tab row scrolls sideways: bring the chosen tab into it
+      const on = row?.querySelector<HTMLElement>('[aria-selected="true"]');
+      const strip = on?.closest<HTMLElement>("[role=tablist]") ?? on?.parentElement;
+      if (on && strip) strip.scrollTo({ left: on.offsetLeft - (strip.clientWidth - on.offsetWidth) / 2, behavior: "smooth" });
+    });
+  }
+
+  return (
+    <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+      {/* Same ground as Home, Explore, Profile and Connect: one AppBackdrop,
+         which already carries the space sheet. This page used to stack two
+         backdrops plus a third copy of the sheet, so it read lighter than
+         every other screen. */}
+{!inSheet && (<>
+      <AppBackdrop />
+      <DesktopNavigation active="Explore" extraClassName="no-print" />
+      <MobileHeaderShell extraClassName="no-print">
+        <Wordmark />
+        <HeaderActions><QuickLinksMenu /></HeaderActions>
+      </MobileHeaderShell>
+      </>)}
+
+      <main className={`seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 md:px-8 ${inSheet ? "pt-[4px] pb-[48px]" : "pb-[120px] md:pt-[var(--space-4)]"}`}>
+        {!inSheet && <button
+          type="button"
+          onClick={() => {
+            // No fallback before (direct feedback, 9 Sept 2026: a back
+            // control needs a real destination, not a bare history call
+            // that's a no-op with nothing to go back to) -- this page is
+            // reachable via a direct/shared link, so history can be empty.
+            if (window.history.length > 1) router.back();
+            else router.push(live ? "/explore" : "/actions-lab/explore");
+          }}
+          className={`dm-link ${SMALL} flex w-fit cursor-pointer items-center gap-[6px] font-semibold`}
+          style={{ color: "var(--muted-foreground)" }}
+        >
+          <ChevronLeft className="h-4 w-4" aria-hidden /> Explore
+        </button>}
+
+        {/* Header card: the poster photo, full bleed, with the same legibility
+           stack as the For You reel and the Connect cards (progressive blur up
+           from the bottom, a soft vignette, a light top scrim) and nothing
+           else: no color wash. Title, one line on what it is, one line to
+           imagine it, and the actions all sit inside the card, on the frosted
+           lower half. */}
+        {/* on-dark-media: the hero is a dark photo in both themes, so it keeps
+           the bright world colours in light mode too (app.css, 9 Oct 2026). */}
+        <section data-focal className="on-dark-media relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+          {/* Faces stay in frame (direct feedback): the poster photos carry the
+             subject in their upper part, so the crop anchors near the top. On
+             phones the photo runs behind the whole card; from md up it sits on
+             the right half at its natural framing and fades into the card's
+             dark base toward the text, so nothing is cropped to fit a wide
+             band. */}
+          <div className="absolute inset-0" aria-hidden style={{ background: "#0e0c20" }}>
+            <HeroPhoto photo={career.photo} sizes="100vw" className="object-cover md:hidden" objectPosition={heroFocus(career.photo)?.mobile ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
+            <span className="absolute inset-y-0 right-0 hidden w-[50%] md:block">
+              <HeroPhoto photo={career.photo} sizes="520px" className="object-cover" objectPosition={heroFocus(career.photo)?.desktop ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
+              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.45) 26%, transparent 58%)" }} />
+            </span>
+            <CardProgressiveBlur size="52%" />
+            {/* lighter than before (direct feedback: the blur and the side fade
+               already carry the type, so the photo can show) */}
+            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.86) 0%, rgba(12,16,35,0.5) 32%, rgba(12,16,35,0.1) 60%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.35) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)` }} />
+          </div>
+          <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
+            <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
+              {/* The career's own poster face (the browse card's approved per-world
+                 font), not the display face: the title should look like the card
+                 the student tapped to get here. */}
+              <h1 className="w-full text-[36px] leading-[40px] uppercase sm:text-[clamp(48px,calc(3.6vw/var(--vz,1)),60px)] sm:leading-[1]" style={{ ...posterTitleFont(career.world), textWrap: "balance" }}>
+                {career.title}
+              </h1>
+              {/* The world, in its accent, right under the title: the same
+                 title-then-world pairing the browse cards use everywhere else
+                 (direct feedback). */}
+              <span className="text-[12px] leading-[16px] font-semibold tracking-[0.6px] uppercase" style={{ color: `color-mix(in srgb, ${accent} 70%, #ffffff)`, fontFamily: "var(--font-body)" }}>{career.world}</span>
+              {vm.summary && <p className={`${LABEL} max-w-[40ch] pt-[2px]`}>{vm.summary}</p>}
+            </div>
+            {/* the actions, shared with the career sheet (CareerHeaderActions) */}
+            <CareerHeaderActions career={career} onConnect={() => setConnectOpen(true)} stack={false} />
+          </div>
+        </section>
+
+        {/* The "imagine" line moved into the Overview (3 Oct 2026, Chandu: "the
+           header has a description and then there's another sub description
+           under the header that follows that description"). The header keeps
+           the one line on what the job is; the example opens What they
+           actually do. */}
+
+        {/* Quick facts: one strip, internal dividers, label over figure.
+           Stays above the tabs (direct feedback, 15 Sept 2026: "keep Typical
+           Degree and Typical Pay visible near the top before the tabs").
+           Briefly reversed and reverted same day, 22 Sept 2026, after
+           confirming this was a deliberate earlier decision, not a mistake
+           -- kept as originally decided. */}
+        {facts.length > 0 && (
+          // Custom-designed edge case, 22 Sept 2026: a thin catalog-only
+          // career (no profile/report) can end up with exactly ONE fact
+          // (median salary survives from the catalog; degree/majors fall
+          // back to the literal "Coming soon" placeholder and viewModel()
+          // filters those out entirely). The grid was always grid-cols-2 at
+          // base regardless of count, so one fact left a dead, empty second
+          // column inside the same full-bleed bordered panel -- reproduced
+          // live with a synthetic thin-career test entry. grid-cols-1 for
+          // the single-fact case only; 2/3/4-fact layouts are unchanged.
+          <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] ${facts.length === 1 ? "grid-cols-1" : "grid-cols-2"} rounded-[var(--radius-lg)] border ${facts.length === 1 ? "" : facts.length === 3 ? "sm:grid-cols-3" : facts.length <= 2 ? "sm:grid-cols-2" : "lg:grid-cols-4"}`} style={PANEL}>
+            {facts.map((fact, i) => (
+              <div
+                key={fact.label}
+                data-fact-cell
+                className={`relative flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${facts.length >= 4 ? "lg:border-t-0 lg:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
+                style={{ borderColor: "var(--glass-border)" }}
+              >
+                {/* label row is one fixed height whether it ends in an (i) or
+                   a chevron, and every figure is one size, so all figures
+                   share one line across the strip */}
+                <span className="flex min-h-[24px] items-center justify-between gap-[6px]">
+                  <span className="min-w-0 text-[14px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.label}</span>
+                  {toOutlook(fact.label) && <ChevronRight className="h-[16px] w-[16px] flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />}
+                  {!toOutlook(fact.label) && factKey(fact.label) && vm.details?.[factKey(fact.label)!] && (
+                    <IconTip label={`About ${fact.label.toLowerCase()}`}>
+                      <button
+                        type="button"
+                        aria-label={`About ${fact.label.toLowerCase()}`}
+                        aria-expanded={openFact === factKey(fact.label)}
+                        onClick={(e) => {
+                          setFactAnchor(e.currentTarget);
+                          setOpenFact((v) => (v === factKey(fact.label) ? null : factKey(fact.label)));
+                        }}
+                        className="dm-quiet -mr-[4px] flex size-6 flex-none cursor-pointer items-center justify-center rounded-full"
+                        style={{ color: "var(--muted-foreground)" }}
+                      >
+                        <Info className="h-[15px] w-[15px]" aria-hidden />
+                      </button>
+                    </IconTip>
+                  )}
+                </span>
+                <StripFigure accent={accent} value={fact.value} />
+                {/* the whole cell opens Pay & Outlook */}
+                {toOutlook(fact.label) && (
+                  <button type="button" aria-label={`${fact.label}: see Pay & Outlook`} onClick={openOutlook} className="absolute inset-0 cursor-pointer transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_5%,transparent)]" />
+                )}
+                {/* pay only: growth and openings lead the strip and own the
+                   Pay & Outlook tab, so the sheet's last row goes there */}
+                {openFact === "pay" && factKey(fact.label) === "pay" && vm.details?.pay && (
+                  <PaySheet
+                    career={career.title}
+                    accent={accent}
+                    pay={vm.details.pay}
+                    source={/Bureau of Labor Statistics/i.test(vm.sources ?? "") ? "U.S. Bureau of Labor Statistics" : undefined}
+                    onMore={national || pay ? () => { setOpenFact(null); openOutlook(); } : undefined}
+                    moreLabel={national ? "Pay by state and job outlook" : "Pay by state"}
+                    onClose={() => setOpenFact(null)}
+                  />
+                )}
+                {openFact === "openings" && factKey(fact.label) === "openings" && vm.details?.openings && (
+                  <FactPopover anchor={factAnchor} onClose={() => setOpenFact(null)}>
+                    <p className={TINY}>{vm.details.openings.note}</p>
+                  </FactPopover>
+                )}
+              </div>
+            ))}
+          </section>
+        )}
+
+        <div id="career-tabs" className="scroll-mt-[96px]">
+          <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={tabs} grow />
+        </div>
+
+        {tab === "pay" && !pay && !national && <TabComingSoon title="Pay" career={career.title} />}
+
+        {/* the Pay by state section, the same as before Pay & Outlook (it was on the
+           live page (Chandu, 19 Oct 2026: "that was approved so lets not
+           edit that too much"); the outlook sections follow it */}
+        {tab === "pay" && pay && (
+          <Section
+            id="pay"
+            title={pay.title ?? "Pay by state"}
+            action={
+              <PayViewToggle value={payView} onChange={setPayView} />
+            }
+          >
+            {payView === "states" ? (
+              <div className="flex flex-col gap-[var(--space-6)]">
+                {pay.yourStates && pay.yourStates.length > 0 && (
+                  <div className="flex flex-col gap-[var(--space-2)]">
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Your states</h3>
+                    <PayRows rows={pay.yourStates} accent={accent} />
+                  </div>
+                )}
+                <div className="flex flex-col gap-[var(--space-2)]">
+                  {pay.yourStates && pay.yourStates.length > 0 && <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Best states</h3>}
+                  <PayRows rows={pay.best} accent={accent} />
+                </div>
+              </div>
+            ) : (
+              <PayMap
+                typical={vm.typicalPay}
+                rows={pay.all ?? [...(pay.yourStates ?? []), ...pay.best]}
+                complete={!!pay.all}
+                yourState={pay.yourStates?.[0]?.state}
+                accent={accent}
+                seed={career.slug}
+              />
+            )}
+          </Section>
+        )}
+
+        {tab === "pay" && national && <OutlookTab slug={career.slug} accent={accent} national={national} picked={pickedStates} />}
+
+        {tab === "ladder" && vm.ladder.length === 0 && <TabComingSoon title="Career ladder" career={career.title} />}
+
+        {tab === "ladder" && vm.ladder.length > 0 && (
+          <Section id="ladder" title="Career ladder">
+            <ol className="flex flex-col">
+              {vm.ladder.map((rung) => (
+                <Rung key={rung.number} rung={rung} accent={accent} open={openRung === rung.number} onToggle={() => setOpenRung((v) => (v === rung.number ? null : rung.number))} />
+              ))}
+            </ol>
+          </Section>
+        )}
+
+        {/* Overview: the general explanation of the career, then what it
+           takes and what it asks for -- the same three ideas College
+           Detail's own Overview tab groups (Key Facts, one panel per idea),
+           just carried over as this page's existing three sections rather
+           than reinvented. */}
+        {tab === "overview" && !vm.whatTheyDo && !vm.scenario && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && <TabComingSoon title="Overview" career={career.title} />}
+
+        {tab === "overview" && (vm.whatTheyDo || vm.scenario || vm.knowAbout.length > 0 || vm.goodAt.length > 0) && (
+          <div className="flex flex-col gap-[var(--space-6)]">
+            {(vm.whatTheyDo || vm.scenario) && (
+              <Section id="what-they-do" title="What they actually do">
+                {vm.scenario && <p className={`${SMALL} max-w-[68ch]`}>{vm.scenario}</p>}
+                {vm.whatTheyDo && <p className={`${SMALL} max-w-[68ch]`}>{vm.whatTheyDo}</p>}
+              </Section>
+            )}
+            {vm.knowAbout.length > 0 && (
+              <Section id="know-about" title="What you need to know about">
+                <DotList items={vm.knowAbout} accent={accent} />
+              </Section>
+            )}
+            {vm.goodAt.length > 0 && (
+              <Section id="good-at" title="What you would need to be good at">
+                <DotList items={vm.goodAt} accent={accent} />
+              </Section>
+            )}
+          </div>
+        )}
+
+        {tab === "software" && vm.software.length === 0 && <TabComingSoon title="Software" career={career.title} />}
+
+        {tab === "software" && vm.software.length > 0 && (
+          <Section id="software" title="Software you would use">
+            <DotList items={vm.software} accent={accent} />
+          </Section>
+        )}
+
+        {tab === "education" && !vm.education && <TabComingSoon title="Education" career={career.title} />}
+
+        {tab === "education" && vm.education && (
+          <Section id="education" title="Education">
+            {/* dreamari.com's two lists, every row a door: see WhereToStudy */}
+            <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerSlug={career.slug} />
+          </Section>
+        )}
+
+        {/* Not for me, after the student has read about the career, not
+           before: it trains recommendations (the feedback says so), it is
+           not a list. Like ("More like this") was removed 8 Oct 2026: on the
+           7 Oct review call Joshua decided "we can remove the like and then
+           just keep it as saved", since Save already says the student likes
+           it and a like shows nowhere. */}
+        <section aria-label="Not a fit for you?" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={PANEL}>
+          <span className={`${LABEL}`}>Not a fit for you?</span>
+          <LabPill small on={reaction === "nope"} busy={lab.pending === `react:${career.slug}`} onClick={() => react(career.slug, "nope")} icon={<ThumbsDown className="h-4 w-4" aria-hidden fill={reaction === "nope" ? "currentColor" : "none"} />} ariaLabel="Not for me: fewer like this">Not for me</LabPill>
+        </section>
+
+        {/* Careers like this one stays outside the tab system, at the
+           bottom of the page regardless of which tab is open -- same
+           placement College Detail gives Similar Schools (15 Sept 2026
+           direct feedback: "Keep careers like this one on the bottom"). */}
+        {similar.length > 0 && (
+          <Section title="Careers like this one">
+            {/* md:-mx-8 md:px-8 (not md:mx-0 md:px-0) -- mirrors `main`'s own
+               md:px-8 so the rail bleeds to the true edge and re-pads back to
+               the same content line, the same convention every other card
+               rail in the app uses (Home, College Detail's Similar Schools).
+               Zeroing the margin/padding on desktop, as this rail used to,
+               left no trailing space for the last card to fade into --
+               it just hard-clipped at the container edge (16 Sept 2026). */}
+            <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
+              {similar.map((c) => (
+                <PosterCard key={c.title} career={c} onClick={() => (live && openCareerPeek(careerSlug(c.title))) || router.push(careerHref(careerSlug(c.title), live))} />
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {openFact === "degree" && vm.details?.degree && (
+          <DegreeSheet
+            career={career.title}
+            accent={accent}
+            detail={vm.details.degree}
+            source={/Bureau of Labor Statistics/i.test(vm.sources ?? "") ? "U.S. Bureau of Labor Statistics" : undefined}
+            onMore={vm.education ? () => { setOpenFact(null); openTab("education"); } : undefined}
+            onClose={() => setOpenFact(null)}
+          />
+        )}
+
+        {vm.sources && (
+          <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{vm.sources}</p>
+        )}
+        {!inSheet && <CareerDetailV2Switch />}
+      </main>
+
+      {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}
+      {!inSheet && <LabLayer dock={!live} />}
+
+      {!inSheet && <MobileNav active="Explore" />}
+    </div>
+  );
+}

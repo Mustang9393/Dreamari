@@ -718,13 +718,15 @@ html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-c
      a tight gap above it with no line; a trailing data note does too.
    No overflow is set anywhere here, so chart glows still spill freely. */
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] {
-  --v4-section-gap: 64px;
-  --v4-section-tight: 28px;
+  /* doubled 20 Oct 2026 (Chandu: "Increase spacing and breathing room 2x
+     everywhere"); was 64 / 28, 72 wide, 40 / 20 on phones */
+  --v4-section-gap: 128px;
+  --v4-section-tight: 56px;
   --v4-section-rule: color-mix(in srgb, var(--foreground) 16%, transparent);
 }
 html:not(.dark) [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-rule: color-mix(in srgb, var(--foreground) 18%, transparent); }
-@media (min-width: 1800px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-gap: 72px; } }
-@media (max-width: 767px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-gap: 40px; --v4-section-tight: 20px; } }
+@media (min-width: 1800px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-gap: 144px; } }
+@media (max-width: 767px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] { --v4-section-gap: 80px; --v4-section-tight: 40px; } }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections { gap: 0 !important; row-gap: 0 !important; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections > * { margin-top: 0 !important; margin-bottom: 0 !important; }
 /* the rhythm owns the space between sections, so the open sections that
@@ -759,7 +761,7 @@ html:not(.dark) [data-counselor-version="v4"] .v4-workspace[data-visual-refresh]
 /* The student profile is a bento of cards: the card edges already part
    them, so they keep a card gutter (24px, both ways) instead of the page
    gap, which would leave a 64px canyon between neighbouring cards. */
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile { row-gap: 24px !important; column-gap: 24px !important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile { row-gap: 24px !important; column-gap: 32px !important; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile-stack,
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-profile-stack > .grid { gap: 24px !important; }
 
@@ -788,3 +790,42 @@ html:not(.dark) [data-counselor-version="v4"] .v4-workspace :is([style*="backgro
   border-color: rgba(255,255,255,.85) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 12px 30px -22px rgba(40,54,110,.38);
 }
+
+/* The page title is the area's pages (20 Oct 2026, Chandu: "the tab row on
+   top like directory/milestones is very hard to see. Nobody notices them").
+   Row 1: every page of the area at title size, this one in full ink over a
+   blue underline, the rest muted (they darken on hover). Row 2: the purpose
+   line on the left, the page's filters on the right. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading.v4-ph {display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:14px;margin:18px 0 40px}
+[data-counselor-version="v4"] .v4-title-tabs {display:flex;flex-wrap:wrap;align-items:flex-end;column-gap:36px;row-gap:6px}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt {position:relative;margin:0;padding:0 0 10px;font-size:34px;line-height:1.1;font-weight:500;letter-spacing:-1.2px;white-space:nowrap;color:color-mix(in srgb,var(--foreground) 34%,transparent);transition:color .15s}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading a.v4-tt:hover,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading a.v4-tt:focus-visible {color:color-mix(in srgb,var(--foreground) 72%,transparent)}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt.is-on {color:var(--foreground)}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt.is-on:not(.is-solo)::after {content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--primary)}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt.is-solo {padding-bottom:0}
+[data-counselor-version="v4"] .v4-ph-row {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px}
+[data-counselor-version="v4"] .v4-ph-row .v4-page-purpose {margin:0}
+[data-counselor-version="v4"] .v4-title-pick {display:none}
+@media (max-width:767px){
+ [data-counselor-version="v4"] .v4-title-tabs {display:none}
+ [data-counselor-version="v4"] .v4-title-pick {display:block}
+ [data-counselor-version="v4"] .v4-title-pick .v4-title-select {height:auto;min-width:0;padding:4px 0;border:0;background:transparent;box-shadow:none;font-size:28px;font-weight:500;letter-spacing:-1px;color:var(--foreground)}
+}
+@media (max-width:1100px) and (min-width:768px){[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt {font-size:28px}[data-counselor-version="v4"] .v4-title-tabs {column-gap:26px}}
+
+/* the purpose line can be hidden on a page (Review, Assist); the filters stay right */
+[data-counselor-version="v4"] .v4-ph-row .v4-page-controls {margin-left:auto}
+[data-counselor-version="v4"] .v4-secondary-nav:empty {display:none}
+/* one face for every title tab, selected or not (20 Oct 2026, Chandu: "the
+   tabs switch fonts when i select them vs not": the selected one is the
+   page's h1 and took the display face, the links took the body face) */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt {font-family:var(--font-display)!important;letter-spacing:-.02em!important;font-weight:500!important}
+/* the search keeps the right edge now that the page tabs left this row */
+[data-counselor-version="v4"] .v4-nav-context .v4-search {margin-left:auto}
+
+/* Composition pass (20 Oct 2026, Chandu: "awkward gaps and misaligned
+   elements"). A folded section is one line, so it takes the tight gap on
+   both sides instead of a full section gap (Readiness' Gaps, My Impact's
+   ASCA and District Goals each cost ~260px of air folded). And a summary
+   strip belongs to the content it summarises (Milestones). */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections.v4-sections.v4-sections.v4-sections > .v4-ms-overview + * { margin-top: var(--v4-section-tight) !important; padding-top: 0 !important; border-top: 0 !important; }

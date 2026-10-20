@@ -1,0 +1,247 @@
+/* Layout 2 (20 Oct 2026). Chandu: "the hero is still cluttered and the
+   spacing isnt improving anywhere, things are all tight and crowded
+   everywhere. We need to seriously rethink the design. If we need to use
+   boxes to organise stuff where needed try that too."
+
+   The rules, from the research (NN/g on cards and dashboards, PatternFly's
+   dashboard guidelines, Gestalt proximity and common region, Stripe's
+   dashboard): group by enclosure, one card per glance question, never a
+   card inside a card; three spacing tiers (tight 8 inside a label/value
+   pair, 16-24 between things in a card, 24 between cards and ~96 between
+   groups) instead of one huge gap everywhere, which blurred groups and
+   left the insides cramped; generous padding inside a card (28-32); the
+   most important figure top-left; hierarchy from type size and weight,
+   color only for state. */
+
+[data-counselor-version="v4"] {
+  --v4-box-pad: 28px;
+  --v4-box-gap: 24px;
+  --v4-box-radius: 20px;
+}
+@media (min-width:1280px){ [data-counselor-version="v4"] { --v4-box-pad: 32px; } }
+@media (max-width:767px){ [data-counselor-version="v4"] { --v4-box-pad: 20px; --v4-box-gap: 16px; } }
+
+/* the card: one surface, one radius, a hairline edge and a soft lift */
+[data-counselor-version="v4"] .v4-box {
+  position: relative; min-width: 0;
+  padding: var(--v4-box-pad);
+  border-radius: var(--v4-box-radius);
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+  box-shadow: 0 1px 2px rgba(20,30,70,.05), 0 12px 32px -20px rgba(20,30,70,.22);
+}
+html.dark [data-counselor-version="v4"] .v4-box {
+  background: color-mix(in srgb, var(--card) 88%, #ffffff 4%);
+  border-color: rgba(255,255,255,.08);
+  box-shadow: 0 16px 40px -24px rgba(0,0,0,.7);
+}
+
+/* the rhythm between page sections: 96px between groups (1.5x the old
+   64, the 2x canyon read as disconnected), a 32px tight gap under a
+   section's own controls */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh][data-visual-refresh] { --v4-section-gap: 96px; --v4-section-tight: 32px; }
+@media (min-width:1800px){ [data-counselor-version="v4"] .v4-workspace[data-visual-refresh][data-visual-refresh] { --v4-section-gap: 112px; } }
+@media (max-width:767px){ [data-counselor-version="v4"] .v4-workspace[data-visual-refresh][data-visual-refresh] { --v4-section-gap: 64px; --v4-section-tight: 24px; } }
+
+/* ---- Home's hero ---- */
+[data-counselor-version="v4"] .v4h { display:flex; flex-direction:column; gap:32px; }
+[data-counselor-version="v4"] .v4h-top { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:20px 32px; }
+[data-counselor-version="v4"] .v4h-date { display:block; font-size:12px; font-weight:600; letter-spacing:1.4px; text-transform:uppercase; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4h-hello h1 { margin:10px 0 0; font-family:var(--font-display); font-size:clamp(32px,3.2vw,44px); line-height:1.08; font-weight:500; letter-spacing:-.02em; color:var(--foreground); }
+[data-counselor-version="v4"] .v4h-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+[data-counselor-version="v4"] .v4h-actions :is(.v4-primary-action,.v4-secondary-action) { height:44px; margin:0; padding:0 20px; border-radius:12px; font-size:14px; gap:10px; }
+[data-counselor-version="v4"] .v4h-scope { display:flex; }
+[data-counselor-version="v4"] .v4h-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--v4-box-gap); }
+[data-counselor-version="v4"] .v4h-card { display:flex; flex-direction:column; align-items:flex-start; gap:10px; text-align:left; color:var(--foreground); }
+[data-counselor-version="v4"] .v4h-card-link { cursor:pointer; transition:box-shadow .2s, transform .2s; }
+@media (hover:hover){ [data-counselor-version="v4"] .v4h-card-link:hover { transform:translateY(-1px); box-shadow:0 1px 2px rgba(20,30,70,.06), 0 18px 40px -22px rgba(20,30,70,.32); } }
+[data-counselor-version="v4"] .v4h-label { font-size:13px; font-weight:600; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4h-big { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 12px; margin-top:6px; text-align:left; color:var(--foreground); cursor:pointer; }
+[data-counselor-version="v4"] .v4h-big strong { font-family:var(--font-display); font-size:52px; line-height:1; font-weight:500; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+[data-counselor-version="v4"] .v4h-big strong.is-risk { color:var(--destructive); }
+[data-counselor-version="v4"] .v4h-big>span { font-family:var(--font-display); font-size:22px; line-height:1.2; font-weight:500; letter-spacing:-.01em; }
+[data-counselor-version="v4"] .v4h-sub { font-size:14px; line-height:1.5; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4h-sub b { font-weight:600; color:var(--foreground); }
+[data-counselor-version="v4"] .v4h-link { color:inherit; cursor:pointer; text-decoration:underline; text-decoration-color:transparent; text-underline-offset:3px; }
+[data-counselor-version="v4"] .v4h-link:hover { text-decoration-color:currentColor; color:var(--foreground); }
+[data-counselor-version="v4"] .v4h-updates { display:flex; flex-direction:column; gap:14px; width:100%; margin:2px 0 0; padding:0; list-style:none; }
+[data-counselor-version="v4"] .v4h-update { display:flex; flex-direction:column; gap:2px; width:100%; text-align:left; cursor:pointer; border-radius:8px; }
+[data-counselor-version="v4"] .v4h-update strong { font-size:15px; font-weight:600; color:var(--foreground); }
+[data-counselor-version="v4"] .v4h-update span { font-size:13px; color:var(--muted-foreground); }
+@media (hover:hover){ [data-counselor-version="v4"] .v4h-update:hover strong, [data-counselor-version="v4"] .v4h-big:hover span { text-decoration:underline; text-underline-offset:3px; } }
+@media (max-width:1023px){ [data-counselor-version="v4"] .v4h-cards { grid-template-columns:minmax(0,1fr); } [data-counselor-version="v4"] .v4h-card { min-height:0; } }
+
+/* ---- Home's two lists: each a card, a steady gutter, roomier rows ---- */
+[data-counselor-version="v4"] .v4-home-lists.v4-home-lists { gap:var(--v4-box-gap); grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); align-items:stretch; }
+[data-counselor-version="v4"] .v4-box.v4-home-list { gap:24px; }
+[data-counselor-version="v4"] .v4-box.v4-home-list .v4-home-row { padding:16px 0; }
+[data-counselor-version="v4"] .v4-box.v4-home-list .v4-home-rows>li:first-child { border-top:1px solid var(--v4-line); }
+/* the hero and the lists belong together: a card gutter's worth more, no rule */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections.v4-sections.v4-sections.v4-sections > .v4-home-lists { margin-top:40px !important; padding-top:0 !important; border-top:0 !important; }
+
+/* ---- One card for every panel (layout 2) ----
+   Every existing v4 panel (.v4-surface and the named sheets) takes the
+   card above: an opaque card surface on the page's tinted canvas (the
+   translucent glass read as no box at all in light mode), one radius, a
+   hairline edge, a soft lift, and the card padding. The analytics pages'
+   sections had been opened up onto one canvas on purpose (10 Oct); with
+   the new rule ("use boxes to organise stuff where needed") each of their
+   sections is a card again, so Readiness, Engagement and My Impact read
+   as a set of answers rather than one long sheet. */
+[data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] :is(.v4-surface.v4-surface,.v4-focus-sheet,.v4-review-island,.v4-progress-landscape,.v4-pathways-sheet,.v4-destination-sheet,.v4-interest-explorer,.v4-roster-table) {
+  background: var(--card) !important;
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent) !important;
+  border-radius: var(--v4-box-radius) !important;
+  box-shadow: 0 1px 2px rgba(20,30,70,.05), 0 12px 32px -20px rgba(20,30,70,.22) !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+}
+html.dark [data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] :is(.v4-surface.v4-surface,.v4-focus-sheet,.v4-review-island,.v4-progress-landscape,.v4-pathways-sheet,.v4-destination-sheet,.v4-interest-explorer,.v4-roster-table) {
+  background: color-mix(in srgb, var(--card) 88%, #ffffff 4%) !important;
+  border-color: rgba(255,255,255,.08) !important;
+  box-shadow: 0 16px 40px -24px rgba(0,0,0,.7) !important;
+}
+/* the analytics sections boxed again, with the card padding */
+[data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] :is(.v4-readiness,.v4-engagement,.v4-impact-report) > .v4-surface.v4-surface,
+[data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] :is(.v4-engagement-chart,.v4-engagement-checkins) > .v4-surface.v4-surface {
+  padding: var(--v4-box-pad) !important;
+}
+/* Engagement's four figures: each its own small card */
+[data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] .v4-engagement-stats { gap: var(--v4-box-gap) !important; }
+[data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] .v4-engagement-stats > * {
+  padding: 24px 28px !important; border-radius: var(--v4-box-radius) !important; background: var(--card) !important;
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent) !important;
+  box-shadow: 0 1px 2px rgba(20,30,70,.05), 0 12px 32px -20px rgba(20,30,70,.22) !important;
+}
+[data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] .v4-engagement-stats > * + * { border-left: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent) !important; padding-left: 28px !important; }
+/* a card already separates itself: no hairline rule above a card section */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections.v4-sections.v4-sections.v4-sections.v4-sections > :is(.v4-surface, .v4-box) { border-top-width: 1px !important; padding-top: var(--v4-box-pad) !important; margin-top: 32px !important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections.v4-sections.v4-sections.v4-sections.v4-sections > :is(.v4-engagement-chart, .v4-engagement-checkins, .v4-engagement-stats) { border-top: 0 !important; padding-top: 0 !important; margin-top: 40px !important; }
+
+/* equal-height hero cards: a footer link pinned to the bottom of each, so a
+   short card is balanced, not hollow (the equal-heights rule) */
+[data-counselor-version="v4"] .v4h-foot { margin-top:auto; padding-top:12px; font-size:13.5px; font-weight:600; color:var(--primary); cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+[data-counselor-version="v4"] .v4h-foot:hover { text-decoration:underline; text-underline-offset:3px; }
+/* list footers on one line across the two Home cards */
+[data-counselor-version="v4"] .v4-box.v4-home-list .v4-home-more { margin-top:auto; }
+[data-counselor-version="v4"] span.v4h-big { cursor:default; }
+
+/* a folded card is one even row: the same padding top and bottom, the
+   same 32px card gap above and below as any card */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections.v4-sections.v4-sections.v4-sections.v4-sections.v4-sections > :is(.v4-surface,.v4-box):has(h2 > button[aria-expanded="false"]) { padding-block: 22px !important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections.v4-sections.v4-sections.v4-sections.v4-sections.v4-sections > :is(.v4-surface,.v4-box):has(h2 > button[aria-expanded="false"]) h2 { margin:0 !important; }
+
+/* Readiness' four indicators: each a card like the rest of the page; the
+   picked one keeps its blue edge (it chooses the list at the foot) */
+[data-counselor-version="v4"] .v4-iv-tiles.v4-iv-tiles { gap: var(--v4-box-gap); }
+[data-counselor-version="v4"] .v4-iv-tiles .v4-iv-tile.v4-iv-tile { padding: 24px 40px 24px 24px; border-radius: var(--v4-box-radius); background: var(--card); border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent); box-shadow: 0 1px 2px rgba(20,30,70,.05), 0 12px 32px -20px rgba(20,30,70,.22); }
+[data-counselor-version="v4"] .v4-iv-tiles .v4-iv-tile.v4-iv-tile.is-on { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary), 0 12px 32px -20px rgba(20,30,70,.22); background: var(--card); }
+html.dark [data-counselor-version="v4"] .v4-iv-tiles .v4-iv-tile.v4-iv-tile { background: color-mix(in srgb, var(--card) 88%, #ffffff 4%); border-color: rgba(255,255,255,.08); }
+
+/* College & Career: schools and majors as two cards side by side (the
+   divider between them goes), Postsecondary Direction as a card */
+[data-counselor-version="v4"] .v4-cc-split.v4-cc-split { gap: var(--v4-box-gap) !important; align-items: stretch !important; }
+[data-counselor-version="v4"] .v4-cc-split > .v4-box { border-left: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent) !important; padding: var(--v4-box-pad) !important; }
+[data-counselor-version="v4"] .v4-cc-split::before, [data-counselor-version="v4"] .v4-cc-split::after { display: none !important; }
+
+/* Student profile: a wider identity column so the ID card and what needs
+   you are not cramped; milestone rows are plain hairline rows inside their
+   card, not a shadowed box each (a card in a card) */
+@media (min-width:1100px){ [data-counselor-version="v4"] .v4-profile.v4-profile { grid-template-columns: 360px minmax(0,1fr) !important; } }
+[data-counselor-version="v4"] .v4-student-milestone-row.v4-student-milestone-row { border: 0 !important; border-bottom: 1px solid var(--v4-line) !important; box-shadow: none !important; border-radius: 0 !important; padding: 16px 0 !important; }
+
+/* Meetings: the week's list is a card, full width (the hero and past
+   meetings above are already cards) */
+[data-counselor-version="v4"] .mtg-coming.mtg-coming { padding: var(--v4-box-pad); border-radius: var(--v4-box-radius); background: var(--card); border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent); box-shadow: 0 1px 2px rgba(20,30,70,.05), 0 12px 32px -20px rgba(20,30,70,.22); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections.v4-sections.v4-sections.v4-sections.v4-sections.v4-sections > .mtg-coming.mtg-coming { margin-top: 32px !important; border-top-width: 1px !important; padding-top: var(--v4-box-pad) !important; }
+html.dark [data-counselor-version="v4"] .mtg-coming.mtg-coming { background: color-mix(in srgb, var(--card) 88%, #ffffff 4%); border-color: rgba(255,255,255,.08); }
+[data-counselor-version="v4"] .v4-sid-who p { white-space: normal !important; }
+/* From Interest to Experience is a card: the same 32px gap as the cards above */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-sections.v4-sections.v4-sections.v4-sections.v4-sections.v4-sections > .v4-section-panel { margin-top: 32px !important; }
+/* the support flag sits on the note's first line, not alone above it */
+[data-counselor-version="v4"] .v4-profile-summary li:has(> svg.lucide-flag) { flex-wrap: nowrap !important; align-items: flex-start !important; line-height: 1.5 !important; }
+[data-counselor-version="v4"] .v4-profile-summary li > svg.lucide-flag { margin-top: 4px; }
+[data-counselor-version="v4"] .mtg-coming.mtg-coming { max-width: none !important; width: 100% !important; }
+
+/* the page's own controls on the title row, ahead of the shell's pickers */
+[data-counselor-version="v4"] .v4-page-controls { gap: 12px; }
+[data-counselor-version="v4"] .v4-ph-own { order: -1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+[data-counselor-version="v4"] .v4-ph-own .msg-toolbar { gap: 12px 20px; }
+/* Messages' inbox rows: more air per row */
+[data-counselor-version="v4"] .msg-row.msg-row { padding-block: 14px !important; }
+
+/* ==== Calm, on Black & Blue (20 Oct 2026) ====
+   Chandu: "v4 is still cluttered like hell. Use our design system, clean
+   it up. It should not overwhelm the users, these are busy people with a
+   huge caseload ... easy and calm and simple to scan and look at without
+   feeling like a bunch of numbers are jumping out at them." Black & Blue
+   (the student app's default look, what v7 is built on) is v4's default
+   now. The rules: v7's surfaces (glass-surface-2 on the glass border, no
+   drop shadow, the 16px radius); labels as small uppercase overlines;
+   figures smaller and in plain foreground ink, never red or amber (state
+   is a dot and a word); no rings, glows or warning lights around numbers. */
+
+/* surfaces: v7's card, in both the box system and the old panels */
+html.dark [data-counselor-version="v4"] .v4-box,
+html.dark [data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] :is(.v4-surface.v4-surface,.v4-focus-sheet,.v4-review-island,.v4-progress-landscape,.v4-pathways-sheet,.v4-destination-sheet,.v4-interest-explorer,.v4-roster-table),
+html.dark [data-counselor-version="v4"][data-counselor-version] .v4-workspace[data-visual-refresh] .v4-engagement-stats > *,
+html.dark [data-counselor-version="v4"] .v4-iv-tiles .v4-iv-tile.v4-iv-tile,
+html.dark [data-counselor-version="v4"] .mtg-coming.mtg-coming {
+  background: var(--glass-surface-2) !important;
+  border-color: var(--glass-border) !important;
+  box-shadow: none !important;
+}
+[data-counselor-version="v4"] { --v4-box-radius: 16px; }
+
+/* labels: the small uppercase overline v7 uses */
+[data-counselor-version="v4"] .v4h-label,
+[data-counselor-version="v4"] .v4-iv-tile-label,
+[data-counselor-version="v4"] .v4-engagement-stat > span:first-child,
+[data-counselor-version="v4"] .ev-activity-label,
+[data-counselor-version="v4"] .iv-ledger-text small {
+  font-size: 12px !important; line-height: 16px !important; font-weight: 600 !important; letter-spacing: .08em !important; text-transform: uppercase !important; color: var(--muted-foreground) !important;
+}
+
+/* figures: smaller, plain ink */
+[data-counselor-version="v4"] .v4h-big strong { font-size: 40px; font-weight: 600; }
+[data-counselor-version="v4"] .v4h-big > span { font-size: 18px; color: var(--muted-foreground); }
+[data-counselor-version="v4"] .v4h-dot { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; vertical-align: 1px; background: var(--color-feedback-danger-solid, var(--destructive)); }
+[data-counselor-version="v4"] .v4-engagement-stat-value.v4-engagement-stat-value { font-size: 32px !important; font-weight: 600 !important; }
+[data-counselor-version="v4"] .ev-activity-figure { font-size: 26px !important; font-weight: 600 !important; }
+[data-counselor-version="v4"] .v4-inactive-tile strong { font-size: 28px !important; font-weight: 600 !important; }
+[data-counselor-version="v4"] .ev-warn-light { display: none !important; }
+[data-counselor-version="v4"] .iv-ledger-fig { color: var(--foreground) !important; font-size: 22px !important; }
+[data-counselor-version="v4"] .v4-home-review-fig strong { font-size: 32px; }
+/* Milestones' summary: no amber numeral, no glowing ring */
+[data-counselor-version="v4"] .v4-ms-summary .v4-ms-summary-link span[style] { color: var(--foreground) !important; }
+[data-counselor-version="v4"] .v4-ms-summary .is-hero .msv-ring-glow,
+[data-counselor-version="v4"] .v4-ms-summary .is-hero [class*="glow"] { display: none !important; }
+/* Readiness: the indicator is its number, not a tick ring */
+[data-counselor-version="v4"] .v4-iv-tiles .v4-iv-gauge svg { display: none; }
+[data-counselor-version="v4"] .v4-iv-tiles .v4-iv-gauge { width: auto !important; height: auto !important; }
+[data-counselor-version="v4"] .v4-iv-tiles .v4-iv-gauge-center { position: static !important; font-size: 30px !important; font-weight: 600 !important; }
+[data-counselor-version="v4"] .v4-iv-tiles.is-gauge .v4-iv-tile { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+[data-counselor-version="v4"] .v4-iv-tiles .v4-iv-tile.is-on { box-shadow: inset 0 0 0 1px var(--primary) !important; }
+
+/* section titles: one size everywhere, v7's weight */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-r2-title,.v4-card-head h2,.v4-engagement-chart h2,.v4-readiness h2,.v4-section-head h2,.v4-ms-grade-head h2) { font-size: 22px !important; font-weight: 600 !important; letter-spacing: -.01em; font-family: var(--font-display); }
+
+/* Milestones, calm: the cards wear the same glass as every card; the tick
+   gauge, the grade heads' little rings and the summary's glowing ring go,
+   the percentage stays as plain type (seven rings in a row was a wall of
+   dials) */
+html.dark [data-counselor-version="v4"] .v4-msc.v4-msc { background: var(--glass-surface-2) !important; border: 1px solid var(--glass-border) !important; box-shadow: none !important; }
+html.dark [data-counselor-version="v4"] .v4-msc.v4-msc::before { display: none !important; }
+[data-counselor-version="v4"] .v4-msc .msv-gauge svg { display: none !important; }
+[data-counselor-version="v4"] .v4-msc .msv-gauge { width: auto !important; height: auto !important; }
+[data-counselor-version="v4"] .v4-msc .msv-gauge-center { position: static !important; transform: none !important; }
+[data-counselor-version="v4"] .v4-msc .v4-msc-pct { font-size: 32px !important; }
+[data-counselor-version="v4"] .v4-msc-body.v4-msc-body { min-height: 0 !important; gap: 24px !important; }
+[data-counselor-version="v4"] .v4-ms-grade-pct svg, [data-counselor-version="v4"] .v4-ms-grade-pct .msv-ring { display: none !important; }
+[data-counselor-version="v4"] .v4-ms-summary .msv-ring, [data-counselor-version="v4"] .v4-ms-summary .msv-ring-glow, [data-counselor-version="v4"] .v4-ms-summary svg { display: none !important; }
+[data-counselor-version="v4"] .v4-ms-summary .v4-ms-summary-link svg { display: inline !important; }
+
+/* Engagement and every glow chart, calm: the orbs keep their dot and lose
+   the wide halo; no glowing chips around the readout */
+[data-counselor-version="v4"] .gl-orb-halo { display: none !important; }
+[data-counselor-version="v4"] .v4-status.v4-status-dot { display: inline-flex; align-items: center; gap: 7px; color: var(--foreground) !important; font-weight: 600; }
+[data-counselor-version="v4"] .v4-status.v4-status-dot > i { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--status-color); }

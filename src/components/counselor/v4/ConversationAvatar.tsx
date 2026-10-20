@@ -41,8 +41,10 @@ export type ConversationAvatarStyle = "line" | "portrait" | DiceBearKey;
 const FAVOURITES: DiceBearKey[] = ["big-smile", "voxel-art", "sprouts"];
 const optionOf = (k: DiceBearKey) => { const st = DICEBEAR_STYLES.find((x) => x.key === k)!; return { value: st.key as ConversationAvatarStyle, label: "animated" in st ? `${st.label} · animated` : st.label }; };
 export const AVATAR_STYLE_OPTIONS: { value: ConversationAvatarStyle; label: string }[] = [
+  // the default first (20 Oct 2026), then Portraits and the other favourites
+  optionOf("voxel-art"),
   { value: "portrait", label: "Portraits" },
-  ...FAVOURITES.map(optionOf),
+  ...FAVOURITES.filter((k) => k !== "voxel-art").map(optionOf),
   { value: "line", label: "Line art" },
   ...DICEBEAR_STYLES.filter((x) => !FAVOURITES.includes(x.key)).map((x) => optionOf(x.key)),
 ];

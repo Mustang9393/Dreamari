@@ -26,8 +26,8 @@ const H = 330;
 
 /** Carousel or row (Chandu, 7 Oct 2026: "a toggle to have them in a proper
  *  row too for easier scanning; the other mode can keep auto-rotating"). */
-export function Coverflow({ items, label, mode = "cover" }: { items: CoverItem[]; label: string; mode?: "cover" | "row" }) {
-  if (mode === "row") return <RowView items={items} label={label} />;
+export function Coverflow({ items, label, mode = "cover", roomy = false }: { items: CoverItem[]; label: string; mode?: "cover" | "row"; /** row mode: more air between posters so a rank numeral never meets the card before it (v7, 20 Oct 2026) */ roomy?: boolean }) {
+  if (mode === "row") return <RowView items={items} label={label} roomy={roomy} />;
   return <CarouselView items={items} label={label} />;
 }
 
@@ -163,9 +163,9 @@ function CarouselView({ items, label }: { items: CoverItem[]; label: string }) {
  *  ranked cards, numerals and all (Chandu, 7 Oct 2026: "when I toggle to
  *  row view it should show the row with the numbers like in explore
  *  careers"). The student count rides on the card, the carousel's chip. */
-function RowView({ items, label }: { items: CoverItem[]; label: string }) {
+function RowView({ items, label, roomy = false }: { items: CoverItem[]; label: string; roomy?: boolean }) {
   return (
-    <ol aria-label={label} className="poster-row -mx-5 flex gap-[var(--space-5)] overflow-x-auto px-5 py-4 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]">
+    <ol aria-label={label} className={`poster-row -mx-5 flex ${roomy ? "gap-[48px] sm:gap-[72px]" : "gap-[var(--space-5)]"} overflow-x-auto px-5 py-4 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]`}>
       {items.map((it) => (
         <li key={it.key} className="relative flex-none">
           <RankedPosterCard career={{ title: it.title, world: it.world, photo: it.photo }} rank={it.rank} onClick={it.onOpen} />
