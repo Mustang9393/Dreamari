@@ -15,7 +15,7 @@ export const SKY_EVENT = "dreamari:sky";
 //
 // Where moments fire (keep this list current):
 //   big   Top 3 gains a career (picks.ts) · Build finished (buildAnswers.ts)
-//         · a new Career Report version (reportHistory.ts) · a simulation's
+//         · the College Goal first chosen (About Me picker) · a new Career Report version (reportHistory.ts) · a simulation's
 //         ten beats done (play/progress.ts) · a Glossary lesson finished the
 //         first time (glossary/progress.ts) · applied to or won an
 //         opportunity (opportunities.ts) · booked a counselor meeting

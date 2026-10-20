@@ -1,3 +1,13 @@
+## 2026-10-21: College Goal chosen on the cards, the Career Goal's way
+
+**Why (Chandu):** "in the college goal let student save their colleges and also set one as their goal from the cards itself. How can we match the Interaction and flow of the career goal here?" Before, the picker's cards only opened the school page, where "Choose this school" set the goal: one step more than the Career Goal, with different words.
+
+- **Cards (`CollegeGoalPicker.tsx`, new `actions` slot on `SchoolCard` in `colleges/shared.tsx`):** each card has the Top 3 card's two buttons, Learn more (the school page in the sheet) and Make my goal, in the same `.t3s-*` styles; the bookmark still saves. The school page's button now says Make my goal too.
+- **First-visit nudge:** the first card teaches Make my goal, then the bookmark (`useSpotSequence`, key `college-goal-cards`), as Top 3 teaches its arrows and X.
+- **The beat (`AboutMeTab.tsx` onPick):** XP flies from the button at once; the card says "My goal" with a `StarBurst`; after 1.1s the goal is stored, the sheet closes, the College Goal card focuses in and a big `skyMoment` fires (listed in `lib/sky.ts`). The goal is stored only at close so the focus-in isn't spent behind the sheet.
+- **Fix (`SpotTip.tsx`):** React's dev double-run of effects cancelled a sequence that started at once (anchor already on screen) and left it marked started, so it never played in dev. The unmount cleanup now un-starts it.
+- Checked: tsc/eslint clean; dark mode at desktop and 375 wide on :3018: both nudge beats, My goal + burst, sheet closes, card focuses in.
+
 ## 2026-10-20: My Build's sky and stars back; softer spotlight and Top 3 nudges
 
 **Why (Chandu):** "the my build when collapsed on open should still have that gradient blue black look we used to have", "lose the AI icon. Use something better or some starry hover stuff we did for the v7 cards", "the success moments could look really nice with the stars pulse and shooting star stuff... without it being always playing"; then "the current highlight and glow for the click on any line to change it is too sharp", and "the nudges in top 3 inside about me is also a little too much or not really catching the eye".

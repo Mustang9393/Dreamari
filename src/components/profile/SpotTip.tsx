@@ -58,7 +58,9 @@ export function useSpotSequence<B extends string>(key: string, beats: readonly B
     if (started.current) markSeen(key);
     setBeat(null);
   };
-  useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
+  // an unmount mid-play (or React's dev double-run of effects) cancels the
+  // beats; un-start too, so a remount plays them instead of thinking it has
+  useEffect(() => () => { if (timers.current.length) started.current = false; timers.current.forEach((t) => window.clearTimeout(t)); timers.current = []; }, []);
   useEffect(() => {
     if (!enabled || started.current || seen(key)) return;
     const check = () => {

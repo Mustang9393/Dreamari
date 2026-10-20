@@ -1359,6 +1359,10 @@ html.light .event-card {
   50% { box-shadow: 0 0 0 1px rgba(158, 198, 250, 0.4), 0 0 34px 6px rgba(89, 157, 249, 0.38); }
 }
 .dm-spot-ring { animation: dm-spot-breathe 2.4s ease-in-out infinite; }
+/* a solid button keeps its own fill under the glow */
+.t3s-play.dm-spot { background-color: var(--t3s-world) !important; }
+/* College Goal picker: the first card's bookmark, lit from outside the card */
+.college-goal-save-lit .school-card [aria-pressed] { animation: dm-spot-glow 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; background-color: rgba(47, 107, 242, 0.4) !important; }
 /* a row of text (My Build's "Tap any line"): no ring at all. A wash of
    light passes across the row, slowly, over a faint blue bed */
 @keyframes dm-spot-wash {
@@ -1407,4 +1411,4 @@ html.light .event-card {
 .dm-spot-tip[data-above]::before { top: auto; bottom: -5px; box-shadow: 1px 1px 0 0 rgba(158, 198, 250, 0.7); }
 @media (prefers-reduced-motion: reduce) { .dm-spot-ring { animation: none; box-shadow: 0 0 0 1px rgba(158, 198, 250, 0.4), 0 0 26px 4px rgba(89, 157, 249, 0.32); }
   .dm-spot { animation: none; box-shadow: 0 0 0 1px rgba(158, 198, 250, 0.6), 0 0 18px 3px rgba(89, 157, 249, 0.5); }
-  .dm-spot-soft, .dm-pencil-write, .dm-lean-up, .dm-lean-down, .dm-lean-left, .dm-lean-right { animation: none; } }
+  .dm-spot-soft, .dm-pencil-write, .college-goal-save-lit .school-card [aria-pressed], .dm-lean-up, .dm-lean-down, .dm-lean-left, .dm-lean-right { animation: none; } }
