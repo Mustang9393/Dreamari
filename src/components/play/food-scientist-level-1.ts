@@ -7,7 +7,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
   "role": "Junior Food Scientist",
   "title": "The snack that keeps breaking",
   "blurb": "Investigate an oat snack, compare trials and recommend the next test.",
-  "cover": "/images/play/fs/v1/arrival.png",
+  "cover": "/images/play/fs/v4/arrival.png",
   "mood": "day",
   "hideBand": true,
   "directed": true,
@@ -18,8 +18,8 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
   "qaSkip": true,
   "saveSlot": 601,
   "cast": {
-    "Kiran": "/images/play/fs/face-kiran.webp",
-    "Mei": "/images/play/fs/face-mei.webp"
+    "Ren": "/images/play/fs/face-ren-v4.webp",
+    "Yuki": "/images/play/fs/face-yuki-v4.webp"
   },
   "preGame": {
     "startLabel": "Start the project",
@@ -45,13 +45,13 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
           "kind": "say",
           "heading": "Study what changes a food.",
           "body": "Ingredients and processes affect quality. Tests help you check an idea.",
-          "image": "/images/play/fs/v1/arrival.png"
+          "image": "/images/play/fs/v4/arrival.png"
         },
         {
           "kind": "say",
           "heading": "Know your authority.",
           "body": "You help record and compare. Your supervisor approves work and the quality lead approves tasting.",
-          "image": "/images/play/fs/v1/hold.png"
+          "image": "/images/play/fs/v4/hold.png"
         },
         {
           "kind": "check",
@@ -97,9 +97,9 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "id": "FS1-03",
       "kind": "card",
       "variant": "chapter",
-      "title": "Meet Kiran, your mentor.",
-      "body": "“I’m Kiran, the product development scientist. You will help plan a comparison and write a recommendation. I supervise the lab work.”",
-      "speaker": "Kiran",
+      "title": "Meet Ren, your mentor.",
+      "body": "“I’m Ren, the product development scientist. You will help plan a comparison and write a recommendation. I supervise the lab work.”",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue"
     },
@@ -108,7 +108,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "kind": "card",
       "variant": "chapter",
       "title": "A recommendation, not a launch.",
-      "body": "Mei, the quality lead, approves tasting and further work. You can record, compare and raise questions; you cannot clear a product for sale.",
+      "body": "Yuki, the quality lead, approves tasting and further work. You can record, compare and raise questions; you cannot clear a product for sale.",
       "speaker": "System",
       "system": true,
       "cta": "Continue",
@@ -147,7 +147,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "id": "FS1-07",
       "kind": "choice",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "The oat snack breaks too easily during handling. What should you investigate first?",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -214,7 +214,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "id": "FS1-09",
       "kind": "match",
       "prompt": "Tap a tool, then tap its evidence.",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Match each tool to the evidence it provides.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -274,7 +274,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "id": "FS1-12",
       "kind": "bucket",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Sort each oat-snack note into observation or possible explanation.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -325,8 +325,8 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "kind": "card",
       "variant": "chapter",
       "title": "Your team’s trial plan.",
-      "body": "Kiran proposes replacing 5 g oats with 5 g binder in each 100 g trial. Keep mixing, shaping, storage interval and the test method unchanged.",
-      "speaker": "Kiran",
+      "body": "Ren proposes replacing 5 g oats with 5 g binder in each 100 g trial. Keep mixing, shaping, storage interval and the test method unchanged.",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue",
       "artifact": FS_ARTIFACTS.plan
@@ -334,7 +334,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "id": "FS1-15",
       "kind": "choice",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "You are testing the planned oats-to-binder adjustment. Which comparison best isolates it?",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -381,7 +381,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "id": "FS1-17",
       "kind": "rank",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Order these dependent steps for the oat-snack comparison.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -411,7 +411,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
         "threshold": 65,
         "intro": {
           "kicker": "Mid-project review",
-          "line": "Kiran checks how you planned the trial."
+          "line": "Ren checks how you planned the trial."
         },
         "progressLine": "Reviewing the first five decisions...",
         "pass": {
@@ -458,7 +458,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "id": "FS1-20",
       "kind": "flags",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Find the two record problems that need follow-up.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -508,9 +508,9 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "id": "FS1-22",
       "kind": "card",
       "variant": "chapter",
-      "title": "Mei joins the project.",
-      "body": "“I’m Mei, the quality lead. Sample C’s ingredient record and allergen review are incomplete. Keep it off the tasting tray while I investigate.”",
-      "speaker": "Mei",
+      "title": "Yuki joins the project.",
+      "body": "“I’m Yuki, the quality lead. Sample C’s ingredient record and allergen review are incomplete. Keep it off the tasting tray while I investigate.”",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
       "artifact": FS_ARTIFACTS.hold
@@ -518,7 +518,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "id": "FS1-23",
       "kind": "choice",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "question": "A colleague asks to taste sample C before its ingredient and allergen checks are confirmed. What do you do?",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -534,7 +534,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "choices": [
         {
           "id": "a",
-          "label": "Keep C out of tasting and ask Mei to confirm the checks",
+          "label": "Keep C out of tasting and ask Yuki to confirm the checks",
           "tier": "best",
           "why": "Unknown ingredient and allergen status must be resolved before tasting is considered."
         },
@@ -567,8 +567,8 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "kind": "card",
       "variant": "chapter",
       "title": "The panel has a clear boundary.",
-      "body": "Mei has confirmed that A and B meet the panel protocol. C remains held. You are helping compare texture, not proving a health benefit.",
-      "speaker": "Mei",
+      "body": "Yuki has confirmed that A and B meet the panel protocol. C remains held. You are helping compare texture, not proving a health benefit.",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
       "artifact": FS_ARTIFACTS.sensory
@@ -576,7 +576,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "id": "FS1-26",
       "kind": "pick",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "question": "Choose three methods for comparing the approved A and B samples fairly.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -593,7 +593,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
           "role": "pick"
         },
         {
-          "label": "Say which sample Kiran expects to win.",
+          "label": "Say which sample Ren expects to win.",
           "role": "leave"
         },
         {
@@ -617,8 +617,8 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "kind": "card",
       "variant": "chapter",
       "title": "The handling results are ready.",
-      "body": "Kiran brings the recorded counts. Read the two results and the limits of the test before recommending the next step.",
-      "speaker": "Kiran",
+      "body": "Ren brings the recorded counts. Read the two results and the limits of the test before recommending the next step.",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue",
       "artifact": FS_ARTIFACTS.results
@@ -657,8 +657,8 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "id": "FS1-30",
       "kind": "chain",
-      "speaker": "Kiran",
-      "question": "Build a recommendation to Mei from the oat-snack handling results.",
+      "speaker": "Ren",
+      "question": "Build a recommendation to Yuki from the oat-snack handling results.",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -719,9 +719,9 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "id": "FS1-31",
       "kind": "card",
       "variant": "chapter",
-      "title": "Mei asks a harder question.",
+      "title": "Yuki asks a harder question.",
       "body": "“Your handling test helps. Could we now promise that this snack stays safe for months?”",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue"
     },
@@ -739,8 +739,8 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "id": "FS1-33",
       "kind": "choice",
-      "speaker": "Mei",
-      "question": "Mei asks whether the handling results support a safe shelf-life claim. What do you recommend?",
+      "speaker": "Yuki",
+      "question": "Yuki asks whether the handling results support a safe shelf-life claim. What do you recommend?",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -777,7 +777,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "variant": "chapter",
       "title": "A result someone else can use.",
       "body": "“Keep the batch records, the measured comparison and its limits together. B is a candidate for another test, while C remains held. That is a useful first project.”",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
       "artifact": FS_ARTIFACTS.handover
@@ -788,7 +788,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "variant": "chapter",
       "title": "You made the next test clearer.",
       "body": "“You asked a testable question, kept a comparison fair and named what we still do not know. That is how a food scientist makes progress.”",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue"
     },

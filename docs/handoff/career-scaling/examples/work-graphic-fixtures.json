@@ -53,6 +53,80 @@
         "action": "Open the record",
         "actionPlacement": "after-details"
       }
+    },
+    {
+      "caption": "Synthetic fixture only, no professional process or release approval.",
+      "provenance": "Cross-career renderer fixture; fictional data.",
+      "id": "textile-mixture",
+      "kind": "mixture",
+      "title": "Textile blend comparison",
+      "unit": "g",
+      "batches": [
+        {
+          "label": "Blend 1",
+          "ingredients": [
+            {
+              "label": "Cotton",
+              "amount": 80
+            },
+            {
+              "label": "Linen",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "label": "Blend 2",
+          "ingredients": [
+            {
+              "label": "Cotton",
+              "amount": 60
+            },
+            {
+              "label": "Linen",
+              "amount": 40
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caption": "Synthetic fixture only, no professional process or release approval.",
+      "provenance": "Cross-career renderer fixture; fictional data.",
+      "id": "ceramics-results",
+      "kind": "sample-results",
+      "title": "Ceramic handling study",
+      "scope": "Mock handling counts, not a strength certification.",
+      "samples": [
+        {
+          "label": "Trial X",
+          "broken": 0,
+          "tested": 6
+        },
+        {
+          "label": "Trial Y",
+          "broken": 6,
+          "tested": 6
+        }
+      ]
+    },
+    {
+      "caption": "Synthetic fixture only, no professional process or release approval.",
+      "provenance": "Cross-career renderer fixture; fictional data.",
+      "id": "workshop-hold",
+      "kind": "sample-hold",
+      "title": "Workshop part control",
+      "sampleId": "P17",
+      "checks": [
+        {
+          "label": "Identity",
+          "value": "Unverified"
+        },
+        {
+          "label": "Release",
+          "value": "Not authorised"
+        }
+      ]
     }
   ]
 }

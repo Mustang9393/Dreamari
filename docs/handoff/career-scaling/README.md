@@ -1,6 +1,6 @@
 # Dreamari career game production SOP
 
-Version 1.3 · 20 October 2026 · AI production workflow; UX Designer QA draft.
+Version 1.4 · 20 October 2026 · AI production workflow; UX and Food Scientist QA drafts.
 
 **Outcome:** turn a career name (and an optional source brief) into a playable, reviewable simulation using the existing IB, nursing and aviation engine. The reusable unit is a decision with evidence, choices and consequences. A new career supplies data and art; it does not get a new gameplay implementation.
 
@@ -36,6 +36,22 @@ The only required creative input is the career name. This SOP is an instruction 
 | Aviation Maintenance | Check a standard before sign-off; investigate a discrepancy; keep records; stop and escalate uncertainty | Aircraft parts, torque limits, custom wrench control, illustrated toolbox/hotspots |
 
 Transfer the reasoning pattern, not the nouns alone. A designer investigates usability; a cook checks preparation and timing; an electrician verifies an installation; a musician rehearses and responds to a brief. Do not give every career a boardroom, hospital emergency or maintenance sign-off.
+
+## 1a. Drawing references, casting and workplace design gates
+
+Use the portable [visual reference library](references/README.md) before any generation. It includes actual UX, Nursing and IB files. UX is the primary economical anime drawing reference for new characters; Nursing supports contours and eyes; IB supports professional staging and distinct casting. These references are not interchangeable identity images. More elaborate hair or fabric in an older reference does not override the current simpler character standard.
+
+**Cast before images:** inspect the recent career cast ledger and create `cast-and-style.json` for the new game. Record each named role, age, gender, ethnicity, face shape, eye shape/colour, skin tone, hair silhouette/part, outfit and canonical asset. Compare the lead with at least the last three available career casts. Unless the user or script fixes the identity, deliberately choose a different lead ethnicity and avoid repeating the same gender/age/silhouette combination. When fewer casts exist, compare all available ones. This is a catalogue-level rotation rule, not a demand for every workplace to contain every ethnicity. Record the choice and reason; never infer ethnicity from an image or use caricature, names alone, flags or costume shorthand. Food Scientist now uses Ren Takahashi and Yuki Mori, Japanese colleagues, replacing the automatic Indian mentor default. This is not a global Japanese default for future games.
+
+**Establish one identity per person:** generate a canonical complete scene first; inspect its face at the same display size as the UX anchor. Reject small realistic eyes, sculpted noses, rendered lips/stubble, strand-heavy hair, dense fabric shading or heavy comic outlines. Use that ONE identity image plus the primary drawing anchor in later shots. Check every shot against it, including supporting cast; do not approve a batch based on its first image. Reuse saved scenes for unchanged moments. Pixel identity requires exact file reuse or a measured protected-pixel edit, not fresh generation.
+
+**Design a real workplace before decoration:** derive the actual work zones and equipment from the script and professional sources. Record a room plan, fixed windows/exterior, camera IDs, materials and essential tools. A food product-development lab needs preparation, weighing/testing, covered sample handling and related record/sensory areas where the story uses them; a domestic kitchen or generic science bench fails. A nurse station, aircraft hangar and design studio each need their own accurate work environment. Do not claim regulatory layout compliance from an illustration.
+
+**Opulence and detail are separate:** give the room excellent proportions, layered depth, fitted equipment, architectural ceiling/lighting, sophisticated material combinations and generous functional space. Keep its identity visible. Draw it as a painted anime environment with selective architectural detail, broad material shapes and restrained reflections. Neither a blank generic room nor a photographic archviz render passes. No marble hotel conversion, ornamental gold, mirror-like steel noise, endless jars, individually rendered foliage or indiscriminate prop clutter. Keep people flatter than the room; do not add face/hair detail to match materials. Soft god rays belong only at a plausible window, sun direction and time.
+
+**Required review record:** for each scene record PASS / REPAIR / NOT CHECKED for (1) anime drawing, (2) identity, (3) workplace function, (4) interior design, (5) controlled environment detail, (6) room/exterior continuity, (7) light/time, (8) player eyeline, (9) UI/crop. Document the observation and repair, not a made-up quality percentage. Any repair item blocks that candidate from release; missing human QA remains explicit even when AI checks pass. Keep rejected candidates out of runtime routes. Review one finished scene in the real game before propagating its environment across the shot list.
+
+**Career work graphics:** derive each graphic from what the player actually inspects. Food science uses formulation strips, sample trays, test counts, held-sample records and panel plans. UX uses wireframes, prototypes and research evidence; Nursing uses relevant monitoring and records; IB uses deal evidence and tables. A row of text cards with different nouns is insufficient where the task needs visual comparison. Render readable values and labels natively from the same project record as the question. Preserve units, denominators and unknown states; neither an illustration nor colour alone can carry the key. Use shared instrument/document primitives styled to their medium, keeping game actions distinct.
 
 ## 2. Source hierarchy and scope
 

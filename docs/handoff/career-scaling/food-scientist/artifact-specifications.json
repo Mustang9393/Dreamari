@@ -1,403 +1,239 @@
-[
-  {
+{
+  "brief": {
     "id": "fs-brief",
-    "version": "FS-1.0",
-    "career": "food-scientist",
-    "beats": [
-      "FS1-01",
-      "FS1-04"
-    ],
-    "family": "notes",
-    "objective": "Project card · Sprout oat snack",
-    "canonicalData": "src/components/play/food-scientist-project.json",
-    "content": {
-      "id": "fs-brief",
-      "kind": "notes",
-      "layout": "handover",
-      "title": "Project card · Sprout oat snack",
-      "caption": "Your recommendation supports the next experiment. It does not authorise a product launch.",
-      "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-      "entries": [
-        {
-          "label": "Problem",
-          "text": "The current snack breaks too easily during handling."
-        },
-        {
-          "label": "Your task",
-          "text": "Compare small trials and recommend the next test."
-        },
-        {
-          "label": "Authority",
-          "text": "Kiran supervises lab work. Mei approves tasting and further testing."
-        }
-      ]
-    },
-    "rendering": "Existing shared WorkArtifact notes/flow renderer",
-    "allowedChanges": "Versioned data changes only; no silent mutation between teaching and scored evidence",
-    "keyIds": [],
-    "textEquivalent": "Native HTML labels and entries; flow steps remain native selectable text.",
-    "phone": "Existing single-column responsive renderer; verify labels and CTA remain visible.",
-    "distractors": "Scored records have neutral styling; no flagged or coloured answer annotations.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits."
+    "kind": "notes",
+    "layout": "handover",
+    "title": "Project card · Sprout oat snack",
+    "caption": "Your recommendation supports the next experiment. It does not authorise a product launch.",
+    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+    "entries": [
+      {
+        "label": "Problem",
+        "text": "The current snack breaks too easily during handling."
+      },
+      {
+        "label": "Your task",
+        "text": "Compare small trials and recommend the next test."
+      },
+      {
+        "label": "Authority",
+        "text": "Ren supervises lab work. Yuki approves tasting and further testing."
+      }
+    ]
   },
-  {
+  "plan": {
     "id": "fs-plan",
-    "version": "FS-1.0",
-    "career": "food-scientist",
-    "beats": [
-      "FS1-14",
-      "FS1-15"
-    ],
-    "family": "notes",
-    "objective": "Trial plan · 100 g per batch",
-    "canonicalData": "src/components/play/food-scientist-project.json",
-    "content": {
-      "id": "fs-plan",
-      "kind": "notes",
-      "layout": "handover",
-      "title": "Trial plan · 100 g per batch",
-      "caption": "One planned change: replace 5 g oats with 5 g binder. These are fictional development trials, not a recipe to follow.",
-      "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-      "entries": [
-        {
-          "label": "A",
-          "text": "Oats 60 g · binder 30 g · seeds 10 g"
-        },
-        {
-          "label": "B",
-          "text": "Oats 55 g · binder 35 g · seeds 10 g"
-        },
-        {
-          "label": "Both trials",
-          "text": "Same mixing, shaping, storage interval and break test."
-        }
-      ]
-    },
-    "rendering": "Existing shared WorkArtifact notes/flow renderer",
-    "allowedChanges": "Versioned data changes only; no silent mutation between teaching and scored evidence",
-    "keyIds": [
-      "FS1-15"
-    ],
-    "textEquivalent": "Native HTML labels and entries; flow steps remain native selectable text.",
-    "phone": "Existing single-column responsive renderer; verify labels and CTA remain visible.",
-    "distractors": "Scored records have neutral styling; no flagged or coloured answer annotations.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits."
+    "kind": "mixture",
+    "title": "Formulation bench · 100 g trials",
+    "unit": "g",
+    "caption": "Replace 5 g oats with 5 g binder; same mixing, shaping, storage interval and break test.",
+    "provenance": "Fictional training formulations, not validated recipes.",
+    "batches": [
+      {
+        "label": "Batch A",
+        "ingredients": [
+          {
+            "label": "Oats",
+            "amount": 60
+          },
+          {
+            "label": "Binder",
+            "amount": 30
+          },
+          {
+            "label": "Seeds",
+            "amount": 10
+          }
+        ]
+      },
+      {
+        "label": "Batch B",
+        "ingredients": [
+          {
+            "label": "Oats",
+            "amount": 55
+          },
+          {
+            "label": "Binder",
+            "amount": 35
+          },
+          {
+            "label": "Seeds",
+            "amount": 10
+          }
+        ]
+      }
+    ]
   },
-  {
+  "example": {
     "id": "fs-example",
-    "version": "FS-1.0",
-    "career": "food-scientist",
-    "beats": [
-      "FS1-13",
-      "FS1-28"
-    ],
-    "family": "notes",
-    "objective": "Example · a different cracker test",
-    "canonicalData": "src/components/play/food-scientist-project.json",
-    "content": {
-      "id": "fs-example",
-      "kind": "notes",
-      "layout": "handover",
-      "title": "Example · a different cracker test",
-      "caption": "Changing one factor makes the comparison easier to interpret; repeat it to check consistency.",
-      "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-      "entries": [
-        {
-          "label": "Changed",
-          "text": "Mixing time: short versus long."
-        },
-        {
-          "label": "Kept the same",
-          "text": "Ingredients, shape and test method."
-        },
-        {
-          "label": "Recorded",
-          "text": "Sample ID, mixing time and break-test result."
-        }
-      ]
-    },
-    "rendering": "Existing shared WorkArtifact notes/flow renderer",
-    "allowedChanges": "Versioned data changes only; no silent mutation between teaching and scored evidence",
-    "keyIds": [],
-    "textEquivalent": "Native HTML labels and entries; flow steps remain native selectable text.",
-    "phone": "Existing single-column responsive renderer; verify labels and CTA remain visible.",
-    "distractors": "Scored records have neutral styling; no flagged or coloured answer annotations.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits."
+    "kind": "notes",
+    "layout": "handover",
+    "title": "Example · a different cracker test",
+    "caption": "Changing one factor makes the comparison easier to interpret; repeat it to check consistency.",
+    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+    "entries": [
+      {
+        "label": "Changed",
+        "text": "Mixing time: short versus long."
+      },
+      {
+        "label": "Kept the same",
+        "text": "Ingredients, shape and test method."
+      },
+      {
+        "label": "Recorded",
+        "text": "Sample ID, mixing time and break-test result."
+      }
+    ]
   },
-  {
+  "flow": {
     "id": "fs-flow",
-    "version": "FS-1.0",
-    "career": "food-scientist",
-    "beats": [
-      "FS1-16"
-    ],
-    "family": "flow",
-    "objective": "From question to evidence",
-    "canonicalData": "src/components/play/food-scientist-project.json",
-    "content": {
-      "id": "fs-flow",
-      "kind": "flow",
-      "title": "From question to evidence",
-      "caption": "Prepare the comparison before making a conclusion.",
-      "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-      "steps": [
-        {
-          "title": "Plan",
-          "detail": "One change; same test",
-          "icon": "file"
-        },
-        {
-          "title": "Make",
-          "detail": "Record both batch IDs",
-          "icon": "tool"
-        },
-        {
-          "title": "Measure",
-          "detail": "Repeat the agreed test",
-          "icon": "search"
-        },
-        {
-          "title": "Recommend",
-          "detail": "Evidence + next check",
-          "icon": "check"
-        }
-      ]
-    },
-    "rendering": "Existing shared WorkArtifact notes/flow renderer",
-    "allowedChanges": "Versioned data changes only; no silent mutation between teaching and scored evidence",
-    "keyIds": [],
-    "textEquivalent": "Native HTML labels and entries; flow steps remain native selectable text.",
-    "phone": "Existing single-column responsive renderer; verify labels and CTA remain visible.",
-    "distractors": "Scored records have neutral styling; no flagged or coloured answer annotations.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits."
+    "kind": "flow",
+    "title": "From question to evidence",
+    "caption": "Prepare the comparison before making a conclusion.",
+    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+    "steps": [
+      {
+        "title": "Plan",
+        "detail": "One change; same test",
+        "icon": "file"
+      },
+      {
+        "title": "Make",
+        "detail": "Record both batch IDs",
+        "icon": "tool"
+      },
+      {
+        "title": "Measure",
+        "detail": "Repeat the agreed test",
+        "icon": "search"
+      },
+      {
+        "title": "Recommend",
+        "detail": "Evidence + next check",
+        "icon": "check"
+      }
+    ]
   },
-  {
+  "results": {
     "id": "fs-results",
-    "version": "FS-1.0",
-    "career": "food-scientist",
-    "beats": [
-      "FS1-27",
-      "FS1-30",
-      "FS1-32"
+    "kind": "sample-results",
+    "title": "Handling test · broken pieces",
+    "caption": "This test measures breakage only, not safety or shelf life.",
+    "provenance": "Fictional training counts from the canonical project record.",
+    "samples": [
+      {
+        "label": "Batch A",
+        "broken": 7,
+        "tested": 10
+      },
+      {
+        "label": "Batch B",
+        "broken": 2,
+        "tested": 10
+      }
     ],
-    "family": "notes",
-    "objective": "Handling test · same method",
-    "canonicalData": "src/components/play/food-scientist-project.json",
-    "content": {
-      "id": "fs-results",
-      "kind": "notes",
-      "layout": "handover",
-      "title": "Handling test · same method",
-      "caption": "These results describe this trial only. Less breakage does not prove why it changed or that the snack is safe.",
-      "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-      "entries": [
-        {
-          "label": "Batch A",
-          "text": "7 of 10 pieces broke"
-        },
-        {
-          "label": "Batch B",
-          "text": "2 of 10 pieces broke"
-        },
-        {
-          "label": "Test scope",
-          "text": "Small trial; no repeat batch yet."
-        },
-        {
-          "label": "Safety / shelf life",
-          "text": "This handling test does not measure either."
-        }
-      ]
-    },
-    "rendering": "Existing shared WorkArtifact notes/flow renderer",
-    "allowedChanges": "Versioned data changes only; no silent mutation between teaching and scored evidence",
-    "keyIds": [
-      "FS1-30"
-    ],
-    "textEquivalent": "Native HTML labels and entries; flow steps remain native selectable text.",
-    "phone": "Existing single-column responsive renderer; verify labels and CTA remain visible.",
-    "distractors": "Scored records have neutral styling; no flagged or coloured answer annotations.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits."
+    "scope": "Small trial · no repeat batch yet · safety and shelf life not measured"
   },
-  {
+  "log": {
     "id": "fs-log",
-    "version": "FS-1.0",
-    "career": "food-scientist",
-    "beats": [
-      "FS1-20"
-    ],
-    "family": "notes",
-    "objective": "Sample record · draft for review",
-    "canonicalData": "src/components/play/food-scientist-project.json",
-    "content": {
-      "id": "fs-log",
-      "kind": "notes",
-      "layout": "handover",
-      "title": "Sample record · draft for review",
-      "caption": "Read each record as written. Missing information must be checked against verified records, never guessed.",
-      "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-      "entries": [
-        {
-          "label": "A",
-          "text": "Ingredient amounts and test method recorded."
-        },
-        {
-          "label": "B",
-          "text": "Test method omitted from the draft record."
-        },
-        {
-          "label": "C",
-          "text": "Ingredient identity missing; tasting not authorised."
-        },
-        {
-          "label": "D",
-          "text": "Held separately while the record is checked."
-        }
-      ]
-    },
-    "rendering": "Existing shared WorkArtifact notes/flow renderer",
-    "allowedChanges": "Versioned data changes only; no silent mutation between teaching and scored evidence",
-    "keyIds": [
-      "FS1-20"
-    ],
-    "textEquivalent": "Native HTML labels and entries; flow steps remain native selectable text.",
-    "phone": "Existing single-column responsive renderer; verify labels and CTA remain visible.",
-    "distractors": "Scored records have neutral styling; no flagged or coloured answer annotations.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits."
+    "kind": "notes",
+    "layout": "handover",
+    "title": "Sample record · draft for review",
+    "caption": "Read each record as written. Missing information must be checked against verified records, never guessed.",
+    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+    "entries": [
+      {
+        "label": "A",
+        "text": "Ingredient amounts and test method recorded."
+      },
+      {
+        "label": "B",
+        "text": "Test method omitted from the draft record."
+      },
+      {
+        "label": "C",
+        "text": "Ingredient identity missing; tasting not authorised."
+      },
+      {
+        "label": "D",
+        "text": "Held separately while the record is checked."
+      }
+    ]
   },
-  {
+  "hold": {
     "id": "fs-hold",
-    "version": "FS-1.0",
-    "career": "food-scientist",
-    "beats": [
-      "FS1-22",
-      "FS1-23"
-    ],
-    "family": "notes",
-    "objective": "Tasting tray · sample C",
-    "canonicalData": "src/components/play/food-scientist-project.json",
-    "content": {
-      "id": "fs-hold",
-      "kind": "notes",
-      "layout": "handover",
-      "title": "Tasting tray · sample C",
-      "caption": "The appearance of a food sample cannot confirm its ingredients or allergen status.",
-      "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-      "entries": [
-        {
-          "label": "Sample ID",
-          "text": "C"
-        },
-        {
-          "label": "Ingredient record",
-          "text": "Missing"
-        },
-        {
-          "label": "Allergen review",
-          "text": "Not confirmed"
-        },
-        {
-          "label": "Tasting",
-          "text": "Not authorised"
-        }
-      ]
-    },
-    "rendering": "Existing shared WorkArtifact notes/flow renderer",
-    "allowedChanges": "Versioned data changes only; no silent mutation between teaching and scored evidence",
-    "keyIds": [
-      "FS1-23"
-    ],
-    "textEquivalent": "Native HTML labels and entries; flow steps remain native selectable text.",
-    "phone": "Existing single-column responsive renderer; verify labels and CTA remain visible.",
-    "distractors": "Scored records have neutral styling; no flagged or coloured answer annotations.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits."
+    "kind": "sample-hold",
+    "title": "Sample control · tasting tray",
+    "caption": "Appearance cannot confirm ingredients or allergen status.",
+    "provenance": "Fictional sample-control training record.",
+    "sampleId": "C",
+    "checks": [
+      {
+        "label": "Ingredient record",
+        "value": "Missing"
+      },
+      {
+        "label": "Allergen review",
+        "value": "Not confirmed"
+      },
+      {
+        "label": "Tasting",
+        "value": "Not authorised"
+      }
+    ]
   },
-  {
+  "sensory": {
     "id": "fs-sensory",
-    "version": "FS-1.0",
-    "career": "food-scientist",
-    "beats": [
-      "FS1-25"
-    ],
-    "family": "notes",
-    "objective": "Panel plan · approved samples A and B",
-    "canonicalData": "src/components/play/food-scientist-project.json",
-    "content": {
-      "id": "fs-sensory",
-      "kind": "notes",
-      "layout": "handover",
-      "title": "Panel plan · approved samples A and B",
-      "caption": "This is an educational plan, not permission to taste unknown food or run a panel yourself.",
-      "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-      "entries": [
-        {
-          "label": "Readiness",
-          "text": "Mei has confirmed the approved panel protocol and sample checks."
-        },
-        {
-          "label": "Method",
-          "text": "Use neutral sample codes; same serving conditions; separate responses."
-        },
-        {
-          "label": "Question",
-          "text": "How firm does each sample feel?"
-        },
-        {
-          "label": "Scope",
-          "text": "Describe this panel. Do not claim everyone prefers one batch."
-        }
-      ]
-    },
-    "rendering": "Existing shared WorkArtifact notes/flow renderer",
-    "allowedChanges": "Versioned data changes only; no silent mutation between teaching and scored evidence",
-    "keyIds": [],
-    "textEquivalent": "Native HTML labels and entries; flow steps remain native selectable text.",
-    "phone": "Existing single-column responsive renderer; verify labels and CTA remain visible.",
-    "distractors": "Scored records have neutral styling; no flagged or coloured answer annotations.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits."
+    "kind": "notes",
+    "layout": "handover",
+    "title": "Panel plan · approved samples A and B",
+    "caption": "This is an educational plan, not permission to taste unknown food or run a panel yourself.",
+    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+    "entries": [
+      {
+        "label": "Readiness",
+        "text": "Yuki has confirmed the approved panel protocol and sample checks."
+      },
+      {
+        "label": "Method",
+        "text": "Use neutral sample codes; same serving conditions; separate responses."
+      },
+      {
+        "label": "Question",
+        "text": "How firm does each sample feel?"
+      },
+      {
+        "label": "Scope",
+        "text": "Describe this panel. Do not claim everyone prefers one batch."
+      }
+    ]
   },
-  {
+  "handover": {
     "id": "fs-handover",
-    "version": "FS-1.0",
-    "career": "food-scientist",
-    "beats": [
-      "FS1-34"
-    ],
-    "family": "notes",
-    "objective": "Project handover · version 1",
-    "canonicalData": "src/components/play/food-scientist-project.json",
-    "content": {
-      "id": "fs-handover",
-      "kind": "notes",
-      "layout": "handover",
-      "title": "Project handover · version 1",
-      "caption": "A useful handover states what was measured and what remains unknown.",
-      "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-      "entries": [
-        {
-          "label": "Trial result",
-          "text": "B had less breakage than A in this small handling test."
-        },
-        {
-          "label": "Recommendation",
-          "text": "Repeat B alongside A under the same method."
-        },
-        {
-          "label": "Unresolved",
-          "text": "Sample C is held for review. Shelf life has not been studied."
-        },
-        {
-          "label": "Owner",
-          "text": "Mei reviews the records and approves the next work."
-        }
-      ]
-    },
-    "rendering": "Existing shared WorkArtifact notes/flow renderer",
-    "allowedChanges": "Versioned data changes only; no silent mutation between teaching and scored evidence",
-    "keyIds": [],
-    "textEquivalent": "Native HTML labels and entries; flow steps remain native selectable text.",
-    "phone": "Existing single-column responsive renderer; verify labels and CTA remain visible.",
-    "distractors": "Scored records have neutral styling; no flagged or coloured answer annotations.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits."
+    "kind": "notes",
+    "layout": "handover",
+    "title": "Project handover · version 1",
+    "caption": "A useful handover states what was measured and what remains unknown.",
+    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+    "entries": [
+      {
+        "label": "Trial result",
+        "text": "B had less breakage than A in this small handling test."
+      },
+      {
+        "label": "Recommendation",
+        "text": "Repeat B alongside A under the same method."
+      },
+      {
+        "label": "Unresolved",
+        "text": "Sample C is held for review. Shelf life has not been studied."
+      },
+      {
+        "label": "Owner",
+        "text": "Yuki reviews the records and approves the next work."
+      }
+    ]
   }
-]
+}

@@ -17,7 +17,7 @@
 .title { flex:1; min-width:0; }
 .meta { font-size:9px; font-weight:600; color:var(--work-muted); text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; }
 .canvas { padding:16px; }
-.flow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; position:relative; }
+.flow { display:grid; grid-template-columns:repeat(var(--flow-columns,3),minmax(0,1fr)); gap:20px; position:relative; }
 .flow::before { content:""; position:absolute; top:36px; left:15%; right:15%; border-top:2px dashed var(--work-line); }
 .flowStep { position:relative; min-width:0; }
 .flowIcon { width:44px; height:44px; margin:0 auto 8px; border:1px solid var(--work-line); border-radius:13px; background:var(--work-paper); display:grid; place-items:center; }
@@ -139,3 +139,35 @@
 .demoProgress > div { height:100%; width:100%; background:var(--work-ink); transform-origin:left; }
 
 .handover .note:last-child:nth-child(odd) { grid-column:1 / -1; }
+
+/* Work records: evidence graphics, deliberately distinct from game action buttons. */
+.labCanvas { padding:14px; }
+.batchGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.batch { min-width:0; padding:12px; border:1px solid var(--work-line); border-radius:8px; }
+.batch h4 { display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px; margin:0 0 12px; font-size:12px; font-weight:700; }
+.batch h4 span,.batch p { font-size:10px; color:var(--work-muted); }
+.formulaBar { height:22px; display:flex; gap:2px; border-radius:4px; overflow:hidden; }
+.artifact [data-material="0"] { background:var(--color-feedback-warning-solid); }
+.artifact [data-material="1"] { background:var(--color-neutral-700); }
+.artifact [data-material="2"] { background:var(--color-neutral-400); }
+.ingredients { margin-top:10px; display:grid; gap:5px; font-size:11px; }
+.ingredients > div { display:flex; justify-content:space-between; gap:5px; }
+.ingredients dt { display:flex; align-items:center; gap:6px; }
+.ingredients dt span { width:7px; height:7px; border-radius:2px; }
+.ingredients dd { font-variant-numeric:tabular-nums; }
+.labFoot { margin-top:10px; font-size:10px; line-height:1.5; color:var(--work-muted); }
+.sampleGrid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; }
+.sampleGrid svg { width:100%; fill:var(--color-neutral-300); }
+.sampleGrid svg[data-broken="true"] { fill:var(--color-feedback-warning-solid); }
+.oatMarks { fill:none; stroke:var(--color-neutral-700); stroke-width:1.3; }
+.holdCanvas { padding:16px; display:flex; align-items:center; gap:18px; }
+.sampleSeal { display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; border:2px solid var(--color-feedback-warning-solid); border-radius:12px; padding:12px; }
+.sampleSeal svg { width:20px; height:20px; }
+.sampleSeal strong { font-size:30px; line-height:1; }
+.sampleSeal span { font-size:9px; font-weight:800; letter-spacing:.1em; }
+.holdChecks { display:grid; flex:1; gap:9px; font-size:11px; }
+.holdChecks dt { color:var(--work-muted); font-size:10px; }
+.holdChecks dd { font-weight:650; }
+@media(max-width:480px) { .batchGrid { gap:7px; } .batch { padding:8px; } .labCanvas { padding:10px; } .holdCanvas { padding:12px; gap:12px; } }
+
+@media(max-width:480px) { .flow[data-long="true"] { grid-template-columns:repeat(2,minmax(0,1fr)); } .flow[data-long="true"] .flowStep:nth-child(2n) .flowArrow { display:none; } .flow[data-long="true"]::before { display:none; } }

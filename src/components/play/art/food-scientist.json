@@ -3,13 +3,13 @@
   "folder": "fs",
   "spriteStandard": "full-scene",
   "notes": [
-    "AI-authored complete-scene QA draft; human visual QA pending.",
-    "No runtime sprites. Same files reused within unchanged beats; new cameras are not pixel-identical."
+    "Selected v4 Japanese cast and designed painted food R&D environment. Human visual QA pending.",
+    "No runtime sprites. Exact repeats reuse saved assets; regenerated variants are not certified pixel-identical."
   ],
   "locations": {
     "fs-arrival": {
-      "src": "/images/play/fs/v1/arrival.png",
-      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "src": "/images/play/fs/v4/arrival.png",
+      "alt": "Ren addresses the first-person player in Sprout Lab.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -21,8 +21,8 @@
       "locked": true
     },
     "fs-brief": {
-      "src": "/images/play/fs/v1/brief.png",
-      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "src": "/images/play/fs/v4/brief.png",
+      "alt": "Ren addresses the first-person player in Sprout Lab.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -34,8 +34,8 @@
       "locked": true
     },
     "fs-tools": {
-      "src": "/images/play/fs/v1/tools.png",
-      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "src": "/images/play/fs/v4/tools.png",
+      "alt": "Ren addresses the first-person player in Sprout Lab.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -47,8 +47,8 @@
       "locked": true
     },
     "fs-observation": {
-      "src": "/images/play/fs/v1/observation.png",
-      "alt": "Kiran observes a broken oat snack with tongs.",
+      "src": "/images/play/fs/v4/observation.png",
+      "alt": "Ren observes a broken oat snack with tongs.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -60,8 +60,8 @@
       "locked": true
     },
     "fs-weighing": {
-      "src": "/images/play/fs/v1/weighing.png",
-      "alt": "Kiran weighs oats using a balance.",
+      "src": "/images/play/fs/v4/weighing.png",
+      "alt": "Ren weighs oats using a balance.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -73,8 +73,8 @@
       "locked": true
     },
     "fs-midpoint": {
-      "src": "/images/play/fs/v1/midpoint.png",
-      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "src": "/images/play/fs/v4/midpoint.png",
+      "alt": "Ren addresses the first-person player in Sprout Lab.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -86,8 +86,8 @@
       "locked": true
     },
     "fs-records": {
-      "src": "/images/play/fs/v1/records-corrected.png",
-      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "src": "/images/play/fs/v4/records.png",
+      "alt": "Ren addresses the first-person player in Sprout Lab.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -99,8 +99,8 @@
       "locked": true
     },
     "fs-hold": {
-      "src": "/images/play/fs/v1/hold.png",
-      "alt": "Mei addresses the first-person player in Sprout Lab.",
+      "src": "/images/play/fs/v4/hold.png",
+      "alt": "Yuki addresses the first-person player in Sprout Lab.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -112,8 +112,8 @@
       "locked": true
     },
     "fs-sensory": {
-      "src": "/images/play/fs/v1/sensory.png",
-      "alt": "Mei addresses the first-person player in Sprout Lab.",
+      "src": "/images/play/fs/v4/sensory.png",
+      "alt": "Yuki addresses the first-person player in Sprout Lab.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -125,8 +125,8 @@
       "locked": true
     },
     "fs-results": {
-      "src": "/images/play/fs/v1/results.png",
-      "alt": "Kiran measures an oat snack using a texture tester.",
+      "src": "/images/play/fs/v4/results.png",
+      "alt": "Ren measures an oat snack using a texture tester.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -138,8 +138,8 @@
       "locked": true
     },
     "fs-handover": {
-      "src": "/images/play/fs/v1/handover.png",
-      "alt": "Mei addresses the first-person player in Sprout Lab.",
+      "src": "/images/play/fs/v4/handover.png",
+      "alt": "Yuki addresses the first-person player in Sprout Lab.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -151,8 +151,8 @@
       "locked": true
     },
     "fs-closing": {
-      "src": "/images/play/fs/v1/closing.png",
-      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "src": "/images/play/fs/v4/closing.png",
+      "alt": "Ren addresses the first-person player in Sprout Lab.",
       "focal": {
         "x": 0.5,
         "y": 0.3
@@ -165,12 +165,12 @@
     }
   },
   "cast": {
-    "Kiran": {
-      "face": "/images/play/fs/face-kiran.webp",
+    "Ren": {
+      "face": "/images/play/fs/face-ren-v4.webp",
       "voicePitch": 410
     },
-    "Mei": {
-      "face": "/images/play/fs/face-mei.webp",
+    "Yuki": {
+      "face": "/images/play/fs/face-yuki-v4.webp",
       "voicePitch": 510
     }
   },

@@ -13,3 +13,5 @@ exact-image-prompts.json and the failed protected-pixel experiment document the 
 
 Shared native flow, notes, wireframe, interface and comparison renderers use canonical data. One optional email-signup demo changes local state only. Three fixture records across workshop/hospitality show reuse; they are not completed additional games. Full-resolution scene files are separate art downloads beside the source ZIP on the SOP page.
 See ux-runtime-checks.json for checks actually run and open QA. Later levels are unbuilt. Resume remains disabled by the prototype's DEMO_START_FRESH setting.
+
+Edition 1.4 adds a separate reference-library.zip (actual IB, Nursing, UX drawing references and the selected Food Scientist lab). Download it beside this source ZIP. Four food-scientist-v4-art archives contain all 12 new complete scenes. Food Scientist is a local QA candidate, not an app deployment.

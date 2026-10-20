@@ -36,7 +36,7 @@
           },
           {
             "label": "Authority",
-            "text": "Kiran supervises lab work. Mei approves tasting and further testing."
+            "text": "Ren supervises lab work. Yuki approves tasting and further testing."
           }
         ]
       }
@@ -68,8 +68,8 @@
   {
     "beat": "FS1-03",
     "kind": "card",
-    "purpose": "Meet Kiran, your mentor.",
-    "speaker": "Kiran",
+    "purpose": "Meet Ren, your mentor.",
+    "speaker": "Ren",
     "scene": "fs-arrival",
     "teaches": [],
     "uses": [],
@@ -79,9 +79,9 @@
       "id": "FS1-03",
       "kind": "card",
       "variant": "chapter",
-      "title": "Meet Kiran, your mentor.",
-      "body": "“I’m Kiran, the product development scientist. You will help plan a comparison and write a recommendation. I supervise the lab work.”",
-      "speaker": "Kiran",
+      "title": "Meet Ren, your mentor.",
+      "body": "“I’m Ren, the product development scientist. You will help plan a comparison and write a recommendation. I supervise the lab work.”",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue"
     }
@@ -104,7 +104,7 @@
       "kind": "card",
       "variant": "chapter",
       "title": "A recommendation, not a launch.",
-      "body": "Mei, the quality lead, approves tasting and further work. You can record, compare and raise questions; you cannot clear a product for sale.",
+      "body": "Yuki, the quality lead, approves tasting and further work. You can record, compare and raise questions; you cannot clear a product for sale.",
       "speaker": "System",
       "system": true,
       "cta": "Continue",
@@ -126,7 +126,7 @@
           },
           {
             "label": "Authority",
-            "text": "Kiran supervises lab work. Mei approves tasting and further testing."
+            "text": "Ren supervises lab work. Yuki approves tasting and further testing."
           }
         ]
       }
@@ -190,7 +190,7 @@
     "beat": "FS1-07",
     "kind": "choice",
     "purpose": "The oat snack breaks too easily during handling. What should you investigate first?",
-    "speaker": "Kiran",
+    "speaker": "Ren",
     "scene": "fs-brief",
     "teaches": [],
     "uses": [
@@ -202,7 +202,7 @@
     "payload": {
       "id": "FS1-07",
       "kind": "choice",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "The oat snack breaks too easily during handling. What should you investigate first?",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -294,7 +294,7 @@
     "beat": "FS1-09",
     "kind": "match",
     "purpose": "Match each tool to the evidence it provides.",
-    "speaker": "Kiran",
+    "speaker": "Ren",
     "scene": "fs-tools",
     "teaches": [],
     "uses": [
@@ -306,7 +306,7 @@
       "id": "FS1-09",
       "kind": "match",
       "prompt": "Tap a tool, then tap its evidence.",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Match each tool to the evidence it provides.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -392,7 +392,7 @@
     "beat": "FS1-12",
     "kind": "bucket",
     "purpose": "Sort each oat-snack note into observation or possible explanation.",
-    "speaker": "Kiran",
+    "speaker": "Ren",
     "scene": "fs-observation",
     "teaches": [],
     "uses": [
@@ -403,7 +403,7 @@
     "payload": {
       "id": "FS1-12",
       "kind": "bucket",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Sort each oat-snack note into observation or possible explanation.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -489,7 +489,7 @@
     "beat": "FS1-14",
     "kind": "card",
     "purpose": "Your team’s trial plan.",
-    "speaker": "Kiran",
+    "speaker": "Ren",
     "scene": "fs-weighing",
     "teaches": [],
     "uses": [],
@@ -500,8 +500,8 @@
       "kind": "card",
       "variant": "chapter",
       "title": "Your team’s trial plan.",
-      "body": "Kiran proposes replacing 5 g oats with 5 g binder in each 100 g trial. Keep mixing, shaping, storage interval and the test method unchanged.",
-      "speaker": "Kiran",
+      "body": "Ren proposes replacing 5 g oats with 5 g binder in each 100 g trial. Keep mixing, shaping, storage interval and the test method unchanged.",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue",
       "artifact": {
@@ -532,7 +532,7 @@
     "beat": "FS1-15",
     "kind": "choice",
     "purpose": "You are testing the planned oats-to-binder adjustment. Which comparison best isolates it?",
-    "speaker": "Kiran",
+    "speaker": "Ren",
     "scene": "fs-weighing",
     "teaches": [],
     "uses": [
@@ -543,7 +543,7 @@
     "payload": {
       "id": "FS1-15",
       "kind": "choice",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "You are testing the planned oats-to-binder adjustment. Which comparison best isolates it?",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -655,7 +655,7 @@
     "beat": "FS1-17",
     "kind": "rank",
     "purpose": "Order these dependent steps for the oat-snack comparison.",
-    "speaker": "Kiran",
+    "speaker": "Ren",
     "scene": "fs-weighing",
     "teaches": [],
     "uses": [
@@ -667,7 +667,7 @@
     "payload": {
       "id": "FS1-17",
       "kind": "rank",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Order these dependent steps for the oat-snack comparison.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -708,7 +708,7 @@
         "threshold": 65,
         "intro": {
           "kicker": "Mid-project review",
-          "line": "Kiran checks how you planned the trial."
+          "line": "Ren checks how you planned the trial."
         },
         "progressLine": "Reviewing the first five decisions...",
         "pass": {
@@ -782,7 +782,7 @@
     "beat": "FS1-20",
     "kind": "flags",
     "purpose": "Find the two record problems that need follow-up.",
-    "speaker": "Kiran",
+    "speaker": "Ren",
     "scene": "fs-records",
     "teaches": [],
     "uses": [
@@ -795,7 +795,7 @@
     "payload": {
       "id": "FS1-20",
       "kind": "flags",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Find the two record problems that need follow-up.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -883,8 +883,8 @@
   {
     "beat": "FS1-22",
     "kind": "card",
-    "purpose": "Mei joins the project.",
-    "speaker": "Mei",
+    "purpose": "Yuki joins the project.",
+    "speaker": "Yuki",
     "scene": "fs-hold",
     "teaches": [],
     "uses": [],
@@ -894,9 +894,9 @@
       "id": "FS1-22",
       "kind": "card",
       "variant": "chapter",
-      "title": "Mei joins the project.",
-      "body": "“I’m Mei, the quality lead. Sample C’s ingredient record and allergen review are incomplete. Keep it off the tasting tray while I investigate.”",
-      "speaker": "Mei",
+      "title": "Yuki joins the project.",
+      "body": "“I’m Yuki, the quality lead. Sample C’s ingredient record and allergen review are incomplete. Keep it off the tasting tray while I investigate.”",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
       "artifact": {
@@ -931,7 +931,7 @@
     "beat": "FS1-23",
     "kind": "choice",
     "purpose": "A colleague asks to taste sample C before its ingredient and allergen checks are confirmed. What do you do?",
-    "speaker": "Mei",
+    "speaker": "Yuki",
     "scene": "fs-hold",
     "teaches": [],
     "uses": [
@@ -944,7 +944,7 @@
     "payload": {
       "id": "FS1-23",
       "kind": "choice",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "question": "A colleague asks to taste sample C before its ingredient and allergen checks are confirmed. What do you do?",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -985,7 +985,7 @@
       "choices": [
         {
           "id": "a",
-          "label": "Keep C out of tasting and ask Mei to confirm the checks",
+          "label": "Keep C out of tasting and ask Yuki to confirm the checks",
           "tier": "best",
           "why": "Unknown ingredient and allergen status must be resolved before tasting is considered."
         },
@@ -1031,7 +1031,7 @@
     "beat": "FS1-25",
     "kind": "card",
     "purpose": "The panel has a clear boundary.",
-    "speaker": "Mei",
+    "speaker": "Yuki",
     "scene": "fs-sensory",
     "teaches": [],
     "uses": [],
@@ -1042,8 +1042,8 @@
       "kind": "card",
       "variant": "chapter",
       "title": "The panel has a clear boundary.",
-      "body": "Mei has confirmed that A and B meet the panel protocol. C remains held. You are helping compare texture, not proving a health benefit.",
-      "speaker": "Mei",
+      "body": "Yuki has confirmed that A and B meet the panel protocol. C remains held. You are helping compare texture, not proving a health benefit.",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
       "artifact": {
@@ -1056,7 +1056,7 @@
         "entries": [
           {
             "label": "Readiness",
-            "text": "Mei has confirmed the approved panel protocol and sample checks."
+            "text": "Yuki has confirmed the approved panel protocol and sample checks."
           },
           {
             "label": "Method",
@@ -1078,7 +1078,7 @@
     "beat": "FS1-26",
     "kind": "pick",
     "purpose": "Choose three methods for comparing the approved A and B samples fairly.",
-    "speaker": "Mei",
+    "speaker": "Yuki",
     "scene": "fs-sensory",
     "teaches": [],
     "uses": [
@@ -1089,7 +1089,7 @@
     "payload": {
       "id": "FS1-26",
       "kind": "pick",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "question": "Choose three methods for comparing the approved A and B samples fairly.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -1106,7 +1106,7 @@
           "role": "pick"
         },
         {
-          "label": "Say which sample Kiran expects to win.",
+          "label": "Say which sample Ren expects to win.",
           "role": "leave"
         },
         {
@@ -1130,7 +1130,7 @@
     "beat": "FS1-27",
     "kind": "card",
     "purpose": "The handling results are ready.",
-    "speaker": "Kiran",
+    "speaker": "Ren",
     "scene": "fs-results",
     "teaches": [],
     "uses": [],
@@ -1141,8 +1141,8 @@
       "kind": "card",
       "variant": "chapter",
       "title": "The handling results are ready.",
-      "body": "Kiran brings the recorded counts. Read the two results and the limits of the test before recommending the next step.",
-      "speaker": "Kiran",
+      "body": "Ren brings the recorded counts. Read the two results and the limits of the test before recommending the next step.",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue",
       "artifact": {
@@ -1253,8 +1253,8 @@
   {
     "beat": "FS1-30",
     "kind": "chain",
-    "purpose": "Build a recommendation to Mei from the oat-snack handling results.",
-    "speaker": "Kiran",
+    "purpose": "Build a recommendation to Yuki from the oat-snack handling results.",
+    "speaker": "Ren",
     "scene": "fs-results",
     "teaches": [],
     "uses": [
@@ -1267,8 +1267,8 @@
     "payload": {
       "id": "FS1-30",
       "kind": "chain",
-      "speaker": "Kiran",
-      "question": "Build a recommendation to Mei from the oat-snack handling results.",
+      "speaker": "Ren",
+      "question": "Build a recommendation to Yuki from the oat-snack handling results.",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -1354,8 +1354,8 @@
   {
     "beat": "FS1-31",
     "kind": "card",
-    "purpose": "Mei asks a harder question.",
-    "speaker": "Mei",
+    "purpose": "Yuki asks a harder question.",
+    "speaker": "Yuki",
     "scene": "fs-handover",
     "teaches": [
       "shelf-life-boundary"
@@ -1367,9 +1367,9 @@
       "id": "FS1-31",
       "kind": "card",
       "variant": "chapter",
-      "title": "Mei asks a harder question.",
+      "title": "Yuki asks a harder question.",
       "body": "“Your handling test helps. Could we now promise that this snack stays safe for months?”",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue"
     }
@@ -1426,8 +1426,8 @@
   {
     "beat": "FS1-33",
     "kind": "choice",
-    "purpose": "Mei asks whether the handling results support a safe shelf-life claim. What do you recommend?",
-    "speaker": "Mei",
+    "purpose": "Yuki asks whether the handling results support a safe shelf-life claim. What do you recommend?",
+    "speaker": "Yuki",
     "scene": "fs-handover",
     "teaches": [],
     "uses": [
@@ -1440,8 +1440,8 @@
     "payload": {
       "id": "FS1-33",
       "kind": "choice",
-      "speaker": "Mei",
-      "question": "Mei asks whether the handling results support a safe shelf-life claim. What do you recommend?",
+      "speaker": "Yuki",
+      "question": "Yuki asks whether the handling results support a safe shelf-life claim. What do you recommend?",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -1477,7 +1477,7 @@
     "beat": "FS1-34",
     "kind": "card",
     "purpose": "A result someone else can use.",
-    "speaker": "Mei",
+    "speaker": "Yuki",
     "scene": "fs-handover",
     "teaches": [],
     "uses": [],
@@ -1489,7 +1489,7 @@
       "variant": "chapter",
       "title": "A result someone else can use.",
       "body": "“Keep the batch records, the measured comparison and its limits together. B is a candidate for another test, while C remains held. That is a useful first project.”",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
       "artifact": {
@@ -1514,7 +1514,7 @@
           },
           {
             "label": "Owner",
-            "text": "Mei reviews the records and approves the next work."
+            "text": "Yuki reviews the records and approves the next work."
           }
         ]
       }
@@ -1524,7 +1524,7 @@
     "beat": "FS1-35",
     "kind": "card",
     "purpose": "You made the next test clearer.",
-    "speaker": "Kiran",
+    "speaker": "Ren",
     "scene": "fs-closing",
     "teaches": [],
     "uses": [],
@@ -1536,7 +1536,7 @@
       "variant": "chapter",
       "title": "You made the next test clearer.",
       "body": "“You asked a testable question, kept a comparison fair and named what we still do not know. That is how a food scientist makes progress.”",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue"
     }

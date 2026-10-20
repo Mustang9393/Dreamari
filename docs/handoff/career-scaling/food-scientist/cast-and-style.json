@@ -1,0 +1,62 @@
+{
+  "version": "FS-art-4",
+  "primaryDrawingReference": "../references/ux-character.png",
+  "supportingReferences": [
+    "../references/nursing-character.png",
+    "../references/ib-character.webp"
+  ],
+  "recentLeadContext": [
+    {
+      "career": "ui-ux-designer",
+      "lead": "Arjun",
+      "ethnicity": "Indian",
+      "gender": "male"
+    },
+    {
+      "career": "food-scientist rejected v1",
+      "lead": "Kiran",
+      "ethnicity": "Indian",
+      "gender": "male"
+    },
+    {
+      "career": "registered-nurse",
+      "lead": "Rosa",
+      "ethnicity": "Not verified in available authored identity metadata; do not infer from drawing",
+      "source": "references/nursing-character.png (visual style only)"
+    },
+    {
+      "career": "investment-banking",
+      "lead": "Christina",
+      "ethnicity": "Not verified in available authored identity metadata; do not infer from drawing",
+      "source": "references/ib-character.webp (visual staging only)"
+    }
+  ],
+  "rotationReason": "User explicitly requested Japanese casting after repeated Indian mentors. Supporting role retained but recast; no inference of identity from image. Future careers must inspect actual available catalogue casts.",
+  "cast": [
+    {
+      "id": "Ren",
+      "name": "Ren Takahashi",
+      "role": "Product development scientist",
+      "ethnicity": "Japanese",
+      "gender": "male",
+      "age": 34,
+      "eyes": "dark brown, large anime shape",
+      "hair": "black simple masses beneath pale blue lab cap",
+      "outfit": "closed white lab coat, indigo collar, navy trousers",
+      "canonical": "/images/play/fs/v4/arrival.png"
+    },
+    {
+      "id": "Yuki",
+      "name": "Yuki Mori",
+      "role": "Quality lead",
+      "ethnicity": "Japanese",
+      "gender": "female",
+      "age": 45,
+      "eyes": "grey-brown, narrower anime shape",
+      "hair": "dark brown tucked into white cap",
+      "outfit": "closed white lab coat, plum collar, charcoal trousers",
+      "canonical": "/images/play/fs/v4/hold.png"
+    }
+  ],
+  "humanQA": "pending"
+}

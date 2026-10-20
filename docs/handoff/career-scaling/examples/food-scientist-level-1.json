@@ -4,7 +4,7 @@
   "role": "Junior Food Scientist",
   "title": "The snack that keeps breaking",
   "blurb": "Investigate an oat snack, compare trials and recommend the next test.",
-  "cover": "/images/play/fs/v1/arrival.png",
+  "cover": "/images/play/fs/v4/arrival.png",
   "mood": "day",
   "hideBand": true,
   "directed": true,
@@ -15,8 +15,8 @@
   "qaSkip": true,
   "saveSlot": 601,
   "cast": {
-    "Kiran": "/images/play/fs/face-kiran.webp",
-    "Mei": "/images/play/fs/face-mei.webp"
+    "Ren": "/images/play/fs/face-ren-v4.webp",
+    "Yuki": "/images/play/fs/face-yuki-v4.webp"
   },
   "preGame": {
     "startLabel": "Start the project",
@@ -42,13 +42,13 @@
           "kind": "say",
           "heading": "Study what changes a food.",
           "body": "Ingredients and processes affect quality. Tests help you check an idea.",
-          "image": "/images/play/fs/v1/arrival.png"
+          "image": "/images/play/fs/v4/arrival.png"
         },
         {
           "kind": "say",
           "heading": "Know your authority.",
           "body": "You help record and compare. Your supervisor approves work and the quality lead approves tasting.",
-          "image": "/images/play/fs/v1/hold.png"
+          "image": "/images/play/fs/v4/hold.png"
         },
         {
           "kind": "check",
@@ -96,7 +96,7 @@
           },
           {
             "label": "Authority",
-            "text": "Kiran supervises lab work. Mei approves tasting and further testing."
+            "text": "Ren supervises lab work. Yuki approves tasting and further testing."
           }
         ]
       }
@@ -115,9 +115,9 @@
       "id": "FS1-03",
       "kind": "card",
       "variant": "chapter",
-      "title": "Meet Kiran, your mentor.",
-      "body": "“I’m Kiran, the product development scientist. You will help plan a comparison and write a recommendation. I supervise the lab work.”",
-      "speaker": "Kiran",
+      "title": "Meet Ren, your mentor.",
+      "body": "“I’m Ren, the product development scientist. You will help plan a comparison and write a recommendation. I supervise the lab work.”",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue"
     },
@@ -126,7 +126,7 @@
       "kind": "card",
       "variant": "chapter",
       "title": "A recommendation, not a launch.",
-      "body": "Mei, the quality lead, approves tasting and further work. You can record, compare and raise questions; you cannot clear a product for sale.",
+      "body": "Yuki, the quality lead, approves tasting and further work. You can record, compare and raise questions; you cannot clear a product for sale.",
       "speaker": "System",
       "system": true,
       "cta": "Continue",
@@ -148,7 +148,7 @@
           },
           {
             "label": "Authority",
-            "text": "Kiran supervises lab work. Mei approves tasting and further testing."
+            "text": "Ren supervises lab work. Yuki approves tasting and further testing."
           }
         ]
       }
@@ -186,7 +186,7 @@
     {
       "id": "FS1-07",
       "kind": "choice",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "The oat snack breaks too easily during handling. What should you investigate first?",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -253,7 +253,7 @@
       "id": "FS1-09",
       "kind": "match",
       "prompt": "Tap a tool, then tap its evidence.",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Match each tool to the evidence it provides.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -313,7 +313,7 @@
     {
       "id": "FS1-12",
       "kind": "bucket",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Sort each oat-snack note into observation or possible explanation.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -385,29 +385,51 @@
       "kind": "card",
       "variant": "chapter",
       "title": "Your team’s trial plan.",
-      "body": "Kiran proposes replacing 5 g oats with 5 g binder in each 100 g trial. Keep mixing, shaping, storage interval and the test method unchanged.",
-      "speaker": "Kiran",
+      "body": "Ren proposes replacing 5 g oats with 5 g binder in each 100 g trial. Keep mixing, shaping, storage interval and the test method unchanged.",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue",
       "artifact": {
         "id": "fs-plan",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Trial plan · 100 g per batch",
-        "caption": "One planned change: replace 5 g oats with 5 g binder. These are fictional development trials, not a recipe to follow.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
+        "kind": "mixture",
+        "title": "Formulation bench · 100 g trials",
+        "unit": "g",
+        "caption": "Replace 5 g oats with 5 g binder; same mixing, shaping, storage interval and break test.",
+        "provenance": "Fictional training formulations, not validated recipes.",
+        "batches": [
           {
-            "label": "A",
-            "text": "Oats 60 g · binder 30 g · seeds 10 g"
+            "label": "Batch A",
+            "ingredients": [
+              {
+                "label": "Oats",
+                "amount": 60
+              },
+              {
+                "label": "Binder",
+                "amount": 30
+              },
+              {
+                "label": "Seeds",
+                "amount": 10
+              }
+            ]
           },
           {
-            "label": "B",
-            "text": "Oats 55 g · binder 35 g · seeds 10 g"
-          },
-          {
-            "label": "Both trials",
-            "text": "Same mixing, shaping, storage interval and break test."
+            "label": "Batch B",
+            "ingredients": [
+              {
+                "label": "Oats",
+                "amount": 55
+              },
+              {
+                "label": "Binder",
+                "amount": 35
+              },
+              {
+                "label": "Seeds",
+                "amount": 10
+              }
+            ]
           }
         ]
       }
@@ -415,7 +437,7 @@
     {
       "id": "FS1-15",
       "kind": "choice",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "You are testing the planned oats-to-binder adjustment. Which comparison best isolates it?",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -428,23 +450,45 @@
       "layout": "options",
       "artifact": {
         "id": "fs-plan",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Trial plan · 100 g per batch",
-        "caption": "One planned change: replace 5 g oats with 5 g binder. These are fictional development trials, not a recipe to follow.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
+        "kind": "mixture",
+        "title": "Formulation bench · 100 g trials",
+        "unit": "g",
+        "caption": "Replace 5 g oats with 5 g binder; same mixing, shaping, storage interval and break test.",
+        "provenance": "Fictional training formulations, not validated recipes.",
+        "batches": [
           {
-            "label": "A",
-            "text": "Oats 60 g · binder 30 g · seeds 10 g"
+            "label": "Batch A",
+            "ingredients": [
+              {
+                "label": "Oats",
+                "amount": 60
+              },
+              {
+                "label": "Binder",
+                "amount": 30
+              },
+              {
+                "label": "Seeds",
+                "amount": 10
+              }
+            ]
           },
           {
-            "label": "B",
-            "text": "Oats 55 g · binder 35 g · seeds 10 g"
-          },
-          {
-            "label": "Both trials",
-            "text": "Same mixing, shaping, storage interval and break test."
+            "label": "Batch B",
+            "ingredients": [
+              {
+                "label": "Oats",
+                "amount": 55
+              },
+              {
+                "label": "Binder",
+                "amount": 35
+              },
+              {
+                "label": "Seeds",
+                "amount": 10
+              }
+            ]
           }
         ]
       },
@@ -511,7 +555,7 @@
     {
       "id": "FS1-17",
       "kind": "rank",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Order these dependent steps for the oat-snack comparison.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -541,7 +585,7 @@
         "threshold": 65,
         "intro": {
           "kicker": "Mid-project review",
-          "line": "Kiran checks how you planned the trial."
+          "line": "Ren checks how you planned the trial."
         },
         "progressLine": "Reviewing the first five decisions...",
         "pass": {
@@ -588,7 +632,7 @@
     {
       "id": "FS1-20",
       "kind": "flags",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "question": "Find the two record problems that need follow-up.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -663,34 +707,30 @@
       "id": "FS1-22",
       "kind": "card",
       "variant": "chapter",
-      "title": "Mei joins the project.",
-      "body": "“I’m Mei, the quality lead. Sample C’s ingredient record and allergen review are incomplete. Keep it off the tasting tray while I investigate.”",
-      "speaker": "Mei",
+      "title": "Yuki joins the project.",
+      "body": "“I’m Yuki, the quality lead. Sample C’s ingredient record and allergen review are incomplete. Keep it off the tasting tray while I investigate.”",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
       "artifact": {
         "id": "fs-hold",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Tasting tray · sample C",
-        "caption": "The appearance of a food sample cannot confirm its ingredients or allergen status.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
-          {
-            "label": "Sample ID",
-            "text": "C"
-          },
+        "kind": "sample-hold",
+        "title": "Sample control · tasting tray",
+        "caption": "Appearance cannot confirm ingredients or allergen status.",
+        "provenance": "Fictional sample-control training record.",
+        "sampleId": "C",
+        "checks": [
           {
             "label": "Ingredient record",
-            "text": "Missing"
+            "value": "Missing"
           },
           {
             "label": "Allergen review",
-            "text": "Not confirmed"
+            "value": "Not confirmed"
           },
           {
             "label": "Tasting",
-            "text": "Not authorised"
+            "value": "Not authorised"
           }
         ]
       }
@@ -698,7 +738,7 @@
     {
       "id": "FS1-23",
       "kind": "choice",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "question": "A colleague asks to taste sample C before its ingredient and allergen checks are confirmed. What do you do?",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -712,34 +752,30 @@
       "layout": "options",
       "artifact": {
         "id": "fs-hold",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Tasting tray · sample C",
-        "caption": "The appearance of a food sample cannot confirm its ingredients or allergen status.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
-          {
-            "label": "Sample ID",
-            "text": "C"
-          },
+        "kind": "sample-hold",
+        "title": "Sample control · tasting tray",
+        "caption": "Appearance cannot confirm ingredients or allergen status.",
+        "provenance": "Fictional sample-control training record.",
+        "sampleId": "C",
+        "checks": [
           {
             "label": "Ingredient record",
-            "text": "Missing"
+            "value": "Missing"
           },
           {
             "label": "Allergen review",
-            "text": "Not confirmed"
+            "value": "Not confirmed"
           },
           {
             "label": "Tasting",
-            "text": "Not authorised"
+            "value": "Not authorised"
           }
         ]
       },
       "choices": [
         {
           "id": "a",
-          "label": "Keep C out of tasting and ask Mei to confirm the checks",
+          "label": "Keep C out of tasting and ask Yuki to confirm the checks",
           "tier": "best",
           "why": "Unknown ingredient and allergen status must be resolved before tasting is considered."
         },
@@ -772,8 +808,8 @@
       "kind": "card",
       "variant": "chapter",
       "title": "The panel has a clear boundary.",
-      "body": "Mei has confirmed that A and B meet the panel protocol. C remains held. You are helping compare texture, not proving a health benefit.",
-      "speaker": "Mei",
+      "body": "Yuki has confirmed that A and B meet the panel protocol. C remains held. You are helping compare texture, not proving a health benefit.",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
       "artifact": {
@@ -786,7 +822,7 @@
         "entries": [
           {
             "label": "Readiness",
-            "text": "Mei has confirmed the approved panel protocol and sample checks."
+            "text": "Yuki has confirmed the approved panel protocol and sample checks."
           },
           {
             "label": "Method",
@@ -806,7 +842,7 @@
     {
       "id": "FS1-26",
       "kind": "pick",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "question": "Choose three methods for comparing the approved A and B samples fairly.",
       "feedback": "",
       "feedbackCta": "Continue",
@@ -823,7 +859,7 @@
           "role": "pick"
         },
         {
-          "label": "Say which sample Kiran expects to win.",
+          "label": "Say which sample Ren expects to win.",
           "role": "leave"
         },
         {
@@ -847,35 +883,29 @@
       "kind": "card",
       "variant": "chapter",
       "title": "The handling results are ready.",
-      "body": "Kiran brings the recorded counts. Read the two results and the limits of the test before recommending the next step.",
-      "speaker": "Kiran",
+      "body": "Ren brings the recorded counts. Read the two results and the limits of the test before recommending the next step.",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue",
       "artifact": {
         "id": "fs-results",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Handling test · same method",
-        "caption": "These results describe this trial only. Less breakage does not prove why it changed or that the snack is safe.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
+        "kind": "sample-results",
+        "title": "Handling test · broken pieces",
+        "caption": "This test measures breakage only, not safety or shelf life.",
+        "provenance": "Fictional training counts from the canonical project record.",
+        "samples": [
           {
             "label": "Batch A",
-            "text": "7 of 10 pieces broke"
+            "broken": 7,
+            "tested": 10
           },
           {
             "label": "Batch B",
-            "text": "2 of 10 pieces broke"
-          },
-          {
-            "label": "Test scope",
-            "text": "Small trial; no repeat batch yet."
-          },
-          {
-            "label": "Safety / shelf life",
-            "text": "This handling test does not measure either."
+            "broken": 2,
+            "tested": 10
           }
-        ]
+        ],
+        "scope": "Small trial · no repeat batch yet · safety and shelf life not measured"
       }
     },
     {
@@ -933,8 +963,8 @@
     {
       "id": "FS1-30",
       "kind": "chain",
-      "speaker": "Kiran",
-      "question": "Build a recommendation to Mei from the oat-snack handling results.",
+      "speaker": "Ren",
+      "question": "Build a recommendation to Yuki from the oat-snack handling results.",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -945,29 +975,23 @@
       "planLineIfFailed": "you decided before checking the evidence",
       "artifact": {
         "id": "fs-results",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Handling test · same method",
-        "caption": "These results describe this trial only. Less breakage does not prove why it changed or that the snack is safe.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
+        "kind": "sample-results",
+        "title": "Handling test · broken pieces",
+        "caption": "This test measures breakage only, not safety or shelf life.",
+        "provenance": "Fictional training counts from the canonical project record.",
+        "samples": [
           {
             "label": "Batch A",
-            "text": "7 of 10 pieces broke"
+            "broken": 7,
+            "tested": 10
           },
           {
             "label": "Batch B",
-            "text": "2 of 10 pieces broke"
-          },
-          {
-            "label": "Test scope",
-            "text": "Small trial; no repeat batch yet."
-          },
-          {
-            "label": "Safety / shelf life",
-            "text": "This handling test does not measure either."
+            "broken": 2,
+            "tested": 10
           }
-        ]
+        ],
+        "scope": "Small trial · no repeat batch yet · safety and shelf life not measured"
       },
       "steps": [
         {
@@ -1020,9 +1044,9 @@
       "id": "FS1-31",
       "kind": "card",
       "variant": "chapter",
-      "title": "Mei asks a harder question.",
+      "title": "Yuki asks a harder question.",
       "body": "“Your handling test helps. Could we now promise that this snack stays safe for months?”",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue"
     },
@@ -1037,36 +1061,30 @@
       "cta": "Continue",
       "artifact": {
         "id": "fs-results",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Handling test · same method",
-        "caption": "These results describe this trial only. Less breakage does not prove why it changed or that the snack is safe.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
+        "kind": "sample-results",
+        "title": "Handling test · broken pieces",
+        "caption": "This test measures breakage only, not safety or shelf life.",
+        "provenance": "Fictional training counts from the canonical project record.",
+        "samples": [
           {
             "label": "Batch A",
-            "text": "7 of 10 pieces broke"
+            "broken": 7,
+            "tested": 10
           },
           {
             "label": "Batch B",
-            "text": "2 of 10 pieces broke"
-          },
-          {
-            "label": "Test scope",
-            "text": "Small trial; no repeat batch yet."
-          },
-          {
-            "label": "Safety / shelf life",
-            "text": "This handling test does not measure either."
+            "broken": 2,
+            "tested": 10
           }
-        ]
+        ],
+        "scope": "Small trial · no repeat batch yet · safety and shelf life not measured"
       }
     },
     {
       "id": "FS1-33",
       "kind": "choice",
-      "speaker": "Mei",
-      "question": "Mei asks whether the handling results support a safe shelf-life claim. What do you recommend?",
+      "speaker": "Yuki",
+      "question": "Yuki asks whether the handling results support a safe shelf-life claim. What do you recommend?",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -1103,7 +1121,7 @@
       "variant": "chapter",
       "title": "A result someone else can use.",
       "body": "“Keep the batch records, the measured comparison and its limits together. B is a candidate for another test, while C remains held. That is a useful first project.”",
-      "speaker": "Mei",
+      "speaker": "Yuki",
       "system": false,
       "cta": "Continue",
       "artifact": {
@@ -1128,7 +1146,7 @@
           },
           {
             "label": "Owner",
-            "text": "Mei reviews the records and approves the next work."
+            "text": "Yuki reviews the records and approves the next work."
           }
         ]
       }
@@ -1139,7 +1157,7 @@
       "variant": "chapter",
       "title": "You made the next test clearer.",
       "body": "“You asked a testable question, kept a comparison fair and named what we still do not know. That is how a food scientist makes progress.”",
-      "speaker": "Kiran",
+      "speaker": "Ren",
       "system": false,
       "cta": "Continue"
     },

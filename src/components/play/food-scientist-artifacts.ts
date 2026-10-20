@@ -22,31 +22,15 @@ export const FS_ARTIFACTS = {
       },
       {
         "label": "Authority",
-        "text": "Kiran supervises lab work. Mei approves tasting and further testing."
+        "text": "Ren supervises lab work. Yuki approves tasting and further testing."
       }
     ]
   },
   "plan": {
-    "id": "fs-plan",
-    "kind": "notes",
-    "layout": "handover",
-    "title": "Trial plan \u00b7 100 g per batch",
-    "caption": "One planned change: replace 5 g oats with 5 g binder. These are fictional development trials, not a recipe to follow.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-    "entries": [
-      {
-        "label": "A",
-        "text": `Oats ${project.batches[0].oats} g · binder ${project.batches[0].binder} g · seeds ${project.batches[0].seeds} g`
-      },
-      {
-        "label": "B",
-        "text": `Oats ${project.batches[1].oats} g · binder ${project.batches[1].binder} g · seeds ${project.batches[1].seeds} g`
-      },
-      {
-        "label": "Both trials",
-        "text": "Same mixing, shaping, storage interval and break test."
-      }
-    ]
+    id:"fs-plan", kind:"mixture", title:"Formulation bench · 100 g trials", unit:"g",
+    caption:"Replace 5 g oats with 5 g binder; same mixing, shaping, storage interval and break test.",
+    provenance:"Fictional training formulations, not validated recipes.",
+    batches:project.batches.map(b=>({label:`Batch ${b.id}`,ingredients:[{label:"Oats",amount:b.oats},{label:"Binder",amount:b.binder},{label:"Seeds",amount:b.seeds}]}))
   },
   "example": {
     "id": "fs-example",
@@ -100,30 +84,11 @@ export const FS_ARTIFACTS = {
     ]
   },
   "results": {
-    "id": "fs-results",
-    "kind": "notes",
-    "layout": "handover",
-    "title": "Handling test \u00b7 same method",
-    "caption": "These results describe this trial only. Less breakage does not prove why it changed or that the snack is safe.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-    "entries": [
-      {
-        "label": "Batch A",
-        "text": `${project.batches[0].broken} of ${project.batches[0].tested} pieces broke`
-      },
-      {
-        "label": "Batch B",
-        "text": `${project.batches[1].broken} of ${project.batches[1].tested} pieces broke`
-      },
-      {
-        "label": "Test scope",
-        "text": "Small trial; no repeat batch yet."
-      },
-      {
-        "label": "Safety / shelf life",
-        "text": "This handling test does not measure either."
-      }
-    ]
+    id:"fs-results", kind:"sample-results", title:"Handling test · broken pieces",
+    caption:"This test measures breakage only, not safety or shelf life.",
+    provenance:"Fictional training counts from the canonical project record.",
+    samples:project.batches.map(b=>({label:`Batch ${b.id}`,broken:b.broken,tested:b.tested})),
+    scope:"Small trial · no repeat batch yet · safety and shelf life not measured"
   },
   "log": {
     "id": "fs-log",
@@ -152,30 +117,10 @@ export const FS_ARTIFACTS = {
     ]
   },
   "hold": {
-    "id": "fs-hold",
-    "kind": "notes",
-    "layout": "handover",
-    "title": "Tasting tray \u00b7 sample C",
-    "caption": "The appearance of a food sample cannot confirm its ingredients or allergen status.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-    "entries": [
-      {
-        "label": "Sample ID",
-        "text": "C"
-      },
-      {
-        "label": "Ingredient record",
-        "text": "Missing"
-      },
-      {
-        "label": "Allergen review",
-        "text": "Not confirmed"
-      },
-      {
-        "label": "Tasting",
-        "text": "Not authorised"
-      }
-    ]
+    id:"fs-hold", kind:"sample-hold", title:"Sample control · tasting tray",
+    caption:"Appearance cannot confirm ingredients or allergen status.",
+    provenance:"Fictional sample-control training record.", sampleId:project.heldSample.id,
+    checks:[{label:"Ingredient record",value:project.heldSample.ingredientRecord},{label:"Allergen review",value:project.heldSample.allergenReview},{label:"Tasting",value:project.heldSample.tasting}]
   },
   "sensory": {
     "id": "fs-sensory",
@@ -187,7 +132,7 @@ export const FS_ARTIFACTS = {
     "entries": [
       {
         "label": "Readiness",
-        "text": "Mei has confirmed the approved panel protocol and sample checks."
+        "text": "Yuki has confirmed the approved panel protocol and sample checks."
       },
       {
         "label": "Method",
@@ -225,7 +170,7 @@ export const FS_ARTIFACTS = {
       },
       {
         "label": "Owner",
-        "text": "Mei reviews the records and approves the next work."
+        "text": "Yuki reviews the records and approves the next work."
       }
     ]
   }

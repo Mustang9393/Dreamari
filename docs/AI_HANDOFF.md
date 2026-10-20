@@ -1,3 +1,13 @@
+## 2026-10-20 — Food Scientist anime, Japanese cast and designed lab revision
+
+**Why:** Chandu: “we've strayed from the anime character designs”, “lets go japanese”, “backgrounds are also being too detailed”, then “these look too simple and dont have the opulent interior design … exactly like the work environment.” The first redraw fixed faces but retained photographic room detail; the simplified room then lost workplace specificity. Selected v4 restores the food-development lab's preparation/testing functions and architectural design with selective painted anime surfaces.
+
+**Changed:** 12 complete v4 scenes, Ren Takahashi/Yuki Mori replace Kiran/Mei across runtime/lesson/recovery/manifests/current authored exports; same-scene face chips. Rejected v2/v3 candidates are not routed. Native formulation proportions, break-test sample silhouettes and sample-hold record read the canonical project; shared renderer adds three data-driven artifact kinds and unrelated textile/ceramic/workshop fixtures. Four-step flows now lay out without edge overflow. Scoring/gameplay unchanged. SOP v1.4 adds actual bundled UX/Nursing/IB visual references, casting review across recent careers, workplace-function/interior-design/detail checks and career-specific visual evidence rules.
+
+**Checks:** 548 structural assertions; ten scored payloads unchanged after normalising names and excluding artifacts; nine food graphics/six reuse fixtures validate; four malformed datasets rejected; TypeScript/scoped ESLint/508 tokens/production build pass. Browser: all 15 graphics fit at 1280 and 390; game desktop formulation/hold/results and phone formulation/hold inspected; sample-C correct answer gives +5/55 and feedback. No fresh phone console warnings/errors. Evidence and limits in `docs/handoff/career-scaling/food-scientist/QA-v4.md`, `visual-review-v4.json` and `validation-v4.json`.
+
+**Status:** local `http://localhost:3081/play/food-scientist` for human QA; no main push or app deployment. Public SOP/reference library updated through Sites separately. Protected-pixel identity is not certified; age readability/subtle face variation remain human QA focus. Full branch replay/hardware/image-failure/reduced-motion browser checks not repeated for this revision. Do not infer those passed from the earlier game's QA.
+
 ## 2026-10-20 — Food Scientist Level 1 SOP candidate
 
 **Why:** Chandu supplied the career-scaling SOP URL and asked, “Use this SOP to create a career simulation for food scientist.” Implemented the default complete Level 1 in the existing player, rather than a separate website/game engine.

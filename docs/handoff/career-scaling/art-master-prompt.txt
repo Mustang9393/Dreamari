@@ -9,7 +9,9 @@ EYELINE: {CAMERA_FOR_PLAYER_DIALOGUE; OTHERWISE_TASK_OR_NAMED_PERSON}
 LOCATION / CAMERA ID: {LOCATION_CAMERA_ID}
 TIME AND LIGHT SETUP: {TIME_LIGHT_DIRECTION_SKY_PRACTICALS}
 VISIBLE CAST: {CAST_IDS_AND_DESIGNS}
-STYLE REFERENCE: {APPROVED_CHARACTER_STYLE_IMAGE}
+PRIMARY DRAWING REFERENCE: {ONE_APPROVED_CHARACTER_STYLE_IMAGE; DEFAULT: references/ux-character.png}
+SUPPORTING REFERENCES / ROLES: {NURSING_CONTOURS; IB_STAGING; NEVER_BLEND_IDENTITIES}
+CAST LEDGER / ROTATION REASON: {CAST_AND_STYLE_JSON; DIFFERENCE_FROM_RECENT_CAREER_LEADS}
 BACKGROUND QUALITY REFERENCE: {APPROVED_ENVIRONMENT_IMAGE}
 IDENTITY REFERENCES: {ONE_CANONICAL_IMAGE_PER_VISIBLE_PERSON}
 SCENE ANCHOR, IF THIS CAMERA ALREADY EXISTS: {EXACT_APPROVED_FULL_SCENE_FILE}
@@ -30,7 +32,7 @@ Use the character-style reference for drawing treatment, not for everybody's fac
 Keep the cast varied in ethnicity, face shape, eye colour, age, height, head angle, gaze and body language without caricature. Older adults must read as adults of their age, not teenage faces with grey hair. Variation between people must not become variation in the identity of the same person.
 
 ENVIRONMENT
-Match the background reference's painted depth, architectural clarity and selective detail. Use clear foreground, midground and distance. Keep rooms richer than faces, but avoid photographic surface noise, dense generated screens and clutter.
+Match the background reference's painted depth, architectural clarity and selective detail. Preserve the real career workplace: identify required work zones, equipment and functional relationships before styling it. Use a deliberately designed room, not an empty generic room or another career's setting. Use clear foreground, midground and distance. Keep selective architectural detail richer than faces, with broad painted material shapes, simplified contours and restrained reflection bands. Luxury comes from proportions, fitted equipment, refined material combinations, architectural lighting and spatial rhythm. Avoid both blank minimal cabinetry and hyperrealistic archviz. No photographic texture noise, mirror-like steel, dense foliage, repeated tiny props or generated screens. A luxurious laboratory must still read as a laboratory with the story's actual preparation/testing functions.
 Make the workplace beautiful and visibly expensive through proportions, fitted joinery, generous useful space, refined materials and carefully placed light. Keep it authentic to the career. An expensive workshop remains a workshop; a hospital remains functional and cleanable. Do not turn every workplace into a hotel or add luxury detail to skin and hair.
 Use a small coherent material palette and enough real equipment to explain the work. Screens show sparse structural shapes. Documents and badges contain no invented words or personal data. Important numbers, diagrams and instructions belong in native game UI using artifact-master-prompt.txt. When a scene shows a screen, prototype, plan or document, use the supplied canonical artifact state for its broad layout; keep the same project and version across relevant shots. Do not invent unrelated interface content. The readable artifact in the game UI remains authoritative.
 
@@ -61,3 +63,7 @@ Use the planned camera/action for this beat. Keep the drawing treatment stable a
 ACCEPTANCE
 Compare the result with the canonical people, scene anchor and actual game UI. Reject identity drift, excess hair detail, comic or 3D rendering, incompatible light, changed room/exterior geography, extra limbs, floating waists, missing props and hidden story information.
 A text prompt is not a pixel lock. Reuse verified files for exact repetition. For an edit that requires exact protected pixels, compare decoded pixels outside an explicit allowed-change mask and require zero changed pixels. If the tool cannot pass that check, reuse the approved scene or mark the edit unapproved. Never describe a visually similar regeneration as pixel-identical.
+
+CAST AND DESIGN GATES
+Read references/README.md and the recent cast ledger. Unless identity is prescribed, choose a lead ethnicity that differs from recent available career leads; also vary gender/age/face/hair combinations across the catalogue. Record it, do not default to the previous Indian mentor or make Japanese the new universal default. Ethnicity does not prescribe eye colour, facial caricature or a costume. Establish one canonical image per person before variants.
+Compare every scene against the primary drawing image at matched face size. Record anime drawing, identity, workplace function, interior design, environment detail, room/exterior continuity, lighting, eyeline and crop as PASS/REPAIR/NOT CHECKED with evidence. Reject both photo-detail excess and an empty unconvincing workplace. Qualitative inspection is not pixel certification.
