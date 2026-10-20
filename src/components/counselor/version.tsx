@@ -205,7 +205,10 @@ export function CounselorVersionChip() {
   const { version, setVersion } = useCounselorVersion();
   const extras = useV3Extras();
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[84px] md:bottom-3 z-[100] flex flex-wrap justify-center gap-[6px] px-4">
+    // marketing-v2 themeable: the dock sits outside every build's themed
+    // wrapper, so without these it read the root's dark ink in light mode
+    // (the V4..V7 labels were near-white on a light pill, 20 Oct 2026)
+    <div className="marketing-v2 themeable pointer-events-none fixed inset-x-0 bottom-[84px] md:bottom-3 z-[100] flex flex-wrap justify-center gap-[6px] px-4" style={{ background: "transparent", minHeight: 0 }}>
       <Pills label="Dashboard version" options={[{ key: "v4", label: "V4" }, { key: "v5", label: "V5" }, { key: "v6", label: "V6" }, { key: "v7", label: "V7" }]} value={version} onChange={setVersion} />
       {/* DEMO-ONLY: brings v3's hidden research screens back for discussion (./v3Extras.ts). */}
       {version === "v3" && <Pills label="Research screens" options={[{ key: "off", label: "Research off" }, { key: "on", label: "Research on" }] as const} value={extras ? "on" : "off"} onChange={(k) => setV3Extras(k === "on")} />}
