@@ -15,7 +15,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, ChevronRight, GraduationCap, Briefcase, Pencil, Plus, Star, Compass, Check, Map as MapIcon } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, Sparkles, GraduationCap, Briefcase, Pencil, Plus, Star, Compass, Check } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FacePhoto } from "@/components/app/FacePhoto";
@@ -169,6 +169,7 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
     window.requestAnimationFrame(() => document.getElementById("profile-panel-about")?.scrollIntoView({ block: "nearest" }));
   };
 
+  const router = useRouter();
   const college = useCollegeGoal();
   const [careerFlag, markCareer] = useGoalFlag(CAREER_SET_KEY);
   const careerSet = careerFlag && top3.length > 0;
@@ -208,6 +209,7 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
           },
         })}
         onBack={() => setView("home")} onAddToTop3={onAddToTop3}
+        goalSet={careerSet}
       />
     );
   }
@@ -217,7 +219,8 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
         // the star in My schools sets the goal (and pays, the first time)
         goal={{ ...college, setTop: (slug) => { const first = !college.top && !!slug; chooseSchool(slug, null); if (first) settle(); } }}
         onBack={() => setView("home")}
-        goalNext={() => onGoTab("plan")}
+        // after both goals, out to Explore (20 Oct 2026), not My Plan
+        goalNext={() => router.push("/explore")}
       />
     );
   }
@@ -294,12 +297,16 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
               }}
             />
           )}
-          {careerSet && (
+          {/* Career Goal, then College Goal, then out to Explore (20 Oct
+             2026, Chandu: "After career goal > go to set the college goal
+             and then explore careers/schools in general"). Not My Plan:
+             "We wont do the my plan ctas". */}
+          {careerSet && collegeSet && (
             <NextStepRow
-              title="See your plan to get there"
-              sub={goalCareer ? `Steps toward ${goalCareer.title}${collegeSet && college.top ? ` and ${college.top.name}` : ""}` : undefined}
-              nudge={collegeSet}
-              onClick={() => onGoTab("plan")}
+              title="Keep exploring"
+              sub="Find more careers and schools"
+              nudge
+              links={[{ label: "Careers", href: "/explore" }, { label: "Schools", href: "/colleges" }]}
             />
           )}
         </section>
@@ -347,14 +354,37 @@ export function AboutMeTab({ top3, primary, saved, onAddToTop3, onGoTab, onOpenB
 }
 
 function BuildBlock({ onOpenBuild }: { onOpenBuild: (section?: BuildSection) => void }) {
+  // Folded to one small blue row until the student asks for it (20 Oct
+  // 2026, Chandu: "maybe the my build can be collapsed in some way and only
+  // open when its clicked on So we can make the my build stuff be very small
+  // and simplified with the blue color. Right now its very noisy"). Open,
+  // it is the same answers, each opening its own section of the editor, on
+  // a flat blue tint instead of Build's aurora sky.
+  const [open, setOpen] = useState(false);
   return (
-      <section aria-labelledby="about-build" className="flex flex-col gap-[var(--space-3)]">
-        {/* No Edit My Build button (Chandu, 19 Oct 2026: "Remove the edit my
-           build CTA. It can all be done in the thing right?"): every answer
-           below opens its own section of the editor. */}
-        <SectionHead id="about-build" title="My Build" sub="What Dreamari uses to pick your matches." />
-        <BuildSummary onOpen={onOpenBuild} />
-      </section>
+    <section aria-label="My Build" className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "color-mix(in srgb, var(--primary) 8%, transparent)", borderColor: "color-mix(in srgb, var(--primary) 30%, var(--glass-border))" }}>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls="about-build-panel"
+        onClick={() => setOpen((o) => !o)}
+        className="dm-quiet group flex min-h-[56px] w-full cursor-pointer items-center gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-3)] text-left"
+      >
+        <span aria-hidden className="flex size-[32px] flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--accent-subtle)" }}>
+          <Sparkles className="h-4 w-4" />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="text-[16px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Build</span>
+          <span className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>What Dreamari uses to pick your matches</span>
+        </span>
+        <ChevronDown aria-hidden className="h-5 w-5 flex-none transition-transform duration-200" style={{ color: "var(--accent-subtle)", transform: open ? "rotate(180deg)" : "none" }} />
+      </button>
+      {open && (
+        <div id="about-build-panel" className="border-t" style={{ borderColor: "color-mix(in srgb, var(--primary) 22%, var(--glass-border))" }}>
+          <BuildSummary onOpen={onOpenBuild} />
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -441,20 +471,30 @@ export function EmptyGoalCard({ kind, Icon, title, backdrop, art, xp, nudge, bad
   );
 }
 
-/** The step after both goals: one row into My Plan. */
+/** The step after both goals: out to Explore, careers or schools. Two
+ *  plain choices on the right, so neither is a guess. */
 // exported for the component lab
-export function NextStepRow({ title, sub, nudge, onClick }: { title: string; sub?: string; nudge: boolean; onClick: () => void }) {
+export function NextStepRow({ title, sub, nudge, links }: { title: string; sub?: string; nudge: boolean; links: { label: string; href: string }[] }) {
   return (
-    <button type="button" onClick={onClick} className="dm-quiet group flex min-h-[64px] w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)] text-left" style={{ ...INSET, borderColor: nudge ? "color-mix(in srgb, var(--primary) 55%, var(--inset-border))" : "var(--inset-border)" }}>
-      <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--accent-subtle)" }}>
-        <MapIcon className="h-5 w-5" />
+    <div className="flex min-h-[64px] w-full flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)]" style={{ ...INSET, borderColor: nudge ? "color-mix(in srgb, var(--primary) 55%, var(--inset-border))" : "var(--inset-border)" }}>
+      <span className="flex min-w-[200px] flex-1 items-center gap-[var(--space-3)]">
+        <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--accent-subtle)" }}>
+          <Compass className="h-5 w-5" />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="text-[16px] leading-[21px] font-extrabold"><NudgeText on={nudge} base="color-mix(in srgb, var(--foreground) 60%, transparent)">{title}</NudgeText></span>
+          {sub && <span className="truncate text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{sub}</span>}
+        </span>
       </span>
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="text-[16px] leading-[21px] font-extrabold"><NudgeText on={nudge} base="color-mix(in srgb, var(--foreground) 60%, transparent)">{title}</NudgeText></span>
-        {sub && <span className="truncate text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{sub}</span>}
+      <span className="flex flex-none gap-[var(--space-2)]">
+        {links.map((l) => (
+          <Link key={l.href} href={l.href} className="dm-tap group flex min-h-[40px] items-center gap-[2px] rounded-full border px-[var(--space-4)] text-[14px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", borderColor: "color-mix(in srgb, var(--primary) 45%, transparent)", color: "var(--foreground)" }}>
+            {l.label}
+            <ChevronRight aria-hidden className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-[2px]" />
+          </Link>
+        ))}
       </span>
-      <ChevronRight className="h-5 w-5 flex-none transition-transform duration-200 group-hover:translate-x-[2px]" aria-hidden />
-    </button>
+    </div>
   );
 }
 
@@ -462,8 +502,8 @@ export function NextStepRow({ title, sub, nudge, onClick }: { title: string; sub
 /** v2 Career Goal: the Top 3 cards themselves (with their move, remove and
  *  add nudges), then the #1 confirmed as the goal, then the saved careers
  *  that can still join. Replaces the Top 3 tab. */
-function CareerGoalV2({ top3, saved, slot, onBack, onAddToTop3 }: {
-  top3: ProfileCareer[]; saved: ProfileCareer[]; slot: React.ReactNode; onBack: () => void; onAddToTop3: (id: string) => void;
+function CareerGoalV2({ top3, saved, slot, onBack, onAddToTop3, goalSet }: {
+  top3: ProfileCareer[]; saved: ProfileCareer[]; slot: React.ReactNode; onBack: () => void; onAddToTop3: (id: string) => void; goalSet: boolean;
 }) {
   const router = useRouter();
   const open = (c: ProfileCareer, row: ProfileCareer[]) => { if (!openCareerPeek(c.id, row.map((x) => x.id))) router.push(`/career/${c.id}`); };
@@ -472,7 +512,7 @@ function CareerGoalV2({ top3, saved, slot, onBack, onAddToTop3 }: {
       <BackLink onBack={onBack} />
       <div className="flex flex-col gap-[2px]">
         <h3 className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Goal</h3>
-        <p className="text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Tap Make my goal on the career you want most.</p>
+        <p className="text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{goalSet ? "Your #1 is your goal. Move a career to #1 to change it." : "Tap Make my goal on the career you want most."}</p>
       </div>
       {/* choosing happens on the cards themselves (Chandu, 19 Oct 2026:
          "keep the making a career the primary within the ranking activity
@@ -553,7 +593,6 @@ export function GoalCard({ kind, Icon, title, picture, accent, onOpen, openLabel
 function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
   const answers = useBuildAnswers();
   const prefs = useSyncExternalStore(subscribePreferences, preferencesSnapshot, serverPreferencesSnapshot);
-  const lookV2 = useLookV2();
   // phones: one group at a time behind a switch instead of ten stacked rows
   // (Chandu: "The layout needs to be better on mobile and tablet. Long
   // scrolling isnt the best way."); from sm (640px, tablets) all three columns
@@ -578,16 +617,9 @@ function BuildSummary({ onOpen }: { onOpen: (section: BuildSection) => void }) {
     return summaryOf(answers, id, 0) || prefSummary(prefs, id);
   };
   return (
-    <div ref={panel} className="relative isolate grid overflow-hidden rounded-[var(--radius-lg)] border sm:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
-      {/* Build's own sky, the same one the Edit My Build sheet wears (Chandu,
-         19 Oct 2026: "please use the same color background thing we did for
-         the my build when you click on edit"), clipped to the panel */}
-      <ThemeProvider>
-        <div aria-hidden className="myb-sky">
-          <BackgroundSpace />
-          <AuroraBackground accent={(lookV2 ? STAGE_ACCENTS_V2 : STAGE_ACCENTS).interests} visitedAccents={[]} lightning={false} />
-        </div>
-      </ThemeProvider>
+    // flat, inside BuildBlock's blue fold: the aurora sky it used to wear
+    // was the noise (20 Oct 2026, "Right now its very noisy")
+    <div ref={panel} className="relative isolate grid sm:grid-cols-3">
       <div className="px-[var(--space-5)] pt-[var(--space-5)] sm:hidden">
         <Segmented ariaLabel="My Build group" value={String(shown)} onChange={(v) => setShown(Number(v))} options={BUILD_GROUPS.map((g, i) => ({ key: String(i), label: g.short }))} grow />
       </div>
@@ -785,7 +817,7 @@ export function useCollegeGoal(): CollegeGoal {
   }, [colleges, topSlug, buckets, gpa]);
 }
 
-export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, goalNext }: { goal: CollegeGoal; onBack?: () => void; /** where Back returns, when it isn't About Me */ backLabel?: string; /** v2: inside Saved > Schools, so no Back and no page title */ embedded?: boolean; /** v2 About Me: the #1 school is the College Goal; this is the step after it (My Plan) */ goalNext?: () => void }) {
+export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, goalNext }: { goal: CollegeGoal; onBack?: () => void; /** where Back returns, when it isn't About Me */ backLabel?: string; /** v2: inside Saved > Schools, so no Back and no page title */ embedded?: boolean; /** v2 About Me: the #1 school is the College Goal; this is the step after it (Explore) */ goalNext?: () => void }) {
   const router = useRouter();
   const allColleges = goal.schools.map((s) => s.c);
   const open = (c: College) => { if (!openSchoolPeek(c, allColleges)) router.push(`/colleges/${c.slug}`); };
@@ -824,7 +856,7 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, goa
                      the next step is. View school steps back to glass. */}
                   {goalNext && (
                     <button type="button" onClick={goalNext} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-                      Next: My Plan <ChevronRight className="h-4 w-4" aria-hidden />
+                      Next: Explore <ChevronRight className="h-4 w-4" aria-hidden />
                     </button>
                   )}
                   <button type="button" onClick={() => open(top)} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={goalNext ? { background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.22)", color: "#fff", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" } : { background: "var(--primary)", color: "var(--primary-foreground)" }}>

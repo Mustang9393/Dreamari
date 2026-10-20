@@ -302,8 +302,8 @@ export function ProfileCareerCollegesModules() {
           </StateCell>
           <StateCell label="Next step row" minH={160}>
             <div className="flex w-full flex-col gap-[var(--space-3)]">
-              <NextStepRow title="See your plan to get there" sub={`Steps toward ${IB.title}`} nudge={false} onClick={noop} />
-              <NextStepRow title="See your plan to get there" sub={`Steps toward ${IB.title} and ${PHOTO_SCHOOLS[0]?.name ?? "your school"}`} nudge onClick={noop} />
+              <NextStepRow title="Keep exploring" sub="Find more careers and schools" nudge={false} links={[{ label: "Careers", href: "/explore" }, { label: "Schools", href: "/colleges" }]} />
+              <NextStepRow title="Keep exploring" sub="Find more careers and schools" nudge links={[{ label: "Careers", href: "/explore" }, { label: "Schools", href: "/colleges" }]} />
             </div>
           </StateCell>
         </StateGrid>

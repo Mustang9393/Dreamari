@@ -1,3 +1,14 @@
+## 2026-10-20: My Profile v2 is the default; no My Plan CTAs; My Build folds away
+
+**Why (Chandu):** "lets push v2 of the my profile as the default without having the part about it leading to my plan. Just move top 3 into the career thing. Keep the start here etc. We wont do the my plan ctas, keep the ctas we have now, Play and report. And the next step should be to lead students to explore. Change the my plan to what it was before too. The content in it i mean." Then: "After career goal > go to set the college goal and then explore careers/schools in general." And: "maybe the my build can be collapsed in some way and only open when its clicked on ... very small and simplified with the blue color. Right now its very noisy."
+
+- `src/lib/top3Flow.ts`: `useTop3FlowV2()` always returns true; the "V2 PROFILE" switch at the foot of My Profile and `?top3=v1/v2` are gone. So everyone gets: no Top 3 tab, the Top 3 cards inside About Me's Career Goal, "Start here" on the Career Goal, then "Next step" on the College Goal.
+- Top 3 cards (`ProfileExperience.tsx`): "Learn more" and "Make my goal" until the Career Goal is set, then the buttons they always had: Show more, Play, Report. "Plan this" / "My Plan" and the `onPlan` wiring are removed. After the goal is set, #1 in the ranking is the goal, so moving a career to #1 changes it (the Career Goal heading says so).
+- After both goals (`AboutMeTab.tsx`): "Keep exploring" with Careers (/explore) and Schools (/colleges), replacing "See your plan to get there". The College Goal view's "Next: My Plan" is "Next: Explore".
+- My Plan: the original grade-plan steps again (`careerSteps = false` in GradePlanCard; `careerPlanSteps.ts` and `lib/planDone` are parked, not deleted). The Report's activity lines go back to their original source (`CareerExploration.tsx`).
+- My Build on About Me: one small blue row (My Build, one line, a chevron) that opens on click to the same answers, each still opening its editor section, on a flat blue tint instead of Build's aurora sky.
+- Checked: tsc, eslint; dark, 1280 and 375: About Me, the full Career Goal > College Goal > Keep exploring path, cards before and after the goal, My Build folded and open, My Plan's Fall steps.
+
 ## 2026-10-20: Outlook's jobs chart drawn as a line of light, quieter fill
 
 **Why (Chandu):** "the same graph improvement we did for what it pays popup applies everywhere including the outlook sections here, and tone down the color/brightness of the area highlight under the line."

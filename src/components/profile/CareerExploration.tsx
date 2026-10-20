@@ -3,8 +3,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Check, ChevronDown, PenLine, Trash2, X } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
-import { useTop3FlowV2 } from "@/lib/top3Flow";
-import { usePlanDone } from "@/lib/planDone";
 import { IconTip } from "@/components/app/IconTip";
 import { Portal } from "@/components/profile/CareerReport";
 import { DatePicker } from "@/components/app/DatePicker";
@@ -28,13 +26,10 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   const all = useSyncExternalStore(subscribeExperiences, experiencesSnapshot, serverExperiencesSnapshot);
   const mine = all.filter((e) => e.careerId === careerId);
-  // v2 (lib/top3Flow): what the student ticked in My Plan for this career,
-  // newest first. DEMO-ONLY: the seeded lines stand in until the first tick,
-  // so a demo Report is never empty.
-  const flowV2 = useTop3FlowV2();
-  const planDone = usePlanDone();
-  const fromPlan = planDone.filter((d) => d.careerId === careerId).sort((a, b) => b.date.localeCompare(a.date)).map((d) => ({ text: d.title, date: d.date }));
-  const logged = flowV2 && fromPlan.length ? fromPlan : loggedActivity(careerId, careerTitle, picks.ids);
+  // The Report's activity lines, as before My Plan's #1-career steps (20 Oct
+  // 2026: My Plan is back to its original content, so its ticks no longer
+  // feed the Report; lib/planDone stays for when they return).
+  const logged = loggedActivity(careerId, careerTitle, picks.ids);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [ownOpen, setOwnOpen] = useState(false);

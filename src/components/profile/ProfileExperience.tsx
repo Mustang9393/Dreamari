@@ -67,7 +67,7 @@ import { OpportunitiesShelf, useSavedOpportunityCount } from "@/components/oppor
 import { playArrival } from "@/lib/showTheWay";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import { useBackStep } from "@/lib/backStep";
-import { setTop3FlowV2, useTop3FlowV2 } from "@/lib/top3Flow";
+import { useTop3FlowV2 } from "@/lib/top3Flow";
 import { togglePlanDone, usePlanDone } from "@/lib/planDone";
 import {
   ACADEMIC_RECORD,
@@ -749,7 +749,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       onDismissUndo={() => setUndoRemove(null)}
       onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
       onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
-      onPlan={(id) => { reorderTop3([id, ...top3.filter((x) => x !== id)]); setTab("plan"); }}
     />
   );
 
@@ -1269,26 +1268,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
            comment above), but the underlying route-choice flow still needs
            a real destination rather than a dead link. */}
         {tab === "settings" && <SettingsView section={settingsSection} onClose={closeSettings} />}
-        {/* DEMO-ONLY: the v2 profile switch (lib/top3Flow), at the foot of
-           the page and quiet so it never competes with the Profile itself
-           (Chandu, 19 Oct 2026: "put the toggle in the my profile under the
-           page as a small toggle that doesnt compete with the UI"). Same as
-           ?top3=v2 / ?top3=v1. */}
-        <div className="flex justify-end">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={flowV2}
-            onClick={() => setTop3FlowV2(!flowV2)}
-            className="dm-quiet flex cursor-pointer items-center gap-[8px] rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[11px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
-            style={{ color: "var(--muted-foreground)" }}
-          >
-            v2 profile
-            <span aria-hidden className="relative h-[14px] w-[24px] flex-none rounded-full transition-colors" style={{ background: flowV2 ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 22%, transparent)" }}>
-              <span className="absolute top-[2px] size-[10px] rounded-full bg-white transition-[left] duration-200" style={{ left: flowV2 ? 12 : 2 }} />
-            </span>
-          </button>
-        </div>
       </main>
 
       {/* ---- Welcome to Your Profile (arrival from Match only): the shared
@@ -1564,7 +1543,7 @@ function useRankHint(): { show: boolean | null; retired: boolean; retire: () => 
 }
 
 export function Top3Tab({
-  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, onPlan, showTour, onTourDone, hintPaused = false, goal,
+  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, showTour, onTourDone, hintPaused = false, goal,
 }: {
   /** v2 About Me's Career Goal: the cards' own button sets the goal */
   goal?: Top3Goal;
@@ -1584,8 +1563,6 @@ export function Top3Tab({
   onDismissUndo: () => void;
   onOpenCompare: () => void;
   onGoReport: () => void;
-  /** v2 (lib/top3Flow): make this career #1 and open its path in My Plan */
-  onPlan?: (id: string) => void;
   showTour: boolean;
   onTourDone: () => void;
   /** a popup is over the page: the hint's reading clock waits */
@@ -1920,27 +1897,20 @@ export function Top3Tab({
                        play button doesn't need a label or report doesn't"):
                        Show more opens the Peek, Play keeps its word, Report is
                        its icon with a tooltip. Three things, one line, room. */}
-                    {/* v2 (lib/top3Flow, 19 Oct 2026, Chandu: "plan this
-                       shouldnt be the only cta, as we want the learn more to
-                       be a thing... the play stuff can happen from my plan"):
-                       Learn more and Plan this. Play and the Report are steps
-                       in the plan. */}
-                    {flowV2 ? (
+                    {/* Before the Career Goal is set: Learn more and Make my
+                       goal, so the goal is chosen right here, in the ranking
+                       (Chandu, 19 Oct 2026: "keep the making a career the
+                       primary within the ranking activity itself"). Once set,
+                       the cards keep the buttons they always had, Show more,
+                       Play and Report (20 Oct 2026: "We wont do the my plan
+                       ctas, keep the ctas we have now, Play and report"); the
+                       ranking itself moves the goal, since #1 is the goal. */}
+                    {flowV2 && goal && !goal.set ? (
                     <div className="t3s-actions pointer-events-auto">
                       <button type="button" onClick={() => openPeek(index)} className="t3s-toggle" aria-label={`Learn more about ${career.title}`}>
                         Learn more <ChevronRight className="h-4 w-4" aria-hidden />
                       </button>
-                      {/* Inside About Me's Career Goal the goal is chosen right
-                         here, in the ranking: any card's button makes it #1 and
-                         the goal (Chandu, 19 Oct 2026: "keep the making a career
-                         the primary within the ranking activity itself instead
-                         of a separate glowing cta"). Once set, #1 opens its plan. */}
-                      {goal && !(goal.set && index === 0) ? (
-                        <button type="button" onClick={(e) => { stopPlay.current = true; setSpot(null); goal.onChoose(id, e.currentTarget); }} aria-label={`Make ${career.title} my Career Goal`} className="t3s-play dm-solid">Make my goal</button>
-                      ) : (
-                      /* #1 is already the plan's career: its button opens the plan (audit) */
-                      <button type="button" onClick={() => onPlan?.(id)} aria-label={index === 0 ? `My Plan for ${career.title}` : `Plan for ${career.title}`} className="t3s-play dm-solid">{index === 0 ? "My Plan" : "Plan this"}</button>
-                      )}
+                      <button type="button" onClick={(e) => { stopPlay.current = true; setSpot(null); goal.onChoose(id, e.currentTarget); }} aria-label={`Make ${career.title} my Career Goal`} className="t3s-play dm-solid">Make my goal</button>
                     </div>
                     ) : (
                     <div className="t3s-actions pointer-events-auto">
@@ -3035,9 +3005,11 @@ function seasonIndexFor(d: Date): number {
 }
 
 function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookMeeting }: { focus: ProfileCareer | null; onGoRoutes: () => void; variant?: "v1" | "v2"; topIds?: string[]; onBookMeeting?: () => void }) {
-  // v2 (lib/top3Flow): the same seasons, In app steps written for the #1
-  // career (careerPlanSteps.ts), and the ones the app can see tick themselves.
-  const flowV2 = useTop3FlowV2();
+  // The original plan content (20 Oct 2026, Chandu: "Change the my plan to
+  // what it was before too. The content in it i mean"). The #1-career steps
+  // (careerPlanSteps.ts) and their self-ticking are parked behind this flag,
+  // not deleted, in case they come back.
+  const careerSteps = false;
   const [savedSchoolsSet] = useSavedColleges();
   const savedOpportunityCount = useSavedOpportunityCount();
   const reportVersions = useSyncExternalStore(subscribeReportHistory, reportHistorySnapshot, serverReportHistorySnapshot);
@@ -3067,7 +3039,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
   // the lock icons"). It used to open a modal from the small lock only.
   const [openNote, setOpenNote] = useState<string | null>(null);
   const plainPlan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { id: focus.id, title: focus.title } : null);
-  const basePlan = flowV2 && stage === "hs" && focus ? { ...plainPlan, windows: careerWindows(plainPlan.windows, focus, grade, topIds) } : plainPlan;
+  const basePlan = careerSteps && stage === "hs" && focus ? { ...plainPlan, windows: careerWindows(plainPlan.windows, focus, grade, topIds) } : plainPlan;
   const levelLabel = stage === "hs" ? `Grade ${grade}` : `Year ${year}`;
   // No progress bar starts at zero (Joshua Pierce, 29 Sept 2026: "always
   // start a progress bar with one action completed such as 'start Fall
@@ -3087,13 +3059,13 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
   const plan = { ...basePlan, windows: basePlan.windows.map((w) => ({ ...w, steps: [{ id: startId(w), label: "START", inApp: true, title: `Start your ${w.title} ${w.id === "winter" ? "term" : "semester"}` } as GradeStep, ...w.steps] })) };
   const autoDone = new Set(plan.windows.filter(started).map(startId));
   const planDoneIds = new Set(planDoneList.map((d) => d.id));
-  if (flowV2) {
+  if (careerSteps) {
     if (reportVersions.length > 0) autoDone.add(SHARE_REPORT_ID);
     if (meetingBooked) autoDone.add(BOOK_MEETING_ID);
     if (savedSchoolsSet.size >= 3) { autoDone.add(SAVE_SCHOOLS_ID); autoDone.add("g11-fall-explore"); }
     if (savedOpportunityCount > 0) autoDone.add(SAVE_PROGRAM_ID);
   }
-  const isDone = (id: string) => (flowV2 ? planDoneIds.has(id) : done.has(id)) || autoDone.has(id);
+  const isDone = (id: string) => (careerSteps ? planDoneIds.has(id) : done.has(id)) || autoDone.has(id);
   const allSteps = plan.windows.flatMap((w) => w.steps).filter((s) => !s.optional);
   const doneCount = allSteps.filter((s) => isDone(s.id)).length;
   const pct = Math.round((doneCount / Math.max(allSteps.length, 1)) * 100);
@@ -3111,7 +3083,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
 
   // v2 keeps the ticks (lib/planDone) so the Career Report can log them
   const toggle = (id: string) => {
-    if (flowV2) {
+    if (careerSteps) {
       const step = plan.windows.flatMap((w) => w.steps).find((x) => x.id === id);
       if (step) togglePlanDone({ id, title: step.title }, focus?.id ?? null);
       return;
