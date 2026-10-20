@@ -24,7 +24,7 @@
 // On phones and tablets the same panel opens as a bottom sheet.
 
 import { openSchoolPeek } from "@/components/app/peek";
-import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowUpDown, BookOpen, Check, GraduationCap, MapPin, School, Search, SlidersHorizontal, Wrench, Building2, X } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
@@ -42,6 +42,7 @@ import {
 } from "./searchV2";
 import { Chips, Dropdown, Option, Section, StickyBar } from "./filterKit";
 import { useRouter } from "next/navigation";
+import { teaches, type CareerPick } from "./careerSchools";
 
 const HOME_STATE = "NJ";
 
@@ -54,9 +55,11 @@ type F = {
   // Usman's filter spec (filters.json, 2 Oct 2026), in More filters so the
   // visible bar stays Joshua's.
   effort: Set<Effort>; portfolio: boolean; religions: Set<string>; also: Set<"hbcu" | "tribal">; campus: Set<"campus" | "online">;
+  /** a Career Detail credential row's curated list (careerSchools.ts) */
+  career: CareerPick | null;
 };
 type Effort = "nothing" | "grades_only" | "more";
-const empty = (): F => ({ types: new Set(), states: new Set(), zip: HOME_ZIP, within: null, admit: new Set(), sat: null, act: null, fit: new Set(), degrees: new Set(), program: null, costCap: null, controls: new Set(), sizes: new Set(), settings: new Set(), effort: new Set(), portfolio: false, religions: new Set(), also: new Set(), campus: new Set() });
+const empty = (): F => ({ career: null, types: new Set(), states: new Set(), zip: HOME_ZIP, within: null, admit: new Set(), sat: null, act: null, fit: new Set(), degrees: new Set(), program: null, costCap: null, controls: new Set(), sizes: new Set(), settings: new Set(), effort: new Set(), portfolio: false, religions: new Set(), also: new Set(), campus: new Set() });
 // Usman's wording, filters.json ("Getting in", "Religious affiliation", "Also", "Campus or online").
 const EFFORT: { key: Effort; label: string; note: string }[] = [
   { key: "nothing", label: "Nothing, everyone who applies gets in", note: "True of most American colleges" },
@@ -181,7 +184,7 @@ function SearchBox({ pool, states, query, setQuery, onProgram, onState }: { pool
 
 // ---- The page ----------------------------------------------------------------
 
-export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "", initialType = "" }: { saved: Set<string>; onSave: (slug: string) => void; compare: string[]; onCompare: (slug: string) => void; initialQuery?: string; initialType?: string }) {
+export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "", initialType = "", initialCareer }: { saved: Set<string>; onSave: (slug: string) => void; compare: string[]; onCompare: (slug: string) => void; initialQuery?: string; initialType?: string; initialCareer?: CareerPick }) {
   const gpa = useGpa();
   const [query, setQuery] = useState(initialQuery);
   const [f, setF] = useState<F>(() => {
@@ -189,9 +192,21 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
     if (initialType === "trade") x.types.add("Trade");
     if (initialType === "2-year") x.types.add("2-year");
     if (initialType === "4-year") x.types.add("4-year");
+    if (initialCareer) x.career = initialCareer;
     return x;
   });
   const [sort, setSort] = useState<SortKey>("relevant");
+  // Taking the career chip off (or Clear all) also takes it out of the
+  // address, so a refresh does not bring it back.
+  const careerOn = !!f.career;
+  useEffect(() => {
+    if (careerOn) return;
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("career")) return;
+    url.searchParams.delete("career");
+    url.searchParams.delete("level");
+    window.history.replaceState(window.history.state, "", url);
+  }, [careerOn]);
   const [programQ, setProgramQ] = useState("");
   const set = (p: Partial<F>) => setF((x) => ({ ...x, ...p }));
   const home = placeForZip(f.zip);
@@ -213,6 +228,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
     // Typed text matches name and place, and (from three letters) the
     // programs a school offers: "nurs" finds every nursing school.
     if (q && !`${c.name} ${c.city} ${c.stateName} ${c.state}`.toLowerCase().includes(q) && !(q.length >= 3 && programsOf(c).some((p) => p.name.toLowerCase().includes(q)))) return false;
+    if (skip !== "career" && f.career && !teaches(c, f.career.degree, f.career.words)) return false;
     if (skip !== "types" && f.types.size && !f.types.has(typeOf(c))) return false;
     if (skip !== "states" && f.states.size && !f.states.has(c.state)) return false;
     if (skip !== "within" && f.within !== null && (r.miles === null || r.miles > f.within)) return false;
@@ -258,6 +274,8 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
 
   // The one row of what is on.
   const chips: { key: string; label: string; remove: () => void }[] = [];
+  // first, as on dreamari.com: "For Coach or Scout · Bachelor's degree"
+  if (f.career) chips.push({ key: "career", label: `For ${f.career.name} · ${f.career.levelName}`, remove: () => set({ career: null }) });
   for (const t of f.types) chips.push({ key: `t-${t}`, label: SCHOOL_TYPES.find((x) => x.key === t)!.label, remove: () => set({ types: tog(f.types, t) }) });
   for (const s of f.states) chips.push({ key: `s-${s}`, label: STATES.find((x) => x.code === s)?.name ?? s, remove: () => set({ states: tog(f.states, s) }) });
   if (f.within !== null) chips.push({ key: "within", label: `Within ${f.within} mi`, remove: () => set({ within: null }) });

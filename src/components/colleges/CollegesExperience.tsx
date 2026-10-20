@@ -1,5 +1,6 @@
 "use client";
 
+import type { CareerPick } from "./careerSchools";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -44,7 +45,7 @@ const COST_CAPS = [10000, 15000, 20000, 25000];
 function toggleIn<T>(set: Set<T>, v: T): Set<T> { const n = new Set(set); if (n.has(v)) n.delete(v); else n.add(v); return n; }
 
 
-export function CollegesExperience({ initialQuery = "", initialType = "", initialView }: { initialQuery?: string; initialType?: string; initialView?: "foryou" | "browse" }) {
+export function CollegesExperience({ initialQuery = "", initialType = "", initialView, initialCareer }: { initialQuery?: string; initialType?: string; initialView?: "foryou" | "browse"; initialCareer?: CareerPick }) {
   const router = useRouter();
   // For you (the student's pathway) vs Browse all (search + filters), the
   // same split Explore Careers has (Joshua Pierce, Slack, 10 Sept 2026).
@@ -145,7 +146,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
            30 Sept 2026). The v1 quick-pick chips and slide-in Filters sheet
            are retired from this page; FilterTray stays exported below for
            the component lab's record only. */}
-        {view === "browse" && <BrowseV2 saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} initialQuery={initialQuery} initialType={initialType} />}
+        {view === "browse" && <BrowseV2 saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} initialQuery={initialQuery} initialType={initialType} initialCareer={initialCareer} />}
       </main>
 
       {/* compare bar */}

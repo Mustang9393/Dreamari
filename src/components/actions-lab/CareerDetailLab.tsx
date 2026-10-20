@@ -906,25 +906,8 @@ export function CareerDetailLab({ slug, live = false }: {
 
         {tab === "education" && vm.education && (
           <Section id="education" title="Education">
-            {/* Stacked, not side by side (20 Oct 2026): the school cards
-               below need the full width to read as cards. */}
-            <div className="flex flex-col gap-[var(--space-3)]">
-              <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>What people study for it</h3>
-              <ul className="flex flex-wrap gap-x-[var(--space-5)] gap-y-[var(--space-2)]">
-                {vm.education.studies.map((s) => (
-                  <li key={s.name} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
-                    <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
-                    {s.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex flex-col gap-[var(--space-3)]">
-              <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Where you would study it</h3>
-              {/* one card per credential, each opening the schools that
-                 teach it (no school counts, Josh's notes): see WhereToStudy */}
-              <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerTitle={career.title} />
-            </div>
+            {/* dreamari.com's two lists, every row a door: see WhereToStudy */}
+            <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerSlug={career.slug} />
           </Section>
         )}
 
