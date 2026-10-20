@@ -20,6 +20,7 @@ import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, Sec
 import { EmptyView } from "@/components/app/states";
 import { PovChip, useConnectPov } from "./networking/pov";
 import { StudentMessaging } from "./networking/StudentMessaging";
+import { useDialogFocus } from "@/components/app/useDialogFocus";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -691,6 +692,9 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
   const coverKey = `dreamari:pro-cover:${pro.id}`;
   const [cover, setCover] = useState(coverFor(pro.id));
   const [coverOpen, setCoverOpen] = useState(false);
+  // the cover picker: focus in, Tab kept inside, Escape closes (WCAG 2.4.3 / 2.1.2)
+  const coverDialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(coverOpen, coverDialog, () => setCoverOpen(false));
   useEffect(() => {
     // syncing with the browser's storage (an external system), which is what
     // the set-state-in-effect rule exists to allow
@@ -729,7 +733,7 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
         </div>
       )}
       {coverOpen && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ fontFamily: "var(--font-body)" }}>
+        <div ref={coverDialog} tabIndex={-1} className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ fontFamily: "var(--font-body)" }}>
           <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
           <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
             <div className="flex items-center justify-between gap-[var(--space-3)]">

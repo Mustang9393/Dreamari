@@ -51,6 +51,7 @@ import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "./car
 import { careerSlug } from "@/components/career/slug";
 import { simulationFor } from "@/components/play/games";
 import "./app.css";
+import { announce } from "./LiveRegion";
 
 // Explore, both faces of the Figma design:
 //  - "For You" (Explore — v2.1B, 2288:16179): the Env Card reel with the
@@ -280,8 +281,14 @@ function FilterPill({ label, selected, onClick }: { label: string; selected: boo
 function SearchResults({ query, hits, onQuery, heading }: { query: string; hits: SearchHit[]; onQuery: (q: string) => void; /** a world's name when the grid is a filter, not a search */ heading?: string }) {
   const router = useRouter();
   const related = query.trim() ? relatedTerms(query, hits) : [];
+  // Only the count is read, once typing settles (WCAG 4.1.3, audit 21 Oct
+  // 2026): an aria-live grid read every card aloud on every keystroke.
+  useEffect(() => {
+    const t = window.setTimeout(() => announce(`${hits.length} ${hits.length === 1 ? "career" : "careers"} found`), 600);
+    return () => window.clearTimeout(t);
+  }, [query, hits.length]);
   return (
-    <section className="flex w-full flex-col gap-[var(--space-5)]" aria-live="polite">
+    <section className="flex w-full flex-col gap-[var(--space-5)]">
       {related.length > 0 && (
         <div className="flex flex-wrap items-center gap-[8px]">
           <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Explore careers related to:</span>

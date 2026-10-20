@@ -46,11 +46,10 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
     <li className="h-full">
     <HoverBeam strength={0.8} className="h-full">
     <div
+      // The whole card opens the profile for a pointer; for keyboard and screen
+      // readers the name is the button (WCAG 4.1.2, audit 21 Oct 2026: a
+      // role="button" card holding the Follow button was nested interactive).
       onClick={() => nav?.openPro(pro.id)}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nav?.openPro(pro.id); } }}
-      role="button"
-      tabIndex={0}
-      aria-label={`Open ${pro.name}'s profile`}
       className="dm-tap flex h-full cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]"
       style={{ background: "var(--glass-surface-1)", border: "1px solid var(--glass-border)" }}
     >
@@ -64,7 +63,7 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
              2026). `min-w-0` alone lets it shrink-to-truncate without
              claiming space it doesn't need. */}
           <span className="flex min-w-0 items-center gap-x-[4px] text-[14.5px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            <span className="min-w-0 truncate">{pro.name}</span>
+            <button type="button" aria-label={`Open ${pro.name}'s profile`} onClick={(e) => { e.stopPropagation(); nav?.openPro(pro.id); }} className="min-w-0 truncate cursor-pointer text-left">{pro.name}</button>
             <VerifiedBadge size={13} />
           </span>
           <p className="truncate text-[13px] leading-[17px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{pro.role}</p>
@@ -242,11 +241,10 @@ export function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pr
     <li className="h-full">
     <HoverBeam strength={0.8} className="h-full">
     <div
+      // The whole card opens the profile for a pointer; for keyboard and screen
+      // readers the name is the button (WCAG 4.1.2, audit 21 Oct 2026: a
+      // role="button" card holding the Follow button was nested interactive).
       onClick={() => nav?.openPro(pro.id)}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nav?.openPro(pro.id); } }}
-      role="button"
-      tabIndex={0}
-      aria-label={`Open ${pro.name}'s profile`}
       className="dm-tap flex h-full cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]"
       style={{ background: "var(--glass-surface-1)" }}
     >
@@ -259,7 +257,7 @@ export function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pr
         <span className="flex-none rounded-full leading-none"><Avatar name={pro.name} size={52} /></span>
         <div className="flex min-w-0 flex-1 flex-col gap-[1px]">
           <span className="flex items-center gap-[5px] text-[15px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            <span className="truncate">{pro.name}</span>
+            <button type="button" aria-label={`Open ${pro.name}'s profile`} onClick={(e) => { e.stopPropagation(); nav?.openPro(pro.id); }} className="truncate cursor-pointer text-left">{pro.name}</button>
             <VerifiedBadge size={15} />
           </span>
           <span className="truncate text-[13px] leading-[17px]" title={pro.role} style={{ color: "color-mix(in srgb, var(--foreground) 80%, transparent)" }}>{pro.role}</span>

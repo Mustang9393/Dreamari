@@ -1,3 +1,40 @@
+## 2026-10-21: WCAG 2.2 AA, step 4 (nested cards, tab keys, announcements, dialogs)
+
+**Why.** These were the audit's remaining keyboard and screen-reader items:
+
+- **4.1.2, nested cards.** `role="button"` cards held Follow, Save, Sound or CTA buttons. Screen readers flatten those, and axe flagged 12.
+- **2.1.1 and 4.1.2, tab rows.** About 50 tablists announced "tab, 1 of N" but ignored the arrow keys.
+- **4.1.3, announcements.** XP awards were silent. Explore read the whole grid on every keystroke.
+- **2.4.3, dialogs.** More dialogs left focus behind them, or had no Escape.
+
+Chandu: "go".
+
+**What changed.**
+- **Cards.**
+  - PeopleTab (×2), the Connect event ticket, and Profile's Top Three and My Plan tiles lose `role`, `tabIndex`, `onKeyDown` and `aria-label`, and keep the pointer `onClick`. The name, title or caption is now a real `<button>`.
+  - CompanyVideoCards gets a full-card transparent Play button, under the z-[1] Save and Sound controls, with an inset focus ring.
+- **`app/TabKeys.tsx`** (mounted in layout): a document keydown handler for `[role=tab]` inside `[role=tablist]`. It skips events already defaultPrevented, which is how CardTabs, v4 viz and WorkScreen handle their own keys. It focuses and clicks the next tab.
+- **Announcements.** `xpFlight` calls `announce()`. Explore SearchResults drops `aria-live` from the grid and announces the count after 600ms.
+- **`useDialogFocus`.**
+  - It records the opener at first render and keeps focus that is already inside the dialog.
+  - It retries focus on the next animation frame.
+  - It is now used in GlobalSearch, WeeklyCheckIn, BookCounselorSheet, the ProProfile cover picker and the phone NotificationsPanel.
+
+**Validation.**
+- tsc is clean. eslint has no new warnings.
+- axe `nested-interactive`, `aria-prohibited-attr` and `button-name` are clean on /connect, /explore and /profile.
+- On Opportunities, ArrowRight moves Scholarships to Programs (selected), and End goes to Internships.
+- The 390px bell sheet takes focus, keeps Tab inside, and returns focus to the bell on Escape.
+- A Connect name button opens the pro on Enter.
+- Step 1's sheets still pass.
+- The cards look unchanged in a screenshot.
+
+**Next.**
+- The remaining dialogs: ConnectExperience (6), ProfileExperience (7), PreferencesTab, the resume sheets and PaySheet.
+- Roving tabindex in TextTabs/Segmented.
+- Video captions, if the clips have speech.
+- A screen-reader pass with NVDA and ChromeVox.
+
 ## 2026-10-21: WCAG 2.2 AA, step 3 (forms)
 
 **Why.** These were the audit's form items:

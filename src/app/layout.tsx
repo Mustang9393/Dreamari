@@ -6,6 +6,7 @@ import { SPLASH_VEIL_SCRIPT, SplashVeilGuard } from "@/components/app/SplashVeil
 import { LiveRegion } from "@/components/app/LiveRegion";
 import { OfflineBanner } from "@/components/app/SurfaceState";
 import { SkipLink } from "@/components/app/SkipLink";
+import { TabKeys } from "@/components/app/TabKeys";
 import { ThemeBoot } from "@/components/app/theme";
 import { LightPulse } from "@/components/app/LightPulse";
 import { ColorThemeSwitch } from "@/components/app/ColorThemeSwitch";
@@ -89,6 +90,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <SkipLink />
+        <TabKeys />
         <ThemeBoot />
         <LightPulse />
         <ColorThemeSwitch />

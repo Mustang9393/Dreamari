@@ -2434,8 +2434,9 @@ export function OverviewTabV2({
              to Explore). role="button" + the same keyboard handling keeps
              the rest of the card exactly as clickable as it always was. */}
           <div
-            role="button" tabIndex={0} onClick={onGoTop3}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onGoTop3(); } }}
+            // a pointer can tap anywhere; keyboard and screen readers use the
+            // caption button (WCAG 4.1.2, audit 21 Oct 2026: nested interactive)
+            onClick={onGoTop3}
             className="dm-tap group relative flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}
           >
             <DashHoverChevron />
@@ -2445,7 +2446,7 @@ export function OverviewTabV2({
                brighter than the rest of the line. The #1 badge + name
                moved underneath the bar instead, in the stat-line spot
                Plan uses for "Term 1 of 3..." (direct feedback, 20 Sept). */}
-            <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Top Three</span>
+            <button type="button" onClick={(e) => { e.stopPropagation(); onGoTop3(); }} className="w-fit cursor-pointer text-left text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Top Three</button>
             {/* The #1 pick's own name dropped (direct feedback, 21 Sept
                2026: "a quick status snapshot, not a detailed page" -- the
                ratio below is the one fact this tile exists to show, so it's
@@ -2493,13 +2494,14 @@ export function OverviewTabV2({
              link straight to that step (direct feedback, 20 Sept) -- a
              <button> can't legally contain another interactive element. */}
           <div
-            role="button" tabIndex={0} onClick={onGoPlan}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onGoPlan(); } }}
+            // a pointer can tap anywhere; keyboard and screen readers use the
+            // caption button (WCAG 4.1.2, audit 21 Oct 2026: nested interactive)
+            onClick={onGoPlan}
             className="dm-season-host dm-tap group relative flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}
           >
             <SeasonScene seasonId={currentWindow.id} />
             <DashHoverChevron />
-            <span className="relative z-[1] text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Plan</span>
+            <button type="button" onClick={(e) => { e.stopPropagation(); onGoPlan(); }} className="relative z-[1] w-fit cursor-pointer text-left text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Plan</button>
             {/* Plan name, term ratio, and the "Next" step all dropped
                (direct feedback, 21 Sept 2026: "a quick status snapshot, not
                a detailed page" -- three separate facts read as too much

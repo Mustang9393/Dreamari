@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useEffectEvent, type RefObject } from "react";
+import { useEffect, useEffectEvent, useState, type RefObject } from "react";
 
 /** Focus and scroll containment for a portalled dialog: focus moves into it,
  *  Tab stays inside, Escape closes, and focus goes back to the control that
@@ -9,12 +9,21 @@ import { useEffect, useEffectEvent, type RefObject } from "react";
  *  needs tabIndex={-1} so it can take focus itself. */
 export function useDialogFocus(open:boolean, ref:RefObject<HTMLElement|null>, onClose:()=>void, mobileOnly=false){
  const close=useEffectEvent(onClose);
+ // what had focus as the dialog first rendered: an autoFocus field inside it
+ // (Search) takes focus before this effect runs, and focus must still go
+ // back to the opener on close
+ const [opener]=useState(()=>typeof document==="undefined"?null:document.activeElement as HTMLElement|null);
  useEffect(()=>{
   if(!open || (mobileOnly && window.matchMedia("(min-width: 1024px)").matches))return;
-  const previous=document.activeElement as HTMLElement|null;
+  const active=document.activeElement as HTMLElement|null;
+  const previous=active && !ref.current?.contains(active) ? active : opener;
   const overflow=document.body.style.overflow;
   document.body.style.overflow="hidden";
-  ref.current?.focus();
+  // an autoFocus field inside keeps its focus; otherwise the dialog takes it
+  // A client-only Portal mounts its children a frame later, so try again then.
+  const focusIn=()=>{if(!ref.current?.contains(document.activeElement))ref.current?.focus();};
+  focusIn();
+  const frame=requestAnimationFrame(focusIn);
   const key=(e:KeyboardEvent)=>{
    if(e.key==="Escape"){e.stopPropagation();close();return;}
    if(e.key!=="Tab")return;
@@ -25,6 +34,6 @@ export function useDialogFocus(open:boolean, ref:RefObject<HTMLElement|null>, on
    else if(!e.shiftKey&&(document.activeElement===last||document.activeElement===ref.current)){e.preventDefault();first.focus();}
   };
   document.addEventListener("keydown",key);
-  return ()=>{document.removeEventListener("keydown",key);document.body.style.overflow=overflow;previous?.focus();};
- },[open,ref,mobileOnly]);
+  return ()=>{cancelAnimationFrame(frame);document.removeEventListener("keydown",key);document.body.style.overflow=overflow;previous?.focus();};
+ },[open,ref,mobileOnly,opener]);
 }

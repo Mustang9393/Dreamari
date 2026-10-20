@@ -144,15 +144,9 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
   };
   return (
     <div
-      role={failed ? undefined : "button"}
-      tabIndex={failed ? undefined : 0}
-      aria-label={failed ? undefined : `Play ${item.company}: ${item.title}`}
       onClick={failed ? undefined : onOpen}
-      onKeyDown={failed ? undefined : (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
       onMouseEnter={failed ? undefined : () => preview(true)}
       onMouseLeave={failed ? undefined : () => preview(false)}
-      onFocus={failed ? undefined : () => preview(true)}
-      onBlur={failed ? undefined : () => preview(false)}
       className={`dm-tap group relative h-[368px] w-[276px] flex-none overflow-hidden rounded-[var(--radius-lg)] border text-left ${failed ? "" : "cursor-pointer"}`}
       style={{ borderColor: "var(--color-glass-border-raised)", background: "#000" }}
     >
@@ -196,6 +190,18 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
         aria-hidden
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${playing ? "opacity-100" : "opacity-0"}`}
         style={{ objectPosition: "50% 30%" }}
+      />
+      {/* The keyboard's way in: one real button over the whole card, under
+         the Save and Sound buttons (z-[1]). The card used to be a
+         role="button" holding those two buttons, which is nested
+         interactive (WCAG 4.1.2, audit 21 Oct 2026). */}
+      <button
+        type="button"
+        aria-label={`Play ${item.company}: ${item.title}`}
+        onClick={(e) => { e.stopPropagation(); onOpen(); }}
+        onFocus={() => preview(true)}
+        onBlur={() => preview(false)}
+        className="absolute inset-0 cursor-pointer rounded-[var(--radius-lg)] focus-visible:outline-offset-[-3px]"
       />
       {/* Top-left: save for later (Profile > Saved > Videos), same corner
          convention as the college/career bookmark toggles elsewhere. */}

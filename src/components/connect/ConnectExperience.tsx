@@ -4082,12 +4082,11 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
          2026): tapping anywhere opens the board (or the code sheet
          when not yet joined); the stub's own flip and the buttons
          keep their own behaviour */}
+      {/* keyboard and screen readers reach it through the title button: a
+         role="button" ticket holding its own buttons was nested
+         interactive (WCAG 4.1.2, audit 21 Oct 2026) */}
       <div
-        role="button"
-        tabIndex={0}
-        aria-label={`${joined || preview ? "Open" : "Join"} ${event.name}`}
         onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; if (joined || preview) onOpenEvent(event.id); else onEnterCode(event.id); }}
-        onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (joined || preview) onOpenEvent(event.id); else onEnterCode(event.id); } }}
         className="connect-ticket dm-tap relative flex h-[316px] cursor-pointer overflow-hidden rounded-[var(--radius-lg)]"
         style={{ background: `color-mix(in srgb, ${lit} 50%, var(--ev-edge-mix, rgba(255,255,255,0.12)))`, fontFamily: "var(--font-display)", textShadow: `var(--ev-text-shadow, ${CARD_TEXT_SHADOW})` }}
       >
@@ -4097,7 +4096,9 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
         </div>
         {/* body */}
         <div className="relative z-10 flex min-w-0 flex-1 flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pt-[var(--space-6)]">
-          <h3 className="line-clamp-3 min-h-[78px] text-[21px] leading-[26px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
+          <h3 className="line-clamp-3 min-h-[78px] text-[21px] leading-[26px] font-extrabold text-balance" style={{ color: eventInk }}>
+            <button type="button" aria-label={`${joined || preview ? "Open" : "Join"} ${event.name}`} onClick={() => { if (joined || preview) onOpenEvent(event.id); else onEnterCode(event.id); }} className="cursor-pointer text-left text-balance">{event.name}</button>
+          </h3>
           <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--ev-soft, rgba(255,255,255,0.8))", fontFamily: "var(--font-body)" }}>
             <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} var(--ev-icon-a, 60%), var(--ev-icon-mix, #fff))` }} /> {when}</span>
             <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} var(--ev-icon-a, 60%), var(--ev-icon-mix, #fff))` }} /> {event.location}</span>

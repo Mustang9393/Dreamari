@@ -12,6 +12,7 @@ import { LISTED_COMMUNITIES, EVENTS, PROS } from "@/components/connect/data";
 import { Avatar, CompanyChip } from "@/components/connect/primitives";
 import { IconTip } from "@/components/app/IconTip";
 import { SurfaceState } from "@/components/app/SurfaceState";
+import { useDialogFocus } from "./useDialogFocus";
 
 // PARKED (2026-09-03): first cut of sitewide search, pulled from the chrome
 // after review ("heavy, busy, misaligned"). Not rendered anywhere. Kept so
@@ -106,19 +107,15 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   const results = useMemo(() => search(q.trim()), [q]);
   const total = results ? Object.values(results).reduce((a, g) => a + g.length, 0) : 0;
 
-  useEffect(() => {
-    inputRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
-  }, [onClose]);
+  useEffect(() => { inputRef.current?.focus(); }, []);
+  // Tab stays inside, Escape closes, focus returns to the search button (WCAG 2.4.3)
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialog, onClose);
 
   if (typeof document === "undefined") return null;
   const visible = GROUPS.filter((g) => scope === "all" || g.key === scope);
   return createPortal(
-    <div className="marketing-v2 themeable fixed inset-0 z-[130] flex flex-col" role="dialog" aria-modal="true" aria-label="Search Dreamari" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
+    <div ref={dialog} tabIndex={-1} className="marketing-v2 themeable fixed inset-0 z-[130] flex flex-col" role="dialog" aria-modal="true" aria-label="Search Dreamari" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
       {/* the page stays visible behind, dimmed and softened */}
       <button type="button" aria-label="Close search" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.55)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
       <div className="relative z-[1] mx-auto flex h-full w-full max-w-[720px] flex-col px-5 pt-[var(--space-4)] pb-[var(--space-6)] md:pt-[72px]">

@@ -8,6 +8,7 @@
 
 import { playXpRise } from "@/components/build/sound";
 import { awardDreamScore, peekDreamScoreAfter, readDreamScore } from "@/lib/dreamScore";
+import { announce } from "./LiveRegion";
 
 export const DREAM_SCORE_TARGET_ATTR = "data-dream-score-target";
 
@@ -39,6 +40,8 @@ function target(): Point {
 export function flyXp({ from, amount, milestone, tone }: { from: Element | Point | null | undefined; amount: number; milestone: string; /** CSS color for the number; defaults to the app accent */ tone?: string }): boolean {
   if (typeof window === "undefined") return false;
   if (peekDreamScoreAfter(milestone, amount) === readDreamScore()) return false; // already banked
+  // the capsule is aria-hidden, so say it too (WCAG 4.1.3, audit 21 Oct 2026)
+  announce(`Plus ${amount} XP`);
   const start = from && "getBoundingClientRect" in from ? centerOf(from, { x: window.innerWidth / 2, y: window.innerHeight / 2 }) : (from as Point | null) ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
   const end = target();
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

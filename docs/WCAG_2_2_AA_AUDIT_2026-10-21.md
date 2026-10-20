@@ -67,6 +67,17 @@ Three things should not be assumed:
 - **S5.** Resume bullets have Move up / Move down buttons next to the drag handle. Focus follows the line.
 - **M8.** The Explore search (×2), the Glossary typed answer and the Tailor job description have labels.
 
+**Step 4 done on the same branch (cards, tabs, announcements, more dialogs):**
+- **S6.** The cards are no longer `role="button"` wrappers around other buttons.
+  - Connect people cards (×2) and event tickets, and the Profile Top Three and My Plan tiles: the name, title or caption is now the button. A pointer can still tap anywhere on the card.
+  - Company video cards: one full-card Play button sits under the Save and Sound buttons.
+  - axe `nested-interactive` is now clean on /connect, /explore and /profile.
+- **M6.** One app-wide `TabKeys` listener gives every `role="tablist"` Left/Right (Up/Down when vertical), Home and End. Tablists that handle their own keys are left alone. Roving tabindex is still not done.
+- **M9.**
+  - XP awards announce "Plus N XP".
+  - Explore search announces only "N careers found", once typing settles.
+- **S1, more.** `useDialogFocus` now also covers GlobalSearch, the weekly check-in, Book a counselor, the pro cover picker and the phone notifications sheet. The hook keeps an autoFocus field's focus and retries focus a frame later for portals that mount late.
+
 ## Serious issues (fix before any claim)
 
 | # | WCAG SC | Issue | Where | Fix |
