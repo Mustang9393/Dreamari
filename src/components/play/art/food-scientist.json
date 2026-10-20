@@ -1,0 +1,217 @@
+{
+  "career": "food-scientist",
+  "folder": "fs",
+  "spriteStandard": "full-scene",
+  "notes": [
+    "AI-authored complete-scene QA draft; human visual QA pending.",
+    "No runtime sprites. Same files reused within unchanged beats; new cameras are not pixel-identical."
+  ],
+  "locations": {
+    "fs-arrival": {
+      "src": "/images/play/fs/v1/arrival.png",
+      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-brief": {
+      "src": "/images/play/fs/v1/brief.png",
+      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-tools": {
+      "src": "/images/play/fs/v1/tools.png",
+      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-observation": {
+      "src": "/images/play/fs/v1/observation.png",
+      "alt": "Kiran observes a broken oat snack with tongs.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-weighing": {
+      "src": "/images/play/fs/v1/weighing.png",
+      "alt": "Kiran weighs oats using a balance.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-midpoint": {
+      "src": "/images/play/fs/v1/midpoint.png",
+      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-records": {
+      "src": "/images/play/fs/v1/records-corrected.png",
+      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-hold": {
+      "src": "/images/play/fs/v1/hold.png",
+      "alt": "Mei addresses the first-person player in Sprout Lab.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-sensory": {
+      "src": "/images/play/fs/v1/sensory.png",
+      "alt": "Mei addresses the first-person player in Sprout Lab.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-results": {
+      "src": "/images/play/fs/v1/results.png",
+      "alt": "Kiran measures an oat snack using a texture tester.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-handover": {
+      "src": "/images/play/fs/v1/handover.png",
+      "alt": "Mei addresses the first-person player in Sprout Lab.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "fs-closing": {
+      "src": "/images/play/fs/v1/closing.png",
+      "alt": "Kiran addresses the first-person player in Sprout Lab.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    }
+  },
+  "cast": {
+    "Kiran": {
+      "face": "/images/play/fs/face-kiran.webp",
+      "voicePitch": 410
+    },
+    "Mei": {
+      "face": "/images/play/fs/face-mei.webp",
+      "voicePitch": 510
+    }
+  },
+  "portraitRatios": {},
+  "beatLocations": {
+    "FS1-01": "fs-arrival",
+    "FS1-02": "fs-arrival",
+    "FS1-03": "fs-arrival",
+    "FS1-04": "fs-arrival",
+    "FS1-05": "fs-brief",
+    "FS1-06": "fs-brief",
+    "FS1-07": "fs-brief",
+    "FS1-08": "fs-tools",
+    "FS1-TOOLS": "fs-tools",
+    "FS1-09": "fs-tools",
+    "FS1-10": "fs-observation",
+    "FS1-11": "fs-observation",
+    "FS1-12": "fs-observation",
+    "FS1-13": "fs-weighing",
+    "FS1-14": "fs-weighing",
+    "FS1-15": "fs-weighing",
+    "FS1-16": "fs-weighing",
+    "FS1-17": "fs-weighing",
+    "FS1-MID": "fs-midpoint",
+    "FS1-18": "fs-records",
+    "FS1-19": "fs-records",
+    "FS1-20": "fs-records",
+    "FS1-21": "fs-hold",
+    "FS1-22": "fs-hold",
+    "FS1-23": "fs-hold",
+    "FS1-24": "fs-sensory",
+    "FS1-25": "fs-sensory",
+    "FS1-26": "fs-sensory",
+    "FS1-27": "fs-results",
+    "FS1-28": "fs-results",
+    "FS1-29": "fs-results",
+    "FS1-30": "fs-results",
+    "FS1-31": "fs-handover",
+    "FS1-32": "fs-handover",
+    "FS1-33": "fs-handover",
+    "FS1-34": "fs-handover",
+    "FS1-35": "fs-closing"
+  }
+}

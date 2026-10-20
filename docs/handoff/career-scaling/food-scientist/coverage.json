@@ -1,0 +1,466 @@
+{
+  "career": "food-scientist",
+  "version": "1.0",
+  "groups": [
+    {
+      "id": "arrival",
+      "required": true,
+      "purpose": "Player conversation at the arrival milestone",
+      "scene": "fs-arrival",
+      "beats": [
+        "FS1-01",
+        "FS1-02",
+        "FS1-03",
+        "FS1-04"
+      ],
+      "visibleCast": [
+        "Kiran"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "observationReason": "",
+      "camera": "sprout-arrival"
+    },
+    {
+      "id": "brief",
+      "required": true,
+      "purpose": "Player conversation at the brief milestone",
+      "scene": "fs-brief",
+      "beats": [
+        "FS1-05",
+        "FS1-06",
+        "FS1-07"
+      ],
+      "visibleCast": [
+        "Kiran"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "observationReason": "",
+      "camera": "sprout-brief"
+    },
+    {
+      "id": "tools",
+      "required": true,
+      "purpose": "Player conversation at the tools milestone",
+      "scene": "fs-tools",
+      "beats": [
+        "FS1-08",
+        "FS1-TOOLS",
+        "FS1-09"
+      ],
+      "visibleCast": [
+        "Kiran"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "observationReason": "",
+      "camera": "sprout-tools"
+    },
+    {
+      "id": "observation",
+      "required": true,
+      "purpose": "Observe the actual work",
+      "scene": "fs-observation",
+      "beats": [
+        "FS1-10",
+        "FS1-11",
+        "FS1-12"
+      ],
+      "visibleCast": [
+        "Kiran"
+      ],
+      "pov": "observe-task",
+      "speakingTarget": "player",
+      "eyeline": "task",
+      "observationReason": "Mentor explains the demonstrated task in voice-over; the player observes.",
+      "camera": "sprout-observation"
+    },
+    {
+      "id": "weighing",
+      "required": true,
+      "purpose": "Observe the actual work",
+      "scene": "fs-weighing",
+      "beats": [
+        "FS1-13",
+        "FS1-14",
+        "FS1-15",
+        "FS1-16",
+        "FS1-17"
+      ],
+      "visibleCast": [
+        "Kiran"
+      ],
+      "pov": "observe-task",
+      "speakingTarget": "player",
+      "eyeline": "task",
+      "observationReason": "Mentor explains the demonstrated task in voice-over; the player observes.",
+      "camera": "sprout-weighing"
+    },
+    {
+      "id": "midpoint",
+      "required": true,
+      "purpose": "Player conversation at the midpoint milestone",
+      "scene": "fs-midpoint",
+      "beats": [
+        "FS1-MID"
+      ],
+      "visibleCast": [
+        "Kiran"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "observationReason": "",
+      "camera": "sprout-midpoint"
+    },
+    {
+      "id": "records",
+      "required": true,
+      "purpose": "Player conversation at the records milestone",
+      "scene": "fs-records",
+      "beats": [
+        "FS1-18",
+        "FS1-19",
+        "FS1-20"
+      ],
+      "visibleCast": [
+        "Kiran"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "observationReason": "",
+      "camera": "sprout-records"
+    },
+    {
+      "id": "hold",
+      "required": true,
+      "purpose": "Player conversation at the hold milestone",
+      "scene": "fs-hold",
+      "beats": [
+        "FS1-21",
+        "FS1-22",
+        "FS1-23"
+      ],
+      "visibleCast": [
+        "Mei"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "observationReason": "",
+      "camera": "sprout-hold"
+    },
+    {
+      "id": "sensory",
+      "required": true,
+      "purpose": "Player conversation at the sensory milestone",
+      "scene": "fs-sensory",
+      "beats": [
+        "FS1-24",
+        "FS1-25",
+        "FS1-26"
+      ],
+      "visibleCast": [
+        "Mei"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "observationReason": "",
+      "camera": "sprout-sensory"
+    },
+    {
+      "id": "results",
+      "required": true,
+      "purpose": "Observe the actual work",
+      "scene": "fs-results",
+      "beats": [
+        "FS1-27",
+        "FS1-28",
+        "FS1-29",
+        "FS1-30"
+      ],
+      "visibleCast": [
+        "Kiran"
+      ],
+      "pov": "observe-task",
+      "speakingTarget": "player",
+      "eyeline": "task",
+      "observationReason": "Mentor explains the demonstrated task in voice-over; the player observes.",
+      "camera": "sprout-results"
+    },
+    {
+      "id": "handover",
+      "required": true,
+      "purpose": "Player conversation at the handover milestone",
+      "scene": "fs-handover",
+      "beats": [
+        "FS1-31",
+        "FS1-32",
+        "FS1-33",
+        "FS1-34"
+      ],
+      "visibleCast": [
+        "Mei"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "observationReason": "",
+      "camera": "sprout-handover"
+    },
+    {
+      "id": "closing",
+      "required": true,
+      "purpose": "Player conversation at the closing milestone",
+      "scene": "fs-closing",
+      "beats": [
+        "FS1-35"
+      ],
+      "visibleCast": [
+        "Kiran"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "observationReason": "",
+      "camera": "sprout-closing"
+    }
+  ],
+  "beats": [
+    {
+      "beat": "FS1-01",
+      "scene": "fs-arrival",
+      "shotGroup": "arrival",
+      "artifact": "fs-brief"
+    },
+    {
+      "beat": "FS1-02",
+      "scene": "fs-arrival",
+      "shotGroup": "arrival",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-03",
+      "scene": "fs-arrival",
+      "shotGroup": "arrival",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-04",
+      "scene": "fs-arrival",
+      "shotGroup": "arrival",
+      "artifact": "fs-brief"
+    },
+    {
+      "beat": "FS1-05",
+      "scene": "fs-brief",
+      "shotGroup": "brief",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-06",
+      "scene": "fs-brief",
+      "shotGroup": "brief",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-07",
+      "scene": "fs-brief",
+      "shotGroup": "brief",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-08",
+      "scene": "fs-tools",
+      "shotGroup": "tools",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-TOOLS",
+      "scene": "fs-tools",
+      "shotGroup": "tools",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-09",
+      "scene": "fs-tools",
+      "shotGroup": "tools",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-10",
+      "scene": "fs-observation",
+      "shotGroup": "observation",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-11",
+      "scene": "fs-observation",
+      "shotGroup": "observation",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-12",
+      "scene": "fs-observation",
+      "shotGroup": "observation",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-13",
+      "scene": "fs-weighing",
+      "shotGroup": "weighing",
+      "artifact": "fs-example"
+    },
+    {
+      "beat": "FS1-14",
+      "scene": "fs-weighing",
+      "shotGroup": "weighing",
+      "artifact": "fs-plan"
+    },
+    {
+      "beat": "FS1-15",
+      "scene": "fs-weighing",
+      "shotGroup": "weighing",
+      "artifact": "fs-plan"
+    },
+    {
+      "beat": "FS1-16",
+      "scene": "fs-weighing",
+      "shotGroup": "weighing",
+      "artifact": "fs-flow"
+    },
+    {
+      "beat": "FS1-17",
+      "scene": "fs-weighing",
+      "shotGroup": "weighing",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-MID",
+      "scene": "fs-midpoint",
+      "shotGroup": "midpoint",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-18",
+      "scene": "fs-records",
+      "shotGroup": "records",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-19",
+      "scene": "fs-records",
+      "shotGroup": "records",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-20",
+      "scene": "fs-records",
+      "shotGroup": "records",
+      "artifact": "fs-log"
+    },
+    {
+      "beat": "FS1-21",
+      "scene": "fs-hold",
+      "shotGroup": "hold",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-22",
+      "scene": "fs-hold",
+      "shotGroup": "hold",
+      "artifact": "fs-hold"
+    },
+    {
+      "beat": "FS1-23",
+      "scene": "fs-hold",
+      "shotGroup": "hold",
+      "artifact": "fs-hold"
+    },
+    {
+      "beat": "FS1-24",
+      "scene": "fs-sensory",
+      "shotGroup": "sensory",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-25",
+      "scene": "fs-sensory",
+      "shotGroup": "sensory",
+      "artifact": "fs-sensory"
+    },
+    {
+      "beat": "FS1-26",
+      "scene": "fs-sensory",
+      "shotGroup": "sensory",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-27",
+      "scene": "fs-results",
+      "shotGroup": "results",
+      "artifact": "fs-results"
+    },
+    {
+      "beat": "FS1-28",
+      "scene": "fs-results",
+      "shotGroup": "results",
+      "artifact": "fs-example"
+    },
+    {
+      "beat": "FS1-29",
+      "scene": "fs-results",
+      "shotGroup": "results",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-30",
+      "scene": "fs-results",
+      "shotGroup": "results",
+      "artifact": "fs-results"
+    },
+    {
+      "beat": "FS1-31",
+      "scene": "fs-handover",
+      "shotGroup": "handover",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-32",
+      "scene": "fs-handover",
+      "shotGroup": "handover",
+      "artifact": "fs-results"
+    },
+    {
+      "beat": "FS1-33",
+      "scene": "fs-handover",
+      "shotGroup": "handover",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    },
+    {
+      "beat": "FS1-34",
+      "scene": "fs-handover",
+      "shotGroup": "handover",
+      "artifact": "fs-handover"
+    },
+    {
+      "beat": "FS1-35",
+      "scene": "fs-closing",
+      "shotGroup": "closing",
+      "noArtifactReason": "Dialogue, concept teaching or a self-contained interaction; no additional graphic is needed."
+    }
+  ],
+  "milestones": [
+    {
+      "beat": "FS1-MID",
+      "afterDecisions": 5,
+      "threshold": 65
+    }
+  ]
+}

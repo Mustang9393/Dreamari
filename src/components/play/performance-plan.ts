@@ -1,3 +1,4 @@
+import { FS_PERFORMANCE_PLAN } from "./food-scientist-performance-plan";
 import { UX_PERFORMANCE_PLAN } from "./ux-performance-plan";
 // The Performance Improvement Plan, from the Performance Plan tab of the
 // handoff. Fires only when a player racks up three strikes inside one
@@ -52,6 +53,7 @@ export type PerformancePlan = {
 // supervisor voice and step options, but the three plan questions never
 // change across careers (Performance Plan tab).
 export const PERFORMANCE_PLANS: Record<string, Record<1 | 2 | 3, PerformancePlan>> = {
+  "food-scientist": { 1: FS_PERFORMANCE_PLAN, 2: FS_PERFORMANCE_PLAN, 3: FS_PERFORMANCE_PLAN },
   "ui-ux-designer": { 1: UX_PERFORMANCE_PLAN, 2: UX_PERFORMANCE_PLAN, 3: UX_PERFORMANCE_PLAN },
   "investment-banking": {
   1: {

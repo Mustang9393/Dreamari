@@ -53,9 +53,18 @@ export type Resolve = (tier: Tier, why: string, id?: string) => void;
 // tiers/roles off the option objects themselves, never off positions.
 const SHUFFLE_NONCE = Math.floor(Math.random() * 0xffffffff);
 
-function seededShuffle<T>(items: readonly T[], key: string): T[] {
+// SSR and the first hydration render must use the same order. The browser's
+// per-load nonce takes over immediately after hydration, before interaction.
+const subscribeShuffle = () => () => {};
+const shuffleClientSnapshot = () => SHUFFLE_NONCE;
+const shuffleServerSnapshot = () => 0;
+function useShuffleNonce(): number {
+  return useSyncExternalStore(subscribeShuffle, shuffleClientSnapshot, shuffleServerSnapshot);
+}
+
+function seededShuffle<T>(items: readonly T[], key: string, nonce: number): T[] {
   // FNV-1a over the key, mixed with the per-load nonce...
-  let h = SHUFFLE_NONCE >>> 0;
+  let h = nonce >>> 0;
   for (let i = 0; i < key.length; i += 1) {
     h ^= key.charCodeAt(i);
     h = Math.imul(h, 16777619) >>> 0;
@@ -77,7 +86,8 @@ function seededShuffle<T>(items: readonly T[], key: string): T[] {
 }
 
 function useShuffled<T>(items: readonly T[], key: string): T[] {
-  return useMemo(() => seededShuffle(items, key), [items, key]);
+  const nonce = useShuffleNonce();
+  return useMemo(() => seededShuffle(items, key, nonce), [items, key, nonce]);
 }
 
 // ---------------------------------------------------------------- typewriter
@@ -3084,10 +3094,11 @@ function MatchTile({
  *  set is a single scored beat; unanswered questions score as wrong. */
 export function RapidBody({ beat, onResolve, remaining, onClockHold }: { beat: RapidBeat; onResolve: Resolve; remaining: number; onClockHold?: (held: boolean) => void }) {
   const { directed } = usePresentation();
+  const shuffleNonce = useShuffleNonce();
   // Question order is the sheet's own; only each question's OPTIONS shuffle.
   const items = useMemo(
-    () => beat.items.map((item, index) => ({ ...item, options: seededShuffle(item.options, `${beat.id}:${index}`) })),
-    [beat.items, beat.id],
+    () => beat.items.map((item, index) => ({ ...item, options: seededShuffle(item.options, `${beat.id}:${index}`, shuffleNonce) })),
+    [beat.items, beat.id, shuffleNonce],
   );
   const [step, setStep] = useState(0);
   const [right, setRight] = useState(0);

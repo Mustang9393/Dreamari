@@ -1,0 +1,256 @@
+{
+  "career": "food-scientist",
+  "trace": [
+    {
+      "beat": "FS1-01",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-02",
+      "teaches": [
+        "role"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-03",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-04",
+      "teaches": [
+        "authority",
+        "brief"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-05",
+      "teaches": [
+        "testable-question"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-06",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-07",
+      "teaches": [],
+      "uses": [
+        "brief",
+        "testable-question"
+      ]
+    },
+    {
+      "beat": "FS1-08",
+      "teaches": [
+        "tools"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-TOOLS",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-09",
+      "teaches": [],
+      "uses": [
+        "tools"
+      ]
+    },
+    {
+      "beat": "FS1-10",
+      "teaches": [
+        "observation"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-11",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-12",
+      "teaches": [],
+      "uses": [
+        "observation"
+      ]
+    },
+    {
+      "beat": "FS1-13",
+      "teaches": [
+        "controlled-test",
+        "repeat"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-14",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-15",
+      "teaches": [],
+      "uses": [
+        "controlled-test"
+      ]
+    },
+    {
+      "beat": "FS1-16",
+      "teaches": [
+        "sequence",
+        "records"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-17",
+      "teaches": [],
+      "uses": [
+        "sequence",
+        "records"
+      ]
+    },
+    {
+      "beat": "FS1-MID",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-18",
+      "teaches": [
+        "record-gaps",
+        "hold"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-19",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-20",
+      "teaches": [],
+      "uses": [
+        "record-gaps",
+        "records",
+        "hold"
+      ]
+    },
+    {
+      "beat": "FS1-21",
+      "teaches": [
+        "allergen"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-22",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-23",
+      "teaches": [],
+      "uses": [
+        "allergen",
+        "hold",
+        "authority"
+      ]
+    },
+    {
+      "beat": "FS1-24",
+      "teaches": [
+        "sensory-fairness"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-25",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-26",
+      "teaches": [],
+      "uses": [
+        "sensory-fairness"
+      ]
+    },
+    {
+      "beat": "FS1-27",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-28",
+      "teaches": [
+        "rationale",
+        "limits"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-29",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-30",
+      "teaches": [],
+      "uses": [
+        "rationale",
+        "limits",
+        "repeat"
+      ]
+    },
+    {
+      "beat": "FS1-31",
+      "teaches": [
+        "shelf-life-boundary"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-32",
+      "teaches": [
+        "shelf-life"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-33",
+      "teaches": [],
+      "uses": [
+        "shelf-life",
+        "authority",
+        "limits"
+      ]
+    },
+    {
+      "beat": "FS1-34",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-35",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-REVIEW",
+      "teaches": [],
+      "uses": []
+    }
+  ]
+}

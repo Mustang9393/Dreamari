@@ -1,3 +1,15 @@
+## 2026-10-20 — Food Scientist Level 1 SOP candidate
+
+**Why:** Chandu supplied the career-scaling SOP URL and asked, “Use this SOP to create a career simulation for food scientist.” Implemented the default complete Level 1 in the existing player, rather than a separate website/game engine.
+
+**Built:** `food-scientist` / Sprout Lab / “The snack that keeps breaking”: 38 beats, ten scored decisions across seven existing mechanics, midpoint, native project graphics, canonical 100 g trial data, 12 complete anime scenes and same-scene face crops, Kiran/Mei voice registration, food-specific recovery, intentional silent music, QA hamburger link and separate save slot 601. Food Scientist follows the existing Farming, Animals & Nature catalogue world. Excluded from normal Play hub until QA. Later projects are explicitly unbuilt. Source ledger uses IFT, FDA and NIST; all samples/counts/dialogue are fictional, no recipes or safety limits are certified.
+
+**Repair discovered in QA:** direct `?screen=` links could hydrate mismatched shuffled options because server/client module random nonces differed. `interactions.tsx` now uses the same zero nonce for server/hydration and the per-load browser nonce afterward, including RapidBody; answer keys and scoring remain unchanged. Direct-question browser regression passed. This addresses an observed shared-rendering defect, not a new gameplay mechanism.
+
+**Checks:** 548 structural assertions, scoped ESLint, TypeScript, 508-token check, production build and whitespace passed. Actual perfect run reached reputation 100 and passing ending; each mechanic exercised; wrong/correct practice and scored feedback, midpoint pass/fail, recovery 2/3 pass and 1/3 fail/restart checked. Phone 390×844 and desktop 1366×900 inspected. See `docs/handoff/career-scaling/food-scientist/QA.md` for exact scope, fixtures, screenshots and limitations. Full perfect replay happened before the narrow shuffle hydration fix; affected direct choice render/keyboard submission rechecked afterward.
+
+**Limits / next:** local QA at `http://localhost:3081/play/food-scientist`; no push, main merge or deployment. Human authenticity/art QA, physical Windows/Chromebook, reduced-motion and image-failure tests remain open. Shared recovery retains employment-oriented headings; demo resume remains intentionally disabled. Exact protected pixels are not certified for the corrected record scene. Request beat-specific QA feedback and repair within the same shared engine.
+
 ## 2026-10-20 — UX work graphics: designed evidence and local prototype
 
 **Why (Chandu):** “more designed ... engaging and fun ... not so full of text”; “make wireframes look like wireframes”; preview CTAs clash with game CTAs; refer to nursing’s ECG UI. The previous renderer treated every artifact as a text card or finished form, repeated it too often and gave its fake actions the game’s primary styling.

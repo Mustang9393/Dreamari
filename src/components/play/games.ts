@@ -1,3 +1,4 @@
+import { FOOD_SCIENTIST_LEVEL_1 } from "./food-scientist-level-1";
 import { UX_LEVEL_1 } from "./ux-level-1";
 import { IB_LEVEL_1 } from "./ib-level-1";
 import { IB_LEVEL_1_V2 } from "./ib-level-1-v2";
@@ -173,7 +174,15 @@ export const UX_DESIGNER: Simulation = {
   ]
 };
 
-export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE, AVIATION_MAINTENANCE, UX_DESIGNER];
+export const FOOD_SCIENTIST: Simulation = {
+  id: "food-scientist", careerId: "food-scientist", title: "Food Scientist",
+  world: "Farming, Animals & Nature", firm: "Sprout Lab",
+  cover: "/images/play/fs/v1/arrival.png", thumb: "/images/play/fs/v1/arrival.png", thumbFocus: "48% 25%",
+  levels: [FOOD_SCIENTIST_LEVEL_1],
+  upcoming: ["Planned: repeatability study", "Planned: process scale-up", "Planned: product review"],
+};
+
+export const SIMULATIONS: Simulation[] = [FOOD_SCIENTIST, INVESTMENT_BANKING, REGISTERED_NURSE, AVIATION_MAINTENANCE, UX_DESIGNER];
 
 /** Careers whose simulation is not built yet. Poster art only, no promises
  *  about when. Cover art here is its OWN `soon-*.png` file per career, not

@@ -32,7 +32,7 @@ import type { Simulation } from "./types";
 const PLAY_ROW_IDS = ["simulations", "glossary", "soon"];
 
 // DEMO-ONLY: UX stays in hamburger Quick Links for discussion before a hub release.
-const HUB_SIMULATIONS = SIMULATIONS.filter((game) => game.id !== "ui-ux-designer");
+const HUB_SIMULATIONS = SIMULATIONS.filter((game) => game.id !== "ui-ux-designer" && game.id !== "food-scientist");
 
 // TV UX (direct feedback, 21 Sept 2026: "he wants all rows like this" --
 // the row-focus treatment Glossary Games got on hover, but the actual

@@ -1,0 +1,30 @@
+{
+  "project": "Sprout oat snack",
+  "version": "FS-1.0",
+  "batches": [
+    {
+      "id": "A",
+      "oats": 60,
+      "binder": 30,
+      "seeds": 10,
+      "broken": 7,
+      "tested": 10
+    },
+    {
+      "id": "B",
+      "oats": 55,
+      "binder": 35,
+      "seeds": 10,
+      "broken": 2,
+      "tested": 10
+    }
+  ],
+  "heldSample": {
+    "id": "C",
+    "ingredientRecord": "Missing",
+    "allergenReview": "Not confirmed",
+    "tasting": "Not authorised"
+  },
+  "shelfLife": "Not studied",
+  "method": "Same mixing, shaping, storage interval and break test for A and B; replace 5 g oats with 5 g binder in each 100 g trial."
+}
