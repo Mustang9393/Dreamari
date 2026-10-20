@@ -105,7 +105,7 @@ export function EditSectionsPanel({ resume, version, onClose }: { resume: Resume
                   aria-label={isHidden ? `Show ${SECTION_LABEL[id]}` : `Hide ${SECTION_LABEL[id]}`}
                   onClick={() => toggleHidden(id)}
                   className="dm-tap flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[10px] py-[6px] text-[12px] font-bold"
-                  style={isHidden ? { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" } : { borderColor: "var(--primary)", color: "var(--primary)" }}
+                  style={isHidden ? { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" } : { borderColor: "var(--primary)", color: "var(--color-text-brand)" }}
                 >
                   {isHidden ? <EyeOff className="h-3.5 w-3.5" aria-hidden /> : <Eye className="h-3.5 w-3.5" aria-hidden />}
                   {isHidden ? "Hidden" : "Visible"}

@@ -71,7 +71,7 @@ function TemplateRow({ template, active, onFocus, v2 }: { template: (typeof RESU
       {<span className="size-7 flex-none rounded-full border" style={{ background: template.accent, borderColor: "var(--glass-border)" }} aria-hidden />}
       <span className="flex min-w-0 flex-col gap-[2px]">
         <span className="flex flex-wrap items-center gap-[6px] text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>
-          {active && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
+          {active && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--color-text-brand)" }} aria-hidden />}
           {template.label}
           {v2 && template.id === "classic" && <RecommendedBadge />}
         </span>

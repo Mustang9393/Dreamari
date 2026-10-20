@@ -909,7 +909,7 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
             )}
           </div>
           <div className="relative flex min-w-0 flex-1 items-center">
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={me === "mentee" ? "Message Avery" : `Message ${D.MENTEE.name}`} aria-label="Message" className="min-w-0 flex-1 rounded-full border py-[10px] pr-[44px] pl-[16px] text-[15px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={me === "mentee" ? "Message Avery" : `Message ${D.MENTEE.name}`} aria-label="Message" className="min-w-0 flex-1 rounded-full border py-[10px] pr-[44px] pl-[16px] text-[15px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--color-text-brand)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
             <IconTip label="Emoji" className="absolute right-[6px]">
               <button type="button" aria-label="Emoji" aria-expanded={menu === "emoji"} onClick={() => setMenu(menu === "emoji" ? "none" : "emoji")} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full" style={{ color: menu === "emoji" ? accent : "var(--muted-foreground)" }}>
                 <Smile className="h-[18px] w-[18px]" aria-hidden />
@@ -973,7 +973,7 @@ function MeetingRequestSheet({ onClose, onSend }: { onClose: () => void; onSend:
   const [title, setTitle] = useState("Career check-in");
   const [agenda, setAgenda] = useState("");
   const [slot, setSlot] = useState<string>(D.MEETING.reschedule[0]);
-  const field = "w-full rounded-[var(--radius-md)] border px-[14px] py-[10px] text-[14.5px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]";
+  const field = "w-full rounded-[var(--radius-md)] border px-[14px] py-[10px] text-[14.5px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--color-text-brand)]";
   const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
     <Sheet title="Request a meeting" label="In this chat" onClose={onClose}>

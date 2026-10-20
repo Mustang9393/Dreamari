@@ -73,7 +73,7 @@ function MilestoneCardView({ card }: { card: MilestoneCard }) {
         <button
           type="button"
           className="dm-quiet mt-auto flex cursor-pointer items-center gap-[4px] text-left text-[12.5px] font-bold"
-          style={{ color: "var(--primary)" }}
+          style={{ color: "var(--color-text-brand)" }}
         >
           View Details & Student Breakdown
         </button>

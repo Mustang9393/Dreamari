@@ -27,7 +27,7 @@
 .v4-leader-lane{margin-bottom:0;padding:9px 0;cursor:default}
 button.v4-leader-lane{cursor:pointer}
 button.v4-leader-lane:hover .ld-dots-axis{opacity:1}
-button.v4-leader-lane:hover .v4-leader-lane-label{color:var(--primary)}
+button.v4-leader-lane:hover .v4-leader-lane-label{color:var(--color-text-brand)}
 .v4-leader-lane-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .v4-leader-lane-axis{margin-top:6px}
 .v4-leader-lanes{display:flex;flex-direction:column}

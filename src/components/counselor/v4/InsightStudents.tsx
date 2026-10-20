@@ -76,7 +76,7 @@ export function StudentRows({ students, onLeave, columns = false, limit = SHOWN 
         ))}
       </ul>
       {students.length > limit && (
-        <button type="button" onClick={() => setAll((v) => !v)} className="v4-text-action self-start" style={{ color: "var(--primary)" }}>
+        <button type="button" onClick={() => setAll((v) => !v)} className="v4-text-action self-start" style={{ color: "var(--color-text-brand)" }}>
           {all ? "Show fewer" : `Show all ${students.length}`}
         </button>
       )}

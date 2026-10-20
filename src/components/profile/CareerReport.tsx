@@ -149,7 +149,7 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
            the header -- one shape, one weight, every section. The icon prop
            stays accepted so call sites don't change; it just isn't drawn. */}
         {void Icon}
-        <span aria-hidden className="dm-report-num flex h-[34px] min-w-[34px] flex-none items-center justify-center rounded-[var(--radius-sm)] px-[8px] text-[18px] leading-[23px] font-extrabold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)", fontFamily: "var(--font-display)" }}>
+        <span aria-hidden className="dm-report-num flex h-[34px] min-w-[34px] flex-none items-center justify-center rounded-[var(--radius-sm)] px-[8px] text-[18px] leading-[23px] font-extrabold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--color-text-brand)", fontFamily: "var(--font-display)" }}>
           {String(n).padStart(2, "0")}
         </span>
         {/* The one hierarchy, everywhere: section heading (18) > label (14)
@@ -178,7 +178,7 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
 function Fact({ label, value, icon: Icon, className }: { label: string; value: React.ReactNode; icon?: typeof Check; className?: string }) {
   return (
     <div className={`rounded-[var(--radius-sm)] border px-[16px] py-[14px] ${className ?? ""}`} style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
-      <dt className="flex items-center gap-[6px] text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>
+      <dt className="flex items-center gap-[6px] text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--color-text-brand)" }}>
         {Icon && <Icon className="h-[13px] w-[13px] flex-none" aria-hidden />}
         {label}
       </dt>
@@ -308,7 +308,7 @@ function ReportDocument({
            much visual weight does this deserve" question from the other
            side. */}
         <header data-print-keep className="flex flex-col items-start">
-          <h1 className="flex items-center gap-[10px] text-[26px] leading-[30px] font-extrabold tracking-[-0.015em] uppercase sm:text-[34px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--primary)" }}>
+          <h1 className="flex items-center gap-[10px] text-[26px] leading-[30px] font-extrabold tracking-[-0.015em] uppercase sm:text-[34px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-brand)" }}>
             <BadgeCheck className="h-[22px] w-[22px] flex-none sm:h-[27px] sm:w-[27px]" aria-hidden />
             Dreamari Career Report
           </h1>
@@ -320,7 +320,7 @@ function ReportDocument({
               <>
                 <span>
                   {`${ACADEMIC_RECORD.gpa} GPA`}
-                  <BadgeCheck className="ml-[5px] inline h-[14px] w-[14px] align-[-2.5px]" aria-hidden style={{ color: "var(--primary)" }} />
+                  <BadgeCheck className="ml-[5px] inline h-[14px] w-[14px] align-[-2.5px]" aria-hidden style={{ color: "var(--color-text-brand)" }} />
                   <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
                 </span>
                 <span aria-hidden style={{ color: "var(--ink-faint)" }}>·</span>
@@ -413,7 +413,7 @@ function ReportDocument({
                 <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[var(--radius-sm)] border px-[16px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
                   <span className="flex min-w-0 flex-col gap-[2px]">
                     <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{route.name}</span>
-                    {route.common && <span className="text-[11.5px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>Most common</span>}
+                    {route.common && <span className="text-[11.5px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--color-text-brand)" }}>Most common</span>}
                   </span>
                   <span className="flex-none rounded-[var(--radius-sm)] border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold tabular-nums" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{route.time}</span>
                 </li>
@@ -757,7 +757,7 @@ function HistoryTab({ history, onPrint, onShare }: { history?: ReportViewProps["
                       {formatVersionTime(version.createdAt)}{index === 0 ? " · Latest" : ""}
                     </span>
                   </span>
-                  {isCurrent && <span className="rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[11.5px] font-bold tracking-[0.06em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>Current</span>}
+                  {isCurrent && <span className="rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[11.5px] font-bold tracking-[0.06em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--color-text-brand)" }}>Current</span>}
                 </div>
                 <div className="flex flex-wrap items-center gap-[var(--space-2)]">
                   {history && !isCurrent && (
@@ -867,7 +867,7 @@ function ReflectionCard({ careerId, careerTitle, isPrimary }: { careerId: string
         <button type="button" aria-expanded={open} aria-controls="reflection-body" onClick={() => setOpen((o) => !o)} className="dm-link flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] text-left">
           <h3 id="reflection-title" className="flex items-center gap-[12px] text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
             <span aria-hidden className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}>
-              <PenLine className="h-[16px] w-[16px]" style={{ color: "var(--primary)" }} aria-hidden />
+              <PenLine className="h-[16px] w-[16px]" style={{ color: "var(--color-text-brand)" }} aria-hidden />
             </span>
             My Reflection
           </h3>

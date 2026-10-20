@@ -256,8 +256,8 @@ export function FamilyCard({ student }: { student: CounselorStudent }) {
           {guardians.map((g) => (
             <li key={g.name} className="flex flex-col gap-[4px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
               <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{g.name} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {g.relation}</span></span>
-              <a href={`tel:${g.phone.replace(/[^\d+]/g, "")}`} className="dm-link flex w-fit items-center gap-[6px] text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--primary)" }}><Phone className="h-[13px] w-[13px]" aria-hidden />{g.phone}</a>
-              <a href={`mailto:${g.email}`} className="dm-link flex w-fit min-w-0 items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--primary)" }}><Mail className="h-[13px] w-[13px] flex-none" aria-hidden /><span className="truncate">{g.email}</span></a>
+              <a href={`tel:${g.phone.replace(/[^\d+]/g, "")}`} className="dm-link flex w-fit items-center gap-[6px] text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--color-text-brand)" }}><Phone className="h-[13px] w-[13px]" aria-hidden />{g.phone}</a>
+              <a href={`mailto:${g.email}`} className="dm-link flex w-fit min-w-0 items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--color-text-brand)" }}><Mail className="h-[13px] w-[13px] flex-none" aria-hidden /><span className="truncate">{g.email}</span></a>
               <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Speaks {g.language}</span>
             </li>
           ))}
@@ -295,7 +295,7 @@ export function MessagesCard({ student }: { student: CounselorStudent }) {
           {rows.slice(0, 8).map((r) => {
             const body = (
               <>
-                <span className="flex size-[28px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--primary)" }}><r.icon className="h-[13px] w-[13px]" /></span>
+                <span className="flex size-[28px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--color-text-brand)" }}><r.icon className="h-[13px] w-[13px]" /></span>
                 <span className="flex min-w-0 flex-1 flex-col leading-tight">
                   <span className="flex items-baseline justify-between gap-[8px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
                     <span className="truncate">{r.label}{r.group && <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}> · {r.group}</span>}</span>

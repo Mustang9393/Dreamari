@@ -144,7 +144,7 @@ const SOURCES = [
 // 11 Sept 2026: include them, design them better than mono caps).
 function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--surface))", borderColor: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}>
+    <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--surface))", borderColor: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--color-text-brand)" }}>
       <span aria-hidden className="size-1.5 rounded-full" style={{ background: "var(--primary)" }} />
       {children}
     </span>
@@ -185,7 +185,7 @@ function Waypoint({ n }: { n: string }) {
   return (
     <div className="flex items-center gap-2.5">
       <span aria-hidden className="size-2 flex-none rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 10px color-mix(in srgb, var(--primary) 55%, transparent)" }} />
-      <span className="text-[12.5px] font-bold tracking-[0.08em] tabular-nums" style={{ color: "var(--primary)" }}>{n}</span>
+      <span className="text-[12.5px] font-bold tracking-[0.08em] tabular-nums" style={{ color: "var(--color-text-brand)" }}>{n}</span>
     </div>
   );
 }
@@ -331,7 +331,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
             <div className="lg:col-span-5 lg:pt-[68px]">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={audience} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
-                  <span className="flex size-12 items-center justify-center rounded-[14px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))", color: "var(--primary)" }}>
+                  <span className="flex size-12 items-center justify-center rounded-[14px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))", color: "var(--color-text-brand)" }}>
                     {(() => { const Icon = AUDIENCE_ICON[audience]; return <Icon className="h-6 w-6" strokeWidth={2} aria-hidden />; })()}
                   </span>
                   <h3 className="mt-5 text-[clamp(24px,calc(2.2vw/var(--vz,1)),30px)] leading-[1.15] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
@@ -374,7 +374,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
               <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-16">
                 <div className="lg:col-span-5">
                   <h3 className="flex items-baseline gap-2.5 text-[clamp(24px,calc(2.2vw/var(--vz,1)),30px)] leading-tight font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)" }}>
-                    <span className="tabular-nums" style={{ color: "var(--primary)" }}>{stage.n}</span>
+                    <span className="tabular-nums" style={{ color: "var(--color-text-brand)" }}>{stage.n}</span>
                     {stage.title}
                   </h3>
                   <p className="mt-4 text-[17px] leading-relaxed" style={{ color: "var(--foreground)", textWrap: "pretty" }}>{stage.line}</p>
@@ -386,7 +386,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
                       </li>
                     ))}
                   </ul>
-                  <Link href={stage.href} className="mt-5 inline-flex items-center gap-1 text-[14px] font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
+                  <Link href={stage.href} className="mt-5 inline-flex items-center gap-1 text-[14px] font-bold transition-colors hover:[color:var(--color-text-brand)]" style={{ color: "var(--foreground)" }}>
                     {stage.linkLabel}
                     <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                   </Link>
@@ -411,7 +411,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
               <ul className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1 lg:gap-y-7">
                 {EDUCATOR_FEATURES.map((f) => (
                   <li key={f.title} className="flex gap-4">
-                    <span className="flex size-11 flex-none items-center justify-center rounded-[12px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))", color: "var(--primary)" }}>
+                    <span className="flex size-11 flex-none items-center justify-center rounded-[12px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))", color: "var(--color-text-brand)" }}>
                       <f.Icon className="h-5 w-5" strokeWidth={2} aria-hidden />
                     </span>
                     <div>
@@ -479,7 +479,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
             <Reveal>
               <span className="mb-5 flex items-center gap-2.5">
                 <span aria-hidden className="size-2 flex-none rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 10px color-mix(in srgb, var(--primary) 55%, transparent)" }} />
-                <span className="text-[12.5px] font-bold tracking-[0.08em]" style={{ color: "var(--primary)" }}>DESTINATION</span>
+                <span className="text-[12.5px] font-bold tracking-[0.08em]" style={{ color: "var(--color-text-brand)" }}>DESTINATION</span>
               </span>
               <h2 className="text-[clamp(32px,calc(4vw/var(--vz,1)),52px)] leading-[1.08] font-extrabold tracking-[-0.015em]" style={{ color: "#ffffff", textWrap: "balance" }}>
                 A clearer direction. Skills for what comes next.

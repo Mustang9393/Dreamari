@@ -210,7 +210,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       <div className="flex flex-col items-center gap-[10px] rounded-[var(--radius-lg)] border py-[60px] text-center" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
         <DreamyMoment mood="explore" size={72} />
         <p style={{ color: "var(--muted-foreground)" }}>Student not found.</p>
-        <button type="button" onClick={() => goBackOr(router, "/counselor?view=students")} className="dm-link text-[13px] font-bold" style={{ color: "var(--primary)" }}>Back to Students</button>
+        <button type="button" onClick={() => goBackOr(router, "/counselor?view=students")} className="dm-link text-[13px] font-bold" style={{ color: "var(--color-text-brand)" }}>Back to Students</button>
       </div>
     );
   }
@@ -401,7 +401,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                     const row = student.topMatches.map((x) => careerByTitle(x.title)).filter((c): c is CatalogCareer => !!c);
                     const body = (
                       <>
-                        <span className="flex size-[22px] flex-none items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>{i + 1}</span>
+                        <span className="flex size-[22px] flex-none items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--color-text-brand)" }}>{i + 1}</span>
                         <span className="flex min-w-0 flex-1 flex-col gap-[4px]">
                           <span className="flex items-center justify-between text-[13px] font-semibold">
                             <span style={{ color: "var(--foreground)" }}>{m.title}</span>
@@ -505,13 +505,13 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       <SidePanel open={activityList !== null} onClose={() => setActivityList(null)} title={activityList === "careers" ? "Careers Saved" : activityList === "colleges" ? "Schools Saved" : "Questions Submitted"} subtitle={student.name}>
         {activityList === "careers" && (careers.length ? (
           <ul className="flex flex-col gap-[2px]">
-            {careers.map((c) => <li key={c.title}><button type="button" onClick={() => { setActivityList(null); openCareer(c, careers); }} className={listRow}><Bookmark className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} /><span className="flex min-w-0 flex-1 flex-col leading-tight"><span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.title}</span><span className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.world}</span></span><Go className="flex-none opacity-0 transition-opacity group-hover:opacity-100" /></button></li>)}
+            {careers.map((c) => <li key={c.title}><button type="button" onClick={() => { setActivityList(null); openCareer(c, careers); }} className={listRow}><Bookmark className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--color-text-brand)" }} /><span className="flex min-w-0 flex-1 flex-col leading-tight"><span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.title}</span><span className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.world}</span></span><Go className="flex-none opacity-0 transition-opacity group-hover:opacity-100" /></button></li>)}
             {signals.careersSaved > careers.length && <li className="px-[6px] pt-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The latest {careers.length} of {signals.careersSaved}</li>}
           </ul>
         ) : <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No careers saved yet.</p>)}
         {activityList === "colleges" && (colleges.length ? (
           <ul className="flex flex-col gap-[2px]">
-            {colleges.map((c) => <li key={c.slug}><button type="button" onClick={() => { setActivityList(null); openSchool(c, colleges); }} className={listRow}><Landmark className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} /><span className="flex min-w-0 flex-1 flex-col leading-tight"><span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span><span className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.city}, {c.state}</span></span><Go className="flex-none opacity-0 transition-opacity group-hover:opacity-100" /></button></li>)}
+            {colleges.map((c) => <li key={c.slug}><button type="button" onClick={() => { setActivityList(null); openSchool(c, colleges); }} className={listRow}><Landmark className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--color-text-brand)" }} /><span className="flex min-w-0 flex-1 flex-col leading-tight"><span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span><span className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.city}, {c.state}</span></span><Go className="flex-none opacity-0 transition-opacity group-hover:opacity-100" /></button></li>)}
             {signals.collegesSaved > colleges.length && <li className="px-[6px] pt-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The latest {colleges.length} of {signals.collegesSaved}</li>}
           </ul>
         ) : <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No schools saved yet.</p>)}
@@ -520,7 +520,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             {questions.map((q) => {
               const st = connect.statusOf(q.id);
               const open = st !== "responded" && st !== "resolved";
-              return <li key={q.id}><button type="button" onClick={() => router.push(`/counselor?view=connect&question=${q.id}&v=4`)} className={listRow}><HelpCircle className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} /><span className="flex min-w-0 flex-1 flex-col gap-[2px] leading-tight"><span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{q.question}</span><span className="text-[12px] font-semibold" style={{ color: open ? STATUS_COLORS["Needs Attention"] : "var(--muted-foreground)" }}>{open ? "Needs a reply" : "Answered"} · {q.tag}</span></span><Go className="flex-none opacity-0 transition-opacity group-hover:opacity-100" /></button></li>;
+              return <li key={q.id}><button type="button" onClick={() => router.push(`/counselor?view=connect&question=${q.id}&v=4`)} className={listRow}><HelpCircle className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--color-text-brand)" }} /><span className="flex min-w-0 flex-1 flex-col gap-[2px] leading-tight"><span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{q.question}</span><span className="text-[12px] font-semibold" style={{ color: open ? STATUS_COLORS["Needs Attention"] : "var(--muted-foreground)" }}>{open ? "Needs a reply" : "Answered"} · {q.tag}</span></span><Go className="flex-none opacity-0 transition-opacity group-hover:opacity-100" /></button></li>;
             })}
             {earlier.map((q) => (
               <li key={q.id} className="flex items-center gap-[10px] px-[6px] py-[8px]">

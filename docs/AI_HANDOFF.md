@@ -1,3 +1,44 @@
+## 2026-10-21: WCAG 2.2 AA, step 1 (shared sheets, skip link, tooltips, contrast)
+
+**Why.** Districts will ask whether students with disabilities can use Dreamari, and for documentation. Chandu asked for a full WCAG 2.2 AA audit of dreamari.vercel.app. The result is docs/WCAG_2_2_AA_AUDIT_2026-10-21.md, with its scanners in docs/reference/wcag-audit-2026-10-21. Then: "Start step 1 of the recommended order: focus management in PageSheet/PeekSheet, skip link + main id, IconTip Escape, and the contrast fixes." Out of scope, per Chandu: the PIN gate ("thats for private demo purposes", it stays), and the Classic toggle and other demo-only toggles.
+
+**What changed.**
+- **Dialog focus (2.4.3, 2.1.2).**
+  - `useDialogFocus` moved from counselor/v4 to `components/app/useDialogFocus.ts`. The v4 path re-exports it.
+  - PageSheet (peek.tsx), PeekSheet and CareerPeek use it: focus moves into the sheet, Tab stays inside, Escape closes, and focus returns to the card that opened it.
+  - Arrow keys still page through the row.
+- **Skip link (2.4.1).**
+  - SkipLink targets the visible `<main>` outside any dialog and gives it `id="main"`.
+  - `/` has a hidden second `<main>`, and a detail page in a sheet has its own. Both used to catch the link.
+  - `/play/[game]` now wraps the player in `<main>`, so sims have a main landmark and the HUD `<header>` is no longer a second banner.
+- **Tooltips (1.4.13).**
+  - IconTip/Tip close on Escape, captured so the sheet under them stays open.
+  - The bubble is hoverable, with a 140ms grace to cross the 8px gap.
+- **Contrast (1.4.3).**
+  - Every `color: var(--primary)` and `text-[var(--primary)]` (173, excluding labs) is now `var(--color-text-brand)`. `--primary` `#176acf` measured 3.2 to 3.9:1 as small text on dark. The text token is `#59a0f8` in dark (7:1) and `#1460c0` in light, the same as light's primary. Fills and borders still use `--primary`.
+  - v7 Schedule past days and rows now use opacity 0.75/0.8 (was 0.45 to 0.6).
+  - v4 inactive page tabs are at 58% foreground (was 34%).
+  - The Opportunities Poster blur scrim is darker at the foot.
+  - Leaderboard "VS" lost its 0.6 opacity.
+  - The Play hub Express chip is on 78% black.
+
+**Validation.**
+- tsc is clean. eslint has no new warnings.
+- Scripted keyboard tests on :3093 (`?sheets=1`):
+  - The Home career sheet, the Colleges school sheet, and the 390px PageSheet all trap focus, close on Escape and return focus to the card.
+  - The skip link lands on the visible main on `/`, `/home` and sims.
+  - Tooltip Escape and hover-onto-bubble work.
+- A contrast re-scan of Counselor Meetings, Insights and Students has 0 fails.
+- On Opportunities, the cards' Award/figure lines now pass. A few "fit" lines still read about 2.3:1 on some cards.
+- Dark mode only. Light mode was not re-checked.
+
+**Not done (next steps, in the audit's order).**
+- The other ~50 dialogs: Inbox, GlobalSearch, Connect, Profile, the resume sheets and the no-Escape list.
+- Play: a timer setting, CardDeck buttons.
+- Forms: autocomplete, error wiring.
+- Nested interactive cards, tab arrow keys, XP announcements, captions.
+- A screen-reader pass.
+
 ## 2026-10-21: merge note, v4 Review and Messages follow v7's new desks
 
 The other session's push (6a3dc7e7) rebuilt v7's Reviews as a readable document desk and gave `V5Messages` a `desk` layout, the same asks Chandu made of v4. When rebasing, v4 took theirs: the Review tab renders v7's `Reviews` (exported, still narrowed by v4's grade picker and milestone links through `only` and `milestone`), with v4's "N of M reviewed today" bar above it. Messages renders `<V5Messages desk />`. The `docFirst` and `docBar` props and the `calm` inbox mode described below were dropped in favor of those.

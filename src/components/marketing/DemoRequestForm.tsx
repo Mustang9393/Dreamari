@@ -120,7 +120,7 @@ export function DemoRequestForm() {
 
   const sent = (
     <div className="flex items-center gap-3">
-      <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--primary)" }}>
+      <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--color-text-brand)" }}>
         <Check className="h-5 w-5" strokeWidth={2.75} aria-hidden />
       </span>
       <div>

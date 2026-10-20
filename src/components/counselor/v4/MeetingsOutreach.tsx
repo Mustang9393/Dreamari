@@ -232,7 +232,7 @@ export function MeetingsOutreach({ flagged, invitedIds, bookedIds, monday, now }
           })}
         </ul>
         {rows.length > 12 && (
-          <button type="button" onClick={() => setAll((a) => !a)} className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--primary)" }}>{all ? "Show fewer" : `Show all ${rows.length}`}</button>
+          <button type="button" onClick={() => setAll((a) => !a)} className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--color-text-brand)" }}>{all ? "Show fewer" : `Show all ${rows.length}`}</button>
         )}
       </div>
       {reviewing && <InviteAll students={toReach} template={template} onCancel={() => setReviewing(false)} onSend={sendAll} />}

@@ -156,7 +156,7 @@ function Badge({ name, range, students, hours, topics = [], languages, big = fal
         <div className="relative w-full" style={{ height: big ? 250 : 190, background: "color-mix(in srgb, var(--primary) 14%, var(--card))" }}>
           {photo
             ? <Image src={photo} alt="" fill sizes={`${w}px`} className="object-cover" style={{ objectPosition: "50% 20%" }} />
-            : <span className="absolute inset-0 flex items-center justify-center text-[56px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--primary)" }}>{initials}</span>}
+            : <span className="absolute inset-0 flex items-center justify-center text-[56px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-brand)" }}>{initials}</span>}
         </div>
         <figcaption className="flex flex-col gap-[var(--space-3)] px-[var(--space-5)] pt-[var(--space-4)] pb-[var(--space-5)]">
           <span className="flex flex-col gap-[2px]">

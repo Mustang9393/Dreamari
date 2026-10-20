@@ -77,7 +77,7 @@ function AnnouncementCard({ a }: { a: (typeof ANNOUNCEMENTS)[number] }) {
       <div className="flex h-full flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
         <div className="flex items-start justify-between gap-[var(--space-3)]">
           <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{a.title}</h3>
-          <span className="flex-none text-[13px] font-bold tabular-nums" style={{ color: "var(--primary)" }}>{a.read}% Read</span>
+          <span className="flex-none text-[13px] font-bold tabular-nums" style={{ color: "var(--color-text-brand)" }}>{a.read}% Read</span>
         </div>
         <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>To: {a.to}</span>
         <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--foreground)" }}>{a.body}</p>

@@ -128,7 +128,7 @@ export function ForYouBrowseToggle({
             }}
             className={`dm-quiet cursor-pointer rounded-[var(--radius-md)] text-[15px] leading-[20px] font-bold whitespace-nowrap uppercase [text-shadow:0_1px_3px_rgba(0,0,0,0.6)] lg:px-[var(--space-4)] lg:py-[6px] lg:text-[13px] lg:leading-[18px] lg:[text-shadow:none] ${
               on
-                ? "text-white lg:bg-[color:var(--primary)] lg:text-[color:var(--primary-foreground)]"
+                ? "text-white lg:bg-[color:var(--color-text-brand)] lg:text-[color:var(--primary-foreground)]"
                 // the unselected label is muted so the nudge's white sweep has
                 // something to travel over (direct feedback, 19 Sept 2026)
                 : "text-white/65 lg:bg-transparent lg:text-[color:var(--muted-foreground)]"

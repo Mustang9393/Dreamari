@@ -73,7 +73,7 @@ export function Conversation({
             onChange={(e) => setDraft(e.target.value)}
             placeholder={`Message ${otherName.split(" ")[0]}`}
             maxLength={500}
-            className="min-h-[40px] w-full rounded-full border px-[14px] text-[14px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]"
+            className="min-h-[40px] w-full rounded-full border px-[14px] text-[14px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--color-text-brand)]"
             style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
           />
         </label>

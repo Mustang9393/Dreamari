@@ -493,7 +493,7 @@ export function SignupExperience() {
                           type="button"
                           onClick={() => setShowPassword((v) => !v)}
                           className="dm-quiet absolute top-1/2 right-[10px] flex h-[34px] -translate-y-1/2 items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[12px] font-semibold"
-                          style={{ fontFamily: "var(--font-body)", color: "var(--primary)" }}
+                          style={{ fontFamily: "var(--font-body)", color: "var(--color-text-brand)" }}
                         >
                           {showPassword ? <EyeOff className="h-[15px] w-[15px]" aria-hidden /> : <Eye className="h-[15px] w-[15px]" aria-hidden />}
                           {showPassword ? "Hide" : "Show"}
@@ -554,7 +554,7 @@ function LoginPrompt() {
   return (
     <p className="flex items-center justify-center gap-[6px] text-[13px] leading-[18px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
       Already have an account?
-      <a href="/home" className="dm-link font-bold" style={{ color: "var(--primary)" }}>
+      <a href="/home" className="dm-link font-bold" style={{ color: "var(--color-text-brand)" }}>
         Log in
       </a>
     </p>

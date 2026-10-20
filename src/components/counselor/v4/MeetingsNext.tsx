@@ -87,7 +87,7 @@ function NothingNext({ onOutreach }: { onOutreach: () => void }) {
       <span className="mtg-mascot is-hero"><GlassesDreamy size={44} pop={2.3} thinking /></span>
       <div className="flex flex-col gap-[6px]">
         <h2 className="mtg-hero-name">Nothing booked</h2>
-        <button type="button" className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--primary)" }} onClick={onOutreach}>Needs Outreach</button>
+        <button type="button" className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--color-text-brand)" }} onClick={onOutreach}>Needs Outreach</button>
       </div>
     </section>
   );

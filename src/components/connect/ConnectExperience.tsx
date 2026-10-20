@@ -3021,7 +3021,7 @@ export function FeedPostRow({
           <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex w-fit min-w-0 cursor-pointer items-center gap-[5px] text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>
               <span className="truncate">{pro.name}</span> <VerifiedBadge size={13} />
-              {isNew && <span className="ml-[4px] flex-none rounded-full px-[7px] py-[1px] text-[10px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>New</span>}
+              {isNew && <span className="ml-[4px] flex-none rounded-full px-[7px] py-[1px] text-[10px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--color-text-brand)" }}>New</span>}
             </button>
             {/* On a phone this line wraps (role, then company and time) instead
                of squeezing the role to nothing beside Follow (6 Oct 2026); the

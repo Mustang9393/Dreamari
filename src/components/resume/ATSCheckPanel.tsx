@@ -96,7 +96,7 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
           {stale && (
             <div className="flex flex-wrap items-center justify-between gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px]" style={{ borderColor: "var(--color-feedback-warning)", background: "color-mix(in srgb, var(--color-feedback-warning) 10%, transparent)" }}>
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>Your resume has changed since this check ran.</span>
-              <button type="button" onClick={run} disabled={running} className="dm-tap cursor-pointer text-[12.5px] font-bold disabled:cursor-not-allowed" style={{ color: "var(--primary)" }}>
+              <button type="button" onClick={run} disabled={running} className="dm-tap cursor-pointer text-[12.5px] font-bold disabled:cursor-not-allowed" style={{ color: "var(--color-text-brand)" }}>
                 {running ? "Checking…" : "Re-run"}
               </button>
             </div>

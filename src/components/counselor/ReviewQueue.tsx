@@ -137,7 +137,7 @@ export function ReviewQueue() {
               {selected.attachment && (
                 <div className="flex flex-col gap-[4px]">
                   <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Attachment</span>
-                  <span className="flex items-center gap-[8px] text-[13px] font-semibold" style={{ color: "var(--primary)" }}>
+                  <span className="flex items-center gap-[8px] text-[13px] font-semibold" style={{ color: "var(--color-text-brand)" }}>
                     <Paperclip className="h-[14px] w-[14px]" aria-hidden /> {selected.attachment}
                   </span>
                 </div>

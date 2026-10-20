@@ -28,6 +28,7 @@ import { StudentCheckInHost } from "./WeeklyCheckIn";
 import { peekOpenedFrom, peekSet, peekSnapshot, peekSubscribe, rememberAt, setSheetsEnabled, sheetsEnabled, subscribeSheets, takeReturn } from "./peekStore";
 import { useNarrowSheet } from "./PeekSheet";
 import { IconTip } from "./IconTip";
+import { useDialogFocus } from "./useDialogFocus";
 import { InSheet } from "./inSheet";
 import { CareerDetailLab } from "@/components/actions-lab/CareerDetailLab";
 import { LiveProvider } from "@/components/actions-lab/labUi";
@@ -176,16 +177,12 @@ function PageSheet({ label, onClose, pageKey, children }: { label: string; onClo
   // a new career or school (Careers like this one) starts at its own top
   const scroller = useRef<HTMLDivElement>(null);
   useEffect(() => { scroller.current?.scrollTo({ top: 0 }); }, [pageKey]);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
-  }, [onClose]);
+  // focus in, Tab kept inside, Escape closes, focus back to the card (WCAG 2.4.3)
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialog, onClose);
   return createPortal(
     <motion.div className="marketing-v2 themeable no-print fixed inset-0 z-[120]" initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} style={{ background: "rgba(5,7,15,0.55)", fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-      <motion.div role="dialog" aria-modal="true" aria-label={label}
+      <motion.div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label={label}
         className="absolute inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-[22px] border-t"
         style={{ top: "max(env(safe-area-inset-top), 10px)", background: "radial-gradient(90% 40% at 50% 0%, color-mix(in srgb, var(--primary) 10%, transparent), transparent 70%), var(--background)", borderColor: "var(--glass-border)", boxShadow: "0 -20px 60px -20px rgba(0,0,0,0.6)" }}
         initial={reduce ? false : { y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "tween", duration: 0.36, ease: [0.22, 1, 0.36, 1] }}

@@ -20,7 +20,7 @@
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, FileText, Play, X } from "lucide-react";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { heroFocus } from "@/components/career/heroFocus";
 import { FacePhoto } from "@/components/app/FacePhoto";
@@ -37,6 +37,7 @@ import { resolveCareer, similarCareers } from "@/components/career/data";
 import { careerSlug } from "@/components/career/slug";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
 import { FullPageLink, SheetGrabber, sheetMotion, sheetOverlayClass, useDragControls, useNarrowSheet } from "@/components/app/PeekSheet";
+import { useDialogFocus } from "@/components/app/useDialogFocus";
 import { statePay } from "@/components/career/statePay";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { IconTip } from "@/components/app/IconTip";
@@ -95,18 +96,18 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport, variant = "
     setOpenRung(null);
     onIndex(next);
   };
+  // focus in, Tab kept inside, Escape closes, focus back to the card (WCAG 2.4.3)
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialog, onClose);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
       if (e.key === "ArrowRight") go(1);
       if (e.key === "ArrowLeft") go(-1);
     };
     document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+    return () => document.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, ids.length, onClose]);
+  }, [index, ids.length]);
   if (!career) return null;
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
   const simulation = simulationFor(career.id);
@@ -146,7 +147,7 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport, variant = "
       className={sheetOverlayClass(narrow)}
       style={{ background: "color-mix(in srgb, var(--background) 48%, transparent)", backdropFilter: "blur(16px) saturate(1.15)", WebkitBackdropFilter: "blur(16px) saturate(1.15)" }}
       onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      role="dialog" aria-modal="true" aria-labelledby="career-peek-title"
+      ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="career-peek-title"
     >
       <motion.div
         {...sheetMotion(narrow, reduce, drag, onClose)}

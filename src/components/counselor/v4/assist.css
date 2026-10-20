@@ -41,7 +41,7 @@
 [data-counselor-version="v4"] .as-format[aria-pressed="true"] {background:color-mix(in srgb,var(--primary) 14%,transparent)}
 [data-counselor-version="v4"] .as-format-name {overflow:hidden;font-size:13.5px;font-weight:600;line-height:18px;color:var(--foreground);text-overflow:ellipsis;white-space:nowrap}
 [data-counselor-version="v4"] .as-format-desc {grid-column:1;font-size:12px;line-height:16px;color:var(--muted-foreground)}
-[data-counselor-version="v4"] .as-format-check {grid-row:1;grid-column:2;color:var(--primary)}
+[data-counselor-version="v4"] .as-format-check {grid-row:1;grid-column:2;color:var(--color-text-brand)}
 /* context and settings, folded */
 [data-counselor-version="v4"] .as-folds {display:flex;flex-direction:column;gap:6px;padding-top:10px;border-top:1px solid var(--v4-line)}
 [data-counselor-version="v4"] .as-progress {display:flex;flex-direction:column;gap:7px}
@@ -127,7 +127,7 @@
    Undo, and the one way forward */
 [data-counselor-version="v4"] .as-held {display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 14px}
 [data-counselor-version="v4"] .as-held-copy {display:inline-flex;min-width:0;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--color-feedback-success)}
-[data-counselor-version="v4"] .as-held-gain {flex:none;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;color:var(--primary);background:color-mix(in srgb,var(--primary) 14%,transparent)}
+[data-counselor-version="v4"] .as-held-gain {flex:none;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;color:var(--color-text-brand);background:color-mix(in srgb,var(--primary) 14%,transparent)}
 [data-counselor-version="v4"] .as-held-actions {display:flex;align-items:center;gap:6px}
 [data-counselor-version="v4"] .as-held.is-compact {width:100%;justify-content:center}
 [data-counselor-version="v4"] .as-held.is-compact .as-held-copy {display:none}

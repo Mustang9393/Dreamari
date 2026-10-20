@@ -123,7 +123,7 @@
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-trend-svg { display:block; overflow:hidden; font-family:var(--font-body); touch-action:pan-y; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-trend-periods { display:grid; gap:0; padding:4px 44px 0 36px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-trend-periods button { min-width:0; padding:7px 2px; border-radius:0; border-bottom:1px solid transparent; font-size:11px; color:var(--muted-foreground); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-trend-periods button[aria-pressed="true"] { border-color:var(--primary); color:var(--primary); font-weight:600; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-trend-periods button[aria-pressed="true"] { border-color:var(--primary); color:var(--color-text-brand); font-weight:600; }
 @media (max-width:520px) {
  [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-trend-readout { gap:8px 14px; padding-bottom:14px; }
  [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-trend-date { flex-basis:100%; }
@@ -255,7 +255,7 @@
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown { display:flex; flex-direction:column; margin-top:4px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a { display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:44px; max-width:100%; font-size:12px; line-height:1.5; text-align:left; border-top:1px solid var(--v4-line); }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a span { min-width:0; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a b { flex:none; font-size:13px; font-weight:600; color:var(--primary); font-variant-numeric:tabular-nums; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a b { flex:none; font-size:13px; font-weight:600; color:var(--color-text-brand); font-variant-numeric:tabular-nums; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a:hover span,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a:focus-visible span { text-decoration:underline; text-underline-offset:3px; }
 
 /* ---- Pending Reviews on the conversations' rows (9 Oct 2026) ----
@@ -381,7 +381,7 @@
    Reviewing, the page's real primary. Book is a soft tint now, the brand
    colour as text on a pale wash, still the stronger of the card's two
    actions; it fills solid on hover. */
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-actions .v4-conversation-book { background:color-mix(in srgb,var(--primary) 10%,transparent)!important; border-color:color-mix(in srgb,var(--primary) 22%,transparent)!important; color:var(--primary)!important; transition:background .15s,color .15s; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-actions .v4-conversation-book { background:color-mix(in srgb,var(--primary) 10%,transparent)!important; border-color:color-mix(in srgb,var(--primary) 22%,transparent)!important; color:var(--color-text-brand)!important; transition:background .15s,color .15s; }
 @media (hover:hover) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-actions .v4-conversation-book:hover { background:var(--primary)!important; color:var(--primary-foreground)!important; } }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-actions .v4-conversation-log { background:transparent!important; }
 /* the reviews heading keeps one line beside its link; the link's icon sits
@@ -798,7 +798,7 @@ html:not(.dark) [data-counselor-version="v4"] .v4-workspace :is([style*="backgro
    line on the left, the page's filters on the right. */
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading.v4-ph {display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:14px;margin:18px 0 40px}
 [data-counselor-version="v4"] .v4-title-tabs {display:flex;flex-wrap:wrap;align-items:flex-end;column-gap:36px;row-gap:6px}
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt {position:relative;margin:0;padding:0 0 10px;font-size:34px;line-height:1.1;font-weight:500;letter-spacing:-1.2px;white-space:nowrap;color:color-mix(in srgb,var(--foreground) 34%,transparent);transition:color .15s}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt {position:relative;margin:0;padding:0 0 10px;font-size:34px;line-height:1.1;font-weight:500;letter-spacing:-1.2px;white-space:nowrap;color:color-mix(in srgb,var(--foreground) 58%,transparent);transition:color .15s}
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading a.v4-tt:hover,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading a.v4-tt:focus-visible {color:color-mix(in srgb,var(--foreground) 72%,transparent)}
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt.is-on {color:var(--foreground)}
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt.is-on:not(.is-solo)::after {content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--primary)}

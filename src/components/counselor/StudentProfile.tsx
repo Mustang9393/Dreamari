@@ -46,7 +46,7 @@ function ActionButton({ icon: Icon, label, onClick }: { icon: typeof Bell; label
 function CardTitle({ icon: Icon, title }: { icon?: typeof Bell; title: string }) {
   return (
     <h2 className="flex items-center gap-[8px] text-[14px] font-bold" style={{ color: "var(--foreground)" }}>
-      {Icon && <Icon className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} />}
+      {Icon && <Icon className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--color-text-brand)" }} />}
       {title}
     </h2>
   );
@@ -89,7 +89,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       <div className="flex flex-col items-center gap-[10px] rounded-[var(--radius-lg)] border py-[60px] text-center" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
         <h2 className="text-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Student Not Found</h2>
         <p style={{ color: "var(--muted-foreground)" }}>The student you&rsquo;re looking for doesn&rsquo;t exist.</p>
-        <button type="button" onClick={() => goBackOr(router, "/counselor?view=students")} className="dm-link text-[13px] font-bold" style={{ color: "var(--primary)" }}>Back to Students</button>
+        <button type="button" onClick={() => goBackOr(router, "/counselor?view=students")} className="dm-link text-[13px] font-bold" style={{ color: "var(--color-text-brand)" }}>Back to Students</button>
       </div>
     );
   }
@@ -152,7 +152,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
               <span className="flex flex-wrap items-baseline gap-x-[10px] gap-y-[2px]">
                 <span className="text-[24px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{student.name}</span>
                 <span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{student.tag}</span>
-                {student.isReal && <span className="rounded-full px-[8px] py-[2px] text-[10.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--primary)" }}>You</span>}
+                {student.isReal && <span className="rounded-full px-[8px] py-[2px] text-[10.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--color-text-brand)" }}>You</span>}
               </span>
               <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.school} · DOB: {student.dob}</span>
               <span className="flex flex-wrap items-center gap-[8px]">
@@ -205,11 +205,11 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             <div className="flex flex-col gap-[10px]">
               {student.topMatches.map((m, i) => (
                 <div key={m.title} className="flex items-center gap-[12px]">
-                  <span className="flex size-[22px] flex-none items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>{i + 1}</span>
+                  <span className="flex size-[22px] flex-none items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--color-text-brand)" }}>{i + 1}</span>
                   <span className="flex min-w-0 flex-1 flex-col gap-[4px]">
                     <span className="flex items-center justify-between text-[13px] font-semibold">
                       <span style={{ color: "var(--foreground)" }}>{m.title}</span>
-                      <span className="tabular-nums" style={{ color: "var(--primary)" }}>{m.pct}%</span>
+                      <span className="tabular-nums" style={{ color: "var(--color-text-brand)" }}>{m.pct}%</span>
                     </span>
                     <span className="relative block h-[6px] overflow-hidden rounded-[3px]" style={{ background: "rgba(255,255,255,0.12)" }}>
                       <span className="absolute inset-y-0 left-0 rounded-[3px]" style={{ width: `${m.pct}%`, background: "var(--primary)" }} />

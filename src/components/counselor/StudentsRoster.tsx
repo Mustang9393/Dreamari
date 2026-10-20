@@ -106,7 +106,7 @@ export function StudentsRoster() {
                 <td className="px-[var(--space-4)] py-[var(--space-3)]">
                   <span className="flex items-center gap-[10px]">
                     <Avatar name={s.name} />
-                    <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}{s.isReal && <span className="ml-[6px] rounded-full px-[6px] py-[1px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--primary)" }}>You</span>}</span>
+                    <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}{s.isReal && <span className="ml-[6px] rounded-full px-[6px] py-[1px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--color-text-brand)" }}>You</span>}</span>
                   </span>
                 </td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold tabular-nums" style={{ color: "var(--foreground)" }}>{s.grade}</td>

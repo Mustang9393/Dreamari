@@ -40,7 +40,7 @@ import { VersionChip, type AttVersion } from "./VersionChip";
 import { useBackStep } from "@/lib/backStep";
 
 const accent = D.ATT.brand.color;
-const FIELD_CLASS = "w-full rounded-[var(--radius-md)] border px-[14px] py-[11px] text-[14.5px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]";
+const FIELD_CLASS = "w-full rounded-[var(--radius-md)] border px-[14px] py-[11px] text-[14.5px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--color-text-brand)]";
 const FIELD_STYLE = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 // Nested cards sit a step above the panel they live in (direct feedback,
 // 17 Sept 2026: "give some elevation to nested cards, refer how the Replit's

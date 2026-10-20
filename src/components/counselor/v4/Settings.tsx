@@ -56,7 +56,7 @@ export function Toggle({ on, onChange, disabled, pending, label="Notification" }
       style={{ background: on ? "var(--primary)" : "var(--glass-surface-1)", borderColor: on ? "var(--primary)" : "var(--glass-border)" }}
     >
       <span aria-hidden className="absolute flex size-[18px] items-center justify-center rounded-full bg-white transition-[left]" style={{ left: on ? 21 : 3, boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
-        {pending && <LoaderCircle className="h-[11px] w-[11px] motion-safe:animate-spin" style={{ color: "var(--primary)", animationDuration: "0.8s" }} aria-hidden />}
+        {pending && <LoaderCircle className="h-[11px] w-[11px] motion-safe:animate-spin" style={{ color: "var(--color-text-brand)", animationDuration: "0.8s" }} aria-hidden />}
       </span>
     </button>
   );

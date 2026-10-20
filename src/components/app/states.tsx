@@ -191,7 +191,7 @@ export function EmptyView({ tier, heading, line, cta, query, icon, onAction }: {
         <p className="max-w-[36ch] text-[12.5px] leading-[18px]" style={MUTED}>
           {line ?? "Try a shorter word, a city, or a company."}
         </p>
-        <button type="button" onClick={act} className="dm-link cursor-pointer text-[12.5px] font-semibold" style={{ color: "var(--primary)" }}>
+        <button type="button" onClick={act} className="dm-link cursor-pointer text-[12.5px] font-semibold" style={{ color: "var(--color-text-brand)" }}>
           {cta ?? "Clear search"}
         </button>
       </div>
@@ -200,7 +200,7 @@ export function EmptyView({ tier, heading, line, cta, query, icon, onAction }: {
     return (
       <div className="flex flex-col items-center gap-[6px] text-center">
         <span className="inline-flex items-center gap-[6px] rounded-full border px-[10px] py-[4px] text-[11.5px] leading-[14px] font-bold tracking-[0.04em] uppercase" style={QUIET_STYLE}>
-          <Clock3 className="h-[12px] w-[12px]" aria-hidden style={{ color: "var(--primary)" }} /> Coming soon
+          <Clock3 className="h-[12px] w-[12px]" aria-hidden style={{ color: "var(--color-text-brand)" }} /> Coming soon
         </span>
         {line && line !== "Coming soon" && (
           <p className="max-w-[34ch] text-[12.5px] leading-[18px]" style={MUTED}>
@@ -216,7 +216,7 @@ export function EmptyView({ tier, heading, line, cta, query, icon, onAction }: {
         <div className="flex min-w-0 flex-col items-center gap-[2px] sm:items-start sm:text-left">
           <p className="text-[13.5px] leading-[19px] font-bold">{heading ?? "Nothing saved here yet"}</p>
           {cta && (
-            <button type="button" onClick={act} className="dm-link inline-flex cursor-pointer items-center gap-[4px] text-[12.5px] font-semibold" style={{ color: "var(--primary)" }}>
+            <button type="button" onClick={act} className="dm-link inline-flex cursor-pointer items-center gap-[4px] text-[12.5px] font-semibold" style={{ color: "var(--color-text-brand)" }}>
               {cta} <ArrowRight className="h-[12px] w-[12px]" aria-hidden />
             </button>
           )}
@@ -266,7 +266,7 @@ export function SlowView({ label = "Loading", shape = "chip", onRetry }: { label
       <p className="flex flex-wrap items-center justify-center gap-x-[6px] gap-y-[2px] text-center text-[12px] leading-[17px]" style={MUTED}>
         <WifiLow className="h-[13px] w-[13px]" aria-hidden />
         Taking longer than usual.
-        <button type="button" onClick={act} className="dm-link cursor-pointer font-semibold" style={{ color: "var(--primary)" }}>
+        <button type="button" onClick={act} className="dm-link cursor-pointer font-semibold" style={{ color: "var(--color-text-brand)" }}>
           Try again
         </button>
       </p>

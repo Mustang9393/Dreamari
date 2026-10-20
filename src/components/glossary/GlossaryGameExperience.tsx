@@ -851,7 +851,7 @@ function ProfitVisual({ title, sells, costs }: { title: string; sells: number; c
       <div className="grid grid-cols-2 gap-[var(--space-3)]">
         <div className={tile} style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
           <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Sells for</span>
-          <span className="text-[30px] leading-[1.1] font-extrabold" style={{ color: "var(--primary)", fontFamily: "var(--font-display)" }}>${sells}</span>
+          <span className="text-[30px] leading-[1.1] font-extrabold" style={{ color: "var(--color-text-brand)", fontFamily: "var(--font-display)" }}>${sells}</span>
         </div>
         <div className={tile} style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--danger, #e0483e) 7%, var(--card))" }}>
           <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Costs</span>

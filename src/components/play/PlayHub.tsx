@@ -907,7 +907,7 @@ function FeaturedPlayOverlay({ sim, faded = false, onTrailer }: { sim: Simulatio
           <Link
             href={`/play/${sim.id}?mode=express`}
             className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[13px] text-[11.5px] font-semibold backdrop-blur-[8px]"
-            style={{ background: "rgba(0,0,0,0.6)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
+            style={{ background: "rgba(0,0,0,0.78)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
           >
             <Zap className="h-[13px] w-[13px]" aria-hidden />
             Express mode
@@ -921,7 +921,7 @@ function FeaturedPlayOverlay({ sim, faded = false, onTrailer }: { sim: Simulatio
             type="button"
             onClick={onTrailer}
             className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[13px] text-[11.5px] font-semibold backdrop-blur-[8px]"
-            style={{ background: "rgba(0,0,0,0.6)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
+            style={{ background: "rgba(0,0,0,0.78)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
           >
             <Film className="h-[13px] w-[13px]" aria-hidden />
             Watch trailer

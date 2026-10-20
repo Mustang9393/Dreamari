@@ -756,7 +756,7 @@ function ResumeBuilderInner() {
               type="button"
               onClick={() => router.push(`/resume-builder?view=wizard${pickedTemplate ? `&template=${pickedTemplate}` : ""}`)}
               className="dm-link self-start cursor-pointer text-[13px] font-semibold"
-              style={{ color: "var(--primary)" }}
+              style={{ color: "var(--color-text-brand)" }}
             >
               Update my info first
             </button>

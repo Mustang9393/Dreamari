@@ -115,7 +115,7 @@ export function AgendaView({ days, rows }: { days: Date[]; rows: Row[] }) {
         return (
           <section key={iso} id={`day-${iso}`} aria-label={`${DAY3[d.getDay()]} ${MON[d.getMonth()]} ${d.getDate()}`} className="grid scroll-mt-[96px] grid-cols-[64px_minmax(0,1fr)] gap-x-[var(--space-5)] sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-x-[var(--space-8)]">
             {/* the date, large, staying with its day as you scroll */}
-            <div className="self-start sm:sticky sm:top-[96px]" style={{ opacity: pastDay ? 0.45 : 1 }}>
+            <div className="self-start sm:sticky sm:top-[96px]" style={{ opacity: pastDay ? 0.75 : 1 }}>
               <span className="block text-[12px] font-semibold tracking-[0.12em] uppercase" style={{ color: isToday ? "var(--pc-link, var(--color-brand-300))" : "var(--muted-foreground)" }}>{isToday ? "Today" : DAY3[d.getDay()]}</span>
               <span className="block text-[44px] leading-[48px] font-extrabold tabular-nums sm:text-[64px] sm:leading-[68px]" style={DISPLAY}>{d.getDate()}</span>
               <span className="block text-[13px]" style={MUTED}>{MON[d.getMonth()]}</span>
@@ -204,7 +204,7 @@ function AgendaCard({ r, past }: { r: Row; past: boolean }) {
   }
   return (
     <Link href={briefHref(r.s.id)} onClick={() => markPrepped(r.m.id)} aria-label={`${past ? "Notes for" : "Prepare for"} ${r.s.name}, ${timeLabel(r.m.time)}`}
-      className={`dm-quiet ${cls}`} style={{ ...surface(r.prep, past), opacity: past ? 0.6 : 1 }}>
+      className={`dm-quiet ${cls}`} style={{ ...surface(r.prep, past), opacity: past ? 0.8 : 1 }}>
       {body}
     </Link>
   );
@@ -238,7 +238,7 @@ export function WeekView({ days, rows, hours, onDay }: { days: Date[]; rows: Row
           const isToday = iso === today;
           const n = rows.filter((r) => r.m.day === iso).length;
           return (
-            <div key={iso} className="flex items-end justify-between gap-[8px] px-[10px] pb-[12px]" style={{ opacity: iso < today ? 0.5 : 1 }}>
+            <div key={iso} className="flex items-end justify-between gap-[8px] px-[10px] pb-[12px]" style={{ opacity: iso < today ? 0.75 : 1 }}>
               <span className="flex flex-col">
                 <span className="text-[12px] font-semibold tracking-[0.12em] uppercase" style={{ color: isToday ? "var(--pc-link, var(--color-brand-300))" : "var(--muted-foreground)" }}>{DAY3[d.getDay()]}</span>
                 <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={DISPLAY}>{d.getDate()}</span>
@@ -326,7 +326,7 @@ function ClusterCard({ rows, from, past, onOpen }: { rows: Row[]; from: number; 
   return (
     <button type="button" onClick={onOpen} aria-label={`${rows.length} meetings from ${label}: ${rows.map((r) => r.s.name).join(", ")}. Open the day`}
       className="dm-quiet absolute inset-x-[6px] flex cursor-pointer flex-col gap-[6px] overflow-hidden rounded-[12px] border px-[10px] py-[7px] text-left"
-      style={{ top: top + 2, minHeight: 64, ...surface(past ? "ready" : worst.prep, past), opacity: past ? 0.55 : 1 }}>
+      style={{ top: top + 2, minHeight: 64, ...surface(past ? "ready" : worst.prep, past), opacity: past ? 0.8 : 1 }}>
       <span className="flex items-center justify-between text-[11.5px] tabular-nums" style={MUTED}>{label}{past && <DoneStar size={11} />}</span>
       <span className="flex items-center gap-[8px]">
         <span className="flex -space-x-[8px]">{rows.slice(0, 4).map((r) => <span key={r.m.id} className="rounded-full ring-2" style={{ ["--tw-ring-color" as string]: "var(--card)" }}><StudentFace s={r.s} size={22} /></span>)}</span>
@@ -344,7 +344,7 @@ function LaneCard({ r, from, past, col, cols }: { r: Row; from: number; past: bo
   // side by side when overlapping: 6px lane padding, 4px between columns
   const width = `calc((100% - 12px - ${(cols - 1) * 4}px) / ${cols})`;
   const left = `calc(6px + ${col} * ((100% - 12px - ${(cols - 1) * 4}px) / ${cols} + 4px))`;
-  const style: React.CSSProperties = { top: top + 2, height, left, width, ...surface(r.prep, past), opacity: past ? 0.55 : 1 };
+  const style: React.CSSProperties = { top: top + 2, height, left, width, ...surface(r.prep, past), opacity: past ? 0.8 : 1 };
   const inner = (
     <>
       <span className="flex items-center justify-between gap-[6px] text-[11.5px] tabular-nums" style={MUTED}>

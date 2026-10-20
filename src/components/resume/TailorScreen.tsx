@@ -29,7 +29,7 @@ function TemplatePicker({ value, onChange }: { value: string; onChange: (id: str
           >
             <span className="size-8 flex-none rounded-full border" style={{ background: t.accent, borderColor: "var(--glass-border)" }} aria-hidden />
             <span className="flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
-              {selected && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
+              {selected && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--color-text-brand)" }} aria-hidden />}
               {t.label}
             </span>
           </button>

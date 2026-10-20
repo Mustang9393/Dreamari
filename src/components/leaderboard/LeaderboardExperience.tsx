@@ -231,7 +231,7 @@ function Rivalry() {
       </div>
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-[12px]">
         {side("New York", ny, "left")}
-        <span className="text-[11px] font-bold tracking-[0.24em]" style={{ color: "var(--muted-foreground)", opacity: 0.6 }}>VS</span>
+        <span className="text-[11px] font-bold tracking-[0.24em]" style={{ color: "var(--muted-foreground)" }}>VS</span>
         {side("New Jersey", nj, "right")}
       </div>
       <div className="flex flex-col gap-[12px]">
@@ -447,7 +447,7 @@ function Row({ s, place, index }: { s: Ranked; place: number; index: number }) {
       <Avatar s={s} size={metal ? 42 : 38} ring={you ? "var(--primary)" : metal} />
       <span className="flex min-w-0 items-center gap-[10px]">
         <span className="truncate text-[15px] font-semibold" style={{ color: you ? "var(--foreground)" : metal ? "var(--foreground)" : "color-mix(in srgb, var(--foreground) 92%, transparent)", ...(metal ? { fontWeight: 700 } : {}) }}>{s.name}</span>
-        {you && <span className="flex-none text-[10.5px] font-bold tracking-[0.12em]" style={{ color: "var(--primary)" }}>YOU</span>}
+        {you && <span className="flex-none text-[10.5px] font-bold tracking-[0.12em]" style={{ color: "var(--color-text-brand)" }}>YOU</span>}
         <span className="flex-none rounded-[6px] px-[7px] py-[2px] text-[10.5px] font-bold" style={{ background: `color-mix(in srgb, ${FLAG[s.state].field} 22%, transparent)`, color: STATE_COLOR[s.state] }}>{STATE_SHORT[s.state]}</span>
       </span>
       <span className="text-[15px] font-semibold tabular-nums sm:text-[16px]" style={{ ...DISPLAY, color: metal ?? undefined }}>{fmt(s.points)}</span>

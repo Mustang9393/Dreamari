@@ -40,7 +40,7 @@ function SuggestionRow({ suggestion, added, onAdd }: { suggestion: SkillSuggesti
         onClick={onAdd}
         disabled={added}
         className="dm-tap flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[12px] py-[6px] text-[12.5px] font-bold disabled:cursor-default"
-        style={added ? { borderColor: "var(--color-feedback-success)", color: "var(--color-feedback-success)", background: "color-mix(in srgb, var(--color-feedback-success) 12%, transparent)" } : { borderColor: "var(--primary)", color: "var(--primary)" }}
+        style={added ? { borderColor: "var(--color-feedback-success)", color: "var(--color-feedback-success)", background: "color-mix(in srgb, var(--color-feedback-success) 12%, transparent)" } : { borderColor: "var(--primary)", color: "var(--color-text-brand)" }}
       >
         {added ? <><Check className="h-3.5 w-3.5" aria-hidden /> Added</> : <><Plus className="h-3.5 w-3.5" aria-hidden /> Add</>}
       </button>

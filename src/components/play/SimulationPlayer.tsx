@@ -3085,7 +3085,7 @@ export function Hud({
            career's own world color -- the HUD reads as that career's world,
            not a generic tier color (Chandu, 7 Sept 2026). */}
         <SparkBar className="flex-1" percent={reputation} height={6} track="var(--color-glass-border-raised)" fill={accent} glow={accent} />
-        <span className="flex flex-none items-center gap-[3px]" aria-label={`${scored} of ${dots.total} decisions made`}>
+        <span role="img" className="flex flex-none items-center gap-[3px]" aria-label={`${scored} of ${dots.total} decisions made`}>
           {/* Every third dot is a checkpoint: the run is saved at each beat, and
              marking them makes that visible instead of hoping the player trusts
              it. */}

@@ -804,7 +804,7 @@ export function SkillsTicker() {
       <ul className="mkt-marquee flex w-max items-center gap-10 pr-10">
         {row.map(({ label, Icon }, i) => (
           <li key={`${label}-${i}`} aria-hidden={i >= SKILLS.length} className="flex flex-none items-center gap-2.5 text-[15px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>
-            <Icon className="h-4 w-4" strokeWidth={2.25} aria-hidden style={{ color: "var(--primary)" }} />
+            <Icon className="h-4 w-4" strokeWidth={2.25} aria-hidden style={{ color: "var(--color-text-brand)" }} />
             {label}
           </li>
         ))}

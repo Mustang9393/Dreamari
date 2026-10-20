@@ -28,10 +28,13 @@ import { PAID, PROGRAM_KIND } from "./types";
 
 /** The progressive blur under the text, top to bottom: light, medium,
  *  heavy, each starting lower than the last. */
+// Darker at the foot than first drawn (WCAG 2.2 audit, 21 Oct 2026): over a
+// white logo the award, figure and fit lines measured 1.8-2.9:1. These
+// steps bring the text zone to about 0.15 brightness, 4.5:1 or better.
 const BLUR_STEPS = [
-  { blur: 3, brightness: 0.86, from: 36, to: 56 },
-  { blur: 10, brightness: 0.72, from: 48, to: 68 },
-  { blur: 24, brightness: 0.5, from: 58, to: 86 },
+  { blur: 3, brightness: 0.82, from: 34, to: 54 },
+  { blur: 10, brightness: 0.6, from: 44, to: 64 },
+  { blur: 24, brightness: 0.3, from: 52, to: 78 },
 ];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const MINT = "var(--pc-op-green, rgb(110,231,183))";

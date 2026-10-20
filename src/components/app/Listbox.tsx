@@ -254,7 +254,7 @@ export function Listbox({
                 }}
               >
                 <span className="min-w-0 flex-1 truncate">{opt.label}</span>
-                {opt.value === value && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
+                {opt.value === value && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--color-text-brand)" }} aria-hidden />}
               </li>
             ))}
           </ul>

@@ -89,7 +89,7 @@ export function V5Home() {
           <div className="flex flex-col gap-[var(--space-3)]">
             <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>{date}</span>
             <h1 className="text-[36px] leading-[1.02] font-extrabold text-balance sm:text-[52px]" style={{ fontFamily: "var(--font-display)" }}>
-              Welcome back{first ? `, ${first}` : ""}<span style={{ color: "var(--primary)" }}>.</span>
+              Welcome back{first ? `, ${first}` : ""}<span style={{ color: "var(--color-text-brand)" }}>.</span>
             </h1>
           </div>
           {/* No tiles: three figures divided by hairlines, the way v4's

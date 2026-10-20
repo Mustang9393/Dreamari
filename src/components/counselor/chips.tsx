@@ -171,7 +171,7 @@ export function Avatar({ name, size = 34, index }: { name: string; size?: number
     return (
       <span
         className="flex flex-none items-center justify-center rounded-full text-[12.5px] font-extrabold"
-        style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}
+        style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--color-text-brand)" }}
       >
         {initials(name)}
       </span>

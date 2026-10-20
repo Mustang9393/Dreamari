@@ -106,14 +106,14 @@ html:not(.dark) [data-counselor-version="v4"] {
 
 
 /* ---------- "See students" paths ---------- */
-[data-counselor-version="v4"] .v4-iv-see { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; margin: 4px -8px 0; padding: 3px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; color: var(--primary); cursor: pointer; transition: background .2s; }
+[data-counselor-version="v4"] .v4-iv-see { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; margin: 4px -8px 0; padding: 3px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; color: var(--color-text-brand); cursor: pointer; transition: background .2s; }
 [data-counselor-version="v4"] .v4-iv-see:hover, [data-counselor-version="v4"] .v4-iv-see:focus-visible { background: color-mix(in srgb, var(--primary) 10%, transparent); }
 [data-counselor-version="v4"] .v4-iv-tile-hit { position: absolute; inset: 0; border-radius: inherit; cursor: pointer; }
 [data-counselor-version="v4"] .v4-iv-tile > :not(.v4-iv-tile-hit) { position: relative; pointer-events: none; }
 [data-counselor-version="v4"] .v4-iv-tile .v4-iv-see, [data-counselor-version="v4"] .v4-iv-tile .v4-iv-see-wrap { pointer-events: auto; }
 [data-counselor-version="v4"] .v4-iv-meterbtn { display: block; width: 100%; padding: 6px 8px; margin: -6px -8px; width: calc(100% + 16px); border-radius: 10px; text-align: left; cursor: pointer; transition: background .2s; }
 [data-counselor-version="v4"] .v4-iv-meterbtn:hover, [data-counselor-version="v4"] .v4-iv-meterbtn:focus-visible { background: color-mix(in srgb, var(--foreground) 5%, transparent); }
-[data-counselor-version="v4"] .v4-iv-meterbtn:hover small { color: var(--primary); }
+[data-counselor-version="v4"] .v4-iv-meterbtn:hover small { color: var(--color-text-brand); }
 [data-counselor-version="v4"] .v4-iv-tmslot { position: absolute; transition: left .7s var(--v4-iv-ease), top .7s var(--v4-iv-ease), width .7s var(--v4-iv-ease), height .7s var(--v4-iv-ease); }
 
 @media (prefers-reduced-motion: reduce) {

@@ -88,7 +88,12 @@ export default async function GamePage({
          2026); ?v=0 plays the old sprite version ("v0"). The start screen
          and HUD toggles keep this param in step. AMT's ?v=2 above is its lab
          level, unrelated. */}
-      <SimulationPlayer key={level.id} simulation={simulation} level={level} startAt={Array.isArray(query.screen) ? query.screen[0] : query.screen} artVersion={version === "0" || !hasV2Art(simulation.id) ? 1 : simulation.id === "registered-nurse" && version !== "1" ? 3 : 2} />
+      {/* the page's main landmark, so the skip link and screen readers can
+         find the game (WCAG 2.2 audit, 21 Oct 2026); the player's own
+         <header> stops counting as a second page banner inside it */}
+      <main>
+        <SimulationPlayer key={level.id} simulation={simulation} level={level} startAt={Array.isArray(query.screen) ? query.screen[0] : query.screen} artVersion={version === "0" || !hasV2Art(simulation.id) ? 1 : simulation.id === "registered-nurse" && version !== "1" ? 3 : 2} />
+      </main>
     </>
   );
 }
