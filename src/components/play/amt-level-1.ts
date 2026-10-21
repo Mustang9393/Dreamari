@@ -403,7 +403,7 @@ export const AMT_LEVEL_1: Level = {
       question: "Almost finished.",
       // One line, as the v2 lab has it: with the drawer above, three lines
       // pushed the fourth row and the button below the fold.
-      prompt: "The repair is complete. What’s left? Drag into order.",
+      prompt: "The repair is complete. What’s left? Put them in order.",
       order: ["Complete required check", "Inspect work area", "Account for tools", "Document the work"],
       whenRight: "Checked, cleared, counted, written down. Now the job is finished.",
       whenWrong: "Complete the required check, inspect the work area, account for your tools, then document the work.",

@@ -50,7 +50,7 @@ export function ProductivitySuite() {
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex items-start gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 10%, var(--card))" }}>
-        <ShieldCheck className="mt-[2px] h-[16px] w-[16px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />
+        <ShieldCheck className="mt-[2px] h-[16px] w-[16px] flex-none" aria-hidden style={{ color: "var(--color-text-brand)" }} />
         <p className="text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>
           <b>You are always in control.</b> Every document generated here is a draft — designed to save you time, not replace your judgment. Review, edit, and approve every document before sharing or acting on it.
         </p>
@@ -83,7 +83,7 @@ export function ProductivitySuite() {
         <HoverBeam strength={0.6} className="h-full">
           <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
             <span className="flex items-center gap-[10px]">
-              <span className="flex size-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
+              <span className="flex size-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--color-text-brand)" }}>
                 <tool.icon className="h-[15px] w-[15px]" aria-hidden />
               </span>
               <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{tool.label}</h2>
@@ -128,7 +128,7 @@ export function ProductivitySuite() {
 
             {draft && (
               <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--primary)" }}>Draft</span>
+                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--color-text-brand)" }}>Draft</span>
                 <p className="text-[13px] leading-[20px] whitespace-pre-line" style={{ color: "var(--foreground)" }}>{draft}</p>
               </div>
             )}

@@ -134,7 +134,7 @@ export function MostPlayedSimulations({ students, titled = true }: { students: n
         {rows.map(({ sim, started, finished }, i) => (
           <button type="button" key={sim.id} onClick={() => openDeadline({ id: `sim:${sim.id}`, title: sim.title, when: `${started} played · ${finished} finished`, days: null, students: roster.filter((s) => s.careerTrack === sim.world).slice(0, Math.max(1, Math.min(12, started))), href: "", lede: `Students exploring ${sim.world} who played it.` })} className="dm-tap group relative flex aspect-[16/10] cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)" }}>
             <Image src={simThumb(sim).src} alt="" fill sizes="(min-width: 640px) 33vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" style={{ objectPosition: simThumb(sim).focus }} />
-            <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(8,10,22,0) 35%, rgba(8,10,22,0.86) 100%)" }} />
+            <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(8,10,22,0) 30%, rgba(8,10,22,0.7) 62%, rgba(8,10,22,0.94) 100%)" /* deeper at the foot: the white title measured 4.4:1 on bright art (WCAG 1.4.3) */ }} />
             <span className="absolute top-[12px] left-[12px] rounded-full px-[10px] py-[3px] text-[12px] font-semibold text-white" style={{ background: "rgba(8,10,22,0.62)", backdropFilter: "blur(8px)" }}>#{i + 1}</span>
             <span className="relative flex items-end justify-between gap-[var(--space-3)] p-[var(--space-4)] text-white">
               <span className="flex min-w-0 flex-col">

@@ -60,7 +60,7 @@ export function FlowChrome() {
         {score > 0 && (
           // hover or focus the chip: what earns the score and why it matters
           <DreamScoreTip>
-            <span key={score} aria-label={`Dream Score ${score} XP`} className="flex h-9 items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[12.5px] leading-[16px] font-bold tabular-nums motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+            <span role="img" key={score} aria-label={`Dream Score ${score} XP`} className="flex h-9 items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[12.5px] leading-[16px] font-bold tabular-nums motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
               <XpBadge size={24} /> {score.toLocaleString("en-US")} XP
             </span>
           </DreamScoreTip>

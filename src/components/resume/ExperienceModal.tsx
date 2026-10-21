@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, ChevronLeft, ChevronRight, GripVertical, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GripVertical, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { makeId, removeExperience, upsertExperience, type ExperienceType, type ResumeExperience } from "@/lib/resume";
 import { ErrorView } from "@/components/app/states";
+import { announce } from "@/components/app/LiveRegion";
 import { EXPERIENCE_QUESTIONS, EXPERIENCE_TYPES } from "./data";
 import { Field, ResumeModal, TextInput } from "./ui";
 import { IconTip } from "@/components/app/IconTip";
@@ -65,6 +66,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
   async function generate() {
     setGenerating(true);
     setGenError(false);
+    announce("Writing your resume lines."); // the button text change alone is silent (WCAG 4.1.3)
     try {
       const res = await fetch("/api/resume-bullets", {
         method: "POST",
@@ -76,6 +78,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
         setDraft((d) => ({ ...d, bullets: data.bullets!, aiAssisted: !!data.aiAssisted }));
         setOwnLines(false);
         setSub("lines");
+        announce(`${data.bullets.length} lines ready to edit.`);
       } else {
         setGenError(true);
       }
@@ -215,7 +218,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
             <button type="button" onClick={() => setSub("info")} className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               <ChevronLeft className="h-4 w-4" aria-hidden /> Back
             </button>
-            <button type="button" onClick={() => setSub("questions1")} className="dm-solid flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[10px] text-[14px] font-bold text-white" style={{ background: "var(--primary)" }}>
+            <button type="button" onClick={() => setSub("questions1")} className="dm-solid flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[10px] text-[14px] font-bold text-[var(--primary-foreground)]" style={{ background: "var(--primary)" }}>
               Next <ChevronRight className="h-4 w-4" aria-hidden />
             </button>
           </div>
@@ -234,7 +237,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
             <button type="button" onClick={() => setSub("dates")} className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               <ChevronLeft className="h-4 w-4" aria-hidden /> Back
             </button>
-            <button type="button" onClick={() => setSub("questions2")} className="dm-solid flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[10px] text-[14px] font-bold text-white" style={{ background: "var(--primary)" }}>
+            <button type="button" onClick={() => setSub("questions2")} className="dm-solid flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[10px] text-[14px] font-bold text-[var(--primary-foreground)]" style={{ background: "var(--primary)" }}>
               Next <ChevronRight className="h-4 w-4" aria-hidden />
             </button>
           </div>
@@ -302,9 +305,42 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
                 <span className="mt-[10px] flex-none cursor-grab touch-none" style={{ color: "var(--muted-foreground)" }} aria-hidden>
                   <GripVertical className="h-4 w-4" />
                 </span>
+                {/* Move up / down as well as the drag (WCAG 2.5.7 and 2.1.1, audit
+                   21 Oct 2026): HTML drag works with neither a keyboard nor touch. */}
+                {draft.bullets.length > 1 && (
+                  <span className="flex flex-none flex-col">
+                    {([["up", -1, ChevronUp], ["down", 1, ChevronDown]] as const).map(([dir, d, Icon]) => (
+                      <IconTip key={dir} label={`Move line ${dir}`}>
+                        <button
+                          type="button"
+                          id={`exp-move-${dir}-${i}`}
+                          aria-label={`Move line ${i + 1} ${dir}`}
+                          disabled={i + d < 0 || i + d >= draft.bullets.length}
+                          onClick={() => {
+                            setDraft((x) => {
+                              const next = [...x.bullets];
+                              [next[i], next[i + d]] = [next[i + d], next[i]];
+                              return { ...x, bullets: next };
+                            });
+                            // focus follows the line; at the top or bottom, onto the button still usable
+                            window.setTimeout(() => {
+                              const same = document.getElementById(`exp-move-${dir}-${i + d}`) as HTMLButtonElement | null;
+                              (same && !same.disabled ? same : document.getElementById(`exp-move-${dir === "up" ? "down" : "up"}-${i + d}`))?.focus();
+                            }, 0);
+                          }}
+                          className="dm-quiet flex size-7 cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30"
+                          style={{ color: "var(--muted-foreground)" }}
+                        >
+                          <Icon className="h-4 w-4" aria-hidden />
+                        </button>
+                      </IconTip>
+                    ))}
+                  </span>
+                )}
                 <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
                   <textarea
                     id={`exp-line-${i}`}
+                    aria-label={`Line ${i + 1}`}
                     value={line}
                     onChange={(e) => setDraft((d) => ({ ...d, bullets: d.bullets.map((b, j) => (j === i ? e.target.value.slice(0, BULLET_MAX) : b)) }))}
                     onFocus={track(`bullet:${i}`)}

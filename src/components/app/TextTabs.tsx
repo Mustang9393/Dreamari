@@ -31,11 +31,12 @@ export function TextTabs<K extends string>({ items, value, onChange, ariaLabel, 
     // area into a pill track; this one keeps its underline there (9 Oct
     // 2026, Chandu on Explore's Careers | Pay by State inside v4: "this is
     // ugly btw, what's happening here": it was getting both)
+    // roving tabindex: one Tab stop per row, arrows between tabs (TabKeys)
     <div role="tablist" data-text-tabs aria-label={ariaLabel} className={`dm-scroll flex items-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${soft ? "gap-[22px] border-b" : "gap-[var(--space-5)] pb-[6px]"} ${className}`} style={soft ? { borderColor: "color-mix(in srgb, var(--foreground) 9%, transparent)" } : undefined}>
       {items.map((item) => {
         const on = item.key === value;
         return (
-          <button key={item.key} type="button" role="tab" aria-selected={on} onClick={() => onChange(item.key)}
+          <button key={item.key} type="button" role="tab" aria-selected={on} tabIndex={on || (!items.some((i) => i.key === value) && item === items[0]) ? 0 : -1} onClick={() => onChange(item.key)}
             className={`relative flex-none whitespace-nowrap ${soft ? `py-[9px] text-[13px] leading-[16px] ${on ? "font-semibold" : "font-medium"}` : `px-[2px] py-[3px] text-[14px] leading-[18px] font-bold ${caps ? "uppercase tracking-[0.01em]" : "capitalize"}`} dm-seg ${on ? "" : "cursor-pointer"}`}
             style={{ fontFamily: "var(--font-body)", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
             {item.label}

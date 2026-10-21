@@ -100,7 +100,7 @@ function Discover() {
             <section key={s.key} aria-label={s.title} className="flex flex-col gap-[var(--space-4)]">
               <div className="flex items-end justify-between gap-[var(--space-4)]">
                 <h2 className={H2} style={DISPLAY}>{s.title}</h2>
-                {row.length > 6 && <button type="button" onClick={() => setShelf(s.key)} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>See all {row.length}</button>}
+                {row.length > 6 && <button type="button" onClick={() => setShelf(s.key)} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>See all {row.length}</button>}
               </div>
               <div className={`poster-row ${RAIL}`} style={{ touchAction: "pan-x pan-y" }}>
                 {row.slice(0, 12).map((o) => <div key={o.e.item.id} className="w-[220px] flex-none sm:w-[236px]">{card(o)}</div>)}
@@ -115,7 +115,7 @@ function Discover() {
       ) : (
         <div className="flex flex-col items-start gap-[var(--space-2)] py-[var(--space-6)]">
           <p className="text-[16px] font-semibold">Nothing matches.</p>
-          <button type="button" onClick={() => { setQ(""); setShelf("all"); }} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>Clear search</button>
+          <button type="button" onClick={() => { setQ(""); setShelf("all"); }} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>Clear search</button>
         </div>
       )}
     </div>

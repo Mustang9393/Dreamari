@@ -90,7 +90,8 @@ export function GetHiredChapter() {
           <div className="min-w-0">
             <div className="truncate text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{current.label}</div>
           </div>
-          <div className="flex flex-none items-center gap-[6px]">
+          {/* 24px hit areas around the 8px dots (WCAG 2.5.8) */}
+          <div className="flex flex-none items-center">
             {STAGES.map((item, index) => (
               <button
                 key={item.id}
@@ -98,9 +99,10 @@ export function GetHiredChapter() {
                 aria-label={`Go to ${item.label}`}
                 aria-pressed={index === stage}
                 onClick={() => setStage(index)}
-                className="size-[8px] cursor-pointer rounded-full transition-all"
-                style={{ background: index === stage ? WORLD_COLOR : "var(--glass-surface-2)", transform: index === stage ? "scale(1.35)" : "scale(1)" }}
-              />
+                className="flex size-6 cursor-pointer items-center justify-center rounded-full"
+              >
+                <span aria-hidden className="size-[8px] rounded-full transition-all" style={{ background: index === stage ? WORLD_COLOR : "var(--glass-surface-2)", transform: index === stage ? "scale(1.35)" : "scale(1)" }} />
+              </button>
             ))}
           </div>
         </div>

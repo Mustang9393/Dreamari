@@ -9,11 +9,12 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronRight, BookOpen, Film, Lock, Play, Zap } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, Film, Lock, Play, Zap } from "lucide-react";
+import { IconTip } from "@/components/app/IconTip";
 
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
-import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
+import { WORLD_COLORS, posterTitleFont, posterInk } from "@/components/app/worlds";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { glossaryFor, isGlossaryReleased } from "@/components/glossary/data";
@@ -579,6 +580,27 @@ export function CardDeck<T extends { id: string }>({
     setLeaving(null);
   };
 
+  // Buttons and arrow keys as well as the swipe (WCAG 2.5.7 and 2.1.1, audit
+  // 21 Oct 2026): a deck that only moved by dragging could not be used from a
+  // keyboard, a switch, or by anyone who can't drag. When the move started
+  // from a card the keyboard was on, focus follows to the new front card.
+  const deckRef = useRef<HTMLDivElement>(null);
+  const followFocus = useRef(false);
+  useEffect(() => {
+    if (leaving || !followFocus.current) return;
+    followFocus.current = false;
+    deckRef.current?.querySelector<HTMLElement>('[data-deck-front] a[href], [data-deck-front] button')?.focus();
+  }, [order, leaving]);
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    e.preventDefault();
+    touched.current = true;
+    followFocus.current = !!(e.target as HTMLElement).closest("[data-deck-front]");
+    if (e.key === "ArrowRight") advance(-1);
+    else back();
+  };
+  const at = Math.max(0, items.findIndex((c) => c.id === (leaving ? order[1] : order[0])));
+
   // Idle hint, once. Only on phones (this component only renders there),
   // only after the splash, never under reduced motion.
   useEffect(() => {
@@ -594,8 +616,11 @@ export function CardDeck<T extends { id: string }>({
 
   const offscreen = width + 60;
   return (
+    <div className={className}>
     <div
-      className={`relative w-full pt-1 pb-3 ${className}`}
+      ref={deckRef}
+      onKeyDown={onKey}
+      className="relative w-full pt-1 pb-3"
       onPointerDownCapture={() => {
         touched.current = true;
       }}
@@ -635,6 +660,9 @@ export function CardDeck<T extends { id: string }>({
               if (isLeaving) settle();
               if (entering === id) setEntering(null);
             }}
+            // only the front card is in the Tab order; the fan behind it is picture
+            inert={!front}
+            data-deck-front={front ? "" : undefined}
             drag={front ? "x" : false}
             dragDirectionLock
             dragSnapToOrigin
@@ -656,6 +684,22 @@ export function CardDeck<T extends { id: string }>({
           </motion.div>
         );
       })}
+    </div>
+    {items.length > 1 && (
+      <div className="flex items-center justify-center gap-[12px] pb-1">
+        <IconTip label="Previous">
+          <button type="button" aria-label="Previous" onClick={() => { touched.current = true; back(); }} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <ChevronLeft className="h-[18px] w-[18px]" aria-hidden />
+          </button>
+        </IconTip>
+        <span aria-live="polite" className="min-w-[44px] text-center text-[13px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{at + 1} of {items.length}</span>
+        <IconTip label="Next">
+          <button type="button" aria-label="Next" onClick={() => { touched.current = true; advance(-1); }} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <ChevronRight className="h-[18px] w-[18px]" aria-hidden />
+          </button>
+        </IconTip>
+      </div>
+    )}
     </div>
   );
 }
@@ -794,7 +838,7 @@ export function RowCard({
         <span className={`block leading-[1.15] font-extrabold uppercase transition-[font-size] duration-500 [overflow-wrap:normal] [word-break:keep-all] ${titleSize}`} style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>
           {breakable(title)}
         </span>
-        <span className={`block font-semibold tracking-[0.6px] uppercase transition-[font-size] duration-500 ${worldSize}`} style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[world] }}>
+        <span className={`block font-semibold tracking-[0.6px] uppercase transition-[font-size] duration-500 ${worldSize}`} style={{ fontFamily: "var(--font-body)", color: posterInk(WORLD_COLORS[world]) }}>
           {world}
         </span>
         {large && candidate.kind === "soon" && (
@@ -907,7 +951,7 @@ function FeaturedPlayOverlay({ sim, faded = false, onTrailer }: { sim: Simulatio
           <Link
             href={`/play/${sim.id}?mode=express`}
             className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[13px] text-[11.5px] font-semibold backdrop-blur-[8px]"
-            style={{ background: "rgba(0,0,0,0.6)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
+            style={{ background: "rgba(0,0,0,0.78)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
           >
             <Zap className="h-[13px] w-[13px]" aria-hidden />
             Express mode
@@ -921,7 +965,7 @@ function FeaturedPlayOverlay({ sim, faded = false, onTrailer }: { sim: Simulatio
             type="button"
             onClick={onTrailer}
             className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[13px] text-[11.5px] font-semibold backdrop-blur-[8px]"
-            style={{ background: "rgba(0,0,0,0.6)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
+            style={{ background: "rgba(0,0,0,0.78)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
           >
             <Film className="h-[13px] w-[13px]" aria-hidden />
             Watch trailer
@@ -1083,7 +1127,7 @@ export function HeroShelfCard({ item, large = false, active = false, onSelect, d
           </span>
         )}
         {item.world && (
-          <span className={`block font-semibold tracking-[0.6px] uppercase ${subSize}`} style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[item.world] }}>
+          <span className={`block font-semibold tracking-[0.6px] uppercase ${subSize}`} style={{ fontFamily: "var(--font-body)", color: posterInk(WORLD_COLORS[item.world]) }}>
             {item.world}
           </span>
         )}

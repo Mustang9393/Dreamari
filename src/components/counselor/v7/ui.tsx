@@ -86,8 +86,8 @@ export function SectionHead({ title, href, cta }: { title: string; href?: string
 export function TextLink({ href, children, onClick }: { href?: string; children: React.ReactNode; onClick?: () => void }) {
   const cls = "dm-quiet group inline-flex flex-none items-center gap-[6px] rounded-[var(--radius-sm)] text-[14px] leading-[20px] font-semibold";
   const inner = <>{children}<ArrowRight className="h-[15px] w-[15px] transition-transform group-hover:translate-x-[2px]" aria-hidden /></>;
-  if (href) return <Link href={href} className={cls} style={{ color: "var(--pc-link, var(--color-brand-300))" }}>{inner}</Link>;
-  return <button type="button" onClick={onClick} className={`${cls} cursor-pointer`} style={{ color: "var(--pc-link, var(--color-brand-300))" }}>{inner}</button>;
+  if (href) return <Link href={href} className={cls} style={{ color: "var(--pc-link, var(--color-text-brand))" }}>{inner}</Link>;
+  return <button type="button" onClick={onClick} className={`${cls} cursor-pointer`} style={{ color: "var(--pc-link, var(--color-text-brand))" }}>{inner}</button>;
 }
 
 /** The screen's one lit action. */

@@ -40,7 +40,7 @@ function Choices({ label, options, value, onChange }: { label: string; options: 
               aria-pressed={on}
               onClick={() => onChange(on ? "" : o)}
               className="cursor-pointer rounded-[10px] border px-3.5 py-2 text-[14px] font-semibold transition-colors"
-              style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#fff" } : { background: "var(--surface, #ffffff)", borderColor: "var(--border)", color: "var(--foreground)" }}
+              style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { background: "var(--surface, #ffffff)", borderColor: "var(--border)", color: "var(--foreground)" }}
             >
               {o}
             </button>
@@ -120,7 +120,7 @@ export function DemoRequestForm() {
 
   const sent = (
     <div className="flex items-center gap-3">
-      <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--primary)" }}>
+      <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--color-text-brand)" }}>
         <Check className="h-5 w-5" strokeWidth={2.75} aria-hidden />
       </span>
       <div>

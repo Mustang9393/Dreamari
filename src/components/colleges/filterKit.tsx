@@ -112,7 +112,7 @@ export function Option({ on, onToggle, label, note, count, lead, radio = false, 
       </span>
       {typeof count === "number" && <Count n={count} />}
       <span aria-hidden className={`flex size-[20px] flex-none items-center justify-center ${radio ? "rounded-full" : "rounded-[6px]"} border`} style={{ borderColor: on ? ACCENT : "color-mix(in srgb, var(--foreground) 30%, transparent)", background: on ? ACCENT : "transparent" }}>
-        {on && <Check className="h-[13px] w-[13px] text-white" strokeWidth={3} />}
+        {on && <Check className="h-[13px] w-[13px] text-[var(--primary-foreground)]" strokeWidth={3} />}
       </span>
     </button>
   );
@@ -126,7 +126,7 @@ export function Chips<T extends string | number>({ options, value, onChange, lab
         const on = o.key === value;
         const n = count?.(o.key);
         return (
-          <button key={String(o.key)} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[6px] rounded-[10px] border px-[13px] text-[13.5px] font-semibold whitespace-nowrap" style={on ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
+          <button key={String(o.key)} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[6px] rounded-[10px] border px-[13px] text-[13.5px] font-semibold whitespace-nowrap" style={on ? { background: ACCENT, borderColor: ACCENT, color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
             {o.label}{typeof n === "number" && <span className="text-[12px] font-medium tabular-nums" style={{ color: on ? "rgba(255,255,255,0.8)" : "var(--muted-foreground)" }}>{n}</span>}
           </button>
         );
@@ -210,7 +210,7 @@ export function Dropdown({ label, value, icon, active, panel, quiet = false, den
       </header>
       <div className="dm-scroll min-h-0 flex-1 overflow-y-auto">{p.children}</div>
       <footer className="flex items-center justify-end gap-[8px] border-t px-[16px] py-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-        <button type="button" onClick={close} className="dm-solid flex min-h-[42px] w-full cursor-pointer items-center justify-center rounded-[10px] px-[18px] text-[14.5px] font-semibold text-white lg:w-auto" style={{ background: ACCENT }}>
+        <button type="button" onClick={close} className="dm-solid flex min-h-[42px] w-full cursor-pointer items-center justify-center rounded-[10px] px-[18px] text-[14.5px] font-semibold text-[var(--primary-foreground)] lg:w-auto" style={{ background: ACCENT }}>
           Show {p.count} {p.count === 1 ? (p.noun ?? "school") : `${p.noun ?? "school"}s`}
         </button>
       </footer>

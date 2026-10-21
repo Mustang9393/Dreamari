@@ -457,7 +457,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
         badges={
           <>
             {version?.jobDescription && (
-              <span className="inline-flex flex-none items-center gap-[5px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold max-sm:size-[24px] max-sm:justify-center max-sm:px-0" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 45%, var(--glass-border))", color: "var(--accent-subtle)" }} aria-label="Tailored to a job description">
+              <span role="img" className="inline-flex flex-none items-center gap-[5px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold max-sm:size-[24px] max-sm:justify-center max-sm:px-0" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 45%, var(--glass-border))", color: "var(--accent-subtle)" }} aria-label="Tailored to a job description">
                 <Wand2 className="h-3 w-3" aria-hidden /> <span className="max-sm:hidden">Tailored</span>
               </span>
             )}
@@ -536,7 +536,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
           {/* On a phone the fitted page is a thumbnail, not a reading size,
              so the whole sheet is one tap into the full-screen reader, with
              the hint saying so. */}
-          <button type="button" onClick={() => setZoomOpen(true)} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)] sm:hidden" aria-label="Read full screen">
+          <button type="button" onClick={() => setZoomOpen(true)} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)] sm:hidden" aria-label="Tap to read full screen">
             <span className="absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-[12px] font-bold whitespace-nowrap" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", backdropFilter: "blur(12px)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               <Expand className="h-3.5 w-3.5" aria-hidden /> Tap to read
             </span>
@@ -756,7 +756,7 @@ function ResumeBuilderInner() {
               type="button"
               onClick={() => router.push(`/resume-builder?view=wizard${pickedTemplate ? `&template=${pickedTemplate}` : ""}`)}
               className="dm-link self-start cursor-pointer text-[13px] font-semibold"
-              style={{ color: "var(--primary)" }}
+              style={{ color: "var(--color-text-brand)" }}
             >
               Update my info first
             </button>

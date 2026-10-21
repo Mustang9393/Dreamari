@@ -60,8 +60,8 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
         {/* LEFT: logged in Dreamari. Heavier than the form: tinted field, a
            stronger border and check marks on every row. */}
         <section aria-labelledby={`${idPrefix}logged`} className="flex flex-col gap-[12px] rounded-[var(--radius-sm)] border px-[16px] py-[14px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 45%, var(--rule))", background: "color-mix(in srgb, var(--primary) 7%, var(--paper-sunken))", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 12%, transparent)" }}>
-          <h4 id={`${idPrefix}logged`} className={LABEL} style={{ color: "var(--primary)" }}>
-            <span className="flex size-[16px] flex-none items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#fff" }}><Check className="h-[10px] w-[10px]" strokeWidth={3.5} aria-hidden /></span>
+          <h4 id={`${idPrefix}logged`} className={LABEL} style={{ color: "var(--color-text-brand)" }}>
+            <span className="flex size-[16px] flex-none items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Check className="h-[10px] w-[10px]" strokeWidth={3.5} aria-hidden /></span>
             Logged in Dreamari
           </h4>
           {logged.length === 0 ? (
@@ -70,7 +70,7 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
             <ul className="flex list-none flex-col gap-[9px] p-0">
               {logged.map((item) => (
                 <li key={item.text} className={ROW} style={{ color: "var(--ink)" }}>
-                  <Check className="mt-[2px] h-[14px] w-[14px] flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--primary)" }} />
+                  <Check className="mt-[2px] h-[14px] w-[14px] flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-text-brand)" }} />
                   <span className="min-w-0 flex-1">{item.text}</span>
                   <span className="flex-none tabular-nums" style={{ color: "var(--ink-faint)" }}>{shortDate(item.date)}</span>
                 </li>
@@ -91,7 +91,7 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
            (`hidden print:flex` below) so Download/print still shows every
            logged experience -- the file's own standing requirement. */}
         <section aria-labelledby={`${idPrefix}own`} className="flex flex-col gap-[12px] rounded-[var(--radius-sm)] border px-[16px] py-[14px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
-          <h4 id={`${idPrefix}own`} className={LABEL} style={{ color: "var(--primary)" }}><PenLine className="h-[13px] w-[13px] flex-none" aria-hidden />Add your own</h4>
+          <h4 id={`${idPrefix}own`} className={LABEL} style={{ color: "var(--color-text-brand)" }}><PenLine className="h-[13px] w-[13px] flex-none" aria-hidden />Add your own</h4>
           <div data-print-hide className="flex flex-col gap-[10px]">
             {mine.length === 0 ? (
               <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-faint)" }}>Nothing added yet -- log a job shadow, project, or conversation.</p>
@@ -165,7 +165,7 @@ function AddYourOwnModal({ idPrefix, items, editing, onEdit, onDone, menuOpen, o
           style={{ background: "var(--paper-raised)", borderColor: "var(--rule)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.5)" }}
         >
           <div className="flex items-center justify-between gap-[8px]">
-            <h3 className={LABEL} style={{ color: "var(--primary)" }}><PenLine className="h-[13px] w-[13px] flex-none" aria-hidden />Add your own</h3>
+            <h3 className={LABEL} style={{ color: "var(--color-text-brand)" }}><PenLine className="h-[13px] w-[13px] flex-none" aria-hidden />Add your own</h3>
             <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--ink-faint)" }}><X className="h-4 w-4" aria-hidden /></button>
           </div>
           <AddMenu open={menuOpen} onToggle={onToggleMenu} onAdd={onAddTypes} idPrefix={idPrefix} />
@@ -306,7 +306,7 @@ function AddMenu({ open, onToggle, onAdd, idPrefix }: { open: boolean; onToggle:
               disabled={checked.size === 0}
               onClick={() => { onAdd([...checked]); setChecked(new Set()); }}
               className="dm-solid flex min-h-[38px] flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ background: "var(--primary)", color: "#fff" }}
+              style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             >
               {checked.size > 1 ? `Add ${checked.size}` : "Add"}
             </button>
@@ -343,7 +343,7 @@ function ExperienceRow({ e, editing, onEdit, onDone }: { e: Experience; editing:
       {editing && (
         <div data-print-hide className="flex flex-col gap-[10px] border-t px-[12px] py-[12px]" style={{ borderColor: "var(--rule)" }}>
           <label className="flex flex-col gap-[4px] text-[12px] font-bold" style={{ color: "var(--ink-soft)" }}>
-            <span>Date<span aria-hidden style={{ color: "var(--primary)" }}>*</span><span className="sr-only"> (required)</span></span>
+            <span>Date<span aria-hidden style={{ color: "var(--color-text-brand)" }}>*</span><span className="sr-only"> (required)</span></span>
             <DatePicker value={e.date} onChange={(v) => updateExperience(e.id, { date: v })} ariaLabel="Date" className={FIELD} style={fieldStyle} />
           </label>
           <label className="flex flex-col gap-[4px] text-[12px] font-bold" style={{ color: "var(--ink-soft)" }}>

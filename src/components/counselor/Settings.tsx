@@ -105,7 +105,7 @@ export function Settings() {
                 <ul className="flex flex-col gap-[4px]">
                   {p.items.map((item) => (
                     <li key={item} className="flex gap-[6px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
-                      <span aria-hidden style={{ color: "var(--primary)" }}>•</span>{item}
+                      <span aria-hidden style={{ color: "var(--color-text-brand)" }}>•</span>{item}
                     </li>
                   ))}
                 </ul>

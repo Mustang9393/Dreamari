@@ -80,7 +80,7 @@ export function CareerCollegeInsights() {
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="relative shrink-0 overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ borderColor: "var(--glass-border)", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, var(--card)), color-mix(in srgb, #7C5CFA 24%, var(--card)))" }}>
-        <span className="flex items-center gap-[8px] text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--primary)" }}>
+        <span className="flex items-center gap-[8px] text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--color-text-brand)" }}>
           <Lightbulb className="h-[14px] w-[14px]" aria-hidden /> Dreamari Recommendations for You
         </span>
         <div className="mt-[var(--space-4)] grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-3">
@@ -114,7 +114,7 @@ export function CareerCollegeInsights() {
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <span className="flex items-center gap-[10px]">
-            <span className="flex size-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
+            <span className="flex size-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--color-text-brand)" }}>
               <Briefcase className="h-[15px] w-[15px]" aria-hidden />
             </span>
             <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Career Fair Planning Opportunity</h2>

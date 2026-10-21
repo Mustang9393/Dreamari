@@ -69,7 +69,9 @@ html.look-v2.dark {
 /* The app's own token scope (marketing/tokens.css). Doubling the class beats
    tokens.css's .marketing-v2 block whatever the bundle order. */
 html.look-v2 .marketing-v2 {
-  --background: #000105;
+  /* the landing's page navy, the colour its hero ends on, so scrolling past
+     Dreamy lands on the same sky, not near-black (21 Oct 2026) */
+  --background: #131f36;
   --card: #0e1219; /* neutral blue-black, was indigo #151829 */
   --primary: #2f5fb1;
   --accent: #2f5fb1;
@@ -113,19 +115,19 @@ html.look-v2.light {
      the pale blue tints measured 4.1:1 at #2f5fb1. #2f5fb1 is 6.1:1 on
      white, 5.6:1 on the page, 4.8:1 on the strongest tint (#d4e6fb). */
   --color-action-primary: #2f5fb1;
-  --color-text-brand: #2f5fb1;
+  --color-text-brand: #24508f; /* AAA 7:1 on the light page (was #2f5fb1, 5.7:1; WCAG 1.4.6, audit 21 Oct 2026) */
   --color-match-accent: #2f5fb1;
 }
 
 html.look-v2.light .marketing-v2.themeable {
   --background: #f3f6f9 !important; /* cool white, was lavender-blue #e4eaf8 */
   --foreground: #101a26 !important;
-  --muted-foreground: #4b5664 !important; /* 7.0:1 on white, 6.6:1 on the page */
+  --muted-foreground: #434c58 !important; /* 8.0:1 on white, 7.5:1 on the page: AAA (was #4b5664, 6.6:1 on the page) */
   --card: #ffffff !important;
   --border: #d5dde7 !important;
   --primary: #2f5fb1 !important;
   --accent: #2f5fb1 !important;
-  --accent-subtle: #2f5fb1 !important;
+  --accent-subtle: #24508f !important; /* the text-safe brand, AAA 7:1 (fills keep --primary) */
   --hero-accent-purple: #d3e4f8 !important; /* ice blue */
   --hero-accent-teal: #eaf1f9 !important; /* was blush pink */
   --hero-accent-pink: #eaf1f9 !important;
@@ -305,9 +307,23 @@ html.look-v2.dark [data-flow-space] {
   /* the same dusk sky as the app (21 Oct): dark overhead, brighter toward
      the horizon; the top nebula (light from above) is off in dark */
   background:
-    radial-gradient(42% 18% at 50% 104%, rgba(190, 220, 252, 0.14) 0%, transparent 70%),
-    radial-gradient(78% 44% at 50% 108%, rgba(120, 170, 230, 0.34) 0%, rgba(110, 160, 220, 0.16) 42%, transparent 76%),
-    linear-gradient(180deg, #0f1c31 0%, #132440 32%, #1a3051 62%, #22406a 100%) !important;
+    /* a darker pocket just above the aurora, bottom middle (Chandu: "we
+       can go a little blacker before we get to the aurora somewhere down
+       the bottom middle?" / "or mid to bottom area"), so the aurora's light
+       rises out of near-black */
+    /* a soft blue glow overhead (Chandu: "maybe a slightly better bluish
+       glow up top without reducing the effectiveness of the stars?"),
+       straight across the top, not a radial ("not a radial gradient up top
+       that reads like water"); faint enough that the stars keep their
+       sparkle */
+    linear-gradient(180deg, rgba(58, 108, 205, 0.2) 0%, rgba(58, 108, 205, 0.11) 14%, rgba(58, 108, 205, 0.04) 30%, transparent 46%),
+    /* (three offset pockets with eased falloff, not one ellipse, so the
+       fade to black has no edge: "make the fade to black more organic") */
+    /* (deeper and wider again: "a little more black area") */
+    radial-gradient(82% 36% at 36% 76%, rgba(6, 10, 22, 0.46) 0%, rgba(6, 10, 22, 0.33) 30%, rgba(6, 10, 22, 0.14) 60%, rgba(6, 10, 22, 0.04) 80%, transparent 100%),
+    radial-gradient(76% 34% at 66% 72%, rgba(6, 10, 22, 0.42) 0%, rgba(6, 10, 22, 0.29) 30%, rgba(6, 10, 22, 0.12) 60%, rgba(6, 10, 22, 0.03) 80%, transparent 100%),
+    radial-gradient(140% 56% at 50% 80%, rgba(6, 10, 22, 0.38) 0%, rgba(6, 10, 22, 0.26) 35%, rgba(6, 10, 22, 0.1) 65%, rgba(6, 10, 22, 0.03) 85%, transparent 100%),
+    linear-gradient(180deg, #121d33 0%, #14213a 40%, #162640 72%, #172843 100%) !important;
 }
 html.look-v2.dark [data-flow-space] [data-nebula="1"] {
   display: none;
@@ -364,6 +380,20 @@ html.look-v2 [data-fill-light] {
 }
 html.look-v2 [data-tab-ink] {
   box-shadow: 0 0 10px 1px rgba(89, 160, 248, 0.75), 0 -6px 16px -4px rgba(89, 160, 248, 0.35);
+}
+/* The selected tab's line reads as light, not paint (21 Oct 2026, Chandu:
+   "the line under the selected tabs ... should be a brigther blue so it
+   looks like LIGHT"): a near-white core that warms to periwinkle at the
+   ends, with a periwinkle glow above and around it. Dark mode only; light
+   mode keeps the deeper blue line, which already reads on white. Covers
+   every tab underline: TextTabs, Explore's section tabs, the resume builder,
+   a pro's profile tabs and the counselor's page tabs. */
+html.look-v2:not(.light) [data-tab-ink],
+html.look-v2:not(.light) [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading .v4-tt.is-on:not(.is-solo)::after {
+  background: linear-gradient(90deg, #a9c6fb 0%, #eaf2ff 30%, #ffffff 50%, #eaf2ff 70%, #a9c6fb 100%) !important;
+  /* glow halved (21 Oct, Chandu: "tone down the glow a bit on the selected
+     tab highlight lines? its too much"): the line itself stays bright */
+  box-shadow: 0 0 4px 0 rgba(203, 224, 251, 0.6), 0 0 10px 1px rgba(143, 179, 245, 0.35), 0 -4px 10px -4px rgba(143, 179, 245, 0.22) !important;
 }
 html.look-v2 [data-tabbar] [aria-current="page"] svg {
   filter: drop-shadow(0 0 7px rgba(89, 160, 248, 0.85));
@@ -515,18 +545,71 @@ html.look-v2:not(.light) [data-app-backdrop] {
      the screen edge so its brightest part meets the bottom and fades up.
      Its peak on screen is about #3c608f, the brightest text-safe sky:
      white 6.4:1, captions at 82% white about 5:1, page links #cbe0fb
-     about 4.9:1. */
+     about 4.9:1.
+     One more stage (21 Oct, Chandu: "needs one more stage of brighter glow
+     maybe towards the bottom because still still reads a bit gloomy", then
+     "not a flat color uplift but an additional glow maybe a radial one but
+     not overly taking over the footer maybe like a sun rising"): a rising
+     sun. A small near-white core sits just below the bottom edge inside a
+     tighter halo, so the light reads as one source coming up from the
+     horizon while the corners and the lower sky keep their colour. The core
+     only reaches the last few percent of the screen (under the mobile tab
+     bar); 8% up from the bottom, white text is still above 7:1.
+     Back on the reference (21 Oct, Chandu, with the team's DREAMARI slide:
+     "I think we've strayed way from this color too much"): the cobalt top
+     and the cyan aurora pulled away from it, so the sky is the reference's
+     own gradient again, one clean linear run from #131f36 to #41699a
+     sampled from the slide (its bottom is a touch lighter, #4c7cae; capped
+     here so white text keeps 5:1 at the very bottom). The aurora stays,
+     tinted in the slide's own pale blue.
+     Then darker (21 Oct, Chandu: "lets try to use a bit more black instead
+     of the overall light uplift towards the bottom, let the aurora carry
+     the light blue instead. this feels too bright... but dont lose sight of
+     the color either"): the same slide hue all the way down, but the lower
+     sky stays near-black navy (#213a61 at the bottom, not #41699a), so the
+     brightness comes from the aurora's light, not from the gradient.
+     Darker again near the aurora (21 Oct, Chandu: "lets go a little darker
+     towards the aurora, make the aurora feel like more when you see the
+     earth horizon/atmosphere line from outer space"): the gradient barely
+     lifts (#172843 at the bottom), so the aurora's limb line glows out of
+     near-black like the atmosphere seen from orbit.
+     Before that, an aurora and a cobalt sky (21 Oct, Chandu: "how can we make this
+     look more optimistic and hopeful and exciting?", then "lets try it, how
+     about we give the lighter glow a more aurora-esque material/shape?"):
+     the overhead navy turns from slate (#0f1c31) to cobalt (#0f2150), the
+     same brightness the sky already had a third of the way down, so it stays
+     dark mode and the stars keep their contrast (17:1 to 15.5:1); the
+     gloom was grey, not darkness. The sun gives way to a rendered aurora
+     (SkyAurora.tsx, a WebGL layer above this gradient): a first pass in CSS
+     stripes and ellipses was rejected ("looks very bad and ugly please make
+     it match an actual spectral material light thingy when rendered"). */
   background:
-    radial-gradient(42% 18% at 50% 104%, rgba(190, 220, 252, 0.14) 0%, transparent 70%),
-    radial-gradient(78% 44% at 50% 108%, rgba(120, 170, 230, 0.34) 0%, rgba(110, 160, 220, 0.16) 42%, transparent 76%),
-    linear-gradient(180deg, #0f1c31 0%, #132440 32%, #1a3051 62%, #22406a 100%) !important;
+    /* a darker pocket just above the aurora, bottom middle (Chandu: "we
+       can go a little blacker before we get to the aurora somewhere down
+       the bottom middle?" / "or mid to bottom area"), so the aurora's light
+       rises out of near-black */
+    /* a soft blue glow overhead (Chandu: "maybe a slightly better bluish
+       glow up top without reducing the effectiveness of the stars?"),
+       straight across the top, not a radial ("not a radial gradient up top
+       that reads like water"); faint enough that the stars keep their
+       sparkle */
+    linear-gradient(180deg, rgba(58, 108, 205, 0.2) 0%, rgba(58, 108, 205, 0.11) 14%, rgba(58, 108, 205, 0.04) 30%, transparent 46%),
+    /* (three offset pockets with eased falloff, not one ellipse, so the
+       fade to black has no edge: "make the fade to black more organic") */
+    /* (deeper and wider again: "a little more black area") */
+    radial-gradient(82% 36% at 36% 76%, rgba(6, 10, 22, 0.46) 0%, rgba(6, 10, 22, 0.33) 30%, rgba(6, 10, 22, 0.14) 60%, rgba(6, 10, 22, 0.04) 80%, transparent 100%),
+    radial-gradient(76% 34% at 66% 72%, rgba(6, 10, 22, 0.42) 0%, rgba(6, 10, 22, 0.29) 30%, rgba(6, 10, 22, 0.12) 60%, rgba(6, 10, 22, 0.03) 80%, transparent 100%),
+    radial-gradient(140% 56% at 50% 80%, rgba(6, 10, 22, 0.38) 0%, rgba(6, 10, 22, 0.26) 35%, rgba(6, 10, 22, 0.1) 65%, rgba(6, 10, 22, 0.03) 85%, transparent 100%),
+    linear-gradient(180deg, #121d33 0%, #14213a 40%, #162640 72%, #172843 100%) !important;
 }
 html.look-v2:not(.light) body {
-  background: #0f1c31;
+  background: #131f36;
 }
 html.look-v2:not(.light) {
-  --background: #0f1c31;
-  --color-surface-page: #0f1c31;
+  --color-action-primary: #8fb3f5;
+  --color-action-primary-hover: #a3c1f7;
+  --background: #131f36;
+  --color-surface-page: #131f36;
   --color-surface-card: #13213a;
   --color-text-brand: #cbe0fb;
   --color-match-toast-link: #cbe0fb;
@@ -540,7 +623,17 @@ html.look-v2:not(.light) {
    step lighter than the one below; still near-opaque so stars never show
    through. */
 html.look-v2:not(.light) .marketing-v2 {
-  --background: #0f1c31;
+  /* The app's blue is the landing's periwinkle (21 Oct 2026, Chandu: "the
+     blues used within the app need to be adjusted. Ther are too dark. Maybe
+     we use the brigther new primary blue thing?"). #2f5fb1 cobalt read as a
+     dark hole on the dusk sky; #8fb3f5 is 8.5:1 against the page, so fills,
+     selected tabs and the nav pill read as light. White on it would be
+     2.2:1, so the ink on every blue fill is near-black (8.2:1). Light mode
+     keeps its deeper blue: periwinkle on white would fail. */
+  --primary: #8fb3f5;
+  --accent: #8fb3f5;
+  --primary-foreground: #0b1a33;
+  --background: #131f36;
   --card: #13213a;
   --surface: #142338;
   --muted: rgba(21, 36, 60, 0.94);
@@ -565,14 +658,29 @@ html.look-v2:not(.light) .event-card {
    body copy high up (on #1e375a, 5.7:1 at 74%) and the sky-blue button
    (3.6:1 against the light behind it). */
 html.look-v2 [data-landing-wash] {
-  background: #0f1c31 !important;
+  background: #131f36 !important;
 }
+/* The hero's sky peaks behind Dreamy and eases back down to the page's own
+   navy by its bottom edge (21 Oct 2026, Chandu: "the landing page hard cuts
+   the gradient above the fold and I see a sharp line and dark nothingness
+   background when I scroll down past dreamy"): it used to stop at its
+   brightest and fade to transparent inside the section's overflow crop, so
+   the crop line showed as a bright edge over flat navy. Ending opaque on
+   the page colour leaves nothing to cut. */
 html.look-v2 [data-hero-surface] {
   display: block !important;
   opacity: 1 !important;
-  background: linear-gradient(180deg, #111f36 0%, #172a46 22%, #1e375a 45%, #2b4b78 62%, #3a6290 76%, #4a7aab 88%, rgba(74, 122, 171, 0) 100%) !important;
+  /* (an eased tail: the slope flattens to zero at the edge, so the eye
+     sees no line where the fall stops; a linear tail read as one. The last
+     few percent go transparent so the page's own grain shows through on
+     both sides of the edge: an opaque end hid it and left a step) */
+  background: linear-gradient(180deg, #111f36 0%, #172a46 20%, #1e375a 40%, #2b4b78 56%, #3a6290 68%, #4a7aab 78.0%, #4a79aa 80.2%, #4775a4 82.4%, #416b98 84.6%, #395d86 86.8%, #2e4c70 89.0%, #243c5b 91.2%, #1c2e49 93.4%, #16243d 95.6%, rgba(19, 32, 55, 0.6) 97.8%, rgba(19, 31, 54, 0) 100%) !important;
   -webkit-mask-image: none !important;
   mask-image: none !important;
+}
+/* the horizon light sits behind Dreamy and is gone before the crop */
+html.look-v2 [data-hero-horizon] {
+  background: radial-gradient(60% 46% at 50% 62%, rgba(122, 162, 255, 0.26) 0%, rgba(122, 162, 255, 0.08) 45%, transparent 75%) !important;
 }
 html.look-v2 [data-hero-glow] {
   display: none;

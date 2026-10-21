@@ -1,5 +1,7 @@
 "use client";
 
+import { useDialogFocus } from "@/components/app/useDialogFocus";
+
 import { useGlobalTheme } from "@/components/app/theme";
 import { canGoBack } from "@/lib/backStep";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
@@ -286,7 +288,7 @@ function ResponderStack({ thread, size = 20, max = 3 }: { thread: Thread; size?:
   const people = responderIdentities(thread).slice(0, max);
   if (people.length === 0) return null;
   return (
-    <span className="flex items-center" aria-label={`${people.length === 1 ? "1 person has" : `${people.length} people have`} replied`}>
+    <span role="img" className="flex items-center" aria-label={`${people.length === 1 ? "1 person has" : `${people.length} people have`} replied`}>
       {people.map((p, i) => (
         <span key={p.name + i} className="rounded-full" style={{ marginLeft: i === 0 ? 0 : -Math.round(size * 0.38), zIndex: people.length - i, boxShadow: "0 0 0 2px var(--glass-surface-1)" }}>
           <Avatar name={p.name} size={size} />
@@ -388,7 +390,7 @@ function InlineAsk({
         <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Cancel
         </button>
-        <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+        <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           Post <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
         </button>
       </div>
@@ -834,7 +836,7 @@ function PrimaryCta({ children, onClick, className = "" }: { children: React.Rea
       type="button"
       onClick={onClick}
       className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] leading-[18px] font-semibold transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${className}`}
-      style={{ background: "var(--primary)", color: "#FFFFFF" }}
+      style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
     >
       {children}
     </button>
@@ -1063,7 +1065,7 @@ function CompactRow({ onOpen, avatarName, title, meta, state, helpful, comments 
          StatusChip's text ("Waiting for an answer") doesn't fit a one-line
          row, but the fact still needs to be visible without opening the
          thread (direct feedback, 8 Sept 2026). */}
-      {state && <span aria-label={STATE_LABEL[state]} className="size-[7px] flex-none rounded-full" style={{ background: STATE_COLOR[state] }} />}
+      {state && <span role="img" aria-label={STATE_LABEL[state]} className="size-[7px] flex-none rounded-full" style={{ background: STATE_COLOR[state] }} />}
       <Avatar name={avatarName} size={24} />
       <span className="min-w-0 flex-1">
         <span className="block min-w-0 truncate text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>
@@ -1390,7 +1392,7 @@ function FilterRow({ options, active, onPick, accent }: { options: { key: string
               active === option.key
                 ? accent
                   ? { background: `color-mix(in srgb, ${accent} 20%, var(--card))`, borderColor: `color-mix(in srgb, ${accent} 60%, var(--glass-border))`, color: "var(--foreground)" }
-                  : { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" }
+                  : { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" }
                 : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }
             }
           >
@@ -2539,10 +2541,13 @@ export function AskSheet({
   initialBoardId?: string;
   initialText?: string;
 }) {
+  // focus in, Tab kept inside, Escape closes, focus back to the opener (WCAG 2.4.3 / 2.1.2)
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   return (
     // Bottom padding clears the fixed MobileNav bar (56px + safe-area-inset-
     // bottom); max-h + overflow-y-auto on the card keeps Post reachable.
-    <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="ask-title">
+    <div ref={dialogRef} tabIndex={-1} className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="ask-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="dm-scroll relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
@@ -2663,9 +2668,12 @@ const REPORT_REASONS = ["Shares personal contact details", "Unkind or bullying",
 
 /** Report, made visible (safety by design): pick why, send, done. */
 export function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (reason: string) => void }) {
+  // focus in, Tab kept inside, Escape closes, focus back to the opener (WCAG 2.4.3 / 2.1.2)
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   const [reason, setReason] = useState<string | null>(null);
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="report-title">
+    <div ref={dialogRef} tabIndex={-1} className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="report-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="dm-scroll relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[440px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
@@ -2897,7 +2905,7 @@ export function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; 
         <div className="relative mt-[14px] flex items-center gap-[clamp(14px,calc(5vw/var(--vz,1)),44px)] text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
           <IconTip label="Comment"><button type="button" onClick={onOpen} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}><MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}</button></IconTip>
           <IconTip label={cardProps.helpful ? "Liked" : "Like"}><button type="button" onClick={cardProps.onHelpful} aria-pressed={cardProps.helpful} aria-label={`Like, ${helpfulTotal.toLocaleString("en-US")} ${pluralize(helpfulTotal, "like")}`} className={`${action} relative z-20 w-fit`} style={{ color: cardProps.helpful ? "var(--accent-subtle)" : undefined }}><ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}</button></IconTip>
-          <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}><Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span></span>
+          <span role="img" className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}><Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span></span>
           <div className="ml-auto flex items-center gap-[var(--space-2)]">
             <IconTip label={cardProps.saved ? "Saved" : "Save"}><button type="button" onClick={cardProps.onSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}><Bookmark className="h-[16px] w-[16px]" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} /></button></IconTip>
             <IconTip label="Share"><button type="button" onClick={() => nav?.share(`?thread=${thread.id}`, thread.title)} aria-label="Share" className="dm-quiet relative z-20 -mr-[6px] flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: quiet }}><Share2 className="h-[16px] w-[16px]" aria-hidden /></button></IconTip>
@@ -3021,7 +3029,7 @@ export function FeedPostRow({
           <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex w-fit min-w-0 cursor-pointer items-center gap-[5px] text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>
               <span className="truncate">{pro.name}</span> <VerifiedBadge size={13} />
-              {isNew && <span className="ml-[4px] flex-none rounded-full px-[7px] py-[1px] text-[10px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>New</span>}
+              {isNew && <span className="ml-[4px] flex-none rounded-full px-[7px] py-[1px] text-[10px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--color-text-brand)" }}>New</span>}
             </button>
             {/* On a phone this line wraps (role, then company and time) instead
                of squeezing the role to nothing beside Follow (6 Oct 2026); the
@@ -3096,7 +3104,7 @@ export function FeedPostRow({
               <ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}
             </button>
           </IconTip>
-          <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}>
+          <span role="img" className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}>
             <Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span>
           </span>
           <div className="ml-auto flex items-center gap-[var(--space-2)]">
@@ -4082,12 +4090,11 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
          2026): tapping anywhere opens the board (or the code sheet
          when not yet joined); the stub's own flip and the buttons
          keep their own behaviour */}
+      {/* keyboard and screen readers reach it through the title button: a
+         role="button" ticket holding its own buttons was nested
+         interactive (WCAG 4.1.2, audit 21 Oct 2026) */}
       <div
-        role="button"
-        tabIndex={0}
-        aria-label={`${joined || preview ? "Open" : "Join"} ${event.name}`}
         onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; if (joined || preview) onOpenEvent(event.id); else onEnterCode(event.id); }}
-        onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (joined || preview) onOpenEvent(event.id); else onEnterCode(event.id); } }}
         className="connect-ticket dm-tap relative flex h-[316px] cursor-pointer overflow-hidden rounded-[var(--radius-lg)]"
         style={{ background: `color-mix(in srgb, ${lit} 50%, var(--ev-edge-mix, rgba(255,255,255,0.12)))`, fontFamily: "var(--font-display)", textShadow: `var(--ev-text-shadow, ${CARD_TEXT_SHADOW})` }}
       >
@@ -4097,7 +4104,9 @@ export function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr, rem
         </div>
         {/* body */}
         <div className="relative z-10 flex min-w-0 flex-1 flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pt-[var(--space-6)]">
-          <h3 className="line-clamp-3 min-h-[78px] text-[21px] leading-[26px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
+          <h3 className="line-clamp-3 min-h-[78px] text-[21px] leading-[26px] font-extrabold text-balance" style={{ color: eventInk }}>
+            <button type="button" aria-label={`${joined || preview ? "Open" : "Join"} ${event.name}`} onClick={() => { if (joined || preview) onOpenEvent(event.id); else onEnterCode(event.id); }} className="cursor-pointer text-left text-balance">{event.name}</button>
+          </h3>
           <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--ev-soft, rgba(255,255,255,0.8))", fontFamily: "var(--font-body)" }}>
             <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} var(--ev-icon-a, 60%), var(--ev-icon-mix, #fff))` }} /> {when}</span>
             <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} var(--ev-icon-a, 60%), var(--ev-icon-mix, #fff))` }} /> {event.location}</span>
@@ -4612,7 +4621,7 @@ function BoardView({
           {firms.length > 1 && (
             <div className="flex flex-wrap gap-[6px]">
               {["All", ...firms].map((f) => (
-                <button key={f} type="button" aria-pressed={firm === f} onClick={() => setFirm(f)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center rounded-[10px] border px-[12px] text-[13px] leading-[18px] font-semibold" style={firm === f ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{f}</button>
+                <button key={f} type="button" aria-pressed={firm === f} onClick={() => setFirm(f)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center rounded-[10px] border px-[12px] text-[13px] leading-[18px] font-semibold" style={firm === f ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{f}</button>
               ))}
             </div>
           )}
@@ -4631,7 +4640,7 @@ function BoardView({
             <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-5)]" style={{ borderColor: RULE }}>
               <div className="flex items-baseline justify-between gap-[10px]">
                 <h3 className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Open now for {community.world}</h3>
-                <Link href="/opportunities" className="dm-link flex-none text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>See all</Link>
+                <Link href="/opportunities" className="dm-link flex-none text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>See all<span className="sr-only"> opportunities</span></Link>
               </div>
               {/* Three quiet rows, not a stack of cards (Chandu: "TOO MUCH CLUTTER, please don't overload the screen"). */}
               <ul className="flex flex-col [&>*+*]:border-t" style={{ ["--feed-rule" as string]: FEED_RULE }}>
@@ -5788,7 +5797,7 @@ export function ReplyComposer({ onPost, as }: { onPost: (text: string) => void; 
         {blocked && <p role="alert" className="mt-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
         <div className="mt-[8px] flex items-center justify-between gap-[var(--space-3)]">
           <span className="text-[11px] leading-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>Posts as {as ? [as.name, as.meta].filter(Boolean).join(" · ") : "Jordan · Junior"}{text.length > 200 ? ` · ${280 - text.length} left` : ""}</span>
-          <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             Post <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
           </button>
         </div>
@@ -5949,6 +5958,9 @@ function InsightThreadView({
 
 
 export function JoinSheet({ community, onClose, onJoin }: { community: Community; onClose: () => void; onJoin: () => void }) {
+  // focus in, Tab kept inside, Escape closes, focus back to the opener (WCAG 2.4.3 / 2.1.2)
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   const [agreed, setAgreed] = useState(false);
   const perks = [
     { title: "Ask verified professionals", body: `People from ${community.professionalsFrom.slice(0, 2).join(" and ")} answer questions here.` },
@@ -5956,7 +5968,7 @@ export function JoinSheet({ community, onClose, onJoin }: { community: Community
     { title: "Save what helps", body: "Keep answers and posts in your Locker for later." },
   ];
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={community.name}>
+    <div ref={dialogRef} tabIndex={-1} className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={community.name}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="dm-scroll relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[480px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: "#0e0c20", fontFamily: "var(--font-display)" }}>
@@ -5989,7 +6001,7 @@ export function JoinSheet({ community, onClose, onJoin }: { community: Community
             onClick={onJoin}
             disabled={!agreed}
             className="dm-solid flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13.5px] font-semibold disabled:cursor-default disabled:opacity-50"
-            style={{ background: "var(--primary)", color: "#FFFFFF" }}
+            style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             Agree &amp; Join
           </button>

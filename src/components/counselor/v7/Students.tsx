@@ -101,7 +101,7 @@ function Directory() {
       ) : (
         <div className="flex flex-col items-start gap-[var(--space-2)] py-[var(--space-6)]">
           <p className="text-[16px] font-semibold">No students match.</p>
-          <button type="button" onClick={() => { setQ(""); setGrade("all"); setPlan("all"); }} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>Clear filters</button>
+          <button type="button" onClick={() => { setQ(""); setGrade("all"); setPlan("all"); }} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>Clear filters</button>
         </div>
       )}
     </div>
@@ -127,7 +127,7 @@ function Group({ label, status, open: startOpen, list }: { label: string; status
           <ul className={`${CARD} overflow-hidden`} style={CARD_STYLE}>
             {list.slice(0, shown).map((s) => <Row key={s.id} s={s} />)}
           </ul>
-          {list.length > shown && <button type="button" onClick={() => setShown((n) => n + 25)} className="dm-link w-fit cursor-pointer pt-[4px] text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>Show {Math.min(25, list.length - shown)} more</button>}
+          {list.length > shown && <button type="button" onClick={() => setShown((n) => n + 25)} className="dm-link w-fit cursor-pointer pt-[4px] text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>Show {Math.min(25, list.length - shown)} more</button>}
         </>
       )}
     </section>

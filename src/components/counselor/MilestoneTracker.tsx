@@ -73,7 +73,7 @@ function MilestoneCardView({ card }: { card: MilestoneCard }) {
         <button
           type="button"
           className="dm-quiet mt-auto flex cursor-pointer items-center gap-[4px] text-left text-[12.5px] font-bold"
-          style={{ color: "var(--primary)" }}
+          style={{ color: "var(--color-text-brand)" }}
         >
           View Details & Student Breakdown
         </button>
@@ -98,7 +98,7 @@ export function MilestoneTracker() {
             aria-selected={tab === g}
             onClick={() => setTab(g)}
             className="dm-quiet flex h-9 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[16px] text-[13px] font-bold"
-            style={{ background: tab === g ? "var(--primary)" : "transparent", color: tab === g ? "#FFFFFF" : "var(--muted-foreground)" }}
+            style={{ background: tab === g ? "var(--primary)" : "transparent", color: tab === g ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
           >
             Grade {g}
           </button>

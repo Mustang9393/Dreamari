@@ -11,6 +11,7 @@ import { SurfaceState } from "@/components/app/SurfaceState";
 import { useSavedVideos } from "@/lib/savedVideos";
 import { COMPANY_VIDEOS, type CompanyVideo } from "./companyVideos";
 import { setVideoSoundMuted, useVideoSoundMuted } from "./videoSound";
+import { CaptionTrack, VideoTranscript } from "@/components/app/VideoTranscript";
 
 /** "Videos Inside Leading Companies" (Explore > Browse, directly above
  *  Typical Pay since 11 Sept 2026): the Apple TV "Lean Back & Watch" shape
@@ -144,15 +145,9 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
   };
   return (
     <div
-      role={failed ? undefined : "button"}
-      tabIndex={failed ? undefined : 0}
-      aria-label={failed ? undefined : `Play ${item.company}: ${item.title}`}
       onClick={failed ? undefined : onOpen}
-      onKeyDown={failed ? undefined : (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
       onMouseEnter={failed ? undefined : () => preview(true)}
       onMouseLeave={failed ? undefined : () => preview(false)}
-      onFocus={failed ? undefined : () => preview(true)}
-      onBlur={failed ? undefined : () => preview(false)}
       className={`dm-tap group relative h-[368px] w-[276px] flex-none overflow-hidden rounded-[var(--radius-lg)] border text-left ${failed ? "" : "cursor-pointer"}`}
       style={{ borderColor: "var(--color-glass-border-raised)", background: "#000" }}
     >
@@ -197,6 +192,16 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${playing ? "opacity-100" : "opacity-0"}`}
         style={{ objectPosition: "50% 30%" }}
       />
+      {/* The keyboard's way in: one real button over the whole card, under
+         the Save and Sound buttons (z-[1]). The card used to be a
+         role="button" holding those two buttons, which is nested
+         interactive (WCAG 4.1.2, audit 21 Oct 2026). */}
+      <button
+        type="button"
+        aria-label={`Play ${item.company}: ${item.title}`}
+        onClick={(e) => { e.stopPropagation(); onOpen(); }}
+        className="absolute inset-0 cursor-pointer rounded-[var(--radius-lg)] focus-visible:outline-offset-[-3px]"
+      />
       {/* Top-left: save for later (Profile > Saved > Videos), same corner
          convention as the college/career bookmark toggles elsewhere. */}
       <IconTip label={saved ? "Remove from Saved" : "Save video"} className="absolute top-[10px] left-[10px] z-[1]">
@@ -235,11 +240,13 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
           <Play className="ml-[2px] h-[15px] w-[15px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
         </span>
       )}
-      {/* Scrim: the company mark always; the clip's title only while the
-         cover (which bakes its own title in) has faded out for the video. */}
+      {/* Scrim: the company mark and the clip's title, always. The cover bakes
+         its title into the picture, which zoom, high contrast and custom
+         fonts cannot reach, so the real text stays on (WCAG 1.4.5, audit
+         21 Oct 2026). */}
       <span aria-hidden className="absolute inset-x-0 bottom-0 flex flex-col gap-[6px] px-[14px] pt-[40px] pb-[13px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
         <span className="flex h-[15px] items-end self-start"><LetterMark name={item.company} ink="var(--poster-title)" letterHeight={15} /></span>
-        <span className={`text-[14px] leading-[18px] font-semibold transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`} style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{item.title}</span>
+        <span className="text-[14px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{item.title}</span>
       </span>
       </>
       )}
@@ -301,10 +308,13 @@ function VideoLightbox({ item, onClose }: { item: CompanyVideo; onClose: () => v
             autoPlay
             controls
             playsInline
-            className="aspect-[9/16] max-h-[calc(calc(100dvh/var(--vz,1))-160px)] w-full rounded-[var(--radius-lg)] border object-contain"
+            className="aspect-[9/16] max-h-[calc(calc(100dvh/var(--vz,1))-210px)] w-full rounded-[var(--radius-lg)] border object-contain"
             style={{ background: "#000", borderColor: "rgba(255,255,255,0.14)" }}
-          />
+          >
+            <CaptionTrack video={item.video} />
+          </video>
         </div>
+        <VideoTranscript video={item.video} />
       </div>
     </div>,
     document.body,

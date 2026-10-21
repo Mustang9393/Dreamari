@@ -240,6 +240,6 @@ export function Stat({ value, label, color }: { value: string; label: string; co
 export function InitialsBadge({ name, size = 32 }: { name: string; size?: number }) {
   const initials = name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   return (
-    <span className="flex flex-none items-center justify-center rounded-full text-[11.5px] font-extrabold" style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}>{initials}</span>
+    <span className="flex flex-none items-center justify-center rounded-full text-[11.5px] font-extrabold" style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--color-text-brand)" }}>{initials}</span>
   );
 }

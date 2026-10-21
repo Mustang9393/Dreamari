@@ -75,7 +75,7 @@
 .v4-school-who{display:flex;align-items:center;gap:12px;min-width:0}
 .v4-school-who strong{display:block;font-size:13px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .v4-school-who small{display:block;font-size:11px;margin-top:5px;color:var(--muted-foreground)}
-.v4-school-monogram{display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;border-radius:13px 13px 18px 6px;background:linear-gradient(145deg,var(--glass-surface-2),var(--inset-bg));border:1px solid var(--v4-edge);font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--primary)}
+.v4-school-monogram{display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;border-radius:13px 13px 18px 6px;background:linear-gradient(145deg,var(--glass-surface-2),var(--inset-bg));border:1px solid var(--v4-edge);font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--color-text-brand)}
 .v4-school-meter{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:12px;align-items:center}
 .v4-school-meter b{font-size:15px;font-weight:450;letter-spacing:-.3px;text-align:right;font-variant-numeric:tabular-nums}
 .v4-school-meter small{display:none}

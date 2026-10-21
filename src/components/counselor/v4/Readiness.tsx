@@ -339,7 +339,7 @@ export function Readiness() {
           <span className="flex flex-wrap items-center gap-[var(--space-3)]">
             <Segmented ariaLabel="Which students" value={show} onChange={setShow} options={[{ key: "support", label: "Needs Support", count: cur.support.length }, { key: "done", label: cur.m.doneWord, count: cur.met.length }]} />
             {listed.length > 0 && (
-              <button type="button" onClick={() => router.push(messageHref(listed.map((s) => s.id)))} className="v4-text-action" style={{ color: "var(--primary)" }}>
+              <button type="button" onClick={() => router.push(messageHref(listed.map((s) => s.id)))} className="v4-text-action" style={{ color: "var(--color-text-brand)" }}>
                 <Users size={14} aria-hidden /> Message all {listed.length}
               </button>
             )}

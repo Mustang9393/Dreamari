@@ -96,7 +96,7 @@ function Chip({ children, tone = accent }: { children: ReactNode; tone?: string 
 }
 function DateTile({ month, day }: { month: string; day: number }) {
   return (
-    <span aria-label={`${month} ${day}`} className="flex h-[52px] w-[52px] flex-none flex-col items-center justify-center rounded-[var(--radius-sm)] border" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 10%, var(--glass-surface-1))` }}>
+    <span role="img" aria-label={`${month} ${day}`} className="flex h-[52px] w-[52px] flex-none flex-col items-center justify-center rounded-[var(--radius-sm)] border" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 10%, var(--glass-surface-1))` }}>
       <span className="text-[10px] leading-none font-extrabold tracking-[0.08em] uppercase" style={{ color: accent }}>{month}</span>
       <span className="mt-[3px] text-[20px] leading-none font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{day}</span>
     </span>
@@ -621,7 +621,7 @@ function ScheduleCard({ me, messages, onRequest, onToast, showMeter }: { me: "me
                 aria-disabled={!live}
                 title={live ? undefined : "Join opens once the meeting starts"}
                 className="dm-solid relative flex min-h-[32px] items-center justify-center gap-[6px] whitespace-nowrap rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold"
-                style={live ? { background: "var(--primary)", color: "#FFFFFF", cursor: "pointer" } : { background: "var(--glass-surface-2)", color: "var(--muted-foreground)", cursor: "default", pointerEvents: "none" }}
+                style={live ? { background: "var(--primary)", color: "var(--primary-foreground)", cursor: "pointer" } : { background: "var(--glass-surface-2)", color: "var(--muted-foreground)", cursor: "default", pointerEvents: "none" }}
               >
                 <Video className="h-4 w-4" aria-hidden /> Join
               </a>
@@ -659,7 +659,7 @@ function ScheduleCard({ me, messages, onRequest, onToast, showMeter }: { me: "me
               aria-disabled={!meetingIsLive(at.month, at.day, at.time)}
               title={meetingIsLive(at.month, at.day, at.time) ? undefined : "Join opens once the meeting starts"}
               className="dm-solid flex min-h-[32px] items-center justify-center gap-[6px] whitespace-nowrap rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold"
-              style={meetingIsLive(at.month, at.day, at.time) ? { background: "var(--primary)", color: "#FFFFFF", cursor: "pointer" } : { background: "var(--glass-surface-2)", color: "var(--muted-foreground)", cursor: "default", pointerEvents: "none" }}
+              style={meetingIsLive(at.month, at.day, at.time) ? { background: "var(--primary)", color: "var(--primary-foreground)", cursor: "pointer" } : { background: "var(--glass-surface-2)", color: "var(--muted-foreground)", cursor: "default", pointerEvents: "none" }}
             ><Video className="h-4 w-4" aria-hidden /> Join</a>
             {request && <QuietCta size="sm" onClick={() => { downloadIcs(request); onToast("Added to your calendar."); }}><CalendarPlus className="h-4 w-4" aria-hidden /> Add to calendar</QuietCta>}
             <QuietCta size="sm" onClick={() => { setDetails(false); setOpen(true); }}>Reschedule</QuietCta>
@@ -866,7 +866,7 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
                   if (m.meeting) return <MeetingCard key={index} m={m.meeting} mine={mine} onDecide={(status) => decide(index, status)} onToast={onToast} />;
                   if (m.share) return <ShareCard key={index} share={m.share} mine={mine} />;
                   return (
-                    <motion.div key={index} initial={m.when === "Just now" ? { opacity: 0, y: 6, scale: 0.98 } : false} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }} className="px-[16px] py-[10px] text-[15.5px] leading-[22px]" style={mine ? { background: "var(--primary)", color: "#FFFFFF", borderRadius: radius } : { background: "var(--glass-surface-2)", color: "var(--foreground)", border: "1px solid var(--glass-border)", borderRadius: radius }}>
+                    <motion.div key={index} initial={m.when === "Just now" ? { opacity: 0, y: 6, scale: 0.98 } : false} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }} className="px-[16px] py-[10px] text-[15.5px] leading-[22px]" style={mine ? { background: "var(--primary)", color: "var(--primary-foreground)", borderRadius: radius } : { background: "var(--glass-surface-2)", color: "var(--foreground)", border: "1px solid var(--glass-border)", borderRadius: radius }}>
                       {m.text}
                     </motion.div>
                   );
@@ -894,7 +894,7 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
         <form className="relative flex items-center gap-[8px]" onSubmit={(e) => { e.preventDefault(); send(draft); }}>
           <div className="relative flex-none">
             <IconTip label="Add">
-              <button type="button" aria-label="Add" aria-expanded={menu === "plus"} onClick={() => setMenu(menu === "plus" ? "none" : "plus")} className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: menu === "plus" ? "var(--glass-surface-2)" : "transparent" }}>
+              <button type="button" aria-label="Add" aria-expanded={menu === "plus"} aria-haspopup="menu" onClick={() => setMenu(menu === "plus" ? "none" : "plus")} className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: menu === "plus" ? "var(--glass-surface-2)" : "transparent" }}>
                 <Plus className="h-[18px] w-[18px] transition-transform" style={{ transform: menu === "plus" ? "rotate(45deg)" : "none" }} aria-hidden />
               </button>
             </IconTip>
@@ -909,9 +909,9 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
             )}
           </div>
           <div className="relative flex min-w-0 flex-1 items-center">
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={me === "mentee" ? "Message Avery" : `Message ${D.MENTEE.name}`} aria-label="Message" className="min-w-0 flex-1 rounded-full border py-[10px] pr-[44px] pl-[16px] text-[15px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={me === "mentee" ? "Message Avery" : `Message ${D.MENTEE.name}`} aria-label="Message" className="min-w-0 flex-1 rounded-full border py-[10px] pr-[44px] pl-[16px] text-[15px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--color-text-brand)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
             <IconTip label="Emoji" className="absolute right-[6px]">
-              <button type="button" aria-label="Emoji" aria-expanded={menu === "emoji"} onClick={() => setMenu(menu === "emoji" ? "none" : "emoji")} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full" style={{ color: menu === "emoji" ? accent : "var(--muted-foreground)" }}>
+              <button type="button" aria-label="Emoji" aria-expanded={menu === "emoji"} aria-haspopup="menu" onClick={() => setMenu(menu === "emoji" ? "none" : "emoji")} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full" style={{ color: menu === "emoji" ? accent : "var(--muted-foreground)" }}>
                 <Smile className="h-[18px] w-[18px]" aria-hidden />
               </button>
             </IconTip>
@@ -924,7 +924,7 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
             )}
           </div>
           <IconTip label="Send">
-            <button type="submit" aria-label="Send" disabled={!draft.trim()} className="dm-solid flex size-[40px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-40" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            <button type="submit" aria-label="Send" disabled={!draft.trim()} className="dm-solid flex size-[40px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-40" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
               <Send className="h-[16px] w-[16px]" aria-hidden />
             </button>
           </IconTip>
@@ -973,7 +973,7 @@ function MeetingRequestSheet({ onClose, onSend }: { onClose: () => void; onSend:
   const [title, setTitle] = useState("Career check-in");
   const [agenda, setAgenda] = useState("");
   const [slot, setSlot] = useState<string>(D.MEETING.reschedule[0]);
-  const field = "w-full rounded-[var(--radius-md)] border px-[14px] py-[10px] text-[14.5px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]";
+  const field = "w-full rounded-[var(--radius-md)] border px-[14px] py-[10px] text-[14.5px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--color-text-brand)]";
   const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
     <Sheet title="Request a meeting" label="In this chat" onClose={onClose}>
@@ -1170,7 +1170,7 @@ function PlayPrepCard({ onClick }: { onClick: () => void }) {
       <Image src={p.cover} alt="" fill sizes="(min-width: 640px) 33vw, 260px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" style={{ objectPosition: "40% 45%" }} />
       <CardProgressiveBlur size={height ? `${height}px` : "58%"} maxBlur={34} />
       <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]" aria-hidden style={{ height: height ? `${height}px` : "58%", background: cardBottomScrim("heavy") }} />
-      <span className="absolute top-[14px] right-[14px] z-[2] flex size-[38px] items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF", boxShadow: "0 8px 20px -8px rgba(0,0,0,0.6)" }}>
+      <span className="absolute top-[14px] right-[14px] z-[2] flex size-[38px] items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 8px 20px -8px rgba(0,0,0,0.6)" }}>
         <Play className="ml-[2px] h-[16px] w-[16px]" fill="currentColor" aria-hidden />
       </span>
       <PrepFoot ref={ref} label={p.label} title={p.title} why={p.why} cta={p.cta} tone={WORLD_COLORS[p.world]} />

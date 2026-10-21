@@ -87,7 +87,7 @@ function NothingNext({ onOutreach }: { onOutreach: () => void }) {
       <span className="mtg-mascot is-hero"><GlassesDreamy size={44} pop={2.3} thinking /></span>
       <div className="flex flex-col gap-[6px]">
         <h2 className="mtg-hero-name">Nothing booked</h2>
-        <button type="button" className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--primary)" }} onClick={onOutreach}>Needs Outreach</button>
+        <button type="button" className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--color-text-brand)" }} onClick={onOutreach}>Needs Outreach</button>
       </div>
     </section>
   );
@@ -184,7 +184,7 @@ export function ToLog({ items, byId, now }: { items: Meeting[]; byId: Map<string
         <LocalBurst nonce={finish} />
         {/* the hero beside this card already has Dreamy: one per view */}
         <span className="mtg-done-badge" aria-hidden><Check className="h-6 w-6" strokeWidth={3} /></span>
-        <h3 className="mtg-wrap-title">All done</h3>
+        <h2 className="mtg-wrap-title">All done</h2>
         {minutes > 0 && <p className="mtg-hero-sub"><b>{minutes} min</b> with students</p>}
         {last && lastName && <Undo word={`Done: ${lastName}`} onUndo={undo} />}
       </section>
@@ -194,7 +194,7 @@ export function ToLog({ items, byId, now }: { items: Meeting[]; byId: Map<string
   return (
     <section aria-label="Past meetings" className="mtg-wrap">
       <div className="mtg-wrap-head">
-        <h3 className="mtg-wrap-title">Past meetings</h3>
+        <h2 className="mtg-wrap-title">Past meetings</h2>
       </div>
       <ul className={`mtg-wrap-list dm-scroll${items.length > 3 ? " has-more" : ""}`}>
         {items.map((m) => {
@@ -242,7 +242,7 @@ export function ComingUp({ meetings, byId, now }: { meetings: Meeting[]; byId: M
   const days = [...new Set(meetings.map((m) => m.day))];
   return (
     <section aria-label="Coming up" className="mtg-coming">
-      <h3 className="mtg-wrap-title">Coming up</h3>
+      <h2 className="mtg-wrap-title">Coming up</h2>
       {days.map((day) => (
         <div key={day} className="mtg-coming-day">
           <span className="mtg-coming-label">{dayWord(day, now)}</span>

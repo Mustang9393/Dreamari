@@ -173,7 +173,7 @@ export function MyImpact() {
           <BigStat value={`${seniorCompliancePct}%`} label="Senior Plan Compliance" sub={`${seniors.length} seniors · district target: 80%`} color="#EC5FA6" />
         </div>
         <div className="flex items-start gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)] text-[13px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))", color: "var(--foreground)" }}>
-          <CheckCircle2 className="mt-[1px] h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />
+          <CheckCircle2 className="mt-[1px] h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--color-text-brand)" }} />
           <span>{seniorsCompliant} of {seniors.length} seniors have college or postsecondary applications in progress or submitted. Senior postsecondary plan rate of {seniorCompliancePct}% {meetsSeniorTarget ? "meets" : "is below"} the district 80% target.</span>
         </div>
       </SectionCard>
@@ -181,32 +181,32 @@ export function MyImpact() {
       <SectionCard title="Counselor Activity & Accountability">
         <div className="grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
           <div className="flex flex-col items-center gap-[4px] text-center">
-            <ClipboardCheck className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--primary)" }} />
+            <ClipboardCheck className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--color-text-brand)" }} />
             <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{plansReviewed}</span>
             <span className="text-[12px] font-bold" style={{ color: "var(--foreground)" }}>Plans Reviewed</span>
             <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{plansApproved} approved · {plansPending} pending</span>
           </div>
           <div className="flex flex-col items-center gap-[4px] text-center">
-            <MessageSquare className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--primary)" }} />
+            <MessageSquare className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--color-text-brand)" }} />
             <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{respondedQuestions}/{QUESTIONS.length}</span>
             <span className="text-[12px] font-bold" style={{ color: "var(--foreground)" }}>Student Questions</span>
             <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{responseRatePct}% response rate</span>
           </div>
           <div className="flex flex-col items-center gap-[4px] text-center">
-            <Megaphone className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--primary)" }} />
+            <Megaphone className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--color-text-brand)" }} />
             <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{announcementsSent}</span>
             <span className="text-[12px] font-bold" style={{ color: "var(--foreground)" }}>Announcements Sent</span>
             <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>school-wide communications</span>
           </div>
           <div className="flex flex-col items-center gap-[4px] text-center">
-            <Flag className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--primary)" }} />
+            <Flag className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--color-text-brand)" }} />
             <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{monitored}</span>
             <span className="text-[12px] font-bold" style={{ color: "var(--foreground)" }}>Support Flags Active</span>
             <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{monitoredPct}% of caseload monitored</span>
           </div>
         </div>
         <div className="flex items-center gap-[6px] text-[13px]" style={{ color: "var(--muted-foreground)" }}>
-          <CheckCircle2 className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />
+          <CheckCircle2 className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--color-text-brand)" }} />
           Average plan review turnaround: <b style={{ color: "var(--foreground)" }}>2.1 days</b> vs. district standard of 5 business days.
         </div>
       </SectionCard>

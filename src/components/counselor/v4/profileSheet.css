@@ -68,7 +68,7 @@
 .v4-profile-sheet .v4-cp-team {display:flex;flex-direction:column;list-style:none;margin:0;padding:0;}
 .v4-profile-sheet .v4-cp-mate {display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--v4-line);}
 .v4-profile-sheet .v4-cp-mate:last-child {border-bottom:0;padding-bottom:4px;}
-.v4-profile-sheet .v4-cp-mate-photo {position:relative;display:grid;place-items:center;flex:none;width:48px;height:48px;border-radius:50%;overflow:hidden;background:color-mix(in srgb,var(--primary) 16%,transparent);color:var(--primary);font-size:15px;font-weight:600;}
+.v4-profile-sheet .v4-cp-mate-photo {position:relative;display:grid;place-items:center;flex:none;width:48px;height:48px;border-radius:50%;overflow:hidden;background:color-mix(in srgb,var(--primary) 16%,transparent);color:var(--color-text-brand);font-size:15px;font-weight:600;}
 .v4-profile-sheet .v4-cp-mate-who {display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;}
 .v4-profile-sheet .v4-cp-mate-who strong {font-size:15px;font-weight:600;}
 .v4-profile-sheet .v4-cp-mate-who small {font-size:12.5px;color:var(--muted-foreground);}
@@ -90,7 +90,7 @@
 .v4-profile-sheet .v4-cp-row-text strong small,.v4-profile-sheet .v4-cp-row-text>small {font-size:12.5px;font-weight:500;color:var(--muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .v4-profile-sheet .v4-cp-row-note {font-size:13px;color:var(--v4-caution);}
 .v4-profile-sheet .v4-cp-kind {flex:none;width:44px;font-size:12.5px;font-weight:600;}
-.v4-profile-sheet .v4-cp-link {flex:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;}
+.v4-profile-sheet .v4-cp-link {flex:none;font-size:13px;font-weight:600;color:var(--color-text-brand);cursor:pointer;}
 .v4-profile-sheet .v4-cp-link:hover {text-decoration:none;filter:brightness(1.15);}
 .v4-profile-sheet .v4-cp-rows .v4-round {width:32px;height:32px;color:var(--muted-foreground);}
 .v4-profile-sheet .v4-cp-add {display:grid;grid-template-columns:1fr 1fr 1.4fr auto;gap:8px;}
@@ -101,7 +101,7 @@
    topics, the caseload; no strap */
 .v4-profile-sheet .v4-cp-preview {display:flex;flex-direction:column;gap:12px;position:sticky;top:16px;}
 .v4-profile-sheet .v4-cp-badge {display:flex;flex-direction:column;overflow:hidden;border-radius:22px;border:1px solid var(--v4-edge);background:var(--card);box-shadow:0 24px 50px -30px rgba(20,30,70,.45);}
-.v4-profile-sheet .v4-cp-badge-photo {position:relative;display:grid;place-items:center;height:210px;background:color-mix(in srgb,var(--primary) 14%,var(--card));color:var(--primary);font-size:56px;font-weight:600;}
+.v4-profile-sheet .v4-cp-badge-photo {position:relative;display:grid;place-items:center;height:210px;background:color-mix(in srgb,var(--primary) 14%,var(--card));color:var(--color-text-brand);font-size:56px;font-weight:600;}
 .v4-profile-sheet .v4-cp-badge-body {display:flex;flex-direction:column;gap:10px;padding:16px 20px 20px;}
 .v4-profile-sheet .v4-cp-badge-body strong {font-size:20px;font-weight:500;letter-spacing:-.4px;line-height:1.2;}
 .v4-profile-sheet .v4-cp-badge-body>small {margin-top:-6px;font-size:13px;color:var(--muted-foreground);}
@@ -301,7 +301,7 @@
    clear tab drops into the slot near the photo's top edge. */
 .v4-profile-sheet .v4-cp-badge {position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:24px;border:1px solid var(--glass-border);background:var(--card);color:var(--foreground);box-shadow:0 30px 60px -32px rgba(5,8,25,.75),inset 0 1px 0 rgba(255,255,255,.08);}
 .v4-profile-sheet .v4-cp-badge-photo {position:relative;display:block;height:300px;background:color-mix(in srgb,var(--primary) 14%,var(--card));}
-.v4-profile-sheet .v4-cp-badge-initials {position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-size:64px;font-weight:600;color:var(--primary);}
+.v4-profile-sheet .v4-cp-badge-initials {position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-size:64px;font-weight:600;color:var(--color-text-brand);}
 .v4-profile-sheet .v4-cp-badge-photo .v4-cp-id-slot {z-index:2;background:color-mix(in srgb,var(--background) 85%,transparent);}
 .v4-profile-sheet .v4-cp-badge-body {display:flex;flex-direction:column;gap:18px;padding:20px 22px 22px;}
 .v4-profile-sheet .v4-cp-badge-who {display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}

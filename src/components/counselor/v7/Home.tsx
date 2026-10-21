@@ -112,7 +112,7 @@ export function Stat({ href, label, value, line, go, figure }: { href: string; l
       <Link href={href} aria-label={`${value} ${label.toLowerCase()}. ${go}`} className={`dm-tap group relative flex h-full flex-col gap-[var(--space-2)] overflow-hidden p-[var(--space-6)] ${CARD}`} style={CARD_STYLE}>
         <span className="flex items-center justify-between gap-[var(--space-3)]">
           <span className="text-[14px] font-semibold" style={MUTED}>{label}</span>
-          <span aria-hidden className="flex size-[32px] flex-none items-center justify-center rounded-full border transition-colors group-hover:border-[color:var(--primary)]" style={{ borderColor: "var(--glass-border)" }}>
+          <span aria-hidden className="flex size-[32px] flex-none items-center justify-center rounded-full border transition-colors group-hover:border-[color:var(--color-text-brand)]" style={{ borderColor: "var(--glass-border)" }}>
             <ArrowUpRight className="h-[15px] w-[15px] transition-transform group-hover:translate-x-[1px] group-hover:-translate-y-[1px]" />
           </span>
         </span>

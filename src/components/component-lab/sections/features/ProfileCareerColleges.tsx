@@ -512,10 +512,10 @@ export function ProfileCareerCollegesModules() {
 
       <SubHead>Career</SubHead>
 
-      <Specimen name="OutlookTab (Pay & Outlook) and PaySheet" file="src/components/career/OutlookTab.tsx" purpose="Career Detail's Pay tab as 'Pay & Outlook' (live since 20 Oct 2026). The approved pay by state map, then outlook by state for the chosen state (growth and openings, each against the US) and the top states. One tab, not a sixth 'Job Outlook' tab: pay and growth by state answer the same question, and six tabs no longer fit a phone tab row. Typical pay's (i) opens PaySheet (src/components/career/PaySheet.tsx): pay only, the range as the lit line, a source line, and a row into this tab." when="Every /career/[slug] whose profile carries BLS outlook figures; careers without them keep a plain Pay tab.">
+      <Specimen name="PayGrowth (Pay & Growth) and PaySheet" file="src/components/career/PayGrowth.tsx" purpose="Career Detail's Pay tab as 'Pay & Growth' (21 Oct 2026): two lines on the career's growth, then one map shaded by pay, growth or openings (the dropdown), with a readout of the chosen state's three figures, each with an up/down arrow against the US, and the top three states as buttons that fill the readout. Typical pay's (i) opens PaySheet (src/components/career/PaySheet.tsx): pay only, the range as a line of light, a source line, and a row into this tab." when="Every /career/[slug] whose profile carries BLS outlook figures; careers without them keep a plain Pay tab.">
         <StateGrid min={360}>
           <StateCell label="Software Engineer (live page)" minH={460} pad={false}>
-            <LiveRoute href="/career/software-engineer" height={440} />
+            <LiveRoute href="/career/software-engineer?tab=pay" height={440} />
           </StateCell>
         </StateGrid>
       </Specimen>

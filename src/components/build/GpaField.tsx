@@ -5,6 +5,7 @@ import { ChevronDown, Check, X } from "lucide-react";
 import { GPA_BELOW, GPA_HIGHER, GPA_NOT_USED, GPA_SCALE } from "./types";
 import { IconTip } from "@/components/app/IconTip";
 import styles from "./GpaField.module.css";
+import { Abbr } from "@/components/app/Abbr";
 
 const choices = [GPA_HIGHER, ...GPA_SCALE.slice(1, -1).reverse(), GPA_BELOW];
 const normalize = (value: string) => value === "2.0" ? GPA_BELOW : value === "4.0" ? GPA_HIGHER : value;
@@ -49,7 +50,7 @@ export function GpaField({ value, onChange }: { value: string; onChange: (next: 
 
   return (
     <div className={styles.field}>
-      <label className={styles.label} htmlFor="build-gpa">GPA</label>
+      <label className={styles.label} htmlFor="build-gpa"><Abbr short="GPA" long="grade point average" /></label>
       <button ref={trigger} id="build-gpa" type="button" className={styles.trigger}
         data-selected={Boolean(value)} disabled={notUsed} aria-haspopup="dialog"
         aria-label={`GPA: ${notUsed ? "Not applicable" : selected || "Select GPA"}`}

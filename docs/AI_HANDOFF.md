@@ -5,6 +5,290 @@
 **Changed:** UX Designer and Food Scientist are 21 beats each; Registered Nurse is 26 beats. Each opens with a choice by beat six, has seven scored decisions worth ±6 from 50, a checkpoint after decision four at 68, and a passing score of 85. Nursing uses one full painting per beat: character faces and bodies are baked into the image, with no runtime sprites or foreground arms. The shift follows one coherent lake-facing hospital timeline. The rejected `revision-2026-10-21` scene set is not routed. Scene graphics provide context; game text contains task facts and answer evidence. Supporting work artifacts remain read-only and add no buttons or tabs. SOP v1.8 records the rebuild and its rationale.
 
 **Validation:** `node --test scripts/qa/work-evidence.test.mjs` passes 8 tests; structural career validation passes for UX and Food Scientist. Nursing's image, copy, scoring, answer-key and coverage checks are prepared; face-chip files were still being added at the time of this entry. Browser replay, live HUD overlap review, and human content/art approval remain pending. See `docs/handoff/career-scaling/README.md` and the coverage/trace examples for implementation evidence.
+## 2026-10-21: Landing: the last line below the hero, removed
+
+- `look-v2.css` `[data-hero-surface]`: two remaining causes of the line Chandu still saw ("there is still a line"):
+  1. A slope break: a linear tail fell steeply, then stopped flat, which reads as a line (a Mach band). The tail is now a smootherstep curve from `#4a7aab` at 78% to navy, so its slope reaches zero at the edge.
+  2. A one-shade step: the opaque hero hid the page's grain, which lifts the area below to `#162135`. The last ~4% now fades to transparent, so the same grain shows on both sides.
+- Verified by pixel sampling: no step larger than one 8-bit unit across the edge.
+
+## 2026-10-21: Landing: no seam below the hero
+
+- `look-v2.css` landing changes:
+  - The hero sky (`[data-hero-surface]`) peaks at `#4a7aab` behind Dreamy (78%) and eases back down to the page navy `#131f36` by its bottom edge, ending opaque.
+  - The horizon light (`[data-hero-horizon]`) is centered behind Dreamy and gone before the crop. It was gated to dark only, but the landing is always dark, so the gate is removed.
+  - The marketing scope's `--background` goes from near-black `#000105` to `#131f36`, the colour the hero ends on.
+- Why: Chandu, "the landing page hard cuts the gradient above the fold and I see a sharp line and dark nothingness background when I scroll down past dreamy".
+- Cause: the hero faded to transparent inside its `overflow-hidden` section, with the horizon glow brightest at that crop line. Below it sat `#000105`, so the crop read as a bright edge over black.
+
+## 2026-10-21: Sky: black above the aurora, blue wash up top
+
+- `look-v2.css`, dark sky (app and Build/Match), with three new layers over the gradient:
+  - A straight blue wash across the top, fading out by 46% of the height. It's a linear gradient, not a radial; a radial read "like water". It's faint enough that the stars keep their sparkle.
+  - Three overlapping near-black pockets across the mid-to-bottom, offset and with eased falloffs, so the fade to black has no visible edge.
+  - The aurora's light rises out of that black.
+- Why: Chandu, in order:
+  - "we can go a little blacker before we get to the aurora somewhere down the bottom middle?" / "or mid to bottom area"
+  - "maybe a slightly better bluish glow up top without reducing the effectiveness of the stars?"
+  - "and make the fade to black more organic"
+  - "not a radial gradient up top that reads like water"
+  - "a little more black area"
+- AA only improves (the sky behind text is darker).
+
+## 2026-10-21: Aurora: the reference photos' fringe colours, brighter base
+
+- `SkyAurora.tsx`: the colour ramp now follows Chandu's two orbit-view borealis references.
+  - Ramp: a near-white cyan base, then teal-green low in the rays, blue through the middle, red-rose at the tips. It's scaled to the rays' real height, since they're short.
+  - Which colour leads wanders slowly along the curtain, so some stretches are greener and some red-tipped.
+- The base is a tad brighter and cyan: seam 0.75, glow 1.05, cap `0.06 + 0.5*exp(-y/0.15)`.
+- Why: Chandu, with the photos, "the aurora can be a tad bit brighter at its base too. Add more of the fringe colors like red and green etc we see?" This supersedes the earlier "DONT DO GREEN" light-only pass.
+- Gotcha: naming the colour `base` silently killed the shader (`base` is already the border height in `curtain()`), so the aurora vanished with no console error. If it ever disappears, check the GLSL compiles.
+
+## 2026-10-21: Aurora: darker sky, flat base glow on the screen edge
+
+- `look-v2.css`, dark sky: near-black navy all the way down (`#121d33` → `#14213a` → `#162640` → `#172843`), so the aurora glows out of darkness.
+- `SkyAurora.tsx`: the curtains stand on the bottom edge. There's a stronger base glow (bright seam, glow and haze, all fading fast upward), the beams are shorter (reach `0.06 + 0.17*n`), and the cap is `0.06 + 0.42*exp(-y/0.15)`.
+- Why: Chandu, "lets go a little darker towards the aurora, make the aurora feel like more when you see the earth horizon/atmosphere line from outer space? more base glow but more fading upwards".
+- A curved limb with the planet's dark below it was tried and removed: "we can move the aurora to the edge of the screen so we dont see the darker horizon stuff. Theres also a flatter circular rough shape that doesnt sit very well lets remove that."
+- AA (from the limb build, same sky): white 10.5:1 at 80% height, 8.5:1 at 85%. Only the bottom glow strip is lower.
+
+## 2026-10-21: Darker sky; the aurora carries the blue
+
+- `look-v2.css`, dark sky (app and Build/Match): same slide hue, but the lower half stays near-black navy. The gradient now runs `#121d33` → `#15233d` → `#192b49` → `#1d3355` → `#213a61` at the bottom, down from `#41699a`.
+- `SkyAurora.tsx`: a little more light is let through (cap `0.06 + 0.36*exp(-y/0.24)`, haze 0.75) so the beams carry the blue.
+- Why: Chandu, "lets try to use a bit more black instead of the overall light uplift towards the bottom, let the aurora carry the light blue instead. this feels too bright is the problem now. but dont lose sight of the color either".
+- AA improved, sampled at the brightest pixel: white 11.1:1 at 70% height, 9.6:1 at 80%, 7.1:1 at 90%. Captions and links pass AA down to 90%. Only the bottom ~3% glow strip is lower.
+
+## 2026-10-21: Selected tab line: glow halved
+
+- `look-v2.css`, dark `[data-tab-ink]` (and the counselor v4 page-tab line): the three glow layers drop to about half (0.95/0.75/0.5 alpha to 0.6/0.35/0.22, with smaller radii). The bright line itself is unchanged.
+- Why: Chandu, "tone down the glow a bit on the selected tab highlight lines? its too much".
+
+## 2026-10-21: Aurora: light only, real-aurora material, clean blue bottom
+
+- `SkyAurora.tsx`: the green, teal and rose are removed; the aurora is light only. It's near white where brightest and a clean, low-red blue where faint.
+- The curtain is rebuilt from aurora-photo traits: fine filaments inside each ray, a crisp, bright lower seam the rays stand on, light thinning upward ray by ray, and a saturated-blue horizon haze for the bottom glow. Each ray's pulse, the uneven sway and the slide are kept.
+- Why: Chandu, "DONT DO GREEN. IT SHOULD JUST BE BRIGHTER LIGHT. LETS AVOID THE COLORS. BUT GET THE MATERIALS RIGHT PLEASE REFER ACTUAL PHOTOS OF AURORA BOREALIS. DONT MAKE THE BOTTOM PART MUDDY WITH GREYER MUDDY COLORING." Whitish light screen-blended over steel blue is what greyed the bottom. The faint light and the haze now carry little red, so they brighten the blue instead of washing it out (saturation at 90% height went from 0.27 to 0.33).
+- AA, sampled at the brightest pixel:
+  - White 7.4:1 at 70% height, 6.0:1 at 80%, 4.7:1 at 90%.
+  - The bottom ~5% is the glow bar (white 3.4:1), under the mobile tab bar.
+
+## 2026-10-21: Aurora beams: rise from the bar, pulse, shorter, soft multicolour
+
+- `SkyAurora.tsx` changes:
+  - The cap is now one smooth curve (`0.05 + 0.27 * exp(-y / 0.24)`) instead of a step, so the beams fade up out of the bright bottom bar. They're also 1.5x brighter.
+  - Each beam pulses in and out on its own noise timing.
+  - The sideways slide is kept, but the sway varies along the curtain, so it doesn't move as one flat sheet.
+  - Beams are shorter: reach `0.1 + 0.27*n`, and the layer fades out by about 45% of the screen.
+  - Soft aurora colours, mixed into the blue at low strength: green low in the beams, teal through the middle, a faint rose at the tips (kept to a trace).
+- Why: Chandu, in order:
+  - "THE BEAMS BRIGHTNESS CAN ORGANICALLY FADE FROM THE BOTTOM BRIGHTER BAR... MAKE SURE THEY GO IN AND OUT OF GLOW SO ITS NOT LIKE A FLAT BRIGHT THING MOVING RIGHT TO LEFT. BUT DONT OVER DO IT"
+  - "DONT DROP THE SLIDE LET THEM MOVE BUT NOT LIKE A FLAT THING"
+  - "GIVE SOFT AURORA LIKE MULTICOLOR BUT KEEP THEM VERY SUBTLE... NO TOO MUCH PURPLE STUFF. REFER ACTUAL AURORA BOREALIS PHOTOS"
+  - "WE CAN REDUCE THE AURORA BEAMS HEIGHTS"
+- The first colour pass at 0.3 mix didn't show up in sampled pixels; it's raised to 0.6, which reads as a faint teal.
+
+## 2026-10-21: Aurora: a brighter glow along the bottom edge
+
+- `SkyAurora.tsx`: only the foot is brighter. Its glow term is stronger and runs the full width, with the cap raised to 0.32 at the edge, easing to 0.07 within the bottom ~15% of the screen. The beams above are unchanged.
+- Why: Chandu, "WAY TOO SUBTLE NOW, THE LOWER MOST PART CAN HAVE MAYBE A BRIGHTER GLOW".
+- AA: the bottom ~10% is now bright, so only full white or large text should sit directly on the sky there. On phones that's under the tab bar.
+
+## 2026-10-21: Sky back on the reference slide's colour; aurora quieter
+
+- Dark sky (`src/app/look-v2.css`) is the team's DREAMARI slide gradient again: one linear run `#131f36` → `#1a2c4a` → `#263f62` → `#34557f` → `#41699a`. That drops the cobalt top and the horizon radials from earlier today, and the page tokens follow.
+- `SkyAurora.tsx` is recolored to the slide's pale blues, with no cyan (the green-teal trace is kept at half). It's also much fainter: the brightness cap went from 0.36/0.17 to 0.12/0.05.
+- Why: Chandu, with the slide, "I think we've strayed way from this color too much", then "IT CAN BE A LITTLE MORE SUBTLE TOO", "FIX AND PUSH".
+- AA, sampled:
+  - Down to 80% of the screen height: white 6.5:1+, 82% captions 5.0:1+, links 4.8:1+.
+  - Bottom 10-20%: white 4.5-5.1:1 passes, but 82% captions and `#cbe0fb` links drop to 3.4-4.1:1. That's the reference's own brightness there.
+  - Open item: anything small that sits directly on the sky in the bottom fifth should use full white.
+
+## 2026-10-21: Cobalt sky and a rendered aurora on the horizon
+
+- Dark Black & Blue sky (`src/app/look-v2.css`, app backdrop and Build/Match): the overhead navy moves from slate `#0f1c31` to cobalt `#0f2150`, and the page tokens follow. That's the same brightness the sky already had a third of the way down, so it stays dark mode, and stars and text keep their contrast (17:1 to 15.5:1).
+- The rising-sun glow is replaced by `src/components/app/SkyAurora.tsx`, a WebGL fragment shader mounted in `AppBackdrop`.
+  - Look: two curtains of aurora beams standing on the bottom edge, noise-driven rays of varied height, a glowing foot, and an ice-cyan to blue falloff with a faint green-teal trace in patches (never purple), screen-blended so stars show through.
+  - Motion: animated; it flickers, sways and drifts.
+- Why: Chandu asked "how can we make this look more optimistic and hopeful and exciting?" A CSS stripe-and-ellipse pass was rejected ("looks very bad and ugly please make it match an actual spectral material light thingy when rendered"). Then: "make it realistic refer aurora beams. Make it sit on the bottom edge too", "can it be a bit animated instead of static?" and "a tiny bit of aurora colors (NO purple) Very subtly too".
+- Cost: rendered at 40% resolution, 24fps cap, paused when the tab is hidden. One still frame for reduced motion and for the counselor's calm sky. Measured 60fps page rAF with it running. Without WebGL it is absent and the CSS gradient remains.
+- AA, sampled from screenshots:
+  - Down to 85% of the screen height: white 7.2:1+, 82% captions 5.5:1+, links 5.4:1+.
+  - The foot in the bottom ~10% is brighter (white 3.1 to 5.7:1). It mostly sits under the mobile tab bar.
+  - Open item: check desktop pages that put small text in the bottom 10% of the viewport.
+- Not done: Build/Match's `[data-flow-space]` gets the cobalt gradient but not the shader (it has its own AuroraBackground canvas).
+
+## 2026-10-21: Dusk sky gets a rising sun at the bottom
+
+- The dark sky (app backdrop and Build/Match's `[data-flow-space]`, `src/app/look-v2.css`) gains a rising-sun glow: a small near-white radial core just below the bottom edge inside a tighter blue halo, over the existing horizon bloom and navy-to-blue gradient.
+- Why: Chandu, "the blue gradient needs one more stage of brighter glow maybe towards the bottom because still still reads a bit gloomy". A first try lifted the whole lower third with a wide saturated blue; Chandu rejected it: "not a flat color uplift but an additional glow maybe a radial one but not overly taking over the footer maybe like a sun rising". So the light is one concentrated source and the corners keep their colour.
+- AA: the core only reaches the last few percent of the screen (under the mobile tab bar). From 8% above the bottom, white text is above 7:1 on the sky. Checked in dark at desktop width, with the page content hidden to see the sky.
+
+## 2026-10-21: Pay & Growth, every state shows all three figures
+
+**Why (Chandu):** "I still see only one stat updating when i hover on a state." Two causes. The seeded state outlook left about one state in five (13 for Software Engineer, including Texas, New York and Florida) and a few whole careers without a forecast, on purpose, to show sparse-data handling; in use it read as broken, and the demo rule is mock values over blanks. And the map file names DC "Washington, DC" while the app's lists say "Washington, D.C.", so DC matched no pay or outlook data at all.
+
+- `outlook.ts`: no seeded gaps; every state of every career has a growth and openings figure. The readout still shows NA if the real data lacks one.
+- `PayMap.tsx`: "Washington, DC" maps to "Washington, D.C." (and code DC).
+- Checked: hovered all 51 map states on Software Engineer: all three figures everywhere except Alaska's pay, which BLS does not publish (NA by the 14 Oct rule).
+## 2026-10-21: WCAG 2.2 Phase 2, pushed as is
+
+**Why.** These are the cheap AAA and robustness items from docs/ACCESSIBILITY_STATUS_REPORT_2026-10-21.md, section 9, Phase 2. Chandu: "Lets skip the caption stuff and push whatever we have in a usable fashion."
+
+**What.** The report's new Progress lines list every item. The main pieces:
+- `MotionPrefs` and the globals.css reduce block.
+- The forced-colors rules.
+- `HeadingFallback`.
+- `lib/quietTips.ts` and `lib/captionsPref.ts`, with switches in Profile Settings > Accessibility. `CaptionTrack` follows the captions preference, and the native CC menu writes back to it.
+- `Abbr.tsx`.
+- The `/accessibility` statement. `REPORT_EMAIL` there is DEMO-ONLY; swap it for the support inbox before launch.
+- The Explore reel Pause button.
+
+**Validation.** tsc, eslint and npm run build are clean. These were not re-checked in a browser: the reduced-motion and forced-colors rendering, Settings > Accessibility, and the reel Pause.
+
+**Next.** Browser-check the items above. Then a reel CC button, and a person's screen-reader pass.
+
+## 2026-10-21: Career Detail, one page: Pay & Growth, Education & Skills, no v1/v2 switch
+
+**Why (Chandu):** on the fact strip, "Lets remove the outlook stuff from here"; on the Pay & Outlook tab, "can we combine pay and outlook somehow? just one map by default and pay and growth instead of outlook and somehow lets just show 1 or 2 main line that describes the growth of the career ... when we hover we can show pay, growth and openings with an arrow to show increase/decrease where we show the pay now", with "use your own judgment to give me the best possible solution"; "rename education to education & skills and fold software and skills into that tab"; "we can remove v2 toggle for career detail and default to this view".
+
+- **One Career Detail page.** The 20 Oct v1 (`CareerDetailLab.tsx` as of 87c005e9), the switch (`lib/careerDetailV2.ts`, `career/CareerDetailV2Switch.tsx`) and `outlook-lab/OutlookTab.tsx` are deleted; `CareerDetailLabV2.tsx` is now `actions-lab/CareerDetailLab.tsx`, exporting `CareerDetailLab`.
+- **Fact strip:** Typical degree and Typical pay only; growth and openings live in the Pay & Growth tab.
+- **Pay & Growth** (`career/PayGrowth.tsx`, replaces the Pay by state section and `career/OutlookTab.tsx`): one map coloured by pay (a By pay / growth / openings dropdown, then a colour legend and dimmed figures, were tried and removed: Chandu found the colours unclear while the numbers stayed put), and above it the chosen state's three figures (the student's state until another is hovered or tapped) in the gradient numeral, each with an arrow against the US: a trend-line icon on growth, plain up/down arrows on pay and openings (openings against the state's share of US jobs, `expectedOpenings` in `outlook.ts`). After review ("this is way too cluttered", "Remove all redundant and extra copy", "the highlight border thing isnt needed", "remove the 5% more jobs in US thing"): no US line or chart, no captions or hint, no top-states list, no Your states list, figures not buttons. CareerOneStop ties wages and projections to one location the same way; Indeed and LinkedIn mark local pay against national with an arrow. `PayMap` gained `payValues`, controlled `active`/`onActive` and `renderReadout`.
+- **Education & Skills:** Education (See N schools), then one Skills section with three short-headed tag groups: Know about, Good at, Software (was two bullet-list sections plus a Software tab). Overview keeps What they actually do. `?tab=software` lands on Education & Skills; `#know-about`, `#good-at`, `#software` ids kept.
+- Checked: tsc, eslint; dark mode at ~580px: Pay & Growth by pay and by growth with a hovered state, top states, Education & Skills. Not checked: desktop width, light mode, Windows/Chromebook. Dev server ran from the terminal on :3016 (all five preview slots were taken by other chats).
+## 2026-10-21: Company video captions and transcripts (WCAG B1)
+
+**Why.** B1 was the last AA blocker in the status report. Chandu: "can we generate them?", then: "Fix the flagged lines you're confident about, wire the captions and transcripts into the players now, and push. I'll spot-check the rest."
+
+**What changed.**
+- **Captions.** All 10 company reels were transcribed locally with Whisper small.en (faster-whisper, the model already cached on the Mac); nothing was uploaded.
+  - The timed WebVTT files are in `public/videos/app/captions/`, placed at 78% height. A `video::cue` style in globals.css gives them a solid backing.
+  - Fixed with certainty: "Kellenova" is now "Kellanova".
+  - The JPMorgan Ohio clip is music only, so it is captioned "[Upbeat music]", and its transcript describes the tour from its frames.
+- **Transcripts.** They are in `src/components/app/videoTranscripts.ts`, with the `captionsFor` and `transcriptFor` helpers.
+- **Players.** `VideoTranscript.tsx` provides `<CaptionTrack>` (default on) and a "Transcript" disclosure. They are wired into the CompanyVideoCards player, the Explore For You reel, Profile's saved-video player and the counselor v5 Videos player. The hover preview card stays aria-hidden and uncaptioned.
+
+**Still to check by ear.**
+- AT&T: "Event pop right now", "leaving to AT&T heaven".
+- EY 2: "thinking involving data science".
+- JPMC London: "What bros?".
+- Kellogg's: "horse-free snacks", "Look at this plan".
+- WildBrain: three lines.
+
+**Validation.**
+- tsc is clean. eslint has no new issues. The production build passes.
+- In the browser pane, the Mars/Kellanova and JPMC London players show their cues on time ("Let's go. Tell me this is not the most beautiful office you've ever seen."), and the Transcript disclosure opens.
+- The Kellanova clip already has burned-in word captions; the closed captions sit under them.
+
+## 2026-10-21: "Training you'll need", not "The degree you'll need"
+
+- Career Education's credential list is now headed "Training you'll need" (WhereToStudy, CareerPeek, CareerDetailExperience), and each row's button reads "See N schools".
+- Why: Chandu, "dont say degree you'll need. It also included trade school, lesser know routes etc so it cant be exclusively about degree." The rows include certificates and apprenticeships, so "degree" was wrong for trades.
+- Verified on /career/carpenter (two certificate rows, "See 1 school"). Lint clean.
+
+## 2026-10-21: Landing hero: Dreamy lower, wider, livelier, plus the night sky
+
+**Why.** Chandu: "dreamy sits too far up and overlaps the scroll down to learn more text. I want dreamy to sit lower, it can be cropped more. We just want the mouth to be visible and the eyes. And it needs to take up more space horizontally ... make it feel more premium than an afterthought and make it more engaging." Then: "add the stars to the landing page too but have them be more animated and engaging but not distracting."
+
+**What changed.**
+- **Size and crop.**
+  - `--mascot-size` (marketing/tokens.css) is now width-driven: 50vw, 88vw under 640px, between 280 and 680px. A height term keeps the visible face under the copy.
+  - The crop is `VISIBLE_FRACTION` .715 (Mascot.tsx), so the bezel cuts just under the mouth. The stage mask runs 69.5% to 79%.
+- **Scroll line removed.** "Scroll Down To Learn More" was sitting on Dreamy's head. Dreamy rising from the edge now does that job.
+- **New touches.**
+  - A horizon glow (`data-hero-horizon`).
+  - A rise-in on load (`.mkt-mascot-rise`).
+  - A perk when Start Journey is hovered or focused (`[data-hero-cta]` with `:has()`, `.mkt-mascot-perk`).
+  - The float is now `motion-safe`.
+- **Night sky.** NightSky has a `lively` mode: cursor parallax by star depth, a shooting star every 9-17s, and a slightly faster turn and twinkle. It sizes to its box. It is mounted inside the hero, over main's opaque dusk surface gradient and under the copy.
+- **Hero height.** The hero min-height is 100dvh + 140px. That gradient fades out over its last 12%, which showed as a dark strip under Dreamy when the hero was exactly one screen tall.
+
+**Validation.**
+- tsc and eslint are clean.
+- Screenshots at 1200x741, 1440x900, 1920x1080 and 390x844.
+- The perk works on hover and on keyboard focus. Under reduced motion there is no perk, rise or float.
+- A shooting star was observed at about 7.4s.
+- Still open: the CTA's BorderBeam spin runs under reduced motion. It is a shared component.
+
+## 2026-10-21: CTA names the goals; career Education says the degree and leads to colleges
+
+**Why (Chandu):** "the cta says see my top 3 but we're taking them to the about me section to select their career and college goal so we need to fix that", and "for career detail page we need to update the copy of 'where you would study' because it shows bachelors degree etc and not where they would study, we still wanna show bachelors etc and lead them from there to colleges they can consider".
+
+- **"Choose my goals"** replaces "See Top 3" on the bar that appears when a career is added to Top 3 (labStore.ts, both the add and the swap), and "Choose my career goal" on Match's last button (V2Flow.tsx, demo). Both land on About Me, which asks for the Career Goal and the College Goal. The Flow Lab keeps "See my Top 3" (it ends on its own Top 3 screen); /match-lab's "Compare My Top 3" is a lab page and was left.
+- **Career page Education** (the default v1, `CareerDetailLab`): the hand-built two lists are replaced by `WhereToStudy`, the version v2 already used. "What people study for it" stays; "Where you would study it" becomes **"The degree you'll need"**: each credential (Bachelor's degree, Master's degree...) with a "See N colleges" button that opens the schools that teach it (training on the job says "no school needed"). Same heading in v2, the older CareerDetailExperience and the career sheet (CareerPeek, whose rows now say "See N colleges").
+- The "See N colleges" buttons were pills (WhereToStudy was only in the lab version when pills were removed); now 10px corners.
+- Checked: tsc, eslint; Investment Banking Education tab (`career-degree-you-need.jpg`: Bachelor's, See 53 colleges; Master's, See 47 colleges); the Top 3 bar label (added, read, undone). Pushed to main on Chandu's go-ahead.
+
+## 2026-10-21: WCAG 2.2 AA Phase 1 (blockers B2-B9)
+
+**Why.** The status report (`docs/ACCESSIBILITY_STATUS_REPORT_2026-10-21.md`) listed nine things blocking a WCAG 2.2 AA claim. Chandu: "go: start Phase 1, the AA blockers B2-B9 (games first), and push the report commit with it." B1, the video captions, is content work and stays open.
+
+**What changed.**
+- **Games.**
+  - The verdict is announced through `LiveRegion` (`FeedbackSheet`).
+  - `BeatStage`'s box (`data-play-stage`, `tabIndex=-1`) takes focus whenever focus was lost.
+  - `useDigitKeys` only fires when the event target is inside `[data-play-stage]` and is not a text field (WCAG 2.1.4).
+  - `PreGame` is `aria-modal` and `data-own-history`, so `DialogFocusHost` traps focus but Back still leaves.
+  - `closePreGame` waits for the card's roughly 2s exit, then focuses the stage.
+  - Game routes `/play/<x>` are always dark (`theme.tsx` `themeFor` plus the boot script). Light mode measured 1.2-2.9:1 on the painted scenes.
+  - ID badge and HUD inks darkened or lightened; Torque value text and wording; AMT "Put them in order".
+- **Non-text contrast.**
+  - Global field-edge rule in `globals.css`: 50% foreground, `!important` over inline borders, error state kept.
+  - v4 focus ring uses `--accent-subtle`. v4 chart-1 in dark is #6f9cf0.
+- **Text contrast.**
+  - `worlds.ts` gains `posterInk` and `worldInk`, used for world labels on posters and pages.
+  - Home eyebrow; Poster label alphas; leaderboard state, league and medal text mixed toward foreground; counselor danger text mixed; v7 `--pc-link` fallback moved to `--color-text-brand`; Schedule past opacity 0.9.
+  - Career Play CTA with white ink shades toward black; Build welcome quiet text; landing source line; Opportunities count.
+- **Focus.** Landing `ChapterRail` is inert while hidden. `html` scroll-padding (96px top; 104px bottom below lg).
+- **Targets.** Connect page dots and landing stage dots have 24px hit areas; poster Save is 32px.
+- **Status shapes.** Caseload statuses are square, ring and triangle, with forced-colors rules.
+- **ARIA and skip link.** Date badges are `role="img"`. The skip link names its target at render.
+
+**Validation.**
+- tsc and eslint are clean (no new warnings). Production build OK.
+- 96-scan harness, before → after:
+  - real AA text fails (dark/light/phone): 85/93/61 → 9/44/24
+  - axe target-size 160 → 0, aria-prohibited-attr 186 → 0, skip-link 75 → 0
+  - fully-covered focus 66 → 14
+- Game keyboard test (g1/g2) passes: modal start, focus in the stage after Start, digit keys scoped, single verdict announcement.
+
+**Next.**
+- B1: captions and transcripts for the 10 reels.
+- Light-mode leftovers (leaderboard chips, small Opportunities labels).
+- Counselor phone Insights axis labels.
+- AI loading announcements, menus without arrow keys.
+- Then Phase 2 (global reduced motion, AAA tokens).
+
+## 2026-10-21: full accessibility status report (WCAG 2.2 A/AA/AAA plus US compliance)
+
+**Why.** Chandu: "I need a full status report about the Accessibility of our app. FULL WCAG 2.2 AA and AAA and a11y ... so we dont run into any trouble with the education system of the united states." Demo-only toggles are out of scope.
+
+**What.**
+- The a11y branch was merged to main first (d497d51f).
+- The report is `docs/ACCESSIBILITY_STATUS_REPORT_2026-10-21.md`, also shared as a Google Doc in the ux@ Drive.
+- It covers all 55 A/AA and all 31 AAA criteria. A/AA: 23 pass, 15 partial, 10 fail, 2 need a person to test, 5 N/A.
+- It lists nine AA blockers (B1–B9): video captions, game status announcements, number-key shortcuts, input border and counselor ring contrast, text contrast, covered focus, small targets, color-only status, and sensory wording.
+- It covers the US legal context, including the Title II dates moved to 26 Apr 2027 / 2028 and the NFB suit, plus a launch roadmap.
+- New scanners `full.mjs` and `extra.mjs` are in `docs/reference/wcag-audit-2026-10-21/`.
+
+**Next.** Phase 1 of the report's roadmap: B2, B3, B6 and B9 in the games first.
+
+## 2026-10-21: Reviews, all builds: a full page that fills the height and scrolls
+
+**Why (Chandu):** a short document ended early and left a dark empty canvas under it: "instead of this sitting cropped vertically, let it be the full page so the scroll still works but just it doesn't leave a lot of space and uses the height available to it", then "fix and push for all versions".
+
+- **v7 (`v7/Workspace.tsx`, also v4 through `v4/ReviewDesk.tsx`):** the page is a full Letter page again (the `.v7-read` min-height override is gone), at canvas width up to 100%. The canvas fills its row (absolute inset at xl, min-height = room to the bottom of the screen) and scrolls on its own; the card no longer stretches to the queue's height (`self-start`), so Approve stays above the fold.
+- **v5 (`v5/Workspace.tsx`, also v6 through V5Reviews):** the page was shrunk to fit the screen height (too small to read). Its column is now the widest of the three (1.35fr), the page draws at column width, and its box is as tall as the screen allows and scrolls; Full screen stays pinned to the box.
+- Checked: tsc and eslint clean; v7 and v5 Reviews at 1440.
+
+## 2026-10-21: Counselor v7 student profile wears v4's student ID tag
+
+**Why (Chandu):** "can we do the same student ID and counselor ID designs for v7?"
+
+- **Student (`v7/StudentProfile.tsx`):** only the header changed: the focal header card is replaced by v4's `StudentIdCard` (now exported from `v4/StudentProfile.tsx`) on its badge reel at the left, with Prepare meeting, Message and Add note at the header's right as before. Tabs and content are v7's, untouched (Chandu, correcting a first pass that moved them into a side column: "don't change the other content from what was there in v7 before. Just the header becomes the ID card on the left instead"). The tag's styles are v4's (today.css), so it sits in a `data-counselor-version="v4"` wrapper.
+- **Counselor:** v7's My Profile already opens v4's `CounselorProfileSheet` (one component), so the badges match with no change.
+- Checked: tsc and eslint clean; v7 student profile and My Profile at 1440, dark.
 
 ## 2026-10-21 — IB master sequence, concise career stories and fixed character identity
 
@@ -37,6 +321,185 @@
 - **Not changed:** light mode, Classic.
 - Noted, not changed: on Explore at laptop width, content scrolling up shows behind the DREAMARI logo at top-left (that corner of the header has no background); to check against Classic.
 - Checked: tsc; landing, Home, Explore, Build and the counselor dashboard (v4) in dark (`dusk-*.jpg`). Pushed to main on Chandu's go-ahead.
+
+## 2026-10-21: WCAG 2.2 AA, step 5 (every modal dialog, roving tabindex)
+
+**Why.** The audit counted 85 modal dialogs. Steps 1 and 4 fixed the shared ones, and about 30 hand-built ones still left focus behind them. Nine of those had no Escape at all. Chandu: "go: finish the remaining dialogs (Connect, Profile, Preferences, resume sheets, PaySheet) and roving tabindex."
+
+Wiring all 30 by hand would leave the next new dialog broken again. So this follows the precedent HistoryHost set for Back: one host watches every modal.
+
+**What changed.**
+- **`app/DialogFocusHost.tsx`**, mounted in layout:
+  - A MutationObserver on childList plus role, aria-modal, hidden and open. Style and class changes are left out for performance, because framer animations change style every frame.
+  - It remembers the opener, moves focus in (unless something inside already has it), wraps Tab in the topmost shown dialog, and refocuses the opener when focus was lost on close.
+  - It skips `data-focus-managed`, which `useDialogFocus` now sets on its dialog.
+  - Escape stays each dialog's own job. The nine that had none got `useDialogFocus`: CollegesExperience FilterTray; ProfileExperience CompareSheet, EvidenceSheet, RouteDetailModal and the cover and avatar pickers; ConnectExperience AskSheet, ReportSheet and JoinSheet.
+  - PreferencesTab, the resume sheets and PaySheet already close on Escape, so the host covers their focus. PaySheet is only used in actions-lab.
+- **Roving tabindex.** TextTabs and the Segmented in connect/viz give `tabIndex` 0 only to the selected tab (or the first, if none is selected). TabKeys' arrows select as they move, so the stop follows.
+
+**Validation.**
+- tsc is clean. eslint has no errors.
+- Career "Ask a professional" (host), and the Profile cover and picture pickers (hook): focus moves in, Tab and Shift+Tab stay inside, and Escape closes and returns focus to the opener.
+- Step 1's sheets and step 4's 390px bell sheet still pass.
+- Career section tabs have tabIndex 0,-1,-1,-1,-1.
+- Not exercised live: Connect Ask, Report and Join, and Profile Compare, Evidence and Route. They use the same hook, but I couldn't reach their triggers by script.
+
+**Next.**
+- Video captions, if the clips have speech.
+- A real screen-reader pass (NVDA + Chrome on Windows, ChromeVox on a Chromebook).
+- A light-mode contrast re-check.
+
+## 2026-10-21: WCAG 2.2 AA, step 4 (nested cards, tab keys, announcements, dialogs)
+
+**Why.** These were the audit's remaining keyboard and screen-reader items:
+
+- **4.1.2, nested cards.** `role="button"` cards held Follow, Save, Sound or CTA buttons. Screen readers flatten those, and axe flagged 12.
+- **2.1.1 and 4.1.2, tab rows.** About 50 tablists announced "tab, 1 of N" but ignored the arrow keys.
+- **4.1.3, announcements.** XP awards were silent. Explore read the whole grid on every keystroke.
+- **2.4.3, dialogs.** More dialogs left focus behind them, or had no Escape.
+
+Chandu: "go".
+
+**What changed.**
+- **Cards.**
+  - PeopleTab (×2), the Connect event ticket, and Profile's Top Three and My Plan tiles lose `role`, `tabIndex`, `onKeyDown` and `aria-label`, and keep the pointer `onClick`. The name, title or caption is now a real `<button>`.
+  - CompanyVideoCards gets a full-card transparent Play button, under the z-[1] Save and Sound controls, with an inset focus ring.
+- **`app/TabKeys.tsx`** (mounted in layout): a document keydown handler for `[role=tab]` inside `[role=tablist]`. It skips events already defaultPrevented, which is how CardTabs, v4 viz and WorkScreen handle their own keys. It focuses and clicks the next tab.
+- **Announcements.** `xpFlight` calls `announce()`. Explore SearchResults drops `aria-live` from the grid and announces the count after 600ms.
+- **`useDialogFocus`.**
+  - It records the opener at first render and keeps focus that is already inside the dialog.
+  - It retries focus on the next animation frame.
+  - It is now used in GlobalSearch, WeeklyCheckIn, BookCounselorSheet, the ProProfile cover picker and the phone NotificationsPanel.
+
+**Validation.**
+- tsc is clean. eslint has no new warnings.
+- axe `nested-interactive`, `aria-prohibited-attr` and `button-name` are clean on /connect, /explore and /profile.
+- On Opportunities, ArrowRight moves Scholarships to Programs (selected), and End goes to Internships.
+- The 390px bell sheet takes focus, keeps Tab inside, and returns focus to the bell on Escape.
+- A Connect name button opens the pro on Enter.
+- Step 1's sheets still pass.
+- The cards look unchanged in a screenshot.
+
+**Next.**
+- The remaining dialogs: ConnectExperience (6), ProfileExperience (7), PreferencesTab, the resume sheets and PaySheet.
+- Roving tabindex in TextTabs/Segmented.
+- Video captions, if the clips have speech.
+- A screen-reader pass with NVDA and ChromeVox.
+
+## 2026-10-21: WCAG 2.2 AA, step 3 (forms)
+
+**Why.** These were the audit's form items:
+
+- **3.3.1 and 1.3.1.** Signup errors were red text that nothing tied to the field. Screen readers never heard them, and focus stayed on the button.
+- **1.3.5.** Name, email, phone and password fields had no autofill.
+- **3.3.2.** The resume's required `*` was visual only.
+- **2.5.7 and 2.1.1.** Resume bullets reordered by HTML drag only, which works with neither keyboard nor touch.
+- **1.3.1.** Four inputs were labelled by their placeholder alone.
+
+Chandu: "go".
+
+**What changed.**
+- **SignupExperience.**
+  - `Field` takes an `errorId`.
+  - Inputs have ids (`signup-name`, `signup-guardianEmail`, `signup-email`, `signup-password`, `signup-agreed`), plus `autoComplete`, `required`, `aria-invalid` and `aria-describedby`.
+  - `validateAccount` focuses the first field in error.
+  - The birthdate error is `role="alert"`.
+- **Resume.**
+  - The wizard contact fields have `autoComplete`.
+  - `ui.tsx` Field marks the star `aria-hidden` and adds an sr-only "(required)".
+  - `TextInput` sets `aria-invalid`.
+  - `ExperienceModal` lines have Move up / Move down IconTip buttons (28px, disabled at the ends). Focus follows the moved line, or lands on the usable button at an end.
+  - Each line textarea is labelled "Line N".
+- **Labels.** `aria-label` added to the Explore search (×2), the Glossary typed answer and the Tailor job description.
+
+**Validation.**
+- tsc and eslint are clean.
+- /signup: Sign up with empty fields focuses `signup-name` (aria-invalid true, described by "Enter your name.", autocomplete name). All four fields are flagged.
+- /resume-builder: `#rb-first` has autocomplete given-name. In Experience lines A/B/C, Move up on C gives A,C,B with focus on the new row's Move up. Pressed again it gives C,A,B, with focus on Move down because Move up is disabled at the top.
+
+**Next.**
+- The remaining ~50 dialogs.
+- Nested interactive cards (Connect, Explore, Profile).
+- Tab arrow keys.
+- XP announcements.
+- Video captions.
+- A screen-reader pass.
+
+## 2026-10-21: WCAG 2.2 AA, step 2 (Play: timers off, card deck buttons)
+
+**Why.** These were the next two serious items in the audit:
+
+- **2.2.1, timing.** A timed sim question that runs out is scored Wrong. A slow reader, a screen-reader or switch user, or an English learner has no way to stop the clock.
+- **2.5.7 and 2.1.1, dragging.** The phone card deck (Play hub, Profile Top 3) only moved by swiping.
+
+Chandu: "go" (the audit's recommended order).
+
+**What changed.**
+- **Timers.**
+  - New `play/timers.ts` holds a per-browser "timers off" setting.
+  - SimulationPlayer shows a Timers switch in the HUD (Timer/TimerOff icons) when the level has any `timer` beat.
+  - When off, the stage clock never runs and `remaining` stays at full, so RapidBody, FlagsBody and PickBody never auto-submit.
+  - The Clock and DrainBar are hidden, the default prompt drops the "before the timer runs out" wording, and the music no longer muffles.
+- **CardDeck (PlayHub).**
+  - Previous and Next IconTip buttons sit under the deck, with a polite live "N of M".
+  - ArrowLeft and ArrowRight move the deck, and focus follows the front card when the move came from it.
+  - Back cards are `inert`, so Tab only reaches the front card.
+  - The caller's `className` now goes on an outer wrapper.
+
+**Validation.**
+- tsc and eslint are clean.
+- At 390px on /play: Next and Previous move the counter (1 of 6, 2 of 6, 1 of 6), ArrowRight moves focus from the IB card to the RN card, and the back cards are inert.
+- On /play/investment-banking?screen=L1-18: with timers on, the rapid set timed out at 45s ("Not quite", -6). With timers off it was still on question 1 after 52s.
+
+**Next.**
+- The remaining ~50 dialogs.
+- Signup and resume forms.
+- Resume bullet reorder buttons.
+- Nested interactive cards.
+- Tab arrow keys.
+- XP announcements.
+- Captions.
+
+## 2026-10-21: WCAG 2.2 AA, step 1 (shared sheets, skip link, tooltips, contrast)
+
+**Why.** Districts will ask whether students with disabilities can use Dreamari, and for documentation. Chandu asked for a full WCAG 2.2 AA audit of dreamari.vercel.app. The result is docs/WCAG_2_2_AA_AUDIT_2026-10-21.md, with its scanners in docs/reference/wcag-audit-2026-10-21. Then: "Start step 1 of the recommended order: focus management in PageSheet/PeekSheet, skip link + main id, IconTip Escape, and the contrast fixes." Out of scope, per Chandu: the PIN gate ("thats for private demo purposes", it stays), and the Classic toggle and other demo-only toggles.
+
+**What changed.**
+- **Dialog focus (2.4.3, 2.1.2).**
+  - `useDialogFocus` moved from counselor/v4 to `components/app/useDialogFocus.ts`. The v4 path re-exports it.
+  - PageSheet (peek.tsx), PeekSheet and CareerPeek use it: focus moves into the sheet, Tab stays inside, Escape closes, and focus returns to the card that opened it.
+  - Arrow keys still page through the row.
+- **Skip link (2.4.1).**
+  - SkipLink targets the visible `<main>` outside any dialog and gives it `id="main"`.
+  - `/` has a hidden second `<main>`, and a detail page in a sheet has its own. Both used to catch the link.
+  - `/play/[game]` now wraps the player in `<main>`, so sims have a main landmark and the HUD `<header>` is no longer a second banner.
+- **Tooltips (1.4.13).**
+  - IconTip/Tip close on Escape, captured so the sheet under them stays open.
+  - The bubble is hoverable, with a 140ms grace to cross the 8px gap.
+- **Contrast (1.4.3).**
+  - Every `color: var(--primary)` and `text-[var(--primary)]` (173, excluding labs) is now `var(--color-text-brand)`. `--primary` `#176acf` measured 3.2 to 3.9:1 as small text on dark. The text token is `#59a0f8` in dark (7:1) and `#1460c0` in light, the same as light's primary. Fills and borders still use `--primary`.
+  - v7 Schedule past days and rows now use opacity 0.75/0.8 (was 0.45 to 0.6).
+  - v4 inactive page tabs are at 58% foreground (was 34%).
+  - The Opportunities Poster blur scrim is darker at the foot.
+  - Leaderboard "VS" lost its 0.6 opacity.
+  - The Play hub Express chip is on 78% black.
+
+**Validation.**
+- tsc is clean. eslint has no new warnings.
+- Scripted keyboard tests on :3093 (`?sheets=1`):
+  - The Home career sheet, the Colleges school sheet, and the 390px PageSheet all trap focus, close on Escape and return focus to the card.
+  - The skip link lands on the visible main on `/`, `/home` and sims.
+  - Tooltip Escape and hover-onto-bubble work.
+- A contrast re-scan of Counselor Meetings, Insights and Students has 0 fails.
+- On Opportunities, the cards' Award/figure lines now pass. A few "fit" lines still read about 2.3:1 on some cards.
+- Dark mode only. Light mode was not re-checked.
+
+**Not done (next steps, in the audit's order).**
+- The other ~50 dialogs: Inbox, GlobalSearch, Connect, Profile, the resume sheets and the no-Escape list.
+- Play: a timer setting, CardDeck buttons.
+- Forms: autocomplete, error wiring.
+- Nested interactive cards, tab arrow keys, XP announcements, captions.
+- A screen-reader pass.
 
 ## 2026-10-21: merge note, v4 Review and Messages follow v7's new desks
 

@@ -70,9 +70,11 @@ export const count = (n: number) => {
 // occupational projections (Projections Central, projectionscentral.org,
 // the same SOC codes STATE_WAGE_SOC maps). Until Usman wires them, each
 // state's figure is seeded from the national one so the layout can be
-// judged with realistic spread, and about one state in five, plus a few
-// whole careers, has no forecast, so the sparse-data handling is always on
-// screen. Replace this block with the real table; keep the null cases.
+// judged with realistic spread. Every state has one (21 Oct 2026, Chandu:
+// "I still see only one stat updating when i hover on a state": the seeded
+// gaps, one state in five plus a few whole careers, read as broken, and the
+// demo rule is mock values over blanks). Replace this block with the real
+// table; the readout already shows NA for a state the real data lacks.
 
 // rough share of US jobs by state (population share, %), for openings
 const SHARE: Record<string, number> = {
@@ -91,15 +93,8 @@ function seed(s: string) {
   return ((h >>> 0) % 10000) / 10000;
 }
 
-// careers whose states publish nothing yet (the "no state forecasts" case);
-// the demo default, Software Engineer, always has them
-const careerHasStates = (slug: string) => slug === "software-engineer" || seed(`${slug}:any`) >= 0.15;
-
 export function stateOutlook(slug: string, state: string, national: NationalOutlook | null): StateOutlook | null {
-  if (!national || !careerHasStates(slug) || SHARE[state] === undefined) return null;
-  // the demo student's state (New Jersey) always has a forecast; the rest
-  // are missing about one time in five
-  if (state !== "New Jersey" && seed(`${slug}:${state}:gap`) < 0.2) return null;
+  if (!national || SHARE[state] === undefined) return null;
   // most states sit near the US figure, a few well above or below it
   const u = seed(`${slug}:${state}:g`) * 2 - 1;
   // (cubed, so a ranked top five spreads out instead of tying)
@@ -107,6 +102,13 @@ export function stateOutlook(slug: string, state: string, national: NationalOutl
   const growthPct = national.growthPct + Math.sign(u) * Math.pow(Math.abs(u), 3) * spread;
   const openings = national.openings * (SHARE[state] / 100) * (0.8 + 0.4 * seed(`${slug}:${state}:o`));
   return { growthPct, openings };
+}
+
+/** A state's fair share of the US yearly openings (its share of US jobs),
+ *  so a state's openings can be read as above or below the US. */
+export function expectedOpenings(state: string, national: NationalOutlook) {
+  const share = SHARE[state];
+  return share === undefined ? undefined : (national.openings * share) / 100;
 }
 
 /** Every state with a forecast, fastest growing first. Empty when the

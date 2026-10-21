@@ -148,7 +148,16 @@
      keep him from taking over a portrait tablet or a huge monitor. On
      laptops the first two terms still win, so nothing below ~1000px tall
      changes. */
-  --mascot-size: max(clamp(264px, 34vw, 400px), min(38dvh, 460px), min(calc((100dvh - 610px - (var(--vz, 1) - 1) * 476px) / .77), 72vw, 900px));
+  /* 21 Oct 2026 (Chandu: "dreamy sits too far up and overlaps the scroll down
+     to learn more text ... it can be cropped more. We just want the mouth to
+     be visible and the eyes. And it needs to take up more space
+     horizontally"). He is sized from the WIDTH now (about half the screen,
+     88vw on phones), and the bezel crops just under the mouth (Mascot.tsx
+     VISIBLE_FRACTION .715). The height term keeps the visible face (58% of
+     the stage, cloud top to crop) under the copy block, which now ends at
+     the Start Journey button (~470px, plus 360px per unit of --vz zoom). */
+  --mascot-w: 50vw;
+  --mascot-size: clamp(280px, min(var(--mascot-w), calc((100dvh - 470px - (var(--vz, 1) - 1) * 360px) / .58)), 680px);
 
   /* ---- Elevation shadows (effect.styles -> Elevation), Semantic.Dark shadow-color ---- */
   --shadow-sm: 0 2px 8px 0 #00000073;
@@ -218,6 +227,11 @@
    hero's headline/paragraph/buttons + the mascot's own peeking sliver both still fit
    above the fold on short phones (e.g. 320x568) instead of the mascot being pushed
    fully offscreen. */
+@media (max-width: 640px) {
+  .marketing-v2 {
+    --mascot-w: 88vw;
+  }
+}
 @media (max-height: 700px) {
   .marketing-v2 {
     --mascot-size: clamp(165px, calc(34vw / var(--vz, 1)), 460px);

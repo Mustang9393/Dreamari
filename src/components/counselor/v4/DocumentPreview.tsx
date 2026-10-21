@@ -79,7 +79,7 @@ export function DocumentPreviewModal({ open, onClose, fileName, pageLabel = "Pag
              card surface as the full-screen report viewer. */}
           <div className="flex flex-none items-center justify-between gap-[10px] border-b px-[16px] py-[10px]" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
             <span className="flex min-w-0 items-center gap-[10px]">
-              <span className="flex size-[28px] flex-none items-center justify-center rounded-[8px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--primary)" }}>
+              <span className="flex size-[28px] flex-none items-center justify-center rounded-[8px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--color-text-brand)" }}>
                 <svg width="13" height="16" viewBox="0 0 13 16" fill="none" aria-hidden><path d="M1 1.5C1 0.947715 1.44772 0.5 2 0.5H8L12 4.5V14.5C12 15.0523 11.5523 15.5 11 15.5H2C1.44772 15.5 1 15.0523 1 14.5V1.5Z" stroke="currentColor" strokeWidth="1.1" /><path d="M8 0.5V4.5H12" stroke="currentColor" strokeWidth="1.1" /></svg>
               </span>
               <span className="flex min-w-0 flex-col leading-tight">

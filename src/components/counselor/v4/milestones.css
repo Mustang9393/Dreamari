@@ -66,7 +66,7 @@
 .v4-ms-row-pct {grid-area:pct;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground);text-align:right}
 .v4-ms-row-bar {grid-area:bar;width:168px;justify-self:end}
 .v4-ms-row-wait {grid-area:wait;justify-self:end;text-align:right}
-.v4-ms-wait {font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer;white-space:nowrap;border-radius:8px;padding:8px 12px;margin:-8px -12px}
+.v4-ms-wait {font-size:12.5px;font-weight:600;color:var(--color-text-brand);cursor:pointer;white-space:nowrap;border-radius:8px;padding:8px 12px;margin:-8px -12px}
 .v4-ms-wait:hover,.v4-ms-wait:focus-visible {background:color-mix(in srgb,var(--primary) 12%,transparent)}
 .v4-ms-row-go {grid-area:go;opacity:0;transition:opacity .15s}
 .v4-ms-row:hover .v4-ms-row-go,.v4-ms-row:focus-within .v4-ms-row-go {opacity:1}
@@ -167,7 +167,7 @@ html.dark .v4-ms {
    one line whatever the names' lengths or how many states have people */
 .v4-msc-head {position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-height:calc(15px * 1.35 * 2)}
 .v4-msc-title {display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-align:left;font-size:15px;line-height:1.35;font-weight:600;letter-spacing:-.01em;color:var(--foreground);cursor:pointer}
-.v4-msc-wait {flex:none;margin-top:-1px;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;color:var(--primary);cursor:pointer;background:color-mix(in srgb,var(--primary) 10%,transparent);transition:background .15s}
+.v4-msc-wait {flex:none;margin-top:-1px;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;color:var(--color-text-brand);cursor:pointer;background:color-mix(in srgb,var(--primary) 10%,transparent);transition:background .15s}
 .v4-msc-wait:hover,.v4-msc-wait:focus-visible {background:color-mix(in srgb,var(--primary) 18%,transparent)}
 .v4-msc-body {position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:20px;min-height:116px}
 /* the counts: Done leads at body size in full ink; the rest are quiet.

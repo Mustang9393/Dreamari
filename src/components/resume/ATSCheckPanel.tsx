@@ -6,6 +6,8 @@ import { type ATSCheckResult, type ResumeData, type ResumeVersion } from "@/lib/
 import { fingerprintFor, runAtsCheck } from "@/lib/resumeAts";
 import { ErrorView } from "@/components/app/states";
 import { CARD_CLASS, INSET, NOT_A_GUARANTEE_NOTE, ResumeModal } from "./ui";
+import { Abbr } from "@/components/app/Abbr";
+import { announce } from "@/components/app/LiveRegion";
 
 // The full "ATS Check" audit -- resume-quality rating (score + grade + a
 // 7-category breakdown + strengths/improvements), a job-match breakdown,
@@ -61,8 +63,10 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
   async function run() {
     setRunning(true);
     setError(false);
+    announce("Checking your resume."); // the button text change alone is silent (WCAG 4.1.3)
     const next = await runAtsCheck(resume, version);
     if (next) {
+      announce("Check done. Your results are ready.");
       setResult(next);
       setStale(false);
     } else {
@@ -78,7 +82,7 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
       {!result ? (
         <div className={CARD_CLASS} style={INSET}>
           <span className="text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
-            Checks your resume&apos;s quality, and how well it fits a job if you added one.
+            Checks your resume&apos;s quality, and how well it fits a job if you added one. <Abbr short="ATS" long="applicant tracking system" /> is the software many employers use to read resumes.
           </span>
           <button
             type="button"
@@ -96,7 +100,7 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
           {stale && (
             <div className="flex flex-wrap items-center justify-between gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px]" style={{ borderColor: "var(--color-feedback-warning)", background: "color-mix(in srgb, var(--color-feedback-warning) 10%, transparent)" }}>
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>Your resume has changed since this check ran.</span>
-              <button type="button" onClick={run} disabled={running} className="dm-tap cursor-pointer text-[12.5px] font-bold disabled:cursor-not-allowed" style={{ color: "var(--primary)" }}>
+              <button type="button" onClick={run} disabled={running} className="dm-tap cursor-pointer text-[12.5px] font-bold disabled:cursor-not-allowed" style={{ color: "var(--color-text-brand)" }}>
                 {running ? "Checking…" : "Re-run"}
               </button>
             </div>

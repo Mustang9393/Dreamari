@@ -174,7 +174,7 @@ export function SchoolPostsecondary() {
             {cp.emerging.chips.map((c, i) => <li key={c}><span className="v4-list-index">{String(i + 1).padStart(2, "0")}</span>{c}</li>)}
           </ol>
           <div className="v4-school-cue">
-            <span className="v4-overline" style={{ color: "var(--primary)" }}>{titleCase(cp.emerging.cue.eyebrow)}</span>
+            <span className="v4-overline" style={{ color: "var(--color-text-brand)" }}>{titleCase(cp.emerging.cue.eyebrow)}</span>
             <p>{cp.emerging.cue.text}</p>
           </div>
           <button type="button" className="v4-island-action mt-[10px]" onClick={() => router.push("/counselor?view=leader-progress&v=4")}>{cp.emerging.cue.linkLabel.replace(" →", "")}<ArrowRight size={18} aria-hidden /></button>

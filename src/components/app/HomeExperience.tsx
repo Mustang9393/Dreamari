@@ -25,7 +25,7 @@ import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/Dail
 import { INVESTMENT_BANKING, REGISTERED_NURSE, simThumb } from "@/components/play/games";
 import type { Simulation } from "@/components/play/types";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "@/components/play/progress";
-import { WORLD_COLORS, posterTitleFont } from "./worlds";
+import { WORLD_COLORS, posterTitleFont, posterInk } from "./worlds";
 import { CARD_TEXT_SHADOW } from "./cardChrome";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
@@ -60,9 +60,12 @@ const SPACE_ACCENTS = [
   { left: 940, top: 140, size: 2 },
 ];
 
+// The eyebrow is mostly white with a hint of its colour (WCAG 1.4.3, audit
+// 21 Oct 2026): at 55% colour it measured 3.8:1 on the dark scrim and 1.8:1
+// under the light theme.
 function CaptionLabel({ color, children }: { color: string; children: React.ReactNode }) {
   return (
-    <p className="text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color }}>
+    <p className="w-fit rounded-[4px] px-[6px] py-[1px] text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color, background: "rgba(5,8,20,0.45)" }}>
       {children}
     </p>
   );
@@ -161,7 +164,7 @@ export function HeroPanel({
         {/* the eyebrow sits on the dark photo in both themes, so its colour is
            lifted toward white rather than taken from the theme's light-mode
            value, which went dark and failed contrast on the card */}
-        <span {...rise(0)}><CaptionLabel color={`color-mix(in srgb, ${eyebrowColor} 55%, #ffffff)`}>{eyebrow}</CaptionLabel></span>
+        <span {...rise(0)}><CaptionLabel color={`color-mix(in srgb, ${eyebrowColor} 25%, #ffffff)`}>{eyebrow}</CaptionLabel></span>
         <p {...rise(1)} className={`${rise(1).className} text-[30px] leading-[1.04] font-extrabold text-balance sm:text-[42px]`} style={{ ...rise(1).style, fontFamily: "var(--font-display)", letterSpacing: "-0.01em" }}>
           {title}
         </p>
@@ -615,7 +618,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
       <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[4px] px-[14px] pt-[32px] pb-[12px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
         <span className="block text-[20px] leading-[1.15] font-extrabold uppercase" style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>{title}</span>
         <span className="flex items-baseline gap-[8px]">
-          <span className="text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[world] }}>{world}</span>
+          <span className="text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: posterInk(WORLD_COLORS[world]) }}>{world}</span>
           <span className="min-w-0 flex-1 truncate text-[11px] leading-[15px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", opacity: 0.75 }}>{label}</span>
         </span>
         {pct > 0 && <span aria-hidden className="mt-[2px] block w-full max-w-[220px]"><SparkBar percent={pct} height={5} track="color-mix(in srgb, var(--poster-title) 25%, transparent)" fill="var(--primary)" glow="var(--primary)" /></span>}

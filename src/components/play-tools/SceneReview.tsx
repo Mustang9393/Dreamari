@@ -248,7 +248,7 @@ function EnlargedFrame({
                   aria-pressed={f.key === frame.key}
                   onClick={() => onPick(f.key)}
                   className="cursor-pointer rounded-full border px-[10px] py-[4px] text-[12px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
-                  style={f.key === frame.key ? { borderColor: "var(--primary)", background: "var(--primary)", color: "#fff" } : QUIET_STYLE}
+                  style={f.key === frame.key ? { borderColor: "var(--primary)", background: "var(--primary)", color: "var(--primary-foreground)" } : QUIET_STYLE}
                 >
                   {f.label}
                 </button>

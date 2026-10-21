@@ -35,11 +35,14 @@ const STATE_CODES: Record<string, string> = {
   Oregon: "OR", Pennsylvania: "PA", "Rhode Island": "RI", "South Carolina": "SC",
   "South Dakota": "SD", Tennessee: "TN", Texas: "TX", Utah: "UT", Vermont: "VT",
   Virginia: "VA", Washington: "WA", "West Virginia": "WV", Wisconsin: "WI",
-  Wyoming: "WY", "District of Columbia": "DC",
+  Wyoming: "WY", "District of Columbia": "DC", "Washington, DC": "DC",
 };
 
+// the map file names DC "Washington, DC"; the app's state lists (Build,
+// statePay, outlook) say "Washington, D.C.", so DC matched no data and read
+// NA for everything (found 21 Oct 2026)
 function displayName(name: string): string {
-  return name === "District of Columbia" ? "Washington, D.C." : name;
+  return name === "District of Columbia" || name === "Washington, DC" ? "Washington, D.C." : name;
 }
 
 function parsePay(text: string): number | null {
@@ -63,6 +66,28 @@ function hash01(input: string): number {
   return ((h >>> 0) % 10000) / 10000;
 }
 
+/** Pay per state, as the map shades it: the published figure, or (for a
+ *  career without every state published) a small seeded spread around the
+ *  typical pay, so it never flickers between renders. */
+export function payValues(typical: string, rows: { state: string; pay: string }[], complete: boolean, seed: string) {
+  const base = parsePay(typical) ?? 60000;
+  const known = new Map<string, number>();
+  for (const row of rows) {
+    const v = parsePay(row.pay);
+    if (v) known.set(row.state, v);
+  }
+  const values = new Map<string, number>();
+  for (const location of USA.locations) {
+    const name = displayName(location.name);
+    const real = known.get(name);
+    if (real !== undefined) values.set(name, real);
+    else if (!complete) values.set(name, base * (0.78 + 0.44 * hash01(`${seed}:${name}`)));
+  }
+  return values;
+}
+
+export { parsePay, formatPay };
+
 export function PayMap({
   typical,
   rows,
@@ -71,6 +96,9 @@ export function PayMap({
   seed,
   complete = false,
   figures,
+  active: activeProp,
+  onActive,
+  renderReadout,
 }: {
   /** the career's typical pay, e.g. "$60,580/year" */
   typical: string;
@@ -86,9 +114,20 @@ export function PayMap({
    *  growth or openings) instead of pay. A state missing from `values` reads
    *  NA, as an unpublished pay state does. `rows`/`typical` are ignored. */
   figures?: { values: Record<string, number>; format: (n: number) => string; prompt: string; label: string; icon?: (n: number) => ReactNode };
+  /** controlled hovered/chosen state, so a list beside the map can drive it */
+  active?: string | null;
+  onActive?: (state: string | null) => void;
+  /** Pay & Growth (21 Oct 2026): the caller draws the readout row (the
+   *  shown state's pay, growth and openings together) */
+  renderReadout?: (shown: string | null, isYours: boolean) => ReactNode;
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const [active, setActive] = useState<string | null>(null);
+  const [ownActive, setOwnActive] = useState<string | null>(null);
+  const active = activeProp !== undefined ? activeProp : ownActive;
+  const setActive = (s: string | null) => {
+    setOwnActive(s);
+    onActive?.(s);
+  };
   const [labelPos, setLabelPos] = useState<Record<string, { x: number; y: number }>>({});
 
   useLayoutEffect(() => {
@@ -104,24 +143,7 @@ export function PayMap({
     setLabelPos(next);
   }, []);
 
-  const base = parsePay(typical) ?? 60000;
-  const known = new Map<string, number>();
-  for (const row of rows) {
-    const v = parsePay(row.pay);
-    if (v) known.set(row.state, v);
-  }
-  const values = new Map<string, number>();
-  for (const location of USA.locations) {
-    const name = displayName(location.name);
-    if (figures) {
-      const v = figures.values[name];
-      if (v !== undefined) values.set(name, v);
-      continue;
-    }
-    const real = known.get(name);
-    if (real !== undefined) values.set(name, real);
-    else if (!complete) values.set(name, base * (0.78 + 0.44 * hash01(`${seed}:${name}`)));
-  }
+  const values = figures ? new Map(Object.entries(figures.values)) : payValues(typical, rows, complete, seed);
   const fmt = figures?.format ?? formatPay;
   const all = [...values.values()];
   const min = Math.min(...all);
@@ -145,7 +167,11 @@ export function PayMap({
          especially on tablet and mobile it overlaps the map"): its own row
          above the map, never on it, at display size. It shows the student's
          state until another is hovered or tapped, so it is never empty. */}
-      {(() => {
+      {renderReadout ? (
+        <div className="mb-[var(--space-3)] border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }} aria-live="polite">
+          {renderReadout(active ?? yourState ?? null, !active && !!yourState)}
+        </div>
+      ) : (() => {
         const shown = active ?? yourState ?? null;
         const v = shown ? values.get(shown) : undefined;
         return (

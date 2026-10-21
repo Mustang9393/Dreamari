@@ -165,8 +165,11 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
   // Career Goal, so the last button names that step (Chandu, 19 Oct 2026:
   // "the cta from match says see my top 3, it should now change right?").
   // The Flow Lab, which ends on its own Top 3 screen, keeps "See my Top 3".
+  // 21 Oct 2026 (Chandu: the CTA "says see my top 3 but we're taking them to
+  // the about me section to select their career and college goal"): About Me
+  // asks for both goals, so the label names both: "Choose my goals".
   const profileV2 = useTop3FlowV2();
-  const finishLabel = demo && profileV2 ? "Choose my career goal" : "See my Top 3";
+  const finishLabel = demo && profileV2 ? "Choose my goals" : "See my Top 3";
   const [state, setState] = useState<State>(EMPTY);
   const [hydrated, setHydrated] = useState(false);
   const [toast, setToast] = useState<string | null>(null);

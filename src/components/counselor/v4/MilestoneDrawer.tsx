@@ -113,7 +113,7 @@ function DrawerBody({ row, onClose, initialFilter, focusId }: { row: MilestoneRo
           {shown.length > 0 && <SelectBox checked={allPicked} label={allPicked ? "Clear selection" : "Select all"} onChange={(on) => setPicked(on ? new Set(shown.map((e) => e.s.id)) : new Set())} />}
           <h3 className="flex-1 text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{listLabel}</h3>
           {shown.length > 0 && (
-            <button type="button" aria-expanded={composing} onClick={() => setComposing((v) => !v)} className="v4-inline-link" style={{ color: "var(--primary)" }}>
+            <button type="button" aria-expanded={composing} onClick={() => setComposing((v) => !v)} className="v4-inline-link" style={{ color: "var(--color-text-brand)" }}>
               <Users className="h-[14px] w-[14px]" aria-hidden />{picked.size ? `Message ${picked.size}` : `Message all ${shown.length}`}
             </button>
           )}

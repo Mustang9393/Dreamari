@@ -56,7 +56,7 @@ export function Toggle({ on, onChange, disabled, pending, label="Notification" }
       style={{ background: on ? "var(--primary)" : "var(--glass-surface-1)", borderColor: on ? "var(--primary)" : "var(--glass-border)" }}
     >
       <span aria-hidden className="absolute flex size-[18px] items-center justify-center rounded-full bg-white transition-[left]" style={{ left: on ? 21 : 3, boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
-        {pending && <LoaderCircle className="h-[11px] w-[11px] motion-safe:animate-spin" style={{ color: "var(--primary)", animationDuration: "0.8s" }} aria-hidden />}
+        {pending && <LoaderCircle className="h-[11px] w-[11px] motion-safe:animate-spin" style={{ color: "var(--color-text-brand)", animationDuration: "0.8s" }} aria-hidden />}
       </span>
     </button>
   );
@@ -146,15 +146,15 @@ export function Settings() {
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Full Name</span>
-              <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
+              <input autoComplete="name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
             </label>
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Email Address</span>
-              <input value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
+              <input type="email" autoComplete="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
             </label>
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>School</span>
-              <input value={draft.school} onChange={(e) => setDraft({ ...draft, school: e.target.value })} className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
+              <input autoComplete="organization" value={draft.school} onChange={(e) => setDraft({ ...draft, school: e.target.value })} className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
             </label>
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Role</span>

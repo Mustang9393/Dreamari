@@ -211,7 +211,7 @@ function WeekView({ ordered, meetings }: { ordered: CounselorStudent[]; meetings
           return (
             <div key={key} className={`flex min-w-0 gap-[var(--space-5)] border-b py-[var(--space-4)] lg:min-h-[300px] lg:flex-col lg:gap-[var(--space-4)] lg:border-b-0 lg:px-[var(--space-4)] lg:py-0 ${i ? "lg:border-l" : "lg:pl-0"}`} style={{ borderColor: RULE }}>
               <div className="flex w-[52px] flex-none flex-col items-center gap-[4px] lg:w-auto lg:flex-row lg:items-center lg:gap-[10px]" style={{ opacity: hours || list.length ? 1 : 0.5 }}>
-                <span className="flex size-[40px] items-center justify-center rounded-full text-[20px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)", ...(isToday ? { background: "var(--accent)", color: "#fff" } : {}) }}>{d.getDate()}</span>
+                <span className="flex size-[40px] items-center justify-center rounded-full text-[20px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)", ...(isToday ? { background: "var(--accent)", color: "var(--primary-foreground)" } : {}) }}>{d.getDate()}</span>
                 <span className="flex flex-col items-center lg:items-start">
                   <span className={OVERLINE} style={{ color: isToday ? "var(--accent)" : "var(--muted-foreground)" }}>{isToday ? "Today" : DAY[d.getDay()]}</span>
                   <span className="hidden text-[12.5px] font-medium tabular-nums lg:block" style={{ color: "var(--muted-foreground)" }}>{hours ? `${timeLabel(hours.from)} to ${timeLabel(hours.to)}` : "No office hours"}</span>
@@ -435,7 +435,7 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
                 return (
                   <li key={a} className="border-b" style={{ borderColor: RULE }}>
                     <button type="button" role="checkbox" aria-checked={on} onClick={() => updateAgenda(aKey, (x) => ({ ...x, ticked: on ? x.ticked.filter((t) => t !== a) : [...x.ticked, a] }))} className="dm-quiet dm-row flex w-[calc(100%+var(--space-4))] cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[12px] text-left">
-                      <span className="flex size-[22px] flex-none items-center justify-center rounded-[6px] border-2" style={{ borderColor: on ? "var(--accent)" : "color-mix(in srgb, var(--foreground) 30%, transparent)", background: on ? "var(--accent)" : "transparent" }}>{on && <Check className="h-[14px] w-[14px] text-white" strokeWidth={3} aria-hidden />}</span>
+                      <span className="flex size-[22px] flex-none items-center justify-center rounded-[6px] border-2" style={{ borderColor: on ? "var(--accent)" : "color-mix(in srgb, var(--foreground) 30%, transparent)", background: on ? "var(--accent)" : "transparent" }}>{on && <Check className="h-[14px] w-[14px] text-[var(--primary-foreground)]" strokeWidth={3} aria-hidden />}</span>
                       <span className="text-[16px] leading-[21px] font-semibold" style={{ textDecoration: on ? "line-through" : "none", color: on ? "var(--muted-foreground)" : "var(--foreground)" }}>{a}</span>
                     </button>
                   </li>

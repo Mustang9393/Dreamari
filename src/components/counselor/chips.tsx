@@ -171,7 +171,7 @@ export function Avatar({ name, size = 34, index }: { name: string; size?: number
     return (
       <span
         className="flex flex-none items-center justify-center rounded-full text-[12.5px] font-extrabold"
-        style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}
+        style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--color-text-brand)" }}
       >
         {initials(name)}
       </span>
@@ -255,7 +255,7 @@ export function ScrollChips<K extends string>({ options, value, onChange, ariaLa
               aria-selected={on}
               onClick={() => onChange(o.key)}
               className="dm-quiet flex h-9 flex-none cursor-pointer items-center rounded-full border px-[14px] text-[13px] font-bold whitespace-nowrap transition-colors"
-              style={{ background: on ? "var(--primary)" : "var(--inset-bg)", borderColor: on ? "var(--primary)" : "var(--inset-border)", color: on ? "#FFFFFF" : "var(--foreground)" }}
+              style={{ background: on ? "var(--primary)" : "var(--inset-bg)", borderColor: on ? "var(--primary)" : "var(--inset-border)", color: on ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {o.label}
             </button>
@@ -329,7 +329,7 @@ export function SelectBox({ checked, label, onChange, disabled }: { checked: boo
       disabled={disabled}
       onClick={() => { if (!disabled) onChange(!checked); }}
       className="flex size-[20px] flex-none cursor-pointer items-center justify-center rounded-[6px] border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-      style={{ borderColor: checked ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 35%, transparent)", background: checked ? "var(--primary)" : "transparent", color: "#fff" }}
+      style={{ borderColor: checked ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 35%, transparent)", background: checked ? "var(--primary)" : "transparent", color: "var(--primary-foreground)" }}
     >
       {checked && <Check className="h-[12px] w-[12px]" aria-hidden />}
     </button>

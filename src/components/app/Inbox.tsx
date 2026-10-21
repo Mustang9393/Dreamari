@@ -9,7 +9,7 @@
 import { pendingCheckIn, useCheckInRequests, useWeeklyCheckIn } from "@/lib/weeklyCheckIn";
 import { openStudentCheckIn } from "./WeeklyCheckIn";
 import Image from "next/image";
-import { useEffect, useState, type ReactNode, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, type ReactNode, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Bell, Briefcase, Calendar, FileText, MessagesSquare, Send, Sparkles, X, Zap } from "lucide-react";
@@ -25,6 +25,7 @@ import { messagesHref, NETWORK_STUDENT_NAME, networkingNotifications, useNetwork
 import { useConnectPov } from "@/components/connect/networking/pov";
 import { openTeamDock, useUwTeamActive } from "@/components/connect/unitedway/uwStore";
 import { TEAM_NOTIFICATIONS } from "@/components/connect/unitedway/uwTeamNotifications";
+import { useDialogFocus } from "./useDialogFocus";
 
 // Loaded only once the United Way Team role is on, so students never pull the United Way data.
 const TeamMessagesNav = dynamic(() => import("@/components/connect/unitedway/UwTeamDock"), { ssr: false });
@@ -194,6 +195,9 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
   const router = useRouter();
   const inbox = useInbox();
   const phone = useIsPhone();
+  // the phone sheet is modal: focus in, Tab kept inside, focus back to the bell (WCAG 2.4.3)
+  const sheet = useRef<HTMLDivElement>(null);
+  useDialogFocus(phone, sheet, onClose);
   const [filter, setFilter] = useState<Filter>("all");
   const { list, isUnread } = useVisibleNotifications(filter);
   const filters: { key: Filter; label: string }[] = [{ key: "all", label: "All" }, { key: "connect", label: "Connect" }, ...(inbox.mentorship ? [{ key: "mentorship" as Filter, label: "Mentorship" }, { key: "messages" as Filter, label: "Messages" }] : [])];
@@ -336,7 +340,7 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
   if (phone) {
     return (
       <Portal>
-        <div className="fixed inset-0 z-[90] flex items-end" role="dialog" aria-modal="true" aria-label="Notifications">
+        <div ref={sheet} tabIndex={-1} className="fixed inset-0 z-[90] flex items-end" role="dialog" aria-modal="true" aria-label="Notifications">
           <button type="button" aria-label="Close notifications" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
           <div className="dm-scroll relative z-[1] max-h-[calc(80dvh/var(--vz,1))] w-full overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-3)] pb-[calc(var(--space-4)+env(safe-area-inset-bottom))]" style={surface}>{body}</div>
         </div>

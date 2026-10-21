@@ -22,21 +22,21 @@
 [data-counselor-version="v4"] .mtg-hero.is-empty {flex-direction:row;align-items:center;gap:18px;border-color:var(--glass-border);box-shadow:none}
 [data-counselor-version="v4"] .mtg-hero-top {display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 [data-counselor-version="v4"] .mtg-hero-who {display:flex;align-items:center;gap:14px;min-width:0;margin:-8px -10px;padding:8px 10px;border-radius:var(--radius-md)}
-[data-counselor-version="v4"] .mtg-eyebrow {font-size:12px;line-height:16px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--primary)}
+[data-counselor-version="v4"] .mtg-eyebrow {font-size:12px;line-height:16px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-brand)}
 [data-counselor-version="v4"] .mtg-hero-name {font-family:var(--font-display);font-size:24px;line-height:29px;font-weight:600;color:var(--foreground)}
 [data-counselor-version="v4"] .mtg-hero-sub {font-size:14px;line-height:20px;font-weight:500;color:var(--muted-foreground)}
 [data-counselor-version="v4"] .mtg-hero-sub b {font-weight:600;color:var(--foreground)}
 /* the live countdown: tabular digits, so the ticking never shifts the line */
 [data-counselor-version="v4"] .mtg-count {display:flex;align-items:baseline;flex:none;gap:6px;padding-top:18px}
 [data-counselor-version="v4"] .mtg-count small {font-size:12px;line-height:16px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
-[data-counselor-version="v4"] .mtg-count strong {min-width:4ch;text-align:right;font-family:var(--font-display);font-size:24px;line-height:29px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--primary);white-space:nowrap}
+[data-counselor-version="v4"] .mtg-count strong {min-width:4ch;text-align:right;font-family:var(--font-display);font-size:24px;line-height:29px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-text-brand);white-space:nowrap}
 [data-counselor-version="v4"] .mtg-topic {display:flex;flex-wrap:wrap;gap:4px 10px;font-size:14.5px;line-height:20px;color:var(--muted-foreground)}
 [data-counselor-version="v4"] .mtg-topic b {font-weight:600;color:var(--foreground)}
 /* the prep: one line of facts, Dreamy's talking point */
 [data-counselor-version="v4"] .mtg-prep {display:flex;flex-direction:column;gap:14px;margin-top:auto;padding-top:14px;border-top:1px solid var(--v4-line)}
 [data-counselor-version="v4"] .mtg-facts {display:flex;flex-wrap:wrap;gap:4px 0;font-size:13.5px;line-height:19px;font-weight:500;color:var(--muted-foreground)}
 [data-counselor-version="v4"] .mtg-facts>*+*::before {content:"·";margin:0 8px;color:var(--muted-foreground);opacity:.6}
-[data-counselor-version="v4"] .mtg-facts-link {font-weight:600;color:var(--primary)}
+[data-counselor-version="v4"] .mtg-facts-link {font-weight:600;color:var(--color-text-brand)}
 /* Dreamy sits across the hero's bottom edge, at the right; his line is a bubble to his left */
 [data-counselor-version="v4"] .mtg-dreamy {display:flex;align-items:center;gap:14px}
 /* Dreamy's slot never shrinks in a flex row; he is drawn as a layer over it */
@@ -54,10 +54,10 @@
 [data-counselor-version="v4"] .mtg-done-badge {display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:color-mix(in srgb,var(--color-feedback-success) 16%,transparent);color:var(--color-feedback-success)}
 [data-counselor-version="v4"] .mtg-dreamy-say {flex:1;min-width:0;padding:8px 14px 9px;border-radius:4px 16px 16px 16px;border:1px solid var(--glass-border);background:var(--glass-surface-2);font-size:14px;line-height:20px;color:var(--foreground)}
 [data-counselor-version="v4"] .mtg-dreamy-say b {display:inline-flex;align-items:center;gap:6px;font-size:12px;line-height:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
-[data-counselor-version="v4"] .mtg-dreamy-say>svg {color:var(--primary)}
+[data-counselor-version="v4"] .mtg-dreamy-say>svg {color:var(--color-text-brand)}
 
 /* Done: quiet outline in a list, solid "Mark done" in the hero */
-[data-counselor-version="v4"] .mtg-log {display:inline-flex;align-items:center;gap:6px;flex:none;height:34px;padding:0 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--primary) 45%,transparent);font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;white-space:nowrap}
+[data-counselor-version="v4"] .mtg-log {display:inline-flex;align-items:center;gap:6px;flex:none;height:34px;padding:0 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--primary) 45%,transparent);font-size:13px;font-weight:600;color:var(--color-text-brand);cursor:pointer;white-space:nowrap}
 [data-counselor-version="v4"] .mtg-log.is-solid {height:40px;padding:0 18px;border:0;background:var(--primary);color:var(--primary-foreground)}
 [data-counselor-version="v4"] .mtg-log:disabled {cursor:default;opacity:.7}
 
@@ -77,13 +77,13 @@
 [data-counselor-version="v4"] .mtg-log-row:last-child {border-bottom:0}
 [data-counselor-version="v4"] .mtg-log-who {display:flex;align-items:center;gap:10px;flex:1;min-width:0;margin:-6px 0 -6px -8px;padding:6px 8px;border-radius:var(--radius-md)}
 [data-counselor-version="v4"] .mtg-undo {display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13.5px;font-weight:500;color:var(--muted-foreground)}
-[data-counselor-version="v4"] .mtg-undo svg:first-child {color:var(--primary)}
-[data-counselor-version="v4"] .mtg-undo button {display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--primary);cursor:pointer}
+[data-counselor-version="v4"] .mtg-undo svg:first-child {color:var(--color-text-brand)}
+[data-counselor-version="v4"] .mtg-undo button {display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--color-text-brand);cursor:pointer}
 
 /* The stamp: green "Logged", blue "Invited" */
 [data-counselor-version="v4"] .mtg-stamp {position:absolute;top:50%;left:50%;z-index:3;padding:6px 18px;border:3px solid currentColor;border-radius:10px;font-family:var(--font-display);font-size:26px;line-height:1.1;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--v4-positive,var(--color-feedback-success));background:color-mix(in srgb,var(--card) 90%,transparent);transform:translate(-50%,-50%) rotate(-8deg);pointer-events:none;white-space:nowrap}
 [data-counselor-version="v4"] .mtg-stamp.is-small {padding:3px 12px;border-width:2.5px;border-radius:8px;font-size:17px}
-[data-counselor-version="v4"] .mtg-stamp.is-invite {color:var(--primary)}
+[data-counselor-version="v4"] .mtg-stamp.is-invite {color:var(--color-text-brand)}
 
 /* ---- Needs Outreach: the session ---- */
 [data-counselor-version="v4"] .mtg-session {position:relative;display:flex;align-items:center;gap:16px 18px;padding:16px 22px;border-radius:var(--radius-xl,20px);border:1px solid var(--glass-border);background:var(--glass-surface-1);box-shadow:0 18px 40px -28px rgba(0,0,0,.5)}
@@ -114,13 +114,13 @@
 /* a sent row stays (10 Oct 2026: "Dont make them disappear unless i click
    done"): its state replaces the status word, the note it sent sits under
    the name with Edit and Undo, and Done is the way out */
-[data-counselor-version="v4"] .mtg-out-state {display:inline-flex;align-items:center;gap:5px;color:var(--primary)}
+[data-counselor-version="v4"] .mtg-out-state {display:inline-flex;align-items:center;gap:5px;color:var(--color-text-brand)}
 [data-counselor-version="v4"] .mtg-out-row.is-sent .mtg-out-who {opacity:.85}
 [data-counselor-version="v4"] .mtg-out-sent {grid-column:1/-1;display:flex;align-items:baseline;gap:14px;min-width:0;margin-top:-4px;padding-left:52px;font-size:13.5px;line-height:19px;color:var(--muted-foreground)}
 [data-counselor-version="v4"] .mtg-out-sent-text {flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 [data-counselor-version="v4"] .mtg-out-sent-text::before {content:"“"}
 [data-counselor-version="v4"] .mtg-out-sent-text::after {content:"”"}
-[data-counselor-version="v4"] .mtg-out-sent button {display:inline-flex;flex:none;align-items:center;gap:4px;font-weight:600;color:var(--primary);cursor:pointer}
+[data-counselor-version="v4"] .mtg-out-sent button {display:inline-flex;flex:none;align-items:center;gap:4px;font-weight:600;color:var(--color-text-brand);cursor:pointer}
 /* the draft opens on the row itself, read before it sends */
 [data-counselor-version="v4"] .mtg-out-compose {grid-column:1/-1;display:flex;flex-direction:column;gap:10px;padding:2px 0 6px 52px}
 [data-counselor-version="v4"] .mtg-textarea {width:100%;min-height:76px;resize:vertical;border-radius:var(--radius-md);border:1px solid var(--glass-border);background:var(--card);padding:11px 14px;font-size:14.5px;line-height:1.5;color:var(--foreground)}
@@ -135,7 +135,7 @@
 [data-counselor-version="v4"] .mtg-review-close {position:absolute;top:14px;right:14px}
 [data-counselor-version="v4"] .mtg-review-close button {display:inline-flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:999px;color:var(--muted-foreground);cursor:pointer}
 [data-counselor-version="v4"] .mtg-label {font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
-[data-counselor-version="v4"] .mtg-token {height:30px;padding:0 12px;border-radius:999px;border:1px dashed color-mix(in srgb,var(--primary) 45%,transparent);font-size:13px;font-weight:600;color:var(--primary);cursor:pointer}
+[data-counselor-version="v4"] .mtg-token {height:30px;padding:0 12px;border-radius:999px;border:1px dashed color-mix(in srgb,var(--primary) 45%,transparent);font-size:13px;font-weight:600;color:var(--color-text-brand);cursor:pointer}
 [data-counselor-version="v4"] .mtg-preview {display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;border:1px solid var(--glass-border);background:var(--glass-surface-1)}
 [data-counselor-version="v4"] .mtg-step {display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--muted-foreground)}
 [data-counselor-version="v4"] .mtg-step button {display:grid;place-items:center;width:30px;height:30px;border-radius:999px;cursor:pointer}
@@ -143,7 +143,7 @@
 [data-counselor-version="v4"] .mtg-bubble-row {display:flex;align-items:flex-end;gap:10px}
 [data-counselor-version="v4"] .mtg-bubble {padding:10px 14px;border-radius:16px 16px 16px 4px;background:var(--glass-surface-2);font-size:14.5px;line-height:1.45;color:var(--foreground)}
 [data-counselor-version="v4"] .mtg-who-toggle {display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:var(--radius-md);font-size:14px;font-weight:600;color:var(--foreground);cursor:pointer;text-align:left}
-[data-counselor-version="v4"] .mtg-link {margin-left:auto;color:var(--primary)}
+[data-counselor-version="v4"] .mtg-link {margin-left:auto;color:var(--color-text-brand)}
 [data-counselor-version="v4"] .mtg-pick-list {display:flex;flex-direction:column;max-height:240px;overflow-y:auto;padding-right:4px}
 [data-counselor-version="v4"] .mtg-pick {display:grid;grid-template-columns:20px 26px minmax(0,auto) minmax(0,1fr);align-items:center;gap:10px;width:100%;padding:7px 10px;border-radius:var(--radius-md);font-size:13.5px;text-align:left;cursor:pointer}
 [data-counselor-version="v4"] .mtg-pick-box {display:grid;place-items:center;width:20px;height:20px;border-radius:6px;border:1.5px solid var(--glass-border);color:var(--primary-foreground)}
@@ -212,10 +212,10 @@
 [data-counselor-version="v4"] .mtg-day-name {font-size:11px;line-height:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-foreground)}
 [data-counselor-version="v4"] .mtg-day-num {display:grid;place-items:center;min-width:40px;height:40px;margin-left:-6px;border-radius:999px;font-family:var(--font-display);font-size:26px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
 [data-counselor-version="v4"] .mtg-day-head.is-today {background:linear-gradient(to bottom,color-mix(in srgb,var(--primary) 14%,transparent),color-mix(in srgb,var(--primary) 6%,transparent))}
-[data-counselor-version="v4"] .mtg-day-head.is-today .mtg-day-name {color:var(--primary)}
+[data-counselor-version="v4"] .mtg-day-head.is-today .mtg-day-name {color:var(--color-text-brand)}
 [data-counselor-version="v4"] .mtg-day-head.is-today .mtg-day-num {background:var(--primary);color:var(--primary-foreground)}
 [data-counselor-version="v4"] .mtg-day-book {display:grid;place-items:center;width:30px;height:30px;border-radius:999px;color:var(--muted-foreground);cursor:pointer;transition:background-color .14s,color .14s}
-@media (hover:hover){[data-counselor-version="v4"] .mtg-day-book:hover {background:var(--glass-surface-2);color:var(--primary)}}
+@media (hover:hover){[data-counselor-version="v4"] .mtg-day-book:hover {background:var(--glass-surface-2);color:var(--color-text-brand)}}
 [data-counselor-version="v4"] .mtg-day-book:focus-visible {outline:2px solid var(--primary);outline-offset:-2px}
 [data-counselor-version="v4"] .mtg-axis {position:relative}
 [data-counselor-version="v4"] .mtg-axis span {position:absolute;right:10px;transform:translateY(-50%);font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted-foreground);white-space:nowrap}
@@ -229,7 +229,7 @@
 [data-counselor-version="v4"] .mtg-band {position:absolute;inset:0;display:block;width:100%;border-radius:12px;border:1px solid color-mix(in srgb,var(--primary) 28%,transparent);background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--primary) 13%,transparent) 0 6px,color-mix(in srgb,var(--primary) 4%,transparent) 6px 12px);cursor:copy;transition:border-color .15s}
 @media (hover:hover){[data-counselor-version="v4"] .mtg-band:hover {border-color:color-mix(in srgb,var(--primary) 55%,transparent)}}
 [data-counselor-version="v4"] .mtg-band:focus-visible {outline:2px solid var(--primary);outline-offset:2px}
-[data-counselor-version="v4"] .mtg-ghost {position:absolute;left:3px;right:3px;display:flex;align-items:center;gap:4px;padding:0 8px;border-radius:8px;border:1.5px dashed var(--primary);background:color-mix(in srgb,var(--card) 80%,transparent);font-size:11.5px;font-weight:700;color:var(--primary);pointer-events:none;white-space:nowrap;overflow:hidden}
+[data-counselor-version="v4"] .mtg-ghost {position:absolute;left:3px;right:3px;display:flex;align-items:center;gap:4px;padding:0 8px;border-radius:8px;border:1.5px dashed var(--primary);background:color-mix(in srgb,var(--card) 80%,transparent);font-size:11.5px;font-weight:700;color:var(--color-text-brand);pointer-events:none;white-space:nowrap;overflow:hidden}
 
 /* a meeting: a soft gradient tile in its kind's tone, an accent bar, a face, a bold name */
 [data-counselor-version="v4"] .mtg-block-pos {position:absolute;left:8px;right:8px;z-index:1}

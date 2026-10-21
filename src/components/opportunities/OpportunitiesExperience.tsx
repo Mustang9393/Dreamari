@@ -53,6 +53,7 @@ import { Shelf } from "./Shelf";
 import { Poster } from "./Poster";
 import { RETURN_KEY, consumeReturning, readListReturn, type ListReturn } from "./listReturn";
 import { useBackStep } from "@/lib/backStep";
+import { Abbr } from "@/components/app/Abbr";
 
 export type Tab = "scholarships" | "programs" | "internships";
 type Closes = "any" | "month" | "3mo" | "later";
@@ -266,8 +267,8 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
       {(["scholarships", "programs", "internships"] as Tab[]).map((key) => {
         const on = tab === key;
         return (
-          <button key={key} type="button" role="tab" aria-selected={on} onClick={() => switchTab(key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[7px] rounded-[10px] px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap sm:px-[16px]" style={on ? { background: ACCENT, color: "#fff" } : { color: "var(--foreground)" }}>
-            {LABEL[key]}<span className="text-[12px] font-semibold tabular-nums" style={{ color: on ? "rgba(255,255,255,0.92)" : "var(--muted-foreground)" }}>{counts[key]}</span>
+          <button key={key} type="button" role="tab" aria-selected={on} onClick={() => switchTab(key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[7px] rounded-[10px] px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap sm:px-[16px]" style={on ? { background: ACCENT, color: "var(--primary-foreground)" } : { color: "var(--foreground)" }}>
+            {LABEL[key]}<span className="text-[12px] font-semibold tabular-nums" style={{ color: on ? "#fff" : "var(--muted-foreground)" }}>{counts[key]}</span>
           </button>
         );
       })}
@@ -479,12 +480,12 @@ function Fafsa({ value }: { value: FafsaStatus }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-[10px] rounded-[var(--radius-lg)] border px-[18px] py-[12px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
       <span className="flex flex-col gap-[2px]">
-        <span className="text-[15px] leading-[20px] font-bold">FAFSA opened October 1</span>
+        <span className="text-[15px] leading-[20px] font-bold"><Abbr short="FAFSA" long="Free Application for Federal Student Aid" /> opened October 1</span>
         <span className="text-[13px] leading-[18px]" style={MUTED}>Most college money starts here.</span>
       </span>
       <div role="radiogroup" aria-label="FAFSA status" className="flex flex-none items-center gap-[3px] rounded-[11px] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
         {([["not-started", "Not started"], ["in-progress", "Started"], ["submitted", "Submitted"]] as const).map(([k, label]) => (
-          <button key={k} type="button" role="radio" aria-checked={value === k} onClick={() => setFafsaStatus(k)} className="dm-quiet h-[30px] cursor-pointer rounded-[8px] px-[12px] text-[13px] font-semibold whitespace-nowrap" style={value === k ? { background: ACCENT, color: "#fff" } : { color: "var(--foreground)" }}>{label}</button>
+          <button key={k} type="button" role="radio" aria-checked={value === k} onClick={() => setFafsaStatus(k)} className="dm-quiet h-[30px] cursor-pointer rounded-[8px] px-[12px] text-[13px] font-semibold whitespace-nowrap" style={value === k ? { background: ACCENT, color: "var(--primary-foreground)" } : { color: "var(--foreground)" }}>{label}</button>
         ))}
       </div>
     </div>

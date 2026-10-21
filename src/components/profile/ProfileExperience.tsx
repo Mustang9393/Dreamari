@@ -1,5 +1,7 @@
 "use client";
 
+import { useDialogFocus } from "@/components/app/useDialogFocus";
+
 import { createPortal } from "react-dom";
 import { openCareerPeek, openSchoolPeek } from "@/components/app/peek";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -33,7 +35,7 @@ import { CareerPeek } from "./CareerPeek";
 import { CompareHighlights } from "./CompareHighlights";
 import { CardDeck } from "@/components/play/PlayHub";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, FileText, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { Accessibility, ArrowLeftRight, FileText, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, ScrollEdges } from "@/components/app/cardChrome";
@@ -44,7 +46,7 @@ import { deleteArchivedProfile, profileArchiveSnapshot, restoreArchivedProfile, 
 import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
 import { liftSplashVeil } from "@/components/app/SplashVeil";
 import { playMilestoneChime } from "@/components/build/sound";
-import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
+import { posterTitleFont, WORLD_COLORS, posterInk, worldInk } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, NOT_IN_REPORT, Portal, cellsFromReport } from "./CareerReport";
@@ -69,6 +71,11 @@ import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/res
 import { useBackStep } from "@/lib/backStep";
 import { useTop3FlowV2 } from "@/lib/top3Flow";
 import { togglePlanDone, usePlanDone } from "@/lib/planDone";
+import { setQuietTips, useQuietTips } from "@/lib/quietTips";
+import { setTimersOff, useTimersOff } from "@/components/play/timers";
+import { setCaptionsOn, useCaptionsOn } from "@/lib/captionsPref";
+import { Abbr } from "@/components/app/Abbr";
+import { CaptionTrack, VideoTranscript } from "@/components/app/VideoTranscript";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -360,7 +367,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   }, [tab]);
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
   // Which Settings section the gear menu asked for; Settings scrolls to it.
-  const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
+  // ?tab=settings&section=accessibility opens a section directly (the
+  // Accessibility page links here)
+  const sectionParam = useSearchParams()?.get("section");
+  const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(() => (SETTINGS_SECTIONS.some((x) => x.id === sectionParam) ? (sectionParam as SettingsSection) : null));
   // The tab Settings was opened from (8 Oct 2026, "ALWAYS EVERYTHING SHOULD
   // GO ONLY ONE STEP BACK"): its X and the browser's Back both return there,
   // not to a fixed Top 3. null means Settings was the page's first view (a
@@ -579,6 +589,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // about once.
   const coverNudge = !coverOpen;
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  // the cover and picture pickers: focus in, Tab kept inside, Escape closes (WCAG 2.4.3 / 2.1.2)
+  const coverDialog = useRef<HTMLDivElement>(null);
+  const avatarDialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(coverOpen, coverDialog, () => setCoverOpen(false));
+  useDialogFocus(avatarPickerOpen, avatarDialog, () => setAvatarPickerOpen(false));
   const avatarSeed = STUDENT.name.split(" ")[0] || STUDENT.name;
   const avatarSrc = useStudentAvatarSrc(avatarSeed);
   const pickAvatar = (src: string) => {
@@ -853,7 +868,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   /* a sheet through the portal: the header clips and the blurred
                      cluster would otherwise contain a fixed child */
                   <Portal>
-                  <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
+                  <div ref={coverDialog} tabIndex={-1} className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
                     {/* the page stays visible behind a frosted overlay, never a black screen */}
                     <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
                     <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
@@ -994,14 +1009,14 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   aria-expanded={avatarPickerOpen}
                   onClick={() => setAvatarPickerOpen(true)}
                   className="dm-tap absolute right-[-2px] bottom-[-2px] flex size-[26px] cursor-pointer items-center justify-center rounded-full border-2"
-                  style={{ background: "var(--primary)", borderColor: "rgba(255,255,255,0.9)", color: "#fff" }}
+                  style={{ background: "var(--primary)", borderColor: "rgba(255,255,255,0.9)", color: "var(--primary-foreground)" }}
                 >
                   <Pencil className="h-3 w-3" strokeWidth={2.75} aria-hidden />
                 </button>
                 </IconTip>
                 {avatarPickerOpen && (
                   <Portal>
-                    <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose your picture" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
+                    <div ref={avatarDialog} tabIndex={-1} className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose your picture" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
                       <button type="button" aria-label="Close" onClick={() => setAvatarPickerOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
                       <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
                         <div className="flex items-center justify-between gap-[var(--space-3)]">
@@ -1166,7 +1181,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {/* The count as a small numeral chip, not part of the word
                  (Chandu, 1 Oct 2026: "I don't want it reading like Saved 6");
                  Gmail's and Linear's tab counts. Inherits the tab's ink. */}
-              {item.badge ? <span aria-label={`${item.badge} saved`} className="relative ml-[6px] inline-flex min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10.5px] leading-[16px] font-bold tabular-nums" style={{ background: tab === item.id ? "rgba(255,255,255,0.22)" : "color-mix(in srgb, var(--foreground) 12%, transparent)", color: "var(--ink)" }}>{item.badge}</span> : null}
+              {item.badge ? <span role="img" aria-label={`${item.badge} saved`} className="relative ml-[6px] inline-flex min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10.5px] leading-[16px] font-bold tabular-nums" style={{ background: tab === item.id ? "rgba(255,255,255,0.22)" : "color-mix(in srgb, var(--foreground) 12%, transparent)", color: "var(--ink)" }}>{item.badge}</span> : null}
             </button>
           ))}
         </div>
@@ -1351,7 +1366,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[15px] font-bold">{career.title}</span>
-                    <span className="truncate text-[12px] font-bold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {interestTier(career.match)}</span>
+                    <span className="truncate text-[12px] font-bold" style={{ color: worldInk(WORLD_COLORS[career.world]) }}>{career.world} · {interestTier(career.match)}</span>
                   </span>
                   <button
                     type="button"
@@ -2186,6 +2201,9 @@ export function Top3Tab({
 // document, and stacking three of them in it made it read as a bundle.
 
 function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[]; focusId: string; onClose: () => void }) {
+  // focus in, Tab kept inside, Escape closes, focus back to the opener (WCAG 2.4.3 / 2.1.2)
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   // Highlights first (6 Oct 2026): one story per slide (pay, growth, what
   // each asks, where each leads, the work, what is the same); Original is
   // the thirteen-row table for the student who wants every cell.
@@ -2209,7 +2227,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
     };
   });
   return (
-    <div className="no-print fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="compare-sheet-title">
+    <div ref={dialogRef} tabIndex={-1} className="no-print fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="compare-sheet-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(28px)" }} />
       <div className="relative mx-auto flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -2434,8 +2452,9 @@ export function OverviewTabV2({
              to Explore). role="button" + the same keyboard handling keeps
              the rest of the card exactly as clickable as it always was. */}
           <div
-            role="button" tabIndex={0} onClick={onGoTop3}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onGoTop3(); } }}
+            // a pointer can tap anywhere; keyboard and screen readers use the
+            // caption button (WCAG 4.1.2, audit 21 Oct 2026: nested interactive)
+            onClick={onGoTop3}
             className="dm-tap group relative flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}
           >
             <DashHoverChevron />
@@ -2445,7 +2464,7 @@ export function OverviewTabV2({
                brighter than the rest of the line. The #1 badge + name
                moved underneath the bar instead, in the stat-line spot
                Plan uses for "Term 1 of 3..." (direct feedback, 20 Sept). */}
-            <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Top Three</span>
+            <button type="button" onClick={(e) => { e.stopPropagation(); onGoTop3(); }} className="w-fit cursor-pointer text-left text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Top Three</button>
             {/* The #1 pick's own name dropped (direct feedback, 21 Sept
                2026: "a quick status snapshot, not a detailed page" -- the
                ratio below is the one fact this tile exists to show, so it's
@@ -2493,13 +2512,14 @@ export function OverviewTabV2({
              link straight to that step (direct feedback, 20 Sept) -- a
              <button> can't legally contain another interactive element. */}
           <div
-            role="button" tabIndex={0} onClick={onGoPlan}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onGoPlan(); } }}
+            // a pointer can tap anywhere; keyboard and screen readers use the
+            // caption button (WCAG 4.1.2, audit 21 Oct 2026: nested interactive)
+            onClick={onGoPlan}
             className="dm-season-host dm-tap group relative flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}
           >
             <SeasonScene seasonId={currentWindow.id} />
             <DashHoverChevron />
-            <span className="relative z-[1] text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Plan</span>
+            <button type="button" onClick={(e) => { e.stopPropagation(); onGoPlan(); }} className="relative z-[1] w-fit cursor-pointer text-left text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Plan</button>
             {/* Plan name, term ratio, and the "Next" step all dropped
                (direct feedback, 21 Sept 2026: "a quick status snapshot, not
                a detailed page" -- three separate facts read as too much
@@ -2594,6 +2614,9 @@ function EvidenceSheet({
   onHide: (id: string) => void;
   onClose: () => void;
 }) {
+  // focus in, Tab kept inside, Escape closes, focus back to the opener (WCAG 2.4.3 / 2.1.2)
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   const [scope, setScope] = useState<"all" | "career">("all");
   const items = EVIDENCE.filter((item) => !hidden.has(item.id)).filter((item) => (scope === "all" ? true : item.careerId === focus?.id));
   const grouped = items.reduce<Record<string, EvidenceItem[]>>((acc, item) => {
@@ -2602,7 +2625,7 @@ function EvidenceSheet({
   }, {});
 
   return (
-    <div className="no-print fixed inset-0 z-[120] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="evidence-intro">
+    <div ref={dialogRef} tabIndex={-1} className="no-print fixed inset-0 z-[120] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="evidence-intro">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 76%, transparent)", backdropFilter: "blur(28px)" }} />
       <div className="dm-scroll relative flex w-full max-w-[560px] flex-col gap-[var(--space-4)] overflow-y-auto border-l p-5 pb-[calc(env(safe-area-inset-bottom)+var(--space-6))] pt-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex items-start justify-between gap-[var(--space-3)]">
@@ -2856,9 +2879,12 @@ function RouteDetailModal({ route, majors, selected, onSelect, onGoPlan, onClose
   onGoPlan: () => void;
   onClose: () => void;
 }) {
+  // focus in, Tab kept inside, Escape closes, focus back to the opener (WCAG 2.4.3 / 2.1.2)
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   return (
     <Portal>
-    <div className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`${route.short} details`}>
+    <div ref={dialogRef} tabIndex={-1} className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`${route.short} details`}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(28px)" }} />
       <div className="relative flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[920px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <IconTip label="Close" className="absolute top-[10px] right-[10px] z-10">
@@ -3160,7 +3186,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
            the right, the bar under both. */}
         <div className="flex items-baseline justify-between gap-[var(--space-4)]">
           <span className="text-[15px] leading-[22px] tabular-nums" style={{ color: "var(--foreground)" }}>{doneCount} of {allSteps.length} done</span>
-          <span ref={pctRef} className="text-[15px] leading-[22px] font-bold tabular-nums" style={{ color: "var(--foreground)" }} aria-label={`${pct} percent done`}>{pct}%</span>
+          <span role="img" ref={pctRef} className="text-[15px] leading-[22px] font-bold tabular-nums" style={{ color: "var(--foreground)" }} aria-label={`${pct} percent done`}>{pct}%</span>
         </div>
         <SparkBar className="w-full" percent={pct} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
       </div>
@@ -3808,7 +3834,8 @@ export function VideosShelf() {
               <span className="flex min-w-0 flex-col"><span className="truncate text-[16px] font-bold">{nowPlaying.title}</span><span className="truncate text-[13px] opacity-80">{nowPlaying.company}</span></span>
               <button type="button" aria-label="Close" autoFocus onClick={() => setPlaying(null)} className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.3)", color: "#fff" }}><X className="h-5 w-5" aria-hidden /></button>
             </div>
-            <video src={nowPlaying.video} poster={nowPlaying.poster} controls autoPlay playsInline className="max-h-[calc(80dvh/var(--vz,1))] w-full rounded-[var(--radius-lg)] bg-black object-contain" />
+            <video src={nowPlaying.video} poster={nowPlaying.poster} controls autoPlay playsInline className="max-h-[calc(72dvh/var(--vz,1))] w-full rounded-[var(--radius-lg)] bg-black object-contain"><CaptionTrack video={nowPlaying.video} /></video>
+            <VideoTranscript video={nowPlaying.video} />
           </div>
         </div>,
         document.body,
@@ -3924,7 +3951,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
                 <span className="absolute top-[8px] right-[8px] z-10"><SaveButton on={savedCareers.has(career.id)} onToggle={() => toggleSavedCareer(career.id)} size={32} /></span>
                 <span className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px] text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)", paddingTop: "30px" }}>
                   <span className="w-full text-[14px] leading-[16px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
-                  <span className="w-full text-[8px] leading-[11px] font-bold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
+                  <span className="w-full text-[8px] leading-[11px] font-bold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: posterInk(WORLD_COLORS[career.world]) }}>{career.world}</span>
                 </span>
               </span>
               {/* Real bug fix, 27 Sept 2026: at this grid's narrowest columns
@@ -3967,11 +3994,12 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
 
 // ---- Settings: a full view under the header, prototype stubs ----
 
-type SettingsSection = "answers" | "account" | "privacy" | "danger";
+type SettingsSection = "answers" | "account" | "privacy" | "accessibility" | "danger";
 const SETTINGS_SECTIONS: { id: SettingsSection; label: string; Icon: LucideIcon; divider?: boolean }[] = [
   { id: "answers", label: "Your answers", Icon: Sparkles },
   { id: "account", label: "Account", Icon: UserRound },
   { id: "privacy", label: "Privacy and sharing", Icon: Lock },
+  { id: "accessibility", label: "Accessibility", Icon: Accessibility },
   { id: "danger", label: "Danger zone", Icon: AlertTriangle, divider: true },
 ];
 
@@ -3987,6 +4015,51 @@ function answersSummary(p: StudentProfile): { label: string; value: string }[] {
     { label: "Subjects", value: p.subjects.join(", ") || "Not set" },
     { label: "States", value: p.states.join(", ") || "Not set" },
   ];
+}
+
+/** Settings > Accessibility (audit 21 Oct 2026): the app's own comfort
+ *  switches in one place. Reduced motion, contrast and text size follow the
+ *  device's own settings, so they are explained here rather than duplicated. */
+function AccessibilitySettings() {
+  const quiet = useQuietTips();
+  const timersOff = useTimersOff();
+  const captions = useCaptionsOn();
+  const row = "flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)]";
+  const toggle = (on: boolean, label: string, onFlip: () => void) => (
+    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onFlip}
+      className="relative h-[28px] w-[48px] flex-none cursor-pointer rounded-full border transition-colors"
+      style={{ background: on ? "var(--primary)" : "var(--glass-surface-2)", borderColor: on ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 50%, transparent)" }}>
+      <span aria-hidden className="absolute top-[3px] h-[20px] w-[20px] rounded-full transition-[left]" style={{ left: on ? 24 : 3, background: on ? "#fff" : "var(--foreground)" }} />
+    </button>
+  );
+  return (
+    <section id="settings-accessibility" className={SETTINGS_CARD} style={INSET}>
+      <div className={row} style={{ background: "var(--glass-surface-1)" }}>
+        <span className="flex flex-col gap-[2px]">
+          <span className="text-[14px] font-bold">Hide tips and welcome screens</span>
+          <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>No pop-up hints or first-visit welcomes.</span>
+        </span>
+        {toggle(quiet, "Hide tips and welcome screens", () => setQuietTips(!quiet))}
+      </div>
+      <div className={row} style={{ background: "var(--glass-surface-1)" }}>
+        <span className="flex flex-col gap-[2px]">
+          <span className="text-[14px] font-bold">Turn off game timers</span>
+          <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Timed questions wait for you.</span>
+        </span>
+        {toggle(timersOff, "Turn off game timers", () => setTimersOff(!timersOff))}
+      </div>
+      <div className={row} style={{ background: "var(--glass-surface-1)" }}>
+        <span className="flex flex-col gap-[2px]">
+          <span className="text-[14px] font-bold">Show captions on videos</span>
+          <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Words on screen for every company video.</span>
+        </span>
+        {toggle(captions, "Show captions on videos", () => setCaptionsOn(!captions))}
+      </div>
+      <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
+        Less motion, high contrast and bigger text follow your device settings.
+      </p>
+    </section>
+  );
 }
 
 function SettingsView({ section, onClose }: { section: SettingsSection | null; onClose: () => void }) {
@@ -4053,7 +4126,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           </div>
           {confirming === "rebuild" ? (
             <span className="flex flex-wrap items-center gap-[var(--space-2)]">
-              <button type="button" onClick={() => window.location.assign("/flow")} className="dm-solid flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+              <button type="button" onClick={() => window.location.assign("/flow")} className="dm-solid flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
                 <RefreshCw className="h-4 w-4" aria-hidden /> Yes, start Build again
               </button>
               <button type="button" onClick={() => setConfirming(null)} className={ghost} style={ghostStyle}>Never mind</button>
@@ -4084,7 +4157,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
                   </span>
                   {confirming === `restore:${entry.id}` ? (
                     <span className="flex items-center gap-[var(--space-2)]">
-                      <button type="button" onClick={() => { restoreArchivedProfile(entry.id); setConfirming(null); }} className="dm-solid min-h-[36px] cursor-pointer rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>Yes, use this build</button>
+                      <button type="button" onClick={() => { restoreArchivedProfile(entry.id); setConfirming(null); }} className="dm-solid min-h-[36px] cursor-pointer rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yes, use this build</button>
                       <button type="button" onClick={() => setConfirming(null)} className={ghost} style={ghostStyle}>Never mind</button>
                     </span>
                   ) : (
@@ -4111,7 +4184,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
             <input id="settings-email" type="email" inputMode="email" autoComplete="email" value={draft.email} onChange={(e) => patch({ email: e.target.value })} placeholder="you@school.org" className={SETTINGS_FIELD} style={{ ...SETTINGS_FIELD_STYLE, borderColor: emailOk ? SETTINGS_FIELD_STYLE.borderColor : DANGER }} />
           </div>
           <div className="flex flex-col gap-[6px]">
-            <label className={SETTINGS_LABEL} htmlFor="settings-gpa" style={{ color: "var(--muted-foreground)" }}>GPA</label>
+            <label className={SETTINGS_LABEL} htmlFor="settings-gpa" style={{ color: "var(--muted-foreground)" }}><Abbr short="GPA" long="grade point average" /></label>
             <Listbox
               id="settings-gpa"
               value={draft.gpa}
@@ -4156,7 +4229,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           </div>
         </div>
         <div className="flex items-center gap-[var(--space-3)]">
-          <button type="button" onClick={save} disabled={!dirty || !zipOk || !emailOk} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          <button type="button" onClick={save} disabled={!dirty || !zipOk || !emailOk} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             {saved && !dirty ? <><Check className="h-4 w-4" aria-hidden /> Saved</> : <>Save <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden /></>}
           </button>
           {dirty && <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Unsaved changes</span>}
@@ -4181,6 +4254,8 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
         <button type="button" className={ghost} style={ghostStyle}>Sign out</button>
       </section>
       )}
+
+      {show === "accessibility" && <AccessibilitySettings />}
 
       {show === "danger" && (
       <section id="settings-danger" className={SETTINGS_CARD} style={{ background: `color-mix(in srgb, ${DANGER} 6%, var(--inset-surface))`, borderColor: `color-mix(in srgb, ${DANGER} 35%, var(--inset-border))` }}>

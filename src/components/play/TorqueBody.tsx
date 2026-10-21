@@ -161,12 +161,12 @@ export function TorqueBody({ beat, onResolve, locked }: { beat: TorqueBeat; onRe
   const stepIndex = phase === "set" ? 0 : phase === "tighten" ? 1 : 2;
   const hint =
     phase === "set"
-      ? "Drag the slider until the orange marker sits on the green mark."
+      ? "Move the slider into the green safe range."
       : phase === "tighten"
         ? holding
           ? arcEnd
             ? "End of the swing. Let go to ratchet back."
-            : "Pull. Listen for the click."
+            : "Pull until the wrench clicks."
           : tension > 0
             ? "Hold again for the next pull."
             : "Press and hold the button to pull the wrench. It takes a few pulls."
@@ -403,6 +403,8 @@ export function TorqueBody({ beat, onResolve, locked }: { beat: TorqueBeat; onRe
             step={0.005}
             value={setting}
             aria-label="Wrench setting"
+            // the band is only drawn in color, so say where the setting sits (WCAG 1.3.3)
+            aria-valuetext={inBand ? "In the safe range" : setting < beat.target ? "Too low" : "Too high"}
             onChange={(event) => setSetting(Number(event.target.value))}
             onPointerUp={commitSetting}
             onKeyUp={(event) => {

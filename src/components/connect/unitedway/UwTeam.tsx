@@ -50,7 +50,7 @@ function Row({ c, on, onPick }: { c: Conversation; on: boolean; onPick: () => vo
         </span>
         <span className="truncate text-[13px] leading-[18px] md:hidden" style={{ color: c.unread ? "var(--foreground)" : MUTED, fontWeight: c.unread ? 600 : 400 }}>{c.preview}</span>
       </span>
-      {c.unread && <span aria-label="Unread" className="size-[9px] flex-none rounded-full" style={{ background: BLUE, boxShadow: `0 0 0 3px color-mix(in srgb, ${BLUE} 25%, transparent)` }} />}
+      {c.unread && <span role="img" aria-label="Unread" className="size-[9px] flex-none rounded-full" style={{ background: BLUE, boxShadow: `0 0 0 3px color-mix(in srgb, ${BLUE} 25%, transparent)` }} />}
     </button>
   );
 }

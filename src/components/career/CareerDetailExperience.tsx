@@ -620,7 +620,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               {/* The world, in its accent, right under the title: the same
                  title-then-world pairing the browse cards use everywhere else
                  (direct feedback). */}
-              <span className="text-[12px] leading-[16px] font-semibold tracking-[0.6px] uppercase" style={{ color: `color-mix(in srgb, ${accent} 70%, #ffffff)`, fontFamily: "var(--font-body)" }}>{career.world}</span>
+              <span className="text-[12px] leading-[16px] font-semibold tracking-[0.6px] uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, #ffffff)`, fontFamily: "var(--font-body)" }}>{career.world}</span>
               {vm.summary && <p className={`${LABEL} max-w-[40ch] pt-[2px]`}>{vm.summary}</p>}
               {/* Actions sit under the summary, left-aligned with the text
                  (direct feedback), not floated to the far corner. */}
@@ -948,7 +948,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 </ul>
               </div>
               <div className="flex flex-col gap-[var(--space-3)]">
-                <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Where you would study it</h3>
+                <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Training you&apos;ll need</h3>
                 {/* the credential in words (no school counts, Josh's notes);
                    each one links to its college page. Those pages are not
                    designed yet, so the links land on the College Lookup shell

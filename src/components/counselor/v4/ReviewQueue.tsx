@@ -417,7 +417,7 @@ export function ReviewQueue() {
                       return (
                         <span className="flex flex-wrap items-center gap-[12px]">
                           <button type="button" onClick={() => sendReminder(selected.student.id, selected.milestone, selected.student.name)} className={last ? "dm-quiet flex h-10 w-fit cursor-pointer items-center justify-center rounded-[var(--radius-md)] border px-[18px] text-[13.5px] font-bold" : "dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 w-fit cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[18px] text-[13.5px] font-bold"} style={last ? { borderColor: "var(--glass-border)", color: "var(--foreground)" } : undefined}>{last ? "Remind again" : "Send a reminder"}</button>
-                          {last && <span className="text-[13px] font-bold" style={{ color: "var(--primary)" }}>Reminded {reminderDate(last)}</span>}
+                          {last && <span className="text-[13px] font-bold" style={{ color: "var(--color-text-brand)" }}>Reminded {reminderDate(last)}</span>}
                         </span>
                       );
                     })()}

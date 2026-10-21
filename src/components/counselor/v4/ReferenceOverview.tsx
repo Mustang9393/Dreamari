@@ -294,7 +294,7 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
     <div className="v4-surface group flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
       <div className="flex items-center justify-between gap-[8px]">
         <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Needs My Attention</h2>
-        <CardLink onClick={onSeeAll}>See all</CardLink>
+        <CardLink onClick={onSeeAll}>See all<span className="sr-only"> students who need my attention</span></CardLink>
       </div>
       {students.length === 0 ? (
         <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing needs attention under the current filters.</p>

@@ -192,8 +192,8 @@ export const QUESTIONS: { id: string; name: string; grade: number; question: str
 const STATUS_STYLE: Record<QuestionStatus, { label: string; color: string; fill: string; rank: number }> = {
   new: { label: "New", color: STATUS_COLORS["Needs Attention"], fill: STATUS_FILLS["Needs Attention"], rank: 0 },
   "follow-up": { label: "Follow Up", color: STATUS_COLORS["Needs Attention"], fill: STATUS_FILLS["Needs Attention"], rank: 1 },
-  viewed: { label: "Viewed", color: "var(--primary)", fill: BLUE_3[0], rank: 2 },
-  "in-progress": { label: "In Progress", color: "var(--primary)", fill: BLUE_3[0], rank: 3 },
+  viewed: { label: "Viewed", color: "var(--color-text-brand)", fill: BLUE_3[0], rank: 2 },
+  "in-progress": { label: "In Progress", color: "var(--color-text-brand)", fill: BLUE_3[0], rank: 3 },
   responded: { label: "Responded", color: "var(--muted-foreground)", fill: "var(--muted-foreground)", rank: 4 },
   resolved: { label: "Resolved", color: "var(--muted-foreground)", fill: "var(--muted-foreground)", rank: 5 },
 };
@@ -1092,7 +1092,7 @@ function ReplyBox({ row, value, onChange, onSend, hop = 0, drafts = true, childr
       <span className="msg-mascot" aria-hidden><DreamyGlasses size={44} pop={2.2} hop={hop} thinking={drafts && typing} /></span>
       <div className="msg-drafts" role="group" aria-label="Dreamy's drafts" aria-busy={drafts && typing}>
         {drafts && <span className="msg-drafts-says">Dreamy suggests</span>}
-        {drafts && typing && <span className="msg-typing" aria-label="Dreamy is drafting"><i /><i /><i /></span>}
+        {drafts && typing && <span role="img" className="msg-typing" aria-label="Dreamy is drafting"><i /><i /><i /></span>}
         {drafts && !typing && draftsFor(row).map((d) => (
           <button key={d.label} type="button" aria-pressed={value === d.text} className="msg-draft dm-quiet"
             onMouseEnter={() => setPreview(d.text)} onMouseLeave={() => setPreview(null)} onFocus={() => setPreview(d.text)} onBlur={() => setPreview(null)}

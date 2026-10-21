@@ -119,7 +119,7 @@ html.dark [data-counselor-version="v4"][data-counselor-version] .v4-workspace[da
 
 /* equal-height hero cards: a footer link pinned to the bottom of each, so a
    short card is balanced, not hollow (the equal-heights rule) */
-[data-counselor-version="v4"] .v4h-foot { margin-top:auto; padding-top:12px; font-size:13.5px; font-weight:600; color:var(--primary); cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+[data-counselor-version="v4"] .v4h-foot { margin-top:auto; padding-top:12px; font-size:13.5px; font-weight:600; color:var(--color-text-brand); cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
 [data-counselor-version="v4"] .v4h-foot:hover { text-decoration:underline; text-underline-offset:3px; }
 /* list footers on one line across the two Home cards */
 [data-counselor-version="v4"] .v4-box.v4-home-list .v4-home-more { margin-top:auto; }

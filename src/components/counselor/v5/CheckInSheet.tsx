@@ -147,7 +147,7 @@ function Sheet({ s, count, index, onIndex }: { s: CounselorStudent; count: numbe
               </ul>
               <p className="flex flex-wrap items-center gap-[8px] text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>
                 Mood, last 4 weeks:
-                {[...past, c.levels.Mood].map((l, i) => <span key={i} aria-label={`${i === 3 ? "This week" : `${3 - i} weeks ago`}: ${LEVEL_WORD[l]}`} className="size-[10px] rounded-full" style={{ background: LEVEL_INK[l], opacity: i === 3 ? 1 : 0.55 }} />)}
+                {[...past, c.levels.Mood].map((l, i) => <span role="img" key={i} aria-label={`${i === 3 ? "This week" : `${3 - i} weeks ago`}: ${LEVEL_WORD[l]}`} className="size-[10px] rounded-full" style={{ background: LEVEL_INK[l], opacity: i === 3 ? 1 : 0.55 }} />)}
                 {past.every((l) => l !== "low") && c.levels.Mood === "low" ? <span className="font-semibold">New this week</span> : past.filter((l) => l === "low").length >= 2 ? <span className="font-semibold v5-risk">Low most weeks</span> : null}
               </p>
             </section>

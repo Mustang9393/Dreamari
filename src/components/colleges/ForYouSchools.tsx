@@ -447,7 +447,7 @@ function Segmented({ value, options, onChange, ariaLabel }: { value: string; opt
       {options.map((o) => {
         const on = o.id === value;
         return (
-          <button key={o.id} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.id)} className={`min-h-[38px] cursor-pointer rounded-[calc(var(--radius-md)-4px)] px-[8px] text-[13px] leading-[16px] font-bold transition-colors ${on ? "" : "dm-quiet"}`} style={{ background: on ? ACCENT : "transparent", color: on ? "#fff" : "var(--foreground)" }}>
+          <button key={o.id} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.id)} className={`min-h-[38px] cursor-pointer rounded-[calc(var(--radius-md)-4px)] px-[8px] text-[13px] leading-[16px] font-bold transition-colors ${on ? "" : "dm-quiet"}`} style={{ background: on ? ACCENT : "transparent", color: on ? "var(--primary-foreground)" : "var(--foreground)" }}>
             {o.label}
           </button>
         );
@@ -547,7 +547,7 @@ function EditSheet({ onClose, career, routes, route, onRoute, place, onPlace, us
           )}
         </Field>
       </div>
-      <button type="button" onClick={onClose} className="dm-solid flex min-h-[48px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
+      <button type="button" onClick={onClose} className="dm-solid flex min-h-[48px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[15px] font-semibold" style={{ background: ACCENT, color: "var(--primary-foreground)" }}>
         Done
       </button>
     </Sheet>

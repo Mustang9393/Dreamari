@@ -127,7 +127,7 @@ export function NextStepBanner({
           )}
           <div className="col-start-1 row-start-1 flex flex-wrap content-center items-center justify-start gap-[var(--space-2)] lg:gap-[var(--space-4)]">
             <span className="flex min-w-[min(28ch,100%)] shrink grow-[999] basis-[28ch] flex-col gap-[3px]">
-              {eyebrow && <span className="flex items-center gap-[7px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--primary)" }}>
+              {eyebrow && <span className="flex items-center gap-[7px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--color-text-brand)" }}>
                 <span aria-hidden className="relative flex size-[8px] flex-none">
                   {!calm && <span className="absolute inset-0 rounded-full motion-safe:animate-[next-step-dot_1.4s_ease-out_infinite]" style={{ background: "var(--primary)" }} />}
                   <span className="relative size-[8px] rounded-full" style={{ background: "var(--primary)" }} />
@@ -137,7 +137,7 @@ export function NextStepBanner({
               <span className="text-[13.5px] leading-[18px] font-semibold lg:text-[15px] lg:leading-[21px]" style={{ color: "var(--foreground)" }}>{content ?? text}</span>
             </span>
             {!ctaHidden && (
-              <Link href={href} className={`dm-solid flex min-h-[40px] grow shrink-0 basis-0 items-center whitespace-nowrap justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_2.2s_ease-out_infinite]"} ${ctaDelayMs ? "motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" : ""}`} style={{ background: "var(--primary)", color: "#FFFFFF", animationDelay: ctaDelayMs ? `${ctaDelayMs}ms` : undefined }}>
+              <Link href={href} className={`dm-solid flex min-h-[40px] grow shrink-0 basis-0 items-center whitespace-nowrap justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_2.2s_ease-out_infinite]"} ${ctaDelayMs ? "motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" : ""}`} style={{ background: "var(--primary)", color: "var(--primary-foreground)", animationDelay: ctaDelayMs ? `${ctaDelayMs}ms` : undefined }}>
                 {Icon && <Icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden />} {ctaLabel}
               </Link>
             )}
@@ -186,7 +186,7 @@ export function NextStepBanner({
             <span className="text-[13.5px] leading-[18px] font-semibold lg:text-[15px] lg:leading-[21px]" style={{ color: "var(--foreground)" }}>{content ?? text}</span>
           </span>
           {!ctaHidden && (
-            <Link href={href} className={`dm-solid flex min-h-[40px] grow shrink-0 basis-0 items-center whitespace-nowrap justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_3.2s_ease-out_infinite]"} ${ctaDelayMs ? "motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" : ""}`} style={{ background: "var(--primary)", color: "#FFFFFF", animationDelay: ctaDelayMs ? `${ctaDelayMs}ms` : undefined }}>
+            <Link href={href} className={`dm-solid flex min-h-[40px] grow shrink-0 basis-0 items-center whitespace-nowrap justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_3.2s_ease-out_infinite]"} ${ctaDelayMs ? "motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" : ""}`} style={{ background: "var(--primary)", color: "var(--primary-foreground)", animationDelay: ctaDelayMs ? `${ctaDelayMs}ms` : undefined }}>
               {Icon && <Icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden />} {ctaLabel}
             </Link>
           )}

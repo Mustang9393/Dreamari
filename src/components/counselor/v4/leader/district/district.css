@@ -20,7 +20,7 @@
 .v4-district-go{opacity:.35;transition:opacity .18s,transform .18s}
 button.v4-district-lane:hover .v4-district-go,button.v4-district-row:hover .v4-district-go{opacity:1;transform:translate(2px,-2px)}
 button.v4-district-lane:hover .ld-dots-axis{opacity:1}
-button.v4-district-lane:hover .v4-person strong,button.v4-district-row:hover .v4-person strong{color:var(--primary)}
+button.v4-district-lane:hover .v4-person strong,button.v4-district-row:hover .v4-person strong{color:var(--color-text-brand)}
 .v4-district-axis{display:grid;grid-template-columns:var(--dl-cols);gap:16px;padding-top:8px;font-size:11px;color:var(--muted-foreground)}
 .v4-district-axis>div{display:flex;justify-content:space-between}
 .v4-district-legend{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 16px;font-size:11px;color:var(--muted-foreground)}

@@ -70,22 +70,20 @@ const EXPLORE_SECTIONS = [
  *  LinkedIn, Handshake), a graduation cap for schools (every school app).
  *  Desktop keeps the text tabs under the title (ExploreSectionTabs). */
 export function ExploreSectionSwitch({ active }: { active: "careers" | "colleges" }) {
-  const router = useRouter();
   return (
-    <div role="tablist" aria-label="Explore section" className="inline-flex h-[32px] flex-none items-center rounded-[10px] p-[2px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+    <nav aria-label="Explore section" className="inline-flex h-[32px] flex-none items-center rounded-[10px] p-[2px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
       {EXPLORE_SECTIONS.map((section) => {
         const on = section.key === active;
         return (
-          <button key={section.key} type="button" role="tab" aria-selected={on} aria-label={section.label} aria-current={on ? "page" : undefined}
-            onClick={() => { if (!on) router.push(section.href); }}
+          <Link key={section.key} href={section.href} aria-label={section.label} aria-current={on ? "page" : undefined}
             className={`dm-quiet flex h-full cursor-pointer items-center gap-[6px] rounded-[8px] text-[13px] leading-[16px] whitespace-nowrap ${on ? "px-[10px] font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]" : "px-[7px] text-[color:var(--muted-foreground)]"}`}
             style={{ fontFamily: "var(--font-body)", background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>
             <section.Icon className="h-4 w-4" aria-hidden />
             {on && <span>{section.label}</span>}
-          </button>
+          </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }
 export function ExploreSectionTabs({
@@ -102,20 +100,20 @@ export function ExploreSectionTabs({
   showTutorial?: boolean;
   onDismissTutorial?: () => void;
 }) {
-  const router = useRouter();
   const [pulsePlayed, setPulsePlayed] = useState(false);
   return (
-    <div role="tablist" aria-label="Explore section" className="flex flex-none items-center gap-[12px] sm:gap-[var(--space-4)]">
+    // A nav of links, not tabs: each one loads a different page (WCAG 4.1.2,
+    // audit 21 Oct 2026), so it opens in a new tab and reads as "link, current
+    // page" rather than promising same-page tab behaviour.
+    <nav aria-label="Explore section" className="flex flex-none items-center gap-[12px] sm:gap-[var(--space-4)]">
       {EXPLORE_SECTIONS.map((section, i) => {
         const isActive = section.key === active;
         const pulsing = showTutorial && !pulsePlayed && section.key === "colleges" && !isActive;
         const button = (
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isActive}
+          <Link
+            href={section.href}
             aria-current={isActive ? "page" : undefined}
-            onClick={() => { onDismissTutorial?.(); if (!isActive) router.push(section.href); }}
+            onClick={() => { onDismissTutorial?.(); }}
             onAnimationEnd={() => { if (pulsing) setPulsePlayed(true); }}
             className={`relative -mx-[10px] -my-[6px] rounded-[var(--radius-sm)] px-[10px] py-[6px] text-[13px] font-bold whitespace-nowrap uppercase sm:text-[14px] tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"} ${pulsing ? "dm-tab-nudge" : ""}`}
             style={{
@@ -137,7 +135,7 @@ export function ExploreSectionTabs({
                 transition={{ type: "spring", stiffness: 500, damping: 40 }}
               />
             )}
-          </button>
+          </Link>
         );
         return (
           <span key={section.key} className="flex items-center gap-[12px] sm:gap-[var(--space-4)]">
@@ -160,7 +158,7 @@ export function ExploreSectionTabs({
           </span>
         );
       })}
-    </div>
+    </nav>
   );
 }
 
@@ -215,6 +213,8 @@ const QUICK_LINKS = [
   // DEMO-ONLY: Level 1 draft for discussion and QA (19 Oct 2026).
   { label: "Food Scientist · QA draft", href: "/play/food-scientist" },
   { label: "UX Designer · QA draft", href: "/play/ui-ux-designer" },
+  { label: "Registered Nurse · QA", href: "/play/registered-nurse" },
+  { label: "Career game master SOP (PDF)", href: "/documents/dreamari-master-career-sop.pdf" },
   // DEMO-ONLY lab build of AMT Level 1 (5 Oct 2026): the detailed take with
   // the task card and the hands-on torque wrench; live Level 1 follows the
   // script. Flagged for Usman.
@@ -227,6 +227,8 @@ const QUICK_LINKS = [
   { label: "Find a school", href: "/colleges" },
   { label: "Connect", href: "/connect" },
   { label: "Sign Up", href: "/signup" },
+  // the help page, in the same menu on every screen (WCAG 3.2.6)
+  { label: "Accessibility and help", href: "/accessibility" },
 ] as const;
 
 // DEMO-ONLY: perspectives (Connect 2.0) -- each role's own Connect, one tap

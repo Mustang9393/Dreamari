@@ -9,7 +9,7 @@
 // DEMO-ONLY: the student is the roster's "real-student" (Jordan Rivera);
 // with a backend this is the signed-in student's id.
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { skyMoment } from "@/lib/sky";
 import { CalendarCheck, Check, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
@@ -17,6 +17,7 @@ import { addMeeting, timeLabel, useAddedMeetings, useOfficeHours, type MeetingTy
 import { isoDay } from "@/lib/localRecord";
 import { useBackStep } from "@/lib/backStep";
 import { Portal } from "./CareerReport";
+import { useDialogFocus } from "@/components/app/useDialogFocus";
 
 export const STUDENT_ID = "real-student";
 const MINUTES = 20;
@@ -35,6 +36,9 @@ function dayLabel(iso: string): string {
 
 export function BookCounselorSheet({ onClose }: { onClose: () => void }) {
   useBackStep(true, onClose);
+  // focus in, Tab kept inside, Escape closes (WCAG 2.4.3 / 2.1.2)
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialog, onClose);
   const hours = useOfficeHours();
   const taken = useAddedMeetings();
   const [type, setType] = useState<MeetingType>("Career exploration");
@@ -72,7 +76,7 @@ export function BookCounselorSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <Portal>
-      <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center p-0 sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label="Book a meeting with your counselor" style={{ background: "transparent", fontFamily: "var(--font-body)" }}>
+      <div ref={dialog} tabIndex={-1} className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center p-0 sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label="Book a meeting with your counselor" style={{ background: "transparent", fontFamily: "var(--font-body)" }}>
         <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
         <div className="relative z-[1] flex max-h-[92dvh] w-full max-w-[520px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-lg)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
           <div className="flex items-start justify-between gap-[var(--space-3)]">

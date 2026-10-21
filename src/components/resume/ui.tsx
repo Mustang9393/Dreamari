@@ -13,7 +13,8 @@ import { Listbox, type ListboxOption } from "@/components/app/Listbox";
 // _LABEL/_CARD, ProfileExperience.tsx:2221-2225) rather than imported, since
 // those are file-local consts in a 2500+ line file. Same look, independent
 // module.
-const FIELD_CLASS = "min-h-[44px] w-full rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px] font-semibold outline-none focus:border-[var(--primary)]";
+// focus shows as a 2px ring, not only a border colour change (WCAG 2.4.7)
+const FIELD_CLASS = "min-h-[44px] w-full rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px] font-semibold outline-none focus:border-[var(--primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent-subtle)]";
 export const FIELD_STYLE: CSSProperties = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" };
 const LABEL_CLASS = "text-[12px] font-bold tracking-[0.06em] uppercase";
 export const CARD_CLASS = "flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]";
@@ -36,7 +37,8 @@ export function Field({ label, htmlFor, children, required }: { label: string; h
     <div className="flex flex-col gap-[6px]">
       <label className={LABEL_CLASS} htmlFor={htmlFor} style={{ color: "var(--muted-foreground)" }}>
         {label}
-        {required && <span style={{ color: "var(--accent-subtle)" }}> *</span>}
+        {/* the star is the sighted cue; screen readers hear "required" (WCAG 3.3.2) */}
+        {required && <><span aria-hidden style={{ color: "var(--accent-subtle)" }}> *</span><span className="sr-only"> (required)</span></>}
       </label>
       {children}
     </div>
@@ -51,6 +53,7 @@ export function TextInput({ id, value, onChange, placeholder, type = "text", inv
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
+      aria-invalid={invalid || undefined}
       className={FIELD_CLASS}
       style={{ ...FIELD_STYLE, borderColor: invalid ? DANGER : FIELD_STYLE.borderColor }}
       {...rest}

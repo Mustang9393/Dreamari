@@ -105,17 +105,17 @@ export function PersonalInfoStep({ resume, onNext, onFieldFocus }: { resume: Res
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
         <Field label="First Name" htmlFor="rb-first" required>
-          <TextInput id="rb-first" value={p.firstName} onChange={(v) => set({ firstName: v })} onFocus={track("profile:name")} placeholder="Jordan" />
+          <TextInput id="rb-first" autoComplete="given-name" required value={p.firstName} onChange={(v) => set({ firstName: v })} onFocus={track("profile:name")} placeholder="Jordan" />
         </Field>
         <Field label="Last Name" htmlFor="rb-last" required>
-          <TextInput id="rb-last" value={p.lastName} onChange={(v) => set({ lastName: v })} onFocus={track("profile:name")} placeholder="Rivers" />
+          <TextInput id="rb-last" autoComplete="family-name" required value={p.lastName} onChange={(v) => set({ lastName: v })} onFocus={track("profile:name")} placeholder="Rivers" />
         </Field>
       </div>
       <Field label="Email" htmlFor="rb-email">
-        <TextInput id="rb-email" type="email" value={p.email} onChange={(v) => set({ email: v })} onFocus={track("profile:contact")} placeholder="you@school.org" />
+        <TextInput id="rb-email" autoComplete="email" type="email" value={p.email} onChange={(v) => set({ email: v })} onFocus={track("profile:contact")} placeholder="you@school.org" />
       </Field>
       <Field label="Phone (optional)" htmlFor="rb-phone">
-        <TextInput id="rb-phone" type="tel" value={p.phone} onChange={(v) => set({ phone: v })} onFocus={track("profile:contact")} placeholder="(555) 123-4567" />
+        <TextInput id="rb-phone" autoComplete="tel" type="tel" value={p.phone} onChange={(v) => set({ phone: v })} onFocus={track("profile:contact")} placeholder="(555) 123-4567" />
       </Field>
       <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
         <Field label="Country" htmlFor="rb-country">
@@ -127,11 +127,11 @@ export function PersonalInfoStep({ resume, onNext, onFieldFocus }: { resume: Res
           />
         </Field>
         <Field label="State / Province / Region" htmlFor="rb-state">
-          <TextInput id="rb-state" value={p.state} onChange={(v) => set({ state: v })} onFocus={track("profile:contact")} placeholder="California" />
+          <TextInput id="rb-state" autoComplete="address-level1" value={p.state} onChange={(v) => set({ state: v })} onFocus={track("profile:contact")} placeholder="California" />
         </Field>
       </div>
       <Field label="City" htmlFor="rb-city">
-        <TextInput id="rb-city" value={p.city} onChange={(v) => set({ city: v })} onFocus={track("profile:contact")} placeholder="San Jose" />
+        <TextInput id="rb-city" autoComplete="address-level2" value={p.city} onChange={(v) => set({ city: v })} onFocus={track("profile:contact")} placeholder="San Jose" />
       </Field>
       {/* No bio field here in v1 -- the reference's own Personal
          Information step only ever asks for name/email/phone/address,
@@ -291,7 +291,7 @@ export function EducationStep({ resume, onNext, showToast, onFieldFocus }: { res
       ) : (
         <>
           <div className="flex items-center justify-end gap-[var(--space-3)]">
-            <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+            <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-[var(--primary-foreground)]" style={{ background: "var(--primary)" }}>
               <Plus className="h-4 w-4" aria-hidden /> Add Education
             </button>
           </div>
@@ -320,7 +320,7 @@ export function ExperienceStep({ resume, onNext, onAdd, onEdit }: { resume: Resu
       ) : (
         <>
           <div className="flex items-center justify-end gap-[var(--space-3)]">
-            <button type="button" onClick={onAdd} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+            <button type="button" onClick={onAdd} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-[var(--primary-foreground)]" style={{ background: "var(--primary)" }}>
               <Plus className="h-4 w-4" aria-hidden /> Add Experience
             </button>
           </div>
@@ -429,7 +429,7 @@ function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSa
               type="button"
               onClick={() => toggle(s)}
               className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[8px] text-[13.5px] font-bold"
-              style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#fff" } : { borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+              style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)", color: "var(--foreground)" }}
             >
               {on && <Check className="h-3.5 w-3.5" aria-hidden />}
               {s}
@@ -439,7 +439,7 @@ function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSa
       </div>
       <div className="mt-[var(--space-5)] flex items-center justify-end gap-[var(--space-3)]">
         <button type="button" onClick={cancel} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
-        <button type="button" onClick={() => onSave(picked)} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white" style={{ background: "var(--primary)" }}>
+        <button type="button" onClick={() => onSave(picked)} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-[var(--primary-foreground)]" style={{ background: "var(--primary)" }}>
           {picked.length > 0 ? `Add ${picked.length} skill${picked.length === 1 ? "" : "s"}` : "Save"}
         </button>
       </div>
@@ -614,7 +614,7 @@ export function CertificationsStep({ resume, onNext, showToast, onFieldFocus }: 
       ) : (
         <>
           <div className="flex items-center justify-end gap-[var(--space-3)]">
-            <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+            <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-[var(--primary-foreground)]" style={{ background: "var(--primary)" }}>
               <Plus className="h-4 w-4" aria-hidden /> Add Certification
             </button>
           </div>

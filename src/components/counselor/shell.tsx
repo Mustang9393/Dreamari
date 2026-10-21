@@ -245,7 +245,7 @@ function SidebarAccount({ account }: { account: { name: string; school: string }
   const initials = leader ? leaderOrg.initials : account.name ? account.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase() : "?";
   const content = (
     <>
-      <span className="flex size-[34px] flex-none items-center justify-center rounded-full text-[13px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}>
+      <span className="flex size-[34px] flex-none items-center justify-center rounded-full text-[13px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--color-text-brand)" }}>
         {initials}
       </span>
       <span className="flex min-w-0 flex-1 flex-col leading-tight">
@@ -329,7 +329,7 @@ function SidebarAccount({ account }: { account: { name: string; school: string }
                     <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{r}</span>
                     <span className="text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>{ROLE_DESCRIPTIONS[r]}</span>
                   </span>
-                  {on && <Check className="mt-[2px] h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />}
+                  {on && <Check className="mt-[2px] h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--color-text-brand)" }} />}
                 </button>
               );
             })}
@@ -445,7 +445,7 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
       <div role="dialog" aria-modal="true" aria-label={`Why ${heading} looks this way`} className="relative mt-[56px] flex max-h-[calc(calc(100dvh/var(--vz,1))-80px)] w-full max-w-[580px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.6)" }}>
         <div className="flex items-start justify-between gap-[8px]">
           <span className="flex flex-col gap-[4px]">
-            <span className={label} style={{ color: "var(--primary)" }}>Design rationale</span>
+            <span className={label} style={{ color: "var(--color-text-brand)" }}>Design rationale</span>
             <span className="text-[18px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{heading}</span>
             <span className="text-[13px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>{note.summary}</span>
           </span>
@@ -457,7 +457,7 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
           <ol className="flex flex-col gap-[12px]">
             {note.decisions.map((d, i) => (
               <li key={d.change} className="flex gap-[10px]">
-                <span className="flex size-[20px] flex-none items-center justify-center rounded-full text-[11px] font-bold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>{i + 1}</span>
+                <span className="flex size-[20px] flex-none items-center justify-center rounded-full text-[11px] font-bold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--color-text-brand)" }}>{i + 1}</span>
                 <span className="flex min-w-0 flex-col gap-[3px]">
                   <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{d.change}</span>
                   <span className="text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>{d.why}</span>
@@ -468,7 +468,7 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
         </section>
 
         <section className="flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[12px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 3%, transparent)" }}>
-          <span className={`${label} flex items-center gap-[6px]`} style={{ color: "var(--muted-foreground)" }}><Check className="h-[12px] w-[12px]" aria-hidden style={{ color: "var(--primary)" }} />{note.keptHeading ?? "Kept from the Replit"}</span>
+          <span className={`${label} flex items-center gap-[6px]`} style={{ color: "var(--muted-foreground)" }}><Check className="h-[12px] w-[12px]" aria-hidden style={{ color: "var(--color-text-brand)" }} />{note.keptHeading ?? "Kept from the Replit"}</span>
           <span className="text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--foreground)" }}>{note.kept}</span>
         </section>
 
@@ -510,7 +510,7 @@ function GlobalSearch({ search, setSearch, className = "w-[280px]", autoFocus }:
   const screens = q ? items.filter((i) => i.label.toLowerCase().includes(q)).slice(0, 4) : [];
   const results: { key: string; href: string; node: React.ReactNode }[] = [
     ...students.map((s) => ({ key: s.id, href: `/counselor?view=students&studentId=${s.id}`, node: <><Avatar name={s.name} size={26} index={s.avatarIndex} /><span className="flex min-w-0 flex-col leading-tight"><span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span><span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.status}</span></span></> })),
-    ...screens.map((i) => { const Icon = i.icon; return { key: i.view, href: `/counselor?view=${i.view}`, node: <><span className="flex size-[26px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--primary)" }}><Icon className="h-[13px] w-[13px]" aria-hidden /></span><span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{i.label}</span></> }; }),
+    ...screens.map((i) => { const Icon = i.icon; return { key: i.view, href: `/counselor?view=${i.view}`, node: <><span className="flex size-[26px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--color-text-brand)" }}><Icon className="h-[13px] w-[13px]" aria-hidden /></span><span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{i.label}</span></> }; }),
   ];
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

@@ -571,7 +571,7 @@ export function ValuationTicker({ from, to, milestone, mode, company = "Dream Sn
     const stepPct = Math.max(6, Math.round((done / Math.max(progress.total, 1)) * 100));
     const where = `Level ${progress.level} of ${progress.total}`;
     return (
-      <div className={`glossary-valuation is-milestone is-${mode}`} aria-label={mode === "reached" ? `${where} complete: ${milestone}.` : `${where}. Finish it to ${milestone.charAt(0).toLowerCase()}${milestone.slice(1)}.`}>
+      <div role="group" className={`glossary-valuation is-milestone is-${mode}`} aria-label={mode === "reached" ? `${where} complete: ${milestone}.` : `${where}. Finish it to ${milestone.charAt(0).toLowerCase()}${milestone.slice(1)}.`}>
         <span className="glossary-valuation-kicker"><Building2 aria-hidden /> {company}</span>
         <b className="glossary-valuation-value">{milestone}</b>
         <span className="glossary-valuation-track" aria-hidden><i style={{ width: `${stepPct}%` }} /></span>
@@ -583,7 +583,7 @@ export function ValuationTicker({ from, to, milestone, mode, company = "Dream Sn
   }
   const pct = mode === "reached" ? 100 : Math.max(6, Math.round((from / Math.max(to, 1)) * 100));
   return (
-    <div className={`glossary-valuation is-${mode}`} aria-label={mode === "reached" ? `${company} is now worth $${to.toLocaleString()}. ${milestone}.` : `${company} is worth $${from.toLocaleString()}. Finish this level to reach $${to.toLocaleString()}: ${milestone}.`}>
+    <div role="group" className={`glossary-valuation is-${mode}`} aria-label={mode === "reached" ? `${company} is now worth $${to.toLocaleString()}. ${milestone}.` : `${company} is worth $${from.toLocaleString()}. Finish this level to reach $${to.toLocaleString()}: ${milestone}.`}>
       <span className="glossary-valuation-kicker"><Building2 aria-hidden /> {company} value</span>
       <b className="glossary-valuation-value">${(mode === "reached" ? shown : from).toLocaleString()}</b>
       <span className="glossary-valuation-track" aria-hidden><i style={{ width: `${pct}%` }} /></span>
@@ -1046,7 +1046,7 @@ export function UnlockCompleteScreen({ lesson, onStartPractice, variant = "defau
 
   if (variant === "lab") {
     return (
-      <div className="glossary-screen glossary-unlock-complete-screen glossary-unlock-finale relative w-full flex-1" aria-labelledby="glossary-unlock-title">
+      <div role="group" className="glossary-screen glossary-unlock-complete-screen glossary-unlock-finale relative w-full flex-1" aria-labelledby="glossary-unlock-title">
         <LocalBurst nonce={1} />
         <div className="glossary-unlock-finale-copy">
           <div className="glossary-unlock-finale-dreamy"><DreamyFace pose="mastery" size={132} /></div>
@@ -1054,7 +1054,7 @@ export function UnlockCompleteScreen({ lesson, onStartPractice, variant = "defau
           <h2 id="glossary-unlock-title">{lesson.terms.length} terms<br /><em>unlocked.</em></h2>
           <p>Now put them to work.</p>
         </div>
-        <div className="glossary-unlock-gallery" aria-label={`${lesson.terms.length} unlocked terms`}>
+        <div role="group" className="glossary-unlock-gallery" aria-label={`${lesson.terms.length} unlocked terms`}>
           <span className="glossary-unlock-gallery-aura" aria-hidden />
           {/* Signal's one Dreamy on this screen (its copy-block Dreamy is
              hidden by glossary-signal.css); Drift hides this one and shows
@@ -2037,7 +2037,7 @@ function ProfitBuilderCard({ question, onAnswer, onReset, framed = false }: { qu
 
   return (
     <div className="glossary-profit-builder flex w-full flex-col gap-[var(--space-4)]">
-      <div className="glossary-profit-machine" aria-label={question.scenario}>
+      <div role="group" className="glossary-profit-machine" aria-label={question.scenario}>
         <span className="glossary-profit-machine-label">Revenue rig</span>
         <div className="glossary-profit-factor"><b>{scenarioValues[0] ?? "500"}</b><small>pairs</small></div>
         <span className="glossary-profit-operator">×</span>
@@ -2237,7 +2237,7 @@ export function QuestionScreen({
   const scene = question.kind === "choice" && question.scene ? <SceneCardView scene={question.scene} answered={pickedCorrect} />
     : (question.kind === "multiSelect" || question.kind === "chain") && question.scene ? <SceneCardView scene={question.scene} answered={answerState === "correct"} />
     : question.kind === "choice" && question.visual?.kind === "profit" ? (
-    <div className="glossary-question-profit-scene" aria-label={`${question.visual.title} sells for $${question.visual.sells}, costs $${question.visual.costs} to make, $${question.visual.sells - question.visual.costs} left`}>
+    <div role="group" className="glossary-question-profit-scene" aria-label={`${question.visual.title} sells for $${question.visual.sells}, costs $${question.visual.costs} to make, $${question.visual.sells - question.visual.costs} left`}>
       <Image src={assets.Product} alt="" width={92} height={92} unoptimized />
       <div><small>{question.visual.title}</small><b>${question.visual.sells}</b><span>Sells for</span></div>
       <strong>−</strong>
@@ -3238,7 +3238,7 @@ export function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { c
           <button type="button" onClick={onClose} aria-label="Close levels"><X aria-hidden /></button>
         </header>
 
-        <div className="glossary-level-map-progress" aria-label={`${completedCount} of ${levels.length} levels complete`}><span style={{ width: `${Math.max(100 / levels.length, ((completedCount + (isComplete(playingIndex) ? 0 : 1)) / levels.length) * 100)}%` }} /></div>
+        <div role="group" className="glossary-level-map-progress" aria-label={`${completedCount} of ${levels.length} levels complete`}><span style={{ width: `${Math.max(100 / levels.length, ((completedCount + (isComplete(playingIndex) ? 0 : 1)) / levels.length) * 100)}%` }} /></div>
         <div className="glossary-level-map-viewport">
         <div className={`glossary-level-map-scroll glossary-map-concept-${atmosphere}`}>
           {atmosphere === "v3" ? <div className="glossary-orbit-core"><DreamyFace pose="glasses" size={90} /><b>Core skill</b><span>Business Basics</span></div> : null}
@@ -3291,7 +3291,7 @@ export function LabLevelMap({ career, lesson, atmosphere, onClose, onPlay }: { c
                   <b>{title}</b>
                   {/* the level in the student's terms: what it is for, the five words, how long, what it opens (6 Oct 2026) */}
                   <span className="glossary-map-rung-goal">{goal}</span>
-                  <span className="glossary-map-rung-words" aria-label="Words in this level">{words.map((w) => <i key={w}>{w}</i>)}</span>
+                  <span role="img" className="glossary-map-rung-words" aria-label="Words in this level">{words.map((w) => <i key={w}>{w}</i>)}</span>
                   <small><span>{minutes} min</span><span>{career.mode === "continuous_story" ? <CircleDollarSign aria-hidden /> : null} Unlocks {value}</span><span>{STATE_LABEL[stateOf(index)]}</span></small>
                   {/* The selected level's detail and its action live in the
                      card itself (16 Oct 2026, Chandu: the footer "that

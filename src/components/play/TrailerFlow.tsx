@@ -245,7 +245,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
                Managing Director at the top. A diagram, not buttons, so the
                one real button below stays the only thing that reads
                tappable. */}
-            <div className="mx-auto flex w-fit flex-col" aria-label="The career ladder">
+            <div role="group" className="mx-auto flex w-fit flex-col" aria-label="The career ladder">
               {[...LADDER].reverse().map((role, i) => {
                 const rung = LADDER.length - 1 - i; // 5 = Managing Director
                 const top = rung === 5;

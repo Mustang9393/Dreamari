@@ -7,7 +7,7 @@
 // Escape and arrow keys. The student school sheet and the counselor's
 // career and school sheets fill it; the student career sheet is CareerPeek.
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useDragControls, useReducedMotion, type DragControls, type PanInfo } from "framer-motion";
 import Link from "next/link";
@@ -16,6 +16,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { Segmented } from "@/components/connect/viz";
 import { ScrollEdges } from "./cardChrome";
 import { rememberReturn } from "./peekStore";
+import { useDialogFocus } from "./useDialogFocus";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -101,17 +102,17 @@ export function PeekSheet<K extends string>({ id, accent, art, chip, title, titl
     setDir(d);
     onIndex(next);
   }, [index, count, onIndex]);
+  // focus in, Tab kept inside, Escape closes, focus back to the card (WCAG 2.4.3)
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialog, onClose);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
       if (e.key === "ArrowRight") go(1);
       if (e.key === "ArrowLeft") go(-1);
     };
     document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
-  }, [go, onClose]);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [go]);
 
   return createPortal(
     <motion.div
@@ -119,7 +120,7 @@ export function PeekSheet<K extends string>({ id, accent, art, chip, title, titl
       className={sheetOverlayClass(narrow, "marketing-v2 themeable")}
       style={{ background: `color-mix(in srgb, var(--background) ${refined ? 48 : 72}%, transparent)`, backdropFilter: refined ? "blur(16px) saturate(1.15)" : "blur(22px)", WebkitBackdropFilter: refined ? "blur(16px) saturate(1.15)" : "blur(22px)" }}
       onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      role="dialog" aria-modal="true" aria-labelledby="explore-sheet-title"
+      ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="explore-sheet-title"
     >
       <motion.div
         {...sheetMotion(narrow, reduce, drag, onClose)}

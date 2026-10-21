@@ -76,7 +76,7 @@ export function MilestonesByStudent({ rows, status, setStatus, onOpenMilestone }
           {picked.size > 0 ? (
             <span className="flex items-center gap-[10px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
               {picked.size} selected
-              <button type="button" aria-expanded={composing} onClick={() => setComposing((v) => !v)} className="v4-inline-link" style={{ color: "var(--primary)" }}><Users className="h-[14px] w-[14px]" aria-hidden />Message {picked.size}</button>
+              <button type="button" aria-expanded={composing} onClick={() => setComposing((v) => !v)} className="v4-inline-link" style={{ color: "var(--color-text-brand)" }}><Users className="h-[14px] w-[14px]" aria-hidden />Message {picked.size}</button>
               <IconTip label="Clear selection"><button type="button" aria-label="Clear selection" onClick={() => { setPicked(new Set()); setComposing(false); }} className="v4-ms-icon"><X className="h-[14px] w-[14px]" aria-hidden /></button></IconTip>
             </span>
           ) : (

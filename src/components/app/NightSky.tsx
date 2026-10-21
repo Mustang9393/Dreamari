@@ -39,10 +39,20 @@
 // it happened, the stars it passes brighten and ease outward, and a big
 // moment adds one shooting star. The sky animates only for those ~2s, then
 // is still again. Off for reduced motion.
+//
+// Lively (21 Oct 2026, the landing page; Chandu: "add the stars to the landing
+// page too but have them be more animated and engaging but not distracting").
+// Three quiet layers on top of the same sky, none of them per-dot wandering:
+//   - depth: the field leans a few px away from the cursor, bright (near)
+//     stars further than faint (far) ones, so the sky has real parallax;
+//   - a shooting star now and then (every 9-17s, never on a timer you can
+//     feel), thin and gone in under a second;
+//   - the sky turns a touch faster and the bright stars twinkle a little more.
+// Still one canvas at ~30fps, paused in hidden tabs, still for reduced motion.
 import { useEffect, useRef } from "react";
 import { SKY_EVENT } from "@/lib/sky";
 
-type Moment = { x: number; big: boolean; t0: number };
+type Moment = { x: number; big: boolean; t0: number; /** lively: a shooting star with no wave of light */ shotOnly?: boolean };
 const MOMENT_EVENT = SKY_EVENT;
 
 export { skyMoment } from "@/lib/sky";
@@ -92,7 +102,7 @@ function pickTint(): number {
   return 0;
 }
 
-export function NightSky({ calm = false, contained = false }: { calm?: boolean; /** sized to its box, not the window (the Edit My Build sheet); no wake-up wave */ contained?: boolean } = {}) {
+export function NightSky({ calm = false, contained = false, lively = false }: { calm?: boolean; /** sized to its box, not the window (the Edit My Build sheet); no wake-up wave */ contained?: boolean; /** the landing page: cursor parallax and the odd shooting star (see above) */ lively?: boolean } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -114,10 +124,19 @@ export function NightSky({ calm = false, contained = false }: { calm?: boolean; 
     let moments: Moment[] = [];
     let animating = false; // calm mode: only while a moment plays
     const MOMENT_MS = 2000;
+    // lively: the eased cursor lean (-1..1) and the next unprompted shooting star
+    let leanX = 0, leanY = 0, aimX = 0, aimY = 0;
+    let nextShot = performance.now() + 4000 + Math.random() * 5000;
+    const onPointer = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      aimX = (e.clientX / window.innerWidth) * 2 - 1;
+      aimY = (e.clientY / window.innerHeight) * 2 - 1;
+    };
 
     const seed = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const box = contained ? canvas.parentElement : null;
+      // lively fills its section (the landing hero runs past the fold), not the window
+      const box = contained || lively ? canvas.parentElement : null;
       width = box ? box.clientWidth : window.innerWidth;
       height = box ? box.clientHeight : window.innerHeight;
       canvas.width = Math.round(width * dpr);
@@ -159,7 +178,7 @@ export function NightSky({ calm = false, contained = false }: { calm?: boolean; 
       return fade * (0.55 + 0.45 * bloom);
     };
 
-    const DRIFT = 0.45; // px per second: the sky turning, not anything flying
+    const DRIFT = lively ? 0.9 : 0.45; // px per second: the sky turning, not anything flying
 
     const draw = (time: number, dt: number) => {
       ctx.clearRect(0, 0, width, height);
@@ -167,6 +186,14 @@ export function NightSky({ calm = false, contained = false }: { calm?: boolean; 
       // calm: a frozen twinkle phase, so a still sky still reads as stars
       const t = calm ? 0 : time / 1000;
       const now = performance.now();
+      if (lively) {
+        leanX += (aimX - leanX) * 0.06;
+        leanY += (aimY - leanY) * 0.06;
+        if (now > nextShot) {
+          nextShot = now + 9000 + Math.random() * 8000;
+          moments.push({ x: width * (0.35 + Math.random() * 0.6), big: true, t0: now, shotOnly: true });
+        }
+      }
       moments = moments.filter((m) => now - m.t0 < MOMENT_MS);
       for (const s of stars) {
         let x = s.x + offset;
@@ -176,6 +203,7 @@ export function NightSky({ calm = false, contained = false }: { calm?: boolean; 
         let boost = 0;
         let push = 0;
         for (const m of moments) {
+          if (m.shotOnly) continue;
           const age = now - m.t0;
           const r = age * 0.85;
           const d = Math.hypot(x - m.x, s.y + 40);
@@ -186,11 +214,15 @@ export function NightSky({ calm = false, contained = false }: { calm?: boolean; 
           push += k * Math.sign(x - m.x) * 5;
         }
         x += push;
-        const vis = visibility(x, s.y);
+        // lively: near (bright) stars lean further from the cursor than far ones
+        const depth = lively ? 4 + s.b * 14 : 0;
+        x -= leanX * depth;
+        const y = s.y - leanY * depth * 0.6;
+        const vis = visibility(x, y);
         // brightness 0..1 to alpha; faint stars sit near the edge of seeing
         const base = (0.13 + s.b * 0.72) * vis;
         // scintillation: only brighter stars, irregular, never a pulse
-        const amp = s.b * 0.45;
+        const amp = s.b * (lively ? 0.6 : 0.45);
         const flicker = amp > 0.04
           ? 1 - amp * (0.5 + 0.5 * Math.sin(t * s.s1 + s.p1)) * (0.5 + 0.5 * Math.sin(t * s.s2 + s.p2))
           : 1;
@@ -198,11 +230,11 @@ export function NightSky({ calm = false, contained = false }: { calm?: boolean; 
         // a crisp core for every star; a halo only on the bright ones
         const core = (1.1 + s.b * 2.4) * (1 + boost * 0.7);
         ctx.globalAlpha = alpha;
-        ctx.drawImage(cores[s.tint], x - core / 2, s.y - core / 2, core, core);
+        ctx.drawImage(cores[s.tint], x - core / 2, y - core / 2, core, core);
         if (s.b > 0.35 || boost > 0.3) {
           const halo = 6 + s.b * 12;
           ctx.globalAlpha = Math.min(1, alpha * Math.max(s.b - 0.2, boost * 0.5));
-          ctx.drawImage(halos[s.tint], x - halo / 2, s.y - halo / 2, halo, halo);
+          ctx.drawImage(halos[s.tint], x - halo / 2, y - halo / 2, halo, halo);
         }
       }
       // a big moment: one shooting star from above where it happened, down
@@ -290,6 +322,7 @@ export function NightSky({ calm = false, contained = false }: { calm?: boolean; 
       }
     };
     window.addEventListener(MOMENT_EVENT, onMoment);
+    if (lively && !calm && window.matchMedia("(pointer: fine)").matches) window.addEventListener("pointermove", onPointer, { passive: true });
 
     seed();
     sync();
@@ -301,7 +334,7 @@ export function NightSky({ calm = false, contained = false }: { calm?: boolean; 
     observer.observe(root, { attributes: true, attributeFilter: ["class"] });
     window.addEventListener("resize", onResize);
     // a boxed sky follows its box (a sheet sizes after it mounts)
-    const boxObserver = contained && canvas.parentElement ? new ResizeObserver(onResize) : null;
+    const boxObserver = (contained || lively) && canvas.parentElement ? new ResizeObserver(onResize) : null;
     if (boxObserver && canvas.parentElement) boxObserver.observe(canvas.parentElement);
     document.addEventListener("visibilitychange", sync);
     return () => {
@@ -311,8 +344,9 @@ export function NightSky({ calm = false, contained = false }: { calm?: boolean; 
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", sync);
       window.removeEventListener(MOMENT_EVENT, onMoment);
+      window.removeEventListener("pointermove", onPointer);
     };
-  }, [calm, contained]);
+  }, [calm, contained, lively]);
 
   return <canvas ref={canvasRef} aria-hidden data-night-sky className="pointer-events-none absolute inset-0 h-full w-full" style={{ display: "none" }} />;
 }

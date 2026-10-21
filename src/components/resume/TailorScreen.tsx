@@ -5,6 +5,7 @@ import { Check, Sparkles } from "lucide-react";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, upsertVersion, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { ErrorView } from "@/components/app/states";
+import { announce } from "@/components/app/LiveRegion";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATES } from "./data";
 import { CARD_CLASS, Field, INSET, selectedRowStyle, TextInput, WizardFooter } from "./ui";
 
@@ -29,7 +30,7 @@ function TemplatePicker({ value, onChange }: { value: string; onChange: (id: str
           >
             <span className="size-8 flex-none rounded-full border" style={{ background: t.accent, borderColor: "var(--glass-border)" }} aria-hidden />
             <span className="flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
-              {selected && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
+              {selected && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--color-text-brand)" }} aria-hidden />}
               {t.label}
             </span>
           </button>
@@ -51,7 +52,7 @@ function PickRow({ label, meta, checked, onToggle }: { label: string; meta?: str
         className="flex size-5 flex-none items-center justify-center rounded-[6px] border"
         style={checked ? { background: "var(--primary)", borderColor: "var(--primary)" } : { borderColor: "var(--glass-border)" }}
       >
-        {checked && <Check className="h-3.5 w-3.5 text-white" aria-hidden />}
+        {checked && <Check className="h-3.5 w-3.5 text-[var(--primary-foreground)]" aria-hidden />}
       </span>
       <span className="flex flex-col gap-[1px]">
         <span className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
@@ -101,6 +102,7 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
   async function matchToJob() {
     if (draft.jobDescription.trim().length === 0) return;
     setMatching(true);
+    announce("Matching your resume to this job."); // the button text change alone is silent (WCAG 4.1.3)
     setMatchError(false);
     try {
       const res = await fetch("/api/resume-tailor", {
@@ -206,6 +208,7 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
         <textarea
           value={draft.jobDescription}
           onChange={(e) => setDraft({ ...draft, jobDescription: e.target.value })}
+          aria-label="Job description"
           placeholder="Paste the full job description here…"
           rows={5}
           className="w-full rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-[14px] font-semibold outline-none focus:border-[var(--primary)]"

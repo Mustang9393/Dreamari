@@ -40,7 +40,9 @@ html.dark [data-counselor-version="v4"] .ld-core-stop { stop-color: var(--ld-cor
 [data-counselor-version="v4"] .ld-flow-stop-a { stop-opacity: var(--ld-rib-a); }
 [data-counselor-version="v4"] .ld-flow-stop-b { stop-opacity: var(--ld-rib-b); }
 [data-counselor-version="v4"] .ld-flow-ribbon { transition: opacity .2s; }
-[data-counselor-version="v4"] .ld-flow-ribbon.is-dim, [data-counselor-version="v4"] .ld-flow-part.is-dim { opacity: .38; }
+[data-counselor-version="v4"] .ld-flow-ribbon.is-dim { opacity: .38; }
+/* a dimmed part keeps its words readable at 4.5:1 (WCAG 1.4.3) */
+[data-counselor-version="v4"] .ld-flow-part.is-dim { opacity: .72; }
 [data-counselor-version="v4"] .ld-flow-ribbon.is-on .ld-flow-stop-b { stop-opacity: var(--ld-rib-on); }
 [data-counselor-version="v4"] .ld-flow-part { transition: opacity .2s; }
 [data-counselor-version="v4"] .ld-flow-edge { stroke-width: 1; stroke-opacity: .55; }

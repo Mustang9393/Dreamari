@@ -7,10 +7,11 @@
 // four quick taps and an optional note here. A low answer shows the 988 line,
 // the way school check-in tools do.
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Check, X } from "lucide-react";
 import { CHECK_AREAS, submitWeeklyCheckIn, type CheckArea, type CheckLevel } from "@/lib/weeklyCheckIn";
+import { useDialogFocus } from "./useDialogFocus";
 
 const OPTIONS: { key: CheckLevel; label: string; face: string }[] = [
   { key: "good", label: "Good", face: "🙂" },
@@ -37,8 +38,11 @@ function Sheet() {
   const [sent, setSent] = useState(false);
   const complete = CHECK_AREAS.every((a) => levels[a]);
   const anyLow = CHECK_AREAS.some((a) => levels[a] === "low");
+  // focus in, Tab kept inside, Escape closes (WCAG 2.4.3 / 2.1.2)
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialog, close);
   return createPortal(
-    <div className="marketing-v2 themeable fixed inset-0 z-[125] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="checkin-student-title">
+    <div ref={dialog} tabIndex={-1} className="marketing-v2 themeable fixed inset-0 z-[125] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="checkin-student-title">
       <button type="button" aria-label="Close" tabIndex={-1} onClick={close} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 60%, transparent)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }} />
       <section className="relative flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-t-[22px] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)", paddingBottom: "max(var(--space-5), env(safe-area-inset-bottom))" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)]">

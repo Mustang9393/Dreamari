@@ -32,7 +32,21 @@ export function Tip({ label, children, hideFromLg = false, className = "", off =
     const r = ref.current?.getBoundingClientRect();
     if (r) setTip({ x: r.left + r.width / 2, triggerTop: r.top, triggerBottom: r.bottom, above: false });
   };
-  const hide = () => setTip(null);
+  const hide = () => { window.clearTimeout(leaveTimer.current); setTip(null); };
+  // WCAG 1.4.13 (audit, 21 Oct 2026): the bubble is hoverable, so the pointer
+  // can cross the 8px gap onto it without it vanishing, and Escape dismisses
+  // it without moving focus. The short delay is only that crossing.
+  const leaveTimer = useRef<number | undefined>(undefined);
+  const hideSoon = () => { window.clearTimeout(leaveTimer.current); leaveTimer.current = window.setTimeout(() => setTip(null), 140); };
+  const stay = () => window.clearTimeout(leaveTimer.current);
+  useEffect(() => () => window.clearTimeout(leaveTimer.current), []);
+  useEffect(() => {
+    if (!tip || off) return;
+    // capture on window, so the Escape closes only the tooltip, not the sheet under it
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setTip(null); } };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [tip, off]);
   // Scrolling under an open tooltip would leave it stranded; dismiss instead.
   useEffect(() => {
     if (!tip) return;
@@ -70,7 +84,7 @@ export function Tip({ label, children, hideFromLg = false, className = "", off =
   // landing on top of the salary chip instead of the card's other corner.
   const positioned = /\b(?:absolute|fixed|sticky|static)\b/.test(className);
   return (
-    <span ref={ref} className={`${positioned ? "" : "relative "}flex flex-none ${className}`} onMouseEnter={show} onMouseLeave={hide} onFocus={(e) => { if (isKeyboardFocus(e.target)) show(); }} onBlur={hide} aria-describedby={tip && !off ? id : undefined}>
+    <span ref={ref} className={`${positioned ? "" : "relative "}flex flex-none ${className}`} onMouseEnter={() => { stay(); show(); }} onMouseLeave={hideSoon} onFocus={(e) => { if (isKeyboardFocus(e.target)) show(); }} onBlur={hide} aria-describedby={tip && !off ? id : undefined}>
       {children}
       {tip && !off && (
         <Portal>
@@ -78,8 +92,10 @@ export function Tip({ label, children, hideFromLg = false, className = "", off =
             ref={bubbleRef}
             id={id}
             role="tooltip"
+            onMouseEnter={stay}
+            onMouseLeave={hideSoon}
             // the house tooltip (.dm-tip, globals.css; 19 Oct 2026)
-            className={`dm-tip pointer-events-none fixed z-[9999] -translate-x-1/2 rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap motion-safe:animate-[fade-slide-up_0.18s_ease-out_both] ${hideFromLg ? "lg:hidden" : ""}`}
+            className={`dm-tip fixed z-[9999] -translate-x-1/2 rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap motion-safe:animate-[fade-slide-up_0.18s_ease-out_both] ${hideFromLg ? "lg:hidden" : ""}`}
             style={{
               left: tip.x,
               top: tip.above ? undefined : tip.triggerBottom + 8,

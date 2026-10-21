@@ -800,11 +800,11 @@ const SKILLS: { label: string; Icon: typeof Sparkles }[] = [
 export function SkillsTicker() {
   const row = [...SKILLS, ...SKILLS];
   return (
-    <div className="relative overflow-hidden border-y py-4" style={{ borderColor: "var(--border)", maskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)", WebkitMaskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)" }} aria-label="What students build">
+    <div role="group" className="relative overflow-hidden border-y py-4" style={{ borderColor: "var(--border)", maskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)", WebkitMaskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)" }} aria-label="What students build">
       <ul className="mkt-marquee flex w-max items-center gap-10 pr-10">
         {row.map(({ label, Icon }, i) => (
           <li key={`${label}-${i}`} aria-hidden={i >= SKILLS.length} className="flex flex-none items-center gap-2.5 text-[15px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>
-            <Icon className="h-4 w-4" strokeWidth={2.25} aria-hidden style={{ color: "var(--primary)" }} />
+            <Icon className="h-4 w-4" strokeWidth={2.25} aria-hidden style={{ color: "var(--color-text-brand)" }} />
             {label}
           </li>
         ))}
