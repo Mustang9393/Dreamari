@@ -24,7 +24,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { Listbox } from "@/components/app/Listbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { openCareerPeek, openSchoolPeek } from "@/components/app/peek";
-import { WORLD_COLORS } from "@/components/app/worlds";
+import { WORLD_COLORS, worldInk } from "@/components/app/worlds";
 import { collegeImage, type College } from "@/components/colleges/data";
 import { useResolvedColleges } from "@/components/colleges/dataset";
 import { CollegePlaceholder } from "@/components/colleges/CollegePlaceholder";
@@ -471,7 +471,7 @@ export function EmptyGoalCard({ kind, Icon, title, backdrop, art, xp, nudge, bad
       </span>
       {badge && <SpotBadge>{badge}</SpotBadge>}
       <span className="relative mt-auto flex flex-col gap-[6px] p-[var(--space-5)]">
-        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>
+        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "color-mix(in srgb, var(--accent-subtle) 30%, #fff)" }}>
           <Icon className="h-[14px] w-[14px]" aria-hidden /> {kind}
         </span>
         <span className="flex items-end justify-between gap-[var(--space-3)]">
@@ -600,7 +600,7 @@ export function GoalCard({ kind, Icon, title, picture, accent, onOpen, openLabel
           </span>
         )}
         <span className="relative flex flex-col gap-[6px] p-[var(--space-5)]">
-          <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: accent ?? "var(--accent-subtle)" }}>
+          <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: `color-mix(in srgb, ${accent ?? "var(--accent-subtle)"} 40%, #fff)` }}>
             <Icon className="h-[14px] w-[14px]" aria-hidden /> {kind}
           </span>
           <span className="flex items-end justify-between gap-[var(--space-3)]">
@@ -772,7 +772,7 @@ function CareerGoalView({ top3, saved, onBack, onAddToTop3, onGoTab }: {
             <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.5) 45%, transparent 80%)" }} />
           </span>
           <div className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-5)]">
-            <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: WORLD_COLORS[primary.world] ?? "var(--accent-subtle)" }}>Primary career</span>
+            <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: WORLD_COLORS[primary.world] ? worldInk(WORLD_COLORS[primary.world]) : "var(--accent-subtle)" }}>Primary career</span>
             <span className="text-[22px] leading-[27px] font-extrabold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{primary.title}</span>
             <span className="flex flex-wrap gap-[var(--space-2)]" style={{ textShadow: "none" }}>
               <Link href={`/career/${primary.id}`} className="dm-tap flex min-h-[40px] items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
@@ -841,7 +841,7 @@ function CareerRow({ career, rank, first, onOpen, trailing }: { career: ProfileC
       </span>
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[15px] leading-[20px] font-bold">{career.title}</span>
-        <span className="truncate text-[12.5px] leading-[17px] font-semibold" style={{ color: WORLD_COLORS[career.world] ?? "var(--muted-foreground)" }}>{career.world}</span>
+        <span className="truncate text-[12.5px] leading-[17px] font-semibold" style={{ color: WORLD_COLORS[career.world] ? worldInk(WORLD_COLORS[career.world]) : "var(--muted-foreground)" }}>{career.world}</span>
       </span>
       {trailing}
     </div>

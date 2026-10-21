@@ -253,7 +253,6 @@ function BuildDemo() {
             fontSize: "calc(var(--mu) * 8px)",
             letterSpacing: "0.02em",
             color: "var(--muted-foreground)",
-            opacity: 0.62,
           }}
         >
           Source: Harvard FAS Mignone + O*NET Interest Profiler

@@ -200,12 +200,18 @@ export function TypedText({
 
 /** Number keys select options. The badge on each option shows its digit, so the
  *  keyboard route is discoverable without a line of instructions -- the affordance
- *  IS the hint. Ignored while focus is in a control, so tabbing still behaves. */
+ *  IS the hint. Active only while focus is inside the question box
+ *  ([data-play-stage], which takes focus on each new screen) and never in a
+ *  text field (WCAG 2.1.4, audit 21 Oct 2026): as a page-wide listener, a
+ *  stray key or a speech-input "one" answered the question from anywhere. */
 export function useDigitKeys(count: number, pick: (index: number) => void, enabled = true) {
   useEffect(() => {
     if (!enabled || count <= 0) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest?.("[data-play-stage]")) return;
+      if (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
       const digit = Number(event.key);
       if (!Number.isInteger(digit) || digit < 1 || digit > count) return;
       event.preventDefault();

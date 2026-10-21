@@ -59,7 +59,7 @@ function Students({ list, title }: { list: CounselorStudent[]; title: string }) 
         ))}
       </ul>
       {list.length > PREVIEW && !all && (
-        <button type="button" onClick={() => setAll(true)} className="dm-link w-fit cursor-pointer pt-[4px] text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>Show all {list.length}</button>
+        <button type="button" onClick={() => setAll(true)} className="dm-link w-fit cursor-pointer pt-[4px] text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>Show all {list.length}</button>
       )}
     </Section>
   );

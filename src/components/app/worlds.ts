@@ -82,3 +82,14 @@ export function posterTitleFont(world: string): CSSProperties {
 // on the light Explore the scrim must NOT resolve to the light background.
 export const TEXT_SCRIM =
   "linear-gradient(180deg, rgba(5,7,15,0) 0%, rgba(5,7,15,0.55) 30%, rgba(5,7,15,0.86) 51%, #05070f 100%)";
+
+/** A world colour used as TEXT (WCAG 1.4.3, audit 21 Oct 2026). The pure
+ *  world colours are tuned for fills, dots and bars; as 10-12px type they
+ *  measured 2.8-4.4:1 (indigo, violet, red, slate the worst). Fills keep the
+ *  pure colour; text takes one of these. */
+/** On a poster: toward the poster's own ink (--pc-ink under the light
+ *  theme's frosted scrim), else the theme's text colour, since the poster
+ *  scrims follow the theme. */
+export const posterInk = (color: string) => `color-mix(in srgb, ${color} 60%, var(--pc-ink, var(--foreground)))`;
+/** On the page or a card: pulled toward the theme's own text colour. */
+export const worldInk = (color: string) => `color-mix(in srgb, ${color} 55%, var(--foreground))`;

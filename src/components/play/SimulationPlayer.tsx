@@ -50,6 +50,7 @@ import { CareerSeal, EndingBackdrop } from "./Celebrations";
 import { HeroCamera } from "./HeroCamera";
 import { TorqueBody } from "./TorqueBody";
 import { setTimersOff, useTimersOff } from "./timers";
+import { announce } from "@/components/app/LiveRegion";
 import { musicFailedSnapshot, musicMutedSnapshot, playMusic, retryMusic, serverMusicFailedSnapshot, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicFailed, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import {
@@ -259,6 +260,19 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
   const closePreGame = () => {
     setPreGameOpen(null);
     setPreGameDismissed(true);
+    // focus goes to the question box the card was covering, so the keyboard
+    // (and the number keys) carry straight on into the level
+    // once the card has actually left (its exit sequence runs about two
+    // seconds), unless something else took focus first; gives up after 4s
+    let tries = 0;
+    const wait = window.setInterval(() => {
+      tries += 1;
+      if (document.querySelector('[role="dialog"][aria-modal="true"]') && tries < 40) return;
+      window.clearInterval(wait);
+      const active = document.activeElement;
+      if (active && active !== document.body && active.isConnected) return;
+      document.querySelector<HTMLElement>("[data-play-stage]")?.focus({ preventScroll: true });
+    }, 100);
   };
 
   // EXPRESS: the cut teaching moves from push to pull ("Without these panels
@@ -1676,6 +1690,18 @@ function BeatStage({
     beat.kind !== "review" &&
     !(directedStage && beat.inlineSetup);
   const [revealed, setRevealed] = useState(!stageable);
+  // Each new screen takes keyboard and screen-reader focus when the old one
+  // took it away (WCAG 2.4.3 / 4.1.3, audit 21 Oct 2026): pressing Continue
+  // unmounts the feedback card, which left focus on <body>, so a screen
+  // reader heard nothing and Tab started over from the top of the page.
+  const boxRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (hidden) return;
+    const active = document.activeElement;
+    if (active && active !== document.body && active.isConnected) return;
+    const frame = requestAnimationFrame(() => boxRef.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [revealed, hidden]);
   useEffect(() => {
     onRevealChange?.(revealed);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1777,7 +1803,10 @@ function BeatStage({
            above it. In the flow it claimed its own ~84px row on a phone, which
            is the black gap that opened up between the art and the question. */}
         <div
-          className={`relative flex w-full flex-col ${
+          ref={boxRef}
+          tabIndex={-1}
+          data-play-stage
+          className={`relative flex w-full flex-col outline-none ${
             // Fixed max-widths only ever changed once, at the sm: breakpoint,
             // then stayed flat forever after -- a 13" laptop and a 5K
             // external monitor got the identical box. clamp()'s middle term
@@ -3019,7 +3048,7 @@ export function Hud({
           <span className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
             {simulation.title}
           </span>
-          <span className="block truncate text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: accent }}>
+          <span className="block truncate text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${accent} 78%, #fff)` }}>
             {sectionLabel ?? `Level ${level.n}`} · {level.role}
             {level.express ? " · Express" : ""}
           </span>
@@ -3367,6 +3396,15 @@ export function FeedbackSheet({
   const skills = "skills" in beat ? beat.skills : [];
   const [openSkill, setOpenSkill] = useState<string | null>(null);
   const portrait = portraitOff ? undefined : expressionFor(reactor ?? beat.speaker, result.tier);
+  // The verdict is read out (WCAG 4.1.3, audit 21 Oct 2026): it appears
+  // without moving focus, so a screen reader only heard "Continue, button".
+  useEffect(() => {
+    const headline = result.tier === "best" && "bestHeadline" in beat && beat.bestHeadline ? beat.bestHeadline : TIER_HEADLINE[result.tier];
+    const points = result.delta === 0 ? "" : ` ${result.delta > 0 ? "Plus" : "Minus"} ${Math.abs(result.delta)} reputation, now ${reputation}.`;
+    announce(`${headline.replace(/[.!?]+$/, "")}.${points} ${result.why}`);
+    // once per verdict
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // The card owns the key rather than leaning on the focused button's default
   // activation: the sheet is the only thing on screen, so enter, space and right

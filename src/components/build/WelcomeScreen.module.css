@@ -211,11 +211,11 @@
 .cta:focus-visible { outline: 2px solid var(--color-night-foreground); outline-offset: 6px; }
 .footer { position: relative; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 8px 0 max(16px, env(safe-area-inset-bottom)); }
 .chapters { display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; list-style: none; gap: clamp(12px, calc(2.8vw / var(--vz, 1)), 28px); }
-.chapters li { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--color-night-muted-foreground); }
+.chapters li { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: color-mix(in srgb, var(--color-night-foreground) 82%, transparent) /* the night muted token is 62% white, 3.9:1 at 10-12px here (WCAG 1.4.3) */; }
 .chapterDot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.35; }
 .chapters [aria-current] { color: var(--color-night-foreground); }
 .chapters [aria-current] .chapterDot { opacity: 1; background: var(--color-brand-500); box-shadow: 0 0 12px 3px color-mix(in srgb, var(--color-brand-500) 50%, transparent); }
-.skip { padding: 10px 20px; min-height: 40px; background: none; border: 0; color: var(--color-night-muted-foreground); font-size: 12px; cursor: pointer; }
+.skip { padding: 10px 20px; min-height: 40px; background: none; border: 0; color: color-mix(in srgb, var(--color-night-foreground) 82%, transparent) /* the night muted token is 62% white, 3.9:1 at 10-12px here (WCAG 1.4.3) */; font-size: 12px; cursor: pointer; }
 .skip:hover { color: var(--color-night-foreground); }
 
 @media (prefers-reduced-motion: no-preference) {

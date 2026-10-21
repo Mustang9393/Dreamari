@@ -60,8 +60,8 @@ function Leaf({ e }: { e: Enriched }) {
   const rule = "my-[5px] h-px w-full";
   if (t.status === "unknown" || !t.iso) {
     return (
-      <span aria-label="No date yet" className={box} style={glass}>
-        <span className={month} style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.75))" }}>Date</span>
+      <span role="img" aria-label="No date yet" className={box} style={glass}>
+        <span className={month} style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.86))" }}>Date</span>
         <span aria-hidden className={rule} style={{ background: "var(--pc-rule, rgba(255,255,255,0.22))" }} />
         <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--pc-ink-2, rgba(255,255,255,0.8))" }}>?</span>
       </span>
@@ -69,7 +69,7 @@ function Leaf({ e }: { e: Enriched }) {
   }
   const d = new Date(`${t.iso}T12:00:00`);
   return (
-    <span aria-label={closesShort(t)} title={closesShort(t)} className={box} style={glass}>
+    <span role="img" aria-label={closesShort(t)} className={box} style={glass}>
       <span aria-hidden className={month} style={{ color: soon ? `var(--pc-chip-reach, ${AMBER})` : "var(--pc-ink-2, rgba(255,255,255,0.9))" }}>{MONTHS[d.getMonth()]}</span>
       <span aria-hidden className={rule} style={{ background: soon ? `color-mix(in srgb, ${AMBER} 55%, transparent)` : "var(--pc-rule, rgba(255,255,255,0.22))" }} />
       <span aria-hidden className="text-[30px] leading-[28px] font-extrabold tracking-[-0.02em] tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{d.getDate()}</span>
@@ -100,7 +100,7 @@ export function Poster({ e, status, onOpen, onSave, action, cue, kindLabel }: { 
     const tone = costTone(item.paid);
     figure = PAID[item.paid];
     if (tone === "plain") tint = INK;
-    if (!tone) tint = "var(--pc-ink-3, rgba(255,255,255,0.6))";
+    if (!tone) tint = "var(--pc-ink-3, rgba(255,255,255,0.86))";
   }
   return (
     <HoverBeam strength={0.7}>
@@ -166,7 +166,7 @@ export function Poster({ e, status, onOpen, onSave, action, cue, kindLabel }: { 
              PAYS YOU it looks really weird" on one line). */}
           {figure && (
             <span className="flex flex-col gap-[1px]">
-              <span className="text-[10px] leading-[13px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.65))" }}>{label}</span>
+              <span className="text-[10px] leading-[13px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.86))" }}>{label}</span>
               <span className="text-[21px] leading-[25px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: tint }}>{figure}</span>
             </span>
           )}
@@ -174,14 +174,14 @@ export function Poster({ e, status, onOpen, onSave, action, cue, kindLabel }: { 
              height on every card (Chandu, 6 Oct 2026: "Every card should be
              consistent"). */}
           <span className="line-clamp-2 min-h-[42px] text-[17px] leading-[21px] font-bold" style={{ textWrap: "balance" }}>{item.name}</span>
-          <span className="line-clamp-1 text-[12.5px] leading-[17px]" style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.7))" }}>{who}</span>
+          <span className="line-clamp-1 text-[12.5px] leading-[17px]" style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.86))" }}>{who}</span>
           <span className="mt-[4px] flex min-h-[18px] items-center justify-between gap-[8px] text-[12px] leading-[16px] font-semibold">
             {status && status !== "saved" ? (
               <span className="flex items-center gap-[4px]" style={{ color: status === "won" ? MINT : "var(--pc-link, var(--color-brand-300))" }}>{status === "won" ? <Trophy className="h-3 w-3" aria-hidden /> : <ClipboardCheck className="h-3 w-3" aria-hidden />}{STATUS_WORD[status]}</span>
             ) : cue ? (
               <span className="flex min-w-0 items-center gap-[4px] truncate" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>{cue}</span>
             ) : signal && (strong || fit.when === "later") ? (
-              <span className="flex min-w-0 items-center gap-[4px] truncate" style={{ color: strong ? "var(--pc-link, var(--color-brand-300))" : "var(--pc-ink-3, rgba(255,255,255,0.7))" }}>{strong && <Check className="h-3 w-3 flex-none" strokeWidth={3} aria-hidden />}{signal}</span>
+              <span className="flex min-w-0 items-center gap-[4px] truncate" style={{ color: strong ? "var(--pc-link, var(--color-brand-300))" : "var(--pc-ink-3, rgba(255,255,255,0.86))" }}>{strong && <Check className="h-3 w-3 flex-none" strokeWidth={3} aria-hidden />}{signal}</span>
             ) : <span />}
             {soon && <span className="flex-none font-bold" style={{ color: `var(--pc-chip-reach, ${AMBER})` }}>{time.days === 0 ? "Closes today" : `${time.days} day${time.days === 1 ? "" : "s"} left`}</span>}
           </span>

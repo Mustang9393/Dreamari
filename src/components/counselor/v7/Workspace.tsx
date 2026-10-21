@@ -137,9 +137,9 @@ export function Reviews({ only, milestone }: { only?: (s: CounselorStudent) => b
                   <PageThumb />
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[14px] leading-[18px] font-semibold">{q.student.name}</span>
-                    <span className="truncate text-[12.5px]" style={MUTED}>{q.milestone}{qLate ? <span style={{ color: "var(--color-feedback-danger-solid)" }}> · late</span> : ""}</span>
+                    <span className="truncate text-[12.5px]" style={MUTED}>{q.milestone}{qLate ? <span style={{ color: "color-mix(in srgb, var(--color-feedback-danger-solid) 70%, var(--foreground))" }}> · late</span> : ""}</span>
                   </span>
-                  {on && <Check className="h-4 w-4 flex-none" style={{ color: "var(--pc-link, var(--color-brand-300))" }} aria-hidden />}
+                  {on && <Check className="h-4 w-4 flex-none" style={{ color: "var(--pc-link, var(--color-text-brand))" }} aria-hidden />}
                 </button>
               </li>
             );
@@ -191,7 +191,7 @@ export function Reviews({ only, milestone }: { only?: (s: CounselorStudent) => b
               <blockquote className="m-0 text-[17px] leading-[26px]">“{sub.note}”</blockquote>
               {sub.secondTry && sub.lastFeedback && <p className="text-[13.5px] leading-[20px]" style={MUTED}>Second try. You asked: “{sub.lastFeedback}”</p>}
             </div>
-            <p className="text-[13.5px]" style={MUTED}>{sent} · <span className="font-semibold" style={late ? { color: "var(--color-feedback-danger-solid)" } : sub.dueInDays <= 2 ? { color: "var(--color-feedback-warning-solid)" } : undefined}>{due}</span></p>
+            <p className="text-[13.5px]" style={MUTED}>{sent} · <span className="font-semibold" style={late ? { color: "color-mix(in srgb, var(--color-feedback-danger-solid) 70%, var(--foreground))" } : sub.dueInDays <= 2 ? { color: "var(--color-feedback-warning-solid)" } : undefined}>{due}</span></p>
             <div className="mt-auto flex flex-col gap-[var(--space-3)]">
               <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} rows={4} aria-label="Feedback"
                 placeholder={sub.asks ? `Answer ${first}, or say what to change` : "Feedback (needed to ask for changes)"}
@@ -228,7 +228,7 @@ function UndoLine({ last, onUndo }: { last: { item: Item; word: string }; onUndo
   return (
     <span role="status" className="flex items-center gap-[8px] text-[14px]" style={MUTED}>
       {last.word}: {last.item.student.name.split(" ")[0]}
-      <button type="button" onClick={onUndo} className="dm-link inline-flex cursor-pointer items-center gap-[4px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}><RotateCcw className="h-[13px] w-[13px]" aria-hidden />Undo</button>
+      <button type="button" onClick={onUndo} className="dm-link inline-flex cursor-pointer items-center gap-[4px] font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}><RotateCcw className="h-[13px] w-[13px]" aria-hidden />Undo</button>
     </span>
   );
 }

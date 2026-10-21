@@ -43,6 +43,12 @@ function keyFor(pathname: string) {
 /** The theme a page should open in: the saved choice for its surface, or
  *  that surface's default (light on the Counselor Dashboard, dark elsewhere). */
 function themeFor(pathname: string): GlobalTheme {
+  // A game is always dark (WCAG 1.4.3, audit 21 Oct 2026): its painted
+  // scenes, ID cards and world-coloured type are drawn for a dark stage, and
+  // under the light theme they measured 1.2-2.9:1. The Play hub keeps the
+  // student's choice; only a level itself (/play/<game>, /play/glossary/...)
+  // is pinned.
+  if (/^\/play\/./.test(pathname)) return "dark";
   try {
     const saved = localStorage.getItem(keyFor(pathname));
     if (saved === "light" || saved === "dark") return saved;

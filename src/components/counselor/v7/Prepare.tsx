@@ -88,7 +88,7 @@ function Agenda() {
             <span className="text-[13px]" style={MUTED}>{rows.length} {rows.length === 1 ? "meeting" : "meetings"}{needPrep ? ` · ${needPrep} need prep` : ""}</span>
           </div>
           <QuietButton label="Next week" onClick={() => setOffset((o) => o + 1)} icon={<ChevronRight className="h-4 w-4" aria-hidden />} />
-          {offset !== 0 && <button type="button" onClick={() => setOffset(0)} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>This week</button>}
+          {offset !== 0 && <button type="button" onClick={() => setOffset(0)} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>This week</button>}
         </div>
         <div className="flex items-center gap-[var(--space-3)]">
           <label className="relative flex min-w-0 flex-1 items-center md:w-[240px] md:flex-none">

@@ -19,7 +19,9 @@ html body .marketing-v2.themeable[data-counselor-version="v4"] {
  font-family:var(--font-body);
 }
 html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
- --v4-chart-2:color-mix(in srgb,var(--primary) 55%,white);
+ /* series 1 at 3:1+ on the dark page (was --primary, 2.6:1), series 2 kept a clear step lighter */
+ --v4-chart-1:#6f9cf0;
+ --v4-chart-2:color-mix(in srgb,var(--primary) 30%,white);
 }
 /* v5 type: display face for titles and section heads, at the calm weight */
 [data-counselor-version="v4"] :is(h1,h2,h3) {font-family:var(--font-display);font-weight:500;}
@@ -27,7 +29,8 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
 [data-counselor-version="v4"] button,[data-counselor-version="v4"] a { -webkit-tap-highlight-color:transparent; }
 [data-counselor-version="v4"] button {cursor:pointer;}
 [data-counselor-version="v4"] button:disabled {cursor:not-allowed;}
-[data-counselor-version="v4"] :focus-visible {outline:2px solid var(--primary);outline-offset:4px;}
+/* the ring is the text-safe brand (#cbe0fb dark, #2f5fb1 light): --primary measured 2.76:1 on the dusk page (WCAG 1.4.11 / 2.4.13, audit 21 Oct 2026) */
+[data-counselor-version="v4"] :focus-visible {outline:2px solid var(--accent-subtle);outline-offset:4px;}
 /* frosted, so content scrolling under it blurs instead of clashing (8 Oct 2026) */
 .v4-navigation {position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--background) 72%,transparent);backdrop-filter:blur(30px) saturate(160%);-webkit-backdrop-filter:blur(30px) saturate(160%);border-bottom:1px solid var(--v4-line);}
 .v4-nav-main {max-width:1600px;margin:auto;padding:14px 36px;display:flex;align-items:center;gap:30px;min-height:80px;}
@@ -120,6 +123,19 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
 .v4-dot-matrix .is-track,.v4-map-key .is-track {background:var(--v4-chart-1);}
 .v4-dot-matrix .is-attention,.v4-map-key .is-attention {background:var(--v4-chart-3);}
 .v4-dot-matrix .is-risk,.v4-map-key .is-risk {background:var(--destructive);}
+/* Status by shape as well as colour (WCAG 1.4.1, audit 21 Oct 2026): a
+   colour-blind counselor could not tell the three apart. On Track stays a
+   filled square, Needs Attention is a ring, At Risk a warning triangle. The
+   key uses the same shapes. Forced colours keep them (system colours). */
+.v4-dot-matrix .is-attention,.v4-map-key i.is-attention {background:transparent;box-shadow:inset 0 0 0 2.5px var(--v4-chart-3);border-radius:50%;}
+.v4-map-key i.is-attention {box-shadow:inset 0 0 0 1.5px var(--v4-chart-3);}
+.v4-dot-matrix .is-risk,.v4-map-key i.is-risk {clip-path:polygon(50% 4%,98% 94%,2% 94%);border-radius:0;}
+.v4-map-key i.is-risk {width:9px;height:8px;}
+@media (forced-colors: active) {
+  .v4-dot-matrix>button,.v4-map-key i {forced-color-adjust:none;}
+  .v4-dot-matrix .is-track,.v4-map-key .is-track,.v4-dot-matrix .is-risk,.v4-map-key .is-risk {background:CanvasText;}
+  .v4-dot-matrix .is-attention,.v4-map-key i.is-attention {background:Canvas;box-shadow:inset 0 0 0 2px CanvasText;}
+}
 .v4-map-key {display:flex;flex-wrap:wrap;gap:12px;font-size:11px;margin:16px 0 7px;}
 .v4-map-key span {display:flex;align-items:center;gap:4px;}
 .v4-map-key i,.v4-destination-key i {display:block;width:7px;height:7px;border-radius:2px;flex-shrink:0;}

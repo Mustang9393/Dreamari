@@ -2,7 +2,7 @@
 
 import { Lock } from "lucide-react";
 import type { PendingCareer } from "./catalog";
-import { posterTitleFont, WORLD_COLORS } from "./worlds";
+import { posterTitleFont, WORLD_COLORS, posterInk } from "./worlds";
 
 // A trending slot whose career is not in the catalog yet (4 Oct 2026: Joshua's
 // Top 10 names Nurse Practitioner, Physician Assistant and Data Analyst, and
@@ -42,7 +42,7 @@ function PendingFace({ career, narrow }: { career: PendingCareer; narrow: boolea
         <span className="w-full [overflow-wrap:normal] [word-break:keep-all]" style={{ ...posterTitleFont(career.world), fontSize: size.fontSize, lineHeight: size.lineHeight, color: "var(--poster-title)" }}>
           {career.title}
         </span>
-        <span className="w-full text-[10px] leading-[14px] font-semibold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: worldColor }}>
+        <span className="w-full text-[10px] leading-[14px] font-semibold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: posterInk(worldColor) }}>
           {career.world}
         </span>
       </span>

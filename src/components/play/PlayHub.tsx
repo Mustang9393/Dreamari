@@ -14,7 +14,7 @@ import { IconTip } from "@/components/app/IconTip";
 
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
-import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
+import { WORLD_COLORS, posterTitleFont, posterInk } from "@/components/app/worlds";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { glossaryFor, isGlossaryReleased } from "@/components/glossary/data";
@@ -838,7 +838,7 @@ export function RowCard({
         <span className={`block leading-[1.15] font-extrabold uppercase transition-[font-size] duration-500 [overflow-wrap:normal] [word-break:keep-all] ${titleSize}`} style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>
           {breakable(title)}
         </span>
-        <span className={`block font-semibold tracking-[0.6px] uppercase transition-[font-size] duration-500 ${worldSize}`} style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[world] }}>
+        <span className={`block font-semibold tracking-[0.6px] uppercase transition-[font-size] duration-500 ${worldSize}`} style={{ fontFamily: "var(--font-body)", color: posterInk(WORLD_COLORS[world]) }}>
           {world}
         </span>
         {large && candidate.kind === "soon" && (
@@ -1127,7 +1127,7 @@ export function HeroShelfCard({ item, large = false, active = false, onSelect, d
           </span>
         )}
         {item.world && (
-          <span className={`block font-semibold tracking-[0.6px] uppercase ${subSize}`} style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[item.world] }}>
+          <span className={`block font-semibold tracking-[0.6px] uppercase ${subSize}`} style={{ fontFamily: "var(--font-body)", color: posterInk(WORLD_COLORS[item.world]) }}>
             {item.world}
           </span>
         )}

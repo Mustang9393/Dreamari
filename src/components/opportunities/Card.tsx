@@ -97,7 +97,7 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 function DateLeaf({ time }: { time: Timing }) {
   if (time.status === "unknown" || !time.iso) {
     return (
-      <span aria-label="No date yet" className="flex w-[48px] flex-none flex-col overflow-hidden rounded-[10px] border text-center" style={{ borderColor: "var(--glass-border)" }}>
+      <span role="img" aria-label="No date yet" className="flex w-[48px] flex-none flex-col overflow-hidden rounded-[10px] border text-center" style={{ borderColor: "var(--glass-border)" }}>
         <span className="py-[2px] text-[9.5px] leading-[13px] font-bold tracking-[0.08em] uppercase" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)", color: "var(--muted-foreground)" }}>Date</span>
         <span className="py-[4px] text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--muted-foreground)" }}>?</span>
       </span>
@@ -108,8 +108,8 @@ function DateLeaf({ time }: { time: Timing }) {
   const tone = closed ? "var(--muted-foreground)" : time.tone === "soon" ? AMBER : "var(--primary)";
   return (
     <span
+      role="img"
       aria-label={closesShort(time)}
-      title={closesShort(time)}
       className="flex w-[48px] flex-none flex-col overflow-hidden rounded-[10px] text-center"
       style={{ boxShadow: "0 8px 18px -10px rgba(0,0,0,0.6)", outline: time.approx ? "1.5px dashed color-mix(in srgb, var(--foreground) 22%, transparent)" : undefined, outlineOffset: time.approx ? 2 : undefined }}
     >

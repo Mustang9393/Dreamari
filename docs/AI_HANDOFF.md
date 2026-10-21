@@ -22,6 +22,60 @@
 - A shooting star was observed at about 7.4s.
 - Still open: the CTA's BorderBeam spin runs under reduced motion. It is a shared component.
 
+## 2026-10-21: WCAG 2.2 AA Phase 1 (blockers B2-B9)
+
+**Why.** The status report (`docs/ACCESSIBILITY_STATUS_REPORT_2026-10-21.md`) listed nine things blocking a WCAG 2.2 AA claim. Chandu: "go: start Phase 1, the AA blockers B2-B9 (games first), and push the report commit with it." B1, the video captions, is content work and stays open.
+
+**What changed.**
+- **Games.**
+  - The verdict is announced through `LiveRegion` (`FeedbackSheet`).
+  - `BeatStage`'s box (`data-play-stage`, `tabIndex=-1`) takes focus whenever focus was lost.
+  - `useDigitKeys` only fires when the event target is inside `[data-play-stage]` and is not a text field (WCAG 2.1.4).
+  - `PreGame` is `aria-modal` and `data-own-history`, so `DialogFocusHost` traps focus but Back still leaves.
+  - `closePreGame` waits for the card's roughly 2s exit, then focuses the stage.
+  - Game routes `/play/<x>` are always dark (`theme.tsx` `themeFor` plus the boot script). Light mode measured 1.2-2.9:1 on the painted scenes.
+  - ID badge and HUD inks darkened or lightened; Torque value text and wording; AMT "Put them in order".
+- **Non-text contrast.**
+  - Global field-edge rule in `globals.css`: 50% foreground, `!important` over inline borders, error state kept.
+  - v4 focus ring uses `--accent-subtle`. v4 chart-1 in dark is #6f9cf0.
+- **Text contrast.**
+  - `worlds.ts` gains `posterInk` and `worldInk`, used for world labels on posters and pages.
+  - Home eyebrow; Poster label alphas; leaderboard state, league and medal text mixed toward foreground; counselor danger text mixed; v7 `--pc-link` fallback moved to `--color-text-brand`; Schedule past opacity 0.9.
+  - Career Play CTA with white ink shades toward black; Build welcome quiet text; landing source line; Opportunities count.
+- **Focus.** Landing `ChapterRail` is inert while hidden. `html` scroll-padding (96px top; 104px bottom below lg).
+- **Targets.** Connect page dots and landing stage dots have 24px hit areas; poster Save is 32px.
+- **Status shapes.** Caseload statuses are square, ring and triangle, with forced-colors rules.
+- **ARIA and skip link.** Date badges are `role="img"`. The skip link names its target at render.
+
+**Validation.**
+- tsc and eslint are clean (no new warnings). Production build OK.
+- 96-scan harness, before → after:
+  - real AA text fails (dark/light/phone): 85/93/61 → 9/44/24
+  - axe target-size 160 → 0, aria-prohibited-attr 186 → 0, skip-link 75 → 0
+  - fully-covered focus 66 → 14
+- Game keyboard test (g1/g2) passes: modal start, focus in the stage after Start, digit keys scoped, single verdict announcement.
+
+**Next.**
+- B1: captions and transcripts for the 10 reels.
+- Light-mode leftovers (leaderboard chips, small Opportunities labels).
+- Counselor phone Insights axis labels.
+- AI loading announcements, menus without arrow keys.
+- Then Phase 2 (global reduced motion, AAA tokens).
+
+## 2026-10-21: full accessibility status report (WCAG 2.2 A/AA/AAA plus US compliance)
+
+**Why.** Chandu: "I need a full status report about the Accessibility of our app. FULL WCAG 2.2 AA and AAA and a11y ... so we dont run into any trouble with the education system of the united states." Demo-only toggles are out of scope.
+
+**What.**
+- The a11y branch was merged to main first (d497d51f).
+- The report is `docs/ACCESSIBILITY_STATUS_REPORT_2026-10-21.md`, also shared as a Google Doc in the ux@ Drive.
+- It covers all 55 A/AA and all 31 AAA criteria. A/AA: 23 pass, 15 partial, 10 fail, 2 need a person to test, 5 N/A.
+- It lists nine AA blockers (B1–B9): video captions, game status announcements, number-key shortcuts, input border and counselor ring contrast, text contrast, covered focus, small targets, color-only status, and sensory wording.
+- It covers the US legal context, including the Title II dates moved to 26 Apr 2027 / 2028 and the NFB suit, plus a launch roadmap.
+- New scanners `full.mjs` and `extra.mjs` are in `docs/reference/wcag-audit-2026-10-21/`.
+
+**Next.** Phase 1 of the report's roadmap: B2, B3, B6 and B9 in the games first.
+
 ## 2026-10-21: Reviews, all builds: a full page that fills the height and scrolls
 
 **Why (Chandu):** a short document ended early and left a dark empty canvas under it: "instead of this sitting cropped vertically, let it be the full page so the scroll still works but just it doesn't leave a lot of space and uses the height available to it", then "fix and push for all versions".
