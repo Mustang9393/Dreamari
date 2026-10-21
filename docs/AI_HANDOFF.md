@@ -1,3 +1,13 @@
+## 2026-10-21: v4 (restored) gets Maisha's three asks: Home's top cards, Calendar-only Meetings, Assist "Drafts" / "Create"
+
+**Why (Maisha):** "Currently at the very top on Home where you have 13 reviews, 3 meetings this week, 18 students who need you - keep this intact. This is good."; "Under Meetings, lets have 'Calendar' view be the default. I don't think we need the 'Agenda' view at all"; "Under 'Assist' the two tabs lets make it 'Drafts' and 'Create'". Chandu: "Align them properly, like we had before."
+
+- **Home (`v4/Overview.tsx`, `today.css` `.v4h-cards`):** v7's three Stat cards (Reviews, Meetings this week, Students who need you) replace the old meeting / reminders / pulse columns, spanning the hero's full width in three equal columns (stacked on phones). Everything below them is the restored Home.
+- **Meetings (`v4/Meetings.tsx`):** Upcoming is the week calendar only; the Agenda/Calendar toggle and the Agenda view are gone. Needs Outreach unchanged.
+- **Assist (`v4/AssistSession.tsx`):** the switch reads "Drafts" and "Create".
+- Still open: Mika's Majors cards (Insights > College & Career), from Chandu's Career Cards zips.
+- Checked: tsc clean; v4 Home and Meetings at 1440, light.
+
 ## 2026-10-21: v4 restored to its 20 Oct afternoon state for Maisha's demos
 
 **Why (Maisha, via Chandu):** "did you change v4 homepage completely?... Please edit a different version for all the new updates + what you're working on with Josh, not v4 as I'm using that for demos to verify what is essential to counselors and school admin versus not." Also: put My Impact's ASCA / use of time back as it was. Chandu chose "Restore v4, drop the declutter".

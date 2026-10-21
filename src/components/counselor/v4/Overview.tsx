@@ -5,7 +5,6 @@
 // conversation cards and review column, shorter copy, and all content kept.
 
 import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, Clock } from "lucide-react";
 import { useCounselorFilters, type GradeFilter } from "../shell";
@@ -17,14 +16,14 @@ import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCoun
 import { ConversationAvatar } from "./ConversationAvatar";
 import { AvatarStylePicker, useCounselorAvatarStyle } from "./avatarStyle";
 import { ReviewDeck } from "./ReviewDeck";
-import { ReminderCarousel } from "./ReminderCarousel";
 import { reviewHref } from "./milestonesModel";
-import { CountUp, DreamyMoment } from "./overviewShared";
+import { DreamyMoment } from "./overviewShared";
 import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
 import { Coverflow } from "../v5/Coverflow";
 import { MostPlayedSimulations } from "../v5/HomeExtras";
 import { useMeetings } from "../v5/Prepare";
+import { Stat } from "../v7/Home";
 import { openCareer } from "../v5/ExploreSheets";
 import { schoolSnapshot, toV5 } from "@/lib/counselorV5";
 import { useTodayFilters } from "./Workspace";
@@ -41,25 +40,29 @@ const studentHref = (id: string) => `/counselor?view=students&studentId=${encode
 function Jump({children,onClick}:{children:React.ReactNode;onClick:()=>void}) {return <button className="v4-text-action" onClick={onClick}>{children}<ArrowUpRight size={16}/></button>;}
 
 /** A glanceable calendar widget; seeds depend on the client clock. */
-function NextMeeting({ roster }: { roster: Parameters<typeof useMeetings>[0] }) {
+// v7's Meetings hero card with v4's meetings (kept from the 20 Oct
+// declutter when v4 was restored, 21 Oct 2026, Maisha: "the very top on Home
+// where you have 13 reviews, 3 meetings this week, 18 students who need you,
+// keep this intact")
+function MeetingsCard({ roster }: { roster: Parameters<typeof useMeetings>[0] }) {
  const mounted = useSyncExternalStore(noop, () => true, () => false);
  const meetings = useMeetings(roster);
  const done = useMeetingsDone();
- if (!mounted) return <div className="v4-calendar-widget" aria-hidden />;
+ if (!mounted) return <div aria-hidden />;
  const now = new Date();
+ const weekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (7 - now.getDay()));
+ const left = meetings.filter((m) => !isPast(m, now) && !done[m.id] && m.day <= iso(weekEnd));
  const next = meetings.find((m) => !isPast(m, now) && !done[m.id]);
- if (!next) return <button type="button" className="v4-calendar-widget dm-quiet" onClick={() => openLog({ mode: "book" })}><strong>Nothing booked yet</strong><span className="v4-widget-detail">Book a meeting <ArrowUpRight size={14} aria-hidden /></span></button>;
- const student = roster.find((s) => s.id === next.studentId);
- const [y, mo, d] = next.day.split("-").map(Number);
- const day = new Date(y, mo - 1, d);
- const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
- const when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "long" });
- const date = day.toLocaleDateString("en-US", { month: "short", day: "numeric" });
- return <Link href="/counselor?view=meetings&v=4" className="v4-calendar-widget dm-quiet" aria-label={`Next meeting: ${timeLabel(next.time)}, ${when}, ${date}, ${student?.name ?? "a student"}, ${next.type}. Open Meetings`}>
-  {/* one headline and one quiet line, like the band's other columns
-     (9 Oct 2026: the band "might look a little cluttered") */}
-  <span className="v4-calendar-event"><span className="v4-calendar-time"><strong>{when}, {date} · {timeLabel(next.time)}<ArrowUpRight size={14} aria-hidden/></strong></span><small className="v4-widget-detail">{student?.name ?? "Student meeting"} · {next.type}, {next.minutes} min</small></span>
- </Link>;
+ const student = next ? roster.find((s) => s.id === next.studentId) : undefined;
+ let when = "";
+ if (next) {
+  const [y, mo, d] = next.day.split("-").map(Number);
+  const day = new Date(y, mo - 1, d);
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+ }
+ return <Stat figure="meetings" href="/counselor?view=meetings&v=4" label="Meetings this week" value={left.length} go="View schedule"
+  line={next ? <>Next: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{student?.name ?? "a student"}</span> · {when} · {timeLabel(next.time)}</> : "Nothing booked yet"} />;
 }
 
 export function Overview(){
@@ -74,6 +77,7 @@ export function Overview(){
  const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
+ const topPending=pending.filter(r=>r.count).sort((x,y)=>y.count-x.count)[0];
  // Pending Reviews' "See all": every milestone with something waiting,
  // the fullest first.
  // every submission waiting, most in need first, for Pending Reviews' deck
@@ -141,20 +145,20 @@ export function Overview(){
     <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log Time</button>
     <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start Reviewing":"Open Students"}<ArrowUpRight size={18}/></button>
    </div></div>
-   {/* Three glanceable columns (9 Oct 2026). Chandu: "the 85 on track, 7 at
-      risk, 42 exploring can also be one of those columns next to the
-      meeting and reminders ... At risk can be highlighted". The full-width
-      figures strip is gone (it cost a band and pushed the work down); the
-      pulse is a third column, At Risk as its headline, the other two as
-      quiet links under it. Not a carousel: these are compared, not read
-      one at a time, and the reminders beside them already rotate. */}
-   <div className="v4-home-widgets">
-    <NextMeeting roster={reviewed} />
-    <ReminderCarousel items={brief}/>
-    <section className="v4-pulse-widget" aria-label="Caseload pulse">
-     <button type="button" onClick={()=>status("At Risk")} className={`v4-pulse-lead dm-quiet ${atRisk?"is-risk":""}`}><strong><CountUp value={atRisk}/></strong><span>{atRisk===1?"student at risk":"students at risk"}<ArrowUpRight size={14} aria-hidden/></span></button>
-     <div className="v4-pulse-links">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden className="v4-pulse-dot">·</span>}<button type="button" onClick={l.action} className="dm-quiet" aria-label={l.label}><b>{l.value}</b> {l.words}</button></span>)}</div>
-    </section>
+   {/* The three hero cards (21 Oct 2026, Maisha: "Currently at the very
+      top on Home where you have 13 reviews, 3 meetings this week, 18
+      students who need you, keep this intact. This is good."): v7's Stat
+      with v4's numbers (the grade filter applies) and v4's pages behind
+      them. They replace the meeting, reminders and pulse columns. */}
+   <div className="v4h-cards">
+    <Stat figure="reviews" href="/counselor?view=review-queue&v=4" label="Reviews" value={pendingCount} go="Start reviewing"
+     line={topPending ? <>Most: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{topPending.key}</span></> : "All caught up"} />
+    <MeetingsCard roster={reviewed} />
+    {/* the card opens Students on the At Risk filter */}
+    <div className="contents" onClickCapture={()=>setStatusFilter("At Risk")}>
+     <Stat figure="people" href="/counselor?view=students&v=4" label="Students who need you" value={priority.length} go="Review students"
+      line={atRisk ? <><span aria-hidden className="mr-[7px] inline-block size-[7px] rounded-full align-[1px]" style={{ background: "var(--color-feedback-danger-solid)" }} /><span className="font-semibold" style={{ color: "var(--foreground)" }}>{atRisk}</span> at risk</> : "None at risk"} />
+    </div>
    </div>
   </section>
 

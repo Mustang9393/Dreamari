@@ -190,3 +190,9 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 [data-counselor-version="v4"] .v4-dreamy-brief button svg {display:inline-block;vertical-align:-2px;margin-left:6px;color:var(--muted-foreground);}
 [data-counselor-version="v4"] .v4-dreamy-brief button:hover svg {color:var(--color-text-brand);}
 @media (max-width:640px){[data-counselor-version="v4"] .v4-dreamy-brief {margin-top:6px;}[data-counselor-version="v4"] .v4-dreamy-brief>img {width:72px;height:72px;margin:-6px 0 0 -6px;}[data-counselor-version="v4"] .v4-dreamy-brief button {font-size:13.5px;}}
+
+/* Home's three hero cards (21 Oct 2026, Maisha: keep the 13 reviews / 3
+   meetings / 18 students cards): the full width of the hero, in the row the
+   old widgets held, three equal columns, stacking on phones */
+[data-counselor-version="v4"] .v4-home-hero .v4h-cards {grid-area:widgets;grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+@media (max-width:767px){[data-counselor-version="v4"] .v4-home-hero .v4h-cards {grid-template-columns:minmax(0,1fr);gap:16px}}
