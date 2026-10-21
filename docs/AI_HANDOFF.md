@@ -1,3 +1,11 @@
+## 2026-10-21: Aurora: darker sky, flat base glow on the screen edge
+
+- `look-v2.css`, dark sky: near-black navy all the way down (`#121d33` → `#14213a` → `#162640` → `#172843`), so the aurora glows out of darkness.
+- `SkyAurora.tsx`: the curtains stand on the bottom edge. There's a stronger base glow (bright seam, glow and haze, all fading fast upward), the beams are shorter (reach `0.06 + 0.17*n`), and the cap is `0.06 + 0.42*exp(-y/0.15)`.
+- Why: Chandu, "lets go a little darker towards the aurora, make the aurora feel like more when you see the earth horizon/atmosphere line from outer space? more base glow but more fading upwards".
+- A curved limb with the planet's dark below it was tried and removed: "we can move the aurora to the edge of the screen so we dont see the darker horizon stuff. Theres also a flatter circular rough shape that doesnt sit very well lets remove that."
+- AA (from the limb build, same sky): white 10.5:1 at 80% height, 8.5:1 at 85%. Only the bottom glow strip is lower.
+
 ## 2026-10-21: Darker sky; the aurora carries the blue
 
 - `look-v2.css`, dark sky (app and Build/Match): same slide hue, but the lower half stays near-black navy. The gradient now runs `#121d33` → `#15233d` → `#192b49` → `#1d3355` → `#213a61` at the bottom, down from `#41699a`.

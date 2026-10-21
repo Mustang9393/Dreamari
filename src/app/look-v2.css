@@ -305,7 +305,7 @@ html.look-v2.dark [data-flow-space] {
   /* the same dusk sky as the app (21 Oct): dark overhead, brighter toward
      the horizon; the top nebula (light from above) is off in dark */
   background:
-    linear-gradient(180deg, #121d33 0%, #15233d 35%, #192b49 62%, #1d3355 84%, #213a61 100%) !important;
+    linear-gradient(180deg, #121d33 0%, #14213a 40%, #162640 72%, #172843 100%) !important;
 }
 html.look-v2.dark [data-flow-space] [data-nebula="1"] {
   display: none;
@@ -550,6 +550,11 @@ html.look-v2:not(.light) [data-app-backdrop] {
      the color either"): the same slide hue all the way down, but the lower
      sky stays near-black navy (#213a61 at the bottom, not #41699a), so the
      brightness comes from the aurora's light, not from the gradient.
+     Darker again near the aurora (21 Oct, Chandu: "lets go a little darker
+     towards the aurora, make the aurora feel like more when you see the
+     earth horizon/atmosphere line from outer space"): the gradient barely
+     lifts (#172843 at the bottom), so the aurora's limb line glows out of
+     near-black like the atmosphere seen from orbit.
      Before that, an aurora and a cobalt sky (21 Oct, Chandu: "how can we make this
      look more optimistic and hopeful and exciting?", then "lets try it, how
      about we give the lighter glow a more aurora-esque material/shape?"):
@@ -561,7 +566,7 @@ html.look-v2:not(.light) [data-app-backdrop] {
      stripes and ellipses was rejected ("looks very bad and ugly please make
      it match an actual spectral material light thingy when rendered"). */
   background:
-    linear-gradient(180deg, #121d33 0%, #15233d 35%, #192b49 62%, #1d3355 84%, #213a61 100%) !important;
+    linear-gradient(180deg, #121d33 0%, #14213a 40%, #162640 72%, #172843 100%) !important;
 }
 html.look-v2:not(.light) body {
   background: #131f36;

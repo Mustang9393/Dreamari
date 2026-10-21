@@ -73,8 +73,11 @@ float fbm(vec2 p) {
 vec3 curtain(vec2 uv, float aspect, float t, float k, float lift, float rayScale) {
   float x = uv.x * aspect;
   // the lower border folds and ripples, just above the bottom edge
-  float base = 0.03 + lift
-    + 0.045 * (fbm(vec2(x * 0.55 + t * 0.04 + k * 3.1, k * 1.7 + t * 0.02)) - 0.5)
+  // the border sits on the bottom edge of the screen, flat (Chandu: "we
+  // can move the aurora to the edge of the screen so we dont see the darker
+  // horizon stuff"), rippling only a little
+  float base = 0.025 + lift
+    + 0.03 * (fbm(vec2(x * 0.55 + t * 0.04 + k * 3.1, k * 1.7 + t * 0.02)) - 0.5)
     + 0.01 * sin(x * 1.4 + t * 0.25 + k * 2.0);
   float d = uv.y - base;
   // the curtain drifts sideways, but sways by different amounts along its
@@ -92,7 +95,7 @@ vec3 curtain(vec2 uv, float aspect, float t, float k, float lift, float rayScale
   float pulse = 0.3 + 0.7 * smoothstep(0.25, 0.75, noise(vec2(wx * rayScale * 0.6 + 17.0, t * 0.4 + k * 9.0)));
   // each ray reaches its own height, some tall, most short; kept low
   // ("WE CAN REDUCE THE AURORA BEAMS HEIGHTS. A BIT TOO.")
-  float reach = 0.1 + 0.27 * pow(noise(vec2(wx * rayScale * 0.45, k * 3.0 + t * 0.12)), 1.8);
+  float reach = 0.06 + 0.17 * pow(noise(vec2(wx * rayScale * 0.45, k * 3.0 + t * 0.12)), 1.8);
   // above the border the light thins upward; below it, it ends crisply
   float body = d > 0.0 ? exp(-d / reach) : exp(d * 80.0);
   // the border itself: a thin, bright seam the rays stand on
@@ -113,11 +116,21 @@ void main() {
   float aspect = uRes.x / uRes.y;
   float t = uTime;
   vec3 col = curtain(uv, aspect, t, 0.0, 0.0, 13.0);
+  // the base glow, like the atmosphere's line seen from orbit (Chandu:
+  // "more base glow but more fading upwards"): brightest on the bottom
+  // edge, fading fast upward. Flat and at the very edge: the curved limb
+  // with the planet's dark under it was removed ("theres also a flatter
+  // circular rough shape that doesnt sit very well lets remove that").
+  float seamL = exp(-uv.y / 0.012);
+  float glowL = exp(-uv.y / 0.06);
+  float hazeL = exp(-uv.y / 0.16);
   col += 0.55 * curtain(uv, aspect, t * 0.8, 1.0, 0.04, 23.0);
   // the haze of scattered light along the horizon the curtain rises from,
   // in a saturated blue so the bottom glows instead of going grey ("DONT
   // MAKE THE BOTTOM PART MUDDY WITH GREYER MUDDY COLORING")
-  col += vec3(0.10, 0.40, 1.00) * 0.75 * exp(-uv.y / 0.08);
+  col += vec3(0.72, 0.88, 1.00) * 0.55 * seamL
+       + vec3(0.18, 0.50, 1.00) * 0.9 * glowL
+       + vec3(0.10, 0.36, 1.00) * 0.25 * hazeL;
   // fade toward the sides and the top of the layer
   float edge = smoothstep(0.0, 0.22, uv.x) * smoothstep(1.0, 0.78, uv.x);
   col *= mix(0.45, 1.0, edge) * smoothstep(0.78, 0.38, uv.y);
@@ -131,7 +144,8 @@ void main() {
   // BEAMS BRIGHTNESS CAN ORGANICALLY FADE FROM THE BOTTOM BRIGHTER BAR")
   // on the darker sky the aurora carries the blue ("let the aurora carry the
   // light blue instead"), so a little more of its light is let through
-  float cap = 0.06 + 0.36 * exp(-uv.y / 0.24);
+  // more at the base, faster fade upward
+  float cap = 0.06 + 0.42 * exp(-uv.y / 0.15);
   col *= min(1.0, cap / max(max(col.r, col.g), max(col.b, 1e-4)));
   gl_FragColor = vec4(col, 1.0);
 }
