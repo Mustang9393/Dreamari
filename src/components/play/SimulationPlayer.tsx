@@ -1954,7 +1954,7 @@ function BeatBody({
     </p>
   );
   const content = (() => {
-    if (beat.kind === "card") return <CardBody beat={beat} accent={accent} onNext={onNext} reputation={reputation} />;
+    if (beat.kind === "card") return <CardBody beat={beat} accent={accent} onNext={onNext} reputation={reputation} graphic={beat.artifact ? <WorkArtifact artifact={beat.artifact} /> : undefined} />;
     if (beat.kind === "check") return <CheckBody beat={beat} onNext={onNext} />;
     if (beat.kind === "reveal") return <RevealBody beat={beat} onNext={onNext} />;
     if (beat.kind === "flips") return <FlipsBody beat={beat} accent={accent} onNext={onNext} />;
@@ -1972,7 +1972,8 @@ function BeatBody({
     if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
     return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} style={beat.kind === "review" ? beat.style : undefined} deciding={beat.kind === "review" ? beat.deciding : undefined} decidingNote={beat.kind === "review" ? beat.decidingNote : undefined} />;
   })();
-  const body = beat.artifact ? <div className="flex min-w-0 flex-col">{content}<WorkArtifact artifact={beat.artifact} /></div> : content;
+  // Story graphics belong between the title and description, before the CTA.
+  const body = beat.artifact && beat.kind !== "card" ? <div className="flex min-w-0 flex-col">{content}<WorkArtifact artifact={beat.artifact} /></div> : content;
   if (!prompt) return body;
   // Directed: heading first, then its instruction (both v2 scripts), or the
   // instruction IS the heading (RN v2 screen 33).

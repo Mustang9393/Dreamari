@@ -1,4 +1,4 @@
-.shell { margin:12px 0 0; overflow:hidden; width:min(100%,360px); align-self:center; border-radius:16px; background:var(--color-neutral-50); color:var(--color-neutral-900); text-align:left; font-family:var(--font-body),sans-serif; box-shadow:0 6px 20px color-mix(in srgb,var(--color-neutral-950) 14%,transparent); }
+.shell { margin:0; overflow:hidden; width:min(100%,360px); align-self:center; border-radius:16px; background:var(--color-neutral-50); color:var(--color-neutral-900); text-align:left; font-family:var(--font-body),sans-serif; box-shadow:0 6px 20px color-mix(in srgb,var(--color-neutral-950) 14%,transparent); }
 .shell svg { width:18px; height:18px; flex:none; }
 .music,.wire { padding:16px 18px; }
 .brand { display:flex; align-items:center; gap:8px; font-size:11px; letter-spacing:.1em; }

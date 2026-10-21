@@ -1,3 +1,7 @@
+## 2026-10-21 — Supporting graphic order
+
+User requested title → graphic → description → CTA. CardBody now owns the optional graphic slot after its title, so passive work graphics appear above prose and navigation instead of after the Continue button. Shared vignette spacing follows the card gap. Browser verified UX1-02 fits without scrolling; TypeScript, scoped lint and tokens pass. Decision controls and scoring are unchanged.
+
 ## 2026-10-21 — Career rebuild release verification
 
 User requested finishing and pushing before usage runs out; contact-sheet approval was explicitly waived. New Nursing, UX and Food are complete opaque scenes with characters baked into the image. The rejected `rn/v2/revision-2026-10-21` files are not routed or committed. Slightly deeper canonical warm-brown palettes, simplified blonde hair and older Sofia/Eleanor faces were applied with reference-guided edits. Nursing has 26 ordered morning-to-evening shots with a lake exterior; UX/Food have 8/7 scene groups and 21 beats each. The hamburger links include all three QA games and the public PDF SOP.

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { type ReactNode, createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { Check, ChevronDown, CircleDot, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, ClipboardList, Clock3, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
 import Image from "next/image";
@@ -371,7 +371,7 @@ export function Question({ children }: { children: React.ReactNode }) {
 
 // ------------------------------------------------------------------ the card
 
-export function CardBody({ beat, onNext, accent = "var(--world-business-money-office)", reputation = 0 }: { beat: CardBeat; onNext: () => void; accent?: string; reputation?: number }) {
+export function CardBody({ beat, onNext, graphic, accent = "var(--world-business-money-office)", reputation = 0 }: { beat: CardBeat; onNext: () => void; graphic?: ReactNode; accent?: string; reputation?: number }) {
   const { directed, cinematic } = usePresentation();
   // Directed levels type what is SAID, never what is shown (4 Oct 2026):
   // a line in quotes is a person speaking (speech pace, their voice blips),
@@ -439,6 +439,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
            where the content is. Please remove that from everywhere"). */}
         {!cinematic && <LocalBurst nonce={1} />}
         {beat.title && <span className="text-[13px] font-extrabold tracking-[0.14em] uppercase" style={{ color: accent }}>{beat.title}</span>}
+        {graphic}
         {beat.world && <WorldPanel ui={beat.world} accent={accent} />}
         {/* A bare section card (no eyebrow, no detail, e.g. IB v2's "Level
            1.5") is a section title, so it reads at title size: "LEVEL 1.5
@@ -504,6 +505,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
       ) : (
         <Question>{line(beat.title, true, () => setTitleDone(true))}</Question>
       )}
+      {graphic}
       {beat.opsChat && <OpsChat who={beat.opsChat} accent={accent} />}
       {beat.world && <WorldPanel ui={beat.world} accent={accent} cells={clockFacts ? beat.facts : undefined} onDone={gated ? () => setWorldDone(true) : undefined} />}
       {beat.body && (

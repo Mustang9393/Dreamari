@@ -14,3 +14,5 @@ Use about 6–14 visible words, strong hierarchy and enough whitespace to read a
 The question contains every fact needed to answer. The visual is not a second task, hidden clue, answer key or evidence gate; removing it cannot change the correct answer. Do not invent clinical readings, dosages, safety thresholds, technical limits or release approval. Mark fictional training values as fictional when needed.
 
 Implement with native HTML/CSS/text, semantic tokens and a shared renderer. No embedded independent buttons, tabs, typing, reset, mandatory exploration or playable demo. Only actual game controls accept answers or advance. Do not create extra focus targets. Supply a concise text equivalent and scene mapping. Verify legibility, focus behavior and lack of duplicated copy on desktop and phone. Record the source, supported fact and limits. The final human reviews the assembled game; no intermediate approval gate.
+
+On story cards, use this reading order: title → supporting graphic → short description → CTA. Keep graphics inside the card, never below its CTA. Decision screens keep the question and answer controls prominent.
