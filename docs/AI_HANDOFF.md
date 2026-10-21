@@ -1,3 +1,11 @@
+## 2026-10-21 — Career rebuild release verification
+
+User requested finishing and pushing before usage runs out; contact-sheet approval was explicitly waived. New Nursing, UX and Food are complete opaque scenes with characters baked into the image. The rejected `rn/v2/revision-2026-10-21` files are not routed or committed. Slightly deeper canonical warm-brown palettes, simplified blonde hair and older Sofia/Eleanor faces were applied with reference-guided edits. Nursing has 26 ordered morning-to-evening shots with a lake exterior; UX/Food have 8/7 scene groups and 21 beats each. The hamburger links include all three QA games and the public PDF SOP.
+
+**Checks:** production build passes after merging current main (including its accessibility/visual updates); TypeScript, scoped ESLint, tokens, 8 regression tests and all three career validators pass. Browser observed UX all seven best answers, midpoint 74, final success at92. Nursing all seven best answers reached92 and final review; its earlier complete run was reset by public-asset Fast Refresh before the outcome screenshot. Food browser observed all seven passing decisions at92 and midpoint74; subagent browser access then failed before final outcome capture. The shared final success flow was verified in UX. Actual production-build Nursing scene at1280x720 shows the complete painting below the HUD, with no face/HUD overlap. Phone viewport override did not apply to that existing tab; this is not a claim of physical phone/Windows/Chromebook QA. Human visual/content QA remains open.
+
+**WHY:** simplify learning and prioritize questions; preserve the IB scoring/checkpoint system while removing long matching/sorting/chain teaching exercises. Supporting graphics are passive native screen/note/message context with no answer data. FullScenePlate contains the image rather than zooming/cropping it; optional graphics sit below scene copy. Existing unrelated main updates were preserved by a merge.
+
 ## 2026-10-21 — Career games rebuilt around short decisions and full-scene art (SOP v1.8)
 
 **Why (Chandu):** “games ... too complex”; “bake characters into images”; and “no ... overlap ... HUD”. The prior career-game rounds carried too many beats and visual controls, while composited characters and floating panels could compete with the play surface.
