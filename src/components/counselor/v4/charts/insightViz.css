@@ -209,9 +209,21 @@ html:not(.dark) [data-counselor-version="v4"] .v4-iv-gt .gl-orb-body { fill: var
 html:not(.dark) [data-counselor-version="v4"] .v4-iv-gt-hair { stroke: color-mix(in srgb, var(--foreground) 18%, transparent); stroke-dasharray: none; }
 
 /* A tile with a picture (Top Majors, 21 Oct 2026, Chandu: "do the tree map
-   with the images"): the scene fills the tile, still sized by its count; a
-   dark fade at the foot carries the name and number in white */
-[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face { justify-content: flex-end; background-color: var(--card); background-size: cover; background-position: center; border: 1px solid var(--glass-border); }
-[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(180deg, transparent 38%, rgba(8, 12, 24, .78) 100%); pointer-events: none; }
-[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-name, [data-counselor-version="v4"] .v4-iv-tm.has-art b { color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, .45); }
+   with the images", then "its difficult to read... It needs to be subtler",
+   then "text scrim needs work. Use the progressive blur"): the scene fills
+   the tile, still sized by its count. Its lower part blurs progressively
+   (two masked backdrop-blur layers, light then stronger toward the foot)
+   over a soft dark fade, and the name and number sit on that in white. The
+   tiles never move, so the blur costs nothing frame to frame. */
+[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face { justify-content: flex-end; padding: 12px 14px; background-color: var(--card); background-size: cover; background-position: center; border: 1px solid var(--glass-border); }
+[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face::before,
+[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face::after { content: ""; position: absolute; inset: auto 0 0 0; border-radius: 0; pointer-events: none; opacity: 1; transition: none; }
+[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face::before { height: 70%; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 55%); mask-image: linear-gradient(180deg, transparent 0%, #000 55%); background: linear-gradient(180deg, transparent 0%, rgba(8, 12, 24, .22) 60%, rgba(8, 12, 24, .5) 100%); }
+[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face::after { height: 42%; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 70%); mask-image: linear-gradient(180deg, transparent 0%, #000 70%); background: linear-gradient(180deg, transparent, rgba(8, 12, 24, .28)); }
+[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-name { color: #fff; font-size: 13px; line-height: 1.25; text-shadow: 0 1px 3px rgba(0, 0, 0, .35); -webkit-line-clamp: 2; }
+[data-counselor-version="v4"] .v4-iv-tm.has-art b { color: #fff; font-size: 22px; text-shadow: 0 1px 3px rgba(0, 0, 0, .35); }
+[data-counselor-version="v4"] .v4-iv-tm.has-art.is-tight b { font-size: 17px; }
 [data-counselor-version="v4"] .v4-iv-tm.has-art:hover .v4-iv-tm-face, [data-counselor-version="v4"] .v4-iv-tm.has-art:focus-visible .v4-iv-tm-face { background-color: var(--card); border-color: var(--primary); }
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  [data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face::before, [data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face::after { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(180deg, transparent, rgba(8, 12, 24, .8)); }
+}

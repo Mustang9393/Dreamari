@@ -350,7 +350,7 @@ function InterestRows() {
          word chips with their count, so a major never looks like a job.
          The Saved | At their schools switch keeps the majors at the schools
          students are exploring. Every item still opens its students. */}
-      <section className="v4-cc-split" aria-label="Schools and majors">
+      <section className="v4-cc-split is-single" aria-label="Top schools">
         <div className="v4-cc-col">
           <header className="v4-r2-head">
             <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Schools Students Are Exploring</h2><span className="v4-r2-sub">{sub("See who is exploring each school.")}</span></div>
@@ -370,18 +370,20 @@ function InterestRows() {
             <ShowAll total={schools.length} shown={5} open={allSchools} onToggle={() => setAllSchools((v) => !v)} />
           </>}
         </div>
-        <div className="v4-cc-col">
-          <header className="v4-r2-head">
-            <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Majors</h2><span className="v4-r2-sub">{sub(majorMode === "saved" ? "Students who saved each major." : "Students exploring a school that offers it.")}</span></div>
-            <span className="v4-r2-tools"><Segmented ariaLabel="Saved majors or majors at their schools" value={majorMode} onChange={setMajorMode} options={[{ key: "saved", label: "Saved" }, { key: "schools", label: "At their schools" }]} /><button type="button" onClick={() => router.push(EXPLORE)} className="v4-r2-link">Explore all majors<ArrowUpRight size={14} aria-hidden /></button></span>
-          </header>
-          {(majorMode === "saved" ? savedMajors : exploredMajors).length === 0
-            ? <p className="v4-cc-empty">{majorMode === "saved" ? `No saved majors for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet.`}</p>
-            // the treemap again, each tile wearing its major's scene (21 Oct
-            // 2026: Mika's major art; a grid of equal cards took a lot of
-            // height and lost the sizing by count)
-            : <Treemap items={majorItems.map((m) => ({ ...m, image: MAJOR_ART[m.label] }))} onOpen={(open) => open()} />}
-        </div>
+      </section>
+      <section className="v4-cc-majors" aria-label="Top majors">
+        <header className="v4-r2-head">
+          <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Majors</h2><span className="v4-r2-sub">{sub(majorMode === "saved" ? "Students who saved each major." : "Students exploring a school that offers it.")}</span></div>
+          <span className="v4-r2-tools"><Segmented ariaLabel="Saved majors or majors at their schools" value={majorMode} onChange={setMajorMode} options={[{ key: "saved", label: "Saved" }, { key: "schools", label: "At their schools" }]} /><button type="button" onClick={() => router.push(EXPLORE)} className="v4-r2-link">Explore all majors<ArrowUpRight size={14} aria-hidden /></button></span>
+        </header>
+        {(majorMode === "saved" ? savedMajors : exploredMajors).length === 0
+          ? <p className="v4-cc-empty">{majorMode === "saved" ? `No saved majors for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet.`}</p>
+          // Mika's major art in the treemap, its own full-width row under
+          // Schools (21 Oct 2026, Chandu: "its difficult to read. If there
+          // isn't an image for a major remove it... or it should be its own
+          // row below that section"): only majors with art, the name on a
+          // small dark label so it reads over any scene
+          : <Treemap height={320} items={majorItems.filter((m) => MAJOR_ART[m.label]).map((m) => ({ ...m, image: MAJOR_ART[m.label] }))} onOpen={(open) => open()} />}
       </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </>
