@@ -97,7 +97,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Plus, Send, Check, Bell, Briefcase, ClipboardList, Landmark, MessageSquare, Mail, ChevronLeft, RotateCcw, Sparkles, CheckCheck, ArrowRight, Minus, X } from "lucide-react";
+import { Plus, Send, Check, Bell, Briefcase, ClipboardList, Landmark, MessageSquare, Mail, ChevronLeft, RotateCcw, Sparkles, CheckCheck, ArrowRight, Minus, X, Flag } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { LocalBurst } from "@/components/build/ui";
@@ -109,7 +109,6 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "./chips";
 import { Segmented } from "./viz";
 import { LightPool, ReachFunnel } from "./charts/lit";
-import { HeadingControls } from "./Workspace";
 import { SubTabs } from "./SubTabs";
 import { Avatar, SelectBox, STATUS_COLORS, STATUS_FILLS, StatusChip, StudentLink } from "./chips";
 import { BulkComposer, BulkReplyReview, EmailToggle, fillFirst, markEmailed, reachFor, useEmailed } from "./MessagesBulk";
@@ -128,9 +127,6 @@ import { logTime } from "@/lib/counselorTimeLog";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { COLLEGES } from "@/components/colleges/data";
 import { openCareer, openSchool } from "../v5/ExploreSheets";
-import { V5Messages } from "../v5/Messages";
-// the statuses v7's inbox counts as still owing a reply (v5/Messages.tsx)
-const V5_OPEN = ["new", "viewed", "in-progress", "follow-up"];
 
 function fmtDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
@@ -906,8 +902,7 @@ function InboxPanel({ initialQuestion, initialStudent, initialDraft, session, se
               className={LIST_FIELD}
               style={FIELD_STYLE}
             />
-            {/* the J / K keys still work; their hint chip left the toolbar
-               (20 Oct 2026 declutter) */}
+            {!zero && <IconTip label="J and K move, X selects"><span className="msg-keys">J / K</span></IconTip>}
           </div>
           <ul className="msg-list dm-scroll" aria-label="Messages">
             {/* a dense list mid-flow: one muted line (COMPONENT_STATES_PLAYBOOK.md, tier 3) */}
@@ -1145,11 +1140,12 @@ function QuestionThread({ row, status, reply, response, setResponse, onReply, on
   const mine = settled?.kind === "replied";
   return (
     <div className="msg-thread is-arriving">
-      {/* grade, topic and milestone as one quiet line under the name; the
-         status as one word with its dot (20 Oct 2026 declutter: three
-         bordered pills on every thread) */}
-      <ThreadHead backRef={backRef} onBack={onBack} id={row.studentId} name={q.name} index={row.avatarIndex} meta={`Grade ${q.grade} · ${q.tag}${q.milestone ? ` · ${q.milestone}` : ""}`}
-        tags={<span className="msg-status-word" style={{ color: STATUS_STYLE[status].color }}><i style={{ background: STATUS_STYLE[status].fill }} />{STATUS_STYLE[status].label}</span>} />
+      <ThreadHead backRef={backRef} onBack={onBack} id={row.studentId} name={q.name} index={row.avatarIndex} meta={`Grade ${q.grade}`}
+        tags={<>
+          <span className="msg-tag-pill is-status" style={{ color: STATUS_STYLE[status].color }}><i style={{ background: STATUS_STYLE[status].fill }} />{STATUS_STYLE[status].label}</span>
+          <span className="msg-tag-pill">{q.tag}</span>
+          {q.milestone && <span className="msg-tag-pill"><Flag className="h-[12px] w-[12px]" aria-hidden />{q.milestone}</span>}
+        </>} />
       <div className="msg-chat dm-scroll">
         <span className="msg-day">{fmtDate(q.date)}</span>
         <div className="msg-line is-them"><BubbleFace id={row.studentId} name={q.name} index={row.avatarIndex} /><p className="msg-bubble">{q.question}</p></div>
@@ -1459,6 +1455,7 @@ export function CounselorConnect() {
   const initialIds = (params.get("ids") ?? "").split(",").filter(Boolean);
   const questionParam = params.get("question");
   const studentParam = params.get("studentId");
+  const draftParam = params.get("draft");
   const tabParam = OLD_TAB[params.get("tab") ?? ""];
   const [tab, setTab] = useState<MessagesTab>(composeParam ? "sent" : (questionParam || studentParam) ? "inbox" : tabParam ?? "inbox");
   const live = useConnectLive();
@@ -1475,9 +1472,9 @@ export function CounselorConnect() {
   for (const r of sentRows) sentCounts[r.kind]++;
   const current = announcements.find((a) => a.id === openAnnouncement) ?? announcements[0];
   const message = (ids: string[]) => { setDrill(null); setTab("sent"); setCompose({ kind: "private", ids, n: Date.now() }); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  // v7's inbox keeps replies in counselorMessages, so count from there
-  const { replies } = useMessages();
-  const answeredAll = QUESTIONS.filter((q) => !V5_OPEN.includes(q.status) || replies[q.id]).length;
+  // the inbox run (InboxPanel), kept here so a trip to Sent keeps it
+  const [session, setSession] = useState<InboxSession>(() => ({ cleared: 0, startedAt: Date.now(), finishedAt: null, keys: [] }));
+  const remaining = QUESTIONS.filter((q) => OWES.includes(live.statusOf(q.id))).length;
   // below 1024px: the announcement list, or one announcement
   const [annOpen, setAnnOpen] = useState(false);
   // a just-published announcement lands with a burst
@@ -1491,9 +1488,6 @@ export function CounselorConnect() {
   };
   return (
     <div className="v4-page v4-connect flex flex-col gap-[var(--space-5)]">
-      {/* Inbox / Sent, the answered count and New message on the title's
-         row (20 Oct 2026 hierarchy pass: they were a second control row) */}
-      <HeadingControls>
       <div className="msg-toolbar">
         {/* the page view switch (level 3): the pill, so it never reads as a
            second row of the shell's underline page nav (9 Oct 2026) */}
@@ -1507,9 +1501,7 @@ export function CounselorConnect() {
           ]}
         />
         <div className="msg-toolbar-end">
-          {/* answered of every question, so the bar never starts at 0 (20 Oct
-             2026, Chandu: "keep the progress bar, never start at 0") */}
-          {tab === "inbox" && <InboxBar cleared={answeredAll} remaining={QUESTIONS.length - answeredAll} />}
+          {tab === "inbox" && session.cleared + remaining > 0 && <InboxBar cleared={session.cleared} remaining={remaining} />}
           {/* bulk sending (10 Oct 2026): one note to many, the page's primary
              action on both tabs; it opens on Sent, where sends are tracked */}
           {!(tab === "sent" && compose) && (
@@ -1519,13 +1511,8 @@ export function CounselorConnect() {
           )}
         </div>
       </div>
-      </HeadingControls>
 
-      {/* the inbox is v7's (20 Oct 2026, Chandu: "match the prepare stuff to
-         the v7 as much as possible"): the questions as wide rows, unanswered
-         first, the open one and the reply box in a panel beside them; it
-         follows &studentId= and &draft= itself */}
-      {tab === "inbox" && <V5Messages desk />}
+      {tab === "inbox" && <InboxPanel initialQuestion={questionParam} initialStudent={studentParam} initialDraft={draftParam} session={session} setSession={setSession} />}
       {tab === "sent" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           {compose && <MessageComposer key={compose.n} initialKind={compose.kind} initialPathway={compose.n === 0 ? initialPathway : null} initialIds={compose.ids} onCancel={() => setCompose(null)} onSendAnnouncement={(a) => { addAnnouncement(a); setCompose(null); setSentKind("announcement"); openAnn(a.id); setPublished({ id: a.id, n: Date.now() }); playCorrect(); }} />}

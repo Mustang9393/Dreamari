@@ -46,9 +46,7 @@ import { useCounselorFilters } from "../shell";
 import { openLog } from "../v5/LogSheet";
 import { SubTabs } from "./SubTabs";
 import { useMeetings } from "../v5/Prepare";
-import { ToLog } from "./MeetingsNext";
-import { HeadingControls } from "./Workspace";
-import { V7Prepare } from "../v7/Prepare";
+import { MeetingsWeek } from "./MeetingsWeek";
 import { MeetingsOutreach } from "./MeetingsOutreach";
 import { iso, useInvites, useMinuteClock } from "./meetingsModel";
 import "./today.css";
@@ -58,7 +56,7 @@ import "./meetings.css";
 type View = "upcoming" | "outreach";
 const NEED: Record<string, number> = { "At Risk": 0, "Needs Attention": 1, "On Track": 2 };
 
-export function Meetings({ studentId }: { studentId?: string } = {}) {
+export function Meetings() {
   const all = useReviewedRoster();
   const { gradeFilter } = useCounselorFilters();
   const params = useSearchParams();
@@ -76,9 +74,12 @@ export function Meetings({ studentId }: { studentId?: string } = {}) {
   const tick = useMinuteClock();
   const now = useMemo(() => (tick ? new Date(tick) : new Date()), [tick]);
   const upcoming = meetings.filter((m) => !isPast(m, now) && !done[m.id]);
+  const next = upcoming[0];
   const twoWeeksAgo = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 14));
   const over = meetings.filter((m) => m.day >= twoWeeksAgo && isPast(m, now));
   const toLog = over.filter((m) => !done[m.id]).reverse();
+  // the agenda lists the next seven days after the hero's meeting
+  const weekOut = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
 
   // Needs Outreach: students Dreamari flags with nothing booked into office
   // hours from this week on. Reached = invited this week, or booked or met
@@ -101,12 +102,8 @@ export function Meetings({ studentId }: { studentId?: string } = {}) {
     router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false });
   };
 
-  // Prepare on a meeting opens the student's brief, as in v7
-  if (studentId) return <V7Prepare studentId={studentId} />;
   return (
     <div className="v4-mtg v4-sections flex flex-col">
-      {/* on the title's row, like every other page (21 Oct 2026) */}
-      <HeadingControls>
       <div className="prep-toolbar">
         <SubTabs ariaLabel="Meetings view" value={view} onChange={setView} options={[{ key: "upcoming", label: "Upcoming", count: upcoming.length }, { key: "outreach", label: "Needs Outreach", count: toReach.length }]} />
         <div className="prep-toolbar-actions">
@@ -114,18 +111,10 @@ export function Meetings({ studentId }: { studentId?: string } = {}) {
           <button type="button" className="prep-action is-primary" onClick={() => openLog({ mode: "book" })}><CalendarPlus className="h-4 w-4" aria-hidden />Book a meeting</button>
         </div>
       </div>
-      </HeadingControls>
       {view === "upcoming" ? (
-        // v7's agenda (20 Oct 2026, Chandu: "match the prepare stuff to the
-        // v7 as much as possible"): the week by day, prep status, requests to
-        // confirm, Agenda or Calendar, availability. v4 keeps what v7 has no
-        // place for: meetings that are over and still need logging under it,
-        // Needs Outreach, Book and Log a walk-in on the toolbar.
-        <div className="v4-v7-agenda flex flex-col gap-[var(--space-6)]">
-          <V7Prepare />
-          {/* the ones that are over, to mark done, after the week ahead */}
-          {toLog.length > 0 && <ToLog items={toLog} byId={byId} now={now} />}
-        </div>
+        // Calendar only (21 Oct 2026, Maisha: "lets have 'Calendar' view be
+        // the default. I don't think we need the 'Agenda' view at all")
+        <MeetingsWeek meetings={meetings} roster={ordered} now={now} done={done} />
       ) : (
         <MeetingsOutreach flagged={flagged} invitedIds={invitedIds} bookedIds={bookedIds} monday={monday} now={now} />
       )}

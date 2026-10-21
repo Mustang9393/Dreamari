@@ -53,25 +53,19 @@ const BAR_FILL = "linear-gradient(90deg, color-mix(in srgb, var(--primary) 70%, 
 export type AssistMode = "drafts" | "scratch";
 
 /** The controls' one switch: Dreamy's drafts, or a blank start. A small
- *  segmented toggle, not a second tab row under the page's tabs. */
+ *  segmented toggle, not a second tab row under the page's tabs. Named
+ *  "Drafts" and "Create" (21 Oct 2026, Maisha). */
 export function ModeSwitch({ mode, count, onChange }: { mode: AssistMode; count: number; onChange: (m: AssistMode) => void }) {
   return (
     <div className="as-switch" role="group" aria-label="How to start">
-      <button type="button" aria-pressed={mode === "drafts"} onClick={() => onChange("drafts")}>Dreamy&apos;s drafts{count > 0 && <span className="as-switch-n">{count}</span>}</button>
-      <button type="button" aria-pressed={mode === "scratch"} onClick={() => onChange("scratch")}>Start from scratch</button>
+      <button type="button" aria-pressed={mode === "drafts"} onClick={() => onChange("drafts")}>Drafts{count > 0 && <span className="as-switch-n">{count}</span>}</button>
+      <button type="button" aria-pressed={mode === "scratch"} onClick={() => onChange("scratch")}>Create</button>
     </div>
   );
 }
 
 /** How far along, and the week's minutes saved, on one line over the bar. */
-// DEMO-ONLY: drafts finished earlier today, so the bar never opens at 0
-// (21 Oct 2026, Chandu: "keep the progress bar, never start at 0 though");
-// production counts the day's finished drafts
-const DONE_EARLIER = 2;
-
-export function SessionProgress({ total: run, done: runDone, weekMinutes }: { total: number; done: number; weekMinutes: number }) {
-  const total = run + DONE_EARLIER;
-  const done = runDone + DONE_EARLIER;
+export function SessionProgress({ total, done, weekMinutes }: { total: number; done: number; weekMinutes: number }) {
   const pct = total ? Math.round((done / total) * 100) : 0;
   return (
     <div className="as-progress" role="status" aria-live="polite">

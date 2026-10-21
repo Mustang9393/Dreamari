@@ -85,7 +85,7 @@
 
 import { createElement, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, Download, LayoutGrid, List } from "lucide-react";
+import { ChevronDown, Download } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
@@ -94,15 +94,16 @@ import { createLocalRecord } from "@/lib/localRecord";
 import { useCounselorFilters, type GradeFilter } from "../shell";
 import { Listbox } from "./Listbox";
 import { Go } from "./chips";
+import { Segmented } from "./viz";
 import { CheckpointWaffle, HeroRing, PillTrack, seeLine } from "./milestoneViz";
 import { DrillPanel, type Drill } from "./Drill";
 import { Tip } from "@/components/app/IconTip";
+import { CountUp } from "./overviewShared";
 import { MilestoneCard } from "./MilestoneCards";
 import { MilestoneDrawer, type MilestoneFilter } from "./MilestoneDrawer";
 import { MilestonesByStudent, type StudentStatusFilter } from "./MilestonesByStudent";
 import { GRADES, M_LABEL, buildModel, milestoneIcon, needsHelp, pctDone, reviewHref, reviewHrefIds, sumCounts, typeLabel, type Grade, type MState, type MilestoneRow, type StudentRow } from "./milestonesModel";
 import { SubTabs } from "./SubTabs";
-import { HeadingControls } from "./Workspace";
 import "./milestones.css";
 
 type Mode = "milestone" | "student";
@@ -111,7 +112,7 @@ const GRADE_OPTIONS = ["All Grades", "9", "10", "11", "12"];
 // The Charts | List choice is one setting for the page, kept across visits
 // (the app's localStorage record idiom: a stable snapshot, the server and
 // the first client paint both read the fallback).
-const VIZ_RECORD = createLocalRecord<Viz>("dreamari:milestones-view-2", "list");
+const VIZ_RECORD = createLocalRecord<Viz>("dreamari:milestones-view", "charts");
 const VIZ_OPTIONS: { key: Viz; label: string }[] = [{ key: "charts", label: "Charts" }, { key: "list", label: "List" }];
 
 export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
@@ -138,10 +139,7 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   const [openGrades, setOpenGrades] = useState<Set<Grade>>(() => new Set<Grade>([9]));
   const toggleGrade = (g: Grade) => setOpenGrades((prev) => { const next = new Set(prev); if (next.has(g)) next.delete(g); else next.add(g); return next; });
   const storedViz = VIZ_RECORD.useValue();
-  // rows by default (21 Oct 2026, Chandu: "declutter a lot more"): one line
-  // a milestone instead of a card with a four-line breakdown each; Charts
-  // stays one click away in the view tools
-  const viz: Viz = storedViz === "charts" ? "charts" : "list";
+  const viz: Viz = storedViz === "list" ? "list" : "charts";
   const setViz = (v: Viz) => VIZ_RECORD.write(v);
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const showCounselor = account.role === "Lead Counselor";
@@ -224,8 +222,6 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
 
   return (
     <div className="v4-page v4-ms v4-sections flex flex-col">
-      {/* on the title's row, like every other page (21 Oct 2026) */}
-      <HeadingControls>
       <div className="v4-ms-toolbar">
         <span className="flex flex-wrap items-center gap-[8px]">
           {/* a row of pills, not a dropdown: Maisha wrote the selector as
@@ -235,41 +231,33 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
           {showCounselor && <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All Counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} />}
         </span>
         <span className="flex items-center gap-[8px]">
-          {/* the view's tools as one quiet icon cluster (20 Oct 2026, Chandu:
-             "refine as you see fit without losing content or control"):
-             Charts, List and Export were a text switch and a heavy bordered
-             button competing with the two pill rows; same three controls,
-             now small icons with their names on hover */}
-          <span className="v4-ms-tools" role="group" aria-label="View tools">
-            {mode === "milestone" && VIZ_OPTIONS.map((o) => (
-              <IconTip key={o.key} label={o.key === "charts" ? "Charts" : "List"}>
-                <button type="button" aria-pressed={viz === o.key} aria-label={o.label} onClick={() => setViz(o.key)} className="v4-ms-icon">{o.key === "charts" ? <LayoutGrid className="h-[15px] w-[15px]" aria-hidden /> : <List className="h-[15px] w-[15px]" aria-hidden />}</button>
-              </IconTip>
-            ))}
-            <IconTip label="Export CSV"><button type="button" onClick={exportCsv} aria-label="Export CSV" className="v4-ms-icon"><Download className="h-[15px] w-[15px]" aria-hidden /></button></IconTip>
-          </span>
+          {mode === "milestone" && <Segmented ariaLabel="Milestone view" value={viz} onChange={setViz} options={VIZ_OPTIONS} />}
+          <IconTip label="Export CSV"><button type="button" onClick={exportCsv} aria-label="Export CSV" className="v4-ms-icon is-bordered"><Download className="h-[15px] w-[15px]" aria-hidden /></button></IconTip>
           {/* two page view switches share one row, both the level 3 pill */}
           <SubTabs ariaLabel="View" value={mode} onChange={setMode} options={[{ key: "milestone", label: "By Milestone" }, { key: "student", label: "By Student" }]} />
         </span>
       </div>
-      </HeadingControls>
 
-      <section aria-label="Summary" className="v4-ms-overview">
+      <section aria-label="Summary" className="v4-ms-overview v4-surface">
         {/* the figures step up on All Grades ("slightly increase the size
            of the summary metrics ... for better visibility", Maisha) */}
-        {/* the four figures as one sentence (20 Oct 2026, the reinvention);
-           each still opens what it counts */}
-        <div className="v4r-say">
-          <p className="v4r-say-line">
-            <button type="button" className="v4r-say-fig" onClick={() => notCompleteDrill(students, scopeLabel, pctDone(counts))}><b>{pctDone(counts)}%</b></button> of milestones done
-            {needHelp > 0 && <>, <button type="button" className="v4r-say-fig" onClick={openNeedHelp}><b>{needHelp} students</b></button> need attention</>}
-          </p>
-          <p className="v4r-say-facts">
-            <button type="button" onClick={openStudents}><b>{students.length}</b> students</button>
-            <span aria-hidden>·</span>
-            <button type="button" onClick={milestonesDrill}><b>{rows.length}</b> milestones</button>
-          </p>
-        </div>
+        <dl className={`v4-ms-summary ${gradeFilter === "All Grades" ? "is-all" : ""}`}>
+          <div><dt>Students</dt><dd><Tip label={seeLine(students.length)}><button type="button" onClick={openStudents} className="v4-ms-fig" aria-label={`${students.length} students: open the student list`}><CountUp value={students.length} /></button></Tip></dd></div>
+          <div><dt>Milestones</dt><dd><Tip label="See every milestone, lowest first"><button type="button" onClick={milestonesDrill} className="v4-ms-fig" aria-label={`${rows.length} milestones: rank them, lowest first`}><CountUp value={rows.length} /></button></Tip></dd></div>
+          <div className="is-hero"><dt>Complete</dt><dd><Tip label={seeLine(students.filter((r) => r.total > 0 && r.pct < 100).length, "not complete")}><button type="button" onClick={() => notCompleteDrill(students, scopeLabel, pctDone(counts))} className="v4-ms-fig is-hero-fig" aria-label={`${pctDone(counts)}% complete: see the students who are not complete`}><HeroRing hero pct={pctDone(counts)} size={gradeFilter === "All Grades" ? 40 : 32} stroke={gradeFilter === "All Grades" ? 5 : 4} /><CountUp value={pctDone(counts)} suffix="%" /></button></Tip></dd></div>
+          <div>
+            <dt>Need Attention</dt>
+            <dd>
+              {needHelp > 0 ? (
+                <Tip label={seeLine(needHelp)}>
+                  <button type="button" onClick={openNeedHelp} className="v4-ms-summary-link v4-ms-fig" aria-label={`${needHelp} students need attention: show them`}>
+                    <span style={{ color: "var(--v4-caution)" }}><CountUp value={needHelp} /></span><Go />
+                  </button>
+                </Tip>
+              ) : 0}
+            </dd>
+          </div>
+        </dl>
         {/* One grade picked: that grade's bar with all four states and the
            counts behind it, under a hairline. The grade lines left All
            Grades (Maisha: "This information should appear only when an
@@ -323,9 +311,7 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
                       </Tip>
                       <button type="button" tabIndex={-1} aria-hidden onClick={() => toggleGrade(g)} className="v4-ms-grade-chev dm-quiet"><ChevronDown className="h-[16px] w-[16px] flex-none transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden /></button>
                     </span>
-                    {/* the grade's total only while it is folded: open, each card
-                       already says its own "N waiting" (20 Oct 2026 declutter) */}
-                    {!open && waitingIds.length > 0 && <button type="button" onClick={() => router.push(reviewHrefIds(waitingIds))} className="v4-ms-wait">{waitingIds.length} waiting for you</button>}
+                    {waitingIds.length > 0 && <button type="button" onClick={() => router.push(reviewHrefIds(waitingIds))} className="v4-ms-wait">{waitingIds.length} waiting for you</button>}
                   </div>
                   {open && list}
                 </section>

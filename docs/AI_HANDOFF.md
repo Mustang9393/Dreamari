@@ -2,6 +2,34 @@
 
 User requested title → graphic → description → CTA. CardBody now owns the optional graphic slot after its title, so passive work graphics appear above prose and navigation instead of after the Continue button. Shared vignette spacing follows the card gap. Browser verified UX1-02 fits without scrolling; TypeScript, scoped lint and tokens pass. Decision controls and scoring are unchanged.
 
+## 2026-10-21: v4 College & Career: Top Majors as Mika's illustrated cards
+
+**Why (Maisha):** "For 'Insights' in college & career, Mika created cards for Majors." Chandu shared them unnamed (Career Cards 1 and 2 zips): "They are not named yet but give it a shot and see if you can make them match."
+
+- **Art (`public/images/majors/`):** both zips are the same 10 majors in the same order, zip 1 as 3D clay scenes, zip 2 photoreal. Matched by what each scene shows: Mechanical Engineering, Nursing, Accounting, Chemistry, Finance, Public Health, Criminal Justice, Pre-Law, Graphic Design, Computer Science. The clay set is used, so a major never reads as a job (career cards are photos; Chandu, 10 Oct: "Majors shouldn't use the cards from careers"). Resized to 900px JPEG. The photoreal set is not in the repo.
+- **Treemap with art (`v4/charts/insightViz.tsx` Treemap `image`, `insightViz.css` `.has-art`, `v4/majors.ts` `MAJOR_ART`):** Top Majors stays the treemap (tiles sized by count), each tile filled with its major's scene under a dark foot fade carrying the name and count in white. A card row and then an equal grid were tried first; Chandu: "the grid is bad. We had a grid as a tree map with varying sizes... Either revert to row or do the tree map with the images." Majors without art keep the plain tile.
+- Checked: tsc clean; v4 Insights at desktop, light. Not checked: phone width, dark.
+
+## 2026-10-21: v4 (restored) gets Maisha's three asks: Home's top cards, Calendar-only Meetings, Assist "Drafts" / "Create"
+
+**Why (Maisha):** "Currently at the very top on Home where you have 13 reviews, 3 meetings this week, 18 students who need you - keep this intact. This is good."; "Under Meetings, lets have 'Calendar' view be the default. I don't think we need the 'Agenda' view at all"; "Under 'Assist' the two tabs lets make it 'Drafts' and 'Create'". Chandu: "Align them properly, like we had before."
+
+- **Home (`v4/Overview.tsx`, `today.css` `.v4h-cards`):** v7's three Stat cards (Reviews, Meetings this week, Students who need you) replace the old meeting / reminders / pulse columns, spanning the hero's full width in three equal columns (stacked on phones). Everything below them is the restored Home.
+- **Meetings (`v4/Meetings.tsx`):** Upcoming is the week calendar only; the Agenda/Calendar toggle and the Agenda view are gone. Needs Outreach unchanged.
+- **Assist (`v4/AssistSession.tsx`):** the switch reads "Drafts" and "Create".
+- Still open: Mika's Majors cards (Insights > College & Career), from Chandu's Career Cards zips.
+- Checked: tsc clean; v4 Home and Meetings at 1440, light.
+
+## 2026-10-21: v4 restored to its 20 Oct afternoon state for Maisha's demos
+
+**Why (Maisha, via Chandu):** "did you change v4 homepage completely?... Please edit a different version for all the new updates + what you're working on with Josh, not v4 as I'm using that for demos to verify what is essential to counselors and school admin versus not." Also: put My Impact's ASCA / use of time back as it was. Chandu chose "Restore v4, drop the declutter".
+
+- **v4 (`src/components/counselor/v4/`):** every file back to `46e10317^` (before the 20 Oct declutter session: 46e10317, b40de9d3, 5f95d18c, 4c05c8f2, b51fd154's v4 part, 74107143, and the v4 parts of 0b8928d6 and 6a3dc7e7). `layout2.css` and `reinvent.css` deleted. That brings back the old Home, My Impact (ASCA / use of time), Reviews, Meetings, profile and student profile. The WCAG commits' v4 hunks were re-applied (078eb306, bab58f59 and c551d113's JS); where a WCAG CSS tweak was written against declutter-only rules it was dropped with them. v4 is light by default again on its original key (`layout.tsx`, `theme.tsx`); `counselorBase.ts`, the v4 shell's backdrop and v4's Explore props are back too.
+- **v7 keeps what it borrowed:** `v7/ProfileSheet.tsx` + `profileSheet.css` (the badge-on-lanyard profile, classes renamed `v7-cp-*`) and `v7/StudentIdCard.tsx` (styles in v7.css as `v7-sid-*`).
+- **`calm.css`:** the one-surface rule is scoped to `.counselor-calm` (v5, v6, v7) only.
+- **Next (Maisha's follow-ups for v4):** keep the three top cards on Home (13 reviews / 3 meetings / 18 students who need you); Meetings opens on Calendar, no Agenda; Assist tabs "Drafts" and "Create"; Mika's Majors cards under Insights > College & Career (need the reference).
+- Checked: tsc clean, eslint no errors. Browser check pending.
+
 ## 2026-10-21 — Career rebuild release verification
 
 User requested finishing and pushing before usage runs out; contact-sheet approval was explicitly waived. New Nursing, UX and Food are complete opaque scenes with characters baked into the image. The rejected `rn/v2/revision-2026-10-21` files are not routed or committed. Slightly deeper canonical warm-brown palettes, simplified blonde hair and older Sofia/Eleanor faces were applied with reference-guided edits. Nursing has 26 ordered morning-to-evening shots with a lake exterior; UX/Food have 8/7 scene groups and 21 beats each. The hamburger links include all three QA games and the public PDF SOP.

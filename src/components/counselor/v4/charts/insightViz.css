@@ -207,3 +207,11 @@ html.dark [data-counselor-version="v4"] { --v4-iv-warn-ink: var(--color-feedback
 [data-counselor-version="v4"] .v4-iv-gt-pt.is-warn { --v4-iv-pt-c: var(--color-feedback-warning); }
 html:not(.dark) [data-counselor-version="v4"] .v4-iv-gt .gl-orb-body { fill: var(--v4-iv-pt-c); }
 html:not(.dark) [data-counselor-version="v4"] .v4-iv-gt-hair { stroke: color-mix(in srgb, var(--foreground) 18%, transparent); stroke-dasharray: none; }
+
+/* A tile with a picture (Top Majors, 21 Oct 2026, Chandu: "do the tree map
+   with the images"): the scene fills the tile, still sized by its count; a
+   dark fade at the foot carries the name and number in white */
+[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face { justify-content: flex-end; background-color: var(--card); background-size: cover; background-position: center; border: 1px solid var(--glass-border); }
+[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-face::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(180deg, transparent 38%, rgba(8, 12, 24, .78) 100%); pointer-events: none; }
+[data-counselor-version="v4"] .v4-iv-tm.has-art .v4-iv-tm-name, [data-counselor-version="v4"] .v4-iv-tm.has-art b { color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, .45); }
+[data-counselor-version="v4"] .v4-iv-tm.has-art:hover .v4-iv-tm-face, [data-counselor-version="v4"] .v4-iv-tm.has-art:focus-visible .v4-iv-tm-face { background-color: var(--card); border-color: var(--primary); }

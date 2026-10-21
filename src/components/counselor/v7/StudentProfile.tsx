@@ -34,7 +34,7 @@ import { EMPTY_PROFILE } from "@/lib/studentProfile";
 import { signalsFor } from "@/lib/studentSignals";
 import { openCareer, openSchool } from "../v5/ExploreSheets";
 import { notify } from "../v5/LogSheet";
-import { StudentIdCard } from "../v4/StudentProfile";
+import { StudentIdCard } from "./StudentIdCard";
 import { flagsFor, useAllMeetings } from "./data";
 import { interestOf, planOf } from "./Students";
 import { coursesToConsider, prefsFor } from "./studentData";
@@ -72,10 +72,9 @@ export function StudentProfile({ studentId, initialTab }: { studentId: string; i
          there in v7 before. Just the header becomes the ID card on the left
          instead"). The tag carries name, grade, status and last active; the
          three actions stay at the header's right. Everything below is as it
-         was. The tag's styles are v4's own (today.css), scoped to
-         data-counselor-version="v4". */}
+         was. */}
       <header className="flex flex-col gap-[var(--space-5)] lg:flex-row lg:items-center lg:justify-between">
-        <div data-counselor-version="v4" className="mx-auto w-full max-w-[300px] lg:mx-0"><StudentIdCard student={row} /></div>
+        <div className="mx-auto w-full max-w-[300px] lg:mx-0"><StudentIdCard student={row} /></div>
         <div className="flex flex-wrap items-center justify-center gap-[var(--space-2)]">
           <PrimaryButton href={briefHref(row.id)} icon={<CalendarCheck className="h-4 w-4" aria-hidden />}>Prepare meeting</PrimaryButton>
           <QuietButton href={v7("reviews", `&tab=messages&studentId=${encodeURIComponent(row.id)}`)} icon={<MessageCircle className="h-4 w-4" aria-hidden />}>Message</QuietButton>

@@ -19,21 +19,16 @@
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
-import { HeadingControls } from "./Workspace";
 import { SubTabs } from "./SubTabs";
 import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { useCounselorFilters } from "../shell";
-import { Reviews as V7Reviews } from "../v7/Workspace";
-import { SparkBar } from "@/components/flow/SparkBar";
+import { ReviewSession } from "./ReviewSession";
 import { NudgeSession } from "./NudgeSession";
 import "./prepare.css";
-import "./messages.css";
 
 type Tab = "awaiting" | "progress" | "missed";
-// DEMO-ONLY: reviews already done today before the demo opens the desk
-const REVIEWED_EARLIER = 4;
 
 export function ReviewDesk() {
   const roster = useReviewedRoster();
@@ -60,13 +55,6 @@ export function ReviewDesk() {
   const awaitingItems = items("Pending Review");
   const progress = items("In Progress");
   const missed = items("Overdue");
-  // the run's progress bar (20 Oct 2026, Chandu: "keep the progress bar,
-  // never start at 0 though"): reviewed of all that were waiting when the
-  // page opened. DEMO-ONLY: REVIEWED_EARLIER stands in for the reviews the
-  // counselor already finished today; production counts today's decisions.
-  const [startCount] = useState(() => awaitingItems.length);
-  const reviewed = REVIEWED_EARLIER + Math.max(0, startCount - awaitingItems.length);
-  const reviewTotal = REVIEWED_EARLIER + Math.max(startCount, awaitingItems.length);
   const [tab, setTab] = useState<Tab>(() => {
     const st = roster.find((s) => s.id === want)?.milestones[wantK as MilestoneKey];
     return st === "In Progress" ? "progress" : st === "Overdue" ? "missed" : "awaiting";
@@ -87,9 +75,9 @@ export function ReviewDesk() {
 
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
-      {/* the queues switch on the title's row, beside the grade picker
-         (20 Oct 2026 hierarchy pass: it was a second control row) */}
-      <HeadingControls>
+      <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[var(--space-3)]">
+        {/* the page view switch, level 3 of the tab hierarchy: the same
+           pill as Meetings' and Messages' (9 Oct 2026) */}
         <SubTabs ariaLabel="Review queues" value={tab} onChange={setTab}
           options={[{ key: "awaiting", label: "Awaiting me", count: awaitingItems.length }, { key: "progress", label: "In progress", count: progress.length }, { key: "missed", label: "Missed deadline", count: missed.length }]} />
         {chip && (
@@ -100,19 +88,8 @@ export function ReviewDesk() {
             </IconTip>
           </span>
         )}
-      </HeadingControls>
-      {/* Awaiting me is v7's review focus mode (20 Oct 2026, Chandu: "match
-         the prepare stuff to the v7 as much as possible"): the document
-         large, one panel beside it, "1 of N" with the list on demand */}
-      {tab === "awaiting" && (
-        <>
-          <div className="msg-bar" role="status" aria-live="polite">
-            <span className="msg-bar-copy"><b>{reviewed} of {reviewTotal}</b> reviewed today</span>
-            <SparkBar percent={reviewTotal ? Math.round((reviewed / reviewTotal) * 100) : 100} min={2} height={6} fill="linear-gradient(90deg, color-mix(in srgb, var(--primary) 70%, #7fd1ff), var(--primary))" glow="var(--primary)" memoryKey="v4-review-session" />
-          </div>
-          <V7Reviews key={`${gradeFilter}|${chip ?? ""}`} only={only} milestone={fMilestone} />
-        </>
-      )}
+      </div>
+      {tab === "awaiting" && <ReviewSession key={`${gradeFilter}|${chip ?? ""}`} only={only} milestone={fMilestone} />}
       {tab === "progress" && <NudgeSession key={`p|${gradeFilter}|${chip ?? ""}`} rows={progress} kind="progress" />}
       {tab === "missed" && <NudgeSession key={`m|${gradeFilter}|${chip ?? ""}`} rows={missed} kind="missed" />}
     </div>

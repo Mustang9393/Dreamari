@@ -196,3 +196,4 @@ html:not(.dark) [data-counselor-version="v4"] .as-switch {background:rgba(216,22
 html:not(.dark) [data-counselor-version="v4"] :is(.as-bar,.as-hero) {background:linear-gradient(180deg,#fff,#f6f8ff)}
 
 /* Assist's desktop layout needs the height: the heading drops its subtitle, as on Review */
+@media (min-width:1024px) { [data-counselor-version="v4"] .v4-main.v4-view-productivity .v4-page-purpose {display:none} }

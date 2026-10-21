@@ -61,15 +61,15 @@
 // All, and a grade row opens that grade's students, needs support first.
 
 import { useMemo, useState } from "react";
-import { ChevronDown, Info, Users } from "lucide-react";
+import { ChevronRight, Info, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { sisFor } from "@/lib/counselorSis";
 import { IconTip } from "@/components/app/IconTip";
 import { CountUp } from "./InsightCharts";
 import { DotDonut, GradeTrail, useWidth } from "./charts/insightViz";
+import { SegmentGauge } from "./charts/ivGauge";
 import { Segmented } from "./viz";
-import { Listbox } from "./Listbox";
 import { InsightStudentsPanel, StudentRows, messageHref, type StudentsDrill } from "./InsightStudents";
 import { GRADES, doneBy, pct, sisConnected, useInsightsScope } from "./insightsScope";
 import "./insights.css";
@@ -139,10 +139,6 @@ export function Readiness() {
   const list = useMemo(() => measures(), []);
   const [pick, setPick] = useState(0);
   const [show, setShow] = useState<"support" | "done">("support");
-  // Gaps starts folded (20 Oct 2026 declutter): its three counts are the
-  // tiles' own "See N missing" above it, so open it is a second look at the
-  // same numbers; one click shows the rings
-  const [gapsOpen, setGapsOpen] = useState(false);
   const [drill, setDrill] = useState<StudentsDrill | null>(null);
   // Readiness by Grade shows one milestone at a time; null = the biggest gap
   const [gradeKey, setGradeKey] = useState<string | null>(null);
@@ -234,57 +230,54 @@ export function Readiness() {
 
   return (
     <div className="v4-page v4-readiness v4-sections flex flex-col">
-      {/* The headline (20 Oct 2026 reinvention, Chandu: "drastically change
-         the amount of information and cognitive overload ... Reduce copy as
-         much as possible"): the four gauge tiles become one sentence. The
-         first indicator leads, its missing count beside it; the rest are one
-         line of facts. Every figure opens the students it counts (the old
-         tile's "See N missing" and "N of M" now live in that drill's title
-         and subtitle), and each fact's tip says what counts. The list at the
-         foot picks its indicator from its own header now. */}
-      {(() => {
-        const [lead, ...rest] = rows;
-        const SHORT: Record<string, string> = { "on-track": "on track to graduate", "academic-plan": "academic plans", postsecondary: "postsecondary plans", "career-pathway": "career pathways" };
-        return (
-          <section className="v4r-say" aria-label="Readiness indicators">
-            <h2 className="v4r-say-line">
-              <IconTip label={lead.m.info} className="v4r-tipi"><button type="button" className="v4r-say-fig" onClick={() => openMet(lead)} aria-label={`${lead.m.label}: ${lead.value}%, ${lead.met.length} of ${lead.eligible.length}. Show them`}><b>{lead.value}%</b></button></IconTip> {SHORT[lead.m.key]}
-              {lead.support.length > 0 && <button type="button" className="v4r-trend v4r-say-fig" onClick={() => openGap(lead)}>{lead.support.length} missing</button>}
-            </h2>
-            <p className="v4r-say-facts">
-              {rest.map((r, i) => (
-                <span key={r.m.key} className="contents">
-                  {i > 0 && <span aria-hidden>·</span>}
-                  <IconTip className="v4r-tipi" label={`${r.m.info} ${r.met.length} of ${r.eligible.length}${r.m.covers ? ` in ${r.m.covers}` : ""}.`}>
-                    <button type="button" onClick={() => openGap(r)} aria-label={`${r.m.label}: ${r.value}%. Show the ${r.support.length} missing`}><b>{r.value}%</b> {SHORT[r.m.key]}{r.support.length > 0 && <span className="v4r-say-miss"> ({r.support.length} missing)</span>}</button>
+      {/* Top indicators: a 40-tick dial lit to the share, the share inside
+         it, the name and the count beside it, and an (i) that says what
+         counts. A tile picks the list at the foot of the page; the picked
+         dial is the page's one glow. */}
+      <div role="group" aria-label="Readiness indicators" className={`v4-iv-tiles is-gauge ${rows.length === 3 ? "is-three" : ""}`}>
+        {rows.map((r, i) => {
+          const on = r === cur;
+          return (
+            <div key={r.m.key} className="v4-iv-cellwrap">
+              <div className={`v4-iv-tile ${on ? "is-on" : ""}`}>
+                {/* the tile picks the list at the foot of the page */}
+                <button type="button" aria-pressed={on} onClick={() => { setPick(i); setShow("support"); }} className="v4-iv-tile-hit" aria-label={`${r.m.label}: ${r.value}%, ${r.met.length} of ${r.eligible.length}${r.m.covers ? ` in ${r.m.covers}` : ""}. Show this list below`} />
+                <SegmentGauge value={r.value} active={on}><CountUp value={r.value} /><small>%</small></SegmentGauge>
+                <span className="v4-iv-tile-copy">
+                  <span className="v4-iv-tile-label">{r.m.label}</span>
+                  <span className="v4-iv-tile-note">{r.met.length} of {r.eligible.length}{r.m.covers && <><span aria-hidden> · </span><span className="whitespace-nowrap">{r.m.covers}</span></>}</span>
+                  {/* and a direct path to the students it counts */}
+                  <IconTip label={r.support.length ? `See the ${n(r.support.length)} ${MISSING[r.m.key]}` : `See the ${n(r.met.length)} ${MET[r.m.key]}`} className="v4-iv-see-wrap">
+                    <button type="button" onClick={() => openGap(r)} className="v4-iv-see" aria-label={r.support.length ? `See the ${n(r.support.length)} ${MISSING[r.m.key]}` : `See the ${n(r.met.length)} ${MET[r.m.key]}`}>
+                      See {r.support.length || r.met.length} {r.support.length ? "missing" : "students"}<ChevronRight size={13} aria-hidden />
+                    </button>
                   </IconTip>
                 </span>
-              ))}
-              <span aria-hidden>·</span>
-              <button type="button" aria-expanded={gapsOpen} aria-controls="v4-iv-gaps" onClick={() => setGapsOpen((o) => !o)} className="v4r-gaps-toggle">{gapsOpen ? "Hide gaps" : "Show gaps"}<ChevronDown size={14} aria-hidden style={{ transform: gapsOpen ? "rotate(180deg)" : undefined }} /></button>
-            </p>
-          </section>
-        );
-      })()}
+              </div>
+              <IconTip label={r.m.info} className="v4-iv-info">
+                <button type="button" aria-label={`About ${r.m.label}`} className="v4-r2-info dm-quiet"><Info size={14} aria-hidden /></button>
+              </IconTip>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Gaps: one dot per student the indicator covers, the students still
          missing it lit, in a ring (the one view since 10 Oct 2026: "I dont
          like bar graphs"). Each opens those students with Message All. */}
-      {/* folded, Gaps is a quiet toggle at the end of the facts line, not an
-         empty card (21 Oct 2026, Chandu: "things are still super dense") */}
-      {gapsOpen && <section className="v4-surface flex min-w-0 flex-col gap-[var(--space-4)] border p-[var(--space-5)]">
+      <section className="v4-surface flex min-w-0 flex-col gap-[var(--space-4)] border p-[var(--space-5)]">
         <header className="v4-r2-head">
           <div className="v4-r2-lead">
-            <h2 className="v4-r2-title">
-              <button type="button" aria-expanded={gapsOpen} aria-controls="v4-iv-gaps" onClick={() => setGapsOpen((o) => !o)} className="dm-quiet inline-flex cursor-pointer items-center gap-[8px]">Gaps<ChevronDown size={16} aria-hidden className="transition-transform" style={{ transform: gapsOpen ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} /></button>
+            <h2 className="v4-r2-title">Gaps
               <IconTip label="Each dot is one student the indicator covers. The bright dots still miss it."><button type="button" aria-label="About Gaps" className="v4-r2-info dm-quiet"><Info size={14} aria-hidden /></button></IconTip>
             </h2>
+            <span className="v4-r2-sub">Students missing each milestone.</span>
           </div>
-          {gapsOpen && <span className="v4-r2-tools">
+          <span className="v4-r2-tools">
             <span className="v4-iv-legend" aria-hidden><span><i className="is-lit" />Missing</span><span><i />Met</span></span>
-          </span>}
+          </span>
         </header>
-          {gapsOpen && <div id="v4-iv-gaps" className="v4-iv-donuts" ref={donutRef}>
+          <div className="v4-iv-donuts" ref={donutRef}>
             {gaps.map((r) => (
               <IconTip key={r.m.key} label={`See the ${n(r.support.length)} ${MISSING[r.m.key]}`} className="w-full">
               <button type="button" onClick={() => openGap(r)} className="v4-iv-donut w-full" aria-label={`${r.m.gap}: ${r.support.length} of ${r.eligible.length} students. Show them`}>
@@ -295,8 +288,8 @@ export function Readiness() {
               </button>
               </IconTip>
             ))}
-          </div>}
-      </section>}
+          </div>
+      </section>
 
       {/* Readiness by Grade: one milestone at a time (the switch in the
          header, the biggest gap first), one trail of light across the
@@ -333,9 +326,7 @@ export function Readiness() {
       {/* The students the picked indicator counts, the part a counselor acts on. */}
       <section className="v4-surface flex flex-col gap-[var(--space-4)] border p-[var(--space-5)]">
         <header className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-          {/* the indicator picker the tiles used to be */}
-          <Listbox ariaLabel="Which indicator" value={cur.m.key} onChange={(v) => { setPick(Math.max(0, rows.findIndex((r) => r.m.key === v))); setShow("support"); }} className="v4-grade-picker" panelStyle={{ background: "var(--card)", color: "var(--foreground)" }}
-            options={rows.map((r) => ({ value: r.m.key, label: r.m.label }))} />
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{show === "support" ? "Needs Support" : cur.m.doneWord}: {cur.m.label}</h2>
           <span className="flex flex-wrap items-center gap-[var(--space-3)]">
             <Segmented ariaLabel="Which students" value={show} onChange={setShow} options={[{ key: "support", label: "Needs Support", count: cur.support.length }, { key: "done", label: cur.m.doneWord, count: cur.met.length }]} />
             {listed.length > 0 && (

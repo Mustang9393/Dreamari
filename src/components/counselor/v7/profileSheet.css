@@ -1,0 +1,325 @@
+/* The counselor profile sheet in v4 (9 Oct 2026, Maisha: "closer to how the
+   Connect professional profiles do"): a cover with the portrait and name on
+   it, three numbers, then connected cards. v4 tokens only: the primary, the
+   glass surfaces, the hairline. Scoped to the sheet. */
+.v7-profile-sheet {font-family:var(--font-body);}
+.v7-profile-sheet .v7-cp-bar {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px var(--space-5);border-bottom:1px solid var(--glass-border);}
+@media (min-width:640px) {.v7-profile-sheet .v7-cp-bar {padding-inline:var(--space-8);}}
+.v7-profile-sheet-tools {display:flex;flex:none;align-items:center;gap:8px;}
+.v7-profile-sheet .v7-cp-body {display:flex;flex-direction:column;gap:28px;padding:var(--space-5) var(--space-5) var(--space-12);}
+@media (min-width:640px) {.v7-profile-sheet .v7-cp-body {padding-inline:var(--space-8);}}
+
+/* ---- the cover ---- */
+.v7-profile-sheet .v7-cp-cover {position:relative;overflow:hidden;border-radius:24px 24px 24px 6px;border:1px solid rgba(255,255,255,.16);background:#0e0c20;color:#fff;box-shadow:0 18px 40px -28px rgba(0,0,0,.6);}
+.v7-profile-sheet .v7-cp-cover-art {position:absolute;inset:0;}
+.v7-profile-sheet .v7-cp-scrim {position:absolute;inset:0;background:linear-gradient(to top,rgba(12,16,35,.96) 0%,rgba(12,16,35,.82) 42%,rgba(12,16,35,.3) 78%,rgba(12,16,35,.08) 100%);}
+.v7-profile-sheet .v7-cp-cover-tools {position:absolute;top:16px;right:16px;z-index:2;display:flex;border-radius:12px;padding:2px;background:rgba(9,10,20,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.v7-profile-sheet .v7-cp-cover-tools button {display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:10px;font-size:13.5px;font-weight:600;color:rgba(255,255,255,.9);cursor:pointer;}
+.v7-profile-sheet .v7-cp-cover-tools button[aria-pressed="true"] {color:#0e0c20!important;background:#fff!important;opacity:1!important;}
+.v7-profile-sheet .v7-cp-identity {position:relative;display:flex;align-items:flex-end;gap:22px;padding:88px 28px 26px;}
+.v7-profile-sheet .v7-cp-portrait {position:relative;display:grid;place-items:center;flex:none;width:104px;height:104px;border-radius:50%;overflow:hidden;background:color-mix(in srgb,var(--primary) 30%,#0e0c20);box-shadow:0 0 0 3px rgba(255,255,255,.9),0 14px 30px -14px rgba(0,0,0,.7);font-size:36px;font-weight:600;}
+.v7-profile-sheet .v7-cp-who {min-width:0;flex:1;}
+.v7-profile-sheet .v7-cp-who h2 {font-size:clamp(26px,3vw,34px);font-weight:500;letter-spacing:-1.2px;line-height:1.1;color:#fff;}
+.v7-profile-sheet .v7-cp-who p {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px;font-size:14.5px;font-weight:500;color:rgba(255,255,255,.8);}
+.v7-profile-sheet .v7-cp-who p span {color:rgba(255,255,255,.3);}
+.v7-profile-sheet .v7-cp-stats {display:flex;flex-wrap:wrap;margin:18px 0 0;}
+.v7-profile-sheet .v7-cp-stats>div {display:flex;}
+.v7-profile-sheet .v7-cp-stats>div+div {border-left:1px solid rgba(255,255,255,.18);}
+.v7-profile-sheet .v7-cp-stats>div+div>* {margin-left:16px;}
+.v7-profile-sheet .v7-cp-stats>div>* {display:flex;flex-direction:column;gap:2px;margin:-6px -10px;padding:6px 26px 6px 10px;border-radius:10px;text-align:left;color:#fff;cursor:pointer;}
+.v7-profile-sheet .v7-cp-stats>div+div>* {margin-left:6px;}
+.v7-profile-sheet .v7-cp-stats>div>*:hover {background:rgba(255,255,255,.12)!important;color:#fff!important;box-shadow:none!important;}
+.v7-profile-sheet .v7-cp-stats dd {margin:0;font-size:22px;line-height:26px;font-weight:600;font-variant-numeric:tabular-nums;}
+.v7-profile-sheet .v7-cp-stats dt {font-size:12.5px;line-height:16px;font-weight:600;color:rgba(255,255,255,.78);white-space:nowrap;}
+
+/* ---- the body: cards left, the preview right ---- */
+.v7-profile-sheet .v7-cp-grid {display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start;}
+.v7-profile-sheet .v7-cp-main {display:flex;flex-direction:column;gap:24px;min-width:0;}
+.v7-profile-sheet .v7-cp-card {display:flex;flex-direction:column;gap:20px;padding:24px 26px;border-radius:22px 22px 6px 22px;border:1px solid var(--v4-edge);background:var(--v4-glass);}
+.v7-profile-sheet .v7-cp-card-head {display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.v7-profile-sheet .v7-cp-card-head h3 {font-size:20px;font-weight:500;letter-spacing:-.5px;line-height:1.2;}
+.v7-profile-sheet .v7-cp-card-head p {flex-basis:100%;font-size:13px;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-saved {display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--v4-positive);transition:opacity .2s;}
+.v7-profile-sheet .v7-cp-field {display:flex;flex-direction:column;gap:8px;}
+.v7-profile-sheet .v7-cp-field>p {font-size:14.5px;line-height:1.5;}
+.v7-profile-sheet .v7-cp-label {font-size:11px;text-transform:uppercase;letter-spacing:1.4px;font-weight:600;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-muted {font-size:13px;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-chips {display:flex;flex-wrap:wrap;gap:8px;}
+.v7-profile-sheet .v7-cp-chip {display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--glass-border);font-size:13px;font-weight:600;color:var(--muted-foreground);}
+.v7-profile-sheet button.v7-cp-chip {cursor:pointer;}
+.v7-profile-sheet .v7-cp-chip.is-on {background:color-mix(in srgb,var(--primary) 14%,transparent);border-color:color-mix(in srgb,var(--primary) 50%,transparent);color:var(--foreground);}
+.v7-profile-sheet .v7-cp-chip.is-small {height:26px;padding:0 10px;font-size:12px;background:color-mix(in srgb,var(--primary) 12%,transparent);border-color:transparent;color:var(--foreground);}
+.v7-profile-sheet .v7-cp-input {height:42px;width:100%;max-width:420px;border-radius:11px;border:1px solid color-mix(in srgb,var(--foreground) 30%,transparent);background:var(--glass-surface-1);padding:0 14px;font-size:14.5px;color:var(--foreground);outline:none;}
+.v7-profile-sheet .v7-cp-input:focus-visible {border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 12%,transparent);}
+
+/* office hours: one row a day, a switch, from and to */
+.v7-profile-sheet .v7-cp-hours {display:flex;flex-direction:column;list-style:none;margin:0;padding:0;}
+.v7-profile-sheet .v7-cp-hours li {display:flex;align-items:center;gap:12px;min-height:52px;border-bottom:1px solid var(--v4-line);}
+.v7-profile-sheet .v7-cp-hours li:last-child {border-bottom:0;}
+.v7-profile-sheet .v7-cp-switch {position:relative;flex:none;width:42px;height:24px;border-radius:999px;background:color-mix(in srgb,var(--foreground) 18%,transparent);transition:background .18s;cursor:pointer;}
+.v7-profile-sheet .v7-cp-switch[data-on="true"] {background:var(--primary);}
+.v7-profile-sheet .v7-cp-switch>span {position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .18s;}
+.v7-profile-sheet .v7-cp-switch[data-on="true"]>span {left:21px;}
+.v7-profile-sheet .v7-cp-day {width:96px;flex:none;font-size:14.5px;font-weight:600;}
+.v7-profile-sheet .v7-cp-times {display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.v7-profile-sheet .v7-cp-time {min-width:118px;}
+
+/* the team */
+.v7-profile-sheet .v7-cp-team {display:flex;flex-direction:column;list-style:none;margin:0;padding:0;}
+.v7-profile-sheet .v7-cp-mate {display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--v4-line);}
+.v7-profile-sheet .v7-cp-mate:last-child {border-bottom:0;padding-bottom:4px;}
+.v7-profile-sheet .v7-cp-mate-photo {position:relative;display:grid;place-items:center;flex:none;width:48px;height:48px;border-radius:50%;overflow:hidden;background:color-mix(in srgb,var(--primary) 16%,transparent);color:var(--color-text-brand);font-size:15px;font-weight:600;}
+.v7-profile-sheet .v7-cp-mate-who {display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;}
+.v7-profile-sheet .v7-cp-mate-who strong {font-size:15px;font-weight:600;}
+.v7-profile-sheet .v7-cp-mate-who small {font-size:12.5px;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-mate-actions {display:flex;align-items:center;gap:8px;flex:none;}
+.v7-profile-sheet .v7-cp-mate-actions .v4-round {width:36px;height:36px;color:var(--foreground);}
+.v7-profile-sheet .v7-cp-cover-btn {display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--glass-border);font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;}
+.v7-profile-sheet .v7-cp-cover-btn.is-on {background:var(--primary);border-color:var(--primary);color:var(--primary-foreground);}
+
+/* the quiet cards: safety contacts, roster, sent for you (smaller heads,
+   compact rows, the same surface) */
+.v7-profile-sheet .v7-cp-card.is-quiet {gap:14px;padding:20px 22px;}
+.v7-profile-sheet .v7-cp-card.is-quiet .v7-cp-card-head h3 {font-size:16px;letter-spacing:-.2px;}
+.v7-profile-sheet .v7-cp-card.is-quiet .v7-cp-card-head p {font-size:12.5px;}
+.v7-profile-sheet .v7-cp-rows {display:flex;flex-direction:column;list-style:none;margin:0;padding:0;}
+.v7-profile-sheet .v7-cp-rows li {display:flex;align-items:center;gap:12px;min-height:46px;padding:6px 0;border-bottom:1px solid var(--v4-line);}
+.v7-profile-sheet .v7-cp-rows li:last-child {border-bottom:0;}
+.v7-profile-sheet .v7-cp-row-text {display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
+.v7-profile-sheet .v7-cp-row-text strong {font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.v7-profile-sheet .v7-cp-row-text strong small,.v7-profile-sheet .v7-cp-row-text>small {font-size:12.5px;font-weight:500;color:var(--muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.v7-profile-sheet .v7-cp-row-note {font-size:13px;color:var(--v4-caution);}
+.v7-profile-sheet .v7-cp-kind {flex:none;width:44px;font-size:12.5px;font-weight:600;}
+.v7-profile-sheet .v7-cp-link {flex:none;font-size:13px;font-weight:600;color:var(--color-text-brand);cursor:pointer;}
+.v7-profile-sheet .v7-cp-link:hover {text-decoration:none;filter:brightness(1.15);}
+.v7-profile-sheet .v7-cp-rows .v4-round {width:32px;height:32px;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-add {display:grid;grid-template-columns:1fr 1fr 1.4fr auto;gap:8px;}
+.v7-profile-sheet .v7-cp-add .v7-cp-input {height:38px;max-width:none;font-size:13.5px;padding:0 12px;}
+.v7-profile-sheet .v7-cp-add .v7-cp-cover-btn {height:38px;border-radius:11px;}
+
+/* the preview card students see: the portrait, the name, the hours, the
+   topics, the caseload; no strap */
+.v7-profile-sheet .v7-cp-preview {display:flex;flex-direction:column;gap:12px;position:sticky;top:16px;}
+.v7-profile-sheet .v7-cp-badge {display:flex;flex-direction:column;overflow:hidden;border-radius:22px;border:1px solid var(--v4-edge);background:var(--card);box-shadow:0 24px 50px -30px rgba(20,30,70,.45);}
+.v7-profile-sheet .v7-cp-badge-photo {position:relative;display:grid;place-items:center;height:210px;background:color-mix(in srgb,var(--primary) 14%,var(--card));color:var(--color-text-brand);font-size:56px;font-weight:600;}
+.v7-profile-sheet .v7-cp-badge-body {display:flex;flex-direction:column;gap:10px;padding:16px 20px 20px;}
+.v7-profile-sheet .v7-cp-badge-body strong {font-size:20px;font-weight:500;letter-spacing:-.4px;line-height:1.2;}
+.v7-profile-sheet .v7-cp-badge-body>small {margin-top:-6px;font-size:13px;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-badge-line {display:flex;flex-direction:column;gap:2px;font-size:13.5px;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-badge-line b {font-weight:600;color:var(--foreground);}
+.v7-profile-sheet .v7-cp-badge-foot {display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--v4-line);padding-top:12px;font-size:13px;font-weight:600;}
+.v7-profile-sheet .v7-cp-badge-foot span:last-child {font-variant-numeric:tabular-nums;color:var(--muted-foreground);}
+
+/* tablets: the two columns still fit; the preview narrows */
+@media (max-width:1023px) {
+  .v7-profile-sheet .v7-cp-grid {grid-template-columns:minmax(0,1fr) 260px;gap:18px;}
+  .v7-profile-sheet .v7-cp-card {padding:20px 22px;}
+  .v7-profile-sheet .v7-cp-identity {padding:76px 22px 22px;gap:18px;}
+}
+/* phones: the identity stacks under the portrait, the stats wrap, the
+   preview sits under About Me and the team */
+@media (max-width:639px) {
+  .v7-profile-sheet .v7-cp-bar {padding:14px 16px;}
+  .v7-profile-sheet .v7-cp-body {padding:16px 16px var(--space-12);gap:20px;}
+  .v7-profile-sheet .v7-cp-cover {border-radius:18px 18px 18px 6px;}
+  .v7-profile-sheet .v7-cp-identity {flex-direction:column;align-items:flex-start;padding:72px 18px 20px;gap:14px;}
+  .v7-profile-sheet .v7-cp-portrait {width:84px;height:84px;font-size:30px;}
+  .v7-profile-sheet .v7-cp-stats {display:grid;grid-template-columns:repeat(3,minmax(0,auto));justify-content:start;}
+  .v7-profile-sheet .v7-cp-stats>div>* {padding-right:12px;}
+  .v7-profile-sheet .v7-cp-stats>div+div>* {margin-left:4px;padding-left:8px;}
+  .v7-profile-sheet .v7-cp-stats dd {font-size:20px;}
+  .v7-profile-sheet .v7-cp-stats dt {font-size:11.5px;white-space:normal;}
+  .v7-profile-sheet .v7-cp-grid {grid-template-columns:minmax(0,1fr);gap:20px;}
+  .v7-profile-sheet .v7-cp-preview {position:static;}
+  .v7-profile-sheet .v7-cp-card {padding:18px;border-radius:18px 18px 6px 18px;}
+  .v7-profile-sheet .v7-cp-mate {flex-wrap:wrap;}
+  .v7-profile-sheet .v7-cp-mate-actions {width:100%;padding-left:62px;}
+  .v7-profile-sheet .v7-cp-hours li {flex-wrap:wrap;padding:6px 0;}
+  .v7-profile-sheet .v7-cp-add {grid-template-columns:1fr 1fr;}
+  .v7-profile-sheet .v7-cp-add .v7-cp-input:nth-child(3) {grid-column:1 / -1;}
+  .v7-profile-sheet .v7-cp-add .v7-cp-cover-btn {grid-column:1 / -1;justify-content:center;}
+  .v7-profile-sheet .v7-cp-times {flex-basis:100%;padding-left:54px;}
+}
+
+/* ---- Full page, the ID card as the identity (10 Oct 2026) ----
+   Chandu: "Make the profile page full page ... the student view ID card
+   thing is good. Let's make that the identity ... left aligned on top, and
+   the rest of the info stays in the column after it. The cover image can be
+   the ID card's background." The card is a sticky left column on the
+   chosen background (white type on a scrim); the info column sits beside
+   it, and under it on a phone. */
+.v7-profile-sheet.is-page {max-width:none;border-left:0;}
+.v7-profile-sheet.is-page .v7-cp-body {width:100%;max-width:1180px;margin:0 auto;padding-top:var(--space-8);}
+.v7-profile-sheet .v7-cp-layout {display:grid;grid-template-columns:380px minmax(0,1fr);gap:40px;align-items:start;}
+.v7-profile-sheet .v7-cp-id-col {position:sticky;top:24px;display:flex;flex-direction:column;gap:12px;}
+.v7-profile-sheet .v7-cp-id {position:relative;isolation:isolate;display:flex;flex-direction:column;gap:20px;overflow:hidden;padding:22px 24px 24px;border-radius:28px;background:#0e0c20;color:#fff;box-shadow:0 30px 60px -34px rgba(10,14,40,.7), inset 0 1px 0 rgba(255,255,255,.14);}
+.v7-profile-sheet .v7-cp-id-art {position:absolute;inset:0;z-index:-2;}
+.v7-profile-sheet .v7-cp-id-scrim {position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,10,24,.25) 0%,rgba(8,10,24,.45) 34%,rgba(8,10,24,.82) 64%,rgba(8,10,24,.92) 100%);}
+.v7-profile-sheet .v7-cp-id-top {display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.v7-profile-sheet .v7-cp-id-org {font-size:11px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.82);}
+.v7-profile-sheet .v7-cp-id-edit {display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);cursor:pointer;}
+.v7-profile-sheet .v7-cp-id-edit:hover {background:rgba(255,255,255,.22)!important;color:#fff!important;}
+.v7-profile-sheet .v7-cp-id-edit[aria-pressed="true"] {background:#fff;color:#0e0c20;}
+.v7-profile-sheet .v7-cp-id-photo {position:relative;display:grid;place-items:center;width:132px;height:132px;margin-top:28px;border-radius:30px;overflow:hidden;background:color-mix(in srgb,var(--primary) 30%,#0e0c20);box-shadow:0 0 0 4px rgba(255,255,255,.9),0 18px 36px -16px rgba(0,0,0,.6);font-size:44px;font-weight:600;color:#fff;}
+.v7-profile-sheet .v7-cp-id-who h2 {font-size:30px;font-weight:500;letter-spacing:-1px;line-height:1.1;color:#fff;}
+.v7-profile-sheet .v7-cp-id-who p {margin-top:6px;font-size:14.5px;font-weight:500;color:rgba(255,255,255,.78);}
+.v7-profile-sheet .v7-cp-id-facts {display:flex;flex-direction:column;gap:14px;padding-top:16px;border-top:1px solid rgba(255,255,255,.16);}
+.v7-profile-sheet .v7-cp-id-facts>div {display:flex;flex-direction:column;gap:5px;}
+.v7-profile-sheet .v7-cp-id-facts span {font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.62);}
+.v7-profile-sheet .v7-cp-id-facts p {font-size:14.5px;line-height:1.45;color:#fff;}
+.v7-profile-sheet .v7-cp-id-chips {display:flex;flex-wrap:wrap;gap:6px;}
+.v7-profile-sheet .v7-cp-id-chips i {font-style:normal;display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);font-size:12.5px;font-weight:600;}
+.v7-profile-sheet .v7-cp-id-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0;padding-top:16px;border-top:1px solid rgba(255,255,255,.16);}
+.v7-profile-sheet .v7-cp-id-stats>div+div {border-left:1px solid rgba(255,255,255,.16);}
+.v7-profile-sheet .v7-cp-id-stats>div>* {display:flex;flex-direction:column;gap:3px;width:100%;padding:4px 10px;border-radius:10px;text-align:left;color:#fff;cursor:pointer;}
+.v7-profile-sheet .v7-cp-id-stats>div:first-child>* {padding-left:0;}
+.v7-profile-sheet .v7-cp-id-stats>div>*:hover {background:rgba(255,255,255,.1)!important;color:#fff!important;}
+.v7-profile-sheet .v7-cp-id-stats dd {margin:0;font-size:24px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;}
+.v7-profile-sheet .v7-cp-id-stats dt {font-size:11.5px;line-height:1.3;font-weight:600;color:rgba(255,255,255,.72);}
+.v7-profile-sheet .v7-cp-id-note {padding-left:4px;}
+/* the background picker */
+.v7-profile-sheet .v7-cp-covers {display:flex;flex-direction:column;gap:10px;}
+.v7-profile-sheet .v7-cp-covers-label {font-size:12.5px;font-weight:600;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-cover-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;}
+.v7-profile-sheet .v7-cp-cover-pick {aspect-ratio:4 / 3;border-radius:14px;background-size:cover;background-position:center;border:2px solid transparent;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);cursor:pointer;transition:transform .15s;}
+.v7-profile-sheet .v7-cp-cover-pick:hover {transform:translateY(-2px);}
+.v7-profile-sheet .v7-cp-cover-pick[aria-pressed="true"] {border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 25%,transparent);}
+@media (max-width:1023px) {
+  .v7-profile-sheet .v7-cp-layout {grid-template-columns:320px minmax(0,1fr);gap:24px;}
+  .v7-profile-sheet .v7-cp-id-photo {width:112px;height:112px;}
+}
+@media (max-width:767px) {
+  .v7-profile-sheet .v7-cp-layout {grid-template-columns:minmax(0,1fr);}
+  .v7-profile-sheet .v7-cp-id-col {position:static;}
+  .v7-profile-sheet .v7-cp-id-photo {margin-top:12px;}
+  .v7-profile-sheet .v7-cp-cover-grid {grid-template-columns:repeat(auto-fill,minmax(72px,1fr));}
+}
+
+/* ---- The lanyard and the card's own controls (10 Oct 2026) ----
+   Chandu: "make it look like an ID card, a premium looking lanyard or part
+   of it is nice", then "allow changing dp and cover by controls that are
+   contextually there". The lower part of a lanyard: a woven strap in the
+   brand blue rising out of view (a fine diagonal weave and a sheen down
+   its middle), a polished metal swivel clip, and a punched slot near the
+   card's top edge. The card gives one gentle swing on arrival. The photo
+   carries its own Change photo button; the card carries Change background
+   beside Edit Profile, which opens the picker on the card. */
+.v7-profile-sheet .v7-cp-id-col {top:0;}
+.v7-profile-sheet .v7-cp-lanyard {position:relative;display:flex;flex-direction:column;align-items:center;height:92px;margin-bottom:-26px;z-index:2;pointer-events:none;}
+.v7-profile-sheet .v7-cp-strap {width:30px;flex:1;border-radius:0 0 3px 3px;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.28) 0%,rgba(255,255,255,.18) 46%,rgba(255,255,255,.04) 54%,rgba(0,0,0,.28) 100%),
+    repeating-linear-gradient(45deg,rgba(255,255,255,.08) 0 2px,transparent 2px 4px),
+    linear-gradient(180deg,color-mix(in srgb,var(--primary) 70%,#0b1027),var(--primary));
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 38%);mask-image:linear-gradient(180deg,transparent 0%,#000 38%);
+  box-shadow:0 2px 6px rgba(0,0,0,.25);}
+.v7-profile-sheet .v7-cp-clip {position:relative;display:grid;place-items:center;width:40px;height:30px;margin-top:-4px;border-radius:9px 9px 14px 14px;
+  background:linear-gradient(180deg,#f7f8fb 0%,#c9ced8 38%,#8d95a5 62%,#e3e6ec 100%);
+  box-shadow:inset 0 1px 0 #fff,inset 0 -2px 3px rgba(0,0,0,.25),0 6px 12px -4px rgba(0,0,0,.45);}
+.v7-profile-sheet .v7-cp-clip i {width:16px;height:16px;border-radius:50%;border:3px solid #9aa2b2;background:transparent;box-shadow:inset 0 1px 2px rgba(0,0,0,.35);transform:translateY(12px);}
+.v7-profile-sheet .v7-cp-id {transform-origin:50% 0;animation:v7-cp-swing 1.6s cubic-bezier(.3,.7,.4,1) both;}
+@keyframes v7-cp-swing {0% {transform:rotate(2.4deg);} 35% {transform:rotate(-1.4deg);} 65% {transform:rotate(.6deg);} 100% {transform:rotate(0);}}
+@media (prefers-reduced-motion:reduce) {.v7-profile-sheet .v7-cp-id {animation:none;}}
+.v7-profile-sheet .v7-cp-id {padding-top:34px!important;}
+.v7-profile-sheet .v7-cp-id-slot {position:absolute;top:12px;left:50%;width:54px;height:10px;margin-left:-27px;border-radius:99px;background:var(--background);box-shadow:inset 0 2px 3px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.25);}
+.v7-profile-sheet .v7-cp-id-tools {display:flex;align-items:center;gap:8px;}
+.v7-profile-sheet .v7-cp-id-icon {display:grid;place-items:center;width:34px;height:34px;border-radius:999px;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);cursor:pointer;}
+.v7-profile-sheet .v7-cp-id-icon:hover,.v7-profile-sheet .v7-cp-id-icon[aria-expanded="true"] {background:rgba(255,255,255,.26)!important;color:#fff!important;}
+/* Change photo: on the photo, shown on hover and keyboard focus (always on
+   touch screens) */
+.v7-profile-sheet .v7-cp-photo-tip {position:absolute!important;inset:0;display:block!important;}
+.v7-profile-sheet .v7-cp-photo-btn {position:absolute;inset:0;display:grid;place-items:center;width:100%;height:100%;color:#fff;background:rgba(8,10,24,.45);opacity:0;transition:opacity .15s;cursor:pointer;}
+.v7-profile-sheet .v7-cp-id-photo:hover .v7-cp-photo-btn,.v7-profile-sheet .v7-cp-photo-btn:focus-visible {opacity:1;}
+@media (hover:none) {.v7-profile-sheet .v7-cp-photo-btn {opacity:1;background:linear-gradient(180deg,transparent 55%,rgba(8,10,24,.6));place-items:end center;padding-bottom:10px;}}
+/* the background picker, on the card */
+.v7-profile-sheet .v7-cp-pop-scrim {position:fixed;inset:0;z-index:20;cursor:default;background:transparent;}
+.v7-profile-sheet .v7-cp-pop {position:absolute;top:70px;left:14px;right:14px;z-index:21;display:flex;flex-direction:column;gap:10px;max-height:min(520px,calc(100% - 84px));overflow-y:auto;padding:16px;border-radius:20px;border:1px solid var(--glass-border);background:var(--card);color:var(--foreground);box-shadow:0 30px 60px -24px rgba(8,10,24,.6);}
+.v7-profile-sheet .v7-cp-pop .v7-cp-cover-grid {grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+.v7-profile-sheet .v7-cp-pop .v7-cp-cover-grid.is-washes {grid-template-columns:repeat(5,minmax(0,1fr));}
+.v7-profile-sheet .v7-cp-pop .v7-cp-cover-pick {border-radius:10px;}
+.v7-profile-sheet .v7-cp-upload {justify-content:center;margin-top:4px;}
+@media (max-width:767px) {.v7-profile-sheet .v7-cp-lanyard {height:72px;}}
+/* the clasp, refined (10 Oct 2026): the strap ends in a polished chrome bar,
+   and a clear plastic tab hangs from the bar down through the card's slot,
+   so the card visibly hangs from the lanyard instead of a clip floating
+   above it */
+.v7-profile-sheet .v7-cp-lanyard {height:96px;margin-bottom:-30px;}
+.v7-profile-sheet .v7-cp-clip {position:relative;display:block;width:56px;height:12px;margin-top:-2px;border-radius:6px;
+  background:linear-gradient(180deg,#ffffff 0%,#d9dde5 35%,#9aa1b0 60%,#eef0f4 100%);
+  box-shadow:inset 0 1px 0 #fff,inset 0 -1px 2px rgba(0,0,0,.3),0 4px 8px -3px rgba(0,0,0,.45);}
+.v7-profile-sheet .v7-cp-clip i {position:absolute;top:9px;left:50%;width:24px;height:34px;margin-left:-12px;transform:none;border-radius:2px 2px 7px 7px;border:1px solid rgba(255,255,255,.75);
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.22));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 3px 6px -2px rgba(0,0,0,.35);}
+.v7-profile-sheet .v7-cp-id-slot {top:14px;width:46px;margin-left:-23px;height:9px;}
+
+/* ---- The card, hung properly (20 Oct 2026) ----
+   Chandu: "use [the sway] and make sure the lanyard touches the card",
+   "align the top of the cards on the right to the top edge of the id card...
+   or push the card up with the lanyard breaking layout and extending upward
+   into the top margin", and on the cover: "super low pixel and blurry". The
+   lanyard now hangs outside the layout, up into the top margin, so the card's
+   top lines up with the column beside it; the clip's tab runs into the
+   card's slot. Card and lanyard swing as one (.v7-cp-hang), pivoting at the
+   top of the strap: one swing on arrival, then a slow, slight idle sway.
+   Photo covers are a banner across the card's top: the cover files are
+   2400x400 strips, which a tall card could only stretch (and Next resized
+   them to 828px wide first); as a banner they render at full sharpness. A
+   colour wash still fills the card (CSS, sharp at any size). */
+.v7-profile-sheet .v7-cp-hang {position:relative;transform-origin:50% -96px;animation:v7-cp-swing 1.6s cubic-bezier(.3,.7,.4,1) both, v7-cp-sway 7s ease-in-out 1.6s infinite;}
+@keyframes v7-cp-sway {0%,100% {transform:rotate(0);} 30% {transform:rotate(.55deg);} 70% {transform:rotate(-.45deg);}}
+.v7-profile-sheet .v7-cp-hang .v7-cp-id {animation:none;}
+.v7-profile-sheet .v7-cp-hang .v7-cp-lanyard {position:absolute;left:0;right:0;bottom:calc(100% - 30px);height:126px;margin:0;}
+@media (prefers-reduced-motion:reduce) {.v7-profile-sheet .v7-cp-hang {animation:none;}}
+.v7-profile-sheet .v7-cp-id.has-banner {background:linear-gradient(180deg,#121a33 0%,#0c1124 100%);}
+.v7-profile-sheet .v7-cp-id.has-banner .v7-cp-id-art {inset:0 0 auto 0;height:190px;-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent);mask-image:linear-gradient(180deg,#000 55%,transparent);}
+.v7-profile-sheet .v7-cp-id.has-banner .v7-cp-id-scrim {background:linear-gradient(180deg,rgba(8,10,24,.2) 0%,rgba(8,10,24,.05) 30%,transparent 60%);}
+.v7-profile-sheet .v7-cp-id-cover {display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;color:#fff;font-size:13px;font-weight:600;background:rgba(8,10,24,.42);border:1px solid rgba(255,255,255,.22);cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}
+.v7-profile-sheet .v7-cp-id-cover:hover,.v7-profile-sheet .v7-cp-id-cover[aria-expanded="true"] {background:rgba(8,10,24,.6);}
+
+/* ---- The column beside the card (20 Oct 2026; Chandu: "the cards beside
+   the id card etc also need work... better design") ----
+   One heading size, no explanatory subtitles, one line per teammate, and
+   the set-once settings (safety contacts, roster, sent) folded into quiet
+   rows that say their one fact and open on tap. */
+.v7-profile-sheet .v7-cp-card {border-radius:22px;}
+.v7-profile-sheet .v7-cp-card-head h3 {font-size:18px;font-weight:600;letter-spacing:-.2px;}
+.v7-profile-sheet .v7-cp-mate {padding:12px 0;}
+.v7-profile-sheet .v7-cp-mate-who {gap:2px;}
+.v7-profile-sheet .v7-cp-card.v7-cp-fold {padding:0;gap:0;overflow:hidden;}
+.v7-profile-sheet .v7-cp-fold > summary {display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;list-style:none;}
+.v7-profile-sheet .v7-cp-fold > summary::-webkit-details-marker {display:none;}
+.v7-profile-sheet .v7-cp-fold > summary h3 {font-size:16px;font-weight:600;flex:1;}
+.v7-profile-sheet .v7-cp-fold > summary .v7-cp-fold-fact {font-size:13.5px;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-fold > summary .v7-cp-fold-chev {transition:transform .2s;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-fold[open] > summary .v7-cp-fold-chev {transform:rotate(180deg);}
+.v7-profile-sheet .v7-cp-fold > summary:hover {background:color-mix(in srgb,var(--foreground) 4%,transparent);}
+.v7-profile-sheet .v7-cp-fold-body {display:flex;flex-direction:column;gap:14px;padding:0 22px 20px;}
+
+/* ---- v7's badge on v4's lanyard (20 Oct 2026) ----
+   The badge (v5 Profile's Badge, the one on v7's profile): the photo across
+   the top, then name, role and school, the facts, the numbers. The lanyard's
+   clear tab drops into the slot near the photo's top edge. */
+.v7-profile-sheet .v7-cp-badge {position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:24px;border:1px solid var(--glass-border);background:var(--card);color:var(--foreground);box-shadow:0 30px 60px -32px rgba(5,8,25,.75),inset 0 1px 0 rgba(255,255,255,.08);}
+.v7-profile-sheet .v7-cp-badge-photo {position:relative;display:block;height:300px;background:color-mix(in srgb,var(--primary) 14%,var(--card));}
+.v7-profile-sheet .v7-cp-badge-initials {position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-size:64px;font-weight:600;color:var(--color-text-brand);}
+.v7-profile-sheet .v7-cp-badge-photo .v7-cp-id-slot {z-index:2;background:color-mix(in srgb,var(--background) 85%,transparent);}
+.v7-profile-sheet .v7-cp-badge-body {display:flex;flex-direction:column;gap:18px;padding:20px 22px 22px;}
+.v7-profile-sheet .v7-cp-badge-who {display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.v7-profile-sheet .v7-cp-badge-who h2 {font-family:var(--font-display);font-size:24px;line-height:30px;font-weight:600;}
+.v7-profile-sheet .v7-cp-badge-who p {font-size:13.5px;color:var(--muted-foreground);margin-top:2px;}
+.v7-profile-sheet .v7-cp-badge-edit {display:inline-flex;flex:none;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--glass-border);font-size:13px;font-weight:600;cursor:pointer;}
+.v7-profile-sheet .v7-cp-badge-facts {display:flex;flex-direction:column;gap:12px;}
+.v7-profile-sheet .v7-cp-badge-facts span {display:block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground);}
+.v7-profile-sheet .v7-cp-badge-facts p {font-size:14px;line-height:20px;margin-top:3px;}
+.v7-profile-sheet .v7-cp-badge-chips {display:flex;flex-wrap:wrap;gap:6px;}
+.v7-profile-sheet .v7-cp-badge-chips i {font-style:normal;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--primary) 14%,transparent);}
+.v7-profile-sheet .v7-cp-badge-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--glass-border);padding-top:14px;}
+.v7-profile-sheet .v7-cp-badge-stats > div + div {border-left:1px solid var(--glass-border);}
+.v7-profile-sheet .v7-cp-badge-stats a,.v7-profile-sheet .v7-cp-badge-stats button {display:flex;flex-direction:column;gap:2px;width:100%;padding:2px 10px;border-radius:10px;text-align:left;cursor:pointer;}
+.v7-profile-sheet .v7-cp-badge-stats dd {font-family:var(--font-display);font-size:22px;line-height:26px;font-weight:600;}
+.v7-profile-sheet .v7-cp-badge-stats dt {font-size:12px;line-height:15px;color:var(--muted-foreground);}
+@media (max-width:767px) {.v7-profile-sheet .v7-cp-badge-photo {height:240px;}}
+/* the lanyard's tab sits in the badge's slot: the strap ends 30px into the
+   badge's top, so the clip's tab (34px tall from 9px below the bar) lands in
+   the slot at 14px */
+.v7-profile-sheet .v7-cp-hang .v7-cp-lanyard {bottom:calc(100% - 28px);}

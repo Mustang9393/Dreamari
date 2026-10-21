@@ -23,7 +23,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, type MobileNavItem, type NavItem } from "@/components/app/chrome";
 import { IconTip } from "@/components/app/IconTip";
 import { setCounselorBase } from "@/lib/counselorBase";
-import { CounselorProfileSheet } from "../v4/CounselorProfileSheet";
+import { CounselorProfileSheet } from "./ProfileSheet";
 import { ExploreSheetHost } from "../v5/ExploreSheets";
 import { LogSheetHost } from "../v5/LogSheet";
 import "../v5/v5.css";
