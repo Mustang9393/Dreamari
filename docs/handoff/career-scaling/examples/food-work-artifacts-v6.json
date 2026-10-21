@@ -7,7 +7,7 @@
     "kind": "notes",
     "layout": "handover",
     "title": "Project card · Sprout oat snack",
-    "caption": "Your recommendation supports the next experiment. It does not authorise a product launch.",
+    "caption": "Your recommendation supports the next experiment. It does not authorize a product launch.",
     "provenance": "Fictional Sprout / VELO trial. Teaching data; no safety approval.",
     "entries": [
       {
@@ -32,7 +32,7 @@
     "kind": "work-screen",
     "title": "Measurement reference",
     "recordId": "FS / work console",
-    "caption": "Select a method to see what it measures. This reference contains no live readings.",
+    "caption": "Methods shown together. No live readings.",
     "provenance": "Fictional lab method reference, no measurements invented.",
     "panels": [
       {
@@ -53,11 +53,11 @@
       {
         "label": "Firmness",
         "heading": "Physical texture test",
-        "detail": "A texture analyser measures a physical property under a defined method.",
+        "detail": "A texture analyzer measures a physical property under a defined method.",
         "fields": [
           {
             "label": "Tool",
-            "value": "Texture analyser"
+            "value": "Texture analyzer"
           },
           {
             "label": "Record",

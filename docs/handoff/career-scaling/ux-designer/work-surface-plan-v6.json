@@ -1,0 +1,267 @@
+{
+  "version": 6,
+  "sources": "../work-graphics-research-v6.json",
+  "beats": [
+    {
+      "beat": "UX1-01",
+      "task": "Launch day starts here.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-02",
+      "task": "One client. One afternoon.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-03",
+      "task": "Meet Arjun.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-04",
+      "task": "Your place on the team.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-05",
+      "task": "Meet your launch team.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-06",
+      "task": "Where do you start?",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-07",
+      "task": "Prepare for the review.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-08",
+      "task": "Match each review note to its meaning.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-09",
+      "task": "",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-10",
+      "task": "One change. Same task.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-11",
+      "task": "Which draft should you test next?",
+      "supportingGraphic": "ux-prototype-versions",
+      "reason": "Read-only task evidence, all necessary information visible at once.",
+      "sourceKey": "ux",
+      "canonicalData": "examples/ux-level-1.json#UX1-11/artifact",
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-12",
+      "task": "Samira joins the review.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-13",
+      "task": "Her craft. Your next step.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-14",
+      "task": "She owns the client demo.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-15",
+      "task": "Which line needs to change before the client review?",
+      "supportingGraphic": "ux-test-result",
+      "reason": "Read-only task evidence, all necessary information visible at once.",
+      "sourceKey": "ux",
+      "canonicalData": "examples/ux-level-1.json#UX1-15/artifact",
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-MID",
+      "task": "",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-ACT2",
+      "task": "The final stretch.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-18",
+      "task": "Noah wants the lead.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-19",
+      "task": "A claim gets ahead of the evidence.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-20",
+      "task": "What do you do about Noah\u2019s claim?",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-21",
+      "task": "3 p.m. A blocker appears.",
+      "supportingGraphic": "ux-release-check",
+      "reason": "Read-only task evidence, all necessary information visible at once.",
+      "sourceKey": "ux",
+      "canonicalData": "examples/ux-level-1.json#UX1-21/artifact",
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-22",
+      "task": "What do you message Arjun?",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-23",
+      "task": "3:30 p.m. The fix is in.",
+      "supportingGraphic": "ux-fixed",
+      "reason": "Read-only task evidence, all necessary information visible at once.",
+      "sourceKey": "ux",
+      "canonicalData": "examples/ux-level-1.json#UX1-23/artifact",
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-24",
+      "task": "A teammate needs a hand.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-25",
+      "task": "Help without making a new claim.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-26",
+      "task": "Rank your next steps, best to worst.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-27",
+      "task": "Arjun notices the teamwork.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-28",
+      "task": "The client demo begins.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "UX1-REVIEW",
+      "task": "The team reviews your launch work.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "ux",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    }
+  ]
+}
