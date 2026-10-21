@@ -271,13 +271,13 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport, variant = "
                         )}
                         {education.where.length > 0 && (
                           <div className="mt-[8px] flex flex-col gap-[10px]">
-                            <h4 className="cpk-sub">Where you would study it</h4>
+                            <h4 className="cpk-sub">The degree you&apos;ll need</h4>
                             <ul className="cpk-list">
                               {education.where.map((w) => (
                                 <li key={w.credential} className="cpk-item">
                                   <span aria-hidden className="cpk-item-dot" />
                                   <Link href={w.href ?? `/colleges?type=${/certif/i.test(w.credential) ? "trade" : /associate/i.test(w.credential) ? "2-year" : "4-year"}`} className="dm-link flex items-center gap-[4px]" style={{ color: "var(--foreground)" }}>
-                                    {w.credential}{/^[\d,]+$/.test(w.count) ? <span style={{ color: "var(--muted-foreground)" }}> · {w.count} colleges</span> : null}
+                                    {w.credential}<span style={{ color: "var(--muted-foreground)" }}> · {/^[\d,]+$/.test(w.count) ? `See ${w.count} colleges` : "See colleges"}</span>
                                     <ChevronRight className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: accent }} />
                                   </Link>
                                 </li>

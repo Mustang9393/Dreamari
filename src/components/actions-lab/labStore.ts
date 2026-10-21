@@ -143,7 +143,7 @@ export function toggleTop3(id: string, title: string) {
   const undoAdd = () => write({ top3: read().top3.filter((x) => x !== id), saved: wasSaved ? read().saved : read().saved.filter((x) => x !== id) });
   run(`top3:${id}`, () => { write({ top3: [...read().top3, id], saved: wasSaved ? read().saved : [...read().saved, id] }); land("top3", id); },
     undoAdd,
-    { text: `${title} is #${n} of 3`, link: { label: "See Top 3", open: "top3" }, undo: () => { undoAdd(); setBar(null); } }, () => toggleTop3(id, title));
+    { text: `${title} is #${n} of 3`, link: { label: "Choose my goals", open: "top3" }, undo: () => { undoAdd(); setBar(null); } }, () => toggleTop3(id, title));
 }
 
 export function swapInto(outId: string, outTitle: string) {
@@ -154,7 +154,7 @@ export function swapInto(outId: string, outTitle: string) {
   const snap = { saved: s.saved, top3: s.top3 };
   const n = s.top3.indexOf(outId) + 1;
   run(`top3:${incoming.id}`, () => { write({ top3: read().top3.map((x) => (x === outId ? incoming.id : x)), saved: read().saved.includes(incoming.id) ? read().saved : [...read().saved, incoming.id] }); land("top3", incoming.id); }, () => write(snap),
-    { text: `${incoming.title} is now #${n}. ${outTitle} is still in Saved.`, link: { label: "See Top 3", open: "top3" }, undo: () => { write(snap); setBar(null); } }, () => { write({ swapFor: incoming }); swapInto(outId, outTitle); });
+    { text: `${incoming.title} is now #${n}. ${outTitle} is still in Saved.`, link: { label: "Choose my goals", open: "top3" }, undo: () => { write(snap); setBar(null); } }, () => { write({ swapFor: incoming }); swapInto(outId, outTitle); });
 }
 
 export function react(id: string, kind: Exclude<Reaction, null>) {

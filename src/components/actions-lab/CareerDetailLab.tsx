@@ -51,6 +51,7 @@ import { careerSlug } from "@/components/career/slug";
 import { OutlookTab } from "@/components/outlook-lab/OutlookTab";
 import { count, nationalOutlook, pct } from "@/components/career/outlook";
 import { CareerDetailLabV2 } from "./CareerDetailLabV2";
+import { WhereToStudy } from "@/components/career/WhereToStudy";
 import { CareerDetailV2Switch } from "@/components/career/CareerDetailV2Switch";
 import { useCareerDetailV2 } from "@/lib/careerDetailV2";
 
@@ -865,37 +866,14 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
 
         {tab === "education" && vm.education && (
           <Section id="education" title="Education">
-            <div className="grid gap-[var(--space-6)] sm:grid-cols-2">
-              <div className="flex flex-col gap-[var(--space-3)]">
-                <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>What people study for it</h3>
-                <ul className="flex flex-col gap-[var(--space-2)]">
-                  {vm.education.studies.map((s) => (
-                    <li key={s.name} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
-                      <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
-                      {s.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex flex-col gap-[var(--space-3)]">
-                <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Where you would study it</h3>
-                {/* the credential in words (no school counts, Josh's notes);
-                   each one links to its college page. Those pages are not
-                   designed yet, so the links land on the College Lookup shell
-                   with the credential carried across as a placeholder. */}
-                <ul className="flex flex-col gap-[var(--space-2)]">
-                  {vm.education.where.map((w) => (
-                    <li key={w.credential} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
-                      <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
-                      <Link href={w.href ?? `/colleges?type=${/certif/i.test(w.credential) ? "trade" : /associate/i.test(w.credential) ? "2-year" : "4-year"}`} className="dm-link flex min-h-[28px] items-center gap-[4px]" style={{ color: "var(--foreground)" }}>
-                        {w.credential}
-                        <ChevronRight className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: accent }} />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+            {/* The credential, then the schools that teach it (21 Oct 2026,
+               Chandu: "update the copy of 'where you would study' because
+               it shows bachelors degree etc and not where they would study,
+               we still wanna show bachelors etc and lead them from there to
+               colleges they can consider"). The same two lists as v2: each
+               credential row opens the colleges that offer it, with a count;
+               training on the job says "no school needed". */}
+            <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerSlug={career.slug} />
           </Section>
         )}
 
