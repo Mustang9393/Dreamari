@@ -4,19 +4,25 @@
 // reminders hierarchy, open on the page (no widget boxes), v5's cleaner
 // conversation cards and review column, shorter copy, and all content kept.
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, Clock } from "lucide-react";
-import { useCounselorFilters } from "../shell";
+import { useCounselorFilters, type GradeFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
-import { attentionRank } from "./studentAttention";
+import { attentionRank, attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { ConversationAvatar } from "./ConversationAvatar";
+import { AvatarStylePicker, useCounselorAvatarStyle } from "./avatarStyle";
+import { ReviewDeck } from "./ReviewDeck";
+import { ReminderCarousel } from "./ReminderCarousel";
+import { reviewHref } from "./milestonesModel";
+import { CountUp, DreamyMoment } from "./overviewShared";
 import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
-import { RankedPosterCard } from "@/components/app/PosterCard";
-import "./insights2.css";
+import { Coverflow } from "../v5/Coverflow";
 import { MostPlayedSimulations } from "../v5/HomeExtras";
 import { useMeetings } from "../v5/Prepare";
 import { openCareer } from "../v5/ExploreSheets";
@@ -24,52 +30,65 @@ import { schoolSnapshot, toV5 } from "@/lib/counselorV5";
 import { useTodayFilters } from "./Workspace";
 import "../v5/v5.css";
 import "./today.css";
-import "./layout2.css";
-import "../v7/v7.css";
-import { Stat } from "../v7/Home";
 
 const subscribeDate = (notify: () => void) => { const timer = window.setInterval(notify, 60000); return () => window.clearInterval(timer); };
 const dateSnapshot = () => new Intl.DateTimeFormat("en", {weekday:"long",month:"long",day:"numeric"}).format(new Date());
 const serverDateSnapshot = () => "Today";
 const noop = () => () => {};
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const studentHref = (id: string) => `/counselor?view=students&studentId=${encodeURIComponent(id)}&v=4`;
 
 function Jump({children,onClick}:{children:React.ReactNode;onClick:()=>void}) {return <button className="v4-text-action" onClick={onClick}>{children}<ArrowUpRight size={16}/></button>;}
 
-/** Home's meetings card (v7's shape): how many are left this week, the
- *  next one, and the way to the schedule. */
-function MeetingsCard({ roster }: { roster: Parameters<typeof useMeetings>[0] }) {
+/** A glanceable calendar widget; seeds depend on the client clock. */
+function NextMeeting({ roster }: { roster: Parameters<typeof useMeetings>[0] }) {
  const mounted = useSyncExternalStore(noop, () => true, () => false);
  const meetings = useMeetings(roster);
  const done = useMeetingsDone();
- if (!mounted) return <div aria-hidden />;
+ if (!mounted) return <div className="v4-calendar-widget" aria-hidden />;
  const now = new Date();
- const weekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (7 - now.getDay()));
- const left = meetings.filter((m) => !isPast(m, now) && !done[m.id] && m.day <= iso(weekEnd));
  const next = meetings.find((m) => !isPast(m, now) && !done[m.id]);
- const student = next ? roster.find((s) => s.id === next.studentId) : undefined;
- let when = "";
- if (next) {
-  const [y, mo, d] = next.day.split("-").map(Number);
-  const day = new Date(y, mo - 1, d);
-  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
- }
- return <Stat figure="meetings" href="/counselor?view=meetings&v=4" label="Meetings this week" value={left.length} go="View schedule"
-  line={next ? <>Next: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{student?.name ?? "a student"}</span> · {when} · {timeLabel(next.time)}</> : "Nothing booked yet"} />;
+ if (!next) return <button type="button" className="v4-calendar-widget dm-quiet" onClick={() => openLog({ mode: "book" })}><strong>Nothing booked yet</strong><span className="v4-widget-detail">Book a meeting <ArrowUpRight size={14} aria-hidden /></span></button>;
+ const student = roster.find((s) => s.id === next.studentId);
+ const [y, mo, d] = next.day.split("-").map(Number);
+ const day = new Date(y, mo - 1, d);
+ const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+ const when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "long" });
+ const date = day.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+ return <Link href="/counselor?view=meetings&v=4" className="v4-calendar-widget dm-quiet" aria-label={`Next meeting: ${timeLabel(next.time)}, ${when}, ${date}, ${student?.name ?? "a student"}, ${next.type}. Open Meetings`}>
+  {/* one headline and one quiet line, like the band's other columns
+     (9 Oct 2026: the band "might look a little cluttered") */}
+  <span className="v4-calendar-event"><span className="v4-calendar-time"><strong>{when}, {date} · {timeLabel(next.time)}<ArrowUpRight size={14} aria-hidden/></strong></span><small className="v4-widget-detail">{student?.name ?? "Student meeting"} · {next.type}, {next.minutes} min</small></span>
+ </Link>;
 }
 
 export function Overview(){
  const router=useRouter();const reviewed=useReviewedRoster();
  const filters=useTodayFilters();
  const account=useSyncExternalStore(subscribeCounselorAccount,counselorAccountSnapshot,serverCounselorAccountSnapshot);
- const {gradeFilter,setStatusFilter}=useCounselorFilters();
+ const {gradeFilter,setGradeFilter,setStatusFilter}=useCounselorFilters();
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
- const total=roster.length;const atRisk=roster.filter(s=>s.status==="At Risk").length;
+ const [avatarStyle]=useCounselorAvatarStyle();
+ const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
+ const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
- const topPending=[...pending].sort((x,y)=>y.count-x.count).find(r=>r.count>0);
+ // Pending Reviews' "See all": every milestone with something waiting,
+ // the fullest first.
+ // every submission waiting, most in need first, for Pending Reviews' deck
+ const waitingDocs=useMemo(()=>[...roster].sort(attentionRank).flatMap(st=>MILESTONE_KEYS.filter(m=>st.milestones[m]==="Pending Review").map(k=>({s:st,k}))),[roster]);
+ // Pending Reviews mirrors a card's bands, so it needs the card picture's
+ // height, which follows the cards' width; measured, not guessed.
+ const railRef=useRef<HTMLDivElement>(null);
+ const [picH,setPicH]=useState<number|null>(null);
+ useLayoutEffect(()=>{
+  const pic=railRef.current?.querySelector<HTMLElement>(".v4-conversation-portrait");
+  if(!pic) return;
+  const ro=new ResizeObserver(()=>setPicH(Math.round(pic.getBoundingClientRect().height)));
+  ro.observe(pic);
+  return ()=>ro.disconnect();
+ },[]);
 
  const saved=useMemo(()=>schoolSnapshot(roster.map(toV5)).topSaved.slice(0,10),[roster]);
  // Dreamy's briefing (9 Oct 2026, Chandu: "incorporate dreamy more in the
@@ -77,12 +96,26 @@ export function Overview(){
  // real engagement or presence"). Dreamy is the counselor's assistant who
  // reads everything first: three lines under the greeting, each a link,
  // about what changed, not the figures the strip below already shows.
+ const missed=roster.filter(s=>Object.values(s.milestones).includes("Overdue")).length;
+ // DEMO-ONLY: submissions have no timestamps yet; "since yesterday" is the newest few waiting
+ const newToday=Math.min(pendingCount,3);
+ const byGrade=[9,10,11,12].map(g=>{const rows=reviewed.filter(s=>s.grade===g);return {g,pct:rows.length?Math.round(rows.filter(s=>s.status==="On Track").length/rows.length*100):100};}).filter(x=>gradeFilter==="All Grades"||x.g===gradeFilter);
+ const lowest=byGrade.reduce((a,b)=>b.pct<a.pct?b:a,byGrade[0]);
+ const lateStudent=[...roster].filter(s=>/overdue/i.test(attentionReason(s))).sort(attentionRank)[0];
+ const brief:{title:string;detail:string;go:()=>void}[]=[
+  newToday>0?{title:`${newToday} new submission${newToday===1?"":"s"}`,detail:`Since yesterday${missed?` · ${missed} past deadline`:""}`,go:()=>go("review-queue")}:{title:"All caught up",detail:"Nothing new waiting for review",go:()=>go("review-queue")},
+  ...(lowest&&gradeFilter==="All Grades"?[{title:`Grade ${lowest.g} needs support`,detail:`${lowest.pct}% on track · Lowest grade`,go:()=>{setGradeFilter(lowest.g as GradeFilter);go("milestones");}}]:[]),
+  ...(lateStudent?[{title:`${lateStudent.name.split(" ")[0]}'s ${attentionReason(lateStudent).replace(/ overdue$/i,"")}`,detail:"Overdue",go:()=>openStudent(lateStudent.id)}]:[]),
+ ];
  // Everyone who needs support, in priority order, not only the first five
  // (9 Oct 2026, Chandu: "the student card row can be scrollable still,
  // right? It's not like there are only 5 students needing attention"). The
  // row scrolls sideways and the next card peeks in at the edge.
  const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank);
+ const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
  const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
+ const openStudent=(id:string)=>router.push(studentHref(id));
+ const status=(value:"On Track"|"Needs Attention"|"At Risk")=>{setStatusFilter(value);go("students");};
  // v4's four metrics, Title Case, in v5's form: the number first, then the
  // label, hairlines between, no third line (Maisha, 9 Oct 2026: "Keep the
  // existing metrics from V4 ... Use V5's cleaner layout"). The numbers roll
@@ -94,48 +127,34 @@ export function Overview(){
  // the figures read first (10 Oct 2026, Chandu: "the 85% etc under the 7
  // at risk students need a bit more prominence. It was not read properly
  // when I demoed"): the number in full ink and weight, the words after it
+ const pulseLinks=[
+  {label:`${pct(onTrack)}% on track`,value:`${pct(onTrack)}%`,words:"on track",action:()=>go("milestones&mode=student")},
+  {label:`${undecided} still exploring`,value:`${undecided}`,words:"still exploring",action:()=>go("insights")},
+ ];
  return <div className="v4-daily v4-sections">
   {/* 9 Oct: Apple's event widget + notification stack hierarchy, adapted to
       Dreamari. Two useful groups; quieter copy without losing an update. */}
-  {/* The hero, rebuilt (20 Oct 2026, Chandu: "the hero is still cluttered
-     ... things are all tight and crowded everywhere. We need to seriously
-     rethink the design. If we need to use boxes to organise stuff where
-     needed try that too"). Research-led: group by enclosure (one card per
-     glance question) instead of hairline columns, the most important figure
-     top-left, hierarchy from type size not color, generous padding inside
-     the cards and a steady gutter between them. The greeting and the day's
-     actions share one line; under it three equal cards, each one label, one
-     large line and one quiet line: who is at risk, the next meeting, and
-     what changed. Every figure and link the band had is still here. */}
-  <section className="v4h" aria-label="Today">
-   <div className="v4h-top">
-    <div className="v4h-hello"><span className="v4h-date">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1></div>
-    <div className="v4h-actions">
-     {filters&&<div className="v4h-scope">{filters}</div>}
-     <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log Time</button>
-     <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start Reviewing":"Open Students"}<ArrowUpRight size={18}/></button>
-    </div>
-   </div>
-   {/* Home in v7's shape (20 Oct 2026, Chandu: "lets try using the same
-      sort of organisation level as v6 and v7 have for the home page of
-      v4"): three summary cards, each one label, one big number with its
-      words, one quiet line and one way in, then the picture rows. The
-      student list and the review breakdown that sat under the band left
-      Home; their facts are on these cards and the full lists are one click
-      away (Students, Review). */}
-   <div className="v4h-cards">
-    {/* v7's three hero cards (20 Oct 2026, Chandu: "lets use the same hero
-       cards from v7 in v4"): v7's own Stat, the label, one number, one
-       line, the whole card the link, a constellation on hover; v4's
-       numbers (the grade filter applies) and v4's pages behind them */}
-    <Stat figure="reviews" href="/counselor?view=review-queue&v=4" label="Reviews" value={pendingCount} go="Start reviewing"
-     line={topPending ? <>Most: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{topPending.key}</span></> : "All caught up"} />
-    <MeetingsCard roster={reviewed} />
-    {/* the card opens Students on the At Risk filter, as the old card did */}
-    <div className="contents" onClickCapture={()=>setStatusFilter("At Risk")}>
-     <Stat figure="people" href="/counselor?view=students&v=4" label="Students who need you" value={priority.length} go="Review students"
-      line={atRisk ? <><span aria-hidden className="mr-[7px] inline-block size-[7px] rounded-full align-[1px]" style={{ background: "var(--color-feedback-danger-solid)" }} /><span className="font-semibold" style={{ color: "var(--foreground)" }}>{atRisk}</span> at risk</> : "None at risk"} />
-    </div>
+  <section className="v4-welcome v4-home-hero v4-home-lockscreen">
+   <div className="v4-home-lead"><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1></div>
+   <div className="v4-home-side"><div className="v4-welcome-actions">
+    {filters&&<div className="v4-home-scope">{filters}</div>}
+    <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log Time</button>
+    <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start Reviewing":"Open Students"}<ArrowUpRight size={18}/></button>
+   </div></div>
+   {/* Three glanceable columns (9 Oct 2026). Chandu: "the 85 on track, 7 at
+      risk, 42 exploring can also be one of those columns next to the
+      meeting and reminders ... At risk can be highlighted". The full-width
+      figures strip is gone (it cost a band and pushed the work down); the
+      pulse is a third column, At Risk as its headline, the other two as
+      quiet links under it. Not a carousel: these are compared, not read
+      one at a time, and the reminders beside them already rotate. */}
+   <div className="v4-home-widgets">
+    <NextMeeting roster={reviewed} />
+    <ReminderCarousel items={brief}/>
+    <section className="v4-pulse-widget" aria-label="Caseload pulse">
+     <button type="button" onClick={()=>status("At Risk")} className={`v4-pulse-lead dm-quiet ${atRisk?"is-risk":""}`}><strong><CountUp value={atRisk}/></strong><span>{atRisk===1?"student at risk":"students at risk"}<ArrowUpRight size={14} aria-hidden/></span></button>
+     <div className="v4-pulse-links">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden className="v4-pulse-dot">·</span>}<button type="button" onClick={l.action} className="dm-quiet" aria-label={l.label}><b>{l.value}</b> {l.words}</button></span>)}</div>
+    </section>
    </div>
   </section>
 
@@ -145,6 +164,55 @@ export function Overview(){
      mental-health monitoring is not something our platform is currently
      promising to do") */}
   <CoverageBanner />
+
+  <div className="v4-daily-grid v4-home-work">
+   <section className="v4-focus-sheet">
+    <header className="v4-section-head"><h2>My Next Conversations</h2><Jump onClick={()=>go("students")}>View students</Jump></header>
+    <div className="v4-conversation-meta"><span>{attention+atRisk} need support · By milestone priority</span>{/* thirteen styles to compare (two house styles and eleven DiceBear
+       ones), so the two-button switch became a dropdown (9 Oct 2026) */}<AvatarStylePicker quiet/></div>
+    <div ref={railRef} className="v4-conversation-rail dm-scroll" role="group" aria-label="Students needing a conversation">{priority.length?priority.map(s=><article key={s.id} className="v4-conversation-card">
+     <button type="button" className="v4-conversation-profile dm-quiet" onClick={()=>openStudent(s.id)}><span className="v4-conversation-portrait" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={160}/></span><span className="v4-conversation-copy"><strong>{s.name}</strong><span className="v4-conversation-grade">Grade {s.grade}<span className={`v4-conversation-status ${s.status==="At Risk"?"is-risk":""}`}>{s.status}</span></span><span className="v4-conversation-reason">{attentionReason(s)}</span></span></button>
+     <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
+    </article>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
+   </section>
+   {/* (superseded 10 Oct: see the three bands below) Pending Reviews beside the student row: an overview, not a list
+      (10 Oct 2026, Chandu: "Just show a big stat number and then some other
+      details as an overview, not the full student list", then "please
+      avoid the bar charts too"). The number starts on the cards' top edge;
+      under it, how many are new, and a "See all" disclosure with each
+      milestone's queue. The group is centred in the card row's height
+      (Chandu: "just show 13 submissions waiting, 3 new since yesterday,
+      have a see all accordion or something, centre it in its height,
+      leaving the title and CTA where they are"). One number on the column:
+      the bars, then number tiles, were too many figures competing. "Review
+      all" in the heading row opens everything. */}
+   <section className="v4-review-column" aria-label="Pending reviews">
+    <header className="v4-section-head"><h2>Pending Reviews</h2>{pendingCount?<Jump onClick={()=>go("review-queue")}>Review all</Jump>:null}</header>
+    {/* the meta row stays (it is the row that lines up with "18 need
+       support" opposite) but says nothing: "Across 7 milestones" repeated
+       See all (10 Oct 2026, Chandu: "too cluttered, so much text to read") */}
+    <div className="v4-conversation-meta v4-review-meta" aria-hidden><span /></div>
+    {/* Three bands, a card's own (10 Oct 2026, Chandu: "the middle
+       alignment still feels off ... anything else that won't introduce
+       clutter but solves the problem?"). Centring matched nothing in the
+       cards beside it. Now the column has their bands: the picture band
+       (the cards' picture height, measured) holds a small stack of the
+       documents waiting; the count starts on the
+       names' line with "new since yesterday" on the grade line; and See
+       all sits on the buttons' line, its list opening upward over the
+       column so nothing moves. */}
+    <div className="v4-review-body" style={picH?{["--review-pic-h" as string]:`${picH}px`}:undefined}>
+    {pendingCount?<>
+     {/* a carousel of the submissions waiting, on the cards' three bands
+        (10 Oct 2026, Chandu: "we can have 1 additional caption or detail
+        under the doc and then 13 waiting, and we can have controls to move
+        through them and make it a carousel like the reminders"); the
+        reasoning for each part is in ReviewDeck.tsx */}
+     <ReviewDeck docs={waitingDocs} total={pendingCount} onOpen={(d)=>router.push(reviewHref(d.k,[d.s.id]))}/>
+    </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
+    </div>
+   </section>
+  </div>
 
   {/* Milestone Completion, Career Interests and Plans After Graduation
      moved to Insights whole (8 Oct 2026, Chandu: "the today tab seems
@@ -156,10 +224,7 @@ export function Overview(){
      "Keep the V4 carousel design displaying the top 10 most-saved careers"). */}
   <section className="v4-today-rail" aria-label="What my students are saving">
    <header className="v4-section-head"><div><h2>What My Students Are Saving</h2></div><Jump onClick={()=>go("explore")}>Explore</Jump></header>
-   {/* a row, like Explore's and Insights' shelves, not a coverflow
-      (20 Oct 2026, Chandu: "change the carousel to a row type everywhere
-      that appears"); the same ten careers, rank and student count */}
-   <div className="v4-cc-rail flow-scroll" role="list" aria-label="Most saved careers">{saved.map(({career,students:n},k)=><div role="listitem" key={career.id} className={`v4-iv-poster ${k+1>=10?"is-two":""}`}><RankedPosterCard career={career} rank={k+1} chip={`${n} saved`} onClick={()=>openCareer({title:career.title,world:career.world,photo:career.photo},saved.map(x=>({title:x.career.title,world:x.career.world,photo:x.career.photo})))}/></div>)}</div>
+   <Coverflow mode="cover" label="Most saved careers" items={saved.map(({career,students:n},k)=>({key:career.id,rank:k+1,title:career.title,world:career.world,photo:career.photo,focus:career.photoFocus,stat:{value:String(n),label:n===1?"Student":"Students"},onOpen:()=>openCareer({title:career.title,world:career.world,photo:career.photo},saved.map(x=>({title:x.career.title,world:x.career.world,photo:x.career.photo})))}))}/>
   </section>
   {/* v5's simulation cards in place of Most Watched (Maisha, 9 Oct 2026:
      "Replace V4's 'Most Watched by My Students' section with V5's 'Most

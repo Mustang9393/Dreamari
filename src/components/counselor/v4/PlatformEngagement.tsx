@@ -37,7 +37,8 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { LoginsArea, ShareLight, WarnLight } from "./charts/engageViz";
+import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { KpiSpark, LoginsArea, ShareLight, WarnLight } from "./charts/engageViz";
 import { Segmented } from "./viz";
 import { Disclosure } from "./Disclosure";
 import { useSyncExternalStore } from "react";
@@ -48,6 +49,7 @@ import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCoun
 import { SCHOOL_TARGETS, districtSchools } from "@/lib/counselorOrg";
 import { MetricRow, OverviewCard, Verdict } from "./overviewShared";
 
+import { TREND_UP } from "./palette";
 import { CountUp, Dreamy } from "./InsightCharts";
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import { seedHash } from "@/lib/localRecord";
@@ -104,6 +106,38 @@ export function Sparkline({ values }: { values: number[] }) {
   );
 }
 
+function EngagementStat({ value, decimals = 0, label, series, delta, prevLabel, share, open }: { value: number; decimals?: number; label: string; series?: number[]; delta?: number; prevLabel?: string; share?: { n: number; of: number }; /** the chart opens the students it counts */ open?: { tip: string; onClick: () => void } }) {
+  const hit = (node: React.ReactNode, cls = "w-full max-w-[260px]") => open ? <IconTip label={open.tip} className={cls}><button type="button" className="ev-hit dm-quiet" onClick={open.onClick} aria-label={`${label}: ${open.tip}`}>{node}</button></IconTip> : node;
+  const up = (delta ?? 0) >= 0;
+  const sharePct = share ? Math.round((share.n / Math.max(1, share.of)) * 100) : 0;
+  return (
+    <div className="v4-engagement-stat flex h-full flex-col gap-[10px]">
+        <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {label}
+        </span>
+        <span className="flex items-baseline gap-[8px]">
+          <span className="v4-engagement-stat-value text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><CountUp value={value} decimals={decimals}/></span>
+          {typeof delta === "number" && (
+            // Green up, the same as the Overview's trend chips (blue text
+            // on a blue-tinted card is hard to read).
+            <span className="flex items-center gap-[3px] text-[12px] font-bold tabular-nums whitespace-nowrap" style={{ color: up ? TREND_UP : "var(--cd-amber)" }}>
+              {up ? <ArrowUpRight className="h-[13px] w-[13px]" aria-hidden /> : <ArrowDownRight className="h-[13px] w-[13px]" aria-hidden />}{up ? "+" : ""}{delta}%
+            </span>
+          )}
+        </span>
+        {/* One structure for all four tiles (label, figure, sub-line, chart
+           directly under it, left-aligned, one width), so the row lines up. */}
+        {(series || share) && (
+          <span className="mt-auto flex w-full flex-col gap-[8px]">
+            <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{series ? `vs ${prevLabel}` : `${sharePct}% of ${share!.of} students`}</span>
+            {series
+              ? hit(<KpiSpark values={series} label={`${label}, month by month`} />)
+              : hit(<ShareLight n={share!.n} of={share!.of} label={`${share!.n} of ${share!.of} students`} />)}
+          </span>
+        )}
+    </div>
+  );
+}
 
 
 
@@ -466,24 +500,17 @@ export function PlatformEngagement() {
           </div>
         </OverviewCard>
       )}
-      {/* The four stat tiles became one sentence (20 Oct 2026, the
-         reinvention: "drastically change the amount of information"). The
-         month's active students lead with their change; this week, today
-         and logins each follow as one quiet line. Every figure still opens
-         its students. The month by month history is the chart below. */}
-      <section className="v4r-say" aria-label="This month">
-        <h2 className="v4r-say-line">
-          <button type="button" className="v4r-say-fig" onClick={() => openPeriod(latest)}><b>{latest.unique} students</b></button> active in {latest.label}
-          {prev && <span className={`v4r-trend ${pctChange(latest.unique, prev.unique) >= 0 ? "is-up" : ""}`}>{pctChange(latest.unique, prev.unique) >= 0 ? "↗" : "↘"} {Math.abs(pctChange(latest.unique, prev.unique))}% vs {prev.label}</span>}
-        </h2>
-        <p className="v4r-say-facts">
-          <button type="button" onClick={() => openActive("Weekly active", weekly, byRecent, "last 7 days")}><b>{weekly}</b> this week</button>
-          <span aria-hidden>·</span>
-          <button type="button" onClick={() => openActive("Daily active", daily, byRecent, "today")}><b>{daily}</b> today</button>
-          <span aria-hidden>·</span>
-          <span><b>{latest.avg.toFixed(2)}</b> logins each</span>
-        </p>
-      </section>
+      {/* Each stat with its direction (direct feedback, 26 Sept 2026: "no
+         trends signal to see growth"). The two monthly figures have six
+         months of history, so they carry a sparkline and the change from
+         last month; weekly and daily have no history here, so they show
+         their share of the caseload instead of an invented trend. */}
+      <div className="v4-engagement-stats grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
+        <EngagementStat value={latest.unique} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} open={{ tip: `See the ${Math.min(latest.unique, roster.length)} students`, onClick: () => openPeriod(latest) }} />
+        <EngagementStat value={weekly} label="Weekly active" share={{ n: weekly, of: roster.length }} open={{ tip: `See the ${weekly} students`, onClick: () => openActive("Weekly active", weekly, byRecent, "last 7 days") }} />
+        <EngagementStat value={daily} label="Daily active" share={{ n: daily, of: roster.length }} open={{ tip: `See the ${daily} students`, onClick: () => openActive("Daily active", daily, byRecent, "today") }} />
+        <EngagementStat value={latest.avg} decimals={2} label="Logins per active student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
+      </div>
 
       {/* What students do on Dreamari, beyond logging in. Each opens the
          students it counts, with a message to the ones not there yet. */}
@@ -560,7 +587,7 @@ export function PlatformEngagement() {
          not as lengths. Each tile is the number, the grade, and Open. */}
       <section className="v4-engagement-checkins h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]">
-          <header className="v4-card-head"><h2>Inactive 7+ Days</h2><span>{inactive.length} {inactive.length === 1 ? "student" : "students"}</span></header>
+          <header className="v4-card-head"><h2>Inactive 7+ Days</h2><span>Right now · {inactive.length} {inactive.length === 1 ? "student" : "students"} · select a grade</span></header>
           {inactive.length === 0 ? (
             <div className="v4-progress-empty"><Dreamy mood="celebrate" size={64}/><p><strong>Every student logged in this week.</strong><span>No one to reach out to right now.</span></p></div>
           ) : (

@@ -37,3 +37,30 @@ html.light .v7-now-star {background:radial-gradient(circle,var(--primary) 0 26%,
 /* a day with no office hours recedes: a fine diagonal grain, not a field of marks */
 .v7-lane-off {background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--foreground) 4%,transparent) 0 1px,transparent 1px 9px) !important;}
 @media (prefers-reduced-motion:reduce) {.v7-now-star {animation:none;}}
+
+/* The student ID tag (StudentIdCard.tsx), moved from v4/today.css */
+.v7-sid-wrap {display:flex;flex-direction:column;align-items:center}
+.v7-sid-reel {position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;margin-bottom:-14px;pointer-events:none}
+.v7-sid-reel-disc {display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#d6dbe6 55%,#a7aebd);box-shadow:inset 0 1px 0 #fff,inset 0 -2px 4px rgba(0,0,0,.18),0 6px 14px -6px rgba(20,30,70,.45)}
+.v7-sid-reel-disc i {width:16px;height:16px;border-radius:50%;background:var(--primary);box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
+.v7-sid-cord {width:2px;height:22px;background:linear-gradient(180deg,#9aa2b2,#c9ced8)}
+.v7-sid-clip {width:22px;height:12px;border-radius:3px 3px 6px 6px;background:linear-gradient(180deg,#f3f5f9,#b8bfcc);box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(0,0,0,.2)}
+.v7-sid {position:relative;width:100%;overflow:hidden;border-radius:22px;background:var(--card);color:var(--foreground);border:1px solid color-mix(in srgb,var(--foreground) 8%,transparent);box-shadow:0 1px 2px rgba(20,30,70,.05),0 18px 40px -22px rgba(20,30,70,.35);transform-origin:50% 0;animation:v7-sid-swing 1.4s cubic-bezier(.3,.7,.4,1) both}
+@keyframes v7-sid-swing {0% {transform:rotate(-2deg)} 40% {transform:rotate(1.2deg)} 70% {transform:rotate(-.5deg)} 100% {transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){.v7-sid {animation:none}}
+.v7-sid-slot {position:absolute;top:8px;left:50%;z-index:1;width:30px;height:7px;margin-left:-15px;border-radius:99px;background:rgba(255,255,255,.85);box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
+.v7-sid-band {display:flex;align-items:center;justify-content:space-between;gap:10px;padding:24px 20px 12px;background:var(--primary);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase}
+.v7-sid-band span:first-child {overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.v7-sid-band span:last-child {flex:none;opacity:.8}
+.v7-sid-body {display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 24px 24px;text-align:center}
+.v7-sid-photo {display:inline-flex;margin:-2px 0 12px;padding:4px;border-radius:50%;background:var(--card);box-shadow:0 0 0 1px color-mix(in srgb,var(--foreground) 8%,transparent),0 8px 20px -12px rgba(20,30,70,.4);transform:translateY(-0px)}
+.v7-sid-photo .v4-portrait {border-radius:50%!important;overflow:hidden}
+.v7-sid-body h1 {margin:0;font-family:var(--font-display);font-size:24px!important;line-height:1.15;font-weight:600!important;letter-spacing:-.02em}
+.v7-sid-body p {margin:0;font-size:13.5px;line-height:1.5;color:var(--muted-foreground)}
+.v7-sid-status {margin-top:10px;padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--color-feedback-success-solid);background:color-mix(in srgb,currentColor 10%,transparent)}
+.v7-sid-status.is-warn {color:var(--color-feedback-warning-solid)}
+.v7-sid-status.is-risk {color:var(--destructive)}
+.v7-sid-active {margin-top:6px;font-size:12px;color:var(--muted-foreground)}
+html.dark .v7-sid {background:color-mix(in srgb,var(--card) 88%,#ffffff 4%);border-color:rgba(255,255,255,.08)}
+.v7-sid-band {padding-bottom:56px}
+.v7-sid-photo {margin:-52px 0 12px}

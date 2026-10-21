@@ -139,22 +139,9 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 
 /* Most Played Career Simulations: v5's three cards, v4's section head */
 [data-counselor-version="v4"] .v4-home-sims {margin-top:40px;--rail-bleed:16px;}
-/* all four in one row (20 Oct 2026 declutter: three across left the 4th
-   card alone on a second row, a ragged band of extra height) */
-@media (min-width:1000px){
- [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm {grid-template-columns:repeat(4,minmax(0,1fr))!important;}
- /* a quarter-width card has no room for the title and the count side by
-    side ("Aviation Maintenance Technician" ran into its rank badge), so the
-    count drops under the title as one quiet line */
- [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm>button>span.relative {flex-direction:column;align-items:flex-start;gap:2px;}
- [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm>button>span.relative>span:last-child {flex-direction:row;align-items:baseline;gap:6px;}
- [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm>button>span.relative>span:last-child>span:first-child {font-size:15px;line-height:20px;}
- [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm>button>span.relative>span:first-child>span:first-child {font-size:16px;line-height:20px;}
-}
-/* tablets and small laptops: four across left each card ~250px wide (the
-   title ran into the rank badge at 820); two show and the next peeks, as a
-   sideways rail */
-@media (min-width:640px) and (max-width:999px){
+/* tablets: three across left each card ~250px wide (the title ran into the
+   rank badge at 820); two show and the third peeks, as a sideways rail */
+@media (min-width:640px) and (max-width:1023px){
  [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm {display:flex!important;flex-wrap:nowrap!important;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:-26px;padding-inline:26px;padding-bottom:4px;}
  [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm::-webkit-scrollbar {display:none;}
  [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm>* {flex:none;width:46%;scroll-snap-align:start;scroll-margin-inline:26px;}
@@ -203,64 +190,3 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 [data-counselor-version="v4"] .v4-dreamy-brief button svg {display:inline-block;vertical-align:-2px;margin-left:6px;color:var(--muted-foreground);}
 [data-counselor-version="v4"] .v4-dreamy-brief button:hover svg {color:var(--color-text-brand);}
 @media (max-width:640px){[data-counselor-version="v4"] .v4-dreamy-brief {margin-top:6px;}[data-counselor-version="v4"] .v4-dreamy-brief>img {width:72px;height:72px;margin:-6px 0 0 -6px;}[data-counselor-version="v4"] .v4-dreamy-brief button {font-size:13.5px;}}
-
-/* Home's two plain lists (20 Oct 2026, replacing the portrait cards and the
-   review stack): one line per row, hairlines between, a wide gutter */
-[data-counselor-version="v4"] .v4-home-lists {display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:96px;align-items:start}
-[data-counselor-version="v4"] .v4-home-list {display:flex;min-width:0;flex-direction:column;gap:20px}
-[data-counselor-version="v4"] .v4-home-rows {display:flex;flex-direction:column;margin:0;padding:0;list-style:none}
-[data-counselor-version="v4"] .v4-home-rows>li+li {border-top:1px solid var(--v4-line)}
-[data-counselor-version="v4"] .v4-home-row {display:flex;width:100%;min-width:0;align-items:center;gap:16px;padding:14px 0}
-[data-counselor-version="v4"] .v4-home-row-who {display:flex;min-width:0;flex:1;align-items:center;gap:14px;text-align:left;cursor:pointer;border-radius:12px}
-[data-counselor-version="v4"] .v4-home-row-face {display:inline-flex;flex:none;width:40px;height:40px;overflow:hidden;border-radius:999px;background:var(--glass-surface-2)}
-[data-counselor-version="v4"] .v4-home-row-face>* {width:100%!important;height:100%!important}
-[data-counselor-version="v4"] .v4-home-row-copy {display:flex;min-width:0;flex:1;flex-direction:column;gap:2px}
-[data-counselor-version="v4"] .v4-home-row-copy strong {overflow:hidden;font-size:14.5px;font-weight:600;white-space:nowrap;text-overflow:ellipsis;color:var(--foreground)}
-[data-counselor-version="v4"] .v4-home-row-copy span {overflow:hidden;font-size:12.5px;white-space:nowrap;text-overflow:ellipsis;color:var(--muted-foreground)}
-@media (hover:hover){[data-counselor-version="v4"] .v4-home-row-who:hover strong,[data-counselor-version="v4"] .v4-home-row-link:hover strong {text-decoration:underline;text-underline-offset:3px}}
-[data-counselor-version="v4"] .v4-home-row-status {flex:none;font-size:12.5px;font-weight:600}
-[data-counselor-version="v4"] .v4-home-row-status.is-risk {color:var(--destructive)}
-[data-counselor-version="v4"] .v4-home-row-status.is-warn {color:var(--v4-caution)}
-[data-counselor-version="v4"] .v4-home-row-actions {display:flex;flex:none;align-items:center;gap:6px}
-[data-counselor-version="v4"] .v4-home-row-icon {display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border-radius:999px;color:var(--muted-foreground);cursor:pointer}
-[data-counselor-version="v4"] .v4-home-row-book {height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--glass-border);font-size:12.5px;font-weight:600;color:var(--color-text-brand);cursor:pointer}
-[data-counselor-version="v4"] .v4-home-row-link {cursor:pointer;text-align:left}
-[data-counselor-version="v4"] .v4-home-row-count {flex:none;font-family:var(--font-display);font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
-[data-counselor-version="v4"] .v4-home-row-go {flex:none;color:var(--muted-foreground)}
-[data-counselor-version="v4"] .v4-home-review-fig {display:flex;align-items:baseline;gap:10px;margin:0}
-[data-counselor-version="v4"] .v4-home-review-fig strong {font-family:var(--font-display);font-size:44px;line-height:1;font-weight:600;letter-spacing:-.03em;color:var(--foreground)}
-[data-counselor-version="v4"] .v4-home-review-fig>span {font-size:13px;color:var(--muted-foreground)}
-[data-counselor-version="v4"] .v4-home-more {align-self:flex-start;font-size:13px;font-weight:600;color:var(--color-text-brand);cursor:pointer}
-@media (max-width:1023px){[data-counselor-version="v4"] .v4-home-lists {grid-template-columns:minmax(0,1fr);gap:64px}}
-@media (max-width:639px){[data-counselor-version="v4"] .v4-home-row-status {display:none}}
-
-/* The student ID tag (20 Oct 2026, second version). Distinct from the
-   counselor's badge: a round badge reel on a short cord (theirs is a woven
-   strap), a light card (theirs is dark with a photo cover), a centred round
-   photo (theirs is square, left). One gentle swing on arrival, like theirs. */
-[data-counselor-version="v4"] .v4-sid-wrap {display:flex;flex-direction:column;align-items:center}
-[data-counselor-version="v4"] .v4-sid-reel {position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;margin-bottom:-14px;pointer-events:none}
-[data-counselor-version="v4"] .v4-sid-reel-disc {display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#d6dbe6 55%,#a7aebd);box-shadow:inset 0 1px 0 #fff,inset 0 -2px 4px rgba(0,0,0,.18),0 6px 14px -6px rgba(20,30,70,.45)}
-[data-counselor-version="v4"] .v4-sid-reel-disc i {width:16px;height:16px;border-radius:50%;background:var(--primary);box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
-[data-counselor-version="v4"] .v4-sid-cord {width:2px;height:22px;background:linear-gradient(180deg,#9aa2b2,#c9ced8)}
-[data-counselor-version="v4"] .v4-sid-clip {width:22px;height:12px;border-radius:3px 3px 6px 6px;background:linear-gradient(180deg,#f3f5f9,#b8bfcc);box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(0,0,0,.2)}
-[data-counselor-version="v4"] .v4-sid {position:relative;width:100%;overflow:hidden;border-radius:22px;background:var(--card);color:var(--foreground);border:1px solid color-mix(in srgb,var(--foreground) 8%,transparent);box-shadow:0 1px 2px rgba(20,30,70,.05),0 18px 40px -22px rgba(20,30,70,.35);transform-origin:50% 0;animation:v4-sid-swing 1.4s cubic-bezier(.3,.7,.4,1) both}
-@keyframes v4-sid-swing {0% {transform:rotate(-2deg)} 40% {transform:rotate(1.2deg)} 70% {transform:rotate(-.5deg)} 100% {transform:rotate(0)}}
-@media (prefers-reduced-motion:reduce){[data-counselor-version="v4"] .v4-sid {animation:none}}
-[data-counselor-version="v4"] .v4-sid-slot {position:absolute;top:8px;left:50%;z-index:1;width:30px;height:7px;margin-left:-15px;border-radius:99px;background:rgba(255,255,255,.85);box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
-[data-counselor-version="v4"] .v4-sid-band {display:flex;align-items:center;justify-content:space-between;gap:10px;padding:24px 20px 12px;background:var(--primary);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase}
-[data-counselor-version="v4"] .v4-sid-band span:first-child {overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-[data-counselor-version="v4"] .v4-sid-band span:last-child {flex:none;opacity:.8}
-[data-counselor-version="v4"] .v4-sid-body {display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 24px 24px;text-align:center}
-[data-counselor-version="v4"] .v4-sid-photo {display:inline-flex;margin:-2px 0 12px;padding:4px;border-radius:50%;background:var(--card);box-shadow:0 0 0 1px color-mix(in srgb,var(--foreground) 8%,transparent),0 8px 20px -12px rgba(20,30,70,.4);transform:translateY(-0px)}
-[data-counselor-version="v4"] .v4-sid-photo .v4-portrait {border-radius:50%!important;overflow:hidden}
-[data-counselor-version="v4"] .v4-sid-body h1 {margin:0;font-family:var(--font-display);font-size:24px!important;line-height:1.15;font-weight:600!important;letter-spacing:-.02em}
-[data-counselor-version="v4"] .v4-sid-body p {margin:0;font-size:13.5px;line-height:1.5;color:var(--muted-foreground)}
-[data-counselor-version="v4"] .v4-sid-status {margin-top:10px;padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--v4-positive);background:color-mix(in srgb,currentColor 10%,transparent)}
-[data-counselor-version="v4"] .v4-sid-status.is-warn {color:var(--v4-caution)}
-[data-counselor-version="v4"] .v4-sid-status.is-risk {color:var(--destructive)}
-[data-counselor-version="v4"] .v4-sid-active {margin-top:6px;font-size:12px;color:var(--muted-foreground)}
-html.dark [data-counselor-version="v4"] .v4-sid {background:color-mix(in srgb,var(--card) 88%,#ffffff 4%);border-color:rgba(255,255,255,.08)}
-/* the photo sits over the band's lower edge, like a printed badge */
-[data-counselor-version="v4"] .v4-sid-band {padding-bottom:56px}
-[data-counselor-version="v4"] .v4-sid-photo {margin:-52px 0 12px}

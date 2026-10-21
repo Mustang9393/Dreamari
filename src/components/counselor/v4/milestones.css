@@ -150,7 +150,7 @@ html.dark .v4-ms {
   --msc-shadow:0 22px 44px -28px rgba(0,0,0,.7);
   --msc-disc-a:rgba(255,255,255,.10); --msc-disc-b:rgba(255,255,255,.0);
 }
-.v4-msc-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px;list-style:none;margin:0;padding:0}
+.v4-msc-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;list-style:none;margin:0;padding:0}
 .v4-msc-cell {min-width:0}
 .v4-msc {position:relative;display:flex;flex-direction:column;gap:20px;height:100%;padding:20px 22px 22px;border-radius:20px;cursor:pointer;
   background:linear-gradient(165deg,var(--msc-glass-a),var(--msc-glass-b));
@@ -184,9 +184,7 @@ html.dark .v4-ms {
 .v4-msc-counts>.is-lead button {font-size:14px;font-weight:600;color:var(--foreground)}
 .v4-msc-counts>.is-lead b {font-size:15px}
 
-/* four across only when "Needs Attention" fits beside the gauge (it
-   truncated to "Needs Attenti" at 1280) */
-@media (max-width:1439px) {.v4-msc-grid {grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1279px) {.v4-msc-grid {grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:1023px) {.v4-msc-grid {grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:639px) {
   .v4-msc-grid {grid-template-columns:minmax(0,1fr);gap:12px}
@@ -205,22 +203,18 @@ html.dark .v4-ms {
    One encoding everywhere so a counselor learns it once: full = Done,
    half = In Progress, amber = Needs Attention, outline = Not Started.
    Light comes from gradients, never a blur filter (Chromebooks). The one
-   glow is the Complete ring in the summary.
-   20 Oct 2026 declutter: one hue. Done was green and In Progress blue, so
-   every card carried green, blue, amber and grey; Done is now the deep
-   blue and In Progress a pale step of the same blue (still half-filled
-   where it is a dot). Amber stays: it is the one state below target. */
+   glow is the Complete ring in the summary. */
 .v4-ms,.v4-ms-drawer {
-  --msv-done:#2b5fd9; --msv-done-lit:#6b95f5;
-  --msv-progress:#93b0ee; --msv-progress-lit:#c3d4fa;
+  --msv-done:#21915c; --msv-done-lit:#56cf92;
+  --msv-progress:#4b7cf0; --msv-progress-lit:#8fb0ff;
   --msv-attention:#cf8a00; --msv-attention-lit:#f5c04a;
   --msv-idle:color-mix(in srgb,var(--foreground) 11%,transparent);
   --msv-idle-line:color-mix(in srgb,var(--foreground) 30%,transparent);
   --msv-quarter:color-mix(in srgb,var(--foreground) 16%,transparent);
 }
 html.dark .v4-ms,html.dark .v4-ms-drawer {
-  --msv-done:#4f82f7; --msv-done-lit:#9dbdff;
-  --msv-progress:#7d93cf; --msv-progress-lit:#a9bbe9;
+  --msv-done:#27a872; --msv-done-lit:#7deab4;
+  --msv-progress:#5f8ff8; --msv-progress-lit:#a9c4ff;
   --msv-attention:#d18a12; --msv-attention-lit:#ffd27a;
   --msv-idle:rgba(255,255,255,.09);
   --msv-idle-line:rgba(255,255,255,.34);
@@ -356,9 +350,3 @@ html.dark .v4-ms,html.dark .v4-ms-drawer {
 @media (prefers-reduced-motion:reduce) {
   .msv-tick,.msv-slot,.msv-cell,.msv-ring-arc {animation:none!important}
 }
-/* the view's tools: one quiet cluster of icons (20 Oct 2026) */
-.v4-ms-tools {display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:color-mix(in srgb,var(--foreground) 5%,transparent)}
-.v4-ms-tools .v4-ms-icon[aria-pressed="true"] {background:var(--card);color:var(--foreground);box-shadow:0 1px 3px rgba(20,30,70,.14)}
-/* the counts start on one line across a row of cards (composition pass):
-   centred, a two-state card's "Done" sat lower than a four-state card's */
-.v4-msc-body {align-items:start}

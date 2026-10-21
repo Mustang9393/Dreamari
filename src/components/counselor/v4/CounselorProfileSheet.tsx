@@ -42,8 +42,7 @@ import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { AlertTriangle, Briefcase, Camera, Check, ChevronDown, FileText, GraduationCap, Mail, PenLine, Plus, RefreshCw, ShieldCheck, X } from "lucide-react";
-import { cv } from "@/lib/counselorBase";
+import { AlertTriangle, Briefcase, Camera, Check, FileText, GraduationCap, ImageIcon, Mail, PenLine, Plus, RefreshCw, ShieldCheck, Upload, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
@@ -70,6 +69,17 @@ const PHOTO: Record<string, string | undefined> = {
   "Sarah Chen": "/images/connect/avatars/pro-tanaka.jpg",
   "Renee Alvarez": "/images/connect/avatars/pro-martinez.jpg",
 };
+// The ID card's backgrounds: the student app's cover photos, and calm
+// washes for anyone who wants a plain card. All dark enough for white type.
+const COVER_PHOTOS = ["ocean-aerial", "aurora-sky", "starry-sky", "galaxy-space", "nebula-color", "bokeh-blue", "bokeh-warm", "crystal-glass", "crystal-macro", "glass-refract", "prism-light", "gradient-glow", "desert-dunes", "fluid-paint", "ink-marble", "ink-swirl", "neon-streak", "neon-tunnel", "smoke", "smoke-color", "smoke-purple"].map((n) => `/images/profile/covers/${n}.webp`);
+const COVER_WASHES: Record<string, string> = {
+  ink: "linear-gradient(155deg,#25357d 0%,#0b1027 100%)",
+  ocean: "linear-gradient(155deg,#0f5f8a 0%,#081a33 100%)",
+  dusk: "linear-gradient(155deg,#5d2d8c 0%,#170d2e 100%)",
+  forest: "linear-gradient(155deg,#17643a 0%,#081a12 100%)",
+  ember: "linear-gradient(155deg,#a2401a 0%,#250b05 100%)",
+};
+const DEFAULT_COVER = COVER_PHOTOS[0];
 
 /** A picked image file, shrunk on a canvas and kept as a JPEG data URL, so
  *  an upload stays small enough for the browser's card store (DEMO-ONLY:
@@ -162,24 +172,28 @@ function ProfileBody({ name, role, onClose }: { name: string; role: string; onCl
   const photo = card.photo ?? PHOTO[name];
   const students = caseload(me.from, me.to);
   const stats = [
-    // cv(): links stay inside whichever build shows the profile (v4, v7)
-    { value: students, label: `Students ${me.range.replace("-", " to ")}`, href: cv("students") },
-    { value: thisWeek, label: thisWeek === 1 ? "Meeting this week" : "Meetings this week", href: cv("prepare", "&tab=week") },
+    { value: students, label: `Students ${me.range.replace("-", " to ")}`, href: "/counselor?view=students&v=4" },
+    { value: thisWeek, label: thisWeek === 1 ? "Meeting this week" : "Meetings this week", href: "/counselor?view=meetings&v=4" },
     { value: officeHours.length, label: officeHours.length === 1 ? "Office-hours day" : "Office-hours days", href: null },
   ];
 
+  const cover = card.cover ?? DEFAULT_COVER;
+  const wash = cover.startsWith("gradient:") ? COVER_WASHES[cover.slice(9)] : null;
   // the contextual controls: change the photo from the photo, the
   // background from the card (10 Oct 2026, Chandu: "allow changing dp and
   // cover by controls that are contextually there")
   const photoInput = useRef<HTMLInputElement>(null);
-  const upload = async (kind: "photo", e: React.ChangeEvent<HTMLInputElement>) => {
+  const coverInput = useRef<HTMLInputElement>(null);
+  const [pickingCover, setPickingCover] = useState(false);
+  const upload = async (kind: "photo" | "cover", e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
     try {
-      const url = await shrinkImage(file, 960);
-      save({ photo: url });
-      notify("Photo updated");
+      const url = await shrinkImage(file, kind === "photo" ? 480 : 1000);
+      save(kind === "photo" ? { photo: url } : { cover: url });
+      if (kind === "cover") setPickingCover(false);
+      notify(kind === "photo" ? "Photo updated" : "Background updated");
     } catch { notify("That file couldn't be read. Try a JPG or PNG."); }
   };
 
@@ -188,46 +202,57 @@ function ProfileBody({ name, role, onClose }: { name: string; role: string; onCl
       <div className="v4-cp-layout">
         {/* the identity: the card students see, on the chosen background */}
         <aside className="v4-cp-id-col" aria-label="Your card">
-          {/* v7's badge (20 Oct 2026, Chandu: "v7 badge with the lanyard fix
-             and sway animation from v4"): the photo across the top, then who,
-             office hours, what to ask about, languages and the numbers. It
-             hangs on v4's woven lanyard, whose clear tab runs into the
-             badge's slot, and swings as one piece with it (.v4-cp-hang). The
-             lanyard rises out of the layout so the badge's top meets the
-             column beside it. */}
-          <div className="v4-cp-hang">
-            <div className="v4-cp-lanyard" aria-hidden><span className="v4-cp-strap" /><span className="v4-cp-clip"><i /></span></div>
-            <section className="v4-cp-badge">
-              <span className="v4-cp-badge-photo">
-                {photo ? <Image src={photo} alt="" fill sizes="(max-width: 1023px) 100vw, 380px" className="object-cover" style={{ objectPosition: "50% 20%" }} priority unoptimized={photo.startsWith("data:")} /> : <span className="v4-cp-badge-initials">{initialsOf(name)}</span>}
-                <span className="v4-cp-id-slot" aria-hidden />
-                <IconTip label="Change photo" className="v4-cp-photo-tip"><button type="button" aria-label="Change photo" onClick={() => photoInput.current?.click()} className="v4-cp-photo-btn"><Camera className="h-[20px] w-[20px]" aria-hidden /></button></IconTip>
-                <input ref={photoInput} type="file" accept="image/*" hidden onChange={(e) => { void upload("photo", e); }} />
+          {/* a premium lanyard, the lower part of it (10 Oct 2026, Chandu:
+             "make it look like an ID card, a premium looking lanyard or part
+             of it is nice"): a woven strap rising out of view, a polished
+             swivel clip, and a punched slot in the card */}
+          <div className="v4-cp-lanyard" aria-hidden><span className="v4-cp-strap" /><span className="v4-cp-clip"><i /></span></div>
+          <section className="v4-cp-id" style={wash ? { background: wash } : undefined}>
+            {!wash && <span className="v4-cp-id-art" aria-hidden><Image src={cover} alt="" fill sizes="380px" className="object-cover" priority unoptimized={cover.startsWith("data:")} /></span>}
+            <span className="v4-cp-id-scrim" aria-hidden />
+            <span className="v4-cp-id-slot" aria-hidden />
+            <div className="v4-cp-id-top">
+              <span className="v4-cp-id-org">{school}</span>
+              <span className="v4-cp-id-tools">
+                <IconTip label="Change background"><button type="button" aria-label="Change background" aria-expanded={pickingCover} onClick={() => setPickingCover((v) => !v)} className="v4-cp-id-icon dm-quiet"><ImageIcon className="h-[15px] w-[15px]" aria-hidden /></button></IconTip>
+                <button type="button" aria-pressed={editing} onClick={() => setEditing((e) => !e)} className="v4-cp-id-edit dm-quiet">
+                  {editing ? <><Check className="h-[14px] w-[14px]" aria-hidden /> Done</> : <><PenLine className="h-[14px] w-[14px]" aria-hidden /> Edit Profile</>}
+                </button>
               </span>
-              <div className="v4-cp-badge-body">
-                <div className="v4-cp-badge-who">
-                  <span>
-                    <h2>{name}</h2>
-                    <p>{role} · {school}</p>
-                  </span>
-                  <button type="button" aria-pressed={editing} onClick={() => setEditing((e) => !e)} className="v4-cp-badge-edit dm-quiet">
-                    {editing ? <><Check className="h-[14px] w-[14px]" aria-hidden /> Done</> : <><PenLine className="h-[14px] w-[14px]" aria-hidden /> Edit</>}
-                  </button>
-                </div>
-                <div className="v4-cp-badge-facts">
-                  <div><span>Office hours</span><p>{hours}</p></div>
-                  {topics.length > 0 && <div><span>Ask me about</span><p className="v4-cp-badge-chips">{topics.map((t) => <i key={t}>{t}</i>)}</p></div>}
-                  {languages && <div><span>Speaks</span><p>{languages}</p></div>}
-                </div>
-                <dl className="v4-cp-badge-stats">
-                  {stats.map((s) => {
-                    const inner = <><dd>{s.value}</dd><dt>{s.label}</dt></>;
-                    return <div key={s.label}>{s.href ? <Link href={s.href} onClick={onClose} className="dm-quiet">{inner}</Link> : <button type="button" className="dm-quiet" onClick={() => setEditing(true)}>{inner}</button>}</div>;
-                  })}
-                </dl>
+            </div>
+            {pickingCover && <>
+              <button type="button" aria-label="Close background picker" tabIndex={-1} className="v4-cp-pop-scrim" onClick={() => setPickingCover(false)} />
+              <div className="v4-cp-pop" role="dialog" aria-label="Card background" onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); setPickingCover(false); } }}>
+                <span className="v4-cp-covers-label">Colors</span>
+                <div className="v4-cp-cover-grid is-washes">{Object.entries(COVER_WASHES).map(([k, g]) => { const v = `gradient:${k}`; return <button key={k} type="button" aria-pressed={cover === v} aria-label={`${k} wash`} onClick={() => save({ cover: v })} className="v4-cp-cover-pick dm-quiet" style={{ background: g }} />; })}</div>
+                <span className="v4-cp-covers-label">Photos</span>
+                <div className="v4-cp-cover-grid">{COVER_PHOTOS.map((src) => <button key={src} type="button" aria-pressed={cover === src} aria-label={src.split("/").pop()!.replace(".webp", "").replace(/-/g, " ")} onClick={() => save({ cover: src })} className="v4-cp-cover-pick dm-quiet" style={{ backgroundImage: `url(${src})` }} />)}</div>
+                <button type="button" onClick={() => coverInput.current?.click()} className="v4-cp-cover-btn dm-quiet v4-cp-upload"><Upload className="h-[14px] w-[14px]" aria-hidden /> Upload your own</button>
               </div>
-            </section>
-          </div>
+            </>}
+            <input ref={coverInput} type="file" accept="image/*" hidden onChange={(e) => { void upload("cover", e); }} />
+            <span className="v4-cp-id-photo">
+              {photo ? <Image src={photo} alt="" fill sizes="132px" className="object-cover" style={{ objectPosition: "50% 20%" }} unoptimized={photo.startsWith("data:")} /> : <span>{initialsOf(name)}</span>}
+              <IconTip label="Change photo" className="v4-cp-photo-tip"><button type="button" aria-label="Change photo" onClick={() => photoInput.current?.click()} className="v4-cp-photo-btn"><Camera className="h-[20px] w-[20px]" aria-hidden /></button></IconTip>
+              <input ref={photoInput} type="file" accept="image/*" hidden onChange={(e) => { void upload("photo", e); }} />
+            </span>
+            <div className="v4-cp-id-who">
+              <h2>{name}</h2>
+              <p>{role}</p>
+            </div>
+            <div className="v4-cp-id-facts">
+              <div><span>Office hours</span><p>{hours}</p></div>
+              {topics.length > 0 && <div><span>Ask me about</span><p className="v4-cp-id-chips">{topics.map((t) => <i key={t}>{t}</i>)}</p></div>}
+              {languages && <div><span>Speaks</span><p>{languages}</p></div>}
+            </div>
+            <dl className="v4-cp-id-stats">
+              {stats.map((s) => {
+                const inner = <><dd>{s.value}</dd><dt>{s.label}</dt></>;
+                return <div key={s.label}>{s.href ? <Link href={s.href} onClick={onClose} className="dm-quiet">{inner}</Link> : <button type="button" className="dm-quiet" onClick={() => setEditing(true)}>{inner}</button>}</div>;
+              })}
+            </dl>
+          </section>
+          <p className="v4-cp-muted v4-cp-id-note">Students see this card when they book you.</p>
         </aside>
 
         <div className="v4-cp-main">
@@ -266,6 +291,7 @@ function ProfileBody({ name, role, onClose }: { name: string; role: string; onCl
           <section className="v4-cp-card" aria-label="My team">
             <header className="v4-cp-card-head">
               <h3>My Team</h3>
+              <p>Who covers which students, for handoffs.</p>
             </header>
             <ul className="v4-cp-team">
               {team.map((c) => <TeamRow key={c.id} name={c.name} range={c.range} students={caseload(c.from, c.to)} />)}
@@ -287,13 +313,15 @@ function TeamRow({ name, range, students }: { name: string; range: string; stude
   const coverage = useCoverage();
   const covering = coverage?.name === name;
   const photo = PHOTO[name];
+  const card = TEAM_CARD[name];
   const first = name.split(" ")[0];
   return (
     <li className="v4-cp-mate">
       <span className="v4-cp-mate-photo">{photo ? <Image src={photo} alt="" fill sizes="48px" className="object-cover" style={{ objectPosition: "50% 20%" }} /> : <span>{initialsOf(name)}</span>}</span>
       <span className="v4-cp-mate-who">
         <strong>{name}</strong>
-        <small>Students {range} · {students}</small>
+        <small>Students {range} · {students}{card ? ` · ${card.hours}` : ""}</small>
+        {card && <span className="v4-cp-chips">{card.topics.map((t) => <span key={t} className="v4-cp-chip is-small">{t}</span>)}</span>}
       </span>
       <span className="v4-cp-mate-actions">
         <IconTip label={`Email ${first}`}><a href={`mailto:${emailFor(name)}`} aria-label={`Email ${name}`} className="v4-round dm-quiet"><Mail size={16} aria-hidden /></a></IconTip>
@@ -358,10 +386,8 @@ function SafetyContactsCard() {
     setDraft({ name: "", role: "", email: "" });
   };
   return (
-    <details className="v4-cp-card is-quiet v4-cp-fold" aria-label="Safety contacts">
-      <Fold title="Safety Contacts" fact={contacts.length ? `${contacts.length} ${contacts.length === 1 ? "contact" : "contacts"}` : "Only you"} />
-      <div className="v4-cp-fold-body">
-      <p className="v4-cp-muted">Emailed when a note uses an alert word.</p>
+    <section className="v4-cp-card is-quiet" aria-label="Safety contacts">
+      <header className="v4-cp-card-head"><h3>Safety Contacts</h3><p>They get an email when a student&apos;s note uses an alert word.</p></header>
       <ul className="v4-cp-rows">
         {contacts.map((c) => (
           <li key={c.email}>
@@ -377,8 +403,7 @@ function SafetyContactsCard() {
         <input value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} placeholder="Email" aria-label="Contact email" className="v4-cp-input" />
         <button type="submit" className="v4-cp-cover-btn dm-quiet"><Plus size={15} aria-hidden />Add</button>
       </form>
-      </div>
-    </details>
+    </section>
   );
 }
 
@@ -389,14 +414,13 @@ function RosterCard() {
   const open = changes.filter((c) => !reviewed.includes(c.id));
   const KIND: Record<string, { word: string; color: string }> = { in: { word: "In", color: "var(--v4-positive)" }, out: { word: "Out", color: "var(--destructive)" }, moved: { word: "Moved", color: "var(--v4-caution)" } };
   return (
-    <details className="v4-cp-card is-quiet v4-cp-fold" aria-label="My roster">
-      <Fold title="My Roster" fact={open.length ? `${open.length} ${open.length === 1 ? "change" : "changes"} to review` : "Up to date"} />
-      <div className="v4-cp-fold-body">
+    <section className="v4-cp-card is-quiet" aria-label="My roster">
       <header className="v4-cp-card-head">
+        <h3>My Roster</h3>
         <button type="button" disabled={busy} onClick={() => { setBusy(true); window.setTimeout(() => { syncNow(); setBusy(false); notify("Roster up to date"); }, 900); }} className="v4-cp-cover-btn dm-quiet"><RefreshCw size={14} aria-hidden className={busy ? "animate-spin" : ""} />{busy ? "Syncing" : "Sync now"}</button>
         <p>From {ROSTER_SOURCE.system} through {ROSTER_SOURCE.via}. {ROSTER_SOURCE.schedule}. Last synced {lastSync.toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })}.</p>
       </header>
-      <span className="v4-cp-label">Changes this week</span>
+      <span className="v4-cp-label">Changes this week · {open.length} to review</span>
       <ul className="v4-cp-rows">
         {changes.map((c) => {
           const done = reviewed.includes(c.id);
@@ -409,8 +433,7 @@ function RosterCard() {
           );
         })}
       </ul>
-      </div>
-    </details>
+    </section>
   );
 }
 
@@ -426,9 +449,12 @@ function SentCard() {
   ].sort((a, b) => b.at.localeCompare(a.at));
   const shown = all ? items.slice(0, 12) : items.slice(0, 3);
   return (
-    <details className="v4-cp-card is-quiet v4-cp-fold" aria-label="Sent for you">
-      <Fold title="Sent for You" fact={items.length ? `${items.length} sent` : "Nothing yet"} />
-      <div className="v4-cp-fold-body">
+    <section className="v4-cp-card is-quiet" aria-label="Sent for you">
+      <header className="v4-cp-card-head">
+        <h3>Sent for You</h3>
+        {items.length > 3 && <button type="button" onClick={() => setAll((v) => !v)} aria-expanded={all} className="v4-cp-link">{all ? "Show less" : `View all ${items.length}`}</button>}
+        <p>Alerts, reports and what you shared from Explore.</p>
+      </header>
       {items.length ? (
         <ul className="v4-cp-rows">
           {shown.map((e) => {
@@ -443,19 +469,6 @@ function SentCard() {
           })}
         </ul>
       ) : <p className="v4-cp-muted">Nothing sent yet.</p>}
-      {items.length > 3 && <button type="button" onClick={() => setAll((v) => !v)} aria-expanded={all} className="v4-cp-link self-start">{all ? "Show less" : `View all ${items.length}`}</button>}
-      </div>
-    </details>
-  );
-}
-
-/** A folded settings card's header: the title, its one fact, a chevron. */
-function Fold({ title, fact }: { title: string; fact: string }) {
-  return (
-    <summary>
-      <h3>{title}</h3>
-      <span className="v4-cp-fold-fact">{fact}</span>
-      <ChevronDown size={18} aria-hidden className="v4-cp-fold-chev" />
-    </summary>
+    </section>
   );
 }

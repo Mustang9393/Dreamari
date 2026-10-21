@@ -261,8 +261,6 @@
 [data-counselor-version="v4"] .msg-tags {display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px}
 [data-counselor-version="v4"] .msg-tag-pill {display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;border:1px solid var(--glass-border);font-size:12.5px;font-weight:600;color:var(--muted-foreground);white-space:nowrap}
 [data-counselor-version="v4"] .msg-tag-pill i {width:7px;height:7px;border-radius:50%}
-[data-counselor-version="v4"] .msg-status-word {display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;white-space:nowrap}
-[data-counselor-version="v4"] .msg-status-word i {width:7px;height:7px;border-radius:50%}
 [data-counselor-version="v4"] .msg-tag-pill.is-status {border-color:color-mix(in srgb,currentColor 40%,transparent)}
 [data-counselor-version="v4"] .msg-token-inline {display:inline-block;padding:0 6px;border-radius:6px;background:color-mix(in srgb,var(--v4-action-fg) 22%,transparent);font-size:.88em;font-weight:600}
 
@@ -379,12 +377,4 @@ html:not(.dark) [data-counselor-version="v4"] :is(.msg-stat,.msg-list-col,.msg-l
 @media (prefers-reduced-motion:reduce){
   [data-counselor-version="v4"] :is(.msg-thread,.msg-thread>*,.msg-line,.msg-stamp,.msg-list li,.msg-read,.msg-sent-note,.msg-typing i,.msg-draft,.msg-tick,.msg-zero-faces li,.msg-next,.msg-bulkbar,.msg-bulkpane,.msg-review) {animation:none!important}
   [data-counselor-version="v4"] :is(.msg-check-tip,.msg-row-face,.msg-switch-track,.msg-switch-track i) {transition:none}
-}
-/* the answered count and its bar on one line, centred on the New message
-   button beside it (composition pass, 20 Oct 2026: label-over-bar floated
-   above the button's centre line) */
-@media (min-width:768px){
- [data-counselor-version="v4"] .msg-toolbar-end .msg-bar {flex-direction:row;align-items:center;gap:12px;width:auto}
- [data-counselor-version="v4"] .msg-toolbar-end .msg-bar>:not(.msg-bar-copy) {width:160px;flex:none}
- [data-counselor-version="v4"] .msg-bar-copy {white-space:nowrap}
 }

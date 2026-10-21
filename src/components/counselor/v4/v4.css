@@ -64,8 +64,6 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
 .v4-today-controls {display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .v4-workspace-footer {display:flex;justify-content:space-between;font-size:11px;color:var(--muted-foreground);padding:40px 0 0;margin-top:30px;border-top:1px solid var(--v4-line);}
 .v4-workspace-footer a {display:flex;gap:8px;align-items:center;}
-.v4-footer-avatar {display:inline-flex;align-items:center;gap:4px;}
-.v4-footer-avatar .v4-avatar-subtle {display:inline-flex;align-items:center;gap:4px;height:auto;min-width:0;padding:0;border:0;background:transparent;box-shadow:none;font-size:11px;font-weight:500;color:var(--muted-foreground);cursor:pointer;}
 .v4-welcome {display:flex;justify-content:space-between;align-items:center;gap:30px;padding:10px 0 30px;}
 .v4-welcome h1 {font-size:clamp(32px,calc(4vw / var(--vz, 1)),56px);font-weight:450;letter-spacing:-2.7px;line-height:1.2;margin:10px 0 12px;}
 .v4-period {color:var(--color-text-brand);}
@@ -181,31 +179,18 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
    .v4-tabs. :where() keeps these at .v4-content's own specificity so those
    two still win. The row scrolls sideways on a phone, scrollbar hidden. */
 .v4-content [role="tablist"]:where(:not([data-text-tabs])) {display:flex;align-items:center;gap:3px;width:fit-content;max-width:100%;flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-radius:99px!important;padding:4px!important;background:var(--glass-surface-1)!important;border:1px solid var(--v4-edge)!important;}
-.v4-page-controls [role="tablist"]:where(:not([data-text-tabs])) {display:flex;align-items:center;gap:3px;width:fit-content;max-width:100%;flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-radius:99px!important;padding:4px!important;background:var(--glass-surface-1)!important;border:1px solid var(--v4-edge)!important;}
 .v4-content [role="tablist"]:where(:not([data-text-tabs]))::-webkit-scrollbar {display:none;}
-.v4-page-controls [role="tablist"]:where(:not([data-text-tabs]))::-webkit-scrollbar {display:none;}
 .v4-content :where([role="tablist"]:not([data-text-tabs])) [role="tab"] {display:inline-flex;align-items:center;gap:5px;flex:none;height:34px;padding:0 15px!important;border-radius:99px!important;font-size:13px!important;font-weight:600;line-height:1;color:var(--muted-foreground);white-space:nowrap;cursor:pointer;transition:color .15s,background .15s;}
-.v4-page-controls :where([role="tablist"]:not([data-text-tabs])) [role="tab"] {display:inline-flex;align-items:center;gap:5px;flex:none;height:34px;padding:0 15px!important;border-radius:99px!important;font-size:13px!important;font-weight:600;line-height:1;color:var(--muted-foreground);white-space:nowrap;cursor:pointer;transition:color .15s,background .15s;}
 .v4-content :where([role="tablist"]:not([data-text-tabs])) [role="tab"]:hover {color:var(--foreground);}
-.v4-page-controls :where([role="tablist"]:not([data-text-tabs])) [role="tab"]:hover {color:var(--foreground);}
-/* the selected view is a raised white pill in full ink, not a blue fill
-   (20 Oct 2026, page hierarchy pass: a filled blue pill under the page
-   title out-shouted the title itself; blue now marks only where you are,
-   the area pill and the page title's underline) */
-.v4-content :where([role="tablist"]:not([data-text-tabs])) [role="tab"][aria-selected="true"] {background:var(--card)!important;color:var(--foreground)!important;box-shadow:0 1px 3px rgba(20,30,70,.16),0 0 0 1px var(--v4-edge)!important;}
-.v4-page-controls :where([role="tablist"]:not([data-text-tabs])) [role="tab"][aria-selected="true"] {background:var(--card)!important;color:var(--foreground)!important;box-shadow:0 1px 3px rgba(20,30,70,.16),0 0 0 1px var(--v4-edge)!important;}
+.v4-content :where([role="tablist"]:not([data-text-tabs])) [role="tab"][aria-selected="true"] {background:var(--v4-action)!important;color:var(--v4-action-fg)!important;box-shadow:0 3px 14px #0000000b!important;}
 .v4-content :where([role="tablist"]:not([data-text-tabs])) [role="tab"] small {font-size:12px;font-weight:600;opacity:.92;font-variant-numeric:tabular-nums;}
-.v4-page-controls :where([role="tablist"]:not([data-text-tabs])) [role="tab"] small {font-size:12px;font-weight:600;opacity:.92;font-variant-numeric:tabular-nums;}
 /* v5's grey segmented switch (seg-track, Explore's All pathways / Skilled
    trades) rendered inside v4 takes the same level 3 pill, so one page never
    shows two pill designs. v5's own rendering is untouched. */
 [data-counselor-version="v4"] .v4-content .seg-track {height:auto;gap:3px;padding:4px;border-radius:99px;background:var(--glass-surface-1)!important;border:1px solid var(--v4-edge);box-shadow:none!important;}
 [data-counselor-version="v4"] .v4-content .seg-item {height:34px;padding:0 15px;border-radius:99px;font-size:13px;font-weight:600;background:transparent!important;color:var(--muted-foreground)!important;box-shadow:none!important;}
 [data-counselor-version="v4"] .v4-content .seg-item:hover {color:var(--foreground)!important;}
-[data-counselor-version="v4"] .v4-content .seg-item[aria-pressed="true"] {background:var(--card)!important;color:var(--foreground)!important;box-shadow:0 1px 3px rgba(20,30,70,.16),0 0 0 1px var(--v4-edge)!important;}
-/* Explore's career-world filter chips inside v4: the chosen one in ink, not
-   blue (same pass) */
-[data-counselor-version="v4"] .v4-content [aria-label="Career world"] button[aria-pressed="true"] {background:var(--foreground)!important;border-color:var(--foreground)!important;color:var(--background)!important;}
+[data-counselor-version="v4"] .v4-content .seg-item[aria-pressed="true"] {background:var(--v4-action)!important;color:var(--v4-action-fg)!important;}
 .v4-content table {border-collapse:separate!important;border-spacing:0 5px;}
 .v4-content thead {background:transparent!important;}
 .v4-content th {font-size:11px!important;text-transform:uppercase;letter-spacing:1px;padding:15px 18px!important;}
@@ -214,8 +199,7 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
 .v4-content tbody tr:last-child td {border-bottom:0;}
 .v4-content input:not([type="checkbox"]),.v4-content textarea {background:var(--v4-paper)!important;border-color:var(--v4-line)!important;border-radius:10px!important;}
 .v4-content .v4-roster {gap:23px!important;}
-/* a plain row, not a second bordered band above the table (20 Oct 2026 declutter) */
-.v4-roster>.v4-roster-toolbar {padding:0;}
+.v4-roster>.v4-roster-toolbar {background:var(--glass-surface-1);border:1px solid var(--v4-edge);border-radius:15px;padding:17px 20px;}
 .v4-roster .v4-roster-table {background:var(--v4-paper)!important;border:0!important;border-radius:18px!important;padding:0 12px 10px;box-shadow:var(--v4-shadow);}
 .v4-roster .v4-roster-table tbody td:first-child {border-left:3px solid transparent;}
 .v4-roster .v4-roster-table tbody tr:hover td:first-child {border-left-color:var(--primary);}

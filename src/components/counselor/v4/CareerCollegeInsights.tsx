@@ -86,7 +86,7 @@ import type { ProfileCareer } from "@/components/profile/data";
 import type { CatalogCareer } from "@/components/app/catalog";
 import { majorPoster, programmeMajor, savedMajorsFor } from "./majors";
 import { useChartColors } from "./ChartColors";
-
+import { InterestMeter, Treemap } from "./charts/insightViz";
 import { FlowSankey } from "./charts/ivFlow";
 import "./insights.css";
 import "./insights2.css";
@@ -206,7 +206,7 @@ function PosterRow({ title, sub, explore, tools, empty, children }: { title: str
       <header className="v4-r2-head">
         <div className="v4-r2-lead">
           <h2 className="v4-r2-title">{title}</h2>
-          {sub && <span className="v4-r2-sub">{sub}</span>}
+          <span className="v4-r2-sub">{sub}</span>
         </div>
         <span className="v4-r2-tools">
           {tools}
@@ -234,7 +234,6 @@ function InterestRows() {
   const scope = useInsightsScope();
   const { roster, all, back, scopeLabel, year } = scope;
   const [majorMode, setMajorMode] = useState<"saved" | "schools">("saved");
-  const [allMajors, setAllMajors] = useState(false);
   const [allSchools, setAllSchools] = useState(false);
   const router = useRouter();
   const [drill, setDrill] = useState<StudentsDrill | null>(null);
@@ -332,15 +331,13 @@ function InterestRows() {
 
   return (
     <>
-      {/* no "See who saved each career." line and no share meter under each
-         poster (20 Oct 2026 declutter): the poster already says "22 saved",
-         the meter said the same number as a percent, and a click shows who
-         with the percent in the drill's subtitle */}
-      <PosterRow title="Most Saved Careers" sub="" explore="Explore all careers"
+      <PosterRow title="Most Saved Careers" sub="See who saved each career." explore="Explore all careers"
         empty={careers.length === 0 ? `No saved careers for ${scope.who} yet.` : undefined}>
         {careers.map((c, i) => (
           <div key={c.item.id} className={`v4-iv-poster ${i + 1 >= 10 ? "is-two" : ""}`}>
             <RankedPosterCard career={c.item} rank={i + 1} chip={`${c.students.length} saved`} onClick={() => openCareerStudents(c)} />
+            <InterestMeter share={Math.round((c.students.length / Math.max(1, roster.length)) * 100)} onOpen={() => openCareerStudents(c)}
+              tip={`See the ${n(c.students.length)} who saved it`} aria={`${c.item.title}: ${n(c.students.length)} saved it, ${Math.round((c.students.length / Math.max(1, roster.length)) * 100)}% of students. Show them`} />
           </div>
         ))}
       </PosterRow>
@@ -354,9 +351,9 @@ function InterestRows() {
          The Saved | At their schools switch keeps the majors at the schools
          students are exploring. Every item still opens its students. */}
       <section className="v4-cc-split" aria-label="Schools and majors">
-        <div className="v4-box v4-cc-col">
+        <div className="v4-cc-col">
           <header className="v4-r2-head">
-            <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Schools Students Are Exploring</h2></div>
+            <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Schools Students Are Exploring</h2><span className="v4-r2-sub">{sub("See who is exploring each school.")}</span></div>
             <span className="v4-r2-tools"><button type="button" onClick={() => router.push(EXPLORE)} className="v4-r2-link">Explore all schools<ArrowUpRight size={14} aria-hidden /></button></span>
           </header>
           {schools.length === 0 ? <p className="v4-cc-empty">No one in {scope.who} is looking at schools yet. Juniors and seniors start this step.</p> : <>
@@ -373,27 +370,14 @@ function InterestRows() {
             <ShowAll total={schools.length} shown={5} open={allSchools} onToggle={() => setAllSchools((v) => !v)} />
           </>}
         </div>
-        <div className="v4-box v4-cc-col">
+        <div className="v4-cc-col">
           <header className="v4-r2-head">
-            <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Majors</h2>{majorMode !== "saved" && <span className="v4-r2-sub">{sub("Students exploring a school that offers it.")}</span>}</div>
+            <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Majors</h2><span className="v4-r2-sub">{sub(majorMode === "saved" ? "Students who saved each major." : "Students exploring a school that offers it.")}</span></div>
             <span className="v4-r2-tools"><Segmented ariaLabel="Saved majors or majors at their schools" value={majorMode} onChange={setMajorMode} options={[{ key: "saved", label: "Saved" }, { key: "schools", label: "At their schools" }]} /><button type="button" onClick={() => router.push(EXPLORE)} className="v4-r2-link">Explore all majors<ArrowUpRight size={14} aria-hidden /></button></span>
           </header>
           {(majorMode === "saved" ? savedMajors : exploredMajors).length === 0
             ? <p className="v4-cc-empty">{majorMode === "saved" ? `No saved majors for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet.`}</p>
-            : <>
-              {/* ranked rows, the same as Top Schools beside it (21 Oct
-                 2026, Chandu: "declutter a lot more"): the treemap's wall of
-                 tiles read as noise; each row still opens its students */}
-              <ol className="v4-iv-schools">
-                {(allMajors ? majorItems : majorItems.slice(0, 5)).map((m) => (
-                  <li key={m.key}><IconTip label={m.tip} className="w-full"><button type="button" onClick={() => m.data()} className="v4-iv-school is-major" aria-label={m.aria}>
-                    <span className="v4-iv-school-copy"><strong>{m.label}</strong></span>
-                    <span className="v4-iv-school-who" aria-hidden><b>{m.value}</b><small>{majorMode === "saved" ? "saved" : "exploring"}</small></span>
-                  </button></IconTip></li>
-                ))}
-              </ol>
-              <ShowAll total={majorItems.length} shown={5} open={allMajors} onToggle={() => setAllMajors((v) => !v)} />
-            </>}
+            : <Treemap items={majorItems} onOpen={(open) => open()} />}
         </div>
       </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
@@ -441,9 +425,9 @@ function PostsecondaryRibbon() {
   if (roster.length === 0) return null;
   return (
     <>
-      <section className="v4-box v4-iv-direction" aria-label="Postsecondary Direction" {...planColors.attrs}>
+      <section className="v4-iv-direction" aria-label="Postsecondary Direction" {...planColors.attrs}>
         <header className="v4-r2-head">
-          <div className="v4-r2-lead"><h2 className="v4-r2-title">Postsecondary Direction</h2><span className="v4-r2-sub">{decided} of {roster.length} have chosen a direction</span></div>
+          <div className="v4-r2-lead"><h2 className="v4-r2-title">Postsecondary Direction</h2><span className="v4-r2-sub">{decided} of {roster.length} have chosen a direction · by grade</span></div>
           <span className="v4-r2-tools">{planColors.toggle}</span>
         </header>
         <FlowSankey hot={hot} onHot={setHot}

@@ -466,13 +466,9 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
             <small className="truncate">{item.milestone} · Grade {item.student.grade}</small>
           </span>
         </Link>
-        {/* the deadline and the student's status as one quiet line of
-           words, colored only when late or not on track, instead of two
-           filled tags (20 Oct 2026 declutter: no chips) */}
         <span className="v4-rp-tags">
-          <span className={sub.dueInDays < 0 ? "v5-risk" : sub.dueInDays <= 2 ? "v5-warn" : ""}>{due}</span>
-          <span aria-hidden>·</span>
-          <span className={item.student.status === "At Risk" ? "v5-risk" : item.student.status === "Needs Attention" ? "v5-warn" : ""}>{item.student.status}</span>
+          <span className={`v4-rp-tag ${sub.dueInDays < 0 ? "v5-risk" : sub.dueInDays <= 2 ? "v5-warn" : ""}`}>{due}</span>
+          <span className={`v4-rp-tag ${item.student.status === "On Track" ? "v5-ok" : item.student.status === "At Risk" ? "v5-risk" : "v5-warn"}`}>{item.student.status}</span>
         </span>
       </header>
       <div className="v4-rp-thread dm-scroll">

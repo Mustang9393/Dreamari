@@ -25,7 +25,6 @@ import { PosterCard, RankedPosterCard } from "@/components/app/PosterCard";
 import { TextTabs } from "@/components/app/TextTabs";
 import { Listbox } from "@/components/app/Listbox";
 import { SubTabs } from "../v4/SubTabs";
-import { HeadingControls } from "../v4/Workspace";
 import { PillSwitch } from "./Switch";
 import { EmptyView } from "@/components/app/states";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -96,16 +95,16 @@ export function V5Explore({ embedded = false, afterCareers, payLabel, consolidat
           // seg-track to match. v5 keeps its own page nav below.
           // ...and on the page title's row in v4 (20 Oct 2026 hierarchy pass:
           // title, purpose, these switches, the search and the world chips
-          // were five rows before the first career); HeadingControls draws
-          // them in place where a shell has no title row (v7).
-          <HeadingControls>
+          // were five rows before the first career). v4 went back to its
+          // 20 Oct afternoon shell on 21 Oct, so they render in place.
+          <>
             <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
               <SubTabs ariaLabel="Explore" options={tabs} value={tab} onChange={setTab} />
               {/* v4 too (20 Oct 2026, Chandu on v4's Explore: "Please fix this
                  whats happening??"): Skilled trades is in the world picker */}
               {!consolidated && <PathwaySwitch value={path} onChange={setPath} />}
             </div>
-          </HeadingControls>
+          </>
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
