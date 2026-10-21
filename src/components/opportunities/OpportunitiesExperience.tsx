@@ -266,7 +266,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
       {(["scholarships", "programs", "internships"] as Tab[]).map((key) => {
         const on = tab === key;
         return (
-          <button key={key} type="button" role="tab" aria-selected={on} onClick={() => switchTab(key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[7px] rounded-[10px] px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap sm:px-[16px]" style={on ? { background: ACCENT, color: "#fff" } : { color: "var(--foreground)" }}>
+          <button key={key} type="button" role="tab" aria-selected={on} onClick={() => switchTab(key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[7px] rounded-[10px] px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap sm:px-[16px]" style={on ? { background: ACCENT, color: "var(--primary-foreground)" } : { color: "var(--foreground)" }}>
             {LABEL[key]}<span className="text-[12px] font-semibold tabular-nums" style={{ color: on ? "#fff" : "var(--muted-foreground)" }}>{counts[key]}</span>
           </button>
         );
@@ -484,7 +484,7 @@ function Fafsa({ value }: { value: FafsaStatus }) {
       </span>
       <div role="radiogroup" aria-label="FAFSA status" className="flex flex-none items-center gap-[3px] rounded-[11px] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
         {([["not-started", "Not started"], ["in-progress", "Started"], ["submitted", "Submitted"]] as const).map(([k, label]) => (
-          <button key={k} type="button" role="radio" aria-checked={value === k} onClick={() => setFafsaStatus(k)} className="dm-quiet h-[30px] cursor-pointer rounded-[8px] px-[12px] text-[13px] font-semibold whitespace-nowrap" style={value === k ? { background: ACCENT, color: "#fff" } : { color: "var(--foreground)" }}>{label}</button>
+          <button key={k} type="button" role="radio" aria-checked={value === k} onClick={() => setFafsaStatus(k)} className="dm-quiet h-[30px] cursor-pointer rounded-[8px] px-[12px] text-[13px] font-semibold whitespace-nowrap" style={value === k ? { background: ACCENT, color: "var(--primary-foreground)" } : { color: "var(--foreground)" }}>{label}</button>
         ))}
       </div>
     </div>

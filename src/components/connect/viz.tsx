@@ -79,7 +79,7 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
               aria-selected={on}
               onClick={() => onChange(option.key)}
               className={`dm-seg relative flex min-h-[34px] ${on ? "cursor-default" : "cursor-pointer"} items-center justify-center rounded-[var(--radius-sm)] ${dense ? "px-[7px] sm:px-[14px]" : "px-[14px]"} text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}
-              style={{ color: on ? "#FFFFFF" : "var(--muted-foreground)" }}
+              style={{ color: on ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
             >
               {on && !overflow && (
                 <motion.span
@@ -92,7 +92,7 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
               )}
               <span className="relative flex items-center gap-[6px]">
                 {option.label}
-                {!!option.badge && <span aria-label={`${option.badge} unread`} className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-[4px] text-[10.5px] leading-none font-extrabold tabular-nums" style={{ background: on ? "#FFFFFF" : "var(--primary)", color: on ? "var(--primary)" : "#FFFFFF" }}>{option.badge}</span>}
+                {!!option.badge && <span aria-label={`${option.badge} unread`} className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-[4px] text-[10.5px] leading-none font-extrabold tabular-nums" style={{ background: on ? "#FFFFFF" : "var(--primary)", color: on ? "var(--primary)" : "var(--primary-foreground)" }}>{option.badge}</span>}
               </span>
             </button>
           );

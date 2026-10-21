@@ -51,7 +51,7 @@ function PickRow({ label, meta, checked, onToggle }: { label: string; meta?: str
         className="flex size-5 flex-none items-center justify-center rounded-[6px] border"
         style={checked ? { background: "var(--primary)", borderColor: "var(--primary)" } : { borderColor: "var(--glass-border)" }}
       >
-        {checked && <Check className="h-3.5 w-3.5 text-white" aria-hidden />}
+        {checked && <Check className="h-3.5 w-3.5 text-[var(--primary-foreground)]" aria-hidden />}
       </span>
       <span className="flex flex-col gap-[1px]">
         <span className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>

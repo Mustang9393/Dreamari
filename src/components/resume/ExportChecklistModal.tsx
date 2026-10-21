@@ -77,7 +77,7 @@ export function ExportChecklistModal({ resume, onClose, checks }: { resume: Resu
           >
             <span
               className="mt-[1px] flex size-[18px] flex-none items-center justify-center rounded-[5px] border text-[11px] font-bold"
-              style={checked[i] ? { background: "var(--primary)", borderColor: "var(--primary)", color: "white" } : { borderColor: "var(--glass-border)" }}
+              style={checked[i] ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)" }}
             >
               {checked[i] ? "✓" : ""}
             </span>

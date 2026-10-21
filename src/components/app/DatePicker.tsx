@@ -255,7 +255,7 @@ export function DatePicker({
                     className="flex h-[32px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13px] font-semibold"
                     style={{
                       background: isSelected ? "var(--primary)" : isFocused ? "var(--glass-surface-2, var(--paper-sunken, rgba(255,255,255,0.08)))" : "transparent",
-                      color: isSelected ? "#fff" : "inherit",
+                      color: isSelected ? "var(--primary-foreground)" : "inherit",
                       boxShadow: isToday && !isSelected ? "inset 0 0 0 1px var(--primary)" : undefined,
                     }}
                   >

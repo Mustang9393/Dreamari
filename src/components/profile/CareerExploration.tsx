@@ -61,7 +61,7 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
            stronger border and check marks on every row. */}
         <section aria-labelledby={`${idPrefix}logged`} className="flex flex-col gap-[12px] rounded-[var(--radius-sm)] border px-[16px] py-[14px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 45%, var(--rule))", background: "color-mix(in srgb, var(--primary) 7%, var(--paper-sunken))", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 12%, transparent)" }}>
           <h4 id={`${idPrefix}logged`} className={LABEL} style={{ color: "var(--color-text-brand)" }}>
-            <span className="flex size-[16px] flex-none items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#fff" }}><Check className="h-[10px] w-[10px]" strokeWidth={3.5} aria-hidden /></span>
+            <span className="flex size-[16px] flex-none items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Check className="h-[10px] w-[10px]" strokeWidth={3.5} aria-hidden /></span>
             Logged in Dreamari
           </h4>
           {logged.length === 0 ? (
@@ -306,7 +306,7 @@ function AddMenu({ open, onToggle, onAdd, idPrefix }: { open: boolean; onToggle:
               disabled={checked.size === 0}
               onClick={() => { onAdd([...checked]); setChecked(new Set()); }}
               className="dm-solid flex min-h-[38px] flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ background: "var(--primary)", color: "#fff" }}
+              style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             >
               {checked.size > 1 ? `Add ${checked.size}` : "Add"}
             </button>

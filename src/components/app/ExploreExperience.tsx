@@ -1340,7 +1340,7 @@ function PreferenceButton({
            surface, so it doesn't need this. */}
         {solid && active && bare ? (
           <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--primary)", boxShadow: "0 2px 8px rgba(0,0,0,0.45)" }}>
-            <Icon className="h-[18px] w-[18px]" strokeWidth={3} style={{ color: "#fff" }} />
+            <Icon className="h-[18px] w-[18px]" strokeWidth={3} style={{ color: "var(--primary-foreground)" }} />
           </span>
         ) : (
           <Icon className="h-6 w-6" strokeWidth={solid && active ? 3 : undefined} fill={filled ? "currentColor" : "none"} style={bare ? { filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 1px 5px rgba(0,0,0,0.35))" } : undefined} />

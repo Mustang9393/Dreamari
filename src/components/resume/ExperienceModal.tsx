@@ -215,7 +215,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
             <button type="button" onClick={() => setSub("info")} className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               <ChevronLeft className="h-4 w-4" aria-hidden /> Back
             </button>
-            <button type="button" onClick={() => setSub("questions1")} className="dm-solid flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[10px] text-[14px] font-bold text-white" style={{ background: "var(--primary)" }}>
+            <button type="button" onClick={() => setSub("questions1")} className="dm-solid flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[10px] text-[14px] font-bold text-[var(--primary-foreground)]" style={{ background: "var(--primary)" }}>
               Next <ChevronRight className="h-4 w-4" aria-hidden />
             </button>
           </div>
@@ -234,7 +234,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
             <button type="button" onClick={() => setSub("dates")} className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               <ChevronLeft className="h-4 w-4" aria-hidden /> Back
             </button>
-            <button type="button" onClick={() => setSub("questions2")} className="dm-solid flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[10px] text-[14px] font-bold text-white" style={{ background: "var(--primary)" }}>
+            <button type="button" onClick={() => setSub("questions2")} className="dm-solid flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[10px] text-[14px] font-bold text-[var(--primary-foreground)]" style={{ background: "var(--primary)" }}>
               Next <ChevronRight className="h-4 w-4" aria-hidden />
             </button>
           </div>

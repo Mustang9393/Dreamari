@@ -40,7 +40,7 @@ function Choices({ label, options, value, onChange }: { label: string; options: 
               aria-pressed={on}
               onClick={() => onChange(on ? "" : o)}
               className="cursor-pointer rounded-[10px] border px-3.5 py-2 text-[14px] font-semibold transition-colors"
-              style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#fff" } : { background: "var(--surface, #ffffff)", borderColor: "var(--border)", color: "var(--foreground)" }}
+              style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { background: "var(--surface, #ffffff)", borderColor: "var(--border)", color: "var(--foreground)" }}
             >
               {o}
             </button>

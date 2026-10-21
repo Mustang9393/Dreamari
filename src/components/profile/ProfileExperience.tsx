@@ -1002,7 +1002,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   aria-expanded={avatarPickerOpen}
                   onClick={() => setAvatarPickerOpen(true)}
                   className="dm-tap absolute right-[-2px] bottom-[-2px] flex size-[26px] cursor-pointer items-center justify-center rounded-full border-2"
-                  style={{ background: "var(--primary)", borderColor: "rgba(255,255,255,0.9)", color: "#fff" }}
+                  style={{ background: "var(--primary)", borderColor: "rgba(255,255,255,0.9)", color: "var(--primary-foreground)" }}
                 >
                   <Pencil className="h-3 w-3" strokeWidth={2.75} aria-hidden />
                 </button>
@@ -4073,7 +4073,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           </div>
           {confirming === "rebuild" ? (
             <span className="flex flex-wrap items-center gap-[var(--space-2)]">
-              <button type="button" onClick={() => window.location.assign("/flow")} className="dm-solid flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+              <button type="button" onClick={() => window.location.assign("/flow")} className="dm-solid flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
                 <RefreshCw className="h-4 w-4" aria-hidden /> Yes, start Build again
               </button>
               <button type="button" onClick={() => setConfirming(null)} className={ghost} style={ghostStyle}>Never mind</button>
@@ -4104,7 +4104,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
                   </span>
                   {confirming === `restore:${entry.id}` ? (
                     <span className="flex items-center gap-[var(--space-2)]">
-                      <button type="button" onClick={() => { restoreArchivedProfile(entry.id); setConfirming(null); }} className="dm-solid min-h-[36px] cursor-pointer rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>Yes, use this build</button>
+                      <button type="button" onClick={() => { restoreArchivedProfile(entry.id); setConfirming(null); }} className="dm-solid min-h-[36px] cursor-pointer rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yes, use this build</button>
                       <button type="button" onClick={() => setConfirming(null)} className={ghost} style={ghostStyle}>Never mind</button>
                     </span>
                   ) : (
@@ -4176,7 +4176,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           </div>
         </div>
         <div className="flex items-center gap-[var(--space-3)]">
-          <button type="button" onClick={save} disabled={!dirty || !zipOk || !emailOk} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          <button type="button" onClick={save} disabled={!dirty || !zipOk || !emailOk} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             {saved && !dirty ? <><Check className="h-4 w-4" aria-hidden /> Saved</> : <>Save <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden /></>}
           </button>
           {dirty && <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Unsaved changes</span>}

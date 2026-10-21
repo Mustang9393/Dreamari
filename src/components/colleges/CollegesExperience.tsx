@@ -156,12 +156,12 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
         <div className="fixed inset-x-0 bottom-[84px] z-[60] flex justify-center px-5 md:bottom-[28px]">
           <div className="flex w-full max-w-[560px] items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[10px]" style={{ ...PANEL, background: "rgba(14,12,32,0.92)" }}>
             <span className="flex min-w-0 items-center gap-[8px]">
-              <span className="flex -space-x-2">{compared.map((c) => <span key={c.slug} className="flex size-[28px] items-center justify-center rounded-full border text-[11px] font-extrabold" style={{ background: ACCENT, borderColor: "#0e0c20", color: "#fff" }}>{c.name[0]}</span>)}</span>
+              <span className="flex -space-x-2">{compared.map((c) => <span key={c.slug} className="flex size-[28px] items-center justify-center rounded-full border text-[11px] font-extrabold" style={{ background: ACCENT, borderColor: "#0e0c20", color: "var(--primary-foreground)" }}>{c.name[0]}</span>)}</span>
               <span className="truncate text-[14px] leading-[18px] font-semibold">{compare.length} of 3 picked</span>
             </span>
             <span className="flex items-center gap-[8px]">
               <button type="button" onClick={() => setCompare([])} className="dm-link cursor-pointer text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>Clear</button>
-              <button type="button" disabled={compare.length < 2} onClick={() => setCompareOpen(true)} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[14px] text-[14px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: ACCENT, color: "#fff" }}>
+              <button type="button" disabled={compare.length < 2} onClick={() => setCompareOpen(true)} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[14px] text-[14px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: ACCENT, color: "var(--primary-foreground)" }}>
                 <ArrowLeftRight className="h-4 w-4" aria-hidden /> Compare
               </button>
             </span>
@@ -277,7 +277,7 @@ export function FilterTray({ filters, set, count, onClose, onClear }: { filters:
           <div className="h-[var(--space-3)]" />
         </div>
         <div className="border-t p-[var(--space-3)]" style={{ borderColor: RULE }}>
-          <button type="button" onClick={onClose} className="dm-solid flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
+          <button type="button" onClick={onClose} className="dm-solid flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[15px] font-semibold" style={{ background: ACCENT, color: "var(--primary-foreground)" }}>
             Show {count} {count === 1 ? "college" : "colleges"}
           </button>
         </div>

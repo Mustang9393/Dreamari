@@ -390,7 +390,7 @@ function InlineAsk({
         <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Cancel
         </button>
-        <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+        <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           Post <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
         </button>
       </div>
@@ -836,7 +836,7 @@ function PrimaryCta({ children, onClick, className = "" }: { children: React.Rea
       type="button"
       onClick={onClick}
       className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] leading-[18px] font-semibold transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${className}`}
-      style={{ background: "var(--primary)", color: "#FFFFFF" }}
+      style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
     >
       {children}
     </button>
@@ -1392,7 +1392,7 @@ function FilterRow({ options, active, onPick, accent }: { options: { key: string
               active === option.key
                 ? accent
                   ? { background: `color-mix(in srgb, ${accent} 20%, var(--card))`, borderColor: `color-mix(in srgb, ${accent} 60%, var(--glass-border))`, color: "var(--foreground)" }
-                  : { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" }
+                  : { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" }
                 : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }
             }
           >
@@ -4621,7 +4621,7 @@ function BoardView({
           {firms.length > 1 && (
             <div className="flex flex-wrap gap-[6px]">
               {["All", ...firms].map((f) => (
-                <button key={f} type="button" aria-pressed={firm === f} onClick={() => setFirm(f)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center rounded-[10px] border px-[12px] text-[13px] leading-[18px] font-semibold" style={firm === f ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{f}</button>
+                <button key={f} type="button" aria-pressed={firm === f} onClick={() => setFirm(f)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center rounded-[10px] border px-[12px] text-[13px] leading-[18px] font-semibold" style={firm === f ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{f}</button>
               ))}
             </div>
           )}
@@ -5797,7 +5797,7 @@ export function ReplyComposer({ onPost, as }: { onPost: (text: string) => void; 
         {blocked && <p role="alert" className="mt-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
         <div className="mt-[8px] flex items-center justify-between gap-[var(--space-3)]">
           <span className="text-[11px] leading-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>Posts as {as ? [as.name, as.meta].filter(Boolean).join(" · ") : "Jordan · Junior"}{text.length > 200 ? ` · ${280 - text.length} left` : ""}</span>
-          <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             Post <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
           </button>
         </div>
@@ -6001,7 +6001,7 @@ export function JoinSheet({ community, onClose, onJoin }: { community: Community
             onClick={onJoin}
             disabled={!agreed}
             className="dm-solid flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13.5px] font-semibold disabled:cursor-default disabled:opacity-50"
-            style={{ background: "var(--primary)", color: "#FFFFFF" }}
+            style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             Agree &amp; Join
           </button>

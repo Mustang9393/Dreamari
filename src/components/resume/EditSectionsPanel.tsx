@@ -138,7 +138,7 @@ export function EditSectionsPanel({ resume, version, onClose }: { resume: Resume
       </div>
       <div className="flex items-center justify-end gap-[var(--space-3)]">
         <button type="button" onClick={onClose} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
-        <button type="button" onClick={save} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+        <button type="button" onClick={save} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13.5px] font-bold text-[var(--primary-foreground)]" style={{ background: "var(--primary)" }}>
           Save Changes
         </button>
       </div>

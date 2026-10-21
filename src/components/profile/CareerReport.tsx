@@ -731,7 +731,7 @@ function HistoryTab({ history, onPrint, onShare }: { history?: ReportViewProps["
           <p className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Every share and print is kept.</p>
         </div>
         {history && (
-          <button type="button" onClick={() => recordReportVersion("Saved", history.snapshot())} className="dm-solid flex min-h-[40px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          <button type="button" onClick={() => recordReportVersion("Saved", history.snapshot())} className="dm-solid flex min-h-[40px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             <History className="h-4 w-4" aria-hidden /> Save this version
           </button>
         )}
@@ -763,7 +763,7 @@ function HistoryTab({ history, onPrint, onShare }: { history?: ReportViewProps["
                   {history && !isCurrent && (
                     confirm === version.id ? (
                       <>
-                        <button type="button" onClick={() => { history.restore(version.snapshot); setConfirm(null); }} className="dm-solid flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[12px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+                        <button type="button" onClick={() => { history.restore(version.snapshot); setConfirm(null); }} className="dm-solid flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[12px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
                           <Check className="h-4 w-4" aria-hidden /> Yes, go back to this
                         </button>
                         <button type="button" onClick={() => setConfirm(null)} className={action} style={actionStyle}>Never mind</button>

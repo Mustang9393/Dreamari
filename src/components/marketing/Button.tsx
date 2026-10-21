@@ -19,7 +19,7 @@ const VARIANT_STYLE: Record<Variant, React.CSSProperties> = {
   // primary, 12px corners, no glow; outline is white with a hairline.
   solid: {
     background: "var(--primary)",
-    color: "#ffffff",
+    color: "var(--primary-foreground)",
     borderRadius: "var(--radius-md)",
   },
   outline: {

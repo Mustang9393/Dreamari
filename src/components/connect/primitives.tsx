@@ -395,7 +395,7 @@ export function InlineAsk({
           <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
             Cancel
           </button>
-          <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-solid flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[15px] text-[12px] leading-[16px] font-bold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-solid flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[15px] text-[12px] leading-[16px] font-bold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             Post <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
           </button>
         </div>
@@ -471,7 +471,7 @@ export function PrimaryCta({ children, onClick, className = "", style, size = "m
       disabled={disabled}
       aria-disabled={disabled || undefined}
       className={`dm-solid flex cursor-pointer items-center justify-center gap-[6px] font-semibold whitespace-nowrap ${CTA_SIZE[size]} ${CTA_DISABLED} ${className}`}
-      style={{ background: "var(--primary)", color: "#FFFFFF", ...style }}
+      style={{ background: "var(--primary)", color: "var(--primary-foreground)", ...style }}
     >
       {children}
     </button>

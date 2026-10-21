@@ -285,7 +285,7 @@ export function OpportunityDetailExperience({ id }: { id: string }) {
               </dl>
               {/* Desktop actions; phones get the bar at the bottom. */}
               <div className="hidden flex-col gap-[8px] lg:flex">
-                <a href={item.url} target="_blank" rel="noreferrer" className={`${btn} dm-solid w-full text-white`} style={{ background: ACCENT, borderColor: ACCENT }}>
+                <a href={item.url} target="_blank" rel="noreferrer" className={`${btn} dm-solid w-full text-[var(--primary-foreground)]`} style={{ background: ACCENT, borderColor: ACCENT }}>
                   {applyLabel} <ArrowUpRight className="h-4 w-4 flex-none" aria-hidden />
                 </a>
                 <div className="grid grid-cols-2 gap-[8px]">
@@ -397,7 +397,7 @@ export function OpportunityDetailExperience({ id }: { id: string }) {
             <ClipboardCheck className="h-[18px] w-[18px]" aria-hidden style={applied ? { color: SOFT } : undefined} />
           </button>
         </IconTip>
-        <a href={item.url} target="_blank" rel="noreferrer" className={`${btn} dm-solid min-w-0 flex-1 text-white`} style={{ background: ACCENT, borderColor: ACCENT }}>
+        <a href={item.url} target="_blank" rel="noreferrer" className={`${btn} dm-solid min-w-0 flex-1 text-[var(--primary-foreground)]`} style={{ background: ACCENT, borderColor: ACCENT }}>
           Apply <ArrowUpRight className="h-4 w-4 flex-none" aria-hidden />
         </a>
       </div>

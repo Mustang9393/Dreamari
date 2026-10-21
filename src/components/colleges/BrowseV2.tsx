@@ -375,7 +375,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
                       <button key={a.key} type="button" role="checkbox" aria-checked={on} onClick={() => set({ admit: tog(f.admit, a.key) })} className="dm-quiet relative flex min-h-[78px] cursor-pointer flex-col items-start justify-center gap-[3px] rounded-[12px] border px-[14px] py-[10px] text-left" style={on ? { borderColor: ACCENT, background: "color-mix(in srgb, var(--primary) 16%, transparent)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                         <span className="text-[16px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{a.big}</span>
                         <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{a.small} · {count} {count === 1 ? "school" : "schools"}</span>
-                        {on && <span aria-hidden className="absolute top-[10px] right-[10px] flex size-[18px] items-center justify-center rounded-full" style={{ background: ACCENT }}><Check className="h-[11px] w-[11px] text-white" strokeWidth={3} /></span>}
+                        {on && <span aria-hidden className="absolute top-[10px] right-[10px] flex size-[18px] items-center justify-center rounded-full" style={{ background: ACCENT }}><Check className="h-[11px] w-[11px] text-[var(--primary-foreground)]" strokeWidth={3} /></span>}
                       </button>
                     );
                   })}

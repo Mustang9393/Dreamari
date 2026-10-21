@@ -927,7 +927,7 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, goa
                       Next: Explore <ChevronRight className="h-4 w-4" aria-hidden />
                     </button>
                   )}
-                  <button type="button" onClick={() => open(top)} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={goalNext ? { background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.22)", color: "#fff", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" } : { background: "var(--primary)", color: "var(--primary-foreground)" }}>
+                  <button type="button" onClick={() => open(top)} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={goalNext ? { background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.22)", color: "var(--primary-foreground)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" } : { background: "var(--primary)", color: "var(--primary-foreground)" }}>
                     View school <ChevronRight className="h-4 w-4" aria-hidden />
                   </button>
                 </span>

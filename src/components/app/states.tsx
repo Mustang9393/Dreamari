@@ -233,7 +233,7 @@ export function EmptyView({ tier, heading, line, cta, query, icon, onAction }: {
         <p className="max-w-[40ch] text-[13.5px] leading-[20px]" style={MUTED}>
           {line ?? "Pick a few careers first and this page fills in."}
         </p>
-        <button type="button" onClick={act} className={`${SOLID_BTN} mt-[2px]`} style={{ background: "var(--primary)", color: "#fff" }}>
+        <button type="button" onClick={act} className={`${SOLID_BTN} mt-[2px]`} style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           {cta ?? "Get started"} <ArrowRight className="h-[14px] w-[14px]" aria-hidden />
         </button>
       </div>
@@ -247,7 +247,7 @@ export function EmptyView({ tier, heading, line, cta, query, icon, onAction }: {
       <p className="max-w-[36ch] text-[13px] leading-[19px]" style={MUTED}>
         {line ?? "Save a few careers and they show up here."}
       </p>
-      <button type="button" onClick={act} className={`${SOLID_BTN} mt-[var(--space-2)]`} style={{ background: "var(--primary)", color: "#fff" }}>
+      <button type="button" onClick={act} className={`${SOLID_BTN} mt-[var(--space-2)]`} style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
         {cta ?? "Explore careers"} <ArrowRight className="h-[14px] w-[14px]" aria-hidden />
       </button>
     </div>
@@ -316,7 +316,7 @@ export function NotFoundView({ what = "page", home = "Go home", homeHref = "/hom
         <button type="button" onClick={back} className={QUIET_BTN} style={QUIET_STYLE}>
           <ArrowLeft className="h-[13px] w-[13px]" aria-hidden /> Back
         </button>
-        <Link href={homeHref} className={SOLID_BTN} style={{ background: "var(--primary)", color: "#fff" }}>
+        <Link href={homeHref} className={SOLID_BTN} style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           {home}
         </Link>
       </div>

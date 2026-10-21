@@ -653,7 +653,8 @@ export function SubTabs<K extends string>({ options, value, onChange, ariaLabel 
               {option.label}
               {on && (
                 <motion.span
-                  layoutId={`subtabs-underline-${uid} data-tab-ink`}
+                  layoutId={`subtabs-underline-${uid}`}
+                  data-tab-ink
                   aria-hidden
                   className="absolute inset-x-0 -bottom-px h-[2px]"
                   style={{ background: "var(--primary)" }}
