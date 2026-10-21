@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Real colleges and trade schools, what students really pay, and who finishes. No rankings.",
 };
 
-// College lookup. Reached from a career page's "The degree you'll need" (each credential's "See colleges"),
+// College lookup. Reached from a career page's "Training you'll need" (each route's "See schools"),
 // the Career Report's Colleges section, the Profile plan routes, and the
 // quick-links menu. ?q= prefills the search, ?type= (trade | 2-year | 4-year)
 // and ?school= (a college name from the report) preselect. ?view= (foryou |

@@ -1,3 +1,9 @@
+## 2026-10-21: "Training you'll need", not "The degree you'll need"
+
+- Career Education's credential list is now headed "Training you'll need" (WhereToStudy, CareerPeek, CareerDetailExperience), and each row's button reads "See N schools".
+- Why: Chandu, "dont say degree you'll need. It also included trade school, lesser know routes etc so it cant be exclusively about degree." The rows include certificates and apprenticeships, so "degree" was wrong for trades.
+- Verified on /career/carpenter (two certificate rows, "See 1 school"). Lint clean.
+
 ## 2026-10-21: Landing hero: Dreamy lower, wider, livelier, plus the night sky
 
 **Why.** Chandu: "dreamy sits too far up and overlaps the scroll down to learn more text. I want dreamy to sit lower, it can be cropped more. We just want the mouth to be visible and the eyes. And it needs to take up more space horizontally ... make it feel more premium than an afterthought and make it more engaging." Then: "add the stars to the landing page too but have them be more animated and engaging but not distracting."

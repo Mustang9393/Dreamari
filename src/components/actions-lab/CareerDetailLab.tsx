@@ -870,9 +870,12 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
                Chandu: "update the copy of 'where you would study' because
                it shows bachelors degree etc and not where they would study,
                we still wanna show bachelors etc and lead them from there to
-               colleges they can consider"). The same two lists as v2: each
-               credential row opens the colleges that offer it, with a count;
-               training on the job says "no school needed". */}
+               colleges they can consider"; then "dont say degree you'll need.
+               It also included trade school, lesser known routes etc so it
+               cant be exclusively about degree"). The same two lists as v2:
+               "Training you'll need", each route (degree, certificate,
+               trade school) opening the schools that offer it, with a
+               count; training on the job says "no school needed". */}
             <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerSlug={career.slug} />
           </Section>
         )}
