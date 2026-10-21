@@ -385,7 +385,8 @@ function InterestRows() {
   );
 }
 
-/** Top Majors as Mika's illustrated cards (21 Oct 2026): ranked by count,
+/** Top Majors as Mika's illustrated cards (21 Oct 2026), in a grid of
+ *  equal cards: ranked by count,
  *  each card the scene, the major and how many students; a tap opens them.
  *  Majors without a card yet follow as one quiet line of names and counts,
  *  so no count is lost (the treemap they replace showed every major). */
@@ -395,8 +396,8 @@ function MajorCards({ items }: { items: { key: string; label: string; value: num
   const rest = ranked.filter((m) => !MAJOR_ART[m.label]);
   return (
     <div className="v4-mj">
-      {carded.length > 0 && <ol className="v4-mj-rail dm-scroll" aria-label="Top majors">
-        {carded.map((m) => <li key={m.key}><IconTip label={m.tip}><button type="button" onClick={m.data} aria-label={`${m.aria}. Show them`} className="v4-mj-card">
+      {carded.length > 0 && <ol className="v4-mj-rail" aria-label="Top majors">
+        {carded.map((m) => <li key={m.key}><IconTip label={m.tip} className="w-full"><button type="button" onClick={m.data} aria-label={`${m.aria}. Show them`} className="v4-mj-card">
           <span className="v4-mj-art" style={{ backgroundImage: `url(${MAJOR_ART[m.label]})` }} aria-hidden />
           <span className="v4-mj-copy"><strong>{m.label}</strong><small><b>{m.value}</b> {m.value === 1 ? "student" : "students"}</small></span>
         </button></IconTip></li>)}
