@@ -1,3 +1,10 @@
+## 2026-10-21: Darker sky; the aurora carries the blue
+
+- `look-v2.css`, dark sky (app and Build/Match): same slide hue, but the lower half stays near-black navy. The gradient now runs `#121d33` → `#15233d` → `#192b49` → `#1d3355` → `#213a61` at the bottom, down from `#41699a`.
+- `SkyAurora.tsx`: a little more light is let through (cap `0.06 + 0.36*exp(-y/0.24)`, haze 0.75) so the beams carry the blue.
+- Why: Chandu, "lets try to use a bit more black instead of the overall light uplift towards the bottom, let the aurora carry the light blue instead. this feels too bright is the problem now. but dont lose sight of the color either".
+- AA improved, sampled at the brightest pixel: white 11.1:1 at 70% height, 9.6:1 at 80%, 7.1:1 at 90%. Captions and links pass AA down to 90%. Only the bottom ~3% glow strip is lower.
+
 ## 2026-10-21: Selected tab line: glow halved
 
 - `look-v2.css`, dark `[data-tab-ink]` (and the counselor v4 page-tab line): the three glow layers drop to about half (0.95/0.75/0.5 alpha to 0.6/0.35/0.22, with smaller radii). The bright line itself is unchanged.

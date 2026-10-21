@@ -117,7 +117,7 @@ void main() {
   // the haze of scattered light along the horizon the curtain rises from,
   // in a saturated blue so the bottom glows instead of going grey ("DONT
   // MAKE THE BOTTOM PART MUDDY WITH GREYER MUDDY COLORING")
-  col += vec3(0.10, 0.40, 1.00) * 0.6 * exp(-uv.y / 0.08);
+  col += vec3(0.10, 0.40, 1.00) * 0.75 * exp(-uv.y / 0.08);
   // fade toward the sides and the top of the layer
   float edge = smoothstep(0.0, 0.22, uv.x) * smoothstep(1.0, 0.78, uv.x);
   col *= mix(0.45, 1.0, edge) * smoothstep(0.78, 0.38, uv.y);
@@ -129,7 +129,9 @@ void main() {
   // MOST PART CAN HAVE MAYBE A BRIGHTER GLOW"), then a smooth fade upward
   // so the beams rise out of that bar instead of starting at a step ("THE
   // BEAMS BRIGHTNESS CAN ORGANICALLY FADE FROM THE BOTTOM BRIGHTER BAR")
-  float cap = 0.05 + 0.27 * exp(-uv.y / 0.24);
+  // on the darker sky the aurora carries the blue ("let the aurora carry the
+  // light blue instead"), so a little more of its light is let through
+  float cap = 0.06 + 0.36 * exp(-uv.y / 0.24);
   col *= min(1.0, cap / max(max(col.r, col.g), max(col.b, 1e-4)));
   gl_FragColor = vec4(col, 1.0);
 }
