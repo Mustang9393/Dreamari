@@ -2352,3 +2352,33 @@ video::cue {
   font-size: 0.85em;
   line-height: 1.35;
 }
+
+/* Abbreviations (Abbr.tsx): a quiet dotted underline, and the full form in
+   the house tooltip on hover. */
+.dm-abbr {
+  position: relative;
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+  text-underline-offset: 3px;
+  cursor: help;
+}
+.dm-abbr:hover::after {
+  content: attr(data-long);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 6px);
+  z-index: 60;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 5px 10px;
+  border: 1px solid rgba(158, 198, 250, 0.7);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2f6bf2 0%, #4a8df6 55%, #599df9 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+  pointer-events: none;
+}

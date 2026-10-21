@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { setCaptionsOn, useCaptionsOn } from "@/lib/captionsPref";
 import { ChevronDown, FileText } from "lucide-react";
 import { captionsFor, transcriptFor } from "./videoTranscripts";
 
@@ -9,7 +10,24 @@ import { captionsFor, transcriptFor } from "./videoTranscripts";
  *  students first meet them. Renders nothing for a video with no captions. */
 export function CaptionTrack({ video }: { video: string }) {
   const src = captionsFor(video);
-  return src ? <track kind="captions" src={src} srcLang="en" label="English" default /> : null;
+  // Shown or hidden by the remembered preference (lib/captionsPref.ts); the
+  // browser's own CC menu writes back to it, so turning captions off in one
+  // player turns them off in all of them.
+  const on = useCaptionsOn();
+  const ref = useRef<HTMLTrackElement>(null);
+  useEffect(() => {
+    const track = ref.current?.track;
+    if (track) track.mode = on ? "showing" : "hidden";
+  }, [on, src]);
+  useEffect(() => {
+    const el = ref.current;
+    const list = el?.parentElement instanceof HTMLVideoElement ? el.parentElement.textTracks : null;
+    if (!el || !list) return;
+    const onChange = () => { if (el.track.mode !== "disabled") setCaptionsOn(el.track.mode === "showing"); };
+    list.addEventListener("change", onChange);
+    return () => list.removeEventListener("change", onChange);
+  }, [src]);
+  return src ? <track ref={ref} kind="captions" src={src} srcLang="en" label="English" default={on} /> : null;
 }
 
 /** "Transcript" under a company video player (WCAG 1.2.3 / 1.2.8): the whole

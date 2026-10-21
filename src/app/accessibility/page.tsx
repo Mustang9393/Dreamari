@@ -76,7 +76,7 @@ export default function AccessibilityPage() {
 
         <section aria-labelledby="a11y-settings" className={card} style={cardStyle}>
           <h2 id="a11y-settings" className="text-[20px] font-bold">Settings you can change</h2>
-          <p className="text-[15px] leading-[1.6]" style={muted}>Turn off game timers and hide tips in <Link href="/profile?tab=settings&section=accessibility" className="dm-link font-semibold underline" style={{ color: "var(--accent-subtle)" }}>Profile, Settings, Accessibility</Link>. Less motion, high contrast and bigger text follow your device settings.</p>
+          <p className="text-[15px] leading-[1.6]" style={muted}>Turn off game timers, hide tips, and turn video captions on or off in <Link href="/profile?tab=settings&section=accessibility" className="dm-link font-semibold underline" style={{ color: "var(--accent-subtle)" }}>Profile, Settings, Accessibility</Link>. Less motion, high contrast and bigger text follow your device settings.</p>
         </section>
 
         <section aria-labelledby="a11y-keys" className={card} style={cardStyle}>
@@ -101,6 +101,17 @@ export default function AccessibilityPage() {
               </div>
             ))}
           </dl>
+        </section>
+
+        {/* Honest about what is not done yet (21 Oct 2026): a statement that
+           overclaims is worse in procurement than one that names its gaps. */}
+        <section aria-labelledby="a11y-progress" className={card} style={cardStyle}>
+          <h2 id="a11y-progress" className="text-[20px] font-bold">Still in progress</h2>
+          <ul className="flex flex-col gap-[var(--space-2)] text-[15px] leading-[1.6]" style={muted}>
+            <li>People who use screen readers are testing Dreamari now.</li>
+            <li>A person is checking every video caption by ear.</li>
+            <li>We are making a few small labels and charts easier to see.</li>
+          </ul>
         </section>
 
         <section aria-labelledby="a11y-report" className={card} style={cardStyle}>

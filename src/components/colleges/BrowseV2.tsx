@@ -43,6 +43,7 @@ import {
 import { Chips, Dropdown, Option, Section, StickyBar } from "./filterKit";
 import { useRouter } from "next/navigation";
 import { teaches, type CareerPick } from "./careerSchools";
+import { Abbr } from "@/components/app/Abbr";
 
 const HOME_STATE = "NJ";
 
@@ -383,8 +384,8 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
               </Section>
               <Section title="Your test scores" hint="Optional">
                 <div className="grid grid-cols-2 gap-[10px]">
-                  <label className="flex flex-col gap-[4px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>SAT, 400 to 1600<input inputMode="numeric" value={f.sat ?? ""} onChange={(e) => { const v = parseInt(e.target.value.replace(/\D/g, "").slice(0, 4), 10); set({ sat: Number.isFinite(v) ? v : null }); }} placeholder="1210" className={field} style={fieldStyle} /></label>
-                  <label className="flex flex-col gap-[4px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>ACT, 1 to 36<input inputMode="numeric" value={f.act ?? ""} onChange={(e) => { const v = parseInt(e.target.value.replace(/\D/g, "").slice(0, 2), 10); set({ act: Number.isFinite(v) ? v : null }); }} placeholder="26" className={field} style={fieldStyle} /></label>
+                  <label className="flex flex-col gap-[4px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span><Abbr short="SAT" long="a college entrance test" />, 400 to 1600</span><input inputMode="numeric" value={f.sat ?? ""} onChange={(e) => { const v = parseInt(e.target.value.replace(/\D/g, "").slice(0, 4), 10); set({ sat: Number.isFinite(v) ? v : null }); }} placeholder="1210" className={field} style={fieldStyle} /></label>
+                  <label className="flex flex-col gap-[4px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span><Abbr short="ACT" long="a college entrance test" />, 1 to 36</span><input inputMode="numeric" value={f.act ?? ""} onChange={(e) => { const v = parseInt(e.target.value.replace(/\D/g, "").slice(0, 2), 10); set({ act: Number.isFinite(v) ? v : null }); }} placeholder="26" className={field} style={fieldStyle} /></label>
                 </div>
                 <p className="pt-[6px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Shows schools where your score is in or above the middle half of admitted students. Test-optional policies aren&apos;t listed yet.</p>
               </Section>

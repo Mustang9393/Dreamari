@@ -53,6 +53,7 @@ import { Shelf } from "./Shelf";
 import { Poster } from "./Poster";
 import { RETURN_KEY, consumeReturning, readListReturn, type ListReturn } from "./listReturn";
 import { useBackStep } from "@/lib/backStep";
+import { Abbr } from "@/components/app/Abbr";
 
 export type Tab = "scholarships" | "programs" | "internships";
 type Closes = "any" | "month" | "3mo" | "later";
@@ -479,7 +480,7 @@ function Fafsa({ value }: { value: FafsaStatus }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-[10px] rounded-[var(--radius-lg)] border px-[18px] py-[12px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
       <span className="flex flex-col gap-[2px]">
-        <span className="text-[15px] leading-[20px] font-bold">FAFSA opened October 1</span>
+        <span className="text-[15px] leading-[20px] font-bold"><Abbr short="FAFSA" long="Free Application for Federal Student Aid" /> opened October 1</span>
         <span className="text-[13px] leading-[18px]" style={MUTED}>Most college money starts here.</span>
       </span>
       <div role="radiogroup" aria-label="FAFSA status" className="flex flex-none items-center gap-[3px] rounded-[11px] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>

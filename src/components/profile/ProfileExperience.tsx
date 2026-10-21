@@ -73,6 +73,8 @@ import { useTop3FlowV2 } from "@/lib/top3Flow";
 import { togglePlanDone, usePlanDone } from "@/lib/planDone";
 import { setQuietTips, useQuietTips } from "@/lib/quietTips";
 import { setTimersOff, useTimersOff } from "@/components/play/timers";
+import { setCaptionsOn, useCaptionsOn } from "@/lib/captionsPref";
+import { Abbr } from "@/components/app/Abbr";
 import { CaptionTrack, VideoTranscript } from "@/components/app/VideoTranscript";
 import {
   ACADEMIC_RECORD,
@@ -4021,6 +4023,7 @@ function answersSummary(p: StudentProfile): { label: string; value: string }[] {
 function AccessibilitySettings() {
   const quiet = useQuietTips();
   const timersOff = useTimersOff();
+  const captions = useCaptionsOn();
   const row = "flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)]";
   const toggle = (on: boolean, label: string, onFlip: () => void) => (
     <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onFlip}
@@ -4044,6 +4047,13 @@ function AccessibilitySettings() {
           <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Timed questions wait for you.</span>
         </span>
         {toggle(timersOff, "Turn off game timers", () => setTimersOff(!timersOff))}
+      </div>
+      <div className={row} style={{ background: "var(--glass-surface-1)" }}>
+        <span className="flex flex-col gap-[2px]">
+          <span className="text-[14px] font-bold">Show captions on videos</span>
+          <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Words on screen for every company video.</span>
+        </span>
+        {toggle(captions, "Show captions on videos", () => setCaptionsOn(!captions))}
       </div>
       <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
         Less motion, high contrast and bigger text follow your device settings.
@@ -4174,7 +4184,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
             <input id="settings-email" type="email" inputMode="email" autoComplete="email" value={draft.email} onChange={(e) => patch({ email: e.target.value })} placeholder="you@school.org" className={SETTINGS_FIELD} style={{ ...SETTINGS_FIELD_STYLE, borderColor: emailOk ? SETTINGS_FIELD_STYLE.borderColor : DANGER }} />
           </div>
           <div className="flex flex-col gap-[6px]">
-            <label className={SETTINGS_LABEL} htmlFor="settings-gpa" style={{ color: "var(--muted-foreground)" }}>GPA</label>
+            <label className={SETTINGS_LABEL} htmlFor="settings-gpa" style={{ color: "var(--muted-foreground)" }}><Abbr short="GPA" long="grade point average" /></label>
             <Listbox
               id="settings-gpa"
               value={draft.gpa}

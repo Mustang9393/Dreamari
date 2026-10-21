@@ -1,3 +1,20 @@
+## 2026-10-21: WCAG 2.2 Phase 2, pushed as is
+
+**Why.** These are the cheap AAA and robustness items from docs/ACCESSIBILITY_STATUS_REPORT_2026-10-21.md, section 9, Phase 2. Chandu: "Lets skip the caption stuff and push whatever we have in a usable fashion."
+
+**What.** The report's new Progress lines list every item. The main pieces:
+- `MotionPrefs` and the globals.css reduce block.
+- The forced-colors rules.
+- `HeadingFallback`.
+- `lib/quietTips.ts` and `lib/captionsPref.ts`, with switches in Profile Settings > Accessibility. `CaptionTrack` follows the captions preference, and the native CC menu writes back to it.
+- `Abbr.tsx`.
+- The `/accessibility` statement. `REPORT_EMAIL` there is DEMO-ONLY; swap it for the support inbox before launch.
+- The Explore reel Pause button.
+
+**Validation.** tsc, eslint and npm run build are clean. These were not re-checked in a browser: the reduced-motion and forced-colors rendering, Settings > Accessibility, and the reel Pause.
+
+**Next.** Browser-check the items above. Then a reel CC button, and a person's screen-reader pass.
+
 ## 2026-10-21: Career Detail, one page: Pay & Growth, Education & Skills, no v1/v2 switch
 
 **Why (Chandu):** on the fact strip, "Lets remove the outlook stuff from here"; on the Pay & Outlook tab, "can we combine pay and outlook somehow? just one map by default and pay and growth instead of outlook and somehow lets just show 1 or 2 main line that describes the growth of the career ... when we hover we can show pay, growth and openings with an arrow to show increase/decrease where we show the pay now", with "use your own judgment to give me the best possible solution"; "rename education to education & skills and fold software and skills into that tab"; "we can remove v2 toggle for career detail and default to this view".
