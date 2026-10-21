@@ -1,3 +1,12 @@
+## 2026-10-21: Aurora: light only, real-aurora material, clean blue bottom
+
+- `SkyAurora.tsx`: the green, teal and rose are removed; the aurora is light only. It's near white where brightest and a clean, low-red blue where faint.
+- The curtain is rebuilt from aurora-photo traits: fine filaments inside each ray, a crisp, bright lower seam the rays stand on, light thinning upward ray by ray, and a saturated-blue horizon haze for the bottom glow. Each ray's pulse, the uneven sway and the slide are kept.
+- Why: Chandu, "DONT DO GREEN. IT SHOULD JUST BE BRIGHTER LIGHT. LETS AVOID THE COLORS. BUT GET THE MATERIALS RIGHT PLEASE REFER ACTUAL PHOTOS OF AURORA BOREALIS. DONT MAKE THE BOTTOM PART MUDDY WITH GREYER MUDDY COLORING." Whitish light screen-blended over steel blue is what greyed the bottom. The faint light and the haze now carry little red, so they brighten the blue instead of washing it out (saturation at 90% height went from 0.27 to 0.33).
+- AA, sampled at the brightest pixel:
+  - White 7.4:1 at 70% height, 6.0:1 at 80%, 4.7:1 at 90%.
+  - The bottom ~5% is the glow bar (white 3.4:1), under the mobile tab bar.
+
 ## 2026-10-21: Aurora beams: rise from the bar, pulse, shorter, soft multicolour
 
 - `SkyAurora.tsx` changes:

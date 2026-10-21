@@ -13,8 +13,8 @@
 //
 // A small fragment shader: two curtains of light, each with a noise-driven
 // lower edge that folds and drifts, fine vertical rays, a hot near-white
-// lower edge and a falloff upward in the reference slide's pale blues, with
-// soft aurora colours mixed in (green, teal, a faint rose at the tips). Subtle ("IT CAN BE A LITTLE
+// lower edge and a falloff upward, in light only: near white where bright,
+// clean blue where faint, no other colours. Subtle ("IT CAN BE A LITTLE
 // MORE SUBTLE TOO"), composited with `screen` so it adds light to the sky and
 // the stars still show through it.
 //
@@ -64,55 +64,47 @@ float fbm(vec2 p) {
   return v;
 }
 
-// one curtain: k picks its own noise, lift raises it, rayScale sets ray density
+// one curtain: k picks its own noise, lift raises it, rayScale sets ray density.
+// Modelled on photos of the borealis (Chandu: "GET THE MATERIALS RIGHT
+// PLEASE REFER ACTUAL PHOTOS OF AURORA BOREALIS"): a curtain is made of fine
+// filaments, its lower border is crisp and the brightest part, the light
+// thins out upward ray by ray, and the colour is light, not paint ("DONT DO
+// GREEN. IT SHOULD JUST BE BRIGHTER LIGHT").
 vec3 curtain(vec2 uv, float aspect, float t, float k, float lift, float rayScale) {
   float x = uv.x * aspect;
-  // the lower edge folds and drifts slowly
-  // its foot rests on the bottom edge of the screen and ripples a little
-  float base = 0.012 + lift
-    + 0.05 * (fbm(vec2(x * 0.55 + t * 0.04 + k * 3.1, k * 1.7 + t * 0.02)) - 0.5)
-    + 0.012 * sin(x * 1.4 + t * 0.25 + k * 2.0);
+  // the lower border folds and ripples, just above the bottom edge
+  float base = 0.03 + lift
+    + 0.045 * (fbm(vec2(x * 0.55 + t * 0.04 + k * 3.1, k * 1.7 + t * 0.02)) - 0.5)
+    + 0.01 * sin(x * 1.4 + t * 0.25 + k * 2.0);
   float d = uv.y - base;
-  // folds: the rays bend with the curtain, so sample them in warped x
-  // (only a slight bend: beams stand nearly upright)
   // the curtain drifts sideways, but sways by different amounts along its
   // length, so it never slides as one flat sheet
   float wx = x + t * 0.018 + 0.12 * fbm(vec2(x * 0.9 + k, uv.y * 0.8 + t * 0.06))
     + 0.05 * sin(t * 0.17 + x * 0.9 + k * 2.3);
-  // beams: distinct shafts of light with dark gaps, a finer texture inside
+  // rays: shafts of light with darker gaps between them
   float r1 = noise(vec2(wx * rayScale, t * 0.22 + k * 5.0));
-  float r2 = noise(vec2(wx * rayScale * 3.1, t * 0.5 + k * 11.0));
-  float rays = 0.18 + 0.82 * pow(r1, 2.0) * (0.6 + 0.4 * r2);
-  // each beam glows up and fades back on its own timing (Chandu: "make sure
-  // they go in and out of glow so its not like a flat bright thing moving
-  // right to left. But dont over do it either")
+  float rays = 0.15 + 0.85 * pow(r1, 1.8);
+  // filaments: the fine vertical striation inside every ray
+  float fil = 0.55 + 0.45 * noise(vec2(wx * rayScale * 6.0, t * 0.6 + k * 11.0));
+  // each ray glows up and fades back on its own timing ("make sure they go
+  // in and out of glow so its not like a flat bright thing moving right to
+  // left. But dont over do it either")
   float pulse = 0.3 + 0.7 * smoothstep(0.25, 0.75, noise(vec2(wx * rayScale * 0.6 + 17.0, t * 0.4 + k * 9.0)));
-  rays *= pulse;
-  // each beam reaches its own height, some tall, most short; kept low
+  // each ray reaches its own height, some tall, most short; kept low
   // ("WE CAN REDUCE THE AURORA BEAMS HEIGHTS. A BIT TOO.")
   float reach = 0.1 + 0.27 * pow(noise(vec2(wx * rayScale * 0.45, k * 3.0 + t * 0.12)), 1.8);
-  float body = d > 0.0 ? exp(-d / reach) : exp(d * 22.0);
+  // above the border the light thins upward; below it, it ends crisply
+  float body = d > 0.0 ? exp(-d / reach) : exp(d * 80.0);
+  // the border itself: a thin, bright seam the rays stand on
+  float seam = exp(-abs(d) / 0.018);
   // brightness along the curtain, with gaps, so it never reads as one band
-  float along = 0.25 + 0.75 * smoothstep(0.2, 0.62, fbm(vec2(x * 0.7 - t * 0.03 + k * 7.0, 2.0 + k + t * 0.04)));
-  // the glowing foot the beams rise from
-  float i = (1.5 * body * rays + 0.8 * exp(-abs(d) / 0.07)) * (0.4 + 0.6 * along);
-  // falloff upward: pale at the foot, deeper blue up high
-  float h = clamp(d / 0.55, 0.0, 1.0);
-  // the reference slide's own sky blues, pale at the foot, deeper up high
-  // (Chandu: "I think we've strayed way from this color too much")
-  vec3 c = mix(vec3(0.80, 0.88, 0.98), vec3(0.60, 0.74, 0.94), smoothstep(0.0, 0.15, h));
-  c = mix(c, vec3(0.42, 0.58, 0.86), smoothstep(0.12, 0.6, h));
-  // soft aurora colours, the way photos of the borealis have them: green
-  // low in the beams, teal through the middle, a faint rose at the tips;
-  // mixed into the blue at low strength, so barely there but there
-  // ("GIVE SOFT AURORA LIKE MULTICOLOR BUT KEEP THEM VERY SUBTLE BARELY
-  // VISIBLE BUT VISIBLY ALL THE SAME, NO TOO MUCH PURPLE STUFF")
-  float hue = noise(vec2(wx * 0.9 - t * 0.02 + k * 4.0, 3.0 + t * 0.03));
-  vec3 aur = mix(vec3(0.30, 1.00, 0.55), vec3(0.25, 0.90, 0.90), smoothstep(0.1, 0.45, h) * 0.7 + hue * 0.3);
-  aur = mix(aur, vec3(0.92, 0.58, 0.74), smoothstep(0.55, 0.95, h) * 0.45);
-  c = mix(c, aur, 0.6 * (0.5 + 0.5 * hue) * smoothstep(0.0, 0.06, d));
-  // the hot lower edge
-  c += vec3(0.16, 0.18, 0.2) * exp(-abs(d) * 55.0);
+  float along = 0.3 + 0.7 * smoothstep(0.2, 0.62, fbm(vec2(x * 0.7 - t * 0.03 + k * 7.0, 2.0 + k + t * 0.04)));
+  float i = (1.4 * body * rays * fil * pulse + 0.9 * seam * (0.45 + 0.55 * rays)) * along;
+  // light, not paint: near white where it is brightest, a clean saturated
+  // sky blue where it is faint, so faint light never turns grey
+  float h = clamp(d / 0.4, 0.0, 1.0);
+  vec3 c = mix(vec3(0.80, 0.92, 1.00), vec3(0.36, 0.66, 1.00), smoothstep(0.0, 0.2, h));
+  c = mix(c, vec3(0.18, 0.48, 1.00), smoothstep(0.2, 0.8, h));
   return c * i;
 }
 
@@ -122,6 +114,10 @@ void main() {
   float t = uTime;
   vec3 col = curtain(uv, aspect, t, 0.0, 0.0, 13.0);
   col += 0.55 * curtain(uv, aspect, t * 0.8, 1.0, 0.04, 23.0);
+  // the haze of scattered light along the horizon the curtain rises from,
+  // in a saturated blue so the bottom glows instead of going grey ("DONT
+  // MAKE THE BOTTOM PART MUDDY WITH GREYER MUDDY COLORING")
+  col += vec3(0.10, 0.40, 1.00) * 0.6 * exp(-uv.y / 0.08);
   // fade toward the sides and the top of the layer
   float edge = smoothstep(0.0, 0.22, uv.x) * smoothstep(1.0, 0.78, uv.x);
   col *= mix(0.45, 1.0, edge) * smoothstep(0.78, 0.38, uv.y);
