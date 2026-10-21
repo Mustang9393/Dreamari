@@ -5,6 +5,7 @@
 // transparent root.
 import { PeekHost } from "./peek";
 import { NightSky } from "./NightSky";
+import { SkyAurora } from "./SkyAurora";
 
 export function AppBackdrop({ calmSky = false }: { /** a still sky that lights up only on skyMoment() (counselor v7, NightSky.tsx) */ calmSky?: boolean } = {}) {
   return (
@@ -45,6 +46,8 @@ export function AppBackdrop({ calmSky = false }: { /** a still sky that lights u
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
       {/* Black & Blue, dark: drifting points of light (./NightSky.tsx) */}
+      {/* Black & Blue, dark: an aurora on the horizon (./SkyAurora.tsx) */}
+      <SkyAurora still={calmSky} />
       <NightSky calm={calmSky} />
     </div>
     </>

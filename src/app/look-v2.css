@@ -305,10 +305,9 @@ html.look-v2.dark [data-flow-space] {
   /* the same dusk sky as the app (21 Oct): dark overhead, brighter toward
      the horizon; the top nebula (light from above) is off in dark */
   background:
-    radial-gradient(26% 17% at 50% 107%, rgba(225, 238, 255, 0.34) 0%, rgba(225, 238, 255, 0.16) 35%, transparent 75%),
-    radial-gradient(60% 34% at 50% 110%, rgba(130, 180, 245, 0.3) 0%, rgba(130, 180, 245, 0.12) 45%, transparent 80%),
-    radial-gradient(78% 44% at 50% 108%, rgba(120, 170, 230, 0.3) 0%, rgba(110, 160, 220, 0.14) 42%, transparent 76%),
-    linear-gradient(180deg, #0f1c31 0%, #132440 32%, #1a3051 62%, #22406a 100%) !important;
+    radial-gradient(60% 30% at 50% 110%, rgba(130, 180, 245, 0.24) 0%, rgba(130, 180, 245, 0.1) 45%, transparent 80%),
+    radial-gradient(78% 44% at 50% 108%, rgba(120, 170, 230, 0.26) 0%, rgba(110, 160, 220, 0.12) 42%, transparent 76%),
+    linear-gradient(180deg, #0f2150 0%, #132857 34%, #1a3362 64%, #22406f 100%) !important;
 }
 html.look-v2.dark [data-flow-space] [data-nebula="1"] {
   display: none;
@@ -537,21 +536,30 @@ html.look-v2:not(.light) [data-app-backdrop] {
      tighter halo, so the light reads as one source coming up from the
      horizon while the corners and the lower sky keep their colour. The core
      only reaches the last few percent of the screen (under the mobile tab
-     bar); 8% up from the bottom, white text is still above 7:1. */
+     bar); 8% up from the bottom, white text is still above 7:1.
+     Then an aurora and a cobalt sky (21 Oct, Chandu: "how can we make this
+     look more optimistic and hopeful and exciting?", then "lets try it, how
+     about we give the lighter glow a more aurora-esque material/shape?"):
+     the overhead navy turns from slate (#0f1c31) to cobalt (#0f2150), the
+     same brightness the sky already had a third of the way down, so it stays
+     dark mode and the stars keep their contrast (17:1 to 15.5:1); the
+     gloom was grey, not darkness. The sun gives way to a rendered aurora
+     (SkyAurora.tsx, a WebGL layer above this gradient): a first pass in CSS
+     stripes and ellipses was rejected ("looks very bad and ugly please make
+     it match an actual spectral material light thingy when rendered"). */
   background:
-    radial-gradient(26% 17% at 50% 107%, rgba(225, 238, 255, 0.34) 0%, rgba(225, 238, 255, 0.16) 35%, transparent 75%),
-    radial-gradient(60% 34% at 50% 110%, rgba(130, 180, 245, 0.3) 0%, rgba(130, 180, 245, 0.12) 45%, transparent 80%),
-    radial-gradient(78% 44% at 50% 108%, rgba(120, 170, 230, 0.3) 0%, rgba(110, 160, 220, 0.14) 42%, transparent 76%),
-    linear-gradient(180deg, #0f1c31 0%, #132440 32%, #1a3051 62%, #22406a 100%) !important;
+    radial-gradient(60% 30% at 50% 110%, rgba(130, 180, 245, 0.24) 0%, rgba(130, 180, 245, 0.1) 45%, transparent 80%),
+    radial-gradient(78% 44% at 50% 108%, rgba(120, 170, 230, 0.26) 0%, rgba(110, 160, 220, 0.12) 42%, transparent 76%),
+    linear-gradient(180deg, #0f2150 0%, #132857 34%, #1a3362 64%, #22406f 100%) !important;
 }
 html.look-v2:not(.light) body {
-  background: #0f1c31;
+  background: #0f2150;
 }
 html.look-v2:not(.light) {
   --color-action-primary: #8fb3f5;
   --color-action-primary-hover: #a3c1f7;
-  --background: #0f1c31;
-  --color-surface-page: #0f1c31;
+  --background: #0f2150;
+  --color-surface-page: #0f2150;
   --color-surface-card: #13213a;
   --color-text-brand: #cbe0fb;
   --color-match-toast-link: #cbe0fb;
@@ -575,7 +583,7 @@ html.look-v2:not(.light) .marketing-v2 {
   --primary: #8fb3f5;
   --accent: #8fb3f5;
   --primary-foreground: #0b1a33;
-  --background: #0f1c31;
+  --background: #0f2150;
   --card: #13213a;
   --surface: #142338;
   --muted: rgba(21, 36, 60, 0.94);

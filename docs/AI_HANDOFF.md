@@ -1,3 +1,17 @@
+## 2026-10-21: Cobalt sky and a rendered aurora on the horizon
+
+- Dark Black & Blue sky (`src/app/look-v2.css`, app backdrop and Build/Match): the overhead navy moves from slate `#0f1c31` to cobalt `#0f2150`, and the page tokens follow. That's the same brightness the sky already had a third of the way down, so it stays dark mode, and stars and text keep their contrast (17:1 to 15.5:1).
+- The rising-sun glow is replaced by `src/components/app/SkyAurora.tsx`, a WebGL fragment shader mounted in `AppBackdrop`.
+  - Look: two curtains of aurora beams standing on the bottom edge, noise-driven rays of varied height, a glowing foot, and an ice-cyan to blue falloff with a faint green-teal trace in patches (never purple), screen-blended so stars show through.
+  - Motion: animated; it flickers, sways and drifts.
+- Why: Chandu asked "how can we make this look more optimistic and hopeful and exciting?" A CSS stripe-and-ellipse pass was rejected ("looks very bad and ugly please make it match an actual spectral material light thingy when rendered"). Then: "make it realistic refer aurora beams. Make it sit on the bottom edge too", "can it be a bit animated instead of static?" and "a tiny bit of aurora colors (NO purple) Very subtly too".
+- Cost: rendered at 40% resolution, 24fps cap, paused when the tab is hidden. One still frame for reduced motion and for the counselor's calm sky. Measured 60fps page rAF with it running. Without WebGL it is absent and the CSS gradient remains.
+- AA, sampled from screenshots:
+  - Down to 85% of the screen height: white 7.2:1+, 82% captions 5.5:1+, links 5.4:1+.
+  - The foot in the bottom ~10% is brighter (white 3.1 to 5.7:1). It mostly sits under the mobile tab bar.
+  - Open item: check desktop pages that put small text in the bottom 10% of the viewport.
+- Not done: Build/Match's `[data-flow-space]` gets the cobalt gradient but not the shader (it has its own AuroraBackground canvas).
+
 ## 2026-10-21: Dusk sky gets a rising sun at the bottom
 
 - The dark sky (app backdrop and Build/Match's `[data-flow-space]`, `src/app/look-v2.css`) gains a rising-sun glow: a small near-white radial core just below the bottom edge inside a tighter blue halo, over the existing horizon bloom and navy-to-blue gradient.
