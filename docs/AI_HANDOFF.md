@@ -1,3 +1,13 @@
+## 2026-10-21: restore optional Agenda in v4 Meetings
+
+**Why (Chandu):** "calendar view is default view now but we lost the agenda view ... bring the agenda view back as an optional toggleable view". The calendar-only change removed the existing layout switch.
+
+**Changed:** restored the existing Calendar / Agenda icon toggle and the original `MeetingsNext` / `ComingUp` agenda. Calendar initializes as the default on every page entry, ignoring the legacy saved Agenda preference. The selection stays while switching between Upcoming and Needs Outreach on this page. Reuses existing components, styling, accessible pressed states and IconTip labels.
+
+**Validation:** TypeScript, scoped ESLint, tokens:check and diff whitespace checks pass. Browser on localhost:3147 confirmed Calendar selected on entry, Agenda renders next meeting / past meetings / coming up, and Calendar renders again after toggling back. No new scrolling containers or positioning code; touched-component scrollbar audit clean. Physical Windows/Chromebook verification not performed.
+
+**Next:** review and merge the focused restoration PR; no direct main push.
+
 ## 2026-10-21 — Supporting graphic order
 
 User requested title → graphic → description → CTA. CardBody now owns the optional graphic slot after its title, so passive work graphics appear above prose and navigation instead of after the Continue button. Shared vignette spacing follows the card gap. Browser verified UX1-02 fits without scrolling; TypeScript, scoped lint and tokens pass. Decision controls and scoring are unchanged.
