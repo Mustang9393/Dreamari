@@ -37,6 +37,3 @@ html.light .v7-now-star {background:radial-gradient(circle,var(--primary) 0 26%,
 /* a day with no office hours recedes: a fine diagonal grain, not a field of marks */
 .v7-lane-off {background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--foreground) 4%,transparent) 0 1px,transparent 1px 9px) !important;}
 @media (prefers-reduced-motion:reduce) {.v7-now-star {animation:none;}}
-
-/* Reviews: the page ends where the writing ends (Workspace.tsx) */
-.v7-read [data-doc-page] { min-height: 0 !important; }

@@ -1,3 +1,11 @@
+## 2026-10-21: Reviews, all builds: a full page that fills the height and scrolls
+
+**Why (Chandu):** a short document ended early and left a dark empty canvas under it: "instead of this sitting cropped vertically, let it be the full page so the scroll still works but just it doesn't leave a lot of space and uses the height available to it", then "fix and push for all versions".
+
+- **v7 (`v7/Workspace.tsx`, also v4 through `v4/ReviewDesk.tsx`):** the page is a full Letter page again (the `.v7-read` min-height override is gone), at canvas width up to 100%. The canvas fills its row (absolute inset at xl, min-height = room to the bottom of the screen) and scrolls on its own; the card no longer stretches to the queue's height (`self-start`), so Approve stays above the fold.
+- **v5 (`v5/Workspace.tsx`, also v6 through V5Reviews):** the page was shrunk to fit the screen height (too small to read). Its column is now the widest of the three (1.35fr), the page draws at column width, and its box is as tall as the screen allows and scrolls; Full screen stays pinned to the box.
+- Checked: tsc and eslint clean; v7 and v5 Reviews at 1440.
+
 ## 2026-10-21: Counselor v7 student profile wears v4's student ID tag
 
 **Why (Chandu):** "can we do the same student ID and counselor ID designs for v7?"
