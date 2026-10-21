@@ -86,7 +86,7 @@ import type { ProfileCareer } from "@/components/profile/data";
 import type { CatalogCareer } from "@/components/app/catalog";
 import { MAJOR_ART, majorPoster, programmeMajor, savedMajorsFor } from "./majors";
 import { useChartColors } from "./ChartColors";
-import { InterestMeter } from "./charts/insightViz";
+import { InterestMeter, Treemap } from "./charts/insightViz";
 import { FlowSankey } from "./charts/ivFlow";
 import "./insights.css";
 import "./insights2.css";
@@ -377,33 +377,14 @@ function InterestRows() {
           </header>
           {(majorMode === "saved" ? savedMajors : exploredMajors).length === 0
             ? <p className="v4-cc-empty">{majorMode === "saved" ? `No saved majors for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet.`}</p>
-            : <MajorCards items={majorItems} />}
+            // the treemap again, each tile wearing its major's scene (21 Oct
+            // 2026: Mika's major art; a grid of equal cards took a lot of
+            // height and lost the sizing by count)
+            : <Treemap items={majorItems.map((m) => ({ ...m, image: MAJOR_ART[m.label] }))} onOpen={(open) => open()} />}
         </div>
       </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </>
-  );
-}
-
-/** Top Majors as Mika's illustrated cards (21 Oct 2026), in a grid of
- *  equal cards: ranked by count,
- *  each card the scene, the major and how many students; a tap opens them.
- *  Majors without a card yet follow as one quiet line of names and counts,
- *  so no count is lost (the treemap they replace showed every major). */
-function MajorCards({ items }: { items: { key: string; label: string; value: number; aria: string; tip: string; data: () => void }[] }) {
-  const ranked = [...items].sort((a, b) => b.value - a.value);
-  const carded = ranked.filter((m) => MAJOR_ART[m.label]);
-  const rest = ranked.filter((m) => !MAJOR_ART[m.label]);
-  return (
-    <div className="v4-mj">
-      {carded.length > 0 && <ol className="v4-mj-rail" aria-label="Top majors">
-        {carded.map((m) => <li key={m.key}><IconTip label={m.tip} className="w-full"><button type="button" onClick={m.data} aria-label={`${m.aria}. Show them`} className="v4-mj-card">
-          <span className="v4-mj-art" style={{ backgroundImage: `url(${MAJOR_ART[m.label]})` }} aria-hidden />
-          <span className="v4-mj-copy"><strong>{m.label}</strong><small><b>{m.value}</b> {m.value === 1 ? "student" : "students"}</small></span>
-        </button></IconTip></li>)}
-      </ol>}
-      {rest.length > 0 && <p className="v4-mj-rest">{rest.map((m, i) => <span key={m.key}>{i > 0 && <span aria-hidden> · </span>}<button type="button" onClick={m.data} aria-label={`${m.aria}. Show them`} className="dm-quiet">{m.label} <b>{m.value}</b></button></span>)}</p>}
-    </div>
   );
 }
 

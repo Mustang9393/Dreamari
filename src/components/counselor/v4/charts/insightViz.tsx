@@ -152,7 +152,7 @@ export function squarify(values: number[], W: number, H: number): Box[] {
  *  is made of light: a soft translucent fill that deepens with the count
  *  (`--k`); no outline at rest, no gloss or shading. Tiles are keyed by name, so switching lists glides each
  *  tile to its new place. */
-export function Treemap<T>({ items, height: fixed, onOpen }: { items: { key: string; label: string; value: number; aria: string; /** hover text, e.g. "See the 9 students" */ tip?: string; data: T }[]; /** default: 384px, taller when narrow so names still fit */ height?: number; onOpen: (data: T) => void }) {
+export function Treemap<T>({ items, height: fixed, onOpen }: { items: { key: string; label: string; value: number; aria: string; /** hover text, e.g. "See the 9 students" */ tip?: string; /** a picture filling the tile (Top Majors: Mika's major art) */ image?: string; data: T }[]; /** default: 384px, taller when narrow so names still fit */ height?: number; onOpen: (data: T) => void }) {
   const [ref, W] = useWidth<HTMLDivElement>();
   const height = fixed ?? (W && W < 520 ? 440 : 384);
   const boxes = useMemo(() => squarify(items.map((i) => i.value), W, height), [items, W, height]);
@@ -166,9 +166,9 @@ export function Treemap<T>({ items, height: fixed, onOpen }: { items: { key: str
         return (
           <div key={it.key} className="v4-iv-tmslot" style={{ left: b.x, top: b.y, width: b.w, height: b.h }}>
             <IconTip label={it.tip ?? it.aria} className="h-full w-full">
-              <button type="button" onClick={() => onOpen(it.data)} aria-label={it.aria} className={`v4-iv-tm ${roomy ? "" : "is-tight"}`}
+              <button type="button" onClick={() => onOpen(it.data)} aria-label={it.aria} className={`v4-iv-tm ${roomy ? "" : "is-tight"} ${it.image ? "has-art" : ""}`}
                 style={{ ["--k" as string]: share.toFixed(2) } as CSSProperties}>
-                <span className="v4-iv-tm-face">
+                <span className="v4-iv-tm-face" style={it.image ? { backgroundImage: `url(${it.image})` } : undefined}>
                   <span className="v4-iv-tm-name">{it.label}</span>
                   <b>{it.value}</b>
                 </span>

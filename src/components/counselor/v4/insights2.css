@@ -261,25 +261,3 @@
   [data-counselor-version="v4"] .v4-cc-col + .v4-cc-col { padding-left: 0; padding-top: 36px; }
 }
 
-/* Top Majors: Mika's illustrated cards (CareerCollegeInsights.tsx MajorCards) */
-[data-counselor-version="v4"] .v4-mj { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-/* a grid, every card one size (21 Oct 2026, Chandu: "wasn't the majors in a
-   grid like thing?" and "the cards for majors is varying heights. Not
-   acceptable"): equal columns, rows stretch, the title keeps room for two
-   lines so a long name never makes its card taller */
-[data-counselor-version="v4"] .v4-mj-rail { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); grid-auto-rows: 1fr; gap: 14px; margin: 0; padding: 0; list-style: none; }
-[data-counselor-version="v4"] .v4-mj-rail > li { display: flex; min-width: 0; }
-[data-counselor-version="v4"] .v4-mj-rail > li > * { display: flex; width: 100%; }
-[data-counselor-version="v4"] .v4-mj-card { display: flex; width: 100%; height: 100%; flex-direction: column; overflow: hidden; border-radius: 16px; border: 1px solid var(--glass-border); background: var(--card); text-align: left; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease; }
-[data-counselor-version="v4"] .v4-mj-card:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -18px rgba(20, 30, 70, .45); }
-[data-counselor-version="v4"] .v4-mj-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-[data-counselor-version="v4"] .v4-mj-art { display: block; aspect-ratio: 9 / 13; background: center / cover no-repeat; }
-[data-counselor-version="v4"] .v4-mj-copy { display: flex; flex: 1; flex-direction: column; gap: 2px; padding: 10px 12px 12px; }
-[data-counselor-version="v4"] .v4-mj-copy strong { display: -webkit-box; min-height: 36px; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 14px; line-height: 18px; font-weight: 600; color: var(--foreground); }
-[data-counselor-version="v4"] .v4-mj-copy small { margin-top: auto; }
-[data-counselor-version="v4"] .v4-mj-copy small { font-size: 12.5px; color: var(--muted-foreground); }
-[data-counselor-version="v4"] .v4-mj-copy small b { color: var(--foreground); font-weight: 600; }
-[data-counselor-version="v4"] .v4-mj-rest { margin: 0; font-size: 13px; line-height: 22px; color: var(--muted-foreground); }
-[data-counselor-version="v4"] .v4-mj-rest button { color: inherit; border-radius: 6px; padding: 0 2px; cursor: pointer; }
-[data-counselor-version="v4"] .v4-mj-rest b { color: var(--foreground); font-weight: 600; }
-@media (prefers-reduced-motion: reduce) { [data-counselor-version="v4"] .v4-mj-card { transition: none; } [data-counselor-version="v4"] .v4-mj-card:hover { transform: none; } }
