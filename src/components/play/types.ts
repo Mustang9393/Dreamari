@@ -731,6 +731,8 @@ export type Ending = {
 export type BandName = "At Risk" | "Cautious" | "Respected" | "Trusted";
 
 export type Level = {
+  /** Authored sequence and scoring source; validation compares it to vetted IB L1. */
+  generationTemplate?: "ib-l1-2026-10-21";
   id: string;
   n: number;
   /** "Intern", "Analyst" ... */
@@ -858,6 +860,9 @@ export type PreGame = {
   tiers?: { label: string }[];
   /** Every rung of the career, bottom first ("Intern", "Analyst", ...). */
   ladder: string[];
+  missionLine?: string;
+  ladderBranches?: {label:string; roles:string}[];
+  ladderNote?: string;
   /** A few of the skills this level practises, shown as chips. */
   skills: string[];
   /** How many career skills the game tracks in all. */

@@ -1,0 +1,226 @@
+{
+  "flow": {
+    "id": "ux-reserve-flow",
+    "kind": "flow",
+    "title": "A runner’s task",
+    "caption": "Read-only task route.",
+    "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
+    "steps": [
+      {
+        "title": "Choose",
+        "detail": "Shoe and size"
+      },
+      {
+        "title": "Reserve",
+        "detail": "Email"
+      },
+      {
+        "title": "Confirm",
+        "detail": "Reservation"
+      }
+    ]
+  },
+  "wireframe": {
+    "id": "ux-wireframe",
+    "kind": "interface",
+    "title": "Launch page · wireframe",
+    "caption": "Rough layout, not a working screen.",
+    "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
+    "screen": {
+      "siteName": "VELO",
+      "navigation": "Aero 01",
+      "heading": "Reserve your pair",
+      "description": "Launch day · 4 p.m.",
+      "detail": "Size 8 · In stock",
+      "action": "Reserve pair",
+      "actionPlacement": "after-details",
+      "fidelity": "wireframe",
+      "fields": []
+    }
+  },
+  "prototype": {
+    "id": "ux-prototype",
+    "kind": "interface",
+    "title": "Launch page · preview",
+    "caption": "Read-only prototype snapshot. No controls inside the artwork.",
+    "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
+    "screen": {
+      "siteName": "VELO",
+      "navigation": "Aero 01",
+      "heading": "Reserve your pair",
+      "description": "Launch day · 4 p.m.",
+      "detail": "Size 8 · In stock",
+      "action": "Reserve pair",
+      "actionPlacement": "after-details",
+      "fields": []
+    }
+  },
+  "notes": {
+    "id": "ux-evidence",
+    "kind": "notes",
+    "title": "Eleanor’s first test",
+    "caption": "Fictional session notes.",
+    "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
+    "entries": [
+      {
+        "label": "Task",
+        "text": "Reserve size 8."
+      },
+      {
+        "label": "Saw",
+        "text": "Tapped Details three times."
+      },
+      {
+        "label": "Said",
+        "text": "Where do I reserve?"
+      }
+    ]
+  },
+  "iteration": {
+    "id": "ux-prototype-versions",
+    "kind": "comparison",
+    "title": "One change · same task",
+    "caption": "Test the new layout; it is not proof of improvement.",
+    "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
+    "panels": [
+      {
+        "label": "A · action below details",
+        "screen": {
+          "siteName": "VELO",
+          "navigation": "Aero 01",
+          "heading": "Reserve your pair",
+          "description": "Launch day · 4 p.m.",
+          "detail": "Size 8 · In stock",
+          "action": "Reserve pair",
+          "actionPlacement": "after-details",
+          "fields": []
+        }
+      },
+      {
+        "label": "B · action above details",
+        "screen": {
+          "siteName": "VELO",
+          "navigation": "Aero 01",
+          "heading": "Reserve your pair",
+          "description": "Launch day · 4 p.m.",
+          "detail": "Size 8 · In stock",
+          "action": "Reserve pair",
+          "actionPlacement": "before-details",
+          "fields": []
+        }
+      }
+    ]
+  },
+  "results": {
+    "id": "ux-test-result",
+    "kind": "notes",
+    "layout": "handover",
+    "title": "Test notes · draft B",
+    "caption": "One participant, not every runner.",
+    "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
+    "entries": [
+      {
+        "label": "Task",
+        "text": "Reserve size 8."
+      },
+      {
+        "label": "Observed",
+        "text": "Eleanor finished the task."
+      },
+      {
+        "label": "Still open",
+        "text": "Keyboard-only test."
+      }
+    ]
+  },
+  "form": {
+    "id": "ux-draft-form",
+    "kind": "interface",
+    "title": "Email form · preview",
+    "caption": "Read-only draft.",
+    "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
+    "screen": {
+      "siteName": "VELO",
+      "navigation": "Aero 01",
+      "heading": "Reserve your pair",
+      "description": "Launch day · 4 p.m.",
+      "detail": "Size 8 · In stock",
+      "action": "Reserve pair",
+      "actionPlacement": "after-details",
+      "fields": [
+        {
+          "label": "Email",
+          "value": "alex@",
+          "required": "colour",
+          "error": "Something went wrong."
+        }
+      ]
+    }
+  },
+  "handover": {
+    "id": "ux-handover",
+    "kind": "notes",
+    "layout": "handover",
+    "title": "Launch handoff",
+    "caption": "Later test state; no claim about every runner.",
+    "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
+    "entries": [
+      {
+        "label": "Changed",
+        "text": "Reserve moved above Details."
+      },
+      {
+        "label": "Retested",
+        "text": "Amina reserved with a keyboard."
+      },
+      {
+        "label": "Next",
+        "text": "Test with more runners."
+      }
+    ]
+  },
+  "releaseCheck": {
+    "id": "ux-release-check",
+    "kind": "notes",
+    "layout": "handover",
+    "title": "Amina · 3 p.m. check",
+    "caption": "Known blocker before the fix.",
+    "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
+    "entries": [
+      {
+        "label": "Input",
+        "text": "Keyboard only"
+      },
+      {
+        "label": "Blocker",
+        "text": "Reserve cannot be reached."
+      },
+      {
+        "label": "Impact",
+        "text": "Reservation stops."
+      }
+    ]
+  },
+  "fixed": {
+    "id": "ux-fixed",
+    "kind": "notes",
+    "layout": "handover",
+    "title": "Amina · 3:30 p.m. retest",
+    "caption": "The authored fix has been retested on this route only.",
+    "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
+    "entries": [
+      {
+        "label": "Input",
+        "text": "Keyboard only"
+      },
+      {
+        "label": "Result",
+        "text": "Reached Reserve. Finished task."
+      },
+      {
+        "label": "Next",
+        "text": "Test with more runners."
+      }
+    ]
+  }
+}

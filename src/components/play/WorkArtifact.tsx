@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ComponentType, type CSSProperties } from "react";
+import { type ComponentType, type CSSProperties } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, ShieldAlert, CalendarDays, Check, CheckCircle2, CircleHelp, FileText, Headphones, Layers2, MapPin, MousePointer2, PanelTop, Play, RotateCcw, Search, TriangleAlert, Wrench } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ShieldAlert, CalendarDays, Check, CircleHelp, FileText, Headphones, Layers2, MapPin, MousePointer2, PanelTop, Search, TriangleAlert, Wrench } from "lucide-react";
 import type { InterfaceSpec, WorkArtifact as Artifact } from "./work-artifacts";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { MixtureBench } from "./MixtureBench";
 import { WorkScreen } from "./WorkScreen";
 import styles from "./WorkArtifact.module.css";
 
@@ -41,21 +40,19 @@ function Wireframe({ screen }: { screen: InterfaceSpec }) {
     </svg>
   </div>;
 }
-function PreviewAction({ label, onClick }: { label: string; onClick?: () => void }) {
-  return onClick ? <button type="button" className={styles.previewAction} data-interactive onClick={onClick}>{label}<ArrowRight aria-hidden /></button>
-    : <span className={styles.previewAction}>{label}<ArrowUpRight aria-hidden /></span>;
+function PreviewAction({ label }: { label: string }) {
+  return <span className={styles.previewAction}>{label}<ArrowUpRight aria-hidden /></span>;
 }
-function Screen({ screen, onAction }: { screen: InterfaceSpec; onAction?: () => void }) {
-  const fieldId = useId();
-  const action = <PreviewAction label={screen.action} onClick={onAction} />;
+function Screen({ screen }: { screen: InterfaceSpec }) {
+  const action = <PreviewAction label={screen.action} />;
   return <div className={styles.screen}>
     <div className={styles.siteBar}><span className={styles.siteMark}><Layers2 aria-hidden />{screen.siteName ?? "Project preview"}</span>{screen.navigation && <span className={styles.siteNav}>{screen.navigation}</span>}</div>
     {screen.fields.length ? <div className={styles.formLayout}>
       <div className={styles.formSummary}>{screen.illustration === "landscape" && <Landscape />}<h4>{screen.heading}</h4><p className={styles.eventMeta}>{screen.description}</p></div>
-      <div className={styles.formBody}><div className={styles.fields}>{screen.fields.map((f,i)=><div key={f.label} className={styles.field}>
-        <label htmlFor={`${fieldId}-${i}`}>{f.label} {f.required === "text" ? <span>(required)</span> : <span aria-label="Red required marker" style={{color:"var(--color-feedback-danger-solid)"}}>●</span>}</label>
-        <input id={`${fieldId}-${i}`} value={f.value} readOnly tabIndex={-1} aria-invalid={Boolean(f.error)} aria-describedby={f.error ? `${fieldId}-error-${i}` : undefined} />
-        {f.error && <p id={`${fieldId}-error-${i}`} className={styles.error}><TriangleAlert aria-hidden />{f.error}</p>}
+      <div className={styles.formBody}><div className={styles.fields}>{screen.fields.map((f)=><div key={f.label} className={styles.field}>
+        <div className={styles.fieldLabel}>{f.label} {f.required === "text" ? <span>(required)</span> : <span aria-label="Red required marker" style={{color:"var(--color-feedback-danger-solid)"}}>●</span>}</div>
+        <div className={styles.previewField} data-invalid={Boolean(f.error)}>{f.value}</div>
+        {f.error && <p className={styles.error}><TriangleAlert aria-hidden />{f.error}</p>}
       </div>)}</div>{action}</div>
     </div> : <div className={screen.illustration ? styles.eventLayout : styles.eventPlain}>
       {screen.illustration === "landscape" && <Landscape />}
@@ -67,48 +64,24 @@ function Screen({ screen, onAction }: { screen: InterfaceSpec; onAction?: () => 
     </div>}
   </div>;
 }
-function Prototype({ artifact }: { artifact: Extract<Artifact, {kind:"interface"}> }) {
-  const [stage,setStage] = useState<"event"|"form"|"done">("event");
-  const [email,setEmail] = useState("");
-  const [error,setError] = useState(false);
-  const inputId=useId();
-  const fieldRef=useRef<HTMLInputElement>(null);
-  const reduced=useReducedMotion();
-  useEffect(()=>{if(stage === "form") fieldRef.current?.focus();},[stage]);
-  const demo=artifact.demo!;
-  return <>
-    <div className={styles.toolbar}><Play aria-hidden /><span className={styles.title}>{artifact.title}</span><span className={styles.demoStatus}>{stage === "done" ? "3 / 3" : stage === "form" ? "2 / 3" : "1 / 3"}</span><button type="button" className={styles.demoReset} onClick={()=>{setStage("event");setEmail("");setError(false);}}><RotateCcw aria-hidden />Reset demo</button></div>
-    <div className={styles.demoProgress} aria-hidden><motion.div initial={false} animate={{scaleX:stage === "event" ? 1/3 : stage === "form" ? 2/3 : 1}} transition={{duration:reduced?0:.25}} /></div>
-    <motion.div key={stage} aria-live="polite" initial={reduced?false:{opacity:0,y:4}} animate={{opacity:1,y:0}} transition={{duration:.2}} className={styles.demoBody}>
-      {stage === "event" ? <Screen screen={artifact.screen} onAction={()=>setStage("form")} /> : stage === "form" ? <form className={styles.screen} noValidate onSubmit={e=>{e.preventDefault();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setError(true);return;}setStage("done");}}>
-        <div className={styles.siteBar}><span>{artifact.screen.heading}</span><span className={styles.meta}>Prototype · not submitted</span></div>
-        <div className={styles.field}><label htmlFor={inputId}>{demo.fieldLabel} (required)</label><input ref={fieldRef} id={inputId} type="email" autoComplete="off" value={email} placeholder={demo.placeholder} onChange={e=>setEmail(e.target.value)} aria-invalid={error} aria-describedby={error?`${inputId}-error`:undefined} />{error&&<p className={styles.error} id={`${inputId}-error`}><TriangleAlert aria-hidden />{demo.error}</p>}</div>
-        <button type="submit" className={styles.previewAction} data-interactive style={{marginTop:10}}>{demo.submitLabel}<ArrowRight aria-hidden /></button>
-      </form> : <div className={styles.success}><CheckCircle2 aria-hidden /><h4>{demo.successTitle}</h4><p>{demo.successBody}</p><span className={styles.meta}>Demo complete · no data sent</span></div>}
-    </motion.div>
-    {artifact.process && <ol className={styles.process} aria-label="Design process">{artifact.process.map((step,i)=><li key={step}><span>{i+1}</span>{step}{i<artifact.process!.length-1&&<ArrowRight aria-hidden/>}</li>)}</ol>}
-  </>;
-}
 /** Data-driven work evidence; visuals are distinct from the game's action controls. */
 export function WorkArtifact({ artifact:a }: { artifact: Artifact }) {
   const reduced=useReducedMotion();
   const enter=(i=0)=>({initial:reduced?false:{opacity:0,y:7},animate:{opacity:1,y:0},transition:{duration:.28,delay:reduced?0:i*.08}});
-  const isDemo=a.kind === "interface" && Boolean(a.demo);
   const Icon=a.kind==="sample-hold"?ShieldAlert:a.kind==="work-screen"||a.kind==="sample-results"?PanelTop:a.kind==="register"||a.kind==="panel-plan"||a.kind==="mixture"?FileText:a.kind==="flow"?MapPin:a.kind==="notes"?FileText:a.kind==="comparison"?Layers2:a.kind==="interface"&&a.screen.fidelity==="wireframe"?Layers2:PanelTop;
-  return <motion.figure {...enter()} aria-label={a.title} className={styles.artifact} style={{"--work-accent":a.world ? WORLD_COLORS[a.world] : undefined} as CSSProperties} data-medium={a.medium} data-work-artifact={a.id}>
+  return <motion.figure {...enter()} aria-label={a.title} className={styles.artifact} style={{"--work-accent":a.world ? WORLD_COLORS[a.world] : undefined} as CSSProperties} data-medium={a.medium} data-work-artifact={a.id} data-readonly="true">
     {a.organisation&&<div className={styles.organisation}><span>{a.organisation}</span><span>{a.recordId ?? "Development record"}</span></div>}
-    {!isDemo&&<div className={styles.toolbar}><Icon aria-hidden /><span className={styles.title}>{a.title}</span><span className={styles.meta}>{a.medium==="laboratory"?"R&D / teaching record":a.kind==="interface"&&a.screen.fidelity==="wireframe"?"Layout only":a.kind==="register"||a.kind==="work-screen"||a.kind==="panel-plan"?"Work record":a.kind==="notes"?"Project file":a.kind==="flow"?"Work sequence":a.kind==="mixture"||a.kind==="sample-results"||a.kind==="sample-hold"?"Lab record":"Design preview"}</span></div>}
+    {<div className={styles.toolbar}><Icon aria-hidden /><span className={styles.title}>{a.title}</span><span className={styles.meta}>{a.medium==="laboratory"?"R&D / teaching record":a.kind==="interface"&&a.screen.fidelity==="wireframe"?"Layout only":a.kind==="register"||a.kind==="work-screen"||a.kind==="panel-plan"?"Work record":a.kind==="notes"?"Project file":a.kind==="flow"?"Work sequence":a.kind==="mixture"||a.kind==="sample-results"||a.kind==="sample-hold"?"Lab record":"Design preview"}</span></div>}
     {a.kind==="work-screen"&&<WorkScreen key={a.id} artifact={a}/>}
     {a.kind==="register"&&<div className={styles.registerStock}><table className={styles.register}><thead><tr><th scope="col">ID</th>{a.columns.map(c=><th scope="col" key={c}>{c}</th>)}</tr></thead><tbody>{a.records.map(r=><tr key={r.id}><th scope="row"><span>{r.id}</span></th>{r.values.map((v,i)=><td key={a.columns[i]}>{v}</td>)}</tr>)}</tbody></table></div>}
     {a.kind==="panel-plan"&&<div className={styles.protocolFile}><div className={styles.protocolHeading}><span>{a.legend}</span><b>PROTOCOL / DRAFT</b></div><h4>{a.question}</h4><div className={styles.responseRows}>{a.codes.map(code=><div key={code}><span className={styles.sampleCode}>{code}</span><div><span>Sample code · response</span><p>Awaiting independent response</p></div></div>)}</div><ul className={styles.protocolChecks}>{a.controls.map(control=><li key={control}><Check aria-hidden/>{control}</li>)}</ul></div>}
-    {a.kind==="mixture"&&!a.practice&&<div className={styles.labCanvas}><div className={styles.batchGrid}>{a.batches.map(b=><section key={b.label} className={styles.batch}><h4>{b.label}<span>{b.ingredients.reduce((sum,i)=>sum+i.amount,0)} {a.unit}</span></h4><div className={styles.formulaBar} aria-hidden>{b.ingredients.map((v,i)=><span key={v.label} data-material={i%3} style={{flexGrow:v.amount}}/>)}</div><dl className={styles.ingredients}>{b.ingredients.map((v,i)=><div key={v.label}><dt><span data-material={i%3}/>{v.label}</dt><dd>{v.amount} {a.unit}</dd></div>)}</dl></section>)}</div><p className={styles.labFoot}>{a.caption}</p></div>}
-    {a.kind==="mixture"&&a.practice&&<MixtureBench key={a.id} artifact={a}/>}
+    {a.kind==="mixture"&&<div className={styles.labCanvas}><div className={styles.batchGrid}>{a.batches.map(b=><section key={b.label} className={styles.batch}><h4>{b.label}<span>{b.ingredients.reduce((sum,i)=>sum+i.amount,0)} {a.unit}</span></h4><div className={styles.formulaBar} aria-hidden>{b.ingredients.map((v,i)=><span key={v.label} data-material={i%3} style={{flexGrow:v.amount}}/>)}</div><dl className={styles.ingredients}>{b.ingredients.map((v,i)=><div key={v.label}><dt><span data-material={i%3}/>{v.label}</dt><dd>{v.amount} {a.unit}</dd></div>)}</dl></section>)}</div></div>}
     {a.kind==="sample-results"&&<div className={styles.resultScreen}><div className={styles.readoutHeader}><span>HANDLING TEST</span><span>Recorded counts · not live</span></div><div className={styles.resultGrid}>{a.samples.map(s=><section key={s.label}><h4>{s.label}</h4><div className={styles.reading}><strong>{s.broken}</strong><span>/ {s.tested}<small>broken</small></span></div><div className={styles.resultTrack} role="img" aria-label={`${s.broken} of ${s.tested} broken`}><motion.span initial={false} animate={{width:`${s.broken/s.tested*100}%`}} transition={{duration:reduced?0:.4}}/></div><p>{s.tested-s.broken} intact · {s.tested} tested</p></section>)}</div><p className={styles.resultScope}>{a.scope}</p></div>}
     {a.kind==="sample-hold"&&<div className={styles.holdCanvas}><div className={styles.sampleSeal}><ShieldAlert aria-hidden/><strong>{a.sampleId}</strong><span>ON HOLD</span></div><dl className={styles.holdChecks}>{a.checks.map(c=><div key={c.label}><dt>{c.label}</dt><dd>{c.value}</dd></div>)}</dl></div>}
     {a.kind==="flow"&&<ol data-long={a.steps.length>3} style={{"--flow-columns":Math.min(4,a.steps.length)} as CSSProperties} className={`${styles.canvas} ${styles.flow}`}>{a.steps.map((s,i)=>{const Glyph=glyphs[s.icon??(i===a.steps.length-1?"check":"file")] ?? FileText;return <li key={s.title} style={{animationDelay:`${(i+1)*80}ms`}} className={`${styles.flowStep} ${styles.itemEnter}`}><div className={styles.flowIcon}><Glyph aria-hidden /></div><strong>{s.title}</strong><p>{s.detail}</p>{i<a.steps.length-1&&<ArrowRight aria-hidden className={styles.flowArrow}/>}</li>;})}</ol>}
     {a.kind==="notes"&&<dl style={{"--note-columns":Math.min(3,a.entries.length)} as CSSProperties} className={a.layout==="handover"?styles.handover:styles.notes}>{a.entries.map((e,i)=>{const Glyph=glyphs[e.tone??"fact"] ?? FileText;return <div key={e.label} style={{animationDelay:`${(i+1)*80}ms`}} className={`${styles.note} ${styles.itemEnter}`} data-tone={e.tone}><dt className={styles.noteHeader}><Glyph aria-hidden /><span>{e.label}</span></dt><dd>{a.layout==="handover"&&<span className={styles.noteLabel}>{e.label}</span>}<p>{e.text}</p></dd></div>;})}</dl>}
-    {a.kind==="interface"&&(a.demo?<Prototype key={a.id} artifact={a}/>:a.screen.fidelity==="wireframe"?<Wireframe screen={a.screen}/>:<Screen screen={a.screen}/>)}
+    {a.kind==="interface"&&(a.screen.fidelity==="wireframe"?<Wireframe screen={a.screen}/>:<Screen screen={a.screen}/>)}
     {a.kind==="comparison"&&<div className={styles.comparison}>{a.panels.map((p,i)=><div key={p.label} style={{animationDelay:`${(i+1)*80}ms`}} className={`${styles.compact} ${styles.itemEnter}`}><div key="version" className={styles.version}><b>{String.fromCharCode(65+i)}</b>{p.label}</div><Screen key="screen" screen={p.screen}/></div>)}</div>}
-    <figcaption className="sr-only">{a.caption}</figcaption>
+    <figcaption className={a.kind==="mixture"?styles.labFoot:"sr-only"}>{a.caption}</figcaption>
   </motion.figure>;
 }

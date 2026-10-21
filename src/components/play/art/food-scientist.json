@@ -3,215 +3,170 @@
   "folder": "fs",
   "spriteStandard": "full-scene",
   "notes": [
-    "Selected v4 Japanese cast and designed painted food R&D environment. Human visual QA pending.",
-    "No runtime sprites. Exact repeats reuse saved assets; regenerated variants are not certified pixel-identical."
+    "v6 IB-template narrative, fixed canonical identity/color references and read-only supporting graphics.",
+    "No runtime sprites. New cameras are visually checked for continuity, never certified pixel-identical."
   ],
   "locations": {
-    "fs-arrival": {
-      "src": "/images/play/fs/v4/arrival.png",
-      "alt": "Ren addresses the first-person player in Sprout Lab.",
+    "fs-v6-arrival": {
+      "src": "/images/play/fs/v6/arrival.png",
+      "alt": "Ren welcomes the junior to a designed food product-development lab.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "fs-brief": {
-      "src": "/images/play/fs/v4/brief.png",
-      "alt": "Ren addresses the first-person player in Sprout Lab.",
+    "fs-v6-team": {
+      "src": "/images/play/fs/v6/team.png",
+      "alt": "Ren introduces Imani and Luis to the player.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
+        "x": 0.52,
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "fs-tools": {
-      "src": "/images/play/fs/v4/tools.png",
-      "alt": "Ren addresses the first-person player in Sprout Lab.",
+    "fs-v6-work": {
+      "src": "/images/play/fs/v6/work.png",
+      "alt": "Ren guides recorded trials and reviews supported evidence.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "fs-observation": {
-      "src": "/images/play/fs/v4/observation.png",
-      "alt": "Ren observes a broken oat snack with tongs.",
+    "fs-v6-review": {
+      "src": "/images/play/fs/v6/review.png",
+      "alt": "Yuki addresses the player about claims and quality authority.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "formal-meeting"
     },
-    "fs-weighing": {
-      "src": "/images/play/fs/v4/weighing.png",
-      "alt": "Ren weighs oats using a balance.",
+    "fs-v6-peer": {
+      "src": "/images/play/fs/v6/peer.png",
+      "alt": "Imani addresses the player about project ambition and report help.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "fs-midpoint": {
-      "src": "/images/play/fs/v4/midpoint.png",
-      "alt": "Ren addresses the first-person player in Sprout Lab.",
+    "fs-v6-hold": {
+      "src": "/images/play/fs/v6/hold.png",
+      "alt": "Imani and Luis discuss a held sample with the player, without tasting.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
+        "x": 0.52,
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "fs-records": {
-      "src": "/images/play/fs/v4/records.png",
-      "alt": "Ren addresses the first-person player in Sprout Lab.",
+    "fs-v6-deadline": {
+      "src": "/images/play/fs/v6/deadline.png",
+      "alt": "Luis reports missing method documentation from a separate records workstation.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "fs-hold": {
-      "src": "/images/play/fs/v4/hold.png",
-      "alt": "Yuki addresses the first-person player in Sprout Lab.",
+    "fs-v6-closing": {
+      "src": "/images/play/fs/v6/closing.png",
+      "alt": "Ren and Yuki close the report before outcome scoring.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
+        "x": 0.52,
+        "y": 0.28
       },
-      "locked": true
-    },
-    "fs-sensory": {
-      "src": "/images/play/fs/v4/sensory.png",
-      "alt": "Yuki addresses the first-person player in Sprout Lab.",
-      "focal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "locked": true
-    },
-    "fs-results": {
-      "src": "/images/play/fs/v4/results.png",
-      "alt": "Ren measures an oat snack using a texture tester.",
-      "focal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "locked": true
-    },
-    "fs-handover": {
-      "src": "/images/play/fs/v4/handover.png",
-      "alt": "Yuki addresses the first-person player in Sprout Lab.",
-      "focal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "locked": true
-    },
-    "fs-closing": {
-      "src": "/images/play/fs/v4/closing.png",
-      "alt": "Ren addresses the first-person player in Sprout Lab.",
-      "focal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "locked": true
+      "locked": true,
+      "role": "formal-meeting"
     }
   },
   "cast": {
     "Ren": {
-      "face": "/images/play/fs/face-ren-v4.webp",
-      "voicePitch": 410
+      "face": "/images/play/fs/face-ren-v6.webp",
+      "voicePitch": 435
     },
     "Yuki": {
-      "face": "/images/play/fs/face-yuki-v4.webp",
-      "voicePitch": 510
+      "face": "/images/play/fs/face-yuki-v6.webp",
+      "voicePitch": 545
+    },
+    "Imani": {
+      "face": "/images/play/fs/face-imani-v6.webp",
+      "voicePitch": 610
+    },
+    "Luis": {
+      "face": "/images/play/fs/face-luis-v6.webp",
+      "voicePitch": 400
     }
   },
   "portraitRatios": {},
   "beatLocations": {
-    "FS1-01": "fs-arrival",
-    "FS1-02": "fs-arrival",
-    "FS1-03": "fs-arrival",
-    "FS1-04": "fs-arrival",
-    "FS1-05": "fs-brief",
-    "FS1-06": "fs-brief",
-    "FS1-07": "fs-brief",
-    "FS1-08": "fs-tools",
-    "FS1-TOOLS": "fs-tools",
-    "FS1-09": "fs-tools",
-    "FS1-10": "fs-observation",
-    "FS1-11": "fs-observation",
-    "FS1-12": "fs-observation",
-    "FS1-13": "fs-weighing",
-    "FS1-14": "fs-weighing",
-    "FS1-15": "fs-weighing",
-    "FS1-16": "fs-weighing",
-    "FS1-17": "fs-weighing",
-    "FS1-MID": "fs-midpoint",
-    "FS1-18": "fs-records",
-    "FS1-19": "fs-records",
-    "FS1-20": "fs-records",
-    "FS1-21": "fs-hold",
-    "FS1-22": "fs-hold",
-    "FS1-23": "fs-hold",
-    "FS1-24": "fs-sensory",
-    "FS1-25": "fs-sensory",
-    "FS1-26": "fs-sensory",
-    "FS1-27": "fs-results",
-    "FS1-28": "fs-results",
-    "FS1-29": "fs-results",
-    "FS1-30": "fs-results",
-    "FS1-31": "fs-handover",
-    "FS1-32": "fs-handover",
-    "FS1-33": "fs-handover",
-    "FS1-34": "fs-handover",
-    "FS1-35": "fs-closing"
+    "FS1-01": "fs-v6-arrival",
+    "FS1-02": "fs-v6-arrival",
+    "FS1-03": "fs-v6-arrival",
+    "FS1-04": "fs-v6-arrival",
+    "FS1-05": "fs-v6-team",
+    "FS1-06": "fs-v6-team",
+    "FS1-07": "fs-v6-work",
+    "FS1-08": "fs-v6-work",
+    "FS1-09": "fs-v6-work",
+    "FS1-10": "fs-v6-work",
+    "FS1-11": "fs-v6-work",
+    "FS1-27": "fs-v6-work",
+    "FS1-12": "fs-v6-review",
+    "FS1-13": "fs-v6-review",
+    "FS1-14": "fs-v6-review",
+    "FS1-15": "fs-v6-review",
+    "FS1-MID": "fs-v6-review",
+    "FS1-ACT2": "fs-v6-peer",
+    "FS1-18": "fs-v6-peer",
+    "FS1-24": "fs-v6-peer",
+    "FS1-25": "fs-v6-peer",
+    "FS1-26": "fs-v6-peer",
+    "FS1-19": "fs-v6-hold",
+    "FS1-20": "fs-v6-hold",
+    "FS1-21": "fs-v6-deadline",
+    "FS1-22": "fs-v6-deadline",
+    "FS1-23": "fs-v6-deadline",
+    "FS1-28": "fs-v6-closing"
   }
 }

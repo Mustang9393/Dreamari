@@ -1,0 +1,24 @@
+{
+  "ui-ux-designer": {
+    "oldBeatCount": 37,
+    "newBeatCount": 29,
+    "oldStoryAndDecisionWords": 1462,
+    "newStoryAndDecisionWords": 1037,
+    "reductionPercent": 29.1,
+    "firstDecisionScreen": 6,
+    "fleschKincaidApprox": 2.8,
+    "fieldBudgetViolations": [],
+    "limits": "Automated estimate uses a simple syllable heuristic and includes all answer/feedback branches. Not a certified reading level. Manual plain-language review required."
+  },
+  "food-scientist": {
+    "oldBeatCount": 38,
+    "newBeatCount": 29,
+    "oldStoryAndDecisionWords": 1520,
+    "newStoryAndDecisionWords": 1022,
+    "reductionPercent": 32.8,
+    "firstDecisionScreen": 6,
+    "fleschKincaidApprox": 2.5,
+    "fieldBudgetViolations": [],
+    "limits": "Automated estimate uses a simple syllable heuristic and includes all answer/feedback branches. Not a certified reading level. Manual plain-language review required."
+  }
+}

@@ -1,0 +1,247 @@
+{
+  "career": "ui-ux-designer",
+  "date": "2026-10-21",
+  "method": "Agent visual comparison, not automated facial recognition. Hashes invalidate a review when either source or target changes. Human QA pending.",
+  "reviews": [
+    {
+      "character": "Arjun",
+      "scene": "/images/play/ux/v6/arrival.png",
+      "sceneSha256": "98ff81e839b02cd8dd934eec883ddeac41d8675e933090d843b393dceacfdcde",
+      "canonicalFace": "/images/play/ux/v6/identity/arjun.png",
+      "canonicalFaceSha256": "fdae22bbf64ef4c3e271b4529c75579fc82fd907e7062cc072c78ffb78cfdb68",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Arjun",
+      "scene": "/images/play/ux/v6/team.png",
+      "sceneSha256": "45c35a31d8444e3f1eee38f73bdb0d5ce6e12af2d19be9d69b740306118dd10c",
+      "canonicalFace": "/images/play/ux/v6/identity/arjun.png",
+      "canonicalFaceSha256": "fdae22bbf64ef4c3e271b4529c75579fc82fd907e7062cc072c78ffb78cfdb68",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Arjun",
+      "scene": "/images/play/ux/v6/work.png",
+      "sceneSha256": "0503526f3ae70a14dc1f7df3b8024799717652956e305c47c69f41f33c752460",
+      "canonicalFace": "/images/play/ux/v6/identity/arjun.png",
+      "canonicalFaceSha256": "fdae22bbf64ef4c3e271b4529c75579fc82fd907e7062cc072c78ffb78cfdb68",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Arjun",
+      "scene": "/images/play/ux/v6/test.png",
+      "sceneSha256": "a345cb74b9f95f66f49402dc79ce7e1bc7e37c3d24a635489f4060c43730c9f4",
+      "canonicalFace": "/images/play/ux/v6/identity/arjun.png",
+      "canonicalFaceSha256": "fdae22bbf64ef4c3e271b4529c75579fc82fd907e7062cc072c78ffb78cfdb68",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Arjun",
+      "scene": "/images/play/ux/v6/closing.png",
+      "sceneSha256": "8748cb9c188d8b94a1bbaaa3d4a097a1881298cdc66c2c8dab950af2f410d071",
+      "canonicalFace": "/images/play/ux/v6/identity/arjun.png",
+      "canonicalFaceSha256": "fdae22bbf64ef4c3e271b4529c75579fc82fd907e7062cc072c78ffb78cfdb68",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Noah",
+      "scene": "/images/play/ux/v6/team.png",
+      "sceneSha256": "45c35a31d8444e3f1eee38f73bdb0d5ce6e12af2d19be9d69b740306118dd10c",
+      "canonicalFace": "/images/play/ux/v6/identity/noah.png",
+      "canonicalFaceSha256": "ce13284f29076ec9ea6597b87935cbee5db40e2744b35ef821d5ea2244462a35",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Noah",
+      "scene": "/images/play/ux/v6/peer.png",
+      "sceneSha256": "eba9ad08ff279dac9af49112b80e2ca53cfec00633f6129259dd16602e04463c",
+      "canonicalFace": "/images/play/ux/v6/identity/noah.png",
+      "canonicalFaceSha256": "ce13284f29076ec9ea6597b87935cbee5db40e2744b35ef821d5ea2244462a35",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Noah",
+      "scene": "/images/play/ux/v6/conflict.png",
+      "sceneSha256": "cb2b87e218041c6dc5e16faea02073fbde8e05d2e91facdadf5c240ce5ac9c6a",
+      "canonicalFace": "/images/play/ux/v6/identity/noah.png",
+      "canonicalFaceSha256": "ce13284f29076ec9ea6597b87935cbee5db40e2744b35ef821d5ea2244462a35",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Amina",
+      "scene": "/images/play/ux/v6/team.png",
+      "sceneSha256": "45c35a31d8444e3f1eee38f73bdb0d5ce6e12af2d19be9d69b740306118dd10c",
+      "canonicalFace": "/images/play/ux/v6/identity/amina.png",
+      "canonicalFaceSha256": "4000d20f9e234725789e330140b91fc9fcda5a205cfa39735625292e0b22a2cf",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Amina",
+      "scene": "/images/play/ux/v6/deadline.png",
+      "sceneSha256": "b00350ba5f49dbc9222dff5429e072fc89da65e6b03127ec15c6410de81b1c10",
+      "canonicalFace": "/images/play/ux/v6/identity/amina.png",
+      "canonicalFaceSha256": "4000d20f9e234725789e330140b91fc9fcda5a205cfa39735625292e0b22a2cf",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Amina",
+      "scene": "/images/play/ux/v6/help.png",
+      "sceneSha256": "a45524c59f834d3ed745641d9af01c25bcf53b1eba94ee44d9b65d3cc2330df6",
+      "canonicalFace": "/images/play/ux/v6/identity/amina.png",
+      "canonicalFaceSha256": "4000d20f9e234725789e330140b91fc9fcda5a205cfa39735625292e0b22a2cf",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Samira",
+      "scene": "/images/play/ux/v6/review.png",
+      "sceneSha256": "7fd5f4449b0a6783d29271c0bf7d8d11c0fde087e8543607c776dbd8a767995f",
+      "canonicalFace": "/images/play/ux/v6/identity/samira.png",
+      "canonicalFaceSha256": "338fd8f8bc21d3e4af1f98cf45c7890f71ad769742c71c0667e94c6d96740bcb",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Samira",
+      "scene": "/images/play/ux/v6/conflict.png",
+      "sceneSha256": "cb2b87e218041c6dc5e16faea02073fbde8e05d2e91facdadf5c240ce5ac9c6a",
+      "canonicalFace": "/images/play/ux/v6/identity/samira.png",
+      "canonicalFaceSha256": "338fd8f8bc21d3e4af1f98cf45c7890f71ad769742c71c0667e94c6d96740bcb",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Samira",
+      "scene": "/images/play/ux/v6/closing.png",
+      "sceneSha256": "8748cb9c188d8b94a1bbaaa3d4a097a1881298cdc66c2c8dab950af2f410d071",
+      "canonicalFace": "/images/play/ux/v6/identity/samira.png",
+      "canonicalFaceSha256": "338fd8f8bc21d3e4af1f98cf45c7890f71ad769742c71c0667e94c6d96740bcb",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Eleanor",
+      "scene": "/images/play/ux/v6/test.png",
+      "sceneSha256": "a345cb74b9f95f66f49402dc79ce7e1bc7e37c3d24a635489f4060c43730c9f4",
+      "canonicalFace": "/images/play/ux/v6/identity/eleanor.png",
+      "canonicalFaceSha256": "f935eedf5cc63eab95c8b9e23ba62a947e2d7a5873d7c968f1e5b46a2b8d3e4c",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    }
+  ]
+}

@@ -11,8 +11,8 @@ export const FS_ARTIFACTS = {
     "kind": "notes",
     "layout": "handover",
     "title": "Project card \u00b7 Sprout oat snack",
-    "caption": "Your recommendation supports the next experiment. It does not authorise a product launch.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+    "caption": "Your recommendation supports the next experiment. It does not authorize a product launch.",
+    "provenance": "Fictional Sprout / VELO trial. Teaching data; no safety approval.",
     "entries": [
       {
         "label": "Problem",
@@ -30,16 +30,15 @@ export const FS_ARTIFACTS = {
   },
   "toolkit": {
     ...lab,id:"fs-toolkit",kind:"work-screen",title:"Measurement reference",recordId:"FS / work console",
-    caption:"Select a method to see what it measures. This reference contains no live readings.",provenance:"Fictional lab method reference, no measurements invented.",
-    tabs:[
+    caption:"Methods shown together. No live readings.",provenance:"Fictional lab method reference, no measurements invented.",
+    panels:[
       {label:"Mass",heading:"Ingredient weighing",detail:"Use a balance to record ingredient mass before mixing.",fields:[{label:"Tool",value:"Balance"},{label:"Record",value:"Mass in g"}]},
-      {label:"Firmness",heading:"Physical texture test",detail:"A texture analyser measures a physical property under a defined method.",fields:[{label:"Tool",value:"Texture analyser"},{label:"Record",value:"Physical firmness"}]},
+      {label:"Firmness",heading:"Physical texture test",detail:"A texture analyzer measures a physical property under a defined method.",fields:[{label:"Tool",value:"Texture analyzer"},{label:"Record",value:"Physical firmness"}]},
       {label:"Sensory",heading:"People’s responses",detail:"A sensory panel records how people perceive a sample.",fields:[{label:"Method",value:"Sensory panel"},{label:"Record",value:"Independent responses"}]}
     ]
   },
   "plan": {
-    id:"fs-plan", ...lab, kind:"mixture", title:"Formulation bench · 100 g trials", unit:"g",
-    practice:{from:"Oats",to:"Binder",step:5,max:5,instruction:"Move 5 g from oats to binder. Keep seeds and total mass fixed."},
+    id:"fs-plan", ...lab, kind:"mixture", title:"Trial plan · 100 g each", unit:"g",
     caption:"Replace 5 g oats with 5 g binder; same mixing, shaping, storage interval and break test.",
     provenance:"Fictional training formulations, not validated recipes.",
     batches:project.batches.map(b=>({label:`Batch ${b.id}`,ingredients:[{label:"Oats",amount:b.oats},{label:"Binder",amount:b.binder},{label:"Seeds",amount:b.seeds}]}))
@@ -51,7 +50,7 @@ export const FS_ARTIFACTS = {
     "layout": "handover",
     "title": "Example \u00b7 a different cracker test",
     "caption": "Changing one factor makes the comparison easier to interpret; repeat it to check consistency.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+    "provenance": "Fictional Sprout / VELO trial. Teaching data; no safety approval.",
     "entries": [
       {
         "label": "Changed",
@@ -73,7 +72,7 @@ export const FS_ARTIFACTS = {
     "kind": "flow",
     "title": "From question to evidence",
     "caption": "Prepare the comparison before making a conclusion.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+    "provenance": "Fictional Sprout / VELO trial. Teaching data; no safety approval.",
     "steps": [
       {
         "title": "Plan",
@@ -127,23 +126,23 @@ export const FS_ARTIFACTS = {
     "layout": "handover",
     "title": "Project handover \u00b7 version 1",
     "caption": "A useful handover states what was measured and what remains unknown.",
-    "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+    "provenance": "Fictional Sprout / VELO trial. Teaching data; no safety approval.",
     "entries": [
       {
         "label": "Trial result",
-        "text": "B had less breakage than A in this small handling test."
+        "text": "A: 7/10 broken. B: 2/10 broken."
       },
       {
         "label": "Recommendation",
-        "text": "Repeat B alongside A under the same method."
+        "text": "Repeat A and B with the same test."
       },
       {
         "label": "Unresolved",
-        "text": "Sample C is held for review. Shelf life has not been studied."
+        "text": "C stays held. Shelf life is not tested."
       },
       {
         "label": "Owner",
-        "text": "Yuki reviews the records and approves the next work."
+        "text": "Yuki reviews the next test."
       }
     ]
   }

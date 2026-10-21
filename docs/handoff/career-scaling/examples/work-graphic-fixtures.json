@@ -136,7 +136,7 @@
       "medium": "operations",
       "organisation": "Workshop / material trials",
       "title": "Material trial console",
-      "tabs": [
+      "panels": [
         {
           "label": "Mass",
           "heading": "Trial material record",

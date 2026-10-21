@@ -1,0 +1,199 @@
+{
+  "career": "food-scientist",
+  "date": "2026-10-21",
+  "method": "Agent visual comparison, not automated facial recognition. Hashes invalidate a review when either source or target changes. Human QA pending.",
+  "reviews": [
+    {
+      "character": "Ren",
+      "scene": "/images/play/fs/v6/arrival.png",
+      "sceneSha256": "b8882e925ffd35e7adc3ca6d3b2e74e85959487fcce6c5d987ad923bbcabaaf6",
+      "canonicalFace": "/images/play/fs/v6/identity/ren.png",
+      "canonicalFaceSha256": "5fc43b129c31a649d54d49c4260e386fd0521597e8a6e68c28c607e081529aca",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Ren",
+      "scene": "/images/play/fs/v6/team.png",
+      "sceneSha256": "319195837a472047caaa5bcae7f366fd2832e0098d29b41c528b8670d1bc988e",
+      "canonicalFace": "/images/play/fs/v6/identity/ren.png",
+      "canonicalFaceSha256": "5fc43b129c31a649d54d49c4260e386fd0521597e8a6e68c28c607e081529aca",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Ren",
+      "scene": "/images/play/fs/v6/work.png",
+      "sceneSha256": "ae09960ecb9ec3641c57453da664164728aa45f95b08c77f4da466bbc9dbe9d5",
+      "canonicalFace": "/images/play/fs/v6/identity/ren.png",
+      "canonicalFaceSha256": "5fc43b129c31a649d54d49c4260e386fd0521597e8a6e68c28c607e081529aca",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Ren",
+      "scene": "/images/play/fs/v6/closing.png",
+      "sceneSha256": "2ff14855c1cf623b345688c87d5c429d76d8a6fc6435382ead533c6705f76520",
+      "canonicalFace": "/images/play/fs/v6/identity/ren.png",
+      "canonicalFaceSha256": "5fc43b129c31a649d54d49c4260e386fd0521597e8a6e68c28c607e081529aca",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Yuki",
+      "scene": "/images/play/fs/v6/review.png",
+      "sceneSha256": "f01324dc945976da1f0ddb5ab5848f9ec778ee9d75442420be1696c9827b38d4",
+      "canonicalFace": "/images/play/fs/v6/identity/yuki.png",
+      "canonicalFaceSha256": "b606f8bbd9971f6e6c6e5170b53d8d516d391e98eccd8a418c626c6f73d3fd43",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Yuki",
+      "scene": "/images/play/fs/v6/closing.png",
+      "sceneSha256": "2ff14855c1cf623b345688c87d5c429d76d8a6fc6435382ead533c6705f76520",
+      "canonicalFace": "/images/play/fs/v6/identity/yuki.png",
+      "canonicalFaceSha256": "b606f8bbd9971f6e6c6e5170b53d8d516d391e98eccd8a418c626c6f73d3fd43",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Imani",
+      "scene": "/images/play/fs/v6/team.png",
+      "sceneSha256": "319195837a472047caaa5bcae7f366fd2832e0098d29b41c528b8670d1bc988e",
+      "canonicalFace": "/images/play/fs/v6/identity/imani.png",
+      "canonicalFaceSha256": "f314ad9e4dad9ffcf42c58542727a2285cad58fe5b3d429b4c8bdf3dd2957843",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Imani",
+      "scene": "/images/play/fs/v6/peer.png",
+      "sceneSha256": "64e10856467b56c4f1329c3eeb8cc799162c93fa5e1df9988637e44ca9a85d6d",
+      "canonicalFace": "/images/play/fs/v6/identity/imani.png",
+      "canonicalFaceSha256": "f314ad9e4dad9ffcf42c58542727a2285cad58fe5b3d429b4c8bdf3dd2957843",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Scoped skin repair selected after rejecting the lighter peer candidate."
+    },
+    {
+      "character": "Imani",
+      "scene": "/images/play/fs/v6/hold.png",
+      "sceneSha256": "67186b7d1595f3f6ac635552a0cc844b02cb66be3340a2d2b2ec2c755737e668",
+      "canonicalFace": "/images/play/fs/v6/identity/imani.png",
+      "canonicalFaceSha256": "f314ad9e4dad9ffcf42c58542727a2285cad58fe5b3d429b4c8bdf3dd2957843",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Scoped skin repair selected after rejecting the lighter peer candidate."
+    },
+    {
+      "character": "Luis",
+      "scene": "/images/play/fs/v6/team.png",
+      "sceneSha256": "319195837a472047caaa5bcae7f366fd2832e0098d29b41c528b8670d1bc988e",
+      "canonicalFace": "/images/play/fs/v6/identity/luis.png",
+      "canonicalFaceSha256": "98a8565550df1e4bf168743e049491bbb55ad09bdeb439b352c989f837295554",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Luis",
+      "scene": "/images/play/fs/v6/hold.png",
+      "sceneSha256": "67186b7d1595f3f6ac635552a0cc844b02cb66be3340a2d2b2ec2c755737e668",
+      "canonicalFace": "/images/play/fs/v6/identity/luis.png",
+      "canonicalFaceSha256": "98a8565550df1e4bf168743e049491bbb55ad09bdeb439b352c989f837295554",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    },
+    {
+      "character": "Luis",
+      "scene": "/images/play/fs/v6/deadline.png",
+      "sceneSha256": "25023b3a171b7ed0643a0910138c365bed7f67f4d652b32d8d92595fe9b20903",
+      "canonicalFace": "/images/play/fs/v6/identity/luis.png",
+      "canonicalFaceSha256": "98a8565550df1e4bf168743e049491bbb55ad09bdeb439b352c989f837295554",
+      "status": "compared",
+      "checks": [
+        "complexion on face/neck/hands",
+        "iris color",
+        "face/eye shape",
+        "hair silhouette",
+        "outfit"
+      ],
+      "note": "Visual identity comparison; lighting is not a new identity."
+    }
+  ]
+}

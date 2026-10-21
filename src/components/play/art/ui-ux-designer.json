@@ -1,265 +1,204 @@
 {
-  "$schema": "./career-art.schema.json",
   "career": "ui-ux-designer",
   "folder": "ux",
   "spriteStandard": "full-scene",
   "notes": [
-    "Complete opaque scene illustrations; no runtime sprite assembly.",
-    "Fifteen authored shot/state groups; exact reuse only within an unchanged narrative moment.",
-    "AI-selected art; human QA remains pending. New cameras preserve landmark continuity, not pixel identity."
+    "v6 IB-template narrative, fixed canonical identity/color references and read-only supporting graphics.",
+    "No runtime sprites. New cameras are visually checked for continuity, never certified pixel-identical."
   ],
   "locations": {
-    "northline-studio": {
-      "src": "/images/play/ux/v4/studio.png",
-      "alt": "Arjun addresses the player directly from the studio.",
+    "ux-v6-arrival": {
+      "src": "/images/play/ux/v6/arrival.png",
+      "alt": "Arjun welcomes the first-person junior to the premium Northline atelier.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "northline-research": {
-      "src": "/images/play/ux/v4/research.png",
-      "alt": "First-person observation of Arjun and Eleanor during the usability session.",
+    "ux-v6-team": {
+      "src": "/images/play/ux/v6/team.png",
+      "alt": "Arjun, Noah and Amina welcome the player and define the launch team.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
+        "x": 0.52,
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "northline-review": {
-      "src": "/images/play/ux/v4/review.png",
-      "alt": "Samira addresses the player directly from the review room.",
+    "ux-v6-work": {
+      "src": "/images/play/ux/v6/work.png",
+      "alt": "Arjun shows supported wireframes and prepares the review.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "ux-arrival": {
-      "src": "/images/play/ux/v4/arrival.png",
-      "alt": "Arjun addresses the player directly from the studio.",
+    "ux-v6-test": {
+      "src": "/images/play/ux/v6/test.png",
+      "alt": "Observed usability test: Eleanor tries to reserve; Arjun observes.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
+        "x": 0.52,
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "ux-goals": {
-      "src": "/images/play/ux/v4/goals.png",
-      "alt": "Arjun addresses the player directly from the studio.",
+    "ux-v6-review": {
+      "src": "/images/play/ux/v6/review.png",
+      "alt": "Samira addresses the player during the evidence review and midpoint.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "formal-meeting"
     },
-    "ux-toolkit": {
-      "src": "/images/play/ux/v4/toolkit.png",
-      "alt": "Arjun addresses the player directly from the studio.",
+    "ux-v6-peer": {
+      "src": "/images/play/ux/v6/peer.png",
+      "alt": "Noah explains his wish to lead the presentation.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "ux-notes": {
-      "src": "/images/play/ux/v4/notes.png",
-      "alt": "Arjun addresses the player directly from the studio.",
+    "ux-v6-conflict": {
+      "src": "/images/play/ux/v6/conflict.png",
+      "alt": "The player observes Noah making an unsupported claim to Samira.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
+        "x": 0.52,
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "ux-research-pause": {
-      "src": "/images/play/ux/v4/research-pause.png",
-      "alt": "First-person observation of Arjun and Eleanor during the usability session.",
+    "ux-v6-deadline": {
+      "src": "/images/play/ux/v6/deadline.png",
+      "alt": "Amina reports the keyboard blocker before the deadline.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "ux-iteration": {
-      "src": "/images/play/ux/v4/iteration.png",
-      "alt": "Arjun addresses the player directly from the studio.",
+    "ux-v6-help": {
+      "src": "/images/play/ux/v6/help.png",
+      "alt": "Amina prepares the checked test notes and asks for help.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.3
+        "y": 0.28
       },
-      "locked": true
+      "locked": true,
+      "role": "work-floor"
     },
-    "ux-midpoint": {
-      "src": "/images/play/ux/v4/midpoint.png",
-      "alt": "Arjun addresses the player directly from the studio.",
+    "ux-v6-closing": {
+      "src": "/images/play/ux/v6/closing.png",
+      "alt": "Arjun and Samira close the work before outcome scoring.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
+        "x": 0.52,
+        "y": 0.28
       },
-      "locked": true
-    },
-    "ux-form-review": {
-      "src": "/images/play/ux/v4/form-review.png",
-      "alt": "Arjun addresses the player directly from the studio.",
-      "focal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "locked": true
-    },
-    "ux-peer-discussion": {
-      "src": "/images/play/ux/v4/peer-discussion.png",
-      "alt": "Noah addresses the player directly from the studio.",
-      "focal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "locked": true
-    },
-    "ux-review-challenge": {
-      "src": "/images/play/ux/v4/review-challenge.png",
-      "alt": "Samira addresses the player directly from the review room.",
-      "focal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "locked": true
-    },
-    "ux-handover": {
-      "src": "/images/play/ux/v4/handover.png",
-      "alt": "Samira addresses the player directly from the review room.",
-      "focal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "locked": true
-    },
-    "ux-closing": {
-      "src": "/images/play/ux/v4/closing.png",
-      "alt": "Arjun addresses the player directly from the review room.",
-      "focal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "locked": true
+      "locked": true,
+      "role": "formal-meeting"
     }
   },
   "cast": {
-    "Noah": {
-      "face": "/images/play/ux/face-noah-v4.webp",
-      "voicePitch": 480
-    },
-    "Eleanor": {
-      "face": "/images/play/ux/face-eleanor-v4.webp",
-      "voicePitch": 530
-    },
     "Arjun": {
-      "face": "/images/play/ux/face-arjun-v4.webp",
-      "voicePitch": 430
+      "face": "/images/play/ux/face-arjun-v6.webp",
+      "voicePitch": 420
+    },
+    "Noah": {
+      "face": "/images/play/ux/face-noah-v6.webp",
+      "voicePitch": 390
+    },
+    "Amina": {
+      "face": "/images/play/ux/face-amina-v6.webp",
+      "voicePitch": 620
     },
     "Samira": {
-      "face": "/images/play/ux/face-samira-v4.webp",
-      "voicePitch": 390
+      "face": "/images/play/ux/face-samira-v6.webp",
+      "voicePitch": 540
+    },
+    "Eleanor": {
+      "face": "/images/play/ux/face-eleanor-v6.webp",
+      "voicePitch": 570
     }
   },
   "portraitRatios": {},
   "beatLocations": {
-    "UX1-01": "ux-arrival",
-    "UX1-02": "ux-arrival",
-    "UX1-03": "ux-arrival",
-    "UX1-04": "northline-studio",
-    "UX1-05": "ux-goals",
-    "UX1-06": "ux-goals",
-    "UX1-07": "ux-goals",
-    "UX1-08": "ux-goals",
-    "UX1-09": "ux-toolkit",
-    "UX1-10": "ux-toolkit",
-    "UX1-11": "ux-toolkit",
-    "UX1-12": "ux-notes",
-    "UX1-13": "ux-notes",
-    "UX1-14": "ux-notes",
-    "UX1-15": "northline-research",
-    "UX1-16": "northline-research",
-    "UX1-17": "northline-research",
-    "UX1-18": "ux-research-pause",
-    "UX1-19": "ux-iteration",
-    "UX1-20": "ux-iteration",
-    "UX1-21": "ux-form-review",
-    "UX1-22": "ux-form-review",
-    "UX1-23": "ux-form-review",
-    "UX1-24": "ux-peer-discussion",
-    "UX1-25": "ux-peer-discussion",
-    "UX1-26": "ux-peer-discussion",
-    "UX1-27": "northline-review",
-    "UX1-28": "northline-review",
-    "UX1-29": "ux-review-challenge",
-    "UX1-30": "ux-handover",
-    "UX1-31": "ux-handover",
-    "UX1-32": "ux-handover",
-    "UX1-33": "ux-handover",
-    "UX1-34": "ux-handover",
-    "UX1-35": "ux-closing",
-    "UX1-MID": "ux-midpoint"
+    "UX1-01": "ux-v6-arrival",
+    "UX1-02": "ux-v6-arrival",
+    "UX1-03": "ux-v6-arrival",
+    "UX1-04": "ux-v6-arrival",
+    "UX1-05": "ux-v6-team",
+    "UX1-06": "ux-v6-team",
+    "UX1-07": "ux-v6-work",
+    "UX1-08": "ux-v6-work",
+    "UX1-10": "ux-v6-work",
+    "UX1-11": "ux-v6-work",
+    "UX1-27": "ux-v6-work",
+    "UX1-09": "ux-v6-test",
+    "UX1-12": "ux-v6-review",
+    "UX1-13": "ux-v6-review",
+    "UX1-14": "ux-v6-review",
+    "UX1-15": "ux-v6-review",
+    "UX1-MID": "ux-v6-review",
+    "UX1-ACT2": "ux-v6-peer",
+    "UX1-18": "ux-v6-peer",
+    "UX1-19": "ux-v6-conflict",
+    "UX1-20": "ux-v6-conflict",
+    "UX1-21": "ux-v6-deadline",
+    "UX1-22": "ux-v6-deadline",
+    "UX1-23": "ux-v6-help",
+    "UX1-24": "ux-v6-help",
+    "UX1-25": "ux-v6-help",
+    "UX1-26": "ux-v6-help",
+    "UX1-28": "ux-v6-closing"
   }
 }

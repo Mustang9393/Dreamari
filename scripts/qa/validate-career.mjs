@@ -27,6 +27,7 @@ const artPath=process.argv[5]??path.join(root,'src/components/play/art',sim.care
 const art=JSON.parse(fs.readFileSync(artPath,'utf8'));
 const coveragePath=path.join(root,'docs/handoff/career-scaling/examples',sim.careerId+'-coverage.json');
 const coverage=fs.existsSync(coveragePath)?JSON.parse(fs.readFileSync(coveragePath,'utf8')):null;
+const ibMaster=load(path.join(root,'src/components/play/ib-level-1-v2.ts')).IB_LEVEL_1_V2;
 const {artifactProblems,decisionEvidenceProblems}=load(path.join(root,'src/components/play/work-artifacts.ts'));
 const traceFile=process.argv[4]??path.join(root,'docs/handoff/career-scaling/examples',sim.careerId+'-trace.json');
 const trace=fs.existsSync(traceFile)?JSON.parse(fs.readFileSync(traceFile,'utf8')).trace:[];
@@ -73,14 +74,21 @@ if(coverage){
   const level=sim.levels.find(l=>l.beats.some(b=>b.id===m.beat));const at=level?.beats.findIndex(b=>b.id===m.beat)??-1;const b=level?.beats[at];
   check(b?.kind==='card'&&b.variant==='act'&&b.review,m.beat+': missing mid-game review');
   check(level?.beats.slice(0,at).filter(isScored).length===m.afterDecisions,m.beat+': misplaced review');
-  check(b?.review?.threshold===m.threshold&&m.threshold<=50+5*m.afterDecisions,m.beat+': unreachable or mismatched threshold');
+  check(b?.review?.threshold===m.threshold&&m.threshold<=50+(level.points??5)*m.afterDecisions,m.beat+': unreachable or mismatched threshold');
  }
  check((coverage.milestones?.length??0)>0,'Missing planned mid-game milestone');
 }
 const levels=[];
 for(const level of sim.levels){
  const scored=level.beats.filter(isScored);
- check(scored.length===10,level.id+': expected ten scored decisions');
+ const ibTemplate=level.generationTemplate==='ib-l1-2026-10-21';
+ const expected=ibTemplate?ibMaster.beats.filter(isScored).length:10;
+ check(scored.length===expected,level.id+': scored decision count differs from template');
+ if(ibTemplate){
+  check(level.points===ibMaster.points&&level.noStrikes===ibMaster.noStrikes,level.id+': IB score policy drift');
+  check(JSON.stringify(level.beats.map(b=>[b.kind,Boolean(b.practice)]))===JSON.stringify(ibMaster.beats.map(b=>[b.kind,Boolean(b.practice)])),level.id+': IB slot sequence drift');
+  check(level.beats.findIndex(isScored)+1<=6,level.id+': first decision too late');
+ }
  check(level.beats.at(-1)?.kind==='review',level.id+': final beat must be review');
  check(level.directed&&level.cinematic&&level.worldTheme&&level.coreKit,level.id+': shared presentation flags missing');
  check(bespokeIn(level).length===0,level.id+': bespoke gameplay found');
@@ -104,7 +112,7 @@ for(const level of sim.levels){
   for(const concept of tr?.uses??[])check(taught.has(concept),b.id+': not taught before test: '+concept);
   for(const concept of tr?.teaches??[])taught.add(concept);
   if(isScored(b)){
-   n++;check(Math.abs(b.progress-n/10)<.00001,b.id+': progress metadata');
+   n++;check(Math.abs(b.progress-n/expected)<.00001,b.id+': progress metadata');
    check(b.skills?.length===2&&unique(b.skills)&&b.skills.every(s=>s in SKILL_MEANING),b.id+': invalid skills');
    check(Boolean(b.planLineIfFailed)&&Boolean(b.feedbackCta),b.id+': missing feedback/recovery fields');
    check((tr?.uses?.length??0)>0,b.id+': no teach/test trace');

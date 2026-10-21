@@ -1,490 +1,360 @@
 {
-  "version": 5,
+  "version": 6,
   "career": "ui-ux-designer",
   "levels": [
     "ux-l1"
   ],
+  "template": "ib-l1-2026-10-21",
   "groups": [
     {
-      "id": "northline-studio",
-      "scene": "northline-studio",
+      "id": "ux-v6-arrival",
+      "scene": "ux-v6-arrival",
       "beats": [
+        "UX1-01",
+        "UX1-02",
+        "UX1-03",
         "UX1-04"
       ],
-      "purpose": "Arjun addresses the player directly from the studio.",
+      "purpose": "Arjun welcomes the first-person junior to the premium Northline atelier.",
       "required": true,
       "pov": "address-player",
-      "eyeline": "camera",
       "speakingTarget": "player",
+      "eyeline": "camera",
       "visibleCast": [
         "Arjun"
       ]
     },
     {
-      "id": "northline-research",
-      "scene": "northline-research",
+      "id": "ux-v6-team",
+      "scene": "ux-v6-team",
       "beats": [
-        "UX1-15",
-        "UX1-16",
-        "UX1-17"
+        "UX1-05",
+        "UX1-06"
       ],
-      "purpose": "First-person observation of Arjun and Eleanor during the usability session.",
+      "purpose": "Arjun, Noah and Amina welcome the player and define the launch team.",
+      "required": true,
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Arjun",
+        "Noah",
+        "Amina"
+      ]
+    },
+    {
+      "id": "ux-v6-work",
+      "scene": "ux-v6-work",
+      "beats": [
+        "UX1-07",
+        "UX1-08",
+        "UX1-10",
+        "UX1-11",
+        "UX1-27"
+      ],
+      "purpose": "Arjun shows supported wireframes and prepares the review.",
+      "required": true,
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Arjun"
+      ]
+    },
+    {
+      "id": "ux-v6-test",
+      "scene": "ux-v6-test",
+      "beats": [
+        "UX1-09"
+      ],
+      "purpose": "Observed usability test: Eleanor tries to reserve; Arjun observes.",
       "required": true,
       "pov": "observe-task",
-      "eyeline": "task",
       "speakingTarget": "voice-over during observation",
+      "eyeline": "task",
       "visibleCast": [
         "Arjun",
         "Eleanor"
       ]
     },
     {
-      "id": "northline-review",
-      "scene": "northline-review",
+      "id": "ux-v6-review",
+      "scene": "ux-v6-review",
       "beats": [
-        "UX1-27",
-        "UX1-28"
+        "UX1-12",
+        "UX1-13",
+        "UX1-14",
+        "UX1-15",
+        "UX1-MID"
       ],
-      "purpose": "Samira addresses the player directly from the review room.",
+      "purpose": "Samira addresses the player during the evidence review and midpoint.",
       "required": true,
       "pov": "address-player",
-      "eyeline": "camera",
       "speakingTarget": "player",
+      "eyeline": "camera",
       "visibleCast": [
         "Samira"
       ]
     },
     {
-      "id": "ux-arrival",
-      "scene": "ux-arrival",
+      "id": "ux-v6-peer",
+      "scene": "ux-v6-peer",
       "beats": [
-        "UX1-01",
-        "UX1-02",
-        "UX1-03"
-      ],
-      "purpose": "Arjun addresses the player directly from the studio.",
-      "required": true,
-      "pov": "address-player",
-      "eyeline": "camera",
-      "speakingTarget": "player",
-      "visibleCast": [
-        "Arjun"
-      ]
-    },
-    {
-      "id": "ux-goals",
-      "scene": "ux-goals",
-      "beats": [
-        "UX1-05",
-        "UX1-06",
-        "UX1-07",
-        "UX1-08"
-      ],
-      "purpose": "Arjun addresses the player directly from the studio.",
-      "required": true,
-      "pov": "address-player",
-      "eyeline": "camera",
-      "speakingTarget": "player",
-      "visibleCast": [
-        "Arjun"
-      ]
-    },
-    {
-      "id": "ux-toolkit",
-      "scene": "ux-toolkit",
-      "beats": [
-        "UX1-09",
-        "UX1-10",
-        "UX1-11"
-      ],
-      "purpose": "Arjun addresses the player directly from the studio.",
-      "required": true,
-      "pov": "address-player",
-      "eyeline": "camera",
-      "speakingTarget": "player",
-      "visibleCast": [
-        "Arjun"
-      ]
-    },
-    {
-      "id": "ux-notes",
-      "scene": "ux-notes",
-      "beats": [
-        "UX1-12",
-        "UX1-13",
-        "UX1-14"
-      ],
-      "purpose": "Arjun addresses the player directly from the studio.",
-      "required": true,
-      "pov": "address-player",
-      "eyeline": "camera",
-      "speakingTarget": "player",
-      "visibleCast": [
-        "Arjun"
-      ]
-    },
-    {
-      "id": "ux-research-pause",
-      "scene": "ux-research-pause",
-      "beats": [
+        "UX1-ACT2",
         "UX1-18"
       ],
-      "purpose": "First-person observation of Arjun and Eleanor during the usability session.",
-      "required": true,
-      "pov": "observe-task",
-      "eyeline": "task",
-      "speakingTarget": "voice-over during observation",
-      "visibleCast": [
-        "Arjun",
-        "Eleanor"
-      ]
-    },
-    {
-      "id": "ux-iteration",
-      "scene": "ux-iteration",
-      "beats": [
-        "UX1-19",
-        "UX1-20"
-      ],
-      "purpose": "Arjun addresses the player directly from the studio.",
+      "purpose": "Noah explains his wish to lead the presentation.",
       "required": true,
       "pov": "address-player",
-      "eyeline": "camera",
       "speakingTarget": "player",
-      "visibleCast": [
-        "Arjun"
-      ]
-    },
-    {
-      "id": "ux-midpoint",
-      "scene": "ux-midpoint",
-      "beats": [
-        "UX1-MID"
-      ],
-      "purpose": "Arjun addresses the player directly from the studio.",
-      "required": true,
-      "pov": "address-player",
       "eyeline": "camera",
-      "speakingTarget": "player",
-      "visibleCast": [
-        "Arjun"
-      ]
-    },
-    {
-      "id": "ux-form-review",
-      "scene": "ux-form-review",
-      "beats": [
-        "UX1-21",
-        "UX1-22",
-        "UX1-23"
-      ],
-      "purpose": "Arjun addresses the player directly from the studio.",
-      "required": true,
-      "pov": "address-player",
-      "eyeline": "camera",
-      "speakingTarget": "player",
-      "visibleCast": [
-        "Arjun"
-      ]
-    },
-    {
-      "id": "ux-peer-discussion",
-      "scene": "ux-peer-discussion",
-      "beats": [
-        "UX1-24",
-        "UX1-25",
-        "UX1-26"
-      ],
-      "purpose": "Noah addresses the player directly from the studio.",
-      "required": true,
-      "pov": "address-player",
-      "eyeline": "camera",
-      "speakingTarget": "player",
       "visibleCast": [
         "Noah"
       ]
     },
     {
-      "id": "ux-review-challenge",
-      "scene": "ux-review-challenge",
+      "id": "ux-v6-conflict",
+      "scene": "ux-v6-conflict",
       "beats": [
-        "UX1-29"
+        "UX1-19",
+        "UX1-20"
       ],
-      "purpose": "Samira addresses the player directly from the review room.",
+      "purpose": "The player observes Noah making an unsupported claim to Samira.",
       "required": true,
-      "pov": "address-player",
-      "eyeline": "camera",
-      "speakingTarget": "player",
+      "pov": "npc-dialogue",
+      "speakingTarget": "Samira",
+      "eyeline": "named colleague",
       "visibleCast": [
+        "Noah",
         "Samira"
       ]
     },
     {
-      "id": "ux-handover",
-      "scene": "ux-handover",
+      "id": "ux-v6-deadline",
+      "scene": "ux-v6-deadline",
       "beats": [
-        "UX1-30",
-        "UX1-31",
-        "UX1-32",
-        "UX1-33",
-        "UX1-34"
+        "UX1-21",
+        "UX1-22"
       ],
-      "purpose": "Samira addresses the player directly from the review room.",
+      "purpose": "Amina reports the keyboard blocker before the deadline.",
       "required": true,
       "pov": "address-player",
-      "eyeline": "camera",
       "speakingTarget": "player",
+      "eyeline": "camera",
       "visibleCast": [
-        "Samira"
+        "Amina"
       ]
     },
     {
-      "id": "ux-closing",
-      "scene": "ux-closing",
+      "id": "ux-v6-help",
+      "scene": "ux-v6-help",
       "beats": [
-        "UX1-35"
+        "UX1-23",
+        "UX1-24",
+        "UX1-25",
+        "UX1-26"
       ],
-      "purpose": "Arjun addresses the player directly from the review room.",
+      "purpose": "Amina prepares the checked test notes and asks for help.",
       "required": true,
       "pov": "address-player",
-      "eyeline": "camera",
       "speakingTarget": "player",
+      "eyeline": "camera",
       "visibleCast": [
-        "Arjun"
+        "Amina"
+      ]
+    },
+    {
+      "id": "ux-v6-closing",
+      "scene": "ux-v6-closing",
+      "beats": [
+        "UX1-28"
+      ],
+      "purpose": "Arjun and Samira close the work before outcome scoring.",
+      "required": true,
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Arjun",
+        "Samira"
       ]
     }
   ],
   "beats": [
     {
       "beat": "UX1-01",
-      "scene": "ux-arrival",
-      "shotGroup": "ux-arrival",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-arrival",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-arrival"
     },
     {
       "beat": "UX1-02",
-      "scene": "ux-arrival",
-      "shotGroup": "ux-arrival",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-arrival",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-arrival"
     },
     {
       "beat": "UX1-03",
-      "scene": "ux-arrival",
-      "shotGroup": "ux-arrival",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-arrival",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-arrival"
     },
     {
       "beat": "UX1-04",
-      "scene": "northline-studio",
-      "shotGroup": "northline-studio",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-arrival",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-arrival"
     },
     {
       "beat": "UX1-05",
-      "scene": "ux-goals",
-      "shotGroup": "ux-goals",
-      "noArtifactReason": "General principle; the concrete visual appears with its worked example rather than repeating it here."
+      "scene": "ux-v6-team",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-team"
     },
     {
       "beat": "UX1-06",
-      "scene": "ux-goals",
-      "shotGroup": "ux-goals",
-      "artifact": "ux-join-flow"
+      "scene": "ux-v6-team",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-team"
     },
     {
       "beat": "UX1-07",
-      "scene": "ux-goals",
-      "shotGroup": "ux-goals",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-work",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-work"
     },
     {
       "beat": "UX1-08",
-      "scene": "ux-goals",
-      "shotGroup": "ux-goals",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-work",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-work"
     },
     {
       "beat": "UX1-09",
-      "scene": "ux-toolkit",
-      "shotGroup": "ux-toolkit",
-      "artifact": "ux-wireframe"
+      "scene": "ux-v6-test",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-test"
     },
     {
       "beat": "UX1-10",
-      "scene": "ux-toolkit",
-      "shotGroup": "ux-toolkit",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-work",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-work"
     },
     {
       "beat": "UX1-11",
-      "scene": "ux-toolkit",
-      "shotGroup": "ux-toolkit",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-work",
+      "artifact": "ux-prototype-versions",
+      "shotGroup": "ux-v6-work"
     },
     {
       "beat": "UX1-12",
-      "scene": "ux-notes",
-      "shotGroup": "ux-notes",
-      "artifact": "ux-evidence"
+      "scene": "ux-v6-review",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-review"
     },
     {
       "beat": "UX1-13",
-      "scene": "ux-notes",
-      "shotGroup": "ux-notes",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-review",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-review"
     },
     {
       "beat": "UX1-14",
-      "scene": "ux-notes",
-      "shotGroup": "ux-notes",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-review",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-review"
     },
     {
       "beat": "UX1-15",
-      "scene": "northline-research",
-      "shotGroup": "northline-research",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-16",
-      "scene": "northline-research",
-      "shotGroup": "northline-research",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-17",
-      "scene": "northline-research",
-      "shotGroup": "northline-research",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-18",
-      "scene": "ux-research-pause",
-      "shotGroup": "ux-research-pause",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-19",
-      "scene": "ux-iteration",
-      "shotGroup": "ux-iteration",
-      "artifact": "ux-live-prototype"
-    },
-    {
-      "beat": "UX1-20",
-      "scene": "ux-iteration",
-      "shotGroup": "ux-iteration",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-21",
-      "scene": "ux-form-review",
-      "shotGroup": "ux-form-review",
-      "noArtifactReason": "General principle; the concrete visual appears with its worked example rather than repeating it here."
-    },
-    {
-      "beat": "UX1-22",
-      "scene": "ux-form-review",
-      "shotGroup": "ux-form-review",
-      "artifact": "ux-form-example"
-    },
-    {
-      "beat": "UX1-23",
-      "scene": "ux-form-review",
-      "shotGroup": "ux-form-review",
-      "artifact": "ux-draft-form"
-    },
-    {
-      "beat": "UX1-24",
-      "scene": "ux-peer-discussion",
-      "shotGroup": "ux-peer-discussion",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-25",
-      "scene": "ux-peer-discussion",
-      "shotGroup": "ux-peer-discussion",
-      "artifact": "ux-prototype-versions"
-    },
-    {
-      "beat": "UX1-26",
-      "scene": "ux-peer-discussion",
-      "shotGroup": "ux-peer-discussion",
-      "noArtifactReason": "General principle; the concrete visual appears with its worked example rather than repeating it here."
-    },
-    {
-      "beat": "UX1-27",
-      "scene": "northline-review",
-      "shotGroup": "northline-review",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-28",
-      "scene": "northline-review",
-      "shotGroup": "northline-review",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-29",
-      "scene": "ux-review-challenge",
-      "shotGroup": "ux-review-challenge",
-      "noArtifactReason": "General principle; the concrete visual appears with its worked example rather than repeating it here."
-    },
-    {
-      "beat": "UX1-30",
-      "scene": "ux-handover",
-      "shotGroup": "ux-handover",
-      "artifact": "ux-handover"
-    },
-    {
-      "beat": "UX1-31",
-      "scene": "ux-handover",
-      "shotGroup": "ux-handover",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-32",
-      "scene": "ux-handover",
-      "shotGroup": "ux-handover",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-33",
-      "scene": "ux-handover",
-      "shotGroup": "ux-handover",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
-    },
-    {
-      "beat": "UX1-34",
-      "scene": "ux-handover",
-      "shotGroup": "ux-handover",
-      "artifact": "ux-release-check"
-    },
-    {
-      "beat": "UX1-35",
-      "scene": "ux-closing",
-      "shotGroup": "ux-closing",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-review",
+      "artifact": "ux-test-result",
+      "shotGroup": "ux-v6-review"
     },
     {
       "beat": "UX1-MID",
-      "scene": "ux-midpoint",
-      "shotGroup": "ux-midpoint",
-      "noArtifactReason": "The narration or existing interaction already presents the needed information; the scene supplies the relevant work context."
+      "scene": "ux-v6-review",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-review"
+    },
+    {
+      "beat": "UX1-ACT2",
+      "scene": "ux-v6-peer",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-peer"
+    },
+    {
+      "beat": "UX1-18",
+      "scene": "ux-v6-peer",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-peer"
+    },
+    {
+      "beat": "UX1-19",
+      "scene": "ux-v6-conflict",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-conflict"
+    },
+    {
+      "beat": "UX1-20",
+      "scene": "ux-v6-conflict",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-conflict"
+    },
+    {
+      "beat": "UX1-21",
+      "scene": "ux-v6-deadline",
+      "artifact": "ux-release-check",
+      "shotGroup": "ux-v6-deadline"
+    },
+    {
+      "beat": "UX1-22",
+      "scene": "ux-v6-deadline",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-deadline"
+    },
+    {
+      "beat": "UX1-23",
+      "scene": "ux-v6-help",
+      "artifact": "ux-fixed",
+      "shotGroup": "ux-v6-help"
+    },
+    {
+      "beat": "UX1-24",
+      "scene": "ux-v6-help",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-help"
+    },
+    {
+      "beat": "UX1-25",
+      "scene": "ux-v6-help",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-help"
+    },
+    {
+      "beat": "UX1-26",
+      "scene": "ux-v6-help",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-help"
+    },
+    {
+      "beat": "UX1-27",
+      "scene": "ux-v6-work",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-work"
+    },
+    {
+      "beat": "UX1-28",
+      "scene": "ux-v6-closing",
+      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
+      "shotGroup": "ux-v6-closing"
     }
   ],
   "milestones": [
     {
       "beat": "UX1-MID",
-      "afterDecisions": 5,
-      "threshold": 65,
-      "reason": "Five Best answers reach 75; threshold 65 permits one Wrong among four Best. Review is unscored; final pass remains 85."
+      "afterDecisions": 4,
+      "threshold": 68
     }
-  ],
-  "visualReview": {
-    "status": "AI inspection plus human QA pending",
-    "limits": [
-      "New camera/frame generations are continuity-reviewed, not pixel-identical edits.",
-      "Image semantics and gaze require visual QA; the structural validator checks declared POV/eyeline contracts, not inferred anatomy."
-    ]
-  }
+  ]
 }

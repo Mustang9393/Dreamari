@@ -1,0 +1,245 @@
+{
+  "id": "ib-l1-2026-10-21",
+  "source": "src/components/play/ib-level-1-v2.ts",
+  "sourceLevel": "ib-l1-v2",
+  "startReputation": 50,
+  "points": 6,
+  "noStrikes": true,
+  "midpointAfterDecisions": 4,
+  "midpointThreshold": 68,
+  "passAt": 85,
+  "slots": [
+    {
+      "slot": 1,
+      "sourceBeat": "L1-01",
+      "kind": "card",
+      "practice": false,
+      "variant": "intro",
+      "purpose": "arrival"
+    },
+    {
+      "slot": 2,
+      "sourceBeat": "L1-02",
+      "kind": "card",
+      "practice": false,
+      "variant": "intro",
+      "purpose": "project stakes"
+    },
+    {
+      "slot": 3,
+      "sourceBeat": "L1-07",
+      "kind": "card",
+      "practice": false,
+      "variant": "character",
+      "purpose": "mentor introduction"
+    },
+    {
+      "slot": 4,
+      "sourceBeat": "L1-08",
+      "kind": "card",
+      "practice": false,
+      "variant": "character",
+      "purpose": "role authority and ladder"
+    },
+    {
+      "slot": 5,
+      "sourceBeat": "L1-10",
+      "kind": "card",
+      "practice": false,
+      "variant": "intro",
+      "purpose": "peer introduction"
+    },
+    {
+      "slot": 6,
+      "sourceBeat": "L1-11",
+      "kind": "choice",
+      "practice": false,
+      "variant": null,
+      "purpose": "first decision"
+    },
+    {
+      "slot": 7,
+      "sourceBeat": "L1-14",
+      "kind": "flips",
+      "practice": false,
+      "variant": null,
+      "purpose": "terms for next task"
+    },
+    {
+      "slot": 8,
+      "sourceBeat": "L1-16",
+      "kind": "match",
+      "practice": true,
+      "variant": null,
+      "purpose": "unscored matching"
+    },
+    {
+      "slot": 9,
+      "sourceBeat": "L1-18",
+      "kind": "rapid",
+      "practice": false,
+      "variant": null,
+      "purpose": "work communication checks"
+    },
+    {
+      "slot": 10,
+      "sourceBeat": "L1-19",
+      "kind": "card",
+      "practice": false,
+      "variant": "intro",
+      "purpose": "next-task rule"
+    },
+    {
+      "slot": 11,
+      "sourceBeat": "L1-20",
+      "kind": "choice",
+      "practice": false,
+      "variant": null,
+      "purpose": "apply that rule"
+    },
+    {
+      "slot": 12,
+      "sourceBeat": "L1-21",
+      "kind": "card",
+      "practice": false,
+      "variant": "character",
+      "purpose": "reviewer introduction"
+    },
+    {
+      "slot": 13,
+      "sourceBeat": "L1-21b",
+      "kind": "card",
+      "practice": false,
+      "variant": "character",
+      "purpose": "reviewer role"
+    },
+    {
+      "slot": 14,
+      "sourceBeat": "L1-22",
+      "kind": "card",
+      "practice": false,
+      "variant": "character",
+      "purpose": "review authority"
+    },
+    {
+      "slot": 15,
+      "sourceBeat": "L1-24",
+      "kind": "choice",
+      "practice": false,
+      "variant": null,
+      "purpose": "evidence challenge"
+    },
+    {
+      "slot": 16,
+      "sourceBeat": "L1-CHECK",
+      "kind": "card",
+      "practice": false,
+      "variant": "act",
+      "purpose": "midpoint review"
+    },
+    {
+      "slot": 17,
+      "sourceBeat": "L1-ACT2",
+      "kind": "card",
+      "practice": false,
+      "variant": "act",
+      "purpose": "second act"
+    },
+    {
+      "slot": 18,
+      "sourceBeat": "L1-26",
+      "kind": "card",
+      "practice": false,
+      "variant": "character",
+      "purpose": "peer motive"
+    },
+    {
+      "slot": 19,
+      "sourceBeat": "L1-27",
+      "kind": "card",
+      "practice": false,
+      "variant": "intro",
+      "purpose": "team conflict"
+    },
+    {
+      "slot": 20,
+      "sourceBeat": "L1-28",
+      "kind": "choice",
+      "practice": false,
+      "variant": null,
+      "purpose": "respond to conflict"
+    },
+    {
+      "slot": 21,
+      "sourceBeat": "L1-29",
+      "kind": "card",
+      "practice": false,
+      "variant": "intro",
+      "purpose": "deadline change"
+    },
+    {
+      "slot": 22,
+      "sourceBeat": "L1-30",
+      "kind": "choice",
+      "practice": false,
+      "variant": null,
+      "purpose": "ask for direction"
+    },
+    {
+      "slot": 23,
+      "sourceBeat": "L1-31",
+      "kind": "card",
+      "practice": false,
+      "variant": "intro",
+      "purpose": "deadline update"
+    },
+    {
+      "slot": 24,
+      "sourceBeat": "L1-32",
+      "kind": "card",
+      "practice": false,
+      "variant": "intro",
+      "purpose": "colleague needs help"
+    },
+    {
+      "slot": 25,
+      "sourceBeat": "L1-32b",
+      "kind": "card",
+      "practice": false,
+      "variant": "intro",
+      "purpose": "clear priority"
+    },
+    {
+      "slot": 26,
+      "sourceBeat": "L1-33",
+      "kind": "rank",
+      "practice": false,
+      "variant": null,
+      "purpose": "rank work priorities"
+    },
+    {
+      "slot": 27,
+      "sourceBeat": "L1-34",
+      "kind": "card",
+      "practice": false,
+      "variant": "intro",
+      "purpose": "mentor observes"
+    },
+    {
+      "slot": 28,
+      "sourceBeat": "L1-35",
+      "kind": "card",
+      "practice": false,
+      "variant": "chapter",
+      "purpose": "project close"
+    },
+    {
+      "slot": 29,
+      "sourceBeat": "L1-36",
+      "kind": "review",
+      "practice": false,
+      "variant": null,
+      "purpose": "final review"
+    }
+  ]
+}
