@@ -4,6 +4,8 @@ Use primary sources: official standards and regulators, government sources, prof
 
 Select only a few optional, native context graphics that fit the actual scene. They may show a relevant UI state. For UX, one useful bad/good pair can show Save buried below long gray copy, then Save promoted to a clear action. Use the actual work surface and keep the important state visible; generic data does not help. For Nursing, research and preserve only the approved screen context (such as ECG, badge, call light, wristband or report) needed by each locked script screen. Never add unsupported readings or change the Nursing script.
 
+Map any graphic to an actual work beat, not an introduction card. Respect the cast ledger: do not show or name a character before their work-led first-appearance beat, and leave gameplay between character entrances.
+
 The UI panel remains centered in the same position scene to scene. Never shift it sideways to protect faces or fit a graphic. Recommend visual compositions that keep the fixed centered HUD and dialogue footprint clear.
 
 Story-card order is title → graphic → description → CTA. Keep graphics concise at about 6–14 visible words. They are optional context, not task instructions or required evidence. The game question supplies all evidence and stays answerable without the graphic. No dense graphs, hidden clues, fabricated data, independent interaction or extra focus targets.

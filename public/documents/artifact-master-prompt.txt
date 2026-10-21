@@ -9,6 +9,8 @@ Implementation: {SHARED NATIVE RENDERER / TOKENS}
 
 Create a small optional native context visual for a real entry-level work surface. It adds atmosphere or shows a relevant good/bad UI state; it is never a required evidence source or second task. Use primary-source research and identify any fictional data. If nothing relevant helps, omit it.
 
+Tie the graphic to an actual work beat, not a character-introduction card. Do not show or name a cast member before their first-appearance beat in the cast ledger.
+
 Keep gameplay panels centered and consistently positioned across scenes. Do not move UI left or right to protect faces or make room for this graphic; artwork and optional context fit around the fixed centered HUD/dialogue footprint.
 
 For UX examples, show the actual relevant states. A poor state may bury a Save action under long gray description lines; the improved state makes Save prominent. Keep the important visual difference legible at game size. The question text still states the task and evidence.

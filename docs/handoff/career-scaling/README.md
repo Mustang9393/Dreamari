@@ -6,7 +6,7 @@ The shareable source of truth is [the Career Simulation Master SOP](../../../out
 
 For new-career games such as UX and Food Science, follow the vetted IB experience and its 29-runtime-beat structure, varied interactions and concise copy. Registered Nurse is an approved exception: `rn-level-1-v2.ts` is locked at 36 runtime beats across 55 script screens. RN updates change images and face chips only.
 
-Keep gameplay panels centered in a fixed position; compose art around the HUD and dialogue zones rather than shifting UI. Introduce new-career cast members one at a time with a solo first appearance and follow-up moments, tracked in a cast ledger. Use the shared IB monogram/CareerSeal for success.
+Keep gameplay panels centered in a fixed position; compose art around the HUD and dialogue zones rather than shifting UI. Introduce new-career cast members one at a time through the actual work, with meaningful gameplay between entrances, a solo first appearance and follow-up moments tracked in a cast ledger. Avoid a succession of introduction cards even when spaced apart. Use the shared IB monogram/CareerSeal for success.
 
 The AI researches, writes, generates, integrates and QA-repairs the whole game. Contact sheets support internal QA and do not require an approval gate. Human QA is for the assembled result.
 
