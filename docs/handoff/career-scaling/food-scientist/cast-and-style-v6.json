@@ -1,0 +1,100 @@
+{
+  "version": 6,
+  "drawingAnchor": "references/ux-character.png",
+  "cast": {
+    "Ren": {
+      "age": 34,
+      "gender": "male",
+      "ethnicity": "Japanese",
+      "complexion": "light warm skin",
+      "iris": "brown",
+      "hair": "short black side part under pale blue hygiene cap",
+      "outfit": "white coat, indigo collar",
+      "role": "senior scientist; trial mentor",
+      "source": "arrival",
+      "canonicalScene": "/images/play/fs/v6/arrival.png",
+      "canonicalFace": "/images/play/fs/v6/identity/ren.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "Compared with canonical face at matched size; human art QA pending",
+      "canonicalFaceSha256": "5fc43b129c31a649d54d49c4260e386fd0521597e8a6e68c28c607e081529aca",
+      "identityNote": "Same complexion family, iris color, face/eye shape, hairline and identifying features across selected shots. Local light/shadow is permitted. Not a pixel-identity certification."
+    },
+    "Yuki": {
+      "age": 45,
+      "gender": "female",
+      "ethnicity": "Japanese",
+      "complexion": "very light cool ivory",
+      "iris": "gray brown",
+      "hair": "simple dark bob secured under white hygiene cap",
+      "outfit": "white coat, plum collar",
+      "role": "quality lead; tasting/claims authority",
+      "source": "review",
+      "canonicalScene": "/images/play/fs/v6/review.png",
+      "canonicalFace": "/images/play/fs/v6/identity/yuki.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "Compared with canonical face at matched size; human art QA pending",
+      "canonicalFaceSha256": "b606f8bbd9971f6e6c6e5170b53d8d516d391e98eccd8a418c626c6f73d3fd43",
+      "identityNote": "Same complexion family, iris color, face/eye shape, hairline and identifying features across selected shots. Local light/shadow is permitted. Not a pixel-identity certification."
+    },
+    "Imani": {
+      "age": 24,
+      "gender": "female",
+      "ethnicity": "Black American",
+      "complexion": "very dark espresso brown; canonical crop palette fixed",
+      "paletteTarget": "base approx #3D241E; canonical crop overrides text swatch",
+      "iris": "warm amber brown",
+      "hair": "tightly coiled hair secured under mint hygiene cap",
+      "outfit": "white coat, mustard collar",
+      "role": "junior scientist; held-sample challenge and report teamwork",
+      "source": "team",
+      "canonicalScene": "/images/play/fs/v6/team.png",
+      "canonicalFace": "/images/play/fs/v6/identity/imani.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "Compared with canonical face at matched size; human art QA pending",
+      "canonicalFaceSha256": "f314ad9e4dad9ffcf42c58542727a2285cad58fe5b3d429b4c8bdf3dd2957843",
+      "identityNote": "Same complexion family, iris color, face/eye shape, hairline and identifying features across selected shots. Local light/shadow is permitted. Not a pixel-identity certification."
+    },
+    "Luis": {
+      "age": 31,
+      "gender": "male",
+      "ethnicity": "Puerto Rican",
+      "complexion": "medium tan brown",
+      "iris": "gray blue",
+      "hair": "short dark waves under white hygiene cap",
+      "outfit": "white coat, rust collar",
+      "role": "record coordinator; flags identity and method gaps, resolves draft",
+      "source": "team",
+      "canonicalScene": "/images/play/fs/v6/team.png",
+      "canonicalFace": "/images/play/fs/v6/identity/luis.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "Compared with canonical face at matched size; human art QA pending",
+      "canonicalFaceSha256": "98a8565550df1e4bf168743e049491bbb55ad09bdeb439b352c989f837295554",
+      "identityNote": "Same complexion family, iris color, face/eye shape, hairline and identifying features across selected shots. Local light/shadow is permitted. Not a pixel-identity certification."
+    }
+  },
+  "skinPolicy": "Lighting changes highlights/shadows, not underlying complexion. Compare face/neck/hands and iris colors against one canonical crop per person. Reject drift."
+}

@@ -266,7 +266,7 @@ export function PreGameFlow({
             className={`mx-auto w-full max-w-[780px] ${mode === "start" ? "mt-auto pt-[24px] pb-[clamp(28px,calc(8vh/var(--vz,1)),80px)] lg:pb-[clamp(80px,calc(17vh/var(--vz,1)),220px)]" : "my-auto py-[clamp(24px,calc(5vh/var(--vz,1)),56px)]"}`}
           >
             {mode === "start" && <StartCard inRun={inRun} simulation={simulation} level={level} preGame={preGame} accent={accent} startLabel={startLabel} onStart={() => { playSelect(); if (inRun) onClose(); else go("handoff"); }} onHowTo={() => go("howto")} onLesson={() => go("lesson")} />}
-            {mode === "howto" && step === 0 && <MissionScreen ladder={ladder} accent={accent} />}
+            {mode === "howto" && step === 0 && <MissionScreen ladder={ladder} accent={accent} line={preGame.missionLine} branches={preGame.ladderBranches} note={preGame.ladderNote} />}
             {mode === "howto" && step === 1 && <ReputationScreen points={points} tiers={tiers} />}
             {mode === "howto" && step === 2 && <SkillsScreen skills={preGame.skills} accent={accent} />}
             {mode === "lesson" && screen && <LessonScreen screen={screen} accent={accent} startLabel={startLabel} onDone={toStory} />}
@@ -379,12 +379,12 @@ function ScreenHead({ title, line }: { title: string; line: string }) {
 /** How to Play 1: the career as a track. You stand on the first stop, the
  *  next one is lit, the line between you fills in. No captions: the lock
  *  and the light say "locked" and "next". */
-function MissionScreen({ ladder, accent }: { ladder: string[]; accent: string }) {
+function MissionScreen({ ladder, accent, line, branches, note }: { ladder: string[]; accent: string; line?:string; branches?:{label:string;roles:string}[]; note?:string }) {
   const rungs = ladder.slice(0, 4);
   const n = rungs.length;
   return (
     <div className="flex flex-col items-center gap-[clamp(28px,calc(5vh/var(--vz,1)),44px)]">
-      <ScreenHead title="Your mission" line="Each level is a new job. Earn the next one." />
+      <ScreenHead title="Your mission" line={line ?? "Each level is a new job. Earn the next one."} />
       <motion.ol
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -428,6 +428,7 @@ function MissionScreen({ ladder, accent }: { ladder: string[]; accent: string })
           );
         })}
       </motion.ol>
+      {branches?.length ? <div className="w-full max-w-[680px] space-y-2 text-center">{branches.map(b=><p className="text-[12px] leading-relaxed" key={b.label}><strong>{b.label}: </strong>{b.roles}</p>)}{note&&<p className="text-[11px] leading-relaxed" style={{color:MUTED}}>{note}</p>}</div> : null}
     </div>
   );
 }

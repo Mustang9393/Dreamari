@@ -1,0 +1,123 @@
+{
+  "version": 6,
+  "drawingAnchor": "references/ux-character.png",
+  "cast": {
+    "Arjun": {
+      "age": 34,
+      "gender": "male",
+      "ethnicity": "Indian",
+      "complexion": "medium warm brown",
+      "iris": "brown",
+      "hair": "short black side sweep",
+      "outfit": "teal overshirt, cream tee, charcoal trousers",
+      "role": "senior UX mentor",
+      "source": "arrival",
+      "canonicalScene": "/images/play/ux/v6/arrival.png",
+      "canonicalFace": "/images/play/ux/v6/identity/arjun.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "Compared with canonical face at matched size; human art QA pending",
+      "canonicalFaceSha256": "fdae22bbf64ef4c3e271b4529c75579fc82fd907e7062cc072c78ffb78cfdb68",
+      "identityNote": "Same complexion family, iris color, face/eye shape, hairline and identifying features across selected shots. Local light/shadow is permitted. Not a pixel-identity certification."
+    },
+    "Noah": {
+      "age": 24,
+      "gender": "male",
+      "ethnicity": "Mexican",
+      "complexion": "medium tan",
+      "iris": "olive green",
+      "hair": "short swept brown masses",
+      "outfit": "pale blue shirt, charcoal trousers",
+      "role": "junior designer; peer ambition and claim challenge",
+      "source": "team",
+      "canonicalScene": "/images/play/ux/v6/team.png",
+      "canonicalFace": "/images/play/ux/v6/identity/noah.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "Compared with canonical face at matched size; human art QA pending",
+      "canonicalFaceSha256": "ce13284f29076ec9ea6597b87935cbee5db40e2744b35ef821d5ea2244462a35",
+      "identityNote": "Same complexion family, iris color, face/eye shape, hairline and identifying features across selected shots. Local light/shadow is permitted. Not a pixel-identity certification."
+    },
+    "Amina": {
+      "age": 25,
+      "gender": "female",
+      "ethnicity": "Black American",
+      "complexion": "very dark espresso brown; lit planes stay deep brown",
+      "paletteTarget": "base approx #3D241E; canonical crop overrides an approximate text swatch",
+      "iris": "dark brown",
+      "hair": "black tightly coiled high natural puff",
+      "outfit": "mustard knit, navy trousers, small gold studs",
+      "role": "junior designer; keyboard testing, retest and handoff",
+      "source": "team",
+      "canonicalScene": "/images/play/ux/v6/team.png",
+      "canonicalFace": "/images/play/ux/v6/identity/amina.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "Compared with canonical face at matched size; human art QA pending",
+      "canonicalFaceSha256": "4000d20f9e234725789e330140b91fc9fcda5a205cfa39735625292e0b22a2cf",
+      "identityNote": "Same complexion family, iris color, face/eye shape, hairline and identifying features across selected shots. Local light/shadow is permitted. Not a pixel-identity certification."
+    },
+    "Samira": {
+      "age": 42,
+      "gender": "female",
+      "ethnicity": "Black",
+      "complexion": "warm medium-deep brown, golden undertone; exact selected crop palette",
+      "iris": "brown",
+      "hair": "asymmetric black crop, one gray temple mass",
+      "outfit": "plum blazer, cream high neck, gold hoops",
+      "role": "design lead; client-review authority",
+      "source": "review",
+      "canonicalScene": "/images/play/ux/v6/review.png",
+      "canonicalFace": "/images/play/ux/v6/identity/samira.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "Compared with canonical face at matched size; human art QA pending",
+      "canonicalFaceSha256": "338fd8f8bc21d3e4af1f98cf45c7890f71ad769742c71c0667e94c6d96740bcb",
+      "identityNote": "Same complexion family, iris color, face/eye shape, hairline and identifying features across selected shots. Local light/shadow is permitted. Not a pixel-identity certification."
+    },
+    "Eleanor": {
+      "age": 60,
+      "gender": "female",
+      "ethnicity": "White",
+      "complexion": "very light cool ivory",
+      "iris": "green",
+      "hair": "chin-length silver-gray bob",
+      "outfit": "lavender jacket, pale blue shirt",
+      "role": "runner/participant; meaningful observed reservation test",
+      "source": "test",
+      "canonicalScene": "/images/play/ux/v6/test.png",
+      "canonicalFace": "/images/play/ux/v6/identity/eleanor.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "Compared with canonical face at matched size; human art QA pending",
+      "canonicalFaceSha256": "f935eedf5cc63eab95c8b9e23ba62a947e2d7a5873d7c968f1e5b46a2b8d3e4c",
+      "identityNote": "Same complexion family, iris color, face/eye shape, hairline and identifying features across selected shots. Local light/shadow is permitted. Not a pixel-identity certification."
+    }
+  },
+  "skinPolicy": "Lighting changes highlights/shadows, not underlying complexion. Compare face/neck/hands and iris colors against one canonical crop per person. Reject drift."
+}

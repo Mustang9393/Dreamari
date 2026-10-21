@@ -1,0 +1,227 @@
+{
+  "version": 6,
+  "date": "2026-10-21",
+  "note": "Generation audit, not a deterministic recipe. Canonical selected face references override rejected drafts. Amina and Imani team drafts were rejected for complexion drift; use v6 identity crops for future edits.",
+  "jobs": [
+    {
+      "key": "ux-anchor",
+      "refs": [
+        "docs/handoff/career-scaling/references/ux-character.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. NEW UX location anchor: Northline Studio, hired by fictional elite sportswear brand VELO to design the reservation experience for a limited running-shoe launch. Do NOT print brand words or UI. Prestigious design atelier in a high-rise: double-height walnut ribbed ceiling, sculptural stair at rear right, pale limestone, curved smoked-glass meeting pods, one long materials/model table, panoramic city and river through tall windows on LEFT, distant stepped tower fixed at left and slim bridge beyond. Beautiful sophisticated architecture rather than a basic open office. Morning blue sky, soft sun rays from left with clear air, amber highlights and cool shadow. Arjun, 34 Indian male senior UX designer, medium-brown skin, brown almond anime eyes, short black side-swept simple hair, teal overshirt over cream T-shirt, charcoal trousers, matching the reference identity. Mid-thigh friendly introduction, facing player holding a closed sketchpad at hip and gesturing toward studio. No other people. Keep hair and skin flatter and less detailed than reference."
+    },
+    {
+      "key": "fs-anchor",
+      "refs": [
+        "docs/handoff/career-scaling/references/ux-character.png",
+        "public/images/play/fs/v4/arrival.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. NEW food R&D anchor: upscale Sprout Lab developing an oat snack for fictional prestigious sportswear company VELO's training centers. Interior must be an actual food product-development pilot lab: cleanable pale engineered stone floors, satin steel preparation islands, fitted sage cabinetry, separate preparation/range hood at right, weighing/test benches and glazed sensory-room door at rear right. Grand clerestory architecture and generous proportions, beautifully designed ceiling planes and recessed practical lights, expensive institutional design, NOT hotel ornaments or domestic kitchen, NO marble/gold/noise. Broad anime material shapes only. Windows LEFT show a courtyard maple, tan research building with three window bays and a tall narrow tower beyond; keep geography locked. Neutral morning sun from left, faint plausible rays, cool room fill. Ren Takahashi 34 Japanese male scientist from second reference: light warm skin, brown anime eyes, short simple black side-part hair fully held under pale blue hygiene cap, white lab coat over indigo collared shirt, dark trousers, closed clipboard. Faces lens welcoming the first-person junior player, full mid-thigh body at center. Match first reference FLAT anime faces/hair style, not realistic skin or comic style. No other people."
+    },
+    {
+      "key": "ux-team",
+      "out": "ux/v6/team.png",
+      "refs": [
+        "public/images/play/ux/v6/arrival.png",
+        "public/images/play/ux/face-noah-v4.webp"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Same premium Northline atelier in image1, preserve architecture/window-city exactly for this camera. THREE named colleagues welcome first-person player; all face camera, no visible player. Arjun at left, SAME identity/clothes as image1. Noah at center-left is 24 Mexican male junior designer, medium-tan skin, olive-green anime eyes, SHORT brown swept hair in 5 broad masses, pale blue rolled-sleeve shirt, charcoal trousers, identity image2 but much less strand detail. Amina at center-right is 25 Black American female junior designer, VERY DARK espresso-brown skin (do not lighten), dark brown almond anime eyes, broad nose suggested by just one small anime mark, black tightly coiled hair in a high rounded natural puff, mustard knit top, navy wide-leg trousers, simple stud earrings. Distinct faces, heights and relaxed upright head angles. She holds a tablet low at waist. Triangular ensemble medium-thigh shot with all faces in middle 50% of wide image so phone crop retains them. Two juniors closer than mentor, faces around y=.27. Morning neutral light matches all skin tones. No text or UI."
+    },
+    {
+      "key": "ux-review",
+      "out": "ux/v6/review.png",
+      "refs": [
+        "public/images/play/ux/v6/arrival.png",
+        "public/images/play/ux/face-samira-v4.webp"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. NEW camera in the curved smoked-glass meeting pod established in image1, high-end restrained Northline review room with walnut curved ceiling, pale limestone round table, city river LEFT outside same window landmarks (stepped tower and bridge), afternoon neutral directional daylight not sunset. Samira, 42 Black female design lead, deep warm-brown skin, brown almond anime eyes, cropped asymmetrical black hair with ONE grey temple mass, plum blazer over cream high-neck top, small gold hoop earrings. Use image2 identity but remove realistic lips, hair strands and face modelling: LINE mouth, flat anime eyes/face. She addresses first-person junior camera directly, poised and thoughtful with an open hand over a closed presentation folder; waist visible with full plausible body below frame. Medium-thigh center shot, face y=.26. No other people, no boardroom stock photo, no dense slides/text."
+    },
+    {
+      "key": "fs-team",
+      "out": "fs/v6/team.png",
+      "refs": [
+        "public/images/play/fs/v6/arrival.png",
+        "docs/handoff/career-scaling/references/ux-character.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Same Sprout pilot food lab and morning light as image1, identical windows/research-building/courtyard, preserve layout. THREE colleagues welcoming first-person junior player, each faces camera: Ren from image1 at left rear, same pale blue cap/white coat/indigo collar and black simple hair. Imani at center-left, 24 Black American female junior food scientist, VERY DARK espresso-brown skin do not lighten, dark brown expressive almond anime eyes, tightly coiled black hair fully secured inside a pale mint hygiene cap, white lab coat over mustard collared shirt, dark trousers, no visible hair outside cap. Luis at center-right, 31 Puerto Rican male lab record coordinator, medium tan-brown skin, grey-blue anime eyes, short dark wavy hair under white hygiene cap, white lab coat over rust collared shirt, dark trousers; slightly squarer face than Ren, no rendered stubble. Both hold closed record folders low at waist, no food touching. Center the two peers closely in middle 50% of canvas, mentor secondary. Faces y=.27, thigh-up complete staging. Flat skin and simple cel shading style of image2, not comic book. Professional warm teamwork, no text."
+    },
+    {
+      "key": "ux-team-dark",
+      "out": "ux/v6/team.png",
+      "refs": [
+        "public/images/play/ux/v6/team.png"
+      ],
+      "prompt": "Edit this complete anime scene. Keep all characters' faces, clothes, positions and room exactly as they are. Correct only Amina's skin palette, the Black woman at right in mustard. Her canonical complexion is VERY DARK rich espresso/ebony brown: base approximately #3D241E and lit planes still deep brown, around Monk skin-tone 9. She must be visibly much darker than both men. Preserve her natural puff, simple flat anime cel shading, eyes, hands and face identity. Darken all visible face/neck/hands consistently. Do not add texture or realistic lighting gradients. Do not change the two men or environment. No text."
+    },
+    {
+      "key": "fs-team-dark",
+      "out": "fs/v6/team.png",
+      "refs": [
+        "public/images/play/fs/v6/team.png"
+      ],
+      "prompt": "Edit this anime scene keeping all figures' identities, expressions, clothes, geometry and the lab unchanged. Only correct Imani's complexion: the center Black woman with mint cap and mustard collar has VERY DARK rich espresso/ebony brown skin, base around #3D241E, lit planes still deep brown, Monk skin-tone 9. Make all her visible face/neck/hands this same much deeper tone, visibly much darker than both men. Preserve flat anime shading and clear expressive eyes. Do not add photographic skin or extra detail. No text or other changes."
+    },
+    {
+      "key": "fs-review",
+      "out": "fs/v6/review.png",
+      "refs": [
+        "public/images/play/fs/v6/arrival.png",
+        "public/images/play/fs/v4/hold.png",
+        "docs/handoff/career-scaling/references/ux-character.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. New review-room camera in the glazed side room established in first image. Preserve lab's left courtyard view with maple, tan 3-window-bay research building and distant narrow tower. Premium cleanable food-lab meeting space: curved pale solid-surface table, sage closed cabinets, ribbed acoustic ceiling, glazed pilot lab beyond, selective painted detail not photoreal. Afternoon neutral light from LEFT. Yuki Mori, 45 Japanese female quality lead, VERY LIGHT cool-ivory skin, gray-brown anime eyes, simple dark straight bob fully secured under white hygiene cap, white lab coat over plum collared shirt, dark trousers. Match identity second image and economy of third image. Slightly mature angular jaw, flat face with tiny nose mark, small mouth LINE, no painted lips. Seated behind table with plausible body/chair and forearms, hand resting on closed document folder, focused and composed, looks straight at first-person player. Main face center y=.25. Nobody else."
+    },
+    {
+      "key": "ux-work",
+      "out": "ux/v6/work.png",
+      "refs": [
+        "public/images/play/ux/v6/arrival.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Same Arjun and same premium Northline atelier, new eye-level close conversation camera beside the right-side long materials table. Architectural stair/glass pod behind right, LEFT windows keep same stepped tower/bridge/river. Arjun seated plausibly at the table, turns face toward first-person junior lens while showing a paper wireframe sheet, its contents only sparse empty gray blocks and thin lines, no words. One monitor beside him has simple abstract UI shapes, not readable text. A few carefully placed running shoe samples and material swatches at far table end identify sportswear work. Midday neutral left light, no golden sunset. Half-body face y=.25, centerx=.50. His face and short black hair use few broad flat masses and 4 interior lines max. Full body/chair contact and supported paper. No other people."
+    },
+    {
+      "key": "ux-test",
+      "out": "ux/v6/test.png",
+      "refs": [
+        "public/images/play/ux/v6/arrival.png",
+        "public/images/play/ux/face-eleanor-v4.webp"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Explicit observed-task scene from first-person researcher/player POV in a quiet premium Northline testing lounge, no visible player avatar or hands. New camera inside glazed research pod, curved walnut wall, pale stone table, window LEFT retaining same city river/stepped tower/bridge, clear late-morning daylight. Eleanor, 60 White woman with VERY LIGHT cool ivory complexion, green anime eyes, simple chin-length silver-gray bob, light blue shirt under lavender sports jacket, visible age in jaw and subtle under-eye marks ONLY not photoreal wrinkles. Same identity second image in flatter anime drawing. She sits correctly with chair/table contact, holding a generic unbranded phone low over the table and looking down at it, a small puzzled eyebrow expression, eyes on task NOT another person. Phone screen is only sparse muted rectangular UI shapes with no readable text; native game UI will supply authoritative labels. Arjun (same identity first image) sits slightly behind at left with a notepad, neutrally observing without pointing or helping. Center Eleanor near .53 face at y=.28, Arjun near .38, both faces survive portrait crop. Complete bodies below table, no cutout sprites."
+    },
+    {
+      "key": "fs-work",
+      "out": "fs/v6/work.png",
+      "refs": [
+        "public/images/play/fs/v6/arrival.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Same Ren, same Sprout Lab kitchen pilot/testing room, NEW eye-level camera at the weighing island looking diagonally toward the left windows, consistent courtyard maple, tan 3-bay research building and distant tower. Ren in pale blue hygiene cap, indigo collar/white lab coat is doing documented trial work: one covered tray and a simple digital balance on clean satin-steel bench, closed ingredient containers, a record sheet with blank ruled rows, no labels or readings. He turns toward the first-person junior player with focused neutral expression and holds a pen over the supported record sheet, no touching open food. Facial identity and simple hair match anchor. One broad cel shadow on face. Cinematic institutional design, fitted sage cabinets, architect-designed ceiling, cool neutral midday sunlight from left and muted warm bounce; rich spatial depth but simplified painted reflection bands. Main face center .50,y=.25, body seated/standing supported correctly. No other people, no illustrated equipment diagram."
+    },
+    {
+      "key": "ux-peer",
+      "out": "ux/v6/peer.png",
+      "refs": [
+        "public/images/play/ux/v6/arrival.png",
+        "public/images/play/ux/v6/identity/noah.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Same Northline studio, NEW medium close first-person camera at the shoe/materials work table. Noah alone addresses the player with confident but not villainous expression, one hand holding a tablet to his side, the other indicating a supported paper layout. EXACT identity/color of image2: medium tan skin, olive-green irises, short swept brown anime hair, pale blue rolled-sleeve shirt, charcoal trousers. Preserve his canonical facial proportions, brows, eye shape and iris color. Do not increase hair detail. Afternoon neutral LEFT daylight, skin base stays same as canonical, no tan/light complexion shift. Same city river/stepped tower/bridge left and stair right in background, new camera plausible continuity. Face x=.5,y=.27, mid-thigh complete body. No extra people or UI/text."
+    },
+    {
+      "key": "ux-help",
+      "out": "ux/v6/help.png",
+      "refs": [
+        "public/images/play/ux/v6/arrival.png",
+        "public/images/play/ux/v6/identity/amina.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Same Northline, new quiet editing alcove at edge of atelier, cream solid-surface desk, walnut ribs, glazed city LEFT with fixed landmarks. Amina is the ONLY character. Exact identity and color of second image: VERY DARK espresso-brown face/neck/hands, base around #3D241E, shadows deeper, highlights still deep brown. Black coiled natural puff, dark brown iris color, round anime face, mustard knit top, navy trousers, tiny gold studs. Do not lighten her, do not change face or hair. Seated plausibly on real chair at desk, close laptop with abstract sparse lines and notebook next to her. She turns to the first-person player for help with test notes, focused friendly expression and small open-hand request, not the same head tilt as before. Face y=.26,x=.5. Neutral afternoon light must preserve base complexion. All visible skin consistent. No readable text, no other people."
+    },
+    {
+      "key": "fs-peer",
+      "out": "fs/v6/peer.png",
+      "refs": [
+        "public/images/play/fs/v6/arrival.png",
+        "public/images/play/fs/v6/identity/imani.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Same Sprout lab, new camera beside a cleanable records desk OUTSIDE food-preparation zone, sage cabinets, glass view back to fixed pilot-lab hood on right, courtyard maple/tan research building at left. Imani alone speaks to first-person junior player: exact face, VERY DARK espresso-brown skin face/neck/hands of image2, warm amber-brown irises fixed, black coiled hair fully secured under mint hygiene cap, white coat/mustard collar/dark trousers. Do not lighten complexion or change facial structure. Holding closed trial report at hip, composed ambitious expression and upright head, medium-thigh center frame, face .5,.25. Neutral afternoon daylight left, deep-brown lit planes, no orange/tan or blue skin. Attractive designed institutional lab, flat anime rendering, no text or other people."
+    },
+    {
+      "key": "fs-deadline",
+      "out": "fs/v6/deadline.png",
+      "refs": [
+        "public/images/play/fs/v6/arrival.png",
+        "public/images/play/fs/v6/identity/luis.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Same Sprout pilot lab, NEW camera at the documentation workstation, glazed wall separates paperwork from prep. Luis only faces first-person player with a concerned but calm expression, holding a paper batch record with sparse blank ruled rows, no readable text or numbers. Exact canonical image2: Puerto Rican male31, medium tan-brown skin, gray-blue irises, short black wavy hair under white hygiene cap, white lab coat/rust shirt/dark trousers, slightly square anime face, no stubble or painted lips. Keep skin/iris/face consistent. Behind him a tasteful integrated workstation, matte monitor with blank form shapes, sage cabinets, expensive cleanable joinery, same courtyard left. 3p.m. neutral afternoon daylight fromleft, no golden sunset. Face centered y=.26, full supported posture, no extra person."
+    },
+    {
+      "key": "ux-conflict",
+      "out": "ux/v6/conflict.png",
+      "refs": [
+        "public/images/play/ux/v6/review.png",
+        "public/images/play/ux/v6/identity/noah.png",
+        "public/images/play/ux/v6/identity/samira.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Explicit NPC-to-NPC exchange observed from first-person player at edge of the SAME Northline curved-glass review pod in image1. Noah (exact canonical face/medium tan skin/olive-green irises/simple brown hair/pale blue shirt in image2) stands at center-left with supported tablet, speaking confidently toward Samira. Samira (exact canonical face, warm brown skin, BROWN irises, cropped black hair with gray temple, plum blazer/cream highneck of image3) sits center-right listening thoughtfully, eyes on Noah. No visible player avatar or hands. This is the ONLY reason they do not look into camera: authored peer makes a claim to the lead. Preserve room geometry, glass mullions, left river/stepped tower/bridge, no different skyline. Both main faces near .43/.59,y=.26 to survive phone crop. Neutral afternoon same skin palettes, no lighter/darker complexion shift. No readable screen text, no extra people."
+    },
+    {
+      "key": "ux-deadline",
+      "out": "ux/v6/deadline.png",
+      "refs": [
+        "public/images/play/ux/v6/arrival.png",
+        "public/images/play/ux/v6/identity/amina.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Same Northline atelier, new eye-level camera at a beautiful accessible testing desk beside glass pod. Amina EXACT identity and color reference2: VERY DARK rich espresso skin, base around #3D241E, brown irises, same round anime face/puff/gold studs/mustard top/navy trousers. No complexion or facial changes. She has found a keyboard blocker, looks straight at first-person player with raised concerned brow and calmly indicates a physical keyboard beside a laptop, not pointing to a second person. Laptop has only abstract UI shapes, no labels. Face centered y=.25, seated naturally with real body/chair/table contact. Work setting visible: walnut architecture, pale stone, same city landmarks left. 3p.m. neutral daytime lighting. Keep all exposed skin deeply brown including hands, no tan/amber replacement. No extra person or player body, no UI text."
+    },
+    {
+      "key": "ux-closing",
+      "out": "ux/v6/closing.png",
+      "refs": [
+        "public/images/play/ux/v6/arrival.png",
+        "public/images/play/ux/v6/identity/arjun.png",
+        "public/images/play/ux/v6/identity/samira.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Closing camera on presentation area of same Northline atelier, deliberately varied wide composition with walnut rib ceiling, curved glass pod and beautiful river/city view left. 4p.m. daylight gently warmer but not sunset, fixed sky landmarks. Arjun and Samira only, both facing first-person player for project close. Exact canonical identities/colors: Arjun image2 medium-brown Indian male, brown irises, simple black side sweep, teal overshirt/cream tee; Samira image3 warm brown Black female42, brown irises, asymmetrical black crop with one gray temple mass, plum blazer/cream high neck. Same faces and skin palettes; no skin lightening. Composed neutral encouragement, no victory/confetti/praise before score. Standing supported bodies fully finished behind a low presentation table, closed report in Arjun's hand, no projected text. Both faces near middle .42/.58 at y=.26, room depth behind them, no other people."
+    },
+    {
+      "key": "fs-hold",
+      "out": "fs/v6/hold.png",
+      "refs": [
+        "public/images/play/fs/v6/arrival.png",
+        "public/images/play/fs/v6/identity/imani.png",
+        "public/images/play/fs/v6/identity/luis.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Same Sprout lab, new camera beside sample-control counter in clean records zone, fixed courtyard/maple/tan research building LEFT and preparation hood right. Imani and Luis address first-person junior player about an unresolved sample. Imani EXACT identity/color image2, VERY DARK deep espresso skin on face/neck/hands, amber-brown eyes, mint hygiene cap containing all hair, white coat/mustard shirt. Luis EXACT image3 medium tan skin, gray-blue eyes, white hygiene cap, white coat/rust collar, square anime face. Imani holds a closed file low, slightly concerned listening posture; Luis gestures toward a SINGLE lidded sample container set aside safely on counter with plain amber status band but NO printed letters or numbers. No touching food, no tasting, no asserted data. Both face camera, main faces middle .44/.59,y=.25. Preserve their exact skin base colors and features with flat cel shading, neutral 3p.m. left daylight. Designed institutional joinery and selective detail, no clutter or extra people."
+    },
+    {
+      "key": "fs-closing",
+      "out": "fs/v6/closing.png",
+      "refs": [
+        "public/images/play/fs/v6/review.png",
+        "public/images/play/fs/v6/identity/ren.png",
+        "public/images/play/fs/v6/identity/yuki.png"
+      ],
+      "prompt": "Use case: illustration-story. Complete 16:9 opaque cinematic 2D anime game scene, no text, logos, UI, borders or watermark. Use the supplied UX character reference strictly for drawing style: thin clean contours, large expressive almond anime eyes, tiny nose mark, line mouth, FLAT base plus ONE broad cel shadow, simple hair masses, sparse interior lines, no strands or glossy hair. Rooms are hand-painted anime architecture with broad materials, selective detail, restrained reflections, never photographic or 3D. First-person player camera; anyone addressing player looks at lens. Complete bodies and furniture even below future dialogue; don't hide defects with a panel. Compose main faces around x=.5,y=.28, enough room below HUD, above bottom-half game dialogue. Premium luxurious functional workplace, cinematic depth and natural motivated light. Diversity must read in actual skin tones, face shapes and hair textures, without caricature. Closing scene in same Sprout glazed review room from image1, changed eye-level camera angled slightly toward the interior with fixed courtyard/tan research-building view LEFT, pilot lab glass behind. Ren and Yuki address the first-person player together at 4p.m. with composed neutral encouragement, not a pass celebration. EXACT Ren image2: light warm skin, BROWN irises, short simple black hair under pale blue cap, white coat/indigo collar. EXACT Yuki image3: VERY LIGHT cool ivory skin, gray-brown irises, simple dark bob under white cap, white coat/plum collar, mature angular face45. Preserve face shapes, eye colors and palettes. Ren holds a closed trial folder; Yuki rests one hand on the review table, no food. Complete bodies/chairs and supported hands, both faces .42/.58,y=.25. Premium cleanable pale solid-surface/sage architecture, restrained painted highlights, same neutral late-afternoon light source fromleft. No logos, claims or text."
+    },
+    {
+      "key": "fs-peer-identity-fix",
+      "out": "fs/v6/peer.png",
+      "refs": [
+        "public/images/play/fs/v6/peer.png",
+        "public/images/play/fs/v6/identity/imani.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Image1 is the complete anime scene to KEEP. Image2 is Imani's approved canonical identity and complexion. Correct ONLY Imani's skin palette in image1 to match image2: very dark warm espresso brown, same undertone, dark base on forehead/cheeks/neck/hands, warm amber-brown irises. Do not brighten her whole face or hands to medium brown. Her face shape, eye shape, nose marks, brows and short coiled hair beneath mint cap must match image2. Keep expression and pose of image1. Preserve all room geometry, outside window view, props, clothing, camera, other person (Luis if present), 16:9 framing and flat anime linework. Flat skin base plus one broad cel shadow, no pores/gloss/rendering upgrade. This is color/identity consistency repair, not a redesign. Return the complete scene without panels, captions or text."
+    },
+    {
+      "key": "fs-hold-identity-fix",
+      "out": "fs/v6/hold.png",
+      "refs": [
+        "public/images/play/fs/v6/hold.png",
+        "public/images/play/fs/v6/identity/imani.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Image1 is the complete anime scene to KEEP. Image2 is Imani's approved canonical identity and complexion. Correct ONLY Imani's skin palette in image1 to match image2: very dark warm espresso brown, same undertone, dark base on forehead/cheeks/neck/hands, warm amber-brown irises. Do not brighten her whole face or hands to medium brown. Her face shape, eye shape, nose marks, brows and short coiled hair beneath mint cap must match image2. Keep expression and pose of image1. Preserve all room geometry, outside window view, props, clothing, camera, other person (Luis if present), 16:9 framing and flat anime linework. Flat skin base plus one broad cel shadow, no pores/gloss/rendering upgrade. This is color/identity consistency repair, not a redesign. Return the complete scene without panels, captions or text."
+    }
+  ],
+  "selected": {
+    "ux": [
+      "images/play/ux/v6/arrival.png",
+      "images/play/ux/v6/closing.png",
+      "images/play/ux/v6/conflict.png",
+      "images/play/ux/v6/deadline.png",
+      "images/play/ux/v6/help.png",
+      "images/play/ux/v6/peer.png",
+      "images/play/ux/v6/review.png",
+      "images/play/ux/v6/team.png",
+      "images/play/ux/v6/test.png",
+      "images/play/ux/v6/work.png"
+    ],
+    "fs": [
+      "images/play/fs/v6/arrival.png",
+      "images/play/fs/v6/closing.png",
+      "images/play/fs/v6/deadline.png",
+      "images/play/fs/v6/hold.png",
+      "images/play/fs/v6/peer.png",
+      "images/play/fs/v6/review.png",
+      "images/play/fs/v6/team.png",
+      "images/play/fs/v6/work.png"
+    ]
+  }
+}

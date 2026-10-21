@@ -1,0 +1,110 @@
+{
+  "career": "ui-ux-designer",
+  "coverageGroups": 10,
+  "artifactBeats": 4,
+  "status": "structural checks passed; human and runtime review are separate",
+  "assertions": 435,
+  "levels": [
+    {
+      "id": "ux-l1",
+      "screens": 29,
+      "scored": 7,
+      "questionTypes": [
+        "choice",
+        "rapid",
+        "rank"
+      ],
+      "bespoke": []
+    }
+  ],
+  "sceneAssets": {
+    "ux-v6-arrival": {
+      "src": "/images/play/ux/v6/arrival.png",
+      "fileSha256": "98ff81e839b02cd8dd934eec883ddeac41d8675e933090d843b393dceacfdcde",
+      "pixelSha256": "c5e7a742fdea3b8eadd064f537871b79d089c35919bc1b7f7d074eb0466ad9c3",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-v6-team": {
+      "src": "/images/play/ux/v6/team.png",
+      "fileSha256": "45c35a31d8444e3f1eee38f73bdb0d5ce6e12af2d19be9d69b740306118dd10c",
+      "pixelSha256": "6ed3e1d73a6f97b26af5db12c2c1f962b20f2c22c184cf8e4c8a2aabacf61bb9",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-v6-work": {
+      "src": "/images/play/ux/v6/work.png",
+      "fileSha256": "0503526f3ae70a14dc1f7df3b8024799717652956e305c47c69f41f33c752460",
+      "pixelSha256": "f6b898d921a3cea45d5898ef524a93b09feeaaa692a436fe755a6ed3709cfe9e",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-v6-test": {
+      "src": "/images/play/ux/v6/test.png",
+      "fileSha256": "a345cb74b9f95f66f49402dc79ce7e1bc7e37c3d24a635489f4060c43730c9f4",
+      "pixelSha256": "dd89564b8b21e3050948916680960bd8f50d916c56e25f21bcbe805e100e92ef",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-v6-review": {
+      "src": "/images/play/ux/v6/review.png",
+      "fileSha256": "7fd5f4449b0a6783d29271c0bf7d8d11c0fde087e8543607c776dbd8a767995f",
+      "pixelSha256": "baebd57012fa5efe4a81b02087fbd65fbd876e34ff443ff5509dd5e4e0970cae",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-v6-peer": {
+      "src": "/images/play/ux/v6/peer.png",
+      "fileSha256": "eba9ad08ff279dac9af49112b80e2ca53cfec00633f6129259dd16602e04463c",
+      "pixelSha256": "6acb534fc9d17b0bd9099dbce2f49e2b52966ff27bdc2bf46b57b21c82e9142c",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-v6-conflict": {
+      "src": "/images/play/ux/v6/conflict.png",
+      "fileSha256": "cb2b87e218041c6dc5e16faea02073fbde8e05d2e91facdadf5c240ce5ac9c6a",
+      "pixelSha256": "ee473a251b578f4ab83906d2574b3653e3dbb0275e42aa22d165d7c7ddf4543e",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-v6-deadline": {
+      "src": "/images/play/ux/v6/deadline.png",
+      "fileSha256": "b00350ba5f49dbc9222dff5429e072fc89da65e6b03127ec15c6410de81b1c10",
+      "pixelSha256": "09b85a1eed866d9a3ad755c4b0513d88aced684994f6abc72437930d4c3e70bb",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-v6-help": {
+      "src": "/images/play/ux/v6/help.png",
+      "fileSha256": "a45524c59f834d3ed745641d9af01c25bcf53b1eba94ee44d9b65d3cc2330df6",
+      "pixelSha256": "b20a93a2a51d170e5398c3dce3b775cf88520a8692d24239e185f071572094e4",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "ux-v6-closing": {
+      "src": "/images/play/ux/v6/closing.png",
+      "fileSha256": "8748cb9c188d8b94a1bbaaa3d4a097a1881298cdc66c2c8dab950af2f410d071",
+      "pixelSha256": "27ab226d5f96f59f948df399929ae17a470891cc47cc042db86f8f9a379a4723",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    }
+  },
+  "routedBeats": 28,
+  "errors": [],
+  "notCertified": [
+    "Subject-matter correctness",
+    "Aesthetic approval",
+    "All runtime branches",
+    "Windows/Chromebook hardware"
+  ]
+}

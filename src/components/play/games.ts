@@ -124,7 +124,7 @@ export const UX_DESIGNER: Simulation = {
   // under career simulations, use a good art from the game as the
   // thumbnail"). Arjun sketching wireframe flows says "UX" at a glance, and
   // its sunset studio light sits with the IB tile beside it.
-  "thumb": "/images/play/ux/v4/thumb-iteration.webp",
+  "thumb": "/images/play/ux/v6/work.png",
   "thumbFocus": "48% 20%",
   "levels": [UX_LEVEL_1],
   "upcoming": [
@@ -139,42 +139,42 @@ export const UX_DESIGNER: Simulation = {
       "id": "UX-TR-1",
       "seconds": 4,
       "text": "A useful design starts with someone trying to do something.",
-      "art": "/images/play/ux/v4/studio.png"
+      "art": "/images/play/ux/v6/arrival.png"
     },
     {
       "id": "UX-TR-2",
       "seconds": 4,
       "text": "An attractive page can still get in their way.",
-      "art": "/images/play/ux/v4/research.png"
+      "art": "/images/play/ux/v6/test.png"
     },
     {
       "id": "UX-TR-3",
       "seconds": 4,
       "text": "Listen before you choose a solution.",
-      "art": "/images/play/ux/v4/research.png"
+      "art": "/images/play/ux/v6/test.png"
     },
     {
       "id": "UX-TR-4",
       "seconds": 4,
       "text": "Turn the evidence into something people can try.",
-      "art": "/images/play/ux/v4/studio.png"
+      "art": "/images/play/ux/v6/arrival.png"
     },
     {
       "id": "UX-TR-5",
       "seconds": 4,
       "text": "One missed detail can stop the whole task.",
-      "art": "/images/play/ux/v4/review.png"
+      "art": "/images/play/ux/v6/review.png"
     },
     {
       "id": "UX-TR-6",
       "seconds": 4,
       "text": "Your team needs to know what you found.",
-      "art": "/images/play/ux/v4/review.png"
+      "art": "/images/play/ux/v6/review.png"
     },
     {
       "id": "UX-TR-7",
       "seconds": 4,
-      "text": "Junior designer to design director. How far will you get?",
+      "text": "A client deadline. A team counting on you. Your first design role.",
       "finale": true
     }
   ]

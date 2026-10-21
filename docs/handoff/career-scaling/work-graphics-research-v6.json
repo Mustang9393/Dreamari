@@ -1,0 +1,22 @@
+{
+  "edition": 6,
+  "reviewed": "2026-10-21",
+  "sources": {
+    "ux": {
+      "url": "https://www.gov.uk/service-manual/user-research/using-moderated-usability-testing",
+      "title": "Using moderated usability testing",
+      "supports": "Observe a participant trying a realistic task; do not infer universal success from one participant."
+    },
+    "food": {
+      "url": "https://www.ift.org/advance-your-career/find-a-job/careers-in-the-science-of-food",
+      "title": "Careers in the Science of Food",
+      "supports": "Product development, sensory work and related career roles."
+    },
+    "allergen": {
+      "url": "https://www.fda.gov/food/conversations-experts-food-topics/current-food-allergen-landscape",
+      "title": "Current food allergen landscape",
+      "supports": "Allergen context; no invented safety threshold or tasting clearance."
+    }
+  },
+  "limits": "All VELO briefs, people, trial amounts/counts, task evidence and dialogue are fictional teaching data. Sources support work methods and role context, not these invented results. No salary, certification or release approval claims."
+}

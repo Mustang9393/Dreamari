@@ -1,25 +1,63 @@
 {
   "career": "ui-ux-designer",
-  "status": "AI-authored draft, human approval pending",
   "trace": [
     {
-      "beat": "UX1-05",
+      "beat": "UX1-01",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "UX1-02",
       "teaches": [
-        "user-goal"
+        "project goal"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-03",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "UX1-04",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "UX1-05",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "UX1-06",
+      "teaches": [],
+      "uses": [
+        "project goal"
+      ]
+    },
+    {
+      "beat": "UX1-07",
+      "teaches": [
+        "work terms"
       ],
       "uses": []
     },
     {
       "beat": "UX1-08",
       "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "UX1-09",
+      "teaches": [],
       "uses": [
-        "user-goal"
+        "work terms"
       ]
     },
     {
       "beat": "UX1-10",
       "teaches": [
-        "ux-terms"
+        "controlled comparison"
       ],
       "uses": []
     },
@@ -27,42 +65,52 @@
       "beat": "UX1-11",
       "teaches": [],
       "uses": [
-        "ux-terms"
+        "controlled comparison"
       ]
     },
     {
       "beat": "UX1-12",
-      "teaches": [
-        "evidence"
-      ],
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "UX1-13",
+      "teaches": [],
       "uses": []
     },
     {
       "beat": "UX1-14",
-      "teaches": [],
-      "uses": [
-        "evidence"
-      ]
+      "teaches": [
+        "evidence limits"
+      ],
+      "uses": []
     },
     {
       "beat": "UX1-15",
-      "teaches": [
-        "neutral-task"
-      ],
+      "teaches": [],
+      "uses": [
+        "evidence limits"
+      ]
+    },
+    {
+      "beat": "UX1-MID",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "UX1-ACT2",
+      "teaches": [],
       "uses": []
     },
     {
       "beat": "UX1-18",
       "teaches": [],
-      "uses": [
-        "neutral-task",
-        "evidence"
-      ]
+      "uses": []
     },
     {
       "beat": "UX1-19",
       "teaches": [
-        "iterate"
+        "team authority"
       ],
       "uses": []
     },
@@ -70,78 +118,56 @@
       "beat": "UX1-20",
       "teaches": [],
       "uses": [
-        "iterate",
-        "evidence"
+        "team authority"
       ]
     },
     {
       "beat": "UX1-21",
       "teaches": [
-        "accessible-form"
+        "report blocker early"
       ],
       "uses": []
+    },
+    {
+      "beat": "UX1-22",
+      "teaches": [],
+      "uses": [
+        "report blocker early"
+      ]
     },
     {
       "beat": "UX1-23",
       "teaches": [],
-      "uses": [
-        "accessible-form"
-      ]
+      "uses": []
+    },
+    {
+      "beat": "UX1-24",
+      "teaches": [],
+      "uses": []
     },
     {
       "beat": "UX1-25",
-      "teaches": [],
-      "uses": [
-        "neutral-task",
-        "iterate"
-      ]
+      "teaches": [
+        "team priorities"
+      ],
+      "uses": []
     },
     {
       "beat": "UX1-26",
-      "teaches": [
-        "design-rationale"
-      ],
-      "uses": []
-    },
-    {
-      "beat": "UX1-29",
       "teaches": [],
       "uses": [
-        "design-rationale",
-        "evidence",
-        "iterate"
+        "team priorities"
       ]
     },
     {
-      "beat": "UX1-30",
-      "teaches": [
-        "handoff"
-      ],
+      "beat": "UX1-27",
+      "teaches": [],
       "uses": []
     },
     {
-      "beat": "UX1-32",
+      "beat": "UX1-28",
       "teaches": [],
-      "uses": [
-        "handoff",
-        "accessible-form"
-      ]
-    },
-    {
-      "beat": "UX1-33",
-      "teaches": [
-        "blocker"
-      ],
       "uses": []
-    },
-    {
-      "beat": "UX1-34",
-      "teaches": [],
-      "uses": [
-        "blocker",
-        "handoff",
-        "accessible-form"
-      ]
     }
   ]
 }

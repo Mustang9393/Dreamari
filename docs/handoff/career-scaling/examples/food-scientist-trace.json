@@ -9,7 +9,7 @@
     {
       "beat": "FS1-02",
       "teaches": [
-        "role"
+        "project goal"
       ],
       "uses": []
     },
@@ -20,41 +20,30 @@
     },
     {
       "beat": "FS1-04",
-      "teaches": [
-        "authority",
-        "brief"
-      ],
+      "teaches": [],
       "uses": []
     },
     {
       "beat": "FS1-05",
-      "teaches": [
-        "testable-question"
-      ],
+      "teaches": [],
       "uses": []
     },
     {
       "beat": "FS1-06",
       "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-07",
-      "teaches": [],
       "uses": [
-        "brief",
-        "testable-question"
+        "project goal"
       ]
     },
     {
-      "beat": "FS1-08",
+      "beat": "FS1-07",
       "teaches": [
-        "tools"
+        "work terms"
       ],
       "uses": []
     },
     {
-      "beat": "FS1-TOOLS",
+      "beat": "FS1-08",
       "teaches": [],
       "uses": []
     },
@@ -62,62 +51,45 @@
       "beat": "FS1-09",
       "teaches": [],
       "uses": [
-        "tools"
+        "work terms"
       ]
     },
     {
       "beat": "FS1-10",
       "teaches": [
-        "observation"
+        "controlled comparison"
       ],
       "uses": []
     },
     {
       "beat": "FS1-11",
       "teaches": [],
-      "uses": []
+      "uses": [
+        "controlled comparison"
+      ]
     },
     {
       "beat": "FS1-12",
       "teaches": [],
-      "uses": [
-        "observation"
-      ]
+      "uses": []
     },
     {
       "beat": "FS1-13",
-      "teaches": [
-        "controlled-test",
-        "repeat"
-      ],
+      "teaches": [],
       "uses": []
     },
     {
       "beat": "FS1-14",
-      "teaches": [],
+      "teaches": [
+        "evidence limits"
+      ],
       "uses": []
     },
     {
       "beat": "FS1-15",
       "teaches": [],
       "uses": [
-        "controlled-test"
-      ]
-    },
-    {
-      "beat": "FS1-16",
-      "teaches": [
-        "sequence",
-        "records"
-      ],
-      "uses": []
-    },
-    {
-      "beat": "FS1-17",
-      "teaches": [],
-      "uses": [
-        "sequence",
-        "records"
+        "evidence limits"
       ]
     },
     {
@@ -126,65 +98,65 @@
       "uses": []
     },
     {
+      "beat": "FS1-ACT2",
+      "teaches": [],
+      "uses": []
+    },
+    {
       "beat": "FS1-18",
-      "teaches": [
-        "record-gaps",
-        "hold"
-      ],
+      "teaches": [],
       "uses": []
     },
     {
       "beat": "FS1-19",
-      "teaches": [],
+      "teaches": [
+        "team authority"
+      ],
       "uses": []
     },
     {
       "beat": "FS1-20",
       "teaches": [],
       "uses": [
-        "record-gaps",
-        "records",
-        "hold"
+        "team authority"
       ]
     },
     {
       "beat": "FS1-21",
       "teaches": [
-        "allergen"
+        "report blocker early"
       ],
       "uses": []
     },
     {
       "beat": "FS1-22",
       "teaches": [],
-      "uses": []
+      "uses": [
+        "report blocker early"
+      ]
     },
     {
       "beat": "FS1-23",
       "teaches": [],
-      "uses": [
-        "allergen",
-        "hold",
-        "authority"
-      ]
+      "uses": []
     },
     {
       "beat": "FS1-24",
-      "teaches": [
-        "sensory-fairness"
-      ],
+      "teaches": [],
       "uses": []
     },
     {
       "beat": "FS1-25",
-      "teaches": [],
+      "teaches": [
+        "team priorities"
+      ],
       "uses": []
     },
     {
       "beat": "FS1-26",
       "teaches": [],
       "uses": [
-        "sensory-fairness"
+        "team priorities"
       ]
     },
     {
@@ -194,61 +166,6 @@
     },
     {
       "beat": "FS1-28",
-      "teaches": [
-        "rationale",
-        "limits"
-      ],
-      "uses": []
-    },
-    {
-      "beat": "FS1-29",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-30",
-      "teaches": [],
-      "uses": [
-        "rationale",
-        "limits",
-        "repeat"
-      ]
-    },
-    {
-      "beat": "FS1-31",
-      "teaches": [
-        "shelf-life-boundary"
-      ],
-      "uses": []
-    },
-    {
-      "beat": "FS1-32",
-      "teaches": [
-        "shelf-life"
-      ],
-      "uses": []
-    },
-    {
-      "beat": "FS1-33",
-      "teaches": [],
-      "uses": [
-        "shelf-life",
-        "authority",
-        "limits"
-      ]
-    },
-    {
-      "beat": "FS1-34",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-35",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-REVIEW",
       "teaches": [],
       "uses": []
     }

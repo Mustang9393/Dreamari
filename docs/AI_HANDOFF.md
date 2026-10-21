@@ -1,3 +1,35 @@
+## 2026-10-21 — IB master sequence, concise career stories and fixed character identity
+
+**Why:** Chandu: “use the vetted Investment Banking simulation ... 1:1 reference”; “too much copy”; supporting graphics “should not be needing tab and clicking and interaction”; latest: “different skin tones ... skin tone and facial details ... consistent ... Eye colors ... consistent for a character.”
+
+**Changed:** UX and Food Scientist now use the actual 29-beat/seven-decision IB contract (first choice six, ±6, no strikes, midpoint after four at 68). Prestigious fictional VELO projects replace the volunteer brief; recurring juniors and colleagues have meaningful contributions. Separate optional career lessons and UX craft/management ladder. Supporting graphics are read-only, with independent prototype/recipe/tab controls removed; existing game interactions preserved. Story/decision/feedback words fall ~29% UX/~33% Food. Selected v6 complete scenes use a single canonical face/complexion/iris reference per person. Rejected lighter Amina/Imani drafts; scoped Imani repairs selected. A generic continuity-review hash check invalidates stale visual reviews when a face or scene changes. SOP v1.6 and all four prompts now encode these requirements. Welcome/tile/trailer use selected v6 images.
+
+**Validation:** seven retained data/render tests pass, UX 434 and Food 413 structural assertions pass, 15 UX/12 Food identity-review hashes pass. TypeScript, scoped ESLint, tokens and Webpack production build pass before final integration. Actual browser checks and open coverage are in `career-scaling/QA-v6.md`; full replay, all outcome branches, hardware and human art/content QA are not certified. Fresh image generation is not pixel-identical. Main release remains the user's authorized QA destination; preserve concurrent main app work, keep Food in hamburger QA quick links and UX in the existing Play hub. Merged latest main c71eeba without dropping its dusk/counselor changes; only handoff history conflicted and both histories were retained. Merged Webpack build/TypeScript, scoped ESLint, seven tests and 508-token check pass. Public SOP v1.6 packaging/publication is in progress; main QA release is authorized by the continuing user request.
+
+## 2026-10-21: buttons and the primary blue match the dusk sky
+
+**Why (Chandu):** "align the CTA colors and primary color token to match this new blue". The old blues (#176acf fills, #59a0f8 for the one lit button) were the electric blues of the black look and sat outside the dusk family.
+
+- **Primary token** (brand-600, action-primary, `--primary`, text-brand in light, every fill with white text, both modes): #2f5fb1, a dusk cobalt at the sky's hue. White text 6.2:1; as text 5.7:1 on the light page and 4.9:1 on its strongest tint, so one blue serves both modes. Hover: #284f93 (light) / #3d6fc4 (dark, 4.9:1 white). Deep shades #284f93.
+- **The one lit button** (data-lit, the landing primary): #8fb3f5 periwinkle with #0b1a33 ink (8.2:1), a step lighter than the team slide's #7aa2ff so it keeps 3:1 against the brightest sky; hover #a3c1f7; its seating shadow in the same periwinkle.
+- **The landing's "DREAM"** is the slide's own #7aa2ff (6.6:1 on the hero top).
+- Checked: computed values in the browser; Home (lit Play) and the counselor dashboard (Start Reviewing, the active tab) in dark (`cta-*.jpg`). Pushed to main on Chandu's go-ahead.
+
+## 2026-10-21: Black & Blue becomes a dusk sky (the team's gradient), not underwater
+
+**Why (Chandu, with the team's DREAMARI title slide):** "the new blue and black looks too gloomy and like its underwater. How can we make it brighter? more inspirational? This is the style of gradient the team likes... incorporate reliably without using radial ones exclusively. Also keep in mind contrast WCAG AA 2.2, usability". The reference is one vertical gradient, #111f36 at the top to #4a7aab at the bottom (212-217deg). Ours read as underwater because the light fell from above onto near-black; a sky is darkest overhead and brightest at the horizon.
+
+- **Student app sky** (look-v2.css section 6): the app backdrop is a linear gradient #0f1c31 to #27446e, no radial light from above. It is capped there because text sits directly on the fixed backdrop: white 9.8:1, captions now 74% white (6.3:1; 62% would fail near the bottom), on-page links #94c2f9 (5.1:1; the old #59a0f8 was 3.65:1 there). Stars stay near the top.
+- **Navy surfaces:** cards, glass and inset surfaces move from near-black to navy (#13213a and up), still near-opaque and each step lighter; borders become a faint sky-blue line. Poster scrims and event tickets follow. Page `--background` is #0f1c31.
+- **Landing hero:** the team's gradient at full strength (#111f36 to #4a7aab behind Dreamy), fading into the navy page below; the radial hero glow is off.
+- **Splash dialogs and Build/Match:** the same dusk direction, capped at #27446e because they carry small text and the sky-blue button (3.6:1 against it). Build's canvas now raises the step accent from the horizon instead of from above; the top nebula is off in dark.
+- **Build's quiet lines** (footnote, Skip) were 62% white at 60% opacity, about 2.8:1 (3.2:1 even on the old black); now full opacity, 5.3:1.
+- **Horizon bloom** (Chandu: "can we have brighter glow on the gradient where it gets lighter?... the whole light bloom thing isnt there anymore"): a glow centred just below the screen edge, brightest where it meets the bottom, peaking about #3c608f on screen (the brightest text-safe sky). Captions went to 82% white and on-page links to #cbe0fb to keep about 5:1 there.
+- **Everywhere, counselor dashboards included** (Chandu: "the color has to cascade everywhere. Including counselor dashboards"): the counselor's calm sky gets the same dusk gradient and bloom (still still, so its blur stays cheap), and its glass (calm.css, v7.css) moves from blue-black to navy rgba(19, 33, 58, 0.58), menus and dialogs #12203a. The phone/tablet tab bar is navy too.
+- **Not changed:** light mode, Classic.
+- Noted, not changed: on Explore at laptop width, content scrolling up shows behind the DREAMARI logo at top-left (that corner of the header has no background); to check against Classic.
+- Checked: tsc; landing, Home, Explore, Build and the counselor dashboard (v4) in dark (`dusk-*.jpg`). Pushed to main on Chandu's go-ahead.
+
 ## 2026-10-21: WCAG 2.2 AA, step 5 (every modal dialog, roving tabindex)
 
 **Why.** The audit counted 85 modal dialogs. Steps 1 and 4 fixed the shared ones, and about 30 hand-built ones still left focus behind them. Nine of those had no Escape at all. Chandu: "go: finish the remaining dialogs (Connect, Profile, Preferences, resume sheets, PaySheet) and roving tabindex."

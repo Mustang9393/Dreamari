@@ -2,9 +2,9 @@
   "id": "fs-l1",
   "n": 1,
   "role": "Junior Food Scientist",
-  "title": "The snack that keeps breaking",
-  "blurb": "Investigate an oat snack, compare trials and recommend the next test.",
-  "cover": "/images/play/fs/v4/arrival.png",
+  "title": "The VELO snack brief",
+  "blurb": "Help a food lab prepare a sound test for a major sportswear client.",
+  "cover": "/images/play/fs/v6/arrival.png",
   "mood": "day",
   "hideBand": true,
   "directed": true,
@@ -13,21 +13,23 @@
   "coreKit": true,
   "quietQuestions": true,
   "qaSkip": true,
-  "saveSlot": 601,
+  "saveSlot": 602,
   "cast": {
-    "Ren": "/images/play/fs/face-ren-v4.webp",
-    "Yuki": "/images/play/fs/face-yuki-v4.webp"
+    "Ren": "/images/play/fs/face-ren-v6.webp",
+    "Yuki": "/images/play/fs/face-yuki-v6.webp",
+    "Imani": "/images/play/fs/face-imani-v6.webp",
+    "Luis": "/images/play/fs/face-luis-v6.webp"
   },
   "preGame": {
     "startLabel": "Start the project",
     "skipLabel": "Skip to the lab",
-    "handoffLine": "Sprout Lab · Your first project",
+    "handoffLine": "Sprout Lab · VELO trial day",
     "howToCta": "Start the project",
     "ladder": [
-      "First formulation project",
-      "Planned: repeatability study",
-      "Planned: process scale-up",
-      "Planned: product review"
+      "Junior Food Scientist",
+      "Food Scientist",
+      "Senior Food Scientist",
+      "Lead Food Scientist"
     ],
     "skills": [
       "Critical Thinking",
@@ -36,425 +38,318 @@
     ],
     "skillTotal": 15,
     "lesson": {
-      "title": "Food science in one minute",
+      "title": "What Is a Food Scientist?",
       "screens": [
         {
           "kind": "say",
-          "heading": "Study what changes a food.",
-          "body": "Ingredients and processes affect quality. Tests help you check an idea.",
-          "image": "/images/play/fs/v4/arrival.png"
+          "heading": "Test an idea about food.",
+          "body": "Food scientists study how ingredients and processes affect food. Tests help them compare ideas.",
+          "image": "/images/play/fs/v6/arrival.png"
         },
         {
           "kind": "say",
-          "heading": "Know your authority.",
-          "body": "You help record and compare. Your supervisor approves work and the quality lead approves tasting.",
-          "image": "/images/play/fs/v4/hold.png"
+          "heading": "Keep records. Know your role.",
+          "body": "You record and compare. Ren guides lab work. Yuki approves tasting and checks safety claims.",
+          "image": "/images/play/fs/v6/review.png"
         },
         {
           "kind": "check",
-          "heading": "Evidence first",
-          "question": "Which supports a recommendation?",
+          "heading": "Evidence first.",
+          "question": "Which supports a next test?",
           "options": [
             {
-              "label": "A recorded comparison using a consistent method",
-              "correct": true
+              "label": "A recorded comparison using the same method",
+              "correct": true,
+              "why": "The record shows what was changed and measured."
             },
             {
-              "label": "A confident guess about what everyone likes",
-              "correct": false
+              "label": "A guess based on the nicer package",
+              "correct": false,
+              "why": "The package does not show how the food performed."
             }
           ]
         }
       ]
-    }
+    },
+    "missionLine": "Build your skills through new food projects.",
+    "ladderBranches": [
+      {
+        "label": "Management path",
+        "roles": "R&D Manager → R&D Director"
+      }
+    ],
+    "ladderNote": "Titles vary by company. Later game projects are not built yet."
   },
   "beats": [
     {
-      "id": "FS1-01",
       "kind": "card",
-      "variant": "chapter",
-      "title": "A snack with a problem.",
-      "body": "Sprout Lab is developing an oat snack. Too many pieces break during handling. Your first project is to help investigate.",
+      "variant": "intro",
       "speaker": "Narrator",
-      "system": false,
+      "title": "Your first lab project.",
+      "body": "You join Sprout Lab as a junior food scientist.",
       "cta": "Continue",
-      "artifact": {
-        "id": "fs-brief",
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Project card · Sprout oat snack",
-        "caption": "Your recommendation supports the next experiment. It does not authorise a product launch.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
-          {
-            "label": "Problem",
-            "text": "The current snack breaks too easily during handling."
-          },
-          {
-            "label": "Your task",
-            "text": "Compare small trials and recommend the next test."
-          },
-          {
-            "label": "Authority",
-            "text": "Ren supervises lab work. Yuki approves tasting and further testing."
-          }
-        ]
-      }
+      "id": "FS1-01"
     },
     {
-      "id": "FS1-02",
       "kind": "card",
-      "variant": "chapter",
-      "title": "Food science turns questions into tests.",
-      "body": "Food scientists study how ingredients and processes affect food quality and safety. A good result needs evidence, not just a good taste.",
-      "speaker": "System",
-      "system": true,
-      "cta": "Continue"
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "A big client. A clear problem.",
+      "body": "VELO needs an oat snack for its training centers. Pieces keep breaking. The client review is at 4 p.m.",
+      "cta": "Continue",
+      "id": "FS1-02"
     },
     {
-      "id": "FS1-03",
       "kind": "card",
-      "variant": "chapter",
-      "title": "Meet Ren, your mentor.",
-      "body": "“I’m Ren, the product development scientist. You will help plan a comparison and write a recommendation. I supervise the lab work.”",
+      "variant": "character",
       "speaker": "Ren",
-      "system": false,
-      "cta": "Continue"
-    },
-    {
-      "id": "FS1-04",
-      "kind": "card",
-      "variant": "chapter",
-      "title": "A recommendation, not a launch.",
-      "body": "Yuki, the quality lead, approves tasting and further work. You can record, compare and raise questions; you cannot clear a product for sale.",
-      "speaker": "System",
-      "system": true,
+      "title": "Meet Ren.",
+      "body": "He guides the trials. Your job is to record the evidence and suggest the next test.",
       "cta": "Continue",
-      "artifact": {
-        "id": "fs-brief",
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Project card · Sprout oat snack",
-        "caption": "Your recommendation supports the next experiment. It does not authorise a product launch.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
-          {
-            "label": "Problem",
-            "text": "The current snack breaks too easily during handling."
-          },
-          {
-            "label": "Your task",
-            "text": "Compare small trials and recommend the next test."
-          },
-          {
-            "label": "Authority",
-            "text": "Ren supervises lab work. Yuki approves tasting and further testing."
-          }
-        ]
-      }
+      "castMember": "Ren",
+      "id": "FS1-03"
     },
     {
-      "id": "FS1-05",
       "kind": "card",
-      "variant": "chapter",
-      "title": "Name the problem before the fix.",
-      "body": "A useful question names something you can observe. “Which trial has less breakage in the same handling test?” gives the team a check.",
-      "speaker": "System",
-      "system": true,
-      "cta": "Continue"
-    },
-    {
-      "id": "FS1-06",
-      "kind": "check",
-      "method": "tap",
-      "speaker": "System",
-      "question": "Which is a testable question about a different juice project?",
-      "options": [
+      "variant": "character",
+      "speaker": "Narrator",
+      "title": "Know your part.",
+      "body": "Ren approves lab work. Quality lead Yuki approves tasting and reviews safety claims.",
+      "cta": "Continue",
+      "ladder": [
         {
-          "label": "Does the colour change during the agreed storage test?",
-          "correct": true,
-          "why": "That follows the evidence and the task."
+          "label": "Junior · You",
+          "lit": true
         },
         {
-          "label": "Will everyone love this juice?",
-          "correct": false,
-          "why": "That goes beyond what the evidence can tell you."
+          "label": "Food Scientist",
+          "lit": false
+        },
+        {
+          "label": "Senior · Ren",
+          "lit": true
+        },
+        {
+          "label": "Lead · Yuki",
+          "lit": false
         }
       ],
-      "cta": "Continue"
+      "id": "FS1-04"
     },
     {
-      "id": "FS1-07",
-      "kind": "choice",
-      "speaker": "Ren",
-      "question": "The oat snack breaks too easily during handling. What should you investigate first?",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": [
-        "Critical Thinking",
-        "Problem-Solving"
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Meet the trial team.",
+      "body": "Imani is a junior scientist. Luis checks the batch records. You will compare results together.",
+      "cta": "Continue",
+      "castMembers": [
+        "Ren",
+        "Imani",
+        "Luis"
       ],
-      "progress": 0.1,
-      "planLineIfFailed": "you decided before checking the evidence",
+      "id": "FS1-05"
+    },
+    {
+      "kind": "choice",
       "layout": "options",
+      "speaker": "Ren",
+      "question": "What should you check first?",
       "choices": [
         {
           "id": "a",
-          "label": "How much the snack breaks in a consistent handling test",
+          "label": "Compare breakage using one agreed test.",
           "tier": "best",
-          "why": "A repeatable observation connects directly to the project problem."
+          "why": "The client’s problem is breakage. Use a test that measures it."
         },
         {
           "id": "b",
-          "label": "Which wrapper colour looks most exciting",
+          "label": "Choose the snack with the best package.",
           "tier": "wrong",
-          "why": "The wrapper colour does not measure snack breakage."
+          "why": "A package does not show how often pieces break."
         },
         {
           "id": "c",
-          "label": "How to promise the longest shelf life",
+          "label": "Promise the snack will stay safe for months.",
           "tier": "wrong",
-          "why": "Shelf life is a different question and has not been studied."
-        }
-      ]
-    },
-    {
-      "id": "FS1-08",
-      "kind": "card",
-      "variant": "chapter",
-      "title": "Use the tool that answers the question.",
-      "body": "Balance: mass. Texture test: physical firmness. Sensory panel: people’s responses.",
-      "speaker": "System",
-      "system": true,
-      "cta": "Continue",
-      "artifact": {
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "id": "fs-toolkit",
-        "kind": "work-screen",
-        "title": "Measurement reference",
-        "recordId": "FS / work console",
-        "caption": "Select a method to see what it measures. This reference contains no live readings.",
-        "provenance": "Fictional lab method reference, no measurements invented.",
-        "tabs": [
-          {
-            "label": "Mass",
-            "heading": "Ingredient weighing",
-            "detail": "Use a balance to record ingredient mass before mixing.",
-            "fields": [
-              {
-                "label": "Tool",
-                "value": "Balance"
-              },
-              {
-                "label": "Record",
-                "value": "Mass in g"
-              }
-            ]
-          },
-          {
-            "label": "Firmness",
-            "heading": "Physical texture test",
-            "detail": "A texture analyser measures a physical property under a defined method.",
-            "fields": [
-              {
-                "label": "Tool",
-                "value": "Texture analyser"
-              },
-              {
-                "label": "Record",
-                "value": "Physical firmness"
-              }
-            ]
-          },
-          {
-            "label": "Sensory",
-            "heading": "People’s responses",
-            "detail": "A sensory panel records how people perceive a sample.",
-            "fields": [
-              {
-                "label": "Method",
-                "value": "Sensory panel"
-              },
-              {
-                "label": "Record",
-                "value": "Independent responses"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "FS1-TOOLS",
-      "kind": "flips",
-      "speaker": "System",
-      "title": "Three different kinds of evidence",
-      "cards": [
-        {
-          "term": "Balance",
-          "def": "Measures ingredient mass in grams."
-        },
-        {
-          "term": "Texture test",
-          "def": "Measures a physical property using a defined method."
-        },
-        {
-          "term": "Sensory panel",
-          "def": "People describe or rate approved samples using an agreed method."
+          "why": "You have no shelf-life evidence for that claim."
         }
       ],
-      "cta": "Continue"
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "id": "FS1-06",
+      "progress": 0.14285714285714285,
+      "skills": [
+        "Decision-Making",
+        "Critical Thinking"
+      ],
+      "planLineIfFailed": "you made a choice before checking the evidence"
     },
     {
-      "id": "FS1-09",
-      "kind": "match",
-      "prompt": "Tap a tool, then tap its evidence.",
+      "kind": "flips",
       "speaker": "Ren",
-      "question": "Match each tool to the evidence it provides.",
+      "setup": "Yuki will ask how you compared the snacks. Know these four terms.",
+      "title": "Prepare for the review.",
+      "cards": [
+        {
+          "term": "Batch",
+          "def": "One recorded group made together"
+        },
+        {
+          "term": "Trial",
+          "def": "A test of a planned change"
+        },
+        {
+          "term": "Observation",
+          "def": "Something you saw or measured"
+        },
+        {
+          "term": "Held sample",
+          "def": "A sample set aside until checks are complete"
+        }
+      ],
+      "cta": "Continue",
+      "id": "FS1-07"
+    },
+    {
+      "kind": "match",
+      "practice": true,
+      "noVerdict": true,
+      "speaker": "Ren",
+      "question": "Match each lab note to its meaning.",
+      "pairs": [
+        {
+          "term": "Group A, made today",
+          "def": "Batch"
+        },
+        {
+          "term": "Test a planned recipe change",
+          "def": "Trial"
+        },
+        {
+          "term": "Seven pieces broke",
+          "def": "Observation"
+        },
+        {
+          "term": "Keep C off the tasting tray",
+          "def": "Held sample"
+        }
+      ],
+      "whenRight": "Clear terms make your records easier to follow.",
+      "whenWrong": "A batch is a group. A trial tests a change. An observation is measured or seen.",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
         "Reading Comprehension",
         "Active Learning"
       ],
-      "progress": 0.2,
-      "planLineIfFailed": "you decided before checking the evidence",
-      "pairs": [
-        {
-          "term": "Balance",
-          "def": "Ingredient mass"
-        },
-        {
-          "term": "Texture test",
-          "def": "Physical firmness"
-        },
-        {
-          "term": "Sensory panel",
-          "def": "People’s responses to a sample"
-        }
-      ],
-      "whenRight": "Different questions need different evidence.",
-      "whenWrong": "Mass, physical firmness and people’s responses are different measurements."
+      "id": "FS1-08"
     },
     {
-      "id": "FS1-10",
-      "kind": "card",
-      "variant": "chapter",
-      "title": "Keep observation separate from explanation.",
-      "body": "“The piece split into two” is an observation. “It split because mixing was too short” is a possible explanation until tested.",
-      "speaker": "System",
-      "system": true,
-      "cta": "Continue"
-    },
-    {
-      "id": "FS1-11",
-      "kind": "check",
-      "method": "tap",
-      "speaker": "System",
-      "question": "Which line is an observation from a different cracker test?",
-      "options": [
-        {
-          "label": "Three pieces cracked when moved to the tray.",
-          "correct": true,
-          "why": "That follows the evidence and the task."
-        },
-        {
-          "label": "The oven must be broken.",
-          "correct": false,
-          "why": "That goes beyond what the evidence can tell you."
-        }
-      ],
-      "cta": "Continue"
-    },
-    {
-      "id": "FS1-12",
-      "kind": "bucket",
+      "kind": "rapid",
+      "timer": 45,
       "speaker": "Ren",
-      "question": "Sort each oat-snack note into observation or possible explanation.",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": [
-        "Attention to Detail",
-        "Critical Thinking"
-      ],
-      "progress": 0.3,
-      "planLineIfFailed": "you decided before checking the evidence",
-      "buckets": [
-        "Observation",
-        "Possible explanation"
-      ],
+      "question": "",
       "items": [
         {
-          "label": "The binder may be too low.",
-          "into": 1
+          "question": "Imani says, “The piece split.” What is that?",
+          "options": [
+            {
+              "label": "An observation",
+              "correct": true,
+              "why": "It records something she saw."
+            },
+            {
+              "label": "A proven cause",
+              "correct": false,
+              "why": "It does not say why the piece split."
+            },
+            {
+              "label": "A safety result",
+              "correct": false,
+              "why": "Breakage does not establish safety."
+            }
+          ]
         },
         {
-          "label": "7 pieces broke in the test.",
-          "into": 0
+          "question": "Ren asks why it split. You are unsure. What do you say?",
+          "options": [
+            {
+              "label": "I recorded the split. We still need to test the cause.",
+              "correct": true,
+              "why": "You keep evidence separate from a guess."
+            },
+            {
+              "label": "Mixing was definitely too short.",
+              "correct": false,
+              "why": "You have not tested that cause."
+            },
+            {
+              "label": "The snack must be unsafe.",
+              "correct": false,
+              "why": "A split alone does not show that."
+            }
+          ]
         },
         {
-          "label": "Batch A weighed 100 g before the test.",
-          "into": 0
+          "question": "Luis finds a missing batch ID. What should happen?",
+          "options": [
+            {
+              "label": "Set it aside and ask Ren to check.",
+              "correct": true,
+              "why": "The team must confirm which sample it is."
+            },
+            {
+              "label": "Guess from its color.",
+              "correct": false,
+              "why": "Similar samples can look the same."
+            },
+            {
+              "label": "Give it a new ID without asking.",
+              "correct": false,
+              "why": "That would hide the missing record."
+            }
+          ]
         },
         {
-          "label": "Longer mixing probably caused the breakage.",
-          "into": 1
+          "question": "What belongs in your update?",
+          "options": [
+            {
+              "label": "Batch A had 7 broken pieces out of 10 tested.",
+              "correct": true,
+              "why": "It gives a clear count and the number tested."
+            },
+            {
+              "label": "The snack is bad.",
+              "correct": false,
+              "why": "That is too vague to guide the next test."
+            },
+            {
+              "label": "The recipe is fixed forever.",
+              "correct": false,
+              "why": "One trial cannot prove that."
+            }
+          ]
         }
       ],
-      "whenRight": "You kept recorded events separate from ideas to investigate.",
-      "whenWrong": "What you saw or measured is evidence. A proposed cause still needs a test."
+      "whenPass": "Clear, honest answers. The team can act on them.",
+      "whenFail": "Use the evidence. Say what you know and what needs checking.",
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "id": "FS1-09",
+      "progress": 0.2857142857142857,
+      "skills": [
+        "Decision-Making",
+        "Critical Thinking"
+      ],
+      "planLineIfFailed": "you made a choice before checking the evidence"
     },
     {
-      "id": "FS1-13",
       "kind": "card",
-      "variant": "chapter",
-      "title": "Make a fair comparison.",
-      "body": "Change one planned factor and keep other conditions the same. Record the exact change. Repeat the comparison before treating one result as reliable.",
-      "speaker": "System",
-      "system": true,
-      "cta": "Continue",
-      "artifact": {
-        "id": "fs-example",
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Example · a different cracker test",
-        "caption": "Changing one factor makes the comparison easier to interpret; repeat it to check consistency.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
-          {
-            "label": "Changed",
-            "text": "Mixing time: short versus long."
-          },
-          {
-            "label": "Kept the same",
-            "text": "Ingredients, shape and test method."
-          },
-          {
-            "label": "Recorded",
-            "text": "Sample ID, mixing time and break-test result."
-          }
-        ]
-      }
-    },
-    {
-      "id": "FS1-14",
-      "kind": "card",
-      "variant": "chapter",
-      "title": "Your team’s trial plan.",
-      "body": "Keep mixing, shaping, storage interval and the break test unchanged.",
+      "variant": "intro",
       "speaker": "Ren",
-      "system": false,
+      "title": "Change one thing. Keep the test the same.",
+      "body": "Replace 5 g of oats with binder. Keep mixing, shape and the break test fixed.",
       "cta": "Continue",
       "artifact": {
         "id": "fs-plan",
@@ -462,15 +357,8 @@
         "medium": "laboratory",
         "organisation": "Sprout Lab / product development",
         "kind": "mixture",
-        "title": "Formulation bench · 100 g trials",
+        "title": "Trial plan · 100 g each",
         "unit": "g",
-        "practice": {
-          "from": "Oats",
-          "to": "Binder",
-          "step": 5,
-          "max": 5,
-          "instruction": "Move 5 g from oats to binder. Keep seeds and total mass fixed."
-        },
         "caption": "Replace 5 g oats with 5 g binder; same mixing, shaping, storage interval and break test.",
         "provenance": "Fictional training formulations, not validated recipes.",
         "batches": [
@@ -509,782 +397,397 @@
             ]
           }
         ]
-      }
+      },
+      "id": "FS1-10"
     },
     {
-      "id": "FS1-15",
       "kind": "choice",
-      "speaker": "Ren",
-      "question": "Which plan tests the recipe change fairly?",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": [
-        "Decision-Making",
-        "Quality Control"
-      ],
-      "progress": 0.4,
-      "planLineIfFailed": "you decided before checking the evidence",
       "layout": "options",
+      "speaker": "Ren",
+      "question": "Which comparison tests that change fairly?",
       "choices": [
         {
           "id": "a",
-          "evidence": {
-            "code": "TRIAL 01",
-            "medium": "laboratory",
-            "fields": [
-              {
-                "label": "Control · oats/binder/seeds",
-                "value": "A · 60/30/10 g"
-              },
-              {
-                "label": "Trial · oats/binder/seeds",
-                "value": "B · 55/35/10 g"
-              },
-              {
-                "label": "Mixing + shape",
-                "value": "Same method"
-              },
-              {
-                "label": "Comparison",
-                "value": "Make and test both"
-              }
-            ]
-          },
-          "label": "Matched pair",
+          "label": "Make A and B. Use the same test for both.",
           "tier": "best",
-          "why": "This tests the planned ingredient balance while holding the method steady."
+          "why": "A and B differ by the planned change. The test stays the same."
         },
         {
           "id": "b",
-          "evidence": {
-            "code": "TRIAL 02",
-            "medium": "laboratory",
-            "fields": [
-              {
-                "label": "Control · oats/binder/seeds",
-                "value": "A · 60/30/10 g"
-              },
-              {
-                "label": "Trial · oats/binder/seeds",
-                "value": "B · 55/35/10 g"
-              },
-              {
-                "label": "Mixing + shape",
-                "value": "Different mixing + shape"
-              },
-              {
-                "label": "Comparison",
-                "value": "Make and test both"
-              }
-            ]
-          },
-          "label": "Recipe + process",
+          "label": "Change B’s recipe, mixing and shape.",
           "tier": "wrong",
-          "why": "Several changes make it harder to tell which one affected the result."
+          "why": "You could not tell which change caused the result."
         },
         {
           "id": "c",
-          "evidence": {
-            "code": "TRIAL 03",
-            "medium": "laboratory",
-            "fields": [
-              {
-                "label": "Control · oats/binder/seeds",
-                "value": "A · remembered"
-              },
-              {
-                "label": "Trial · oats/binder/seeds",
-                "value": "B · 55/35/10 g"
-              },
-              {
-                "label": "Mixing + shape",
-                "value": "Not verified"
-              },
-              {
-                "label": "Comparison",
-                "value": "Only B made and tested"
-              }
-            ]
-          },
-          "label": "Historical control",
+          "label": "Test only B and compare it with memory.",
           "tier": "wrong",
-          "why": "A remembered result is a weak comparison with no consistent control."
+          "why": "You need a recorded comparison, not a remembered result."
         }
-      ]
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "id": "FS1-11",
+      "progress": 0.42857142857142855,
+      "skills": [
+        "Decision-Making",
+        "Critical Thinking"
+      ],
+      "planLineIfFailed": "you made a choice before checking the evidence"
     },
     {
-      "id": "FS1-16",
       "kind": "card",
-      "variant": "chapter",
-      "title": "The record lets someone repeat your work.",
-      "body": "Agree the method first, record both batch IDs while making them, then test. Write the result against the right ID before drawing a conclusion.",
-      "speaker": "System",
-      "system": true,
+      "variant": "character",
+      "speaker": "Yuki",
+      "title": "Yuki joins the review.",
+      "body": "She leads quality. She needs records she can trace, not a confident guess.",
+      "cta": "Continue",
+      "castMember": "Yuki",
+      "id": "FS1-12"
+    },
+    {
+      "kind": "card",
+      "variant": "character",
+      "speaker": "Narrator",
+      "title": "Different roles. Shared responsibility.",
+      "body": "Yuki checks the limits of a claim. Ren guides the product tests.",
+      "cta": "Continue",
+      "castMember": "Yuki",
+      "id": "FS1-13"
+    },
+    {
+      "kind": "card",
+      "variant": "character",
+      "speaker": "Narrator",
+      "title": "The client wants an answer.",
+      "body": "Your handling test is complete. Be clear about what it measured.",
       "cta": "Continue",
       "artifact": {
-        "id": "fs-flow",
+        "id": "fs-results",
         "world": "Farming, Animals & Nature",
         "medium": "laboratory",
         "organisation": "Sprout Lab / product development",
-        "kind": "flow",
-        "title": "From question to evidence",
-        "caption": "Prepare the comparison before making a conclusion.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "steps": [
+        "kind": "sample-results",
+        "title": "Handling test · broken pieces",
+        "caption": "This test measures breakage only, not safety or shelf life.",
+        "provenance": "Fictional training counts from the canonical project record.",
+        "samples": [
           {
-            "title": "Plan",
-            "detail": "One change; same test",
-            "icon": "file"
+            "label": "Batch A",
+            "broken": 7,
+            "tested": 10
           },
           {
-            "title": "Make",
-            "detail": "Record both batch IDs",
-            "icon": "tool"
-          },
-          {
-            "title": "Measure",
-            "detail": "Repeat the agreed test",
-            "icon": "search"
-          },
-          {
-            "title": "Recommend",
-            "detail": "Evidence + next check",
-            "icon": "check"
+            "label": "Batch B",
+            "broken": 2,
+            "tested": 10
           }
-        ]
-      }
+        ],
+        "scope": "Small trial · no repeat batch yet · safety and shelf life not measured"
+      },
+      "id": "FS1-14"
     },
     {
-      "id": "FS1-17",
-      "kind": "rank",
-      "speaker": "Ren",
-      "question": "Order these dependent steps for the oat-snack comparison.",
+      "kind": "choice",
+      "layout": "document",
+      "speaker": "Yuki",
+      "question": "Which claim needs to change before the review?",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Batch B broke less, so it is safe for six months.",
+          "tier": "best",
+          "why": "The test measured breakage. It did not measure shelf life."
+        },
+        {
+          "id": "b",
+          "label": "Batch B had 2 broken pieces out of 10.",
+          "tier": "wrong",
+          "why": "That matches the recorded result."
+        },
+        {
+          "id": "c",
+          "label": "We should repeat B alongside A.",
+          "tier": "wrong",
+          "why": "A repeat comparison is a useful next test."
+        }
+      ],
       "feedback": "",
       "feedbackCta": "Continue",
+      "doc": "VELO · trial summary",
+      "artifact": {
+        "id": "fs-results",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
+        "kind": "sample-results",
+        "title": "Handling test · broken pieces",
+        "caption": "This test measures breakage only, not safety or shelf life.",
+        "provenance": "Fictional training counts from the canonical project record.",
+        "samples": [
+          {
+            "label": "Batch A",
+            "broken": 7,
+            "tested": 10
+          },
+          {
+            "label": "Batch B",
+            "broken": 2,
+            "tested": 10
+          }
+        ],
+        "scope": "Small trial · no repeat batch yet · safety and shelf life not measured"
+      },
+      "id": "FS1-15",
+      "progress": 0.5714285714285714,
       "skills": [
-        "Time Management",
-        "Quality Control"
+        "Decision-Making",
+        "Critical Thinking"
       ],
-      "progress": 0.5,
-      "planLineIfFailed": "you decided before checking the evidence",
-      "order": [
-        "Agree the single change and shared test method",
-        "Make and identify A and B using the plan",
-        "Run the agreed test and record results by batch ID",
-        "Compare results and propose the next check"
-      ],
-      "whenRight": "The plan defines the samples; the records connect the measurement to the recommendation.",
-      "whenWrong": "You need a defined plan and identified samples before a result can support a conclusion."
+      "planLineIfFailed": "you made a choice before checking the evidence"
     },
     {
-      "id": "FS1-MID",
       "kind": "card",
       "variant": "act",
       "speaker": "System",
       "title": "",
       "body": "",
+      "cta": "Continue",
       "review": {
-        "threshold": 65,
+        "threshold": 68,
         "intro": {
           "kicker": "Mid-project review",
-          "line": "Ren checks how you planned the trial."
+          "line": "Ren and Yuki check your progress."
         },
-        "progressLine": "Reviewing the first five decisions...",
+        "progressLine": "Reviewing your work...",
         "pass": {
-          "title": "A sound start.",
-          "body": "You connected a testable question to a fair comparison. Next, protect the samples and interpret the evidence."
+          "title": "You are on track.",
+          "note": "First checkpoint complete.",
+          "body": "The client review is still ahead."
         },
         "fail": {
-          "title": "Use the next checks to improve.",
-          "body": "Keep the method steady, separate observations from explanations and ask when records are incomplete."
+          "title": "You can still turn this around.",
+          "body": "Use the feedback in the second half."
         }
       },
-      "cta": "Continue the project"
+      "id": "FS1-MID"
     },
     {
-      "id": "FS1-18",
       "kind": "card",
-      "variant": "chapter",
-      "title": "A missing record is a real gap.",
-      "body": "A batch needs its ingredient identity and an agreed test method. Hold an uncertain sample separately and ask the supervisor. Never fill a gap with a guess.",
+      "variant": "act",
       "speaker": "System",
-      "system": true,
-      "cta": "Continue"
+      "title": "The final stretch.",
+      "body": "Client review · 4 p.m.",
+      "cta": "Continue",
+      "id": "FS1-ACT2"
     },
     {
-      "id": "FS1-19",
-      "kind": "check",
-      "method": "tap",
-      "speaker": "System",
-      "question": "A different test has an unknown sample ID. What is the next step?",
-      "options": [
+      "kind": "card",
+      "variant": "character",
+      "speaker": "Imani",
+      "title": "Imani wants the next project.",
+      "body": "She is quick and ambitious. You both want your trial work to earn trust.",
+      "cta": "Continue",
+      "castMember": "Imani",
+      "id": "FS1-18"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "A sample needs checking.",
+      "body": "Imani wants sample C on the tasting tray. Luis has flagged its missing ingredient and allergy checks.",
+      "cta": "Continue",
+      "castMembers": [
+        "Imani",
+        "Luis"
+      ],
+      "artifact": {
+        "id": "fs-hold",
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
+        "kind": "sample-hold",
+        "title": "Sample control · tasting tray",
+        "caption": "Appearance cannot confirm ingredients or allergen status.",
+        "provenance": "Fictional sample-control training record.",
+        "sampleId": "C",
+        "checks": [
+          {
+            "label": "Ingredient record",
+            "value": "Missing"
+          },
+          {
+            "label": "Allergen review",
+            "value": "Not confirmed"
+          },
+          {
+            "label": "Tasting",
+            "value": "Not authorised"
+          }
+        ]
+      },
+      "id": "FS1-19"
+    },
+    {
+      "kind": "choice",
+      "layout": "options",
+      "speaker": "Narrator",
+      "question": "What do you do about sample C?",
+      "choices": [
         {
-          "label": "Hold it separately and check with the supervisor.",
-          "correct": true,
-          "why": "That follows the evidence and the task."
+          "id": "a",
+          "label": "Keep C held and ask Yuki to review it.",
+          "tier": "best",
+          "why": "Missing checks must be resolved before tasting."
         },
         {
-          "label": "Guess its identity from its colour.",
-          "correct": false,
-          "why": "That goes beyond what the evidence can tell you."
+          "id": "b",
+          "label": "Let one person taste it first.",
+          "tier": "wrong",
+          "why": "A small taste does not resolve the missing checks."
+        },
+        {
+          "id": "c",
+          "label": "Use its appearance to clear it.",
+          "tier": "wrong",
+          "why": "Appearance cannot confirm ingredients or allergy risks."
         }
       ],
-      "cta": "Continue"
-    },
-    {
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "pivotal": true,
       "id": "FS1-20",
-      "kind": "flags",
-      "speaker": "Ren",
-      "question": "Which two records have missing information?",
-      "feedback": "",
-      "feedbackCta": "Continue",
+      "progress": 0.7142857142857143,
       "skills": [
-        "Attention to Detail",
-        "Written Communication"
+        "Decision-Making",
+        "Critical Thinking"
       ],
-      "progress": 0.6,
-      "planLineIfFailed": "you decided before checking the evidence",
-      "rows": [
-        {
-          "label": "Sample A",
-          "flag": false,
-          "why": "Those records support identifying and repeating the trial.",
-          "evidence": {
-            "code": "A",
-            "medium": "laboratory",
-            "fields": [
-              {
-                "label": "Ingredients",
-                "value": "Recorded"
-              },
-              {
-                "label": "Test method",
-                "value": "Recorded"
-              },
-              {
-                "label": "Sample state",
-                "value": "Ready for review"
-              }
+      "planLineIfFailed": "you made a choice before checking the evidence"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "3 p.m. The report has a gap.",
+      "body": "Luis finds B’s test method missing from the draft. The client review is in one hour.",
+      "cta": "Continue",
+      "artifact": {
+        "world": "Farming, Animals & Nature",
+        "medium": "laboratory",
+        "organisation": "Sprout Lab / product development",
+        "id": "fs-log",
+        "kind": "register",
+        "title": "Sample traceability register",
+        "recordId": "FS / sample log",
+        "caption": "Read the draft as written. Confirm missing information; never guess.",
+        "provenance": "Fictional training records.",
+        "columns": [
+          "Ingredients",
+          "Test method",
+          "Sample state"
+        ],
+        "records": [
+          {
+            "id": "A",
+            "values": [
+              "Recorded",
+              "Recorded",
+              "Ready for review"
+            ]
+          },
+          {
+            "id": "B",
+            "values": [
+              "Recorded",
+              "Not recorded",
+              "Draft"
+            ]
+          },
+          {
+            "id": "C",
+            "values": [
+              "Not confirmed",
+              "Recorded",
+              "Held"
+            ]
+          },
+          {
+            "id": "D",
+            "values": [
+              "Recorded",
+              "Recorded",
+              "Held for review"
             ]
           }
+        ]
+      },
+      "id": "FS1-21"
+    },
+    {
+      "kind": "choice",
+      "layout": "chat",
+      "speaker": "Ren",
+      "question": "What do you message Ren?",
+      "choices": [
+        {
+          "id": "a",
+          "label": "B’s method is missing. Can we check it before the review?",
+          "tier": "best",
+          "why": "You raise the gap early and ask for the right check."
         },
         {
-          "label": "Sample B",
-          "flag": true,
-          "why": "The team must restore the verified method record so the result can be interpreted.",
-          "evidence": {
-            "code": "B",
-            "medium": "laboratory",
-            "fields": [
-              {
-                "label": "Ingredients",
-                "value": "Recorded"
-              },
-              {
-                "label": "Test method",
-                "value": "Not recorded"
-              },
-              {
-                "label": "Sample state",
-                "value": "Draft"
-              }
-            ]
-          }
+          "id": "b",
+          "label": "I’ll copy A’s method into B’s record.",
+          "tier": "wrong",
+          "why": "The methods may match, but you must confirm that first."
         },
         {
-          "label": "Sample C",
-          "flag": true,
-          "why": "Unknown ingredients must be checked before this sample can be used.",
-          "evidence": {
-            "code": "C",
-            "medium": "laboratory",
-            "fields": [
-              {
-                "label": "Ingredients",
-                "value": "Not confirmed"
-              },
-              {
-                "label": "Test method",
-                "value": "Recorded"
-              },
-              {
-                "label": "Sample state",
-                "value": "Held"
-              }
-            ]
-          }
-        },
-        {
-          "label": "Sample D",
-          "flag": false,
-          "why": "Holding an uncertain sample protects against using it by mistake.",
-          "evidence": {
-            "code": "D",
-            "medium": "laboratory",
-            "fields": [
-              {
-                "label": "Ingredients",
-                "value": "Recorded"
-              },
-              {
-                "label": "Test method",
-                "value": "Recorded"
-              },
-              {
-                "label": "Sample state",
-                "value": "Held for review"
-              }
-            ]
-          }
+          "id": "c",
+          "label": "I’ll leave out the gap so the report looks ready.",
+          "tier": "wrong",
+          "why": "The client could trust a result the team cannot trace."
         }
       ],
-      "whenRight": "You identified missing evidence without treating a sensible hold as a defect.",
-      "whenWrong": "The problems are B’s missing method and C’s missing ingredient identity."
-    },
-    {
-      "id": "FS1-21",
-      "kind": "card",
-      "variant": "chapter",
-      "title": "Tasting cannot clear an unknown sample.",
-      "body": "An allergen is a substance that can trigger an allergic reaction. Allergen cross-contact can introduce one unintentionally. Appearance or taste cannot confirm allergen status.",
-      "speaker": "System",
-      "system": true,
-      "cta": "Continue"
-    },
-    {
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "chatWith": {
+        "name": "Ren",
+        "role": "Senior Food Scientist"
+      },
       "id": "FS1-22",
-      "kind": "card",
-      "variant": "chapter",
-      "title": "Yuki joins the project.",
-      "body": "“I’m Yuki, the quality lead. Sample C’s ingredient record and allergen review are incomplete. Keep it off the tasting tray while I investigate.”",
-      "speaker": "Yuki",
-      "system": false,
-      "cta": "Continue",
-      "artifact": {
-        "id": "fs-hold",
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "kind": "sample-hold",
-        "title": "Sample control · tasting tray",
-        "caption": "Appearance cannot confirm ingredients or allergen status.",
-        "provenance": "Fictional sample-control training record.",
-        "sampleId": "C",
-        "checks": [
-          {
-            "label": "Ingredient record",
-            "value": "Missing"
-          },
-          {
-            "label": "Allergen review",
-            "value": "Not confirmed"
-          },
-          {
-            "label": "Tasting",
-            "value": "Not authorised"
-          }
-        ]
-      }
-    },
-    {
-      "id": "FS1-23",
-      "kind": "choice",
-      "speaker": "Yuki",
-      "question": "A colleague asks to taste sample C before its ingredient and allergen checks are confirmed. What do you do?",
-      "feedback": "",
-      "feedbackCta": "Continue",
+      "progress": 0.8571428571428571,
       "skills": [
-        "Safety Awareness",
-        "Teamwork & Collaboration"
+        "Decision-Making",
+        "Critical Thinking"
       ],
-      "progress": 0.7,
-      "planLineIfFailed": "you decided before checking the evidence",
-      "speakerRole": "Junior food scientist",
-      "layout": "options",
-      "artifact": {
-        "id": "fs-hold",
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "kind": "sample-hold",
-        "title": "Sample control · tasting tray",
-        "caption": "Appearance cannot confirm ingredients or allergen status.",
-        "provenance": "Fictional sample-control training record.",
-        "sampleId": "C",
-        "checks": [
-          {
-            "label": "Ingredient record",
-            "value": "Missing"
-          },
-          {
-            "label": "Allergen review",
-            "value": "Not confirmed"
-          },
-          {
-            "label": "Tasting",
-            "value": "Not authorised"
-          }
-        ]
-      },
-      "choices": [
-        {
-          "id": "a",
-          "label": "Keep C out of tasting and ask Yuki to confirm the checks",
-          "tier": "best",
-          "why": "Unknown ingredient and allergen status must be resolved before tasting is considered."
-        },
-        {
-          "id": "b",
-          "label": "Taste a tiny piece to see whether it seems safe",
-          "tier": "wrong",
-          "why": "A small taste cannot establish allergen status or safety."
-        },
-        {
-          "id": "c",
-          "label": "Offer C without mentioning the missing record",
-          "tier": "wrong",
-          "why": "The colleague would be deciding without essential information."
-        }
-      ]
+      "planLineIfFailed": "you made a choice before checking the evidence"
     },
     {
-      "id": "FS1-24",
       "kind": "card",
-      "variant": "chapter",
-      "title": "Ask a fair sensory question.",
-      "body": "For approved samples, neutral codes reduce expectation clues. Keep serving conditions consistent and collect each person’s own response before discussion.",
-      "speaker": "System",
-      "system": true,
-      "cta": "Continue"
-    },
-    {
-      "id": "FS1-25",
-      "kind": "card",
-      "variant": "chapter",
-      "title": "The panel has a clear boundary.",
-      "body": "A and B are approved; C stays held. Compare texture, not health benefits.",
-      "speaker": "Yuki",
-      "system": false,
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "3:30 p.m. The record is checked.",
+      "body": "Ren confirms the method from the original notes. Luis updates the draft. C stays held.",
       "cta": "Continue",
-      "artifact": {
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "id": "fs-sensory",
-        "kind": "panel-plan",
-        "title": "Sensory panel / serving plan",
-        "recordId": "FS / coded panel",
-        "caption": "A blank response protocol, not panel results. Yuki has approved A and B; C remains held.",
-        "provenance": "Fictional approved-sample teaching setup; codes are illustrative.",
-        "legend": "Approved samples · response sheet",
-        "codes": [
-          "318",
-          "742"
-        ],
-        "question": "How firm does each sample feel?",
-        "controls": [
-          "Same serving conditions",
-          "Independent responses",
-          "C stays off the tray"
-        ]
-      }
+      "id": "FS1-23"
     },
     {
-      "id": "FS1-26",
-      "kind": "pick",
-      "speaker": "Yuki",
-      "question": "Choose three methods for comparing the approved A and B samples fairly.",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": [
-        "Quality Control",
-        "Active Listening"
-      ],
-      "progress": 0.8,
-      "planLineIfFailed": "you decided before checking the evidence",
-      "pick": 3,
-      "cards": [
-        {
-          "label": "Use neutral sample codes.",
-          "role": "pick"
-        },
-        {
-          "label": "Say which sample Ren expects to win.",
-          "role": "leave"
-        },
-        {
-          "label": "Use the same serving conditions.",
-          "role": "pick"
-        },
-        {
-          "label": "Collect independent responses before group discussion.",
-          "role": "pick"
-        },
-        {
-          "label": "Let the loudest person answer for everyone.",
-          "role": "leave"
-        }
-      ],
-      "whenRight": "You reduced expectation and group-pressure clues while keeping the comparison consistent.",
-      "whenWrong": "Use neutral codes, consistent conditions and independent responses."
-    },
-    {
-      "id": "FS1-27",
       "kind": "card",
-      "variant": "chapter",
-      "title": "The handling results are ready.",
-      "body": "Compare the recorded counts before recommending the next step.",
-      "speaker": "Ren",
-      "system": false,
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "A teammate needs a hand.",
+      "body": "Imani must send the trial summary in ten minutes. Your next task is due tomorrow.",
       "cta": "Continue",
-      "artifact": {
-        "id": "fs-results",
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "kind": "sample-results",
-        "title": "Handling test · broken pieces",
-        "caption": "This test measures breakage only, not safety or shelf life.",
-        "provenance": "Fictional training counts from the canonical project record.",
-        "samples": [
-          {
-            "label": "Batch A",
-            "broken": 7,
-            "tested": 10
-          },
-          {
-            "label": "Batch B",
-            "broken": 2,
-            "tested": 10
-          }
-        ],
-        "scope": "Small trial · no repeat batch yet · safety and shelf life not measured"
-      }
+      "castMember": "Imani",
+      "id": "FS1-24"
     },
     {
-      "id": "FS1-28",
       "kind": "card",
-      "variant": "chapter",
-      "title": "Build a recommendation in three parts.",
-      "body": "Connect the question to the measured result and a next check. A small trial can support a repeat test; it cannot prove all production will behave the same way.",
-      "speaker": "System",
-      "system": true,
-      "cta": "Continue",
-      "artifact": {
-        "id": "fs-example",
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Example · a different cracker test",
-        "caption": "Changing one factor makes the comparison easier to interpret; repeat it to check consistency.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
-        "entries": [
-          {
-            "label": "Changed",
-            "text": "Mixing time: short versus long."
-          },
-          {
-            "label": "Kept the same",
-            "text": "Ingredients, shape and test method."
-          },
-          {
-            "label": "Recorded",
-            "text": "Sample ID, mixing time and break-test result."
-          }
-        ]
-      }
-    },
-    {
-      "id": "FS1-29",
-      "kind": "check",
-      "method": "tap",
-      "speaker": "System",
-      "question": "One different cracker trial breaks less often. What does that support?",
-      "options": [
-        {
-          "label": "Repeat that comparison using the same method.",
-          "correct": true,
-          "why": "That follows the evidence and the task."
-        },
-        {
-          "label": "Promise that it will never break in production.",
-          "correct": false,
-          "why": "That goes beyond what the evidence can tell you."
-        }
-      ],
-      "cta": "Continue"
-    },
-    {
-      "id": "FS1-30",
-      "kind": "chain",
-      "speaker": "Ren",
-      "question": "Build a recommendation to Yuki from the oat-snack handling results.",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": [
-        "Persuasive Communication",
-        "Professional Judgment"
-      ],
-      "progress": 0.9,
-      "planLineIfFailed": "you decided before checking the evidence",
-      "artifact": {
-        "id": "fs-results",
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "kind": "sample-results",
-        "title": "Handling test · broken pieces",
-        "caption": "This test measures breakage only, not safety or shelf life.",
-        "provenance": "Fictional training counts from the canonical project record.",
-        "samples": [
-          {
-            "label": "Batch A",
-            "broken": 7,
-            "tested": 10
-          },
-          {
-            "label": "Batch B",
-            "broken": 2,
-            "tested": 10
-          }
-        ],
-        "scope": "Small trial · no repeat batch yet · safety and shelf life not measured"
-      },
-      "steps": [
-        {
-          "label": "Question",
-          "prompt": "What were we investigating?",
-          "options": [
-            {
-              "label": "Reduce breakage during handling",
-              "correct": true
-            },
-            {
-              "label": "Prove the snack has a long shelf life",
-              "correct": false
-            }
-          ]
-        },
-        {
-          "label": "Evidence",
-          "prompt": "What did this comparison show?",
-          "options": [
-            {
-              "label": "B had less breakage than A in this small test",
-              "correct": true
-            },
-            {
-              "label": "Everyone prefers the flavour of B",
-              "correct": false
-            }
-          ]
-        },
-        {
-          "label": "Next step",
-          "prompt": "What can you recommend?",
-          "options": [
-            {
-              "label": "Repeat B alongside A under the same method",
-              "correct": true
-            },
-            {
-              "label": "Launch B and stop checking",
-              "correct": false
-            }
-          ]
-        }
-      ],
-      "whenRight": "You connected the real question, the measured result and a proportionate next test.",
-      "whenWrong": "Keep the recommendation within the handling evidence: less breakage in this trial, then a repeat comparison."
-    },
-    {
-      "id": "FS1-31",
-      "kind": "card",
-      "variant": "chapter",
-      "title": "Yuki asks a harder question.",
-      "body": "“Your handling test helps. Could we now promise that this snack stays safe for months?”",
-      "speaker": "Yuki",
-      "system": false,
-      "cta": "Continue"
-    },
-    {
-      "id": "FS1-32",
-      "kind": "card",
-      "variant": "chapter",
-      "title": "Each claim needs the right evidence.",
-      "body": "Handling tests measure breakage. Sensory tests collect responses. Neither establishes a safe shelf life. Ask the quality team for a suitable study before making that claim.",
-      "speaker": "System",
-      "system": true,
-      "cta": "Continue",
-      "artifact": {
-        "id": "fs-results",
-        "world": "Farming, Animals & Nature",
-        "medium": "laboratory",
-        "organisation": "Sprout Lab / product development",
-        "kind": "sample-results",
-        "title": "Handling test · broken pieces",
-        "caption": "This test measures breakage only, not safety or shelf life.",
-        "provenance": "Fictional training counts from the canonical project record.",
-        "samples": [
-          {
-            "label": "Batch A",
-            "broken": 7,
-            "tested": 10
-          },
-          {
-            "label": "Batch B",
-            "broken": 2,
-            "tested": 10
-          }
-        ],
-        "scope": "Small trial · no repeat batch yet · safety and shelf life not measured"
-      }
-    },
-    {
-      "id": "FS1-33",
-      "kind": "choice",
-      "speaker": "Yuki",
-      "question": "Yuki asks whether the handling results support a safe shelf-life claim. What do you recommend?",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": [
-        "Professional Judgment",
-        "Written Communication"
-      ],
-      "progress": 1,
-      "planLineIfFailed": "you decided before checking the evidence",
-      "layout": "options",
-      "choices": [
-        {
-          "id": "a",
-          "label": "Record that shelf life is unknown and ask the quality team to plan the required study",
-          "tier": "best",
-          "why": "The handling evidence does not answer the shelf-life question. A qualified team must define the appropriate work."
-        },
-        {
-          "id": "b",
-          "label": "Promise months of safe storage because B broke less",
-          "tier": "wrong",
-          "why": "Mechanical breakage is not evidence of safe storage life."
-        },
-        {
-          "id": "c",
-          "label": "Use the panel’s texture response as a safety certificate",
-          "tier": "wrong",
-          "why": "People’s texture responses do not establish product safety."
-        }
-      ]
-    },
-    {
-      "id": "FS1-34",
-      "kind": "card",
-      "variant": "chapter",
-      "title": "A result someone else can use.",
-      "body": "“Keep the batch records, the measured comparison and its limits together. B is a candidate for another test, while C remains held. That is a useful first project.”",
-      "speaker": "Yuki",
-      "system": false,
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Check the result and its limits.",
+      "body": "The report needs counts, a next test and the unresolved hold. No launch promise.",
       "cta": "Continue",
       "artifact": {
         "id": "fs-handover",
@@ -1295,65 +798,109 @@
         "layout": "handover",
         "title": "Project handover · version 1",
         "caption": "A useful handover states what was measured and what remains unknown.",
-        "provenance": "Fictional Sprout Lab training project. Counts and formulations are teaching data, not validated recipes or safety limits.",
+        "provenance": "Fictional Sprout / VELO trial. Teaching data; no safety approval.",
         "entries": [
           {
             "label": "Trial result",
-            "text": "B had less breakage than A in this small handling test."
+            "text": "A: 7/10 broken. B: 2/10 broken."
           },
           {
             "label": "Recommendation",
-            "text": "Repeat B alongside A under the same method."
+            "text": "Repeat A and B with the same test."
           },
           {
             "label": "Unresolved",
-            "text": "Sample C is held for review. Shelf life has not been studied."
+            "text": "C stays held. Shelf life is not tested."
           },
           {
             "label": "Owner",
-            "text": "Yuki reviews the records and approves the next work."
+            "text": "Yuki reviews the next test."
           }
         ]
-      }
+      },
+      "id": "FS1-25"
     },
     {
-      "id": "FS1-35",
+      "kind": "rank",
+      "speaker": "Narrator",
+      "question": "Rank your next steps, best to worst.",
+      "order": [
+        "Offer to check the trial summary with Imani.",
+        "Wish her luck and return to your task.",
+        "Add a safety claim to make the report sound stronger."
+      ],
+      "whenRight": "You had time to help. A clear check protects the team and the client.",
+      "whenWrong": "Help with the real report first. Never add a claim the test did not support.",
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Teamwork & Collaboration",
+        "Professional Judgment"
+      ],
+      "id": "FS1-26",
+      "progress": 1,
+      "planLineIfFailed": "you made a choice before checking the evidence"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Ren notices the teamwork.",
+      "body": "Good lab work needs sound records and people who speak up.",
+      "cta": "Continue",
+      "castMember": "Ren",
+      "id": "FS1-27"
+    },
+    {
       "kind": "card",
       "variant": "chapter",
-      "title": "You made the next test clearer.",
-      "body": "“You asked a testable question, kept a comparison fair and named what we still do not know. That is how a food scientist makes progress.”",
-      "speaker": "Ren",
-      "system": false,
-      "cta": "Continue"
+      "speaker": "Narrator",
+      "title": "The client review begins.",
+      "body": "Your part is done. Yuki now reviews the choices you made.",
+      "cta": "Begin Final Review",
+      "id": "FS1-28"
     },
     {
-      "id": "FS1-REVIEW",
       "kind": "review",
-      "title": "Your first food science project",
-      "body": "The review considers your decisions, records and communication.",
-      "pending": "Reviewing your project",
-      "deciding": "Project review in progress",
-      "decidingNote": "Evidence, quality and responsible next steps."
+      "speaker": "System",
+      "title": "The team reviews your trial work.",
+      "body": "Your reputation decides the result.",
+      "deciding": "Reviewing your decisions...",
+      "decidingNote": "Ren and Yuki check your evidence and teamwork.",
+      "id": "FS1-REVIEW"
     }
   ],
   "endings": [
     {
       "min": 85,
-      "band": "Trusted",
-      "headline": "A recommendation worth testing",
-      "message": "You used evidence, kept uncertainty visible and worked within your role.",
-      "subline": "Level 1 complete. Later projects are planned, not built.",
-      "primary": "Next project · planned",
+      "headline": "A next test worth backing",
+      "scoreNote": "Your project passes.",
+      "message": "You kept the comparison fair, raised missing checks and helped the team.",
+      "subline": "Level 1 complete. Later projects are not built yet.",
+      "primary": "Play the project again",
       "advances": true
     },
     {
+      "min": 40,
+      "headline": "Revise and retry",
+      "scoreNote": "The evidence needs work.",
+      "message": "Review the missed decisions. Keep each claim tied to the test.",
+      "subline": "You can try again.",
+      "primary": "Try again",
+      "advances": false
+    },
+    {
       "min": 0,
-      "band": "At Risk",
-      "headline": "Strengthen the evidence",
-      "message": "Review the missed decisions, then try the project again. One attempt does not define your future.",
-      "subline": "Connect each recommendation to a record and a check.",
-      "primary": "Start over",
+      "headline": "This attempt ends here",
+      "scoreNote": "Restart the project.",
+      "message": "The team cannot rely on this report yet. Use the feedback and start fresh.",
+      "subline": "One attempt does not define your future.",
+      "primary": "Start again",
       "advances": false
     }
-  ]
+  ],
+  "points": 6,
+  "noStrikes": true,
+  "generationTemplate": "ib-l1-2026-10-21",
+  "scoreTip": "Start at 50. Each scored decision adds or removes 6. Reach 85 to pass."
 }

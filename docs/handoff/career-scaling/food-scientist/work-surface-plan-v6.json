@@ -1,0 +1,267 @@
+{
+  "version": 6,
+  "sources": "../work-graphics-research-v6.json",
+  "beats": [
+    {
+      "beat": "FS1-01",
+      "task": "Your first lab project.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-02",
+      "task": "A big client. A clear problem.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-03",
+      "task": "Meet Ren.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-04",
+      "task": "Know your part.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-05",
+      "task": "Meet the trial team.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-06",
+      "task": "What should you check first?",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-07",
+      "task": "Prepare for the review.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-08",
+      "task": "Match each lab note to its meaning.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-09",
+      "task": "",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-10",
+      "task": "Change one thing. Keep the test the same.",
+      "supportingGraphic": "fs-plan",
+      "reason": "Read-only task evidence, all necessary information visible at once.",
+      "sourceKey": "food",
+      "canonicalData": "examples/food-scientist-level-1.json#FS1-10/artifact",
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-11",
+      "task": "Which comparison tests that change fairly?",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-12",
+      "task": "Yuki joins the review.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-13",
+      "task": "Different roles. Shared responsibility.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-14",
+      "task": "The client wants an answer.",
+      "supportingGraphic": "fs-results",
+      "reason": "Read-only task evidence, all necessary information visible at once.",
+      "sourceKey": "food",
+      "canonicalData": "examples/food-scientist-level-1.json#FS1-14/artifact",
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-15",
+      "task": "Which claim needs to change before the review?",
+      "supportingGraphic": "fs-results",
+      "reason": "Read-only task evidence, all necessary information visible at once.",
+      "sourceKey": "food",
+      "canonicalData": "examples/food-scientist-level-1.json#FS1-15/artifact",
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-MID",
+      "task": "",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-ACT2",
+      "task": "The final stretch.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-18",
+      "task": "Imani wants the next project.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-19",
+      "task": "A sample needs checking.",
+      "supportingGraphic": "fs-hold",
+      "reason": "Read-only task evidence, all necessary information visible at once.",
+      "sourceKey": "allergen",
+      "canonicalData": "examples/food-scientist-level-1.json#FS1-19/artifact",
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-20",
+      "task": "What do you do about sample C?",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-21",
+      "task": "3 p.m. The report has a gap.",
+      "supportingGraphic": "fs-log",
+      "reason": "Read-only task evidence, all necessary information visible at once.",
+      "sourceKey": "food",
+      "canonicalData": "examples/food-scientist-level-1.json#FS1-21/artifact",
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-22",
+      "task": "What do you message Ren?",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-23",
+      "task": "3:30 p.m. The record is checked.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-24",
+      "task": "A teammate needs a hand.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-25",
+      "task": "Check the result and its limits.",
+      "supportingGraphic": "fs-handover",
+      "reason": "Read-only task evidence, all necessary information visible at once.",
+      "sourceKey": "food",
+      "canonicalData": "examples/food-scientist-level-1.json#FS1-25/artifact",
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-26",
+      "task": "Rank your next steps, best to worst.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-27",
+      "task": "Ren notices the teamwork.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-28",
+      "task": "The client review begins.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    },
+    {
+      "beat": "FS1-REVIEW",
+      "task": "The team reviews your trial work.",
+      "supportingGraphic": null,
+      "reason": "Existing scene and concise game text provide the context; no extra graphic needed.",
+      "sourceKey": "food",
+      "canonicalData": null,
+      "state": "Authored snapshot; no independent interaction or live readings."
+    }
+  ]
+}
