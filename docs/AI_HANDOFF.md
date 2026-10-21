@@ -22,6 +22,15 @@
 - A shooting star was observed at about 7.4s.
 - Still open: the CTA's BorderBeam spin runs under reduced motion. It is a shared component.
 
+## 2026-10-21: CTA names the goals; career Education says the degree and leads to colleges
+
+**Why (Chandu):** "the cta says see my top 3 but we're taking them to the about me section to select their career and college goal so we need to fix that", and "for career detail page we need to update the copy of 'where you would study' because it shows bachelors degree etc and not where they would study, we still wanna show bachelors etc and lead them from there to colleges they can consider".
+
+- **"Choose my goals"** replaces "See Top 3" on the bar that appears when a career is added to Top 3 (labStore.ts, both the add and the swap), and "Choose my career goal" on Match's last button (V2Flow.tsx, demo). Both land on About Me, which asks for the Career Goal and the College Goal. The Flow Lab keeps "See my Top 3" (it ends on its own Top 3 screen); /match-lab's "Compare My Top 3" is a lab page and was left.
+- **Career page Education** (the default v1, `CareerDetailLab`): the hand-built two lists are replaced by `WhereToStudy`, the version v2 already used. "What people study for it" stays; "Where you would study it" becomes **"The degree you'll need"**: each credential (Bachelor's degree, Master's degree...) with a "See N colleges" button that opens the schools that teach it (training on the job says "no school needed"). Same heading in v2, the older CareerDetailExperience and the career sheet (CareerPeek, whose rows now say "See N colleges").
+- The "See N colleges" buttons were pills (WhereToStudy was only in the lab version when pills were removed); now 10px corners.
+- Checked: tsc, eslint; Investment Banking Education tab (`career-degree-you-need.jpg`: Bachelor's, See 53 colleges; Master's, See 47 colleges); the Top 3 bar label (added, read, undone). Pushed to main on Chandu's go-ahead.
+
 ## 2026-10-21: WCAG 2.2 AA Phase 1 (blockers B2-B9)
 
 **Why.** The status report (`docs/ACCESSIBILITY_STATUS_REPORT_2026-10-21.md`) listed nine things blocking a WCAG 2.2 AA claim. Chandu: "go: start Phase 1, the AA blockers B2-B9 (games first), and push the report commit with it." B1, the video captions, is content work and stays open.
