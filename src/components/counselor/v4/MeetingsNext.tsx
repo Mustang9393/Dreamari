@@ -157,7 +157,7 @@ function NextUp({ m, s, now }: { m: Meeting; s: CounselorStudent; now: Date }) {
   );
 }
 
-function ToLog({ items, byId, now }: { items: Meeting[]; byId: Map<string, CounselorStudent>; now: Date }) {
+export function ToLog({ items, byId, now }: { items: Meeting[]; byId: Map<string, CounselorStudent>; now: Date }) {
   const entries = useTimeLog();
   const [minutes, setMinutes] = useState(0);
   const [last, setLast] = useState<Meeting | null>(null);

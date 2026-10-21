@@ -85,14 +85,14 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
       // Prepare (9 Oct 2026, Maisha): Reviews, Meetings, Messages, Assist.
       // v5's desk layout, v4's queues (8 Oct 2026: "Use the layout in v5")
       case "review-queue": return <ReviewDesk />;
-      case "meetings": return <MeetingsV4 />;
+      case "meetings": return <MeetingsV4 studentId={initialStudentId} />;
       case "connect": return <CounselorConnectV4 />;
       // College & Career in Maisha's order (9 Oct 2026): poster rows, then
       // Postsecondary Direction, then From Interest to Experience
       case "insights": return <CareerCollegeInsightsV4 />;
       // v5's Explore inside v4 (7 Oct 2026), v4's own page title above it;
       // Turn Interest into Opportunity under its career rows (9 Oct 2026)
-      case "explore": return <V5Explore embedded afterCareers={<ExploreOpportunity />} />;
+      case "explore": return <V5Explore embedded consolidated afterCareers={<ExploreOpportunity />} />;
       // Check-ins left the demo (9 Oct 2026, Maisha); an old link lands on Today
       case "checkins": return <OverviewV4 />;
       case "productivity": return <ProductivitySuiteV4 />;

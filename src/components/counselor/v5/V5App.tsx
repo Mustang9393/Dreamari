@@ -75,7 +75,7 @@ export function V5App({ view }: { view: string | undefined }) {
   const shown: V5View = merged && active === "workspace" ? "prepare" : active;
   return (
     <div className="marketing-v2 themeable counselor-calm relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
-      <AppBackdrop />
+      <AppBackdrop calmSky />
       <DesktopNavigation
         active={onProfile ? "Profile" : LABEL[shown]}
         items={navFor(merged)}

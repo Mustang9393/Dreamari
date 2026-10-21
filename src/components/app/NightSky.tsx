@@ -92,7 +92,7 @@ function pickTint(): number {
   return 0;
 }
 
-export function NightSky({ calm = false }: { calm?: boolean } = {}) {
+export function NightSky({ calm = false, contained = false }: { calm?: boolean; /** sized to its box, not the window (the Edit My Build sheet); no wake-up wave */ contained?: boolean } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -117,8 +117,9 @@ export function NightSky({ calm = false }: { calm?: boolean } = {}) {
 
     const seed = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = window.innerWidth;
-      height = window.innerHeight;
+      const box = contained ? canvas.parentElement : null;
+      width = box ? box.clientWidth : window.innerWidth;
+      height = box ? box.clientHeight : window.innerHeight;
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -258,7 +259,7 @@ export function NightSky({ calm = false }: { calm?: boolean } = {}) {
         // the first page of a visit: the sky wakes up with one soft wave from
         // the middle, once per browser session (never on every navigation)
         try {
-          if (!reduce.matches && !sessionStorage.getItem("dreamari-sky-awake")) {
+          if (!contained && !reduce.matches && !sessionStorage.getItem("dreamari-sky-awake")) {
             sessionStorage.setItem("dreamari-sky-awake", "1");
             window.setTimeout(() => window.dispatchEvent(new CustomEvent(MOMENT_EVENT, { detail: { x: window.innerWidth / 2, big: false } })), 700);
           }
@@ -279,7 +280,9 @@ export function NightSky({ calm = false }: { calm?: boolean } = {}) {
     const onMoment = (e: Event) => {
       if (reduce.matches || !running) return;
       const d = (e as CustomEvent<Omit<Moment, "t0">>).detail;
-      moments.push({ x: d.x, big: d.big, t0: performance.now() });
+      // a moment's x is the screen's; a boxed sky counts from its own edge
+      const left = contained ? canvas.getBoundingClientRect().left : 0;
+      moments.push({ x: d.x - left, big: d.big, t0: performance.now() });
       if (calm && !animating) {
         animating = true;
         last = 0;
@@ -297,15 +300,19 @@ export function NightSky({ calm = false }: { calm?: boolean } = {}) {
     const observer = new MutationObserver(sync);
     observer.observe(root, { attributes: true, attributeFilter: ["class"] });
     window.addEventListener("resize", onResize);
+    // a boxed sky follows its box (a sheet sizes after it mounts)
+    const boxObserver = contained && canvas.parentElement ? new ResizeObserver(onResize) : null;
+    if (boxObserver && canvas.parentElement) boxObserver.observe(canvas.parentElement);
     document.addEventListener("visibilitychange", sync);
     return () => {
       cancelAnimationFrame(raf);
       observer.disconnect();
+      boxObserver?.disconnect();
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", sync);
       window.removeEventListener(MOMENT_EVENT, onMoment);
     };
-  }, [calm]);
+  }, [calm, contained]);
 
   return <canvas ref={canvasRef} aria-hidden data-night-sky className="pointer-events-none absolute inset-0 h-full w-full" style={{ display: "none" }} />;
 }

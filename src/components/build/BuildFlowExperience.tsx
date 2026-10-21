@@ -14,8 +14,12 @@ import { archiveCurrentProfile, writeStudentProfile } from "@/lib/studentProfile
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
 import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
+import { PARTY_SPRITE } from "./ui";
 import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_ACCENTS_V2, STAGE_DREAMY, type BuildState, type StageId } from "./types";
 import { useLookV2 } from "@/components/app/look";
+import { NightSky } from "@/components/app/NightSky";
+import { skyMoment } from "@/lib/sky";
+import { preload } from "react-dom";
 
 // The rebuilt build-profile flow (docs/BUILD_FLOW_SPEC.md = verbatim copy source).
 // Design/layout/structure follow the Figma Build Flow frames (3009-15623):
@@ -46,7 +50,13 @@ export function BuildFlowExperience() {
   const stage = STAGES[stageIndex];
   const stageId: StageId = stage.id;
 
-  const next = () => setStageIndex((current) => Math.min(current + 1, STAGES.length - 1));
+  // The night sky's moments in Build (21 Oct 2026, Chandu: "I dont see the
+  // stars and the reactions in the BUILD flow"): Build drew only its aurora,
+  // so moments fired here had no sky to light. Each Next (a step answered)
+  // sends a small wave from the button; picking chips does not, or the sky
+  // would never rest. The halfway screen and the finish are big moments
+  // with a shooting star (steps.tsx).
+  const next = () => { skyMoment(); setStageIndex((current) => Math.min(current + 1, STAGES.length - 1)); };
   const back = () => setStageIndex((current) => Math.max(current - 1, 0));
   const react = () => setReactionNonce((n) => n + 1);
   // The answers a student may revise later live in the student-profile store
@@ -72,6 +82,11 @@ export function BuildFlowExperience() {
   // Unlock audio on the first real tap/keypress (iOS mutes Web Audio behind the
   // ringer switch until an <audio> element has played; see feedback.ts).
   useEffect(() => primeAudioOnFirstGesture(), []);
+  // The celebration sprite, fetched while the student answers, so the
+  // halfway and finish screens open with Dreamy already there (21 Oct 2026:
+  // "the success animation etc in BUILD loads super slow"; the sprite was
+  // first requested, through the image optimizer, as the screen appeared).
+  preload(PARTY_SPRITE, { as: "image", fetchPriority: "low" });
 
   function patch(update: Partial<BuildState>) {
     setState((current) => ({ ...current, ...update }));
@@ -126,6 +141,8 @@ export function BuildFlowExperience() {
            Screen-wide confetti is still reserved for the Match celebration —
            the flow's own celebrations are Dreamy-local bursts. */}
         <AuroraBackground accent={accent} visitedAccents={visitedAccents} finale={isComplete} lightning={false} />
+        {/* the app's night sky over the aurora, calm: still until a moment */}
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10"><NightSky calm /></div>
         <FlowChrome />
 
         {/* h-dvh + overflow-hidden: the flow never page-scrolls. If a stage's

@@ -101,7 +101,9 @@ export function V5Explore({ embedded = false, afterCareers, payLabel, consolidat
           <HeadingControls>
             <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
               <SubTabs ariaLabel="Explore" options={tabs} value={tab} onChange={setTab} />
-              <PathwaySwitch value={path} onChange={setPath} />
+              {/* v4 too (20 Oct 2026, Chandu on v4's Explore: "Please fix this
+                 whats happening??"): Skilled trades is in the world picker */}
+              {!consolidated && <PathwaySwitch value={path} onChange={setPath} />}
             </div>
           </HeadingControls>
         ) : (

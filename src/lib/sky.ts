@@ -9,11 +9,15 @@
 export const SKY_EVENT = "dreamari:sky";
 
 // The budget, so it stays special (Chandu: "fire in a lot of places just not
-// so much that it gets boring and overused"): a small wave at most every 5s,
-// a shooting star at most every 2s. A big moment always beats a small one
-// (a press that saves and also fills the Top 3 shows the star).
+// so much that it gets boring and overused"): a shooting star at most every
+// 2s; small waves only come from the student's own taps (see SMALL_GAP). A
+// big moment always beats a small one (a press that saves and also fills the
+// Top 3 shows the star).
 //
 // Where moments fire (keep this list current):
+//   Build: a small wave on each Next, big at halfway and at the finish
+//   Match: a small wave per save or rank, big on the third of either
+//   Edit My Build: a wave on Save changes, big when it fills the last section
 //   big   Top 3 gains a career (picks.ts) · Build finished (buildAnswers.ts)
 //         · the College Goal first chosen (About Me picker) · a new Career Report version (reportHistory.ts) · a simulation's
 //         ten beats done (play/progress.ts) · a Glossary lesson finished the
@@ -25,7 +29,14 @@ export const SKY_EVENT = "dreamari:sky";
 //         (LightPulse, data-lit) · following a professional · counselor: a
 //         note, a meeting added, office hours, any other review decision
 //   once  the first page of a visit: the sky wakes up (NightSky)
-const SMALL_GAP = 5000;
+// 21 Oct 2026 (Chandu: "the stars pulsing on save button doesnt work all
+// the time, i think its mostly when the toast with the undo is present"):
+// the small gap was 5s, about as long as a save's Undo toast stays up, so
+// a second save in that window was silently dropped. Every moment here
+// answers something the student did, so a tap always gets its wave; the
+// gap only swallows a double fire from one press (say a save that is
+// also a main call to action).
+const SMALL_GAP = 600;
 const BIG_GAP = 2000;
 let lastSmall = 0;
 let lastBig = 0;

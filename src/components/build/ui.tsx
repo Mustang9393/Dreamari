@@ -34,6 +34,11 @@ function DreamyFallback({ className }: { className?: string }) {
 
 /** `fill`-based Dreamy sprite (WelcomeScreen's hero, Milestone/Completion's
  *  celebration art) -- falls back to DreamyFallback on a failed load. */
+/** Dreamy celebrating: the halfway and finish screens. Served as is (a
+ *  29 KB webp), not through the image optimizer, and preloaded by the flow,
+ *  so it is there the moment the screen opens. */
+export const PARTY_SPRITE = "/images/dreamy/v2/dreamy-party.webp";
+
 export function DreamySprite({ src, alt, sizes, className, unoptimized, priority, preload }: { src: string; alt: string; sizes: string; className?: string; unoptimized?: boolean; priority?: boolean; preload?: boolean }) {
   const [failed, setFailed] = useState(false);
   if (failed) return <DreamyFallback className={`absolute inset-0 ${className ?? ""}`} />;
@@ -299,6 +304,7 @@ export function QuestionHeading({
 export function Citation({ children }: { children: ReactNode }) {
   return (
     <p
+      data-quiet-flow-text
       className="mt-2 bg-transparent text-center text-[11px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] opacity-60"
       style={{ background: "transparent" }}
     >
@@ -363,6 +369,7 @@ export function StepFooter({
         <button
           type="button"
           onClick={onSkip}
+          data-quiet-flow-text
           className="dm-link cursor-pointer text-[13px] font-semibold text-[var(--color-night-muted-foreground)] opacity-60 transition-opacity hover:opacity-90"
         >
           Skip

@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { CardHud, ChipGrid, Citation, ConfirmShimmer, DreamySprite, GLASS_CHIP_IDLE_BG, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
+import { CardHud, ChipGrid, Citation, ConfirmShimmer, DreamySprite, PARTY_SPRITE, GLASS_CHIP_IDLE_BG, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
 import { ChevronRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
 import { playMilestoneChime, playXpRise } from "./sound";
+import { skyMoment } from "@/lib/sky";
 import { Listbox } from "@/components/app/Listbox";
 import { awardDreamScore, peekDreamScoreAfter } from "@/lib/dreamScore";
 import {
@@ -424,7 +425,11 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
 export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => void; onBack: () => void; percent: number }) {
   const [burstNonce, setBurstNonce] = useState(0);
   useEffect(() => {
-    const chime = setTimeout(() => playMilestoneChime(), 200);
+    const chime = setTimeout(() => {
+      playMilestoneChime();
+      // halfway is a big moment: the night sky's wave and shooting star
+      skyMoment({ big: true, from: document.querySelector("[data-dreamy-anchor]") });
+    }, 200);
     const kick = setTimeout(() => setBurstNonce(1), 60);
     const interval = setInterval(() => setBurstNonce((n) => (n < 4 ? n + 1 : n)), 1300);
     return () => {
@@ -446,7 +451,7 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
       <GlassCard className="text-center">
         {/* No "50% Complete" eyebrow: the HUD two lines up already says it. */}
         <div data-dreamy-anchor className="relative mx-auto mt-4 mb-2 h-28 w-28 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite] sm:h-32 sm:w-32">
-          <DreamySprite src="/images/dreamy/v2/dreamy-party.webp" alt="Dreamy celebrating" sizes="128px" className="object-contain" />
+          <DreamySprite src={PARTY_SPRITE} alt="Dreamy celebrating" sizes="128px" unoptimized priority className="object-contain" />
           <LocalBurst nonce={burstNonce} />
         </div>
         <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="You’re halfway there. ✨" /></h1>
@@ -523,7 +528,12 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
   // chime, then lifts, floats and shrinks into its slot beside the menu,
   // where the header chip pops in. The points are banked as it arrives (or
   // on the way out, if the student taps Reveal before it gets there).
-  const [xp, setXp] = useState(0);
+  // The count runs on the number's own text node, not React state: a state
+  // update every frame re-rendered the whole screen (glass card, sprite,
+  // filters) sixty times a second, the main reason the finish stuttered
+  // (21 Oct 2026: "the success animation etc in BUILD loads super slow").
+  const countRef = useRef<HTMLSpanElement | null>(null);
+  const [landed, setLanded] = useState(false);
   const [flown, setFlown] = useState(false);
   const xpRef = useRef<HTMLParagraphElement | null>(null);
   const awarded = useRef(false);
@@ -541,8 +551,9 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / COUNT_MS);
       const eased = 1 - Math.pow(1 - t, 3);
-      setXp(Math.max(1, Math.round(eased * BUILD_XP)));
+      if (countRef.current) countRef.current.textContent = `+${Math.max(1, Math.round(eased * BUILD_XP))} XP`;
       if (t < 1) raf = requestAnimationFrame(tick);
+      else setLanded(true);
     };
     raf = requestAnimationFrame(tick);
     const land = COUNT_MS + 60;
@@ -552,6 +563,9 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       // the background pulses out from Dreamy as the score lands (the 50%
       // screen's pulse), glow only, no traced ring; the chime is the sound
       dispatchAuroraPulse("cta", undefined, { forceDreamyOrigin: true, soft: true, silent: true });
+      // and the night sky's big moment: a wave through the stars and one
+      // shooting star, in place of half the old sparkle storm
+      skyMoment({ big: true, from: document.querySelector("[data-dreamy-anchor]") });
     }, land);
     const kick = setTimeout(() => setBurstNonce(1), land);
     const rain = setTimeout(() => setSparkNonce(1), land);
@@ -643,7 +657,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
         });
         host.appendChild(spark);
         setTimeout(() => spark.remove(), 900);
-      }, 38);
+      }, 70);
       flight.onfinish = () => { clone?.remove(); clone = null; if (trail) clearInterval(trail); trail = null; bank(); };
     }, land + HOLD_MS);
     return () => {
@@ -662,7 +676,6 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       if (landedRef.current) bank();
     };
   }, []);
-  const landed = xp >= BUILD_XP;
   return (
     <div className="flex h-full w-full flex-col">
       {/* The HUD stays on the last screen too, at 100 -- it had simply
@@ -673,7 +686,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       <div className="mx-auto w-full max-w-[640px]">
       <GlassCard className="text-center">
         <div data-dreamy-anchor className="relative mx-auto mb-3 h-28 w-28 sm:h-32 sm:w-32 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
-          <DreamySprite src="/images/dreamy/v2/dreamy-party.webp" alt="Dreamy celebrating" sizes="128px" className="object-contain" />
+          <DreamySprite src={PARTY_SPRITE} alt="Dreamy celebrating" sizes="128px" unoptimized priority className="object-contain" />
           <LocalBurst nonce={burstNonce} />
           <span
             aria-hidden
@@ -700,7 +713,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
             className={`${bricolage.className} xp-shimmer-text mt-1 flex items-center justify-center gap-[8px] text-[40px] leading-[44px] font-extrabold tabular-nums sm:text-[48px] sm:leading-[52px] ${landed ? "motion-safe:animate-[dreamy-pop_0.6s_cubic-bezier(0.16,1,0.3,1)_both]" : ""}`}
             style={{ filter: landed ? "drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 60%, transparent))" : "none" }}
           >
-            <Sparkles className="h-7 w-7 flex-none sm:h-8 sm:w-8" aria-hidden style={{ color: "var(--accent-subtle)" }} /> <span className="xp-shimmer-ink">+{xp} XP</span>
+            <Sparkles className="h-7 w-7 flex-none sm:h-8 sm:w-8" aria-hidden style={{ color: "var(--accent-subtle)" }} /> <span ref={countRef} className="xp-shimmer-ink">+1 XP</span>
           </p>
         </div>
         <p className="mt-3 text-[16px] leading-[22px] font-semibold text-[var(--color-night-foreground)] motion-safe:animate-[fade-slide-up_0.6s_ease-out_1.2s_both] sm:text-[18px] sm:leading-[24px]">Your personalized career matches are ready.</p>
@@ -709,7 +722,9 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       </div>
       {/* the success is sparkles, not confetti (direct feedback, 5 Sept 2026):
          two waves of stars bloom out from the centre and drift up */}
-      {sparkNonce > 0 && <MagicSparkles key={sparkNonce} count={sparkNonce === 1 ? 84 : 48} />}
+      {/* fewer, lighter points (no blur filter on the orbs, globals.css):
+         84 + 48 glowing layers at once was the other half of the stutter */}
+      {sparkNonce > 0 && <MagicSparkles key={sparkNonce} count={sparkNonce === 1 ? 40 : 24} />}
       <StepFooter onBack={onBack} onNext={onSeeMatches} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Reveal My Matches<ChevronRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
     </div>
   );

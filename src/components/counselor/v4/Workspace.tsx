@@ -3,15 +3,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Listbox } from "./Listbox";
-import { createContext, useContext, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { IconTip } from "@/components/app/IconTip";
-import { SlidersHorizontal, Sun, Moon } from "lucide-react";
+import { Search, SlidersHorizontal, Sun, Moon } from "lucide-react";
 import type { CounselorView } from "../roles";
 import "./visual-refresh.css";
 import "./layout2.css";
+import "./reinvent.css";
 import { AvatarStylePicker, AvatarStyleProvider } from "./avatarStyle";
-import { QuickLinksMenu } from "@/components/app/chrome";
+import { DesktopNavigation, QuickLinksMenu } from "@/components/app/chrome";
 
 const areas: WorkspaceArea[] = [
   // "Rename the 'Today' tab to Home" (Maisha, 9 Oct 2026).
@@ -141,35 +142,43 @@ export function Workspace({active,items,children,search,filters,account,org,them
  // By Student reading, so it lights Milestones rather than a second tab)
  const pages=(area?.items??[]).filter(i=>i.view!=="progress");
  const lit=active==="progress"?"milestones":active;
+ const [searchOpen,setSearchOpen]=useState(false);
+ const searchRef=useRef<HTMLDivElement>(null);
+ const searchBtn=useRef<HTMLButtonElement>(null);
+ // "/" opens the search wherever focus is not already in a field
+ useEffect(()=>{const onKey=(e:KeyboardEvent)=>{const t=e.target as HTMLElement|null;if(e.key==="/"&&!(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.isContentEditable))){e.preventDefault();setSearchOpen(true);}};window.addEventListener("keydown",onKey);return()=>window.removeEventListener("keydown",onKey);},[]);
+ // focus the field on open; Escape or a click outside closes it
+ useEffect(()=>{if(!searchOpen)return;searchRef.current?.querySelector("input")?.focus();const onDown=(e:PointerEvent)=>{const t=e.target as Node;if(!searchRef.current?.contains(t)&&!(t instanceof Element&&t.closest("[data-v4-search-toggle]")))setSearchOpen(false);};const onKey=(e:KeyboardEvent)=>{if(e.key==="Escape"){setSearchOpen(false);searchBtn.current?.focus();}};document.addEventListener("pointerdown",onDown);window.addEventListener("keydown",onKey);return()=>{document.removeEventListener("pointerdown",onDown);window.removeEventListener("keydown",onKey);};},[searchOpen]);
+ const tools=<><IconTip label="Search (/)"><button type="button" data-v4-search-toggle ref={searchBtn} className="v4-round" aria-label="Search students or screens" aria-expanded={searchOpen} onClick={()=>setSearchOpen(o=>!o)}><Search size={18}/></button></IconTip><IconTip label={`Switch to ${theme==="dark"?"light":"dark"} mode`}><button className="v4-round" onClick={onTheme} aria-label={`Switch to ${theme==="dark"?"light":"dark"} mode`}>{theme==="dark"?<Sun size={18}/>:<Moon size={18}/>}</button></IconTip>{items.some(i=>i.view==="settings")&&<IconTip label="Preferences"><Link className="v4-round" href="/counselor?view=settings&v=4" aria-label="Preferences"><SlidersHorizontal size={18}/></Link></IconTip>}<div className="v4-account">{account}</div></>;
  return <div className="v4-workspace" data-visual-refresh="calm">
   {/* DEMO-ONLY: the nav tools end with the site-wide quick links
       hamburger, the way back to the rest of the demo (Chandu, 20 Oct
       2026: "When i get to there i cant naviagte back to other parts of
       the app"). Same as v5, v7 and shell.tsx. */}
-  <header className="v4-navigation">
+  {/* The student app's top bar (20 Oct 2026, Chandu: "why is there a solid
+      black header dont do that" and "the top navbar should be like what we
+      have in the student section, same design and width etc."): the same
+      DesktopNavigation v7 uses, the areas in its centred pill, transparent
+      over the sky until scrolled, the tools in its right slot. Search is
+      an icon there now (a 280px field made the band crowded); "/" still
+      opens it. Phones and tablets keep v4's own bar below lg, now see-
+      through too. */}
+  <DesktopNavigation active={area?.label} items={available.map(a=>({label:a.label,href:`/counselor?view=${a.items[0].view}&v=4`}))} right={<div className="v4-nav-tools">{tools}</div>}/>
+  <header className="v4-navigation v4-nav-compact">
    <div className="v4-nav-main">
-    {/* The real Dreamari mark and wordmark (4 Oct 2026, Chandu: "add the
-           proper dreamari logo and wordmark instead of the generic thing"),
-           built exactly like the app's own Wordmark (chrome.tsx): the
-           logo-mark SVG as a currentColor mask, DREAMARI in the display face.
-           "Counselor" stays as the quiet caption, as v2's "Command Center". */}
         <Link href="/counselor?view=overview&v=4" aria-label="Dreamari Counselor, Home" className="v4-brand dm-link" style={{ color: "var(--foreground)" }}>
-          <span className="flex flex-col gap-[3px]">
-            <span className="flex items-center gap-[var(--space-1)]">
-              <span aria-hidden className="h-[13px] w-[23px] flex-none" style={{ background: "currentColor", maskImage: "url(/images/app/logo-mark.svg)", WebkitMaskImage: "url(/images/app/logo-mark.svg)", maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat" }} />
-              <span className="text-[17px] leading-[22px] font-extrabold tracking-normal" style={{ fontFamily: "var(--font-display)" }}>DREAMARI</span>
-            </span>
-            <span className="v4-brand-caption" style={{ marginTop: 0 }}>COUNSELOR</span>
+          <span className="flex items-center gap-[var(--space-1)]">
+            <span aria-hidden className="h-[13px] w-[23px] flex-none" style={{ background: "currentColor", maskImage: "url(/images/app/logo-mark.svg)", WebkitMaskImage: "url(/images/app/logo-mark.svg)", maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat" }} />
+            <span className="text-[17px] leading-[22px] font-extrabold tracking-normal" style={{ fontFamily: "var(--font-display)" }}>DREAMARI</span>
           </span>
         </Link>
     <nav className="v4-primary-nav dm-scroll" aria-label="Workspace areas">{available.map(a=><Link key={a.label} href={`/counselor?view=${a.items[0].view}&v=4`} aria-current={area?.label===a.label?"page":undefined}>{a.label}</Link>)}</nav>
-    <div className="v4-nav-tools"><IconTip label={`Switch to ${theme==="dark"?"light":"dark"} mode`}><button className="v4-round" onClick={onTheme} aria-label={`Switch to ${theme==="dark"?"light":"dark"} mode`}>{theme==="dark"?<Sun size={18}/>:<Moon size={18}/>}</button></IconTip>{items.some(i=>i.view==="settings")&&<IconTip label="Preferences"><Link className="v4-round" href="/counselor?view=settings&v=4" aria-label="Preferences"><SlidersHorizontal size={18}/></Link></IconTip>}<div className="v4-account">{account}</div><QuickLinksMenu /></div>
+    <div className="v4-nav-tools">{tools}<QuickLinksMenu /></div>
    </div>
-   {/* the area's pages left this row for the page title (20 Oct 2026,
-       Chandu: "the tab row on top like directory/milestones is very hard to
-       see. Nobody notices them"); it keeps the school and the search */}
-   <div className="v4-nav-context"><span className="v4-secondary-nav">{org?<span className="v4-org">{org}</span>:null}</span><div className="v4-search">{search}</div></div>
+   {org?<div className="v4-nav-context"><span className="v4-secondary-nav"><span className="v4-org">{org}</span></span></div>:null}
   </header>
+  {/* one search field for both bars, under the bar's right edge */}
+  {searchOpen&&<div ref={searchRef} className="v4-search-pop" role="dialog" aria-label="Search students or screens">{search}</div>}
   <main id="main" className={`v4-main v4-view-${active}`}>
    {/* The page title is the area's pages (20 Oct 2026): every page of the
       area at title size in a fixed order, this one in full ink with the

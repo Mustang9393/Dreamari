@@ -6,6 +6,193 @@
 
 **Validation:** seven retained data/render tests pass, UX 434 and Food 413 structural assertions pass, 15 UX/12 Food identity-review hashes pass. TypeScript, scoped ESLint, tokens and Webpack production build pass before final integration. Actual browser checks and open coverage are in `career-scaling/QA-v6.md`; full replay, all outcome branches, hardware and human art/content QA are not certified. Fresh image generation is not pixel-identical. Main release remains the user's authorized QA destination; preserve concurrent main app work, keep Food in hamburger QA quick links and UX in the existing Play hub. Public SOP publication status and final integration checks follow.
 
+## 2026-10-21: buttons and the primary blue match the dusk sky
+
+**Why (Chandu):** "align the CTA colors and primary color token to match this new blue". The old blues (#176acf fills, #59a0f8 for the one lit button) were the electric blues of the black look and sat outside the dusk family.
+
+- **Primary token** (brand-600, action-primary, `--primary`, text-brand in light, every fill with white text, both modes): #2f5fb1, a dusk cobalt at the sky's hue. White text 6.2:1; as text 5.7:1 on the light page and 4.9:1 on its strongest tint, so one blue serves both modes. Hover: #284f93 (light) / #3d6fc4 (dark, 4.9:1 white). Deep shades #284f93.
+- **The one lit button** (data-lit, the landing primary): #8fb3f5 periwinkle with #0b1a33 ink (8.2:1), a step lighter than the team slide's #7aa2ff so it keeps 3:1 against the brightest sky; hover #a3c1f7; its seating shadow in the same periwinkle.
+- **The landing's "DREAM"** is the slide's own #7aa2ff (6.6:1 on the hero top).
+- Checked: computed values in the browser; Home (lit Play) and the counselor dashboard (Start Reviewing, the active tab) in dark (`cta-*.jpg`). Pushed to main on Chandu's go-ahead.
+
+## 2026-10-21: Black & Blue becomes a dusk sky (the team's gradient), not underwater
+
+**Why (Chandu, with the team's DREAMARI title slide):** "the new blue and black looks too gloomy and like its underwater. How can we make it brighter? more inspirational? This is the style of gradient the team likes... incorporate reliably without using radial ones exclusively. Also keep in mind contrast WCAG AA 2.2, usability". The reference is one vertical gradient, #111f36 at the top to #4a7aab at the bottom (212-217deg). Ours read as underwater because the light fell from above onto near-black; a sky is darkest overhead and brightest at the horizon.
+
+- **Student app sky** (look-v2.css section 6): the app backdrop is a linear gradient #0f1c31 to #27446e, no radial light from above. It is capped there because text sits directly on the fixed backdrop: white 9.8:1, captions now 74% white (6.3:1; 62% would fail near the bottom), on-page links #94c2f9 (5.1:1; the old #59a0f8 was 3.65:1 there). Stars stay near the top.
+- **Navy surfaces:** cards, glass and inset surfaces move from near-black to navy (#13213a and up), still near-opaque and each step lighter; borders become a faint sky-blue line. Poster scrims and event tickets follow. Page `--background` is #0f1c31.
+- **Landing hero:** the team's gradient at full strength (#111f36 to #4a7aab behind Dreamy), fading into the navy page below; the radial hero glow is off.
+- **Splash dialogs and Build/Match:** the same dusk direction, capped at #27446e because they carry small text and the sky-blue button (3.6:1 against it). Build's canvas now raises the step accent from the horizon instead of from above; the top nebula is off in dark.
+- **Build's quiet lines** (footnote, Skip) were 62% white at 60% opacity, about 2.8:1 (3.2:1 even on the old black); now full opacity, 5.3:1.
+- **Horizon bloom** (Chandu: "can we have brighter glow on the gradient where it gets lighter?... the whole light bloom thing isnt there anymore"): a glow centred just below the screen edge, brightest where it meets the bottom, peaking about #3c608f on screen (the brightest text-safe sky). Captions went to 82% white and on-page links to #cbe0fb to keep about 5:1 there.
+- **Everywhere, counselor dashboards included** (Chandu: "the color has to cascade everywhere. Including counselor dashboards"): the counselor's calm sky gets the same dusk gradient and bloom (still still, so its blur stays cheap), and its glass (calm.css, v7.css) moves from blue-black to navy rgba(19, 33, 58, 0.58), menus and dialogs #12203a. The phone/tablet tab bar is navy too.
+- **Not changed:** light mode, Classic.
+- Noted, not changed: on Explore at laptop width, content scrolling up shows behind the DREAMARI logo at top-left (that corner of the header has no background); to check against Classic.
+- Checked: tsc; landing, Home, Explore, Build and the counselor dashboard (v4) in dark (`dusk-*.jpg`). Pushed to main on Chandu's go-ahead.
+
+## 2026-10-21: merge note, v4 Review and Messages follow v7's new desks
+
+The other session's push (6a3dc7e7) rebuilt v7's Reviews as a readable document desk and gave `V5Messages` a `desk` layout, the same asks Chandu made of v4. When rebasing, v4 took theirs: the Review tab renders v7's `Reviews` (exported, still narrowed by v4's grade picker and milestone links through `only` and `milestone`), with v4's "N of M reviewed today" bar above it. Messages renders `<V5Messages desk />`. The `docFirst` and `docBar` props and the `calm` inbox mode described below were dropped in favor of those.
+
+## 2026-10-21: v4 declutter, round 2 (right-aligned controls, rows everywhere, folded sections quiet)
+
+**Why.** Chandu: "the tabs everything are also aligned right for some reason. Please declutter a lot more whatever im seeing on the preview is still horrible." His preview pane is about 1186px wide, so the page controls wrapped to a second line and `margin-left:auto` pushed them right.
+
+**What changed.**
+- **Title row.** The tabs take the rest of their line, so controls sit at the right when they fit and start at the left when they wrap.
+- **Directory.** Rows went from 80px to 64px. The per-milestone pips are hidden; the "1 / 11" count stays, and each milestone's state is on the profile.
+- **Milestones.**
+  - The List view (one row a milestone) is the default. The record key is now `dreamari:milestones-view-2`, so returning visitors land on rows too.
+  - Charts stays one click away in the view tools.
+  - The toolbar moved onto the title row.
+- **College & Career.** The Top Majors treemap became ranked rows like Top Schools: five shown, "Show all 10", and each row still opens its students.
+- **Home.** The Most Played sims run four across from 1000px (was 1200px), so they are no longer two huge cards at laptop width.
+- **Meetings.** Past meetings to log moved under the week's agenda.
+- **Review.** The decision panel is 300px below 1280px, so the document keeps its width.
+- **Messages** (`V5Messages` calm mode):
+  - One line a row: face, name, question, date.
+  - Eight rows show, with "Show all N to answer".
+  - The Reply label is hidden; the field's placeholder says it.
+- **Assist.** The progress bar never starts at 0. DEMO-ONLY: `DONE_EARLIER = 2` in AssistSession.
+- **Folded sections** (ASCA Alignment, District Goals and the like) render as quiet header lines, not empty cards. This is a `:has()` rule in reinvent.css that catches any card whose only child holds a collapsed toggle.
+- **Run bars.** All are a compact 200px.
+
+**Validation.** tsc and eslint are clean (the one known warning: the unused `InboxPanel`). Checked in the browser pane at about 1186px on Milestones, Directory, Messages, My Impact and College & Career. Nothing is committed or pushed.
+
+## 2026-10-21: v4 title row, type scale and Messages density
+
+**Why.** Chandu on the Review title row: "This is badly laid out. Please fix. Also things are still super dense on the v4 side. Please do better hierarchy, scale some things down." Then: "especially messages is super messed up and dense and really A LOT of information on a screen."
+
+The root of the layout bug: his screen runs the app-wide 125% zoom (globals.css, at 1800px and wider). The 34px page tabs drew at about 42px, and the page's controls fell onto a second row of their own, right-aligned under empty space.
+
+**What changed.**
+- **One type ladder** (reinvent.css): page tabs 26px, section titles 19px, body 14px. Home's greeting is 28 to 34px and the headline sentences are 24 to 30px. Cards are 26px padded (was 32).
+- **Page tabs and controls share one row.** The controls (segmented, pickers and buttons) are a compact 36px and 13px. Meetings' toolbar moved onto the title row too (HeadingControls).
+- **Review.** The progress bar sits left of Full screen above the document, through the new `docBar` prop on v7's `Reviews`. The repeated "Academic Plan · Lily Santos" line is gone.
+- **Readiness.** The folded Gaps card (an empty box) is now "Show gaps" at the end of the facts line, and the card renders only when open.
+- **Messages.** `V5Messages` gained a `calm` prop; v5 and v7 render as before. In v4:
+  - The "Questions / N to answer" header and the "To answer" label are gone; the bar counts them.
+  - Six questions show, with "Show all N to answer".
+  - Rows drop the grade, which the open panel shows.
+  - Answered and Your messages fold behind "Show answered (N)".
+
+**Validation.** tsc and eslint are clean. Checked at 1800 wide (125% zoom) on Review, Readiness, Meetings and Messages. Nothing is committed or pushed.
+
+## 2026-10-21: v4 Home back, v7's hero cards, Prepare matched to v7, a readable review document
+
+**Why.** Chandu, on the reinvented Home: "Lets revert to what the home page was before this. I dont like the new design." Then: "match the prepare stuff to the v7 as much as possible. I think its better done there. keep the progress bar, never start at 0 though." Then: "lets use the same hero cards from v7 in v4." On Review he said: "it should obvious that the preview can be opened or zoomed ... its too zoomed out to be valuable ... make the canvas large and zoom in so its readable and make the message smaller ... Right now the preview is just visual noise."
+
+**What changed.**
+- **Home.** Overview.tsx is back to the committed version (the greeting, cards, saved careers and Most Played sims). Most Played left Engagement again so it is not shown twice. The three cards are now v7's own `Stat` (exported from v7/Home.tsx), fed by v4's numbers, which the grade filter still narrows:
+  - Reviews, with the biggest queue named.
+  - Meetings this week, with who is next.
+  - Students who need you, with the at-risk count. This card still opens Students on the At Risk filter.
+
+  The "N new since yesterday" line left with v4's old card. It was a DEMO-ONLY stand-in.
+- **Meetings.** Upcoming is v7's agenda (`V7Prepare`): the week by day, prep status, requests to confirm or suggest a time, Agenda or Calendar, and availability. v4 keeps the tools v7 has no place for:
+  - Past meetings to log (`ToLog`, now exported) above the agenda.
+  - Needs Outreach.
+  - Book and Log a walk-in.
+
+  Prepare on a meeting opens the v5 brief, as it does in v7. In v4, `prepare&studentId` now routes to `meetings&studentId` in counselorBase's v4View, and plain `prepare` goes to Meetings.
+- **v7 links inside v4.** v7/ui's `v7()` now goes through `cv()`. In v7 the address is unchanged; inside v4 the links stay in v4.
+- **Review.** Awaiting me is v7's review desk (`Reviews`, now exported). It takes optional `only` and `milestone` props, so v4's grade picker and milestone links still narrow it. In progress and Missed deadline are unchanged.
+  - The new `docFirst` prop makes the document the work surface. It fills the column, zooms up to 125% so it is readable, and scrolls with the page. A labelled Full screen button sits above it. The decision panel is a slim 340px sticky column.
+  - v7 is unchanged unless it passes `docFirst`.
+  - A progress bar reads "4 of 17 reviewed today". DEMO-ONLY: `REVIEWED_EARLIER = 4` stands in for today's earlier reviews, so it never starts at 0.
+- **Messages.** The Inbox is v7's (`V5Messages`). v4 keeps Inbox/Sent, New message and the whole Sent tab. The progress bar counts every answered question ("5 of 15 answered"), so it never starts at 0. Not carried over, because v7's inbox has no place for them: v4's Dreamy reply chips and Mark resolved. `InboxPanel` is kept, unused (one eslint warning), in case Chandu wants them back.
+- **Assist.** Unchanged. v7 has no matching screen; its Documents tab is a different tool.
+
+**Shared files touched (v7 is the other session's).** All changes are additive or address-neutral:
+- v7/ui.tsx (`v7()` via `cv()`).
+- v7/Home.tsx (`export Stat`).
+- v7/Workspace.tsx (`export Reviews`, plus the `only`, `milestone` and `docFirst` props).
+- lib/counselorBase.ts (v4View prepare routes).
+
+**Validation.** tsc and eslint are clean (one warning: the unused `InboxPanel`). Home, Meetings, Review (including Full screen) and Messages were checked in the browser at 1440.
+
+**Next.** Show Chandu. Ask whether the Dreamy reply chips and Mark resolved should return to Messages. Nothing is committed or pushed.
+
+## 2026-10-20: v4 reinvention: headline sentences, a pill-track nav, less on every page
+
+**Why.** Chandu sent 14 reference dashboards (Eduvo, Filko, Stay on Track, Xylo, NexUX and others). His words: "These are still cluttered, but see what we can learn from them and apply to our v4 design ... we need to drastically change the amount of information and cognitive overload without causing confusion or losing valuable data ... make the UI super intuitive and navigation obvious. Reduce copy as much as possible ... we can reinvent the wheel if we have to."
+
+**Research behind the rules.**
+- The 3 to 5 top destinations always visible in one track, with an obvious active state (NN/g on navigation, Material on tabs).
+- The most important thing goes top left.
+- A sentence with one number reads faster than a grid of KPI tiles (the references' headlines; Stephen Few on dashboards).
+- Lists as rows.
+- Detail no more than 2 to 3 clicks deep (progressive disclosure).
+- One lit element per chart, no decorative charts.
+
+**Rule kept throughout.** No data point was dropped. Every figure removed from view is one click away, and every figure in a sentence opens the students it counts.
+
+**What changed** (all in src/components/counselor/v4/; the new reinvent.css holds the shared patterns):
+- **Header.** One row. The five destinations sit in a pill track with a solid blue active pill, and search is inline. Page descriptions are hidden, and each page's filters sit on its title-tab row.
+- **Home** (Overview.tsx, rewritten):
+  - A headline: "N reviews waiting, N students need you", with Log time and Start reviewing beside it.
+  - This week as a Mon to Fri timeline, today lit, each meeting a chip that opens the student.
+  - "Needs you": five rows with a Book button, and the rest behind "N more students".
+  - Where the removed pieces went:
+    - Saved careers: College & Career.
+    - Most Played sims: Engagement.
+    - On-track, exploring and lowest-grade figures: Readiness and Milestones.
+    - Review breakdown: the Review queue.
+- **Engagement.** Four stat tiles became "N students active in {month}" with the trend. This week, today and logins each are one facts line. Most Played Career Simulations now sits at the foot.
+- **Milestones.** The summary strip became "66% of milestones done, 18 students need attention", with students and milestones counts as facts. The summary lost its card surface; it is page text now.
+- **Readiness.** The four gauge tiles became "95% on track to graduate · 6 missing", plus one facts line for academic, postsecondary and career, each with its missing count. Each fact's tooltip carries the definition and the N of M. The foot list picks its indicator from a dropdown in its header, replacing the tiles.
+- **My Impact.**
+  - Why: the hero said 85% three ways (serif title, dot flower, Next Step column).
+  - Now: "85% of my students on track ↗ 14 pts vs school's 71%", with "103 of 121 students · 42 still exploring" as facts.
+  - Principal Report and Export moved into the hero.
+  - The period picker reads "Fall 2026 (now)" so all filters fit on the title row.
+  - DotConstellation is no longer used here.
+- **Student profile.** The milestone grid shows the six most urgent rows (already sorted by urgency). "Show all 11" opens the rest.
+- **Explore header.** Chandu saw it on main and wrote: "Please fix this whats happening??" The header had a title, a subtitle, Careers/Pay by State, a pathway switch, a search and nine world pills.
+  - v4 now turns on v7's `consolidated` mode on the embed in CounselorApp.
+  - The pathway switch is gone; Skilled trades is an option in the world picker.
+  - The nine world pills became one "All worlds" picker beside the search.
+  - The subtitle is hidden.
+  - v5/Explore.tsx was taken verbatim from v7's commit 6c934a23, plus one line: the embedded branch hides PathwaySwitch when consolidated.
+- **Top bar.** Chandu: "why is there a solid black header dont do that" and "the top navbar should be like what we have in the student section, same design and width etc."
+  - On lg and up, Workspace.tsx now renders the student app's DesktopNavigation (the same one v7 uses), transparent over the sky until scrolled.
+  - The areas sit in its centered pill. Search, theme, Preferences and the account menu are in its right slot, and the quick links come with it.
+  - The "COUNSELOR" caption is gone.
+  - Search is an icon that opens one field under the bar's right edge. "/" still opens it, and Escape or a click outside closes it.
+  - v4's own bar remains only below lg. It is see-through, with the tools on one line.
+  - Page content now uses the student column: 1440 wide with 56px sides.
+- **Left as they were, already calm:** Directory, College & Career, Meetings, Review, Messages, Assist.
+
+**Validation.**
+- tsc is clean. eslint is clean on every touched file.
+- Each page was screenshotted at 1440 in dark mode and sent to Chandu.
+
+**Not done.**
+- Light mode was not rechecked.
+- The phone width of the new header was not checked; it wraps under 1180px.
+
+**Next.** Wait for Chandu's go-ahead. Nothing is committed or pushed.
+## 2026-10-21: Counselor surfaces, one material in every build; v7 Reviews readable; Messages desk; Prepare agenda and calendar
+
+**Why (Chandu):** "the surface materials and colors are very inconsistent, please make sure we have it uniform. The three hero cards in home are the blueprint"; on Reviews: "this preview isn't valuable if it's so zoomed out... How can we make sure everything is 100% valuable and usable?" (before that: "forces the content and message to sit below a tiny preview"); "Reviews and messages are still messy... I like the documents space"; "the trail of finished meetings... looks like cotton balls"; the Prepare brief: "redo the meeting agenda and calendar views to be much more engaging and premium... starry element stuff".
+
+- **One surface (`counselor/calm.css`), dark mode, v4 to v7:** inside every counselor root the surface tokens become the Home hero card material (rgba(10,14,24,.52), 9% white hairline). A top-level surface also gets its blur, top highlight and lift; a surface inside a surface is one faint white tint, no second blur; `--card` (dialogs, menus) stays opaque in the same hue. v4's tinted card gradients go, except the one `data-focal` block per screen. The rules carry `:not(#cc)` for id weight so they beat v4's stacked !important card rules without editing v4's files (tell the v4 session before it changes card surfaces). All four shells now use `AppBackdrop calmSky`, so the blur never redraws over a moving sky. Checked by reading computed surface colours on every v7 tab, v6, v5 and v4 Home/Students.
+- **Reviews (`v7/Workspace.tsx`):** the page is not fit to the screen height any more (that drew it at ~55%); it fills the reading canvas width up to 100%, ends where the writing ends (`.v7-read` drops the Letter min-height), and scrolls inside its own canvas so the student's note, reply box and Approve never move. A thumbnail plus pop-up was considered and rejected: reading is the review, and SpeedGrader and Google Classroom grade with the paper beside the comment box. Queue 256px, decision column 300px.
+- **Messages (`v5/Messages.tsx` `desk`):** the document-desk layout: a glass list on the left, the open question on a glass stage with the composer pinned at its foot; initials when a sender has no photo.
+- **Prepare (`v7/Schedule.tsx`, new):** Agenda with big sticky date numerals, the next meeting as the one focal card, one-line rows; finished meetings collapse to one line (check, "N done", names) instead of star balls; Calendar is hour-rail lanes with overlap columns, a cluster card for 3+, and a now line.
+- Checked: tsc clean; Reviews, Prepare, Home and v4 Students at 1440 in dark.
+- Next: v4 session's own declutter work is separate; confirm its card edits don't reintroduce per-card fills.
+
+## 2026-10-21: Reactive stars in Build, Match and Edit My Build; every save pulses; smoother Build finish
+
+**Why (Chandu):** "I dont see the stars and the reactions in the BUILD flow, and also in match flow, also in the my build when things are being updated can have that too within the pop up"; "the success animation etc in BUILD loads super slow"; "the stars pulsing on save button doesnt work all the time, i think its mostly when the toast with the undo is present".
+
+- **No sky to light:** Build (`BuildFlowExperience.tsx`) and Match (`MiniExploreMatch.tsx`) drew only the aurora, and the Edit My Build sheet covers the page's sky, so `skyMoment()` fell on nothing. Each now has a calm `NightSky` (still until a moment). `NightSky contained` sizes to its box and offsets moment x for the sheet (`PreferencesTab.tsx`).
+- **Where they fire:** Build: each Next small, halfway and finish big (`steps.tsx`); chip picks don't, or the sky never rests. Match (`V2Flow.tsx`): each save or rank small, the third of either big. Edit My Build: Save changes small, big when it fills the last empty section. List kept in `lib/sky.ts`.
+- **Saves dropped:** `SMALL_GAP` was 5s, about an Undo toast's life, so a second save inside it was swallowed. Now 600ms (only a double fire from one press). Shooting stars still at most every 2s.
+- **Build finish smoothing:** the party sprite is served as is (`PARTY_SPRITE`, `unoptimized`) and preloaded at flow start, so Dreamy is there when the screen opens; the XP count-up writes the number's text, not React state (was a full re-render every frame); sparkles 84+48 to 40+24 and the orbs lost their `blur()` filter (globals.css); the XP trail spawns half as often. Measured ~60fps, no frame over 50ms.
+- Checked on :3018, dark, desktop: event log for Build Next/halfway/finish, Match saves 1s apart, sheet saves 1s apart; sheet sky sized to the sheet. Not checked: light mode, phone width.
+
 ## 2026-10-20 — Release Food Scientist QA and current welcome art to main
 
 **Why:** Chandu: “push into main for QA.” Merge the Food Scientist candidate, native work surfaces and research/SOP changes into latest main. Preserve main's newer UX Play-hub release and thumbnail, counselor/My Build/night-sky changes. Food Scientist stays hamburger → Quick links → Food Scientist · QA draft; no normal-hub promotion requested.

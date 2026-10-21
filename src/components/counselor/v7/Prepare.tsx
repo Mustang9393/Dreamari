@@ -27,6 +27,7 @@ import { StudentFace } from "../v5/StudentFace";
 import { V5Prepare } from "../v5/Prepare";
 import { STUDENT_ID } from "@/components/profile/BookCounselorSheet";
 import { addDays, answerMeeting, flagsFor, inWeek, markPrepped, mondayOf, prepFor, PREP_DOT, PREP_LABEL, useAllMeetings, useAnswers, usePrepped, type Prep } from "./data";
+import { AgendaView, WeekView, type Row } from "./Schedule";
 import { moment, CARD, CARD_STYLE, DISPLAY, Field, FIELD, FIELD_STYLE, Modal, MUTED, PageHead, PrimaryButton, QuietButton, RULE, TextLink, Toggle, briefHref } from "./ui";
 
 const DAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -38,7 +39,7 @@ export function V7Prepare({ studentId }: { studentId?: string }) {
   return <Agenda />;
 }
 
-type Row = { m: Meeting; s: CounselorStudent; prep: Prep };
+
 
 function Agenda() {
   const roster = useReviewedRoster();
@@ -99,29 +100,14 @@ function Agenda() {
       </div>
 
       {mode === "agenda" ? (
-        rows.length ? (
-          <div className="flex flex-col gap-[var(--space-6)]">
-            {days.map((d) => {
-              const today = rows.filter((r) => r.m.day === isoDay(d));
-              if (!today.length) return null;
-              return (
-                <section key={isoDay(d)} id={`day-${isoDay(d)}`} aria-label={DAY[d.getDay()]} className="flex scroll-mt-[96px] flex-col gap-[var(--space-3)]">
-                  <h2 className="text-[15px] font-semibold">{DAY[d.getDay()]}, {MON[d.getMonth()]} {d.getDate()}{isoDay(d) === isoDay(now) && <span style={MUTED}> · Today</span>}</h2>
-                  <ul className={`${CARD} overflow-hidden`} style={CARD_STYLE}>
-                    {today.map((r) => <AgendaRow key={r.m.id} r={r} />)}
-                  </ul>
-                </section>
-              );
-            })}
-          </div>
-        ) : (
+        rows.length ? <AgendaView days={days} rows={rows} /> : (
           <div className="flex flex-col items-start gap-[var(--space-2)] py-[var(--space-6)]">
             <p className="text-[16px] font-semibold">{q ? "No meetings match." : "No meetings booked this week."}</p>
             {!q && <TextLink onClick={() => setAdding(true)}>Add a meeting</TextLink>}
           </div>
         )
       ) : (
-        <CalendarWeek days={days} rows={rows} />
+        <WeekView days={days} rows={rows} hours={hours} onDay={(iso) => { setMode("agenda"); window.setTimeout(() => document.getElementById(`day-${iso}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }} />
       )}
 
       <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-5)]" style={{ borderColor: RULE }}>
@@ -139,73 +125,6 @@ function Agenda() {
 
       {adding && <AddMeeting roster={roster} onClose={() => setAdding(false)} />}
       {editingHours && <Availability hours={hours} onClose={() => setEditingHours(false)} />}
-    </div>
-  );
-}
-
-function AgendaRow({ r }: { r: Row }) {
-  const { m, s, prep } = r;
-  // one line: the open item that makes it need prep, else what the student wrote
-  const why = flagsFor(s)[0] ?? (m.topic || m.type);
-  const requested = prep === "requested";
-  const body = (
-    <>
-      <span className="w-[76px] flex-none text-[15px] font-semibold tabular-nums">{timeLabel(m.time)}</span>
-      <StudentFace s={s} size={32} />
-      <span className="w-[132px] flex-none truncate text-[15px] font-semibold sm:w-[180px]">{s.name}</span>
-      <span className="min-w-0 flex-1 truncate text-[14px]" style={MUTED}>{why}</span>
-      {/* only what needs something is said; a ready meeting stays quiet */}
-      <span className="inline-flex w-[124px] flex-none items-center justify-end gap-[7px] text-[13px] font-semibold whitespace-nowrap">
-        {prep !== "ready" && <><span aria-hidden className="size-[8px] rounded-full" style={{ background: PREP_DOT[prep] }} />{PREP_LABEL[prep]}</>}
-      </span>
-    </>
-  );
-  const row = "flex flex-wrap items-center gap-x-[14px] gap-y-[8px] px-[var(--space-5)] py-[11px] md:flex-nowrap";
-  // The row itself opens the brief (the Replit's Prepare button, one per row,
-  // repeated seven times down the page); only a request keeps buttons,
-  // because it needs an answer.
-  return (
-    <li className="border-b last:border-b-0" style={{ borderColor: RULE }}>
-      {requested ? (
-        <div className={row}>
-          {body}
-          <span className="flex flex-none flex-wrap items-center gap-[var(--space-2)]">
-            <QuietButton onClick={() => { answerMeeting(m.id, "confirmed"); notify(`Confirmed with ${s.name.split(" ")[0]}`); moment(true); }}>Confirm</QuietButton>
-            <QuietButton onClick={() => notify(`Asked ${s.name.split(" ")[0]} to pick another time`)}>Suggest time</QuietButton>
-            <QuietButton label="Decline" icon={<X className="h-4 w-4" aria-hidden />} onClick={() => { answerMeeting(m.id, "declined"); notify(`Declined ${s.name.split(" ")[0]}'s request`); }} />
-          </span>
-        </div>
-      ) : (
-        <Link href={briefHref(s.id)} onClick={() => markPrepped(m.id)} aria-label={`Prepare for ${s.name}, ${timeLabel(m.time)}`} className={`dm-quiet group ${row}`}>
-          {body}
-          <ChevronRight className="hidden h-4 w-4 flex-none opacity-60 transition-transform group-hover:translate-x-[2px] md:block" aria-hidden />
-        </Link>
-      )}
-    </li>
-  );
-}
-
-/** The week as five columns, a block per meeting. */
-function CalendarWeek({ days, rows }: { days: Date[]; rows: Row[] }) {
-  return (
-    <div className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
-      <div className={`${CARD} grid min-w-[720px] grid-cols-5 overflow-hidden`} style={CARD_STYLE}>
-        {days.map((d, i) => {
-          const list = rows.filter((r) => r.m.day === isoDay(d));
-          return (
-            <div key={isoDay(d)} className={`flex min-h-[320px] flex-col gap-[8px] p-[12px] ${i ? "border-l" : ""}`} style={{ borderColor: RULE }}>
-              <span className="pb-[4px] text-[13px] font-semibold">{DAY[d.getDay()].slice(0, 3)} <span style={MUTED}>{d.getDate()}</span></span>
-              {list.map((r) => (
-                  <Link key={r.m.id} href={briefHref(r.s.id)} onClick={() => markPrepped(r.m.id)} className="dm-quiet flex flex-col gap-[2px] rounded-[10px] border-l-[3px] px-[10px] py-[8px]" style={{ background: "var(--glass-surface-3)", borderColor: PREP_DOT[r.prep] }}>
-                    <span className="text-[13px] tabular-nums" style={MUTED}>{timeLabel(r.m.time)}</span>
-                    <span className="truncate text-[13px] font-semibold">{r.s.name}</span>
-                    <span className="sr-only">{PREP_LABEL[r.prep]}</span>
-                  </Link>
-              ))}
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }

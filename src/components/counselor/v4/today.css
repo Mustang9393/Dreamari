@@ -141,7 +141,7 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 [data-counselor-version="v4"] .v4-home-sims {margin-top:40px;--rail-bleed:16px;}
 /* all four in one row (20 Oct 2026 declutter: three across left the 4th
    card alone on a second row, a ragged band of extra height) */
-@media (min-width:1200px){
+@media (min-width:1000px){
  [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm {grid-template-columns:repeat(4,minmax(0,1fr))!important;}
  /* a quarter-width card has no room for the title and the count side by
     side ("Aviation Maintenance Technician" ran into its rank badge), so the
@@ -154,7 +154,7 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 /* tablets and small laptops: four across left each card ~250px wide (the
    title ran into the rank badge at 820); two show and the next peeks, as a
    sideways rail */
-@media (min-width:640px) and (max-width:1199px){
+@media (min-width:640px) and (max-width:999px){
  [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm {display:flex!important;flex-wrap:nowrap!important;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:-26px;padding-inline:26px;padding-bottom:4px;}
  [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm::-webkit-scrollbar {display:none;}
  [data-counselor-version="v4"] .v4-home-sims .cv-rail-sm>* {flex:none;width:46%;scroll-snap-align:start;scroll-margin-inline:26px;}

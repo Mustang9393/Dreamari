@@ -19,6 +19,7 @@ import { PAGE_TITLE_CLASS as PAGE_TITLE_CLASS_LOCAL } from "@/components/app/chr
 export { SheetHero } from "@/components/career/PaySheet";
 import { IconTip } from "@/components/app/IconTip";
 import type { CaseloadStatus } from "@/lib/counselorRoster";
+import { cv } from "@/lib/counselorBase";
 
 export const OVERLINE = "text-[12px] leading-[16px] font-semibold tracking-[0.08em] uppercase";
 export const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
@@ -39,7 +40,10 @@ export const FIGURE = "text-[48px] leading-[0.95] font-extrabold tabular-nums";
 export const SECTIONS = "flex flex-col gap-[48px] pt-[var(--space-2)] lg:gap-[56px] lg:pt-[var(--space-4)]";
 
 /** v7 links stay inside v7. */
-export const v7 = (view: string, extra = "") => `/counselor?v=7&view=${view}${extra}`;
+// through the shared base (V7App sets v=7), so v7 screens v4 borrows for
+// Prepare (20 Oct 2026, Chandu: "match the prepare stuff to the v7") link
+// inside v4; in v7 it is the same address as before
+export const v7 = (view: string, extra = "") => cv(view, extra);
 export const studentHref = (id: string, tab?: string) => v7("students", `&studentId=${encodeURIComponent(id)}${tab ? `&tab=${tab}` : ""}`);
 export const briefHref = (id: string) => v7("prepare", `&studentId=${encodeURIComponent(id)}`);
 

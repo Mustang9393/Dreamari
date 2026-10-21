@@ -198,6 +198,10 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const [notes, setNotes] = useState(() => readNotes(studentId));
   const [draft, setDraft] = useState("");
   const [tab, setTab] = useState<ProfileTab>("overview");
+  // the milestone grid shows the six most urgent; the rest one click away
+  // (20 Oct 2026 reinvention: eleven status rows at once was the profile's
+  // densest block, and the urgent ones already sort first)
+  const [allMilestones, setAllMilestones] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
 
@@ -344,7 +348,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                 <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{approvedCount} of {gradeKeys.length} complete</span>
               </span>
               <div className="v4-student-milestone-list">
-                {orderedKeys.map((key) => (
+                {(allMilestones ? orderedKeys : orderedKeys.slice(0, 6)).map((key) => (
                   <span key={key} className="v4-student-milestone-row" style={GLASS_INSET}>
                     <span className="truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{key}</span>
                     {/* 20 Oct 2026 declutter: red only for late or sent-back work */}
@@ -352,6 +356,11 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                   </span>
                 ))}
               </div>
+              {orderedKeys.length > 6 && (
+                <button type="button" className="v4r-more self-start" aria-expanded={allMilestones} onClick={() => setAllMilestones((o) => !o)}>
+                  {allMilestones ? "Show fewer" : `Show all ${orderedKeys.length}`}
+                </button>
+              )}
             </div>
           </HoverBeam>
           {/* the calendar and the family, beside each other. The week's
