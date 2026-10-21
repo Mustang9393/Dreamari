@@ -87,7 +87,7 @@ vec3 curtain(vec2 uv, float aspect, float t, float k, float lift, float rayScale
   // brightness along the curtain, with gaps, so it never reads as one band
   float along = 0.25 + 0.75 * smoothstep(0.2, 0.62, fbm(vec2(x * 0.7 - t * 0.03 + k * 7.0, 2.0 + k + t * 0.04)));
   // the glowing foot the beams rise from
-  float i = (body * rays + 0.35 * exp(-abs(d) / 0.06)) * along;
+  float i = (body * rays + 0.8 * exp(-abs(d) / 0.07)) * (0.4 + 0.6 * along);
   // falloff upward: pale at the foot, deeper blue up high
   float h = clamp(d / 0.55, 0.0, 1.0);
   // the reference slide's own sky blues, pale at the foot, deeper up high
@@ -116,7 +116,10 @@ void main() {
   // full strength only at the foot, lower where text can sit
   col = 1.0 - exp(-col * 0.85);
   // (scaled, not clipped per channel, so the colour keeps its hue)
-  float cap = mix(0.12, 0.05, smoothstep(0.06, 0.35, uv.y));
+  // a brighter glow only at the very bottom (Chandu: "WAY TOO SUBTLE NOW,
+  // THE LOWER MOST PART CAN HAVE MAYBE A BRIGHTER GLOW"), the beams above
+  // stay quiet
+  float cap = mix(0.32, 0.07, smoothstep(0.0, 0.2, uv.y));
   col *= min(1.0, cap / max(max(col.r, col.g), max(col.b, 1e-4)));
   gl_FragColor = vec4(col, 1.0);
 }

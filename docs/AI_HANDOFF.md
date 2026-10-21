@@ -1,3 +1,9 @@
+## 2026-10-21: Aurora: a brighter glow along the bottom edge
+
+- `SkyAurora.tsx`: only the foot is brighter. Its glow term is stronger and runs the full width, with the cap raised to 0.32 at the edge, easing to 0.07 within the bottom ~15% of the screen. The beams above are unchanged.
+- Why: Chandu, "WAY TOO SUBTLE NOW, THE LOWER MOST PART CAN HAVE MAYBE A BRIGHTER GLOW".
+- AA: the bottom ~10% is now bright, so only full white or large text should sit directly on the sky there. On phones that's under the tab bar.
+
 ## 2026-10-21: Sky back on the reference slide's colour; aurora quieter
 
 - Dark sky (`src/app/look-v2.css`) is the team's DREAMARI slide gradient again: one linear run `#131f36` → `#1a2c4a` → `#263f62` → `#34557f` → `#41699a`. That drops the cobalt top and the horizon radials from earlier today, and the page tokens follow.
