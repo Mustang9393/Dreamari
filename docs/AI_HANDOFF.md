@@ -1,3 +1,8 @@
+## 2026-10-21: Selected tab line: glow halved
+
+- `look-v2.css`, dark `[data-tab-ink]` (and the counselor v4 page-tab line): the three glow layers drop to about half (0.95/0.75/0.5 alpha to 0.6/0.35/0.22, with smaller radii). The bright line itself is unchanged.
+- Why: Chandu, "tone down the glow a bit on the selected tab highlight lines? its too much".
+
 ## 2026-10-21: Aurora: light only, real-aurora material, clean blue bottom
 
 - `SkyAurora.tsx`: the green, teal and rose are removed; the aurora is light only. It's near white where brightest and a clean, low-red blue where faint.
