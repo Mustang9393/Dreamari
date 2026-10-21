@@ -261,3 +261,9 @@
   [data-counselor-version="v4"] .v4-cc-col + .v4-cc-col { padding-left: 0; padding-top: 36px; }
 }
 
+
+/* Schools alone in its row, Top Majors its own full-width row under it
+   (21 Oct 2026) */
+[data-counselor-version="v4"] .v4-cc-split.is-single { grid-template-columns: minmax(0, 1fr); }
+[data-counselor-version="v4"] .v4-cc-split.is-single > .v4-cc-col { padding: 0; border: 0; }
+[data-counselor-version="v4"] .v4-cc-majors { display: flex; flex-direction: column; gap: 22px; min-width: 0; padding-top: 8px; }
