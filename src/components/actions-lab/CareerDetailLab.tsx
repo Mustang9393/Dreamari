@@ -824,27 +824,23 @@ export function CareerDetailLab({ slug, live = false }: {
                 <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerSlug={career.slug} />
               </Section>
             )}
-            {(vm.knowAbout.length > 0 || vm.goodAt.length > 0) && (
+            {/* one Skills section (21 Oct 2026, "this is way too cluttered",
+               "Remove all redundant and extra copy"): three short-headed
+               groups of tags instead of two sections of long bullet lists */}
+            {(vm.knowAbout.length > 0 || vm.goodAt.length > 0 || vm.software.length > 0) && (
               <Section id="skills" title="Skills">
-                <div className="grid grid-cols-1 gap-[var(--space-6)] md:grid-cols-2">
-                  {vm.knowAbout.length > 0 && (
-                    <div id="know-about" className="flex scroll-mt-[96px] flex-col gap-[var(--space-2)]">
-                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>What you need to know about</h3>
-                      <DotList items={vm.knowAbout} accent={accent} />
+                {([["know-about", "Know about", vm.knowAbout], ["good-at", "Good at", vm.goodAt], ["software", "Software", vm.software]] as const).map(([id, label, items]) =>
+                  items.length > 0 ? (
+                    <div key={id} id={id} className="flex scroll-mt-[96px] flex-col gap-[var(--space-2)]">
+                      <h3 className="text-[16px] leading-[22px] font-semibold" style={{ ...DISPLAY, color: accent }}>{label}</h3>
+                      <ul className="flex flex-wrap gap-[8px]">
+                        {items.filter(Boolean).map((t) => (
+                          <li key={t} className="rounded-[10px] border px-[12px] py-[6px] text-[14px] leading-[20px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{t}</li>
+                        ))}
+                      </ul>
                     </div>
-                  )}
-                  {vm.goodAt.length > 0 && (
-                    <div id="good-at" className="flex scroll-mt-[96px] flex-col gap-[var(--space-2)]">
-                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>What you would need to be good at</h3>
-                      <DotList items={vm.goodAt} accent={accent} />
-                    </div>
-                  )}
-                </div>
-              </Section>
-            )}
-            {vm.software.length > 0 && (
-              <Section id="software" title="Software you would use">
-                <DotList items={vm.software} accent={accent} />
+                  ) : null,
+                )}
               </Section>
             )}
           </div>

@@ -109,6 +109,13 @@ export function stateOutlook(slug: string, state: string, national: NationalOutl
   return { growthPct, openings };
 }
 
+/** A state's fair share of the US yearly openings (its share of US jobs),
+ *  so a state's openings can be read as above or below the US. */
+export function expectedOpenings(state: string, national: NationalOutlook) {
+  const share = SHARE[state];
+  return share === undefined ? undefined : (national.openings * share) / 100;
+}
+
 /** Every state with a forecast, fastest growing first. Empty when the
  *  career's states publish none. */
 export function statesByGrowth(slug: string, national: NationalOutlook | null) {
