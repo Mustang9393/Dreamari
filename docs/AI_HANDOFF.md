@@ -1,3 +1,17 @@
+## 2026-10-21: Sky: black above the aurora, blue wash up top
+
+- `look-v2.css`, dark sky (app and Build/Match), with three new layers over the gradient:
+  - A straight blue wash across the top, fading out by 46% of the height. It's a linear gradient, not a radial; a radial read "like water". It's faint enough that the stars keep their sparkle.
+  - Three overlapping near-black pockets across the mid-to-bottom, offset and with eased falloffs, so the fade to black has no visible edge.
+  - The aurora's light rises out of that black.
+- Why: Chandu, in order:
+  - "we can go a little blacker before we get to the aurora somewhere down the bottom middle?" / "or mid to bottom area"
+  - "maybe a slightly better bluish glow up top without reducing the effectiveness of the stars?"
+  - "and make the fade to black more organic"
+  - "not a radial gradient up top that reads like water"
+  - "a little more black area"
+- AA only improves (the sky behind text is darker).
+
 ## 2026-10-21: Aurora: the reference photos' fringe colours, brighter base
 
 - `SkyAurora.tsx`: the colour ramp now follows Chandu's two orbit-view borealis references.

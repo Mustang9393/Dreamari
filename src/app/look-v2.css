@@ -305,6 +305,22 @@ html.look-v2.dark [data-flow-space] {
   /* the same dusk sky as the app (21 Oct): dark overhead, brighter toward
      the horizon; the top nebula (light from above) is off in dark */
   background:
+    /* a darker pocket just above the aurora, bottom middle (Chandu: "we
+       can go a little blacker before we get to the aurora somewhere down
+       the bottom middle?" / "or mid to bottom area"), so the aurora's light
+       rises out of near-black */
+    /* a soft blue glow overhead (Chandu: "maybe a slightly better bluish
+       glow up top without reducing the effectiveness of the stars?"),
+       straight across the top, not a radial ("not a radial gradient up top
+       that reads like water"); faint enough that the stars keep their
+       sparkle */
+    linear-gradient(180deg, rgba(58, 108, 205, 0.2) 0%, rgba(58, 108, 205, 0.11) 14%, rgba(58, 108, 205, 0.04) 30%, transparent 46%),
+    /* (three offset pockets with eased falloff, not one ellipse, so the
+       fade to black has no edge: "make the fade to black more organic") */
+    /* (deeper and wider again: "a little more black area") */
+    radial-gradient(82% 36% at 36% 76%, rgba(6, 10, 22, 0.46) 0%, rgba(6, 10, 22, 0.33) 30%, rgba(6, 10, 22, 0.14) 60%, rgba(6, 10, 22, 0.04) 80%, transparent 100%),
+    radial-gradient(76% 34% at 66% 72%, rgba(6, 10, 22, 0.42) 0%, rgba(6, 10, 22, 0.29) 30%, rgba(6, 10, 22, 0.12) 60%, rgba(6, 10, 22, 0.03) 80%, transparent 100%),
+    radial-gradient(140% 56% at 50% 80%, rgba(6, 10, 22, 0.38) 0%, rgba(6, 10, 22, 0.26) 35%, rgba(6, 10, 22, 0.1) 65%, rgba(6, 10, 22, 0.03) 85%, transparent 100%),
     linear-gradient(180deg, #121d33 0%, #14213a 40%, #162640 72%, #172843 100%) !important;
 }
 html.look-v2.dark [data-flow-space] [data-nebula="1"] {
@@ -566,6 +582,22 @@ html.look-v2:not(.light) [data-app-backdrop] {
      stripes and ellipses was rejected ("looks very bad and ugly please make
      it match an actual spectral material light thingy when rendered"). */
   background:
+    /* a darker pocket just above the aurora, bottom middle (Chandu: "we
+       can go a little blacker before we get to the aurora somewhere down
+       the bottom middle?" / "or mid to bottom area"), so the aurora's light
+       rises out of near-black */
+    /* a soft blue glow overhead (Chandu: "maybe a slightly better bluish
+       glow up top without reducing the effectiveness of the stars?"),
+       straight across the top, not a radial ("not a radial gradient up top
+       that reads like water"); faint enough that the stars keep their
+       sparkle */
+    linear-gradient(180deg, rgba(58, 108, 205, 0.2) 0%, rgba(58, 108, 205, 0.11) 14%, rgba(58, 108, 205, 0.04) 30%, transparent 46%),
+    /* (three offset pockets with eased falloff, not one ellipse, so the
+       fade to black has no edge: "make the fade to black more organic") */
+    /* (deeper and wider again: "a little more black area") */
+    radial-gradient(82% 36% at 36% 76%, rgba(6, 10, 22, 0.46) 0%, rgba(6, 10, 22, 0.33) 30%, rgba(6, 10, 22, 0.14) 60%, rgba(6, 10, 22, 0.04) 80%, transparent 100%),
+    radial-gradient(76% 34% at 66% 72%, rgba(6, 10, 22, 0.42) 0%, rgba(6, 10, 22, 0.29) 30%, rgba(6, 10, 22, 0.12) 60%, rgba(6, 10, 22, 0.03) 80%, transparent 100%),
+    radial-gradient(140% 56% at 50% 80%, rgba(6, 10, 22, 0.38) 0%, rgba(6, 10, 22, 0.26) 35%, rgba(6, 10, 22, 0.1) 65%, rgba(6, 10, 22, 0.03) 85%, transparent 100%),
     linear-gradient(180deg, #121d33 0%, #14213a 40%, #162640 72%, #172843 100%) !important;
 }
 html.look-v2:not(.light) body {
