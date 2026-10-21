@@ -1,3 +1,17 @@
+## 2026-10-21: full accessibility status report (WCAG 2.2 A/AA/AAA plus US compliance)
+
+**Why.** Chandu: "I need a full status report about the Accessibility of our app. FULL WCAG 2.2 AA and AAA and a11y ... so we dont run into any trouble with the education system of the united states." Demo-only toggles are out of scope.
+
+**What.**
+- The a11y branch was merged to main first (d497d51f).
+- The report is `docs/ACCESSIBILITY_STATUS_REPORT_2026-10-21.md`, also shared as a Google Doc in the ux@ Drive.
+- It covers all 55 A/AA and all 31 AAA criteria. A/AA: 23 pass, 15 partial, 10 fail, 2 need a person to test, 5 N/A.
+- It lists nine AA blockers (B1–B9): video captions, game status announcements, number-key shortcuts, input border and counselor ring contrast, text contrast, covered focus, small targets, color-only status, and sensory wording.
+- It covers the US legal context, including the Title II dates moved to 26 Apr 2027 / 2028 and the NFB suit, plus a launch roadmap.
+- New scanners `full.mjs` and `extra.mjs` are in `docs/reference/wcag-audit-2026-10-21/`.
+
+**Next.** Phase 1 of the report's roadmap: B2, B3, B6 and B9 in the games first.
+
 ## 2026-10-21 — IB master sequence, concise career stories and fixed character identity
 
 **Why:** Chandu: “use the vetted Investment Banking simulation ... 1:1 reference”; “too much copy”; supporting graphics “should not be needing tab and clicking and interaction”; latest: “different skin tones ... skin tone and facial details ... consistent ... Eye colors ... consistent for a character.”
