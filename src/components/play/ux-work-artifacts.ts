@@ -1,17 +1,29 @@
-import type { InterfaceSpec, WorkArtifact } from "./work-artifacts";
-const provenance="Fictional VELO sportswear launch. Authored test notes, not a real study.";
-const base={siteName:"VELO",navigation:"Aero 01",heading:"Reserve your pair",description:"Launch day · 4 p.m.",detail:"Size 8 · In stock",action:"Reserve pair",actionPlacement:"after-details" as const};
-export const UX_DRAFT_FORM:InterfaceSpec={...base,fields:[{label:"Email",value:"alex@",required:"colour",error:"Something went wrong."}]};
-export const UX_FORM_FINDINGS=[{label:"Required fields use only color.",flag:true,why:"Words must explain what is required."},{label:"The error names no fix.",flag:true,why:"Name the problem and how to fix it."},{label:"The field has a visible label.",flag:false,why:"The label helps people know what to enter."}];
-export const UX_ARTIFACTS={
- flow:{id:"ux-reserve-flow",kind:"flow",title:"A runner’s task",caption:"Read-only task route.",provenance,steps:[{title:"Choose",detail:"Shoe and size"},{title:"Reserve",detail:"Email"},{title:"Confirm",detail:"Reservation"}]},
- wireframe:{id:"ux-wireframe",kind:"interface",title:"Launch page · wireframe",caption:"Rough layout, not a working screen.",provenance,screen:{...base,fidelity:"wireframe",fields:[]}},
- prototype:{id:"ux-prototype",kind:"interface",title:"Launch page · preview",caption:"Read-only prototype snapshot. No controls inside the artwork.",provenance,screen:{...base,fields:[]}},
- notes:{id:"ux-evidence",kind:"notes",title:"Eleanor’s first test",caption:"Fictional session notes.",provenance,entries:[{label:"Task",text:"Reserve size 8."},{label:"Saw",text:"Tapped Details three times."},{label:"Said",text:"Where do I reserve?"}]},
- iteration:{id:"ux-prototype-versions",kind:"comparison",title:"One change · same task",caption:"Test the new layout; it is not proof of improvement.",provenance,panels:[{label:"A · action below details",screen:{...base,fields:[]}},{label:"B · action above details",screen:{...base,actionPlacement:"before-details",fields:[]}}]},
- results:{id:"ux-test-result",kind:"notes",layout:"handover",title:"Test notes · draft B",caption:"One participant, not every runner.",provenance,entries:[{label:"Task",text:"Reserve size 8."},{label:"Observed",text:"Eleanor finished the task."},{label:"Still open",text:"Keyboard-only test."}]},
- form:{id:"ux-draft-form",kind:"interface",title:"Email form · preview",caption:"Read-only draft.",provenance,screen:UX_DRAFT_FORM},
- handover:{id:"ux-handover",kind:"notes",layout:"handover",title:"Launch handoff",caption:"Later test state; no claim about every runner.",provenance,entries:[{label:"Changed",text:"Reserve moved above Details."},{label:"Retested",text:"Amina reserved with a keyboard."},{label:"Next",text:"Test with more runners."}]},
- releaseCheck:{id:"ux-release-check",kind:"notes",layout:"handover",title:"Amina · 3 p.m. check",caption:"Known blocker before the fix.",provenance,entries:[{label:"Input",text:"Keyboard only"},{label:"Blocker",text:"Reserve cannot be reached."},{label:"Impact",text:"Reservation stops."}]},
- fixed:{id:"ux-fixed",kind:"notes",layout:"handover",title:"Amina · 3:30 p.m. retest",caption:"The authored fix has been retested on this route only.",provenance,entries:[{label:"Input",text:"Keyboard only"},{label:"Result",text:"Reached Reserve. Finished task."},{label:"Next",text:"Test with more runners."}]}
-} satisfies Record<string,WorkArtifact>;
+import type { WorkArtifact } from "./work-artifacts";
+export const UX_ARTIFACTS = {
+  "app": {
+    "id": "ux-context-app",
+    "kind": "scene-context",
+    "view": "music-ui",
+    "title": "Music app preview",
+    "caption": "Music app preview. Illustrative context only; no answer information.",
+    "provenance": "Fictional project atmosphere, not a live screen or measurement."
+  },
+  "wireframe": {
+    "id": "ux-context-wireframe",
+    "kind": "scene-context",
+    "view": "wireframe",
+    "title": "Rough app layout",
+    "caption": "Rough app layout. Illustrative context only; no answer information.",
+    "provenance": "Fictional project atmosphere, not a live screen or measurement."
+  },
+  "message": {
+    "id": "ux-context-message",
+    "kind": "scene-context",
+    "view": "message",
+    "title": "Team message",
+    "caption": "Team message. Illustrative context only; no answer information.",
+    "provenance": "Fictional project atmosphere, not a live screen or measurement.",
+    "from": "Noah",
+    "line": "Ready for a quick check?"
+  }
+} satisfies Record<string, WorkArtifact>;

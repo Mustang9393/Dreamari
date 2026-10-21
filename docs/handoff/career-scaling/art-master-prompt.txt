@@ -1,73 +1,26 @@
-DREAMARI · COMPLETE SCENE ART MASTER
+DREAMARI COMPLETE ANIME SCENE
 
-CAREER: {CAREER}
-LEVEL / ROLE: {LEVEL_AND_ROLE}
-SCENE ID: {SCENE_ID}
-SCRIPT ACTION: {ACTION}
-PLAYER POV / SPEAKING TARGET: {ADDRESS_PLAYER | OBSERVE_TASK | NPC_DIALOGUE; TARGET}
-EYELINE: {CAMERA_FOR_PLAYER_DIALOGUE; OTHERWISE_TASK_OR_NAMED_PERSON}
-LOCATION / CAMERA ID: {LOCATION_CAMERA_ID}
-TIME AND LIGHT SETUP: {TIME_LIGHT_DIRECTION_SKY_PRACTICALS}
-VISIBLE CAST: {CAST_IDS_AND_DESIGNS}
-PRIMARY DRAWING REFERENCE: {ONE_APPROVED_CHARACTER_STYLE_IMAGE; DEFAULT: references/ux-character.png}
-SUPPORTING REFERENCES / ROLES: {NURSING_CONTOURS; IB_STAGING; NEVER_BLEND_IDENTITIES}
-CAST LEDGER / ROTATION REASON: {CAST_AND_STYLE_JSON; DIFFERENCE_FROM_RECENT_CAREER_LEADS}
-BACKGROUND QUALITY REFERENCE: {APPROVED_ENVIRONMENT_IMAGE}
-IDENTITY REFERENCES: {ONE_CANONICAL_IMAGE_PER_VISIBLE_PERSON}
-SCENE ANCHOR, IF THIS CAMERA ALREADY EXISTS: {EXACT_APPROVED_FULL_SCENE_FILE}
-OUTPUT: {DIMENSIONS_AND_FILE_ID}
-WORK ARTIFACT REFERENCES / STATE IDS: {CANONICAL_ARTIFACT_FILES_OR_NONE}
-UI SAFE AREAS / TARGET CROPS: {ACTUAL_HUD_DIALOGUE_AND_PORTRAIT_CROP}
-MODE: {NEW_LOCATION_ANCHOR | REUSE_EXISTING_SCENE | SCOPED_SCENE_EDIT}
-ALLOWED CHANGE, FOR AN EDIT: {EXACT_CHANGE_AND_EDIT_REGION}
+Career / beat: {CAREER, BEAT_ID}
+Story action: {ACTION}
+Location / canonical camera: {LOCATION_AND_CAMERA}
+Time / plausible light: {TIME, WINDOW_DIRECTION, PRACTICALS}
+Visible cast: {NAMES_AND_FIXED_IDENTITIES}
+Drawing reference: {APPROVED UX v3 / RN CHARACTER REFERENCE}
+Identity references: {ONE CANONICAL FACE AND COLOR CROP PER PERSON}
+Room reference: {SELECTED COMPLETE SCENE}
+Allowed edit: {EXACT CHANGE OR NEW CAMERA}
+Output: {DIMENSIONS, FILE_ID}
 
-The AI fills this brief from the script and coverage map. Select and version canonical references after automated comparison; do not require human approval between shots. Human visual QA follows the assembled playable build. “Approved” below means the selected reference, not a claim of human sign-off.
+Paint one complete, opaque 2D anime scene with people, room, furniture and lighting together. The runtime uses this full scene as one background image. Never create separate sprites, character cutouts, counter portraits, unfinished bodies hidden by HUD, or player arms/hands in the foreground. The player is the camera. A person addressing the player looks toward the lens; observed conversations may look at each other. Keep gestures natural and near each character’s body.
 
-Create one complete opaque illustration with people, furniture, props, shadows and surroundings drawn together. Deliver a finished scene, not separate sprites, a collage, a contact sheet or a game mockup. Follow the script. Do not add story events or extra people.
+Match the approved character style: thin controlled outlines, expressive anime eyes, small nose mark, short line mouth, flat base color and one broad cel shadow. Hair is a few solid masses; blonde hair uses no more than four broad solid masses and no more than two internal hairlines. No glossy strands, painted lips, sculpted cheeks, heavy comic outlines, photoreal skin or 3D.
 
-PEOPLE
-Match the supplied character drawing reference: clean Japanese 2D television anime, thin controlled contours, expressive anime eye shapes, a small nose mark and a short line mouth. Use flat base colours with one broad cel shadow. Build hair from a few large solid masses with sparse interior lines and restrained flat highlights. Use only necessary clothing folds. Keep the rendering economical even when the lighting is cinematic.
-No individual hair strands, glossy hair bands, painted lips, sculpted cheek planes, realistic skin texture, dense gradients, hatching, heavy comic outlines, plastic shine or 3D rendering.
-Use the character-style reference for drawing treatment, not for everybody's face. Preserve each person's canonical face shape, eye shape and colour, skin tone, hair silhouette and part, age, build, outfit and accessories. Do not average several versions of one person. Do not copy a franchise's characters or costumes.
-Keep the cast varied in ethnicity, face shape, eye colour, age, height, head angle, gaze and body language without caricature. Older adults must read as adults of their age, not teenage faces with grey hair. Variation between people must not become variation in the identity of the same person.
+Maintain each canonical identity in every shot: age, face proportions, skin base and undertone, iris color, brows, hairline and texture, outfit and identifying details. Keep older characters visibly older. Eleanor (60) and Sofia (67) retain clear, consistent age cues in every shot. Keep face, neck and hands consistent under scene light. For the requested Black-cast update, move the cast one shade darker in one canonical palette change and propagate it to every scene and face chip. Keep the shade consistent; preserve skin bases under light and shadow, with no crushed-black shadows.
 
-ENVIRONMENT
-Match the background reference's painted depth, architectural clarity and selective detail. Preserve the real career workplace: identify required work zones, equipment and functional relationships before styling it. Use a deliberately designed room, not an empty generic room or another career's setting. Use clear foreground, midground and distance. Keep selective architectural detail richer than faces, with broad painted material shapes, simplified contours and restrained reflection bands. Luxury comes from proportions, fitted equipment, refined material combinations, architectural lighting and spatial rhythm. Avoid both blank minimal cabinetry and hyperrealistic archviz. No photographic texture noise, mirror-like steel, dense foliage, repeated tiny props or generated screens. A luxurious laboratory must still read as a laboratory with the story's actual preparation/testing functions.
-Make the workplace beautiful and visibly expensive through proportions, fitted joinery, generous useful space, refined materials and carefully placed light. Keep it authentic to the career. An expensive workshop remains a workshop; a hospital remains functional and cleanable. Do not turn every workplace into a hotel or add luxury detail to skin and hair.
-Use a small coherent material palette and enough real equipment to explain the work. Screens show sparse structural shapes. Documents and badges contain no invented words or personal data. Important numbers, diagrams and instructions belong in native game UI using artifact-master-prompt.txt. When a scene shows a screen, prototype, plan or document, use the supplied canonical artifact state for its broad layout; keep the same project and version across relevant shots. Do not invent unrelated interface content. The readable artifact in the game UI remains authoritative.
+Create luxurious five-star architecture suited to the real workplace: ivory stone, walnut joinery, brass trim, considered ceilings and beautiful functional furniture. Environment rendering stays selective and anime-flat. No photographic detail, mirror floors, glossy skin, bloom, haze or beams from closed doors. Light should come from plausible windows and practical fixtures.
 
-PLAYER VIEWPOINT
-The camera is the player’s first-person viewpoint. A character speaking to the player looks toward the lens and addresses the viewer. Do not insert a visible player avatar or a second person as a stand-in for the player. Include a peer only when the script requires that peer. For an observed task, characters may look at the work; record why the dialogue is voice-over or why the player is observing. Reserve NPC-to-NPC conversations for explicitly authored exchanges, never the default conversation image. Vary gestures and expressions without tilting every head the same way.
+For Nursing, every window shows the same lake, red-roof houses, trees and green hill. Never substitute a city or parking lot. Preserve room geography, window placement, furniture and exterior. The established RN timeline is early morning through evening; daytime must not become sunrise. Rosa beats 4–17 are morning, Denise 18–20 and Tyler/Room 12 21–23 are afternoon, and 24–26 are evening. Use plausible window and practical light. Reaction art keeps the exact base camera and time.
 
-PHYSICAL STAGING
-People occupy real space in the room. Finish every visible body, hand, limb, furniture edge and shadow. Standing figures continue naturally below the waist. Seated figures have plausible hips, legs and chair contact. A desk may physically occlude a person, but a body must not end at a counter or float above it. Props must be held or supported plausibly.
-The image must still look complete with ALL game text and panels removed. Never depend on the dialogue card to hide a waist cutoff, missing hand, unfinished floor or compositing seam.
+Compose for the actual game UI: keep the top 20% clear of faces for HUD; keep the bottom 38% clear of faces for dialogue; place main heads around y=.23–.44. Complete bodies, chairs, hands and floor beneath UI areas. Make camera and action fit the beat; avoid a repeated centered-counter template. Do not rely on runtime zoom or crop to make the image fit. Prompt dimensions are not verification; inspect the assembled desktop and phone screens.
 
-LIGHT
-Use the same key light, fill colour and shadow direction on people, furniture and room. Express light on people through broad cel shapes, not extra drawing detail.
-Dawn: pale low warm light, cool room fill. Day: clear neutral daylight and blue sky. Late afternoon: lower warmer sun with cooler unlit areas. Night: a dark exterior and believable practical lamps.
-Soft god rays are optional. Use them only where the window, sun angle and air support them: faint, broad, soft-edged shafts fading into clear air. No fog across faces, glitter, rigid light stripes or daylight rays at night. Do not add sunset merely to make a frame attractive.
-
-CONTINUITY
-For REUSE_EXISTING_SCENE, return the exact saved file; do not generate again.
-For SCOPED_SCENE_EDIT, use the approved complete scene as the edit target. Change only the specified region/action. Keep camera, crop, architecture, window frames, furniture, equipment and exterior landmarks fixed. The exterior includes the horizon, buildings, shoreline, trees and their positions. A different expression must not redesign the room or restyle the person.
-For a new camera, record a new camera ID and establish its geography deliberately. For a different time, keep geometry fixed; only light, sky brightness and permitted scene-state changes may change. Do not promise unchanged pixels if the editing tool cannot preserve them. An unverified edit is a candidate, not a production asset.
-
-COMPOSITION
-Use the actual game overlay and crop references. Keep the main face below the HUD and above dialogue; keep essential hands, tools and actions clear of controls. Leave quiet space for UI while finishing the image beneath it. If a wide action cannot survive a phone crop, make a deliberate portrait camera version from the approved scene references; do not make people tiny or cut essential faces away.
-No baked-in buttons, dialogue, meters, captions, names, logos, watermarks, borders or fake UI.
-
-SHOT COVERAGE
-Use the planned camera/action for this beat. Keep the drawing treatment stable across establishing, working, conversation and closing shots. Do not answer a request for a working-action shot by returning the same posed conversation again. Preserve the location geometry across camera changes; record each distinct camera. Use deliberate repeat files only when the action and state truly stay unchanged.
-
-ACCEPTANCE
-Compare the result with the canonical people, scene anchor and actual game UI. Reject identity drift, excess hair detail, comic or 3D rendering, incompatible light, changed room/exterior geography, extra limbs, floating waists, missing props and hidden story information.
-A text prompt is not a pixel lock. Reuse verified files for exact repetition. For an edit that requires exact protected pixels, compare decoded pixels outside an explicit allowed-change mask and require zero changed pixels. If the tool cannot pass that check, reuse the approved scene or mark the edit unapproved. Never describe a visually similar regeneration as pixel-identical.
-
-CAST AND DESIGN GATES
-Read references/README.md and the recent cast ledger. Unless identity is prescribed, choose a lead ethnicity that differs from recent available career leads; also vary gender/age/face/hair combinations across the catalogue. Record it, do not default to the previous Indian mentor or make Japanese the new universal default. Ethnicity does not prescribe eye colour, facial caricature or a costume. Establish one canonical image per person before variants.
-Compare every scene against the primary drawing image at matched face size. Record anime drawing, identity, workplace function, interior design, environment detail, room/exterior continuity, lighting, eyeline and crop as PASS/REPAIR/NOT CHECKED with evidence. Reject both photo-detail excess and an empty unconvincing workplace. Qualitative inspection is not pixel certification.
-
-FIXED CHARACTER COLOR AND FACE LOCK — REQUIRED FOR EVERY SHOT
-Use ONE canonical face/color crop per recurring person, supplied every time. Record skin BASE/shadow/highlight palette, fixed iris color, face and eye shape, nose/mouth marks, hairline/part/texture, age, build and outfit. Never average several identities or treat a fresh shot as a new anchor. Different people should vary in skin/eyes/hair; one person must not change. Very dark skin stays visibly very dark in daylight; keep lit planes deep brown rather than tan. Lighting may tint highlights and shadows, never replace the complexion. Check face, neck and hands together. Compare every output side by side with the canonical crop at matched face size. Reject changed skin tone, eye color, face or hair; repair before routing. Record actual observations, not a fake consistency score or pixel-perfect regeneration claim.
-Supporting native UI graphics are read-only snapshots; no independent tabs, typing or playable demos. Use the career’s true work and the game’s current story state.
+Reuse the saved image when identical pixels are required. Fresh generation cannot promise pixel identity. Record source references, full prompt, selected filename, file hash and QA status. Hashes prove provenance, not facial identity or visual quality. Compare every recurring character with the canonical crop and compare room geography and actual UI. Repair drift before integration; repeat visual review after edits. The internal contact sheet is a QA aid, not a human approval gate.

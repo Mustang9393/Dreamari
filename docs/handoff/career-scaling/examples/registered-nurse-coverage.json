@@ -1,0 +1,544 @@
+{
+  "version": 1,
+  "career": "registered-nurse",
+  "levels": [
+    "rn-l1"
+  ],
+  "template": "ib-narrative-v2",
+  "groups": [
+    {
+      "id": "rn-rebuild-RN1-01",
+      "scene": "rn-rebuild-RN1-01",
+      "beats": [
+        "RN1-01"
+      ],
+      "purpose": "Welcome to Riverbend. Your first shift starts on Four West.",
+      "required": true,
+      "visibleCast": [],
+      "pov": "observe-task",
+      "speakingTarget": "the shift setting",
+      "eyeline": "task"
+    },
+    {
+      "id": "rn-rebuild-RN1-02",
+      "scene": "rn-rebuild-RN1-02",
+      "beats": [
+        "RN1-02"
+      ],
+      "purpose": "A floor with a view. You will work beside Rosa, an experienced nurse.",
+      "required": true,
+      "visibleCast": [],
+      "pov": "observe-task",
+      "speakingTarget": "the shift setting",
+      "eyeline": "task"
+    },
+    {
+      "id": "rn-rebuild-RN1-03",
+      "scene": "rn-rebuild-RN1-03",
+      "beats": [
+        "RN1-03"
+      ],
+      "purpose": "You are part of a team. Ask for help when you need it.",
+      "required": true,
+      "visibleCast": [],
+      "pov": "observe-task",
+      "speakingTarget": "the shift setting",
+      "eyeline": "task"
+    },
+    {
+      "id": "rn-rebuild-RN1-04",
+      "scene": "rn-rebuild-RN1-04",
+      "beats": [
+        "RN1-04"
+      ],
+      "purpose": "Meet Rosa. She will guide you and check your work today.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-05",
+      "scene": "rn-rebuild-RN1-05",
+      "beats": [
+        "RN1-05"
+      ],
+      "purpose": "Start with the handover. The night nurse is ready to share what changed.",
+      "required": true,
+      "visibleCast": [
+        "Rosa",
+        "Sofia"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-06",
+      "scene": "rn-rebuild-RN1-06",
+      "beats": [
+        "RN1-06"
+      ],
+      "purpose": "A useful update. You know which patients need a closer check.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-07",
+      "scene": "rn-rebuild-RN1-07",
+      "beats": [
+        "RN1-07"
+      ],
+      "purpose": "At the bedside. Rosa checks the patient before starting care.",
+      "required": true,
+      "visibleCast": [
+        "Rosa",
+        "Patient"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-08",
+      "scene": "rn-rebuild-RN1-08",
+      "beats": [
+        "RN1-08"
+      ],
+      "purpose": "Two checks. Use the patient’s name and date of birth to check who they are.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-09",
+      "scene": "rn-rebuild-RN1-09",
+      "beats": [
+        "RN1-09"
+      ],
+      "purpose": "Check the person. The patient is ready for your identity check.",
+      "required": true,
+      "visibleCast": [
+        "Rosa",
+        "Patient"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-10",
+      "scene": "rn-rebuild-RN1-10",
+      "beats": [
+        "RN1-10"
+      ],
+      "purpose": "Write what happened. A clear note helps the next nurse understand the change.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-11",
+      "scene": "rn-rebuild-RN1-11",
+      "beats": [
+        "RN1-11"
+      ],
+      "purpose": "Keep records private. Open records only when needed for your care duties.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-12",
+      "scene": "rn-rebuild-RN1-12",
+      "beats": [
+        "RN1-12"
+      ],
+      "purpose": "The floor gets busy. Rosa asks you to stay alert for changes.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-13",
+      "scene": "rn-rebuild-RN1-13",
+      "beats": [
+        "RN1-13"
+      ],
+      "purpose": "Speak up early. A patient’s breathing has suddenly become difficult.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-14",
+      "scene": "rn-rebuild-RN1-14",
+      "beats": [
+        "RN1-14"
+      ],
+      "purpose": "Ask when unsure. Rosa gives you an instruction you do not understand.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-15",
+      "scene": "rn-rebuild-RN1-15",
+      "beats": [
+        "RN1-15"
+      ],
+      "purpose": "Choose a safe response. You can ask Rosa to explain before you act.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-16",
+      "scene": "rn-rebuild-RN1-16",
+      "beats": [
+        "RN1-16"
+      ],
+      "purpose": "Morning checkpoint. Rosa reviews your first four decisions.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-17",
+      "scene": "rn-rebuild-RN1-17",
+      "beats": [
+        "RN1-17"
+      ],
+      "purpose": "A new task. Denise needs a clear record of the afternoon checks.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-18",
+      "scene": "rn-rebuild-RN1-18",
+      "beats": [
+        "RN1-18"
+      ],
+      "purpose": "Meet Denise. The nurse manager wants notes the whole team can follow.",
+      "required": true,
+      "visibleCast": [
+        "Denise"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-19",
+      "scene": "rn-rebuild-RN1-19",
+      "beats": [
+        "RN1-19"
+      ],
+      "purpose": "A note needs a check. Denise asks you to spot a clear mistake.",
+      "required": true,
+      "visibleCast": [
+        "Denise",
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-20",
+      "scene": "rn-rebuild-RN1-20",
+      "beats": [
+        "RN1-20"
+      ],
+      "purpose": "Check the note. The note says the medicine was given tomorrow.",
+      "required": true,
+      "visibleCast": [
+        "Denise"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-21",
+      "scene": "rn-rebuild-RN1-21",
+      "beats": [
+        "RN1-21"
+      ],
+      "purpose": "Meet Tyler. The other new nurse is eager to impress the team.",
+      "required": true,
+      "visibleCast": [
+        "Tyler",
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-22",
+      "scene": "rn-rebuild-RN1-22",
+      "beats": [
+        "RN1-22"
+      ],
+      "purpose": "Handle the disagreement. Tyler takes credit for a change you reported.",
+      "required": true,
+      "visibleCast": [
+        "Tyler"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-23",
+      "scene": "rn-rebuild-RN1-23",
+      "beats": [
+        "RN1-23"
+      ],
+      "purpose": "Room 12 needs help. Your patient suddenly seems confused and is breathing fast.",
+      "required": true,
+      "visibleCast": [
+        "Patient",
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-24",
+      "scene": "rn-rebuild-RN1-24",
+      "beats": [
+        "RN1-24"
+      ],
+      "purpose": "Hand over the shift. Sofia needs the changes and the work still due.",
+      "required": true,
+      "visibleCast": [
+        "Sofia"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "rn-rebuild-RN1-25",
+      "scene": "rn-rebuild-RN1-25",
+      "beats": [
+        "RN1-25"
+      ],
+      "purpose": "Your shift is complete. The team reviews what you did well and what needs work.",
+      "required": true,
+      "visibleCast": [
+        "Rosa"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    }
+  ],
+  "beats": [
+    {
+      "beat": "RN1-01",
+      "scene": "rn-rebuild-RN1-01",
+      "shotGroup": "rn-rebuild-RN1-01",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-02",
+      "scene": "rn-rebuild-RN1-02",
+      "shotGroup": "rn-rebuild-RN1-02",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-03",
+      "scene": "rn-rebuild-RN1-03",
+      "shotGroup": "rn-rebuild-RN1-03",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-04",
+      "scene": "rn-rebuild-RN1-04",
+      "shotGroup": "rn-rebuild-RN1-04",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-05",
+      "scene": "rn-rebuild-RN1-05",
+      "shotGroup": "rn-rebuild-RN1-05",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-06",
+      "scene": "rn-rebuild-RN1-06",
+      "shotGroup": "rn-rebuild-RN1-06",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-07",
+      "scene": "rn-rebuild-RN1-07",
+      "shotGroup": "rn-rebuild-RN1-07",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-08",
+      "scene": "rn-rebuild-RN1-08",
+      "shotGroup": "rn-rebuild-RN1-08",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-09",
+      "scene": "rn-rebuild-RN1-09",
+      "shotGroup": "rn-rebuild-RN1-09",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-10",
+      "scene": "rn-rebuild-RN1-10",
+      "shotGroup": "rn-rebuild-RN1-10",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-11",
+      "scene": "rn-rebuild-RN1-11",
+      "shotGroup": "rn-rebuild-RN1-11",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-12",
+      "scene": "rn-rebuild-RN1-12",
+      "shotGroup": "rn-rebuild-RN1-12",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-13",
+      "scene": "rn-rebuild-RN1-13",
+      "shotGroup": "rn-rebuild-RN1-13",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-14",
+      "scene": "rn-rebuild-RN1-14",
+      "shotGroup": "rn-rebuild-RN1-14",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-15",
+      "scene": "rn-rebuild-RN1-15",
+      "shotGroup": "rn-rebuild-RN1-15",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-16",
+      "scene": "rn-rebuild-RN1-16",
+      "shotGroup": "rn-rebuild-RN1-16",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-17",
+      "scene": "rn-rebuild-RN1-17",
+      "shotGroup": "rn-rebuild-RN1-17",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-18",
+      "scene": "rn-rebuild-RN1-18",
+      "shotGroup": "rn-rebuild-RN1-18",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-19",
+      "scene": "rn-rebuild-RN1-19",
+      "shotGroup": "rn-rebuild-RN1-19",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-20",
+      "scene": "rn-rebuild-RN1-20",
+      "shotGroup": "rn-rebuild-RN1-20",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-21",
+      "scene": "rn-rebuild-RN1-21",
+      "shotGroup": "rn-rebuild-RN1-21",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-22",
+      "scene": "rn-rebuild-RN1-22",
+      "shotGroup": "rn-rebuild-RN1-22",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-23",
+      "scene": "rn-rebuild-RN1-23",
+      "shotGroup": "rn-rebuild-RN1-23",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-24",
+      "scene": "rn-rebuild-RN1-24",
+      "shotGroup": "rn-rebuild-RN1-24",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    },
+    {
+      "beat": "RN1-25",
+      "scene": "rn-rebuild-RN1-25",
+      "shotGroup": "rn-rebuild-RN1-25",
+      "noArtifactReason": "Optional scene art sets the place and people; all task facts and answer choices are stated in the game text."
+    }
+  ],
+  "milestones": [
+    {
+      "beat": "RN1-16",
+      "afterDecisions": 4,
+      "threshold": 68
+    }
+  ]
+}

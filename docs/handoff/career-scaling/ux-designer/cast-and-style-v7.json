@@ -1,0 +1,113 @@
+{
+  "version": 7,
+  "drawingAnchor": "references/ux-character.png",
+  "cast": {
+    "Arjun": {
+      "age": 34,
+      "gender": "male",
+      "ethnicity": "Indian",
+      "complexion": "medium warm brown",
+      "iris": "brown",
+      "hair": "short black side sweep",
+      "outfit": "teal overshirt, cream tee, charcoal trousers",
+      "role": "senior UX mentor",
+      "source": "arrival",
+      "canonicalScene": "/images/play/ux/v7/arrival.png",
+      "canonicalFace": "/images/play/ux/v7/identity/arjun.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "AI comparison complete for selected files; human game QA open"
+    },
+    "Noah": {
+      "age": 24,
+      "gender": "male",
+      "ethnicity": "Mexican",
+      "complexion": "medium tan",
+      "iris": "olive green",
+      "hair": "short swept brown masses",
+      "outfit": "pale blue shirt, charcoal trousers",
+      "role": "junior designer; peer ambition and claim challenge",
+      "source": "team",
+      "canonicalScene": "/images/play/ux/v7/team.png",
+      "canonicalFace": "/images/play/ux/v7/identity/noah.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "AI comparison complete for selected files; human game QA open"
+    },
+    "Amina": {
+      "age": 25,
+      "gender": "female",
+      "ethnicity": "Black American",
+      "complexion": "warm deep brown; final canonical reference after user-requested one-shade adjustment",
+      "paletteTarget": "v7 canonical face, neck and hands; no old espresso palette",
+      "iris": "dark brown",
+      "hair": "black tightly coiled high natural puff",
+      "outfit": "mustard knit, navy trousers, small gold studs",
+      "role": "junior designer; keyboard testing, retest and handoff",
+      "source": "team",
+      "canonicalScene": "/images/play/ux/v7/team.png",
+      "canonicalFace": "/images/play/ux/v7/identity/amina.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "AI comparison complete for selected files; human game QA open"
+    },
+    "Samira": {
+      "age": 42,
+      "gender": "female",
+      "ethnicity": "Black",
+      "complexion": "warm deep brown; final canonical reference after user-requested one-shade adjustment",
+      "iris": "brown",
+      "hair": "asymmetric black crop, one gray temple mass",
+      "outfit": "plum blazer, cream high neck, gold hoops",
+      "role": "design lead; client-review authority",
+      "source": "review",
+      "canonicalScene": "/images/play/ux/v7/review.png",
+      "canonicalFace": "/images/play/ux/v7/identity/samira.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "AI comparison complete for selected files; human game QA open"
+    },
+    "Eleanor": {
+      "age": 67,
+      "gender": "female",
+      "ethnicity": "White",
+      "complexion": "very light cool ivory",
+      "iris": "green",
+      "hair": "chin-length silver-gray bob",
+      "outfit": "lavender jacket, pale blue shirt",
+      "role": "runner/participant; meaningful observed reservation test",
+      "source": "test",
+      "canonicalScene": "/images/play/ux/v7/test.png",
+      "canonicalFace": "/images/play/ux/v7/identity/eleanor.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "AI comparison complete for selected files; human game QA open"
+    }
+  },
+  "skinPolicy": "Lighting changes highlights/shadows, not underlying complexion. Compare face/neck/hands and iris colors against one canonical crop per person. Reject drift."
+}

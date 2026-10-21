@@ -1,10 +1,10 @@
-**New career simulation production (19 Oct 2026):** [SOP, prompts and UX proof](handoff/career-scaling/README.md). Complete scene images, no runtime sprites for new careers; older Play chapters remain the component reference. UX Designer is an AI-authored Level 1 QA draft, available through hamburger → UX Designer · QA draft. Publication is for discussion; content/art approval and richer scene coverage remain open.
+**Career simulation production (SOP v1.8, 21 Oct 2026):** [SOP, prompts, examples and QA notes](handoff/career-scaling/README.md). UX Designer and Food Scientist are 21-beat chapters; Registered Nurse is 26 beats. Each uses seven ±6 scored decisions from 50, a checkpoint after four at 68, and a pass score of 85. New scenes bake people into complete images with no runtime sprites; Nursing follows one lake-facing hospital timeline, and its rejected revision is not routed. Graphics are context only; tasks and answer evidence stay in gameplay text. Browser replay, HUD overlap review, and human content/art QA remain pending. The linked handoff has current coverage and trace files.
 
 # Dreamari prototype: engineering handoff index
 
 Start here. This file tells an engineer, or an AI agent working for one, what is locked, where the truth for each feature lives, and what is demo scaffolding that must not be built.
 
-Last updated: 21 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
+Last updated: 21 October 2026. Demo build tag: `demo-2026-09-06` on `main`.
 
 ## How to use this repo
 

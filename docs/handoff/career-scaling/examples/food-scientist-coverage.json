@@ -1,324 +1,253 @@
 {
-  "version": 6,
+  "version": 7,
   "career": "food-scientist",
   "levels": [
     "fs-l1"
   ],
-  "template": "ib-l1-2026-10-21",
+  "template": "ib-narrative-v2",
   "groups": [
     {
-      "id": "fs-v6-arrival",
-      "scene": "fs-v6-arrival",
+      "id": "fs-v7-arrival",
+      "scene": "fs-v7-arrival",
       "beats": [
         "FS1-01",
         "FS1-02",
-        "FS1-03",
         "FS1-04"
       ],
-      "purpose": "Ren welcomes the junior to a designed food product-development lab.",
+      "purpose": "Ren welcomes the junior to a beverage-development lab.",
       "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
       "visibleCast": [
         "Ren"
-      ]
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
     },
     {
-      "id": "fs-v6-team",
-      "scene": "fs-v6-team",
+      "id": "fs-v7-team",
+      "scene": "fs-v7-team",
       "beats": [
         "FS1-05",
         "FS1-06"
       ],
-      "purpose": "Ren introduces Imani and Luis to the player.",
+      "purpose": "Ren, Imani and Luis prepare a caf\u00e9 drink trial.",
       "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
       "visibleCast": [
         "Ren",
         "Imani",
         "Luis"
-      ]
-    },
-    {
-      "id": "fs-v6-work",
-      "scene": "fs-v6-work",
-      "beats": [
-        "FS1-07",
-        "FS1-08",
-        "FS1-09",
-        "FS1-10",
-        "FS1-11",
-        "FS1-27"
       ],
-      "purpose": "Ren guides recorded trials and reviews supported evidence.",
-      "required": true,
       "pov": "address-player",
       "speakingTarget": "player",
-      "eyeline": "camera",
-      "visibleCast": [
-        "Ren"
-      ]
+      "eyeline": "camera"
     },
     {
-      "id": "fs-v6-review",
-      "scene": "fs-v6-review",
+      "id": "fs-v7-work",
+      "scene": "fs-v7-work",
+      "beats": [
+        "FS1-07",
+        "FS1-09",
+        "FS1-10",
+        "FS1-11"
+      ],
+      "purpose": "Ren prepares small beverage trials at a supported bench.",
+      "required": true,
+      "visibleCast": [
+        "Ren"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "fs-v7-review",
+      "scene": "fs-v7-review",
       "beats": [
         "FS1-12",
-        "FS1-13",
-        "FS1-14",
         "FS1-15",
         "FS1-MID"
       ],
-      "purpose": "Yuki addresses the player about claims and quality authority.",
+      "purpose": "Yuki plans a neutral tasting review.",
       "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
       "visibleCast": [
         "Yuki"
-      ]
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
     },
     {
-      "id": "fs-v6-peer",
-      "scene": "fs-v6-peer",
+      "id": "fs-v7-records",
+      "scene": "fs-v7-records",
       "beats": [
         "FS1-ACT2",
-        "FS1-18",
-        "FS1-24",
-        "FS1-25",
+        "FS1-20",
+        "FS1-21",
+        "FS1-22"
+      ],
+      "purpose": "Luis identifies the missing sample-code record.",
+      "required": true,
+      "visibleCast": [
+        "Luis"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
+    },
+    {
+      "id": "fs-v7-collab",
+      "scene": "fs-v7-collab",
+      "beats": [
+        "FS1-23",
         "FS1-26"
       ],
-      "purpose": "Imani addresses the player about project ambition and report help.",
+      "purpose": "Imani discusses the next product trial.",
       "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
       "visibleCast": [
         "Imani"
-      ]
-    },
-    {
-      "id": "fs-v6-hold",
-      "scene": "fs-v6-hold",
-      "beats": [
-        "FS1-19",
-        "FS1-20"
       ],
-      "purpose": "Imani and Luis discuss a held sample with the player, without tasting.",
-      "required": true,
       "pov": "address-player",
       "speakingTarget": "player",
-      "eyeline": "camera",
-      "visibleCast": [
-        "Imani",
-        "Luis"
-      ]
+      "eyeline": "camera"
     },
     {
-      "id": "fs-v6-deadline",
-      "scene": "fs-v6-deadline",
+      "id": "fs-v7-closing",
+      "scene": "fs-v7-closing",
       "beats": [
-        "FS1-21",
-        "FS1-22",
-        "FS1-23"
-      ],
-      "purpose": "Luis reports missing method documentation from a separate records workstation.",
-      "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
-      "visibleCast": [
-        "Luis"
-      ]
-    },
-    {
-      "id": "fs-v6-closing",
-      "scene": "fs-v6-closing",
-      "beats": [
+        "FS1-27",
         "FS1-28"
       ],
-      "purpose": "Ren and Yuki close the report before outcome scoring.",
+      "purpose": "Ren and Yuki close the first trial.",
       "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
       "visibleCast": [
         "Ren",
         "Yuki"
-      ]
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
     }
   ],
   "beats": [
     {
       "beat": "FS1-01",
-      "scene": "fs-v6-arrival",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-arrival"
+      "scene": "fs-v7-arrival",
+      "shotGroup": "fs-v7-arrival",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-02",
-      "scene": "fs-v6-arrival",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-arrival"
-    },
-    {
-      "beat": "FS1-03",
-      "scene": "fs-v6-arrival",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-arrival"
+      "scene": "fs-v7-arrival",
+      "shotGroup": "fs-v7-arrival",
+      "artifact": "fs-context-note"
     },
     {
       "beat": "FS1-04",
-      "scene": "fs-v6-arrival",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-arrival"
+      "scene": "fs-v7-arrival",
+      "shotGroup": "fs-v7-arrival",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-05",
-      "scene": "fs-v6-team",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-team"
+      "scene": "fs-v7-team",
+      "shotGroup": "fs-v7-team",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-06",
-      "scene": "fs-v6-team",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-team"
+      "scene": "fs-v7-team",
+      "shotGroup": "fs-v7-team",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-07",
-      "scene": "fs-v6-work",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-work"
-    },
-    {
-      "beat": "FS1-08",
-      "scene": "fs-v6-work",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-work"
+      "scene": "fs-v7-work",
+      "shotGroup": "fs-v7-work",
+      "artifact": "fs-context-codes"
     },
     {
       "beat": "FS1-09",
-      "scene": "fs-v6-work",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-work"
+      "scene": "fs-v7-work",
+      "shotGroup": "fs-v7-work",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-10",
-      "scene": "fs-v6-work",
-      "artifact": "fs-plan",
-      "shotGroup": "fs-v6-work"
+      "scene": "fs-v7-work",
+      "shotGroup": "fs-v7-work",
+      "artifact": "fs-context-note"
     },
     {
       "beat": "FS1-11",
-      "scene": "fs-v6-work",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-work"
+      "scene": "fs-v7-work",
+      "shotGroup": "fs-v7-work",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-12",
-      "scene": "fs-v6-review",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-review"
-    },
-    {
-      "beat": "FS1-13",
-      "scene": "fs-v6-review",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-review"
-    },
-    {
-      "beat": "FS1-14",
-      "scene": "fs-v6-review",
-      "artifact": "fs-results",
-      "shotGroup": "fs-v6-review"
+      "scene": "fs-v7-review",
+      "shotGroup": "fs-v7-review",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-15",
-      "scene": "fs-v6-review",
-      "artifact": "fs-results",
-      "shotGroup": "fs-v6-review"
+      "scene": "fs-v7-review",
+      "shotGroup": "fs-v7-review",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-MID",
-      "scene": "fs-v6-review",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-review"
+      "scene": "fs-v7-review",
+      "shotGroup": "fs-v7-review",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-ACT2",
-      "scene": "fs-v6-peer",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-peer"
-    },
-    {
-      "beat": "FS1-18",
-      "scene": "fs-v6-peer",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-peer"
-    },
-    {
-      "beat": "FS1-19",
-      "scene": "fs-v6-hold",
-      "artifact": "fs-hold",
-      "shotGroup": "fs-v6-hold"
+      "scene": "fs-v7-records",
+      "shotGroup": "fs-v7-records",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-20",
-      "scene": "fs-v6-hold",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-hold"
+      "scene": "fs-v7-records",
+      "shotGroup": "fs-v7-records",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-21",
-      "scene": "fs-v6-deadline",
-      "artifact": "fs-log",
-      "shotGroup": "fs-v6-deadline"
+      "scene": "fs-v7-records",
+      "shotGroup": "fs-v7-records",
+      "artifact": "fs-context-message"
     },
     {
       "beat": "FS1-22",
-      "scene": "fs-v6-deadline",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-deadline"
+      "scene": "fs-v7-records",
+      "shotGroup": "fs-v7-records",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-23",
-      "scene": "fs-v6-deadline",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-deadline"
-    },
-    {
-      "beat": "FS1-24",
-      "scene": "fs-v6-peer",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-peer"
-    },
-    {
-      "beat": "FS1-25",
-      "scene": "fs-v6-peer",
-      "artifact": "fs-handover",
-      "shotGroup": "fs-v6-peer"
+      "scene": "fs-v7-collab",
+      "shotGroup": "fs-v7-collab",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-26",
-      "scene": "fs-v6-peer",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-peer"
+      "scene": "fs-v7-collab",
+      "shotGroup": "fs-v7-collab",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-27",
-      "scene": "fs-v6-work",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-work"
+      "scene": "fs-v7-closing",
+      "shotGroup": "fs-v7-closing",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "FS1-28",
-      "scene": "fs-v6-closing",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "fs-v6-closing"
+      "scene": "fs-v7-closing",
+      "shotGroup": "fs-v7-closing",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     }
   ],
   "milestones": [

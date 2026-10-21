@@ -1,0 +1,372 @@
+{
+  "edition": "review-2026-10-21-b",
+  "status": "AI reviewed; user waived contact-sheet review and requested integration",
+  "integrationAllowed": true,
+  "rejectedRevision": "revision-2026-10-21",
+  "exterior": {
+    "id": "riverbend-lake",
+    "landmarks": [
+      "lake",
+      "tree-lined opposite shore",
+      "three red-roof houses",
+      "low green hill"
+    ],
+    "windowOrientation": "lake-facing windows on plan west; new camera preserves geography",
+    "forbidden": [
+      "city skyline",
+      "parking lot"
+    ]
+  },
+  "materialPalette": [
+    "honed ivory stone",
+    "walnut cabinetry",
+    "brushed brass trim",
+    "navy upholstery"
+  ],
+  "lighting": {
+    "morning": "soft diffuse daylight from lake-side windows; no sunrise colors",
+    "afternoon": "neutral daylight and ceiling/task practicals",
+    "evening": "cool blue dim lake, warm ceiling and task practicals; no sunbeams"
+  },
+  "beats": [
+    {
+      "id": "RN1-01",
+      "time": "06:40",
+      "room": "lobby",
+      "cast": [],
+      "staging": "Wide arrival from the entrance; reception on right, lake through left windows",
+      "title": "Welcome to Riverbend.",
+      "body": "Your first shift starts on Four West.",
+      "file": "RN1-01.png",
+      "timeOfDay": "early morning"
+    },
+    {
+      "id": "RN1-02",
+      "time": "06:45",
+      "room": "station",
+      "cast": [],
+      "staging": "Oblique view along the workstation, with the lake on left; no centered counter portrait",
+      "title": "A floor with a view.",
+      "body": "You will work beside Rosa, an experienced nurse.",
+      "file": "RN1-02.png",
+      "timeOfDay": "early morning"
+    },
+    {
+      "id": "RN1-03",
+      "time": "06:50",
+      "room": "corridor",
+      "cast": [],
+      "staging": "Walk toward the lake-end window; doors on right, no sunlight through closed doors",
+      "title": "You are part of a team.",
+      "body": "Ask for help when you need it.",
+      "file": "RN1-03.png",
+      "timeOfDay": "early morning"
+    },
+    {
+      "id": "RN1-04",
+      "time": "07:00",
+      "room": "corridor",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Rosa walking beside player, full standing figure, turns toward camera with a calm smile",
+      "title": "Meet Rosa.",
+      "body": "She will guide you and check your work today.",
+      "file": "RN1-04.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-05",
+      "time": "07:05",
+      "room": "station",
+      "cast": [
+        "Rosa",
+        "Sofia"
+      ],
+      "staging": "Angled handover table; Rosa beside Sofia, Sofia holds a chart toward Rosa, player has no visible body",
+      "title": "Start with the handover.",
+      "body": "The night nurse is ready to share what changed.",
+      "file": "RN1-05.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-06",
+      "time": "07:15",
+      "room": "station",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Rosa standing beside a wall screen, relaxed upright head, open palm toward screen",
+      "title": "A useful update.",
+      "body": "You know which patients need a closer check.",
+      "file": "RN1-06.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-07",
+      "time": "07:30",
+      "room": "room",
+      "cast": [
+        "Rosa",
+        "Patient"
+      ],
+      "staging": "Foot-of-bed medium-wide; Rosa at bedside talking to patient, not facing player during observed conversation",
+      "title": "At the bedside.",
+      "body": "Rosa checks the patient before starting care.",
+      "file": "RN1-07.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-08",
+      "time": "07:35",
+      "room": "room",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Side of bed with Rosa standing fully visible near bedside cabinet, holding scanner close to torso with bent elbow",
+      "title": "Two checks.",
+      "body": "Use the patient\u2019s name and date of birth to check who they are.",
+      "file": "RN1-08.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-09",
+      "time": "07:40",
+      "room": "room",
+      "cast": [
+        "Rosa",
+        "Patient"
+      ],
+      "staging": "Patient seated in bed left and Rosa standing right, angled toward patient; patient looks at player",
+      "title": "Check the person.",
+      "body": "The patient is ready for your identity check.",
+      "file": "RN1-09.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-10",
+      "time": "08:15",
+      "room": "station",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Rosa seated in side workstation alcove, screen below shoulder, lake still left, thoughtful expression",
+      "title": "Write what happened.",
+      "body": "A clear note helps the next nurse understand the change.",
+      "file": "RN1-10.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-11",
+      "time": "08:25",
+      "room": "station",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "From station open end, Rosa sets a closed chart on work surface, three-quarter standing view",
+      "title": "Keep records private.",
+      "body": "Open records only when needed for your care duties.",
+      "file": "RN1-11.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-12",
+      "time": "09:00",
+      "room": "corridor",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Rosa pauses by a closed patient door, one hand near torso, attentive listening posture; soft ceiling light only",
+      "title": "The floor gets busy.",
+      "body": "Rosa asks you to stay alert for changes.",
+      "file": "RN1-12.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-13",
+      "time": "09:10",
+      "room": "corridor",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Wider view from opposite corridor end, Rosa stands on left looking directly at player, serious but calm",
+      "title": "Speak up early.",
+      "body": "A patient\u2019s breathing has suddenly become difficult.",
+      "file": "RN1-13.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-14",
+      "time": "10:00",
+      "room": "station",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Rosa beside a screen at station far end, neutral head upright; view toward lake through left window",
+      "title": "Ask when unsure.",
+      "body": "Rosa gives you an instruction you do not understand.",
+      "file": "RN1-14.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-15",
+      "time": "10:05",
+      "room": "station",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Rosa pulling a chair beside player\u2019s empty chair, hand naturally on chair back, encouraging expression",
+      "title": "Choose a safe response.",
+      "body": "You can ask Rosa to explain before you act.",
+      "file": "RN1-15.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-16",
+      "time": "10:30",
+      "room": "staff",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Rosa seated sideways at lounge table, turns toward player, pleasant small smile, lake through left window",
+      "title": "Morning checkpoint.",
+      "body": "Rosa reviews your first four decisions.",
+      "file": "RN1-16.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-17",
+      "time": "11:15",
+      "room": "corridor",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Rosa walking away from station toward patient rooms, looking back toward player, tablet at her side",
+      "title": "A new task.",
+      "body": "Denise needs a clear record of the afternoon checks.",
+      "file": "RN1-17.png",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "RN1-18",
+      "time": "13:00",
+      "room": "station",
+      "cast": [
+        "Denise"
+      ],
+      "staging": "Denise standing at a wall screen, body angled to screen and eyes toward camera, composed expression",
+      "title": "Meet Denise.",
+      "body": "The nurse manager wants notes the whole team can follow.",
+      "file": "RN1-18.png",
+      "timeOfDay": "afternoon"
+    },
+    {
+      "id": "RN1-19",
+      "time": "13:10",
+      "room": "station",
+      "cast": [
+        "Denise",
+        "Rosa"
+      ],
+      "staging": "Two nurses at diagonal handover table; Rosa gives chart to Denise with normal bent arms; both faces visible",
+      "title": "A note needs a check.",
+      "body": "Denise asks you to spot a clear mistake.",
+      "file": "RN1-19.png",
+      "timeOfDay": "afternoon"
+    },
+    {
+      "id": "RN1-20",
+      "time": "13:15",
+      "room": "station",
+      "cast": [
+        "Denise"
+      ],
+      "staging": "Denise seated at side desk with closed chart on table, serious attentive eye contact",
+      "title": "Check the note.",
+      "body": "The note says the medicine was given tomorrow.",
+      "file": "RN1-20.png",
+      "timeOfDay": "afternoon"
+    },
+    {
+      "id": "RN1-21",
+      "time": "14:00",
+      "room": "staff",
+      "cast": [
+        "Tyler",
+        "Rosa"
+      ],
+      "staging": "Small standing huddle angled around end of table, Tyler upright and self-assured, Rosa attentive, player no surrogate",
+      "title": "Meet Tyler.",
+      "body": "The other new nurse is eager to impress the team.",
+      "file": "RN1-21.png",
+      "timeOfDay": "afternoon"
+    },
+    {
+      "id": "RN1-22",
+      "time": "14:10",
+      "room": "corridor",
+      "cast": [
+        "Tyler"
+      ],
+      "staging": "Tyler near huddle-room doorway at a natural angle, shoulders relaxed, uncertain expression toward camera",
+      "title": "Handle the disagreement.",
+      "body": "Tyler takes credit for a change you reported.",
+      "file": "RN1-22.png",
+      "timeOfDay": "afternoon"
+    },
+    {
+      "id": "RN1-23",
+      "time": "15:00",
+      "room": "room",
+      "cast": [
+        "Patient",
+        "Rosa"
+      ],
+      "staging": "Same lake-facing suite from diagonal foot of bed; patient worried and leaning slightly forward, Rosa beside bed; no foreground arms",
+      "title": "Room 12 needs help.",
+      "body": "Your patient suddenly seems confused and is breathing fast.",
+      "file": "RN1-23.png",
+      "timeOfDay": "afternoon"
+    },
+    {
+      "id": "RN1-24",
+      "time": "18:30",
+      "room": "station",
+      "cast": [
+        "Sofia"
+      ],
+      "staging": "Sofia at angled handover table, chart on desk and hand near pen; dim blue lake with red-roof house lights, warm task lamp",
+      "title": "Hand over the shift.",
+      "body": "Sofia needs the changes and the work still due.",
+      "file": "RN1-24.png",
+      "timeOfDay": "evening"
+    },
+    {
+      "id": "RN1-25",
+      "time": "18:40",
+      "room": "corridor",
+      "cast": [
+        "Rosa"
+      ],
+      "staging": "Rosa stands beside lake-end window, level head, gentle tired smile and folded tablet near torso, evening light",
+      "title": "Your shift is complete.",
+      "body": "The team reviews what you did well and what needs work.",
+      "file": "RN1-25.png",
+      "timeOfDay": "evening"
+    },
+    {
+      "id": "RN1-26",
+      "time": "18:45",
+      "room": "station",
+      "cast": [
+        "Rosa",
+        "Sofia"
+      ],
+      "staging": "Wide two-person review at angled table, calm neutral expressions, exact evening practical and blue lake lighting",
+      "title": "Your first-shift review.",
+      "body": "See how your decisions shaped the shift.",
+      "file": "RN1-26.png",
+      "timeOfDay": "evening"
+    }
+  ]
+}

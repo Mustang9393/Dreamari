@@ -15,6 +15,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { ErrorView, LoadingView } from "@/components/app/states";
 
 import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO, poseFor, VOICE_PITCH } from "./expressions";
+import { FullScenePlate } from "./FullScenePlate";
 import { isFullSceneImage, locationFor } from "./locations";
 import { DESKTOP_PLATE_SCALE, FALLBACK_PORTRAIT_RATIO, plateObjectPosition, spriteBox } from "./scenePlacement";
 import { PerformancePlanFlow } from "./PerformancePlanFlow";
@@ -1308,6 +1309,7 @@ function LocationBackdrop({
   const filter = drained
     ? dimmed ? "blur(7px) grayscale(1) brightness(0.55)" : "grayscale(1) brightness(0.6) contrast(1.1)"
     : dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined;
+  if (isFullSceneImage(src)) return <FullScenePlate src={src} alt={alt} focal={focal} mobileFocal={mobileFocal} filter={filter} onReady={onReady}/>;
   return (
     <>
       <div className="absolute inset-0 sm:hidden" style={isFullSceneImage(src) ? { top: "8%", height: "65%", bottom: "auto", maskImage: "linear-gradient(to bottom, black 0%, black 82%, transparent 100%)" } : undefined}>
@@ -1328,10 +1330,10 @@ function LocationBackdrop({
         fill
         priority
         sizes="100vw"
-        className="hidden object-cover transition-[filter] duration-500 motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both] sm:block"
+        className="hidden object-cover transition-[filter] duration-500 sm:block"
         style={{
           objectPosition: plateObjectPosition(focal),
-          transform: `translate3d(${offset.x * -6}px, ${offset.y * -4}px, 0) scale(${DESKTOP_PLATE_SCALE})`,
+          transform: `translate3d(${offset.x * -6}px, ${offset.y * -4}px, 0) scale(${isFullSceneImage(src) ? 1 : DESKTOP_PLATE_SCALE})`,
           filter,
         }}
         onLoad={onReady}
@@ -1348,6 +1350,7 @@ function LocationBackdrop({
  *  with the same entrance push. Keyed on the picture, so a cut to a new scene
  *  (or a flip from v1) plays that entrance again. */
 function V2Backdrop({ scene, filter, slowFilter, onReady }: { scene: V2Image; filter?: string; slowFilter?: boolean; onReady?: () => void }) {
+  if (scene.src.includes("/rn/v2/revision-2026-10-21/")) return <FullScenePlate src={scene.src} alt={scene.alt} focal={scene.focal} mobileFocal={scene.mobileFocal} filter={filter} onReady={onReady}/>;
   if (scene.composition) return <CareerScene scene={scene} filter={filter} onReady={onReady} />;
   return (
     <>
@@ -1369,7 +1372,7 @@ function V2Backdrop({ scene, filter, slowFilter, onReady }: { scene: V2Image; fi
         fill
         priority
         sizes="100vw"
-        className={`hidden object-cover transition-[filter] motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both] sm:block ${slowFilter ? "duration-[1100ms]" : "duration-500"}`}
+        className={`hidden object-cover transition-[filter] sm:block ${slowFilter ? "duration-[1100ms]" : "duration-500"}`}
         style={{ objectPosition: plateObjectPosition(scene.focal), transform: `scale(${DESKTOP_PLATE_SCALE})`, filter }}
         onLoad={onReady}
       />
@@ -1935,7 +1938,7 @@ function BeatBody({
     if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
     return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} style={beat.kind === "review" ? beat.style : undefined} deciding={beat.kind === "review" ? beat.deciding : undefined} decidingNote={beat.kind === "review" ? beat.decidingNote : undefined} />;
   })();
-  const body = beat.artifact ? <div className="flex min-w-0 flex-col"><WorkArtifact artifact={beat.artifact} />{content}</div> : content;
+  const body = beat.artifact ? <div className="flex min-w-0 flex-col">{content}<WorkArtifact artifact={beat.artifact} /></div> : content;
   if (!prompt) return body;
   // Directed: heading first, then its instruction (both v2 scripts), or the
   // instruction IS the heading (RN v2 screen 33).

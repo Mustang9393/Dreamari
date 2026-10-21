@@ -1,0 +1,16 @@
+OPTIONAL NATIVE WORK GRAPHIC
+
+Career / beat: {CAREER, BEAT_ID}
+Project: {PROJECT}
+Work surface: {REAL APP, MESSAGE, SHORT NOTE, LABEL OR RELEVANT MONITOR}
+Purpose in the scene: {ATMOSPHERE OR CONTEXT}
+Source and limits: {PRIMARY SOURCE, FACT SUPPORTED, ROLE AUTHORITY, FICTIONAL VALUES}
+Native implementation: {SHARED RENDERER / TOKENS}
+
+Create a small optional context visual for a real work surface used by an entry-level {CAREER}. It may be an app screen, rough wireframe, short message, concise notepad, sample label or relevant monitor. It adds atmosphere and context. Nursing’s ECG-like display is one career-specific example, not a template. If the visual adds no useful context, omit it.
+
+Use about 6–14 visible words, strong hierarchy and enough whitespace to read at game size. Avoid dense graphs, tables, paragraphs, repeated task titles, equipment drawings and long notes. Make a UX interface look like a real UI; make a wireframe visibly rough. Do not make decoration look like a live measurement.
+
+The question contains every fact needed to answer. The visual is not a second task, hidden clue, answer key or evidence gate; removing it cannot change the correct answer. Do not invent clinical readings, dosages, safety thresholds, technical limits or release approval. Mark fictional training values as fictional when needed.
+
+Implement with native HTML/CSS/text, semantic tokens and a shared renderer. No embedded independent buttons, tabs, typing, reset, mandatory exploration or playable demo. Only actual game controls accept answers or advance. Do not create extra focus targets. Supply a concise text equivalent and scene mapping. Verify legibility, focus behavior and lack of duplicated copy on desktop and phone. Record the source, supported fact and limits. The final human reviews the assembled game; no intermediate approval gate.

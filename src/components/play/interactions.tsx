@@ -444,6 +444,9 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         </p>
         {beat.example && <p className="max-w-[40ch] text-[16px] leading-relaxed font-semibold whitespace-pre-line" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{beat.example}</p>}
         {beat.note && <p className="text-[15px] font-extrabold" style={{ color: accent }}>{beat.note}</p>}
+        {!beat.auto && !beat.secondaryCta && (
+          <button type="button" onClick={() => { playSelect(); onNext(); }} className="dm-solid mt-2 cursor-pointer rounded-[var(--radius-md)] px-5 py-3 text-[15px] font-semibold" style={{background:"var(--primary)",color:"var(--primary-foreground)"}}>{beat.cta || "Continue"}</button>
+        )}
         {beat.secondaryCta && (
           <div className="mt-[var(--space-2)] flex w-full max-w-[320px] flex-col gap-[10px]">
             <button

@@ -1,0 +1,163 @@
+{
+  "career": "registered-nurse",
+  "trace": [
+    {
+      "beat": "RN1-01",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-02",
+      "teaches": [
+        "team handover provides changed and outstanding care"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "RN1-03",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-04",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-05",
+      "teaches": [],
+      "uses": [
+        "team handover provides changed and outstanding care"
+      ]
+    },
+    {
+      "beat": "RN1-06",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-07",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-08",
+      "teaches": [
+        "patient identity uses approved identifiers"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "RN1-09",
+      "teaches": [],
+      "uses": [
+        "patient identity uses approved identifiers"
+      ]
+    },
+    {
+      "beat": "RN1-10",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-11",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-12",
+      "teaches": [
+        "sudden condition changes need prompt escalation"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "RN1-13",
+      "teaches": [],
+      "uses": [
+        "sudden condition changes need prompt escalation"
+      ]
+    },
+    {
+      "beat": "RN1-14",
+      "teaches": [
+        "ask a supervisor to clarify an unclear instruction"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "RN1-15",
+      "teaches": [],
+      "uses": [
+        "ask a supervisor to clarify an unclear instruction"
+      ]
+    },
+    {
+      "beat": "RN1-16",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-17",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-18",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-19",
+      "teaches": [
+        "records should describe events accurately"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "RN1-20",
+      "teaches": [],
+      "uses": [
+        "records should describe events accurately"
+      ]
+    },
+    {
+      "beat": "RN1-21",
+      "teaches": [
+        "professional concerns can be raised calmly"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "RN1-22",
+      "teaches": [],
+      "uses": [
+        "professional concerns can be raised calmly"
+      ]
+    },
+    {
+      "beat": "RN1-23",
+      "teaches": [
+        "handover includes current patient changes and care still due"
+      ],
+      "uses": []
+    },
+    {
+      "beat": "RN1-24",
+      "teaches": [],
+      "uses": [
+        "handover includes current patient changes and care still due"
+      ]
+    },
+    {
+      "beat": "RN1-25",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "RN1-26",
+      "teaches": [],
+      "uses": []
+    }
+  ]
+}

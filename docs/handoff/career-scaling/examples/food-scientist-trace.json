@@ -8,13 +8,6 @@
     },
     {
       "beat": "FS1-02",
-      "teaches": [
-        "project goal"
-      ],
-      "uses": []
-    },
-    {
-      "beat": "FS1-03",
       "teaches": [],
       "uses": []
     },
@@ -25,71 +18,66 @@
     },
     {
       "beat": "FS1-05",
-      "teaches": [],
+      "teaches": [
+        "a fair test changes one factor while holding others steady"
+      ],
       "uses": []
     },
     {
       "beat": "FS1-06",
-      "teaches": [],
+      "teaches": [
+        "a fair test changes one factor while holding others steady"
+      ],
       "uses": [
-        "project goal"
+        "a fair test changes one factor while holding others steady"
       ]
     },
     {
       "beat": "FS1-07",
       "teaches": [
-        "work terms"
+        "keep batch size and mixing method constant"
       ],
       "uses": []
     },
     {
-      "beat": "FS1-08",
-      "teaches": [],
-      "uses": []
-    },
-    {
       "beat": "FS1-09",
-      "teaches": [],
+      "teaches": [
+        "keep batch size and mixing method constant"
+      ],
       "uses": [
-        "work terms"
+        "keep batch size and mixing method constant"
       ]
     },
     {
       "beat": "FS1-10",
       "teaches": [
-        "controlled comparison"
+        "compare samples with the same mixing steps"
       ],
       "uses": []
     },
     {
       "beat": "FS1-11",
-      "teaches": [],
+      "teaches": [
+        "compare samples with the same mixing steps"
+      ],
       "uses": [
-        "controlled comparison"
+        "compare samples with the same mixing steps"
       ]
     },
     {
       "beat": "FS1-12",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-13",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-14",
       "teaches": [
-        "evidence limits"
+        "blind tasting avoids brand influence"
       ],
       "uses": []
     },
     {
       "beat": "FS1-15",
-      "teaches": [],
+      "teaches": [
+        "blind tasting avoids brand influence"
+      ],
       "uses": [
-        "evidence limits"
+        "blind tasting avoids brand influence"
       ]
     },
     {
@@ -99,64 +87,50 @@
     },
     {
       "beat": "FS1-ACT2",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-18",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-19",
       "teaches": [
-        "team authority"
+        "results need a matching batch record"
       ],
       "uses": []
     },
     {
       "beat": "FS1-20",
-      "teaches": [],
+      "teaches": [
+        "results need a matching batch record"
+      ],
       "uses": [
-        "team authority"
+        "results need a matching batch record"
       ]
     },
     {
       "beat": "FS1-21",
       "teaches": [
-        "report blocker early"
+        "separate known results from untested claims"
       ],
       "uses": []
     },
     {
       "beat": "FS1-22",
-      "teaches": [],
+      "teaches": [
+        "separate known results from untested claims"
+      ],
       "uses": [
-        "report blocker early"
+        "separate known results from untested claims"
       ]
     },
     {
       "beat": "FS1-23",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-24",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-25",
       "teaches": [
-        "team priorities"
+        "a promising small trial needs more testing"
       ],
       "uses": []
     },
     {
       "beat": "FS1-26",
-      "teaches": [],
+      "teaches": [
+        "a promising small trial needs more testing"
+      ],
       "uses": [
-        "team priorities"
+        "a promising small trial needs more testing"
       ]
     },
     {
@@ -166,6 +140,11 @@
     },
     {
       "beat": "FS1-28",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-REVIEW",
       "teaches": [],
       "uses": []
     }

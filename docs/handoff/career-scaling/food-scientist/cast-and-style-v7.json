@@ -1,0 +1,92 @@
+{
+  "version": 7,
+  "drawingAnchor": "references/ux-character.png",
+  "cast": {
+    "Ren": {
+      "age": 34,
+      "gender": "male",
+      "ethnicity": "Japanese",
+      "complexion": "light warm skin",
+      "iris": "brown",
+      "hair": "short black side part under pale blue hygiene cap",
+      "outfit": "white coat, indigo collar",
+      "role": "senior scientist; trial mentor",
+      "source": "arrival",
+      "canonicalScene": "/images/play/fs/v7/arrival.png",
+      "canonicalFace": "/images/play/fs/v7/identity/ren.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "AI comparison complete for selected files; human game QA open"
+    },
+    "Yuki": {
+      "age": 45,
+      "gender": "female",
+      "ethnicity": "Japanese",
+      "complexion": "very light cool ivory",
+      "iris": "gray brown",
+      "hair": "simple dark bob secured under white hygiene cap",
+      "outfit": "white coat, plum collar",
+      "role": "quality lead; tasting/claims authority",
+      "source": "review",
+      "canonicalScene": "/images/play/fs/v7/review.png",
+      "canonicalFace": "/images/play/fs/v7/identity/yuki.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "AI comparison complete for selected files; human game QA open"
+    },
+    "Imani": {
+      "age": 24,
+      "gender": "female",
+      "ethnicity": "Black American",
+      "complexion": "warm deep brown; final canonical reference after user-requested one-shade adjustment",
+      "paletteTarget": "v7 canonical face, neck and hands; no old espresso palette",
+      "iris": "warm amber brown",
+      "hair": "tightly coiled hair secured under mint hygiene cap",
+      "outfit": "white coat, mustard collar",
+      "role": "junior scientist; held-sample challenge and report teamwork",
+      "source": "team",
+      "canonicalScene": "/images/play/fs/v7/team.png",
+      "canonicalFace": "/images/play/fs/v7/identity/imani.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "AI comparison complete for selected files; human game QA open"
+    },
+    "Luis": {
+      "age": 31,
+      "gender": "male",
+      "ethnicity": "Puerto Rican",
+      "complexion": "medium tan brown",
+      "iris": "gray blue",
+      "hair": "short dark waves under white hygiene cap",
+      "outfit": "white coat, rust collar",
+      "role": "record coordinator; flags identity and method gaps, resolves draft",
+      "source": "team",
+      "canonicalScene": "/images/play/fs/v7/team.png",
+      "canonicalFace": "/images/play/fs/v7/identity/luis.png",
+      "fixed": [
+        "skin base/shadow/highlight palette",
+        "iris color",
+        "face and eye shape",
+        "hairline/texture",
+        "outfit"
+      ],
+      "reviewStatus": "AI comparison complete for selected files; human game QA open"
+    }
+  },
+  "skinPolicy": "Lighting changes highlights/shadows, not underlying complexion. Compare face/neck/hands and iris colors against one canonical crop per person. Reject drift."
+}

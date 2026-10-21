@@ -15,6 +15,7 @@ export type InterfaceSpec = {
   detail: string;
 };
 export type WorkArtifact = ArtifactBase & (
+  | { kind: "scene-context"; view: "music-ui" | "wireframe" | "message" | "batch-note" | "sample-codes"; from?:string; line?:string }
   | { kind: "work-screen"; panels: {label:string; heading:string; detail:string; fields:{label:string; value:string}[]}[] }
   | { kind: "register"; columns:string[]; records:{id:string; values:string[]}[] }
   | { kind: "panel-plan"; legend:string; codes:string[]; question:string; controls:string[] }
@@ -29,6 +30,7 @@ export type WorkArtifact = ArtifactBase & (
 
 export function artifactProblems(a: WorkArtifact): string[] {
   const errors: string[] = [];
+  if (a.kind === "scene-context" && a.view === "message" && (!a.from || !a.line)) errors.push("Incomplete scene message");
   if ("demo" in a || "practice" in a) errors.push("Supporting graphics must be read-only");
   if (!a.id || !a.title || !a.caption || !a.provenance) errors.push("Missing artifact identity, caption or provenance");
   if (a.kind === "flow" && (a.steps.length < 2 || a.steps.some(s => !s.title || !s.detail))) errors.push("Incomplete flow");

@@ -2,9 +2,9 @@
   "id": "ux-l1",
   "n": 1,
   "role": "Junior UX Designer",
-  "title": "The VELO launch",
-  "blurb": "Your studio has one day to fix a sportswear launch before the client demo.",
-  "cover": "/images/play/ux/v6/arrival.png",
+  "title": "Before the first song",
+  "blurb": "Help music fans save a festival set for offline listening.",
+  "cover": "/images/play/ux/v7/arrival.png",
   "mood": "day",
   "hideBand": true,
   "directed": true,
@@ -12,18 +12,18 @@
   "worldTheme": true,
   "coreKit": true,
   "quietQuestions": true,
-  "saveSlot": 502,
+  "saveSlot": 504,
   "cast": {
-    "Arjun": "/images/play/ux/face-arjun-v6.webp",
-    "Noah": "/images/play/ux/face-noah-v6.webp",
-    "Eleanor": "/images/play/ux/face-eleanor-v6.webp",
-    "Samira": "/images/play/ux/face-samira-v6.webp",
-    "Amina": "/images/play/ux/face-amina-v6.webp"
+    "Arjun": "/images/play/ux/face-arjun-v7.webp",
+    "Noah": "/images/play/ux/face-noah-v7.webp",
+    "Eleanor": "/images/play/ux/face-eleanor-v7.webp",
+    "Samira": "/images/play/ux/face-samira-v7.webp",
+    "Amina": "/images/play/ux/face-amina-v7.webp"
   },
   "preGame": {
-    "startLabel": "Start the project",
-    "skipLabel": "Skip to launch day",
-    "handoffLine": "Northline Studio · VELO launch day",
+    "startLabel": "Start my first day",
+    "skipLabel": "Start the story",
+    "handoffLine": "AMPLIFY festival set",
     "howToCta": "Start the project",
     "ladder": [
       "Junior UX Designer",
@@ -44,13 +44,13 @@
           "kind": "say",
           "heading": "Help people finish a task.",
           "body": "UX means user experience. Designers study what people need, then test ways to help.",
-          "image": "/images/play/ux/v6/arrival.png"
+          "image": "/images/play/ux/v7/arrival.png"
         },
         {
           "kind": "say",
           "heading": "Start rough. Learn fast.",
           "body": "A wireframe is a rough screen layout. A prototype is a test version of a design.",
-          "image": "/images/play/ux/v6/work.png"
+          "image": "/images/play/ux/v7/arrival.png"
         },
         {
           "kind": "check",
@@ -84,721 +84,12 @@
     ],
     "ladderNote": "Titles vary by company. These are career paths, not promised promotions."
   },
-  "beats": [
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "Launch day starts here.",
-      "body": "You join Northline Studio as a junior UX designer.",
-      "cta": "Continue",
-      "id": "UX1-01"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "One client. One afternoon.",
-      "body": "VELO, a top sportswear brand, demos its new shoe app at 4 p.m. Runners must be able to reserve a pair.",
-      "cta": "Continue",
-      "id": "UX1-02"
-    },
-    {
-      "kind": "card",
-      "variant": "character",
-      "speaker": "Arjun",
-      "title": "Meet Arjun.",
-      "body": "Your senior designer guides the work. He needs a clear plan before the client arrives.",
-      "cta": "Continue",
-      "castMember": "Arjun",
-      "id": "UX1-03"
-    },
-    {
-      "kind": "card",
-      "variant": "character",
-      "speaker": "Narrator",
-      "title": "Your place on the team.",
-      "body": "Arjun reviews your draft. Design lead Samira decides what the client sees.",
-      "cta": "Continue",
-      "ladder": [
-        {
-          "label": "Junior · You",
-          "lit": true
-        },
-        {
-          "label": "UX Designer",
-          "lit": false
-        },
-        {
-          "label": "Senior · Arjun",
-          "lit": true
-        },
-        {
-          "label": "Lead / Principal",
-          "lit": false
-        }
-      ],
-      "id": "UX1-04"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "Meet your launch team.",
-      "body": "Noah builds screens. Amina checks the mobile flow. You will test whether runners can reserve a pair.",
-      "cta": "Continue",
-      "castMembers": [
-        "Arjun",
-        "Noah",
-        "Amina"
-      ],
-      "id": "UX1-05"
-    },
-    {
-      "kind": "choice",
-      "layout": "options",
-      "speaker": "Arjun",
-      "question": "Where do you start?",
-      "choices": [
-        {
-          "id": "a",
-          "label": "Watch a runner try to reserve a pair.",
-          "tier": "best",
-          "why": "You need to see where the task breaks before choosing a fix."
-        },
-        {
-          "id": "b",
-          "label": "Polish the launch screen first.",
-          "tier": "wrong",
-          "why": "You could polish the wrong part. First watch someone use it."
-        },
-        {
-          "id": "c",
-          "label": "Copy a rival brand’s app.",
-          "tier": "wrong",
-          "why": "Their design may solve a different problem."
-        }
-      ],
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "id": "UX1-06",
-      "progress": 0.14285714285714285,
-      "skills": [
-        "Decision-Making",
-        "Critical Thinking"
-      ],
-      "planLineIfFailed": "you made a choice before checking the evidence"
-    },
-    {
-      "kind": "flips",
-      "speaker": "Arjun",
-      "setup": "These four terms will help you explain the test to Samira.",
-      "title": "Prepare for the review.",
-      "cards": [
-        {
-          "term": "User goal",
-          "def": "What a person wants to do"
-        },
-        {
-          "term": "Wireframe",
-          "def": "A rough screen layout"
-        },
-        {
-          "term": "Prototype",
-          "def": "A test version of a design"
-        },
-        {
-          "term": "Observation",
-          "def": "Something you saw or heard"
-        }
-      ],
-      "cta": "Continue",
-      "id": "UX1-07"
-    },
-    {
-      "kind": "match",
-      "practice": true,
-      "noVerdict": true,
-      "speaker": "Arjun",
-      "question": "Match each review note to its meaning.",
-      "pairs": [
-        {
-          "term": "Reserve a pair",
-          "def": "User goal"
-        },
-        {
-          "term": "Rough screen layout",
-          "def": "Wireframe"
-        },
-        {
-          "term": "Test version",
-          "def": "Prototype"
-        },
-        {
-          "term": "Runner tapped “Details” three times",
-          "def": "Observation"
-        }
-      ],
-      "whenRight": "You can explain both the work and the evidence.",
-      "whenWrong": "A goal is a task. A layout is a wireframe. A test version is a prototype.",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": [
-        "Reading Comprehension",
-        "Active Learning"
-      ],
-      "id": "UX1-08"
-    },
-    {
-      "kind": "rapid",
-      "timer": 45,
-      "speaker": "Arjun",
-      "question": "",
-      "items": [
-        {
-          "question": "Eleanor wants to reserve size 8. What task do you give her?",
-          "options": [
-            {
-              "label": "Reserve a size 8 pair.",
-              "correct": true,
-              "why": "The task names her goal without giving away the route."
-            },
-            {
-              "label": "Tap the blue Reserve button.",
-              "correct": false,
-              "why": "That tells her which control to use. You would miss whether she can find it."
-            },
-            {
-              "label": "Tell us if the app looks cool.",
-              "correct": false,
-              "why": "That does not test whether she can reserve shoes."
-            }
-          ]
-        },
-        {
-          "question": "She taps “Details” three times. What belongs in your notes?",
-          "options": [
-            {
-              "label": "She tapped Details three times.",
-              "correct": true,
-              "why": "That records what happened."
-            },
-            {
-              "label": "She hates the design.",
-              "correct": false,
-              "why": "You have not asked her. That is a guess."
-            },
-            {
-              "label": "The font caused the problem.",
-              "correct": false,
-              "why": "You have not tested that cause."
-            }
-          ]
-        },
-        {
-          "question": "Arjun asks why she got stuck. You are unsure. What do you say?",
-          "options": [
-            {
-              "label": "I saw repeated taps. I need to check why.",
-              "correct": true,
-              "why": "You separate what happened from a possible cause."
-            },
-            {
-              "label": "The color must be wrong.",
-              "correct": false,
-              "why": "You have no evidence for that cause."
-            },
-            {
-              "label": "She is bad at using apps.",
-              "correct": false,
-              "why": "The test checks the design, not the person."
-            }
-          ]
-        },
-        {
-          "question": "Which update helps the team?",
-          "options": [
-            {
-              "label": "The runner could not find Reserve. We need to test its placement.",
-              "correct": true,
-              "why": "It names a clear problem and a next check."
-            },
-            {
-              "label": "The whole app is confusing.",
-              "correct": false,
-              "why": "That is too broad to guide a change."
-            },
-            {
-              "label": "Everything looks great.",
-              "correct": false,
-              "why": "That hides the problem you observed."
-            }
-          ]
-        }
-      ],
-      "whenPass": "Clear, honest answers. The team can act on them.",
-      "whenFail": "Use the evidence. Say what you know and what needs checking.",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "id": "UX1-09",
-      "progress": 0.2857142857142857,
-      "skills": [
-        "Decision-Making",
-        "Critical Thinking"
-      ],
-      "planLineIfFailed": "you made a choice before checking the evidence"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Arjun",
-      "title": "One change. Same task.",
-      "body": "Eleanor could not find Reserve. Move that action above the details, then test the same task.",
-      "cta": "Continue",
-      "id": "UX1-10"
-    },
-    {
-      "kind": "choice",
-      "layout": "options",
-      "speaker": "Arjun",
-      "question": "Which draft should you test next?",
-      "choices": [
-        {
-          "id": "a",
-          "label": "Keep the page. Move Reserve above the details.",
-          "tier": "best",
-          "why": "One planned change lets you test whether placement helps."
-        },
-        {
-          "id": "b",
-          "label": "Change the layout, labels and colors together.",
-          "tier": "wrong",
-          "why": "You could not tell which change helped."
-        },
-        {
-          "id": "c",
-          "label": "Keep Reserve hidden and add a new banner.",
-          "tier": "wrong",
-          "why": "That does not address the problem you saw."
-        }
-      ],
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "artifact": {
-        "id": "ux-prototype-versions",
-        "kind": "comparison",
-        "title": "One change · same task",
-        "caption": "Test the new layout; it is not proof of improvement.",
-        "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
-        "panels": [
-          {
-            "label": "A · action below details",
-            "screen": {
-              "siteName": "VELO",
-              "navigation": "Aero 01",
-              "heading": "Reserve your pair",
-              "description": "Launch day · 4 p.m.",
-              "detail": "Size 8 · In stock",
-              "action": "Reserve pair",
-              "actionPlacement": "after-details",
-              "fields": []
-            }
-          },
-          {
-            "label": "B · action above details",
-            "screen": {
-              "siteName": "VELO",
-              "navigation": "Aero 01",
-              "heading": "Reserve your pair",
-              "description": "Launch day · 4 p.m.",
-              "detail": "Size 8 · In stock",
-              "action": "Reserve pair",
-              "actionPlacement": "before-details",
-              "fields": []
-            }
-          }
-        ]
-      },
-      "id": "UX1-11",
-      "progress": 0.42857142857142855,
-      "skills": [
-        "Decision-Making",
-        "Critical Thinking"
-      ],
-      "planLineIfFailed": "you made a choice before checking the evidence"
-    },
-    {
-      "kind": "card",
-      "variant": "character",
-      "speaker": "Samira",
-      "title": "Samira joins the review.",
-      "body": "She leads design for the VELO account. Bring evidence, not a sales pitch.",
-      "cta": "Continue",
-      "castMember": "Samira",
-      "id": "UX1-12"
-    },
-    {
-      "kind": "card",
-      "variant": "character",
-      "speaker": "Narrator",
-      "title": "Her craft. Your next step.",
-      "body": "Samira started in a junior role. She now guides designers and reviews major client work.",
-      "cta": "Continue",
-      "castMember": "Samira",
-      "id": "UX1-13"
-    },
-    {
-      "kind": "card",
-      "variant": "character",
-      "speaker": "Narrator",
-      "title": "She owns the client demo.",
-      "body": "A strong recommendation explains what the test shows and what still needs work.",
-      "cta": "Continue",
-      "ladder": [
-        {
-          "label": "Junior · You",
-          "lit": true
-        },
-        {
-          "label": "UX Designer",
-          "lit": false
-        },
-        {
-          "label": "Senior · Arjun",
-          "lit": true
-        },
-        {
-          "label": "Lead · Samira",
-          "lit": true
-        }
-      ],
-      "id": "UX1-14"
-    },
-    {
-      "kind": "choice",
-      "layout": "document",
-      "speaker": "Samira",
-      "question": "Which line needs to change before the client review?",
-      "choices": [
-        {
-          "id": "a",
-          "label": "One person finished, so every runner will succeed.",
-          "tier": "best",
-          "why": "One test does not prove the design works for everyone."
-        },
-        {
-          "id": "b",
-          "label": "Eleanor finished after Reserve moved up.",
-          "tier": "wrong",
-          "why": "That matches the recorded test."
-        },
-        {
-          "id": "c",
-          "label": "We still need to test with a keyboard.",
-          "tier": "wrong",
-          "why": "That states an open check honestly."
-        }
-      ],
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "doc": "VELO · test summary",
-      "artifact": {
-        "id": "ux-test-result",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Test notes · draft B",
-        "caption": "One participant, not every runner.",
-        "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
-        "entries": [
-          {
-            "label": "Task",
-            "text": "Reserve size 8."
-          },
-          {
-            "label": "Observed",
-            "text": "Eleanor finished the task."
-          },
-          {
-            "label": "Still open",
-            "text": "Keyboard-only test."
-          }
-        ]
-      },
-      "id": "UX1-15",
-      "progress": 0.5714285714285714,
-      "skills": [
-        "Decision-Making",
-        "Critical Thinking"
-      ],
-      "planLineIfFailed": "you made a choice before checking the evidence"
-    },
-    {
-      "kind": "card",
-      "variant": "act",
-      "speaker": "System",
-      "title": "",
-      "body": "",
-      "cta": "Continue",
-      "review": {
-        "threshold": 68,
-        "intro": {
-          "kicker": "Mid-project review",
-          "line": "Arjun and Samira check your progress."
-        },
-        "progressLine": "Reviewing your work...",
-        "pass": {
-          "title": "You are on track.",
-          "note": "First checkpoint complete.",
-          "body": "The client review is still ahead."
-        },
-        "fail": {
-          "title": "You can still turn this around.",
-          "body": "Use the feedback in the second half."
-        }
-      },
-      "id": "UX1-MID"
-    },
-    {
-      "kind": "card",
-      "variant": "act",
-      "speaker": "System",
-      "title": "The final stretch.",
-      "body": "Client demo · 4 p.m.",
-      "cta": "Continue",
-      "id": "UX1-ACT2"
-    },
-    {
-      "kind": "card",
-      "variant": "character",
-      "speaker": "Noah",
-      "title": "Noah wants the lead.",
-      "body": "He wants to present the final design. You both need the team’s work to hold up.",
-      "cta": "Continue",
-      "castMember": "Noah",
-      "id": "UX1-18"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "A claim gets ahead of the evidence.",
-      "body": "Noah tells Samira the new screen is ready for everyone. The keyboard check has not happened yet.",
-      "cta": "Continue",
-      "castMember": "Noah",
-      "id": "UX1-19"
-    },
-    {
-      "kind": "choice",
-      "layout": "options",
-      "speaker": "Narrator",
-      "question": "What do you do about Noah’s claim?",
-      "choices": [
-        {
-          "id": "a",
-          "label": "Show Arjun the test notes and open check privately.",
-          "tier": "best",
-          "why": "You correct the record with evidence and keep the team focused."
-        },
-        {
-          "id": "b",
-          "label": "Call Noah a liar in front of the client.",
-          "tier": "wrong",
-          "why": "An argument will not resolve the missing test."
-        },
-        {
-          "id": "c",
-          "label": "Say nothing so the demo goes smoothly.",
-          "tier": "wrong",
-          "why": "The team may present a claim it cannot support."
-        }
-      ],
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "pivotal": true,
-      "id": "UX1-20",
-      "progress": 0.7142857142857143,
-      "skills": [
-        "Decision-Making",
-        "Critical Thinking"
-      ],
-      "planLineIfFailed": "you made a choice before checking the evidence"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "3 p.m. A blocker appears.",
-      "body": "Amina finds that keyboard users cannot reach Reserve. The demo is in one hour.",
-      "cta": "Continue",
-      "artifact": {
-        "id": "ux-release-check",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Amina · 3 p.m. check",
-        "caption": "Known blocker before the fix.",
-        "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
-        "entries": [
-          {
-            "label": "Input",
-            "text": "Keyboard only"
-          },
-          {
-            "label": "Blocker",
-            "text": "Reserve cannot be reached."
-          },
-          {
-            "label": "Impact",
-            "text": "Reservation stops."
-          }
-        ]
-      },
-      "id": "UX1-21"
-    },
-    {
-      "kind": "choice",
-      "layout": "chat",
-      "speaker": "Arjun",
-      "question": "What do you message Arjun?",
-      "choices": [
-        {
-          "id": "a",
-          "label": "Keyboard users are blocked. Can we fix and retest Reserve first?",
-          "tier": "best",
-          "why": "You name the impact and ask for a clear priority before the deadline."
-        },
-        {
-          "id": "b",
-          "label": "I’ll polish the animation before I mention it.",
-          "tier": "wrong",
-          "why": "The main task is still blocked. Report that first."
-        },
-        {
-          "id": "c",
-          "label": "I’ll tell the client testing is complete.",
-          "tier": "wrong",
-          "why": "That would hide a known problem."
-        }
-      ],
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "chatWith": {
-        "name": "Arjun",
-        "role": "Senior UX Designer"
-      },
-      "id": "UX1-22",
-      "progress": 0.8571428571428571,
-      "skills": [
-        "Decision-Making",
-        "Critical Thinking"
-      ],
-      "planLineIfFailed": "you made a choice before checking the evidence"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "3:30 p.m. The fix is in.",
-      "body": "Amina retests with a keyboard and reserves a pair. Samira can show that tested route.",
-      "cta": "Continue",
-      "artifact": {
-        "id": "ux-fixed",
-        "kind": "notes",
-        "layout": "handover",
-        "title": "Amina · 3:30 p.m. retest",
-        "caption": "The authored fix has been retested on this route only.",
-        "provenance": "Fictional VELO sportswear launch. Authored test notes, not a real study.",
-        "entries": [
-          {
-            "label": "Input",
-            "text": "Keyboard only"
-          },
-          {
-            "label": "Result",
-            "text": "Reached Reserve. Finished task."
-          },
-          {
-            "label": "Next",
-            "text": "Test with more runners."
-          }
-        ]
-      },
-      "id": "UX1-23"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "A teammate needs a hand.",
-      "body": "Amina must send the test notes in ten minutes. Your handoff is not due until tomorrow.",
-      "cta": "Continue",
-      "castMember": "Amina",
-      "id": "UX1-24"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "Help without making a new claim.",
-      "body": "She needs the actual result and the next check, not a longer report.",
-      "cta": "Continue",
-      "id": "UX1-25"
-    },
-    {
-      "kind": "rank",
-      "speaker": "Narrator",
-      "question": "Rank your next steps, best to worst.",
-      "order": [
-        "Offer to check the notes with Amina.",
-        "Wish her luck and return to your draft.",
-        "Send untested claims to make the report look complete."
-      ],
-      "whenRight": "You had time to help. Checking the notes protects the whole team.",
-      "whenWrong": "Help with the real task first. Never fill a report with claims you did not test.",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": [
-        "Teamwork & Collaboration",
-        "Critical Thinking"
-      ],
-      "id": "UX1-26",
-      "progress": 1,
-      "planLineIfFailed": "you made a choice before checking the evidence"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "Arjun notices the teamwork.",
-      "body": "Your choices shape whether people can trust your work.",
-      "cta": "Continue",
-      "castMember": "Arjun",
-      "id": "UX1-27"
-    },
-    {
-      "kind": "card",
-      "variant": "chapter",
-      "speaker": "Narrator",
-      "title": "The client demo begins.",
-      "body": "Your part is done. The team now reviews your decisions.",
-      "cta": "Begin Final Review",
-      "id": "UX1-28"
-    },
-    {
-      "kind": "review",
-      "speaker": "System",
-      "title": "The team reviews your launch work.",
-      "body": "Your reputation decides the result.",
-      "deciding": "Reviewing your decisions...",
-      "decidingNote": "Arjun and Samira check your work and teamwork.",
-      "id": "UX1-REVIEW"
-    }
-  ],
   "endings": [
     {
       "min": 85,
-      "headline": "Launch team trusted",
+      "headline": "A set worth saving",
       "scoreNote": "Your project passes.",
-      "message": "You used evidence, raised the blocker and helped the team deliver.",
+      "message": "You helped the team make a clearer design.",
       "subline": "Level 1 complete. Later projects are not built yet.",
       "primary": "Play the project again",
       "advances": true
@@ -807,7 +98,7 @@
       "min": 40,
       "headline": "Revise and retry",
       "scoreNote": "The project needs another pass.",
-      "message": "Review the choices you missed. Use evidence before making a claim.",
+      "message": "Use the feedback to improve your next attempt.",
       "subline": "You can try again.",
       "primary": "Try again",
       "advances": false
@@ -816,7 +107,7 @@
       "min": 0,
       "headline": "This attempt ends here",
       "scoreNote": "Restart the project.",
-      "message": "The team cannot rely on this work yet. Use the feedback and start fresh.",
+      "message": "Take a fresh run and use what you learned.",
       "subline": "One attempt does not define your future.",
       "primary": "Start again",
       "advances": false
@@ -824,7 +115,406 @@
   ],
   "points": 6,
   "noStrikes": true,
-  "generationTemplate": "ib-l1-2026-10-21",
   "qaSkip": true,
-  "scoreTip": "Start at 50. Each scored decision adds or removes 6. Reach 85 to pass."
+  "scoreTip": "Start at 50. Each scored decision adds or removes 6. Reach 85 to pass.",
+  "generationTemplate": "ib-narrative-v2",
+  "beats": [
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Your first day.",
+      "body": "Arjun, your mentor, welcomes you to Northline’s music-app design team.",
+      "cta": "Continue",
+      "id": "UX1-01"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "The festival is tonight.",
+      "body": "AMPLIFY needs fans to save a set before losing cell service. Your test could prevent a messy launch.",
+      "cta": "Continue",
+      "id": "UX1-02",
+      "artifact": "__ART_app"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Samira leads the review.",
+      "body": "Samira leads the client demo. Your findings will shape what the team presents.",
+      "cta": "Continue",
+      "id": "UX1-04"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "You have a team.",
+      "body": "Noah builds the prototype. Amina checks access. Your research guides their next change.",
+      "cta": "Continue",
+      "id": "UX1-05"
+    },
+    {
+      "kind": "choice",
+      "speaker": "Narrator",
+      "layout": "options",
+      "question": "Fans need music without service. What should you watch them try?",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Save a set, then open it offline.",
+          "tier": "best",
+          "why": "That task tests the actual need."
+        },
+        {
+          "id": "b",
+          "label": "Choose a favorite album cover.",
+          "tier": "wrong",
+          "why": "A cover preference does not test offline listening."
+        },
+        {
+          "id": "c",
+          "label": "Rate the app’s colors.",
+          "tier": "wrong",
+          "why": "Color ratings do not test the task."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Decision-Making"
+      ],
+      "id": "UX1-06",
+      "progress": 0.14285714285714285,
+      "planLineIfFailed": "you made a claim before checking what happened",
+      "prompt": ""
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Arjun",
+      "title": "Start with a sketch.",
+      "body": "A wireframe is a rough layout. A prototype is a version people can try.",
+      "cta": "Continue",
+      "id": "UX1-07",
+      "artifact": "__ART_wireframe"
+    },
+    {
+      "kind": "pick",
+      "speaker": "Narrator",
+      "question": "Choose two things to record during an offline-save test.",
+      "whenRight": "Actions and results show whether the task works.",
+      "whenWrong": "Record what happened during the task, not guesses or preferences.",
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Problem-Solving"
+      ],
+      "pick": 2,
+      "cards": [
+        {
+          "label": "Where the fan taps.",
+          "role": "pick"
+        },
+        {
+          "label": "Whether the set opens offline.",
+          "role": "pick"
+        },
+        {
+          "label": "Your guess about their age.",
+          "role": "leave"
+        },
+        {
+          "label": "Which color you like.",
+          "role": "leave"
+        }
+      ],
+      "id": "UX1-09",
+      "progress": 0.2857142857142857,
+      "planLineIfFailed": "you made a claim before checking what happened",
+      "prompt": ""
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Eleanor misses the control.",
+      "body": "The fan taps the cover twice. “Where do I save this?” The Save control sits below a long description.",
+      "cta": "Continue",
+      "id": "UX1-10",
+      "artifact": "__ART_app"
+    },
+    {
+      "kind": "choice",
+      "speaker": "Narrator",
+      "layout": "options",
+      "question": "Save sits below a long description. Which change should you test first?",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Move Save beside the set title.",
+          "tier": "best",
+          "why": "One clear change tests whether people can find it."
+        },
+        {
+          "id": "b",
+          "label": "Change every label and color.",
+          "tier": "wrong",
+          "why": "Many changes make the result harder to explain."
+        },
+        {
+          "id": "c",
+          "label": "Remove offline saving.",
+          "tier": "wrong",
+          "why": "That removes the feature fans need."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Decision-Making"
+      ],
+      "id": "UX1-11",
+      "progress": 0.42857142857142855,
+      "planLineIfFailed": "you made a claim before checking what happened",
+      "prompt": ""
+    },
+    {
+      "kind": "card",
+      "variant": "character",
+      "speaker": "Samira",
+      "title": "The design lead joins.",
+      "body": "Samira wants your finding, not a long report.",
+      "cta": "Continue",
+      "castMember": "Samira",
+      "id": "UX1-12"
+    },
+    {
+      "kind": "flags",
+      "speaker": "Narrator",
+      "question": "Two fans finished the test. Flag both claims that go beyond that result.",
+      "whenRight": "Keep the finding as narrow as the evidence.",
+      "whenWrong": "Flag the claims about every fan and never failing.",
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Problem-Solving"
+      ],
+      "rows": [
+        {
+          "label": "Both fans saved the set.",
+          "flag": false,
+          "why": "That describes the observed result."
+        },
+        {
+          "label": "Every fan will find Save.",
+          "flag": true,
+          "why": "Two people cannot represent every fan."
+        },
+        {
+          "label": "The app never fails offline.",
+          "flag": true,
+          "why": "This test did not cover every offline situation."
+        }
+      ],
+      "id": "UX1-15",
+      "progress": 0.5714285714285714,
+      "planLineIfFailed": "you made a claim before checking what happened",
+      "prompt": ""
+    },
+    {
+      "kind": "card",
+      "variant": "act",
+      "speaker": "System",
+      "title": "Checkpoint reached.",
+      "body": "",
+      "cta": "Continue",
+      "review": {
+        "threshold": 68,
+        "intro": {
+          "kicker": "MID-PROJECT REVIEW",
+          "line": "Arjun and Samira check your work."
+        },
+        "progressLine": "Checking your decisions...",
+        "pass": {
+          "title": "A strong first pass.",
+          "body": "Keep going. The next task is ready."
+        },
+        "fail": {
+          "title": "You can recover.",
+          "body": "Use the feedback on your next task."
+        }
+      },
+      "id": "UX1-MID"
+    },
+    {
+      "kind": "card",
+      "variant": "act",
+      "speaker": "System",
+      "title": "A new snag.",
+      "body": "The button is easier to find. Now Amina checks whether everyone can reach it.",
+      "cta": "Continue",
+      "id": "UX1-ACT2"
+    },
+    {
+      "kind": "choice",
+      "speaker": "Narrator",
+      "layout": "chat",
+      "question": "Tab reaches Save, but the selected control is invisible. What should the team change?",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Add a clear focus outline.",
+          "tier": "best",
+          "why": "A visible focus mark shows the selected control."
+        },
+        {
+          "id": "b",
+          "label": "Require everyone to use a mouse.",
+          "tier": "wrong",
+          "why": "Some people cannot use a mouse."
+        },
+        {
+          "id": "c",
+          "label": "Hide the Save button.",
+          "tier": "wrong",
+          "why": "Hiding it makes the task harder."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Decision-Making"
+      ],
+      "id": "UX1-20",
+      "progress": 0.7142857142857143,
+      "planLineIfFailed": "you made a claim before checking what happened",
+      "prompt": ""
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Noah asks for help.",
+      "body": "“How do we check the fix before the festival team sees it?”",
+      "cta": "Continue",
+      "id": "UX1-21",
+      "artifact": "__ART_message"
+    },
+    {
+      "kind": "choice",
+      "layout": "options",
+      "speaker": "Narrator",
+      "id": "UX1-22",
+      "progress": 0.8571428571428571,
+      "question": "Noah uses only a keyboard. How should he check the new focus outline?",
+      "prompt": "",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Press Tab and watch which control is selected.",
+          "tier": "best",
+          "why": "The outline should show where keyboard focus is."
+        },
+        {
+          "id": "b",
+          "label": "Only move the mouse over the button.",
+          "tier": "wrong",
+          "why": "A mouse check does not test keyboard focus."
+        },
+        {
+          "id": "c",
+          "label": "Ask whether the colors look stylish.",
+          "tier": "wrong",
+          "why": "Style alone does not show whether the control is usable."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Problem-Solving"
+      ],
+      "planLineIfFailed": "you skipped the keyboard check"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "The check is complete.",
+      "body": "Amina confirms the focus stays visible. Noah adds the change to the demo.",
+      "cta": "Continue",
+      "id": "UX1-23"
+    },
+    {
+      "kind": "choice",
+      "layout": "boss",
+      "speaker": "Narrator",
+      "id": "UX1-26",
+      "progress": 1,
+      "question": "What should you tell the client about two fans completing the task?",
+      "prompt": "",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Both finished. Next, test with more fans.",
+          "tier": "best",
+          "why": "State the result and the next check without overclaiming."
+        },
+        {
+          "id": "b",
+          "label": "The design works for every fan.",
+          "tier": "wrong",
+          "why": "Two tests cannot show what every fan will do."
+        },
+        {
+          "id": "c",
+          "label": "There is nothing left to improve.",
+          "tier": "wrong",
+          "why": "A useful result still needs further checks."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Verbal Communication",
+        "Critical Thinking"
+      ],
+      "planLineIfFailed": "you made a claim beyond the test"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "A place on the team.",
+      "body": "Arjun thanks you for making the work clearer for everyone.",
+      "cta": "Continue",
+      "id": "UX1-27"
+    },
+    {
+      "kind": "card",
+      "variant": "chapter",
+      "speaker": "Narrator",
+      "title": "The music is about to start.",
+      "body": "Your test notes are in the demo. See how your decisions held up.",
+      "cta": "See my result",
+      "id": "UX1-28"
+    },
+    {
+      "kind": "review",
+      "speaker": "System",
+      "title": "Your first design project.",
+      "body": "See the result of your seven decisions.",
+      "deciding": "Reviewing your work...",
+      "decidingNote": "The team checks your design decisions.",
+      "id": "UX1-REVIEW"
+    }
+  ]
 }

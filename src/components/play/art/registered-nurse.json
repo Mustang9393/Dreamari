@@ -1,258 +1,396 @@
 {
-  "$schema": "./career-art.schema.json",
   "career": "registered-nurse",
   "folder": "rn",
-  "spriteStandard": "full-figure-1024x2048",
+  "spriteStandard": "full-scene",
   "notes": [
-    "Full-figure 1024x2048 sprites (the standard). Slots run past full height on purpose: heightFrac 1.75 puts head-to-hips across the frame like the IB treatment, face in the upper third, legs cropped behind the dialogue box. baselineY = heightFrac + 0.03 keeps the canvas's transparent top margin above the frame so no head crops."
+    "One complete opaque painting per RN1 beat. No runtime people or arms.",
+    "rebuild-2026-10-21 is the timeline/identity repair; rejected revision-2026-10-21 is never routed."
   ],
   "locations": {
-    "riverbend-lobby": {
-      "src": "/images/play/rn/locations/lobby.jpg",
-      "alt": "Riverbend Medical Center's main lobby, morning light across the marble floor.",
-      "focal": {
-        "x": 0.45,
-        "y": 0.45
-      },
-      "mobileFocal": {
-        "x": 0.4,
-        "y": 0.4
-      },
-      "characterAnchor": {
-        "x": 0.62,
-        "baselineY": 1.78,
-        "heightFrac": 1.75
-      },
-      "locked": true,
-      "role": "arrival"
-    },
-    "riverbend-station": {
-      "src": "/images/play/rn/locations/station.jpg",
-      "alt": "The Four West nurses' station, monitors lit, the corridor stretching away.",
-      "focal": {
-        "x": 0.42,
-        "y": 0.45
-      },
-      "mobileFocal": {
-        "x": 0.38,
-        "y": 0.42
-      },
-      "characterAnchor": {
-        "x": 0.68,
-        "baselineY": 1.78,
-        "heightFrac": 1.75
-      },
-      "locked": true,
-      "role": "work-floor"
-    },
-    "riverbend-patient-room": {
-      "src": "/images/play/rn/locations/patient-room.jpg",
-      "alt": "A patient room on Four West, monitors beside the bed, the city through the window.",
-      "focal": {
-        "x": 0.6,
-        "y": 0.5
-      },
-      "mobileFocal": {
-        "x": 0.65,
-        "y": 0.45
-      },
-      "characterAnchor": {
-        "x": 0.24,
-        "baselineY": 1.78,
-        "heightFrac": 1.75
-      },
-      "note": "The open floor left of the bed, never over the bed.",
-      "locked": true,
-      "role": "specialist"
-    },
-    "riverbend-corridor": {
-      "src": "/images/play/rn/locations/corridor.jpg",
-      "alt": "The Four West corridor, numbered patient doors and warm light down its length.",
+    "rn-rebuild-RN1-01": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-01.png",
+      "alt": "Wide arrival from the entrance; reception on right, lake through left windows",
       "focal": {
         "x": 0.5,
-        "y": 0.45
+        "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.45,
-        "y": 0.42
+        "x": 0.5,
+        "y": 0.3
       },
-      "characterAnchor": {
-        "x": 0.55,
-        "baselineY": 1.78,
-        "heightFrac": 1.75
-      },
-      "locked": true,
-      "role": "transition"
+      "locked": true
     },
-    "riverbend-staff-room": {
-      "src": "/images/play/rn/locations/staff-room.jpg",
-      "alt": "The staff room at Riverbend, coffee shelves and the city beyond the glass.",
+    "rn-rebuild-RN1-02": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-02.png",
+      "alt": "Oblique view along the workstation, with the lake on left; no centered counter portrait",
       "focal": {
         "x": 0.5,
-        "y": 0.45
+        "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.45,
-        "y": 0.42
-      },
-      "characterAnchor": {
-        "x": 0.64,
-        "baselineY": 1.78,
-        "heightFrac": 1.75
-      },
-      "locked": true,
-      "role": "break"
-    },
-    "riverbend-ward-night": {
-      "src": "/images/play/rn/locations/ward-night.jpg",
-      "alt": "The ward at night, monitors glowing against the city lights.",
-      "focal": {
-        "x": 0.4,
-        "y": 0.45
-      },
-      "mobileFocal": {
-        "x": 0.35,
-        "y": 0.42
-      },
-      "characterAnchor": {
-        "x": 0.72,
-        "baselineY": 1.78,
-        "heightFrac": 1.75
-      },
-      "note": "The clear aisle right of the bed and cart.",
-      "locked": true,
-      "role": "work-floor-night"
-    },
-    "riverbend-station-night": {
-      "src": "/images/play/rn/locations/riverbend-station-night.webp",
-      "alt": "The Four West nurses' station at night, one nurse charting at the lit desk, the city dark outside.",
-      "focal": {
-        "x": 1,
-        "y": 0.5255
-      },
-      "mobileFocal": {
-        "x": 0.588,
-        "y": 0.4855
-      },
-      "characterAnchor": {
         "x": 0.5,
-        "baselineY": 1.78,
-        "heightFrac": 1.75
+        "y": 0.3
       },
-      "role": "work-floor-night"
+      "locked": true
+    },
+    "rn-rebuild-RN1-03": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-03.png",
+      "alt": "Walk toward the lake-end window; doors on right, no sunlight through closed doors",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-04": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-04.png",
+      "alt": "Rosa walking beside player, full standing figure, turns toward camera with a calm smile",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-05": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-05.png",
+      "alt": "Angled handover table; Rosa beside Sofia, Sofia holds a chart toward Rosa, player has no visible body",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-06": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-06.png",
+      "alt": "Rosa standing beside a wall screen, relaxed upright head, open palm toward screen",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-07": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-07.png",
+      "alt": "Foot-of-bed medium-wide; Rosa at bedside talking to patient, not facing player during observed conversation",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-08": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-08.png",
+      "alt": "Side of bed with Rosa standing fully visible near bedside cabinet, holding scanner close to torso with bent elbow",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-09": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-09.png",
+      "alt": "Patient seated in bed left and Rosa standing right, angled toward patient; patient looks at player",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-10": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-10.png",
+      "alt": "Rosa seated in side workstation alcove, screen below shoulder, lake still left, thoughtful expression",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-11": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-11.png",
+      "alt": "From station open end, Rosa sets a closed chart on work surface, three-quarter standing view",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-12": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-12.png",
+      "alt": "Rosa pauses by a closed patient door, one hand near torso, attentive listening posture; soft ceiling light only",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-13": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-13.png",
+      "alt": "Wider view from opposite corridor end, Rosa stands on left looking directly at player, serious but calm",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-14": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-14.png",
+      "alt": "Rosa beside a screen at station far end, neutral head upright; view toward lake through left window",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-15": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-15.png",
+      "alt": "Rosa pulling a chair beside player\u2019s empty chair, hand naturally on chair back, encouraging expression",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-16": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-16.png",
+      "alt": "Rosa seated sideways at lounge table, turns toward player, pleasant small smile, lake through left window",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-17": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-17.png",
+      "alt": "Rosa walking away from station toward patient rooms, looking back toward player, tablet at her side",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-18": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-18.png",
+      "alt": "Denise standing at a wall screen, body angled to screen and eyes toward camera, composed expression",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-19": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-19.png",
+      "alt": "Two nurses at diagonal handover table; Rosa gives chart to Denise with normal bent arms; both faces visible",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-20": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-20.png",
+      "alt": "Denise seated at side desk with closed chart on table, serious attentive eye contact",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-21": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-21.png",
+      "alt": "Small standing huddle angled around end of table, Tyler upright and self-assured, Rosa attentive, player no surrogate",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-22": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-22.png",
+      "alt": "Tyler near huddle-room doorway at a natural angle, shoulders relaxed, uncertain expression toward camera",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-23": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-23.png",
+      "alt": "Same lake-facing suite from diagonal foot of bed; patient worried and leaning slightly forward, Rosa beside bed; no foreground arms",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-24": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-24.png",
+      "alt": "Sofia at angled handover table, chart on desk and hand near pen; dim blue lake with red-roof house lights, warm task lamp",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-25": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-25.png",
+      "alt": "Rosa stands beside lake-end window, level head, gentle tired smile and folded tablet near torso, evening light",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
+    },
+    "rn-rebuild-RN1-26": {
+      "src": "/images/play/rn/rebuild-2026-10-21/RN1-26.png",
+      "alt": "Wide two-person review at angled table, calm neutral expressions, exact evening practical and blue lake lighting",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true
     }
   },
   "cast": {
     "Rosa": {
-      "default": "/images/play/rn/expressions/rosa-welcoming.webp",
-      "tiers": {
-        "best": "/images/play/rn/expressions/rosa-proud.webp",
-        "acceptable": "/images/play/rn/expressions/rosa-welcoming.webp",
-        "wrong": "/images/play/rn/expressions/rosa-concerned.webp",
-        "risky": "/images/play/rn/expressions/rosa-concerned.webp",
-        "none": "/images/play/rn/expressions/rosa-welcoming.webp"
-      },
-      "face": "/images/play/rn/face-rosa.jpg",
-      "voicePitch": 615
+      "face": "/images/play/rn/rebuild-2026-10-21/face-rosa.webp",
+      "voicePitch": 420
     },
     "Denise": {
-      "default": "/images/play/rn/expressions/denise-assessing.webp",
-      "tiers": {
-        "best": "/images/play/rn/expressions/denise-composed.webp",
-        "acceptable": "/images/play/rn/expressions/denise-composed.webp",
-        "wrong": "/images/play/rn/expressions/denise-concerned.webp",
-        "risky": "/images/play/rn/expressions/denise-concerned.webp",
-        "none": "/images/play/rn/expressions/denise-assessing.webp"
-      },
-      "face": "/images/play/rn/face-denise.jpg",
-      "voicePitch": 395
+      "face": "/images/play/rn/rebuild-2026-10-21/face-denise.webp",
+      "voicePitch": 455
     },
     "Tyler": {
-      "default": "/images/play/rn/expressions/tyler-confident.webp",
-      "tiers": {
-        "best": "/images/play/rn/expressions/tyler-confident.webp",
-        "acceptable": "/images/play/rn/expressions/tyler-focused.webp",
-        "wrong": "/images/play/rn/expressions/tyler-uncertain.webp",
-        "risky": "/images/play/rn/expressions/tyler-uncertain.webp",
-        "none": "/images/play/rn/expressions/tyler-focused.webp"
-      },
-      "face": "/images/play/rn/face-tyler.jpg",
-      "voicePitch": 505
+      "face": "/images/play/rn/rebuild-2026-10-21/face-tyler.webp",
+      "voicePitch": 490
     },
-    "Yvonne": {
-      "default": "/images/play/rn/expressions/yvonne-composed.webp",
-      "face": "/images/play/rn/face-yvonne.jpg"
+    "Sofia": {
+      "face": "/images/play/rn/rebuild-2026-10-21/face-sofia.webp",
+      "voicePitch": 525
     }
   },
-  "portraitRatios": {
-    "/images/play/rn/expressions/rosa-welcoming.webp": 0.5,
-    "/images/play/rn/expressions/rosa-proud.webp": 0.5,
-    "/images/play/rn/expressions/rosa-concerned.webp": 0.5,
-    "/images/play/rn/expressions/denise-composed.webp": 0.5,
-    "/images/play/rn/expressions/denise-assessing.webp": 0.5,
-    "/images/play/rn/expressions/denise-concerned.webp": 0.5,
-    "/images/play/rn/expressions/tyler-confident.webp": 0.5,
-    "/images/play/rn/expressions/tyler-focused.webp": 0.5,
-    "/images/play/rn/expressions/tyler-uncertain.webp": 0.5,
-    "/images/play/rn/expressions/yvonne-composed.webp": 0.5
-  },
+  "portraitRatios": {},
   "beatLocations": {
-    "RN1-01": "riverbend-corridor",
-    "RN1-02": "riverbend-corridor",
-    "RN1-03": "riverbend-corridor",
-    "RN1-04": "riverbend-corridor",
-    "RN1-04b": "riverbend-corridor",
-    "RN1-05": "riverbend-corridor",
-    "RN1-06": "riverbend-station",
-    "RN1-07": "riverbend-station",
-    "RN1-08": "riverbend-station",
-    "RN1-09": "riverbend-station",
-    "RN1-10": "riverbend-station",
-    "RN1-11": "riverbend-station",
-    "RN1-12": "riverbend-staff-room",
-    "RN1-13": "riverbend-staff-room",
-    "RN1-14": "riverbend-staff-room",
-    "RN1-15": "riverbend-corridor",
-    "RN1-16": "riverbend-station",
-    "RN1-17": "riverbend-station",
-    "RN1-18": "riverbend-station",
-    "RN1-19": "riverbend-station",
-    "RN1-20": "riverbend-station",
-    "RN1-21": "riverbend-station",
-    "RN1-22": "riverbend-station",
-    "RN1-23": "riverbend-patient-room",
-    "RN1-24": "riverbend-ward-night",
-    "RN1-25": "riverbend-ward-night",
-    "RN2-01": "riverbend-lobby",
-    "RN2-02": "riverbend-station",
-    "RN2-03": "riverbend-corridor",
-    "RN2-04": "riverbend-station",
-    "RN2-05": "riverbend-station",
-    "RN2-06": "riverbend-station",
-    "RN2-07": "riverbend-station",
-    "RN2-08": "riverbend-station",
-    "RN2-10": "riverbend-station",
-    "RN2-11": "riverbend-station",
-    "RN2-15": "riverbend-station",
-    "RN2-17": "riverbend-station",
-    "RN2-18": "riverbend-station",
-    "RN2-26": "riverbend-corridor",
-    "RN2-28": "riverbend-staff-room",
-    "RN2-29": "riverbend-station",
-    "RN2-30": "riverbend-station",
-    "RN2-32": "riverbend-station",
-    "RN2-33": "riverbend-station",
-    "RN2-35": "riverbend-station",
-    "RN2-36": "riverbend-station",
-    "RN2-37": "riverbend-station",
-    "RN2-38": "riverbend-station",
-    "RN2-40": "riverbend-station",
-    "RN2-41": "riverbend-station",
-    "RN2-47": "riverbend-station",
-    "RN2-48": "riverbend-station",
-    "RN2-50": "riverbend-station-night",
-    "RN2-51": "riverbend-station-night",
-    "RN2-53": "riverbend-station",
-    "RN2-54": "riverbend-station-night"
+    "RN1-01": "rn-rebuild-RN1-01",
+    "RN1-02": "rn-rebuild-RN1-02",
+    "RN1-03": "rn-rebuild-RN1-03",
+    "RN1-04": "rn-rebuild-RN1-04",
+    "RN1-05": "rn-rebuild-RN1-05",
+    "RN1-06": "rn-rebuild-RN1-06",
+    "RN1-07": "rn-rebuild-RN1-07",
+    "RN1-08": "rn-rebuild-RN1-08",
+    "RN1-09": "rn-rebuild-RN1-09",
+    "RN1-10": "rn-rebuild-RN1-10",
+    "RN1-11": "rn-rebuild-RN1-11",
+    "RN1-12": "rn-rebuild-RN1-12",
+    "RN1-13": "rn-rebuild-RN1-13",
+    "RN1-14": "rn-rebuild-RN1-14",
+    "RN1-15": "rn-rebuild-RN1-15",
+    "RN1-16": "rn-rebuild-RN1-16",
+    "RN1-17": "rn-rebuild-RN1-17",
+    "RN1-18": "rn-rebuild-RN1-18",
+    "RN1-19": "rn-rebuild-RN1-19",
+    "RN1-20": "rn-rebuild-RN1-20",
+    "RN1-21": "rn-rebuild-RN1-21",
+    "RN1-22": "rn-rebuild-RN1-22",
+    "RN1-23": "rn-rebuild-RN1-23",
+    "RN1-24": "rn-rebuild-RN1-24",
+    "RN1-25": "rn-rebuild-RN1-25",
+    "RN1-26": "rn-rebuild-RN1-26"
   }
 }

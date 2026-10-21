@@ -1,0 +1,213 @@
+{
+  "status": "QA release",
+  "generation": "built-in image_gen",
+  "rejectedRNRevision": "revision-2026-10-21 not routed",
+  "identityChanges": "One final canonical update: simpler blonde hair, slightly deeper warm brown cast, age cues for Sofia/Eleanor; references supplied during edits",
+  "files": [
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-14.png",
+      "sha256": "bdc469cc4732564876c5608f94c9f0648e1fdb0e1f740956ba3ae44d5a6d1ac7",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-15.png",
+      "sha256": "51c009a375122050993070f52f70335a39335def94f4bd8142b9949f9d64ff1c",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-01.png",
+      "sha256": "5109998af1ab94ebef311a6a497ffaf837a0a9e82ded15f23d3bf658b8136175",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-17.png",
+      "sha256": "a2116ba893f873656636b7164683fe1b9ea7ba4b74970798187f9c490bac209f",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-03.png",
+      "sha256": "8edb67f3105aec19abea1274d39978495954dd58fb78ca6347a6f44265acdfdc",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-02.png",
+      "sha256": "e304552acd974133156a295eb18a4830311181cdeb778d587d574aa9ff79a027",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-16.png",
+      "sha256": "4583b67f41209876d3da56236c9e993a18375b65c63d559e77ab3a2f03bbd73c",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-12.png",
+      "sha256": "a5cb85f795c71ced344db9f1aea2a2dbfd37338ef6971ddcb6765705d4f34930",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-06.png",
+      "sha256": "09166c7f6724a5d7017f8ae66e0b78b840086f6b99cebd17991d1431cfd0dcdf",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-07.png",
+      "sha256": "53a063b07ae044cfdfecdd8b6b4d099cf2a1368f7a5e10775eb2d96971a05eb3",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-13.png",
+      "sha256": "fa4c41e338e75676fa7055a7c1ef27c616070eebf8112abf0965409e3bde0d07",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-05.png",
+      "sha256": "4032a63039135ac3e01d9897527972d980a2c8bc1c83a278f6b7dd5fc4d7426a",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-11.png",
+      "sha256": "cc487a361b4a726b937c62b1777ae27596daa08f3354a79a64ac592225d3006d",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-10.png",
+      "sha256": "9dad403fc0a97acea4ca8f0f1d4f4b183485d9cb676bcf834e85c7fd9f75fc7d",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-04.png",
+      "sha256": "b8a120771a669d7eea116b413a8cfc7440578dd7aafca1cbc7db72ed2282d164",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-21.png",
+      "sha256": "de5a69a2c9d32704ae2aff878cd5b9af6cb8d763d29a36861037793d25cbce8c",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-09.png",
+      "sha256": "4c7c1cdb4a95f78fa4b48a315c27d6fa97c926462697f2858e9eb889b8c00b89",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-08.png",
+      "sha256": "c1ae51a8f498c982d527d03213b6eba7e7337db012c4563eba66968f08d4d360",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-20.png",
+      "sha256": "dfca2d82646f1abd728fc0b435c5fd5929e3357500630be02437e60315927d84",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-22.png",
+      "sha256": "ff421be48f456d0520067eecfa8165ed28d76768635379093856bc8f0ddc17a8",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-23.png",
+      "sha256": "33e131263b229a5acd595f6989fb10cc1d72a614da93f68731f0301862385a21",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-26.png",
+      "sha256": "500463be2372409267218f07174b7287334a489ec92d15bc16bf7fd0ac51a02f",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-18.png",
+      "sha256": "5be0422968d83cd47a0c261c6939119facb010aad140d7c287b3efeaa0e50d07",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-24.png",
+      "sha256": "cafebbfaaee2f10f8d52bfd405fc5c7c460ea214166a4df3a8d88231d82c03c9",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-25.png",
+      "sha256": "c723dcbd9af33e14768c5858cc90377bc239375306c83a7c8e2553a0a8531d9a",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/rn/rebuild-2026-10-21/RN1-19.png",
+      "sha256": "4a3242394d7d588ec21c366d20e7c23b32314503ce82ceaaf1d3a7973e10ccd3",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/ux/v7/team.png",
+      "sha256": "6149f0b0362d48dcb34070a26adc03976476f973ebd8f80a3febe1eb97e66033",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/ux/v7/access.png",
+      "sha256": "b902356dd9178cd1c70689f2f257204adc4ea99cce813346b7032750b78f4187",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/ux/v7/work.png",
+      "sha256": "0760c2841cf2eeef642ae16f79abfe058f96a321c0c303d3ddf358cce526183c",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/ux/v7/collab.png",
+      "sha256": "18ec474b82aab29c7144d71046aca19e0b55ed8e22bb0ecd485482763c1bd3bb",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/ux/v7/review.png",
+      "sha256": "d26c68216dd6f2d0ea08b888193a4110eb0ca45ef93a7c2889bf4289ec6611d4",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/ux/v7/arrival.png",
+      "sha256": "c4953da47c90f590c488353d51938fdeea4efadcdcc19a4c8d99decd1d15174e",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/ux/v7/test.png",
+      "sha256": "f342a9bfcc68295c4e9bb4aec683e4da1bd2af772756141209fdc7c4f943221f",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/ux/v7/closing.png",
+      "sha256": "0fe1ad9a05490b90f017170df5a6aca29f40258dbf1307796f067973e3bd5f57",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/fs/v7/team.png",
+      "sha256": "2591f2fdaf95b1469a8a7ba02f0f05415cd5776980e94840a288fdaf26bb2088",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/fs/v7/work.png",
+      "sha256": "db1f76c73bd85af602ac735a7f92b93b94de36eaeb3dd58973ab2ddac08ec30e",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/fs/v7/collab.png",
+      "sha256": "1fc1677f7ba80299652d7552caec8e82ffa3f98487e63492121a9ca160197de9",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/fs/v7/records.png",
+      "sha256": "1a37f403ec1dc1f01d8a2db8ce7cf29f8c75dba2e278ac733b6d165243876af7",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/fs/v7/review.png",
+      "sha256": "ae50b325bd640847099d39a37f368721e4f147ff9f1da6b1b5bf07b52ac6c356",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/fs/v7/arrival.png",
+      "sha256": "809a760d66927b8fdb147365cbd25022810be99e2c813e15a219713832cff776",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    },
+    {
+      "file": "/images/play/fs/v7/closing.png",
+      "sha256": "53d5dbeb99b4294b32c6f45bef5b1cd557fbdd29626059bb69f1516b546036e0",
+      "review": "AI side-by-side reference and scene-order review; human game QA remains open"
+    }
+  ]
+}

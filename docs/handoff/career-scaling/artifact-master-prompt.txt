@@ -1,14 +1,16 @@
-DREAMARI — READ-ONLY CAREER GRAPHICS
-Inputs: {CAREER}, {PROJECT}, {BEAT_ID}, {PLAYER_TASK}, {SOURCE_BACKED_WORK_RESEARCH}, {CANONICAL_DATA}, {STORY_STATE}.
+OPTIONAL NATIVE WORK GRAPHIC
 
-Design one compact relevant visual supporting this beat, or state why none is useful. The AI chooses and implements it. Humans QA the game.
+Career / beat: {CAREER, BEAT_ID}
+Project: {PROJECT}
+Work surface: {REAL APP, MESSAGE, SHORT NOTE, LABEL OR RELEVANT MONITOR}
+Purpose in the scene: {ATMOSPHERE OR CONTEXT}
+Source and limits: {PRIMARY SOURCE, FACT SUPPORTED, ROLE AUTHORITY, FICTIONAL VALUES}
+Native implementation: {SHARED RENDERER / TOKENS}
 
-Research actual professional work first with work-graphics-research-prompt.txt. Prefer a notepad, file, report, app screen, wireframe, prototype SNAPSHOT, message or relevant device readout. Keep it authentic to the profession; do not reskin the previous game. The Nursing ECG is a purposeful monitor example, not a waveform to reuse in every job.
+Create a small optional context visual for a real work surface used by an entry-level {CAREER}. It may be an app screen, rough wireframe, short message, concise notepad, sample label or relevant monitor. It adds atmosphere and context. Nursing’s ECG-like display is one career-specific example, not a template. If the visual adds no useful context, omit it.
 
-The visual is READ-ONLY. Show all necessary evidence at once. No tabs, independent clicks, typing, reset, transfers, playable prototypes, extra tasks or progress. Static app actions are visible labels within a clearly read-only preview, not buttons or focus targets. Existing game questions remain interactive through IB's shared controls. Game Continue/Submit is the only progression action.
+Use about 6–14 visible words, strong hierarchy and enough whitespace to read at game size. Avoid dense graphs, tables, paragraphs, repeated task titles, equipment drawings and long notes. Make a UX interface look like a real UI; make a wireframe visibly rough. Do not make decoration look like a live measurement.
 
-Use native readable HTML/CSS/text and canonical values, units and denominators. No raster answer text, invented metrics, traces or data. A pending test stays pending until the authored story changes. Do not highlight the correct answer before selection. No decorative vector tools, apparatus or sample-food drawings.
+The question contains every fact needed to answer. The visual is not a second task, hidden clue, answer key or evidence gate; removing it cannot change the correct answer. Do not invent clinical readings, dosages, safety thresholds, technical limits or release approval. Mark fictional training values as fictional when needed.
 
-Make it designed and engaging through hierarchy, alignment, contrast and one useful visual comparison. Normally≤60 visible words, concise labels, no long captions or prose repeated from the story. A wireframe must look rough; a prototype snapshot should look like a real interface. Charts encode actual supplied data. A brief entrance/state transition may clarify evidence, with reduced motion; no distracting loops or fake live status.
-
-Use shared tokens and reusable data-driven rendering, not career-ID branches or a second scoring engine. Save ID, beat/objective, source, canonical data path, state, visible evidence, caption/text equivalent, responsive layout and answer-key relationship. Test on phone/desktop, no independent focusable controls, no clipped labels, correct data/state, and unrelated-career fixture reuse. Deliver the implemented graphic and actual QA evidence, not a proposed mockup.
+Implement with native HTML/CSS/text, semantic tokens and a shared renderer. No embedded independent buttons, tabs, typing, reset, mandatory exploration or playable demo. Only actual game controls accept answers or advance. Do not create extra focus targets. Supply a concise text equivalent and scene mapping. Verify legibility, focus behavior and lack of duplicated copy on desktop and phone. Record the source, supported fact and limits. The final human reviews the assembled game; no intermediate approval gate.

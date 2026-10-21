@@ -63,7 +63,7 @@ if(coverage){
  const assigned=new Set();
  for(const g of coverage.groups){
   check(g.required&&g.purpose&&g.beats?.length,g.id+': incomplete required shot group');
-  check(['address-player','observe-task','npc-dialogue'].includes(g.pov)&&g.speakingTarget&&g.visibleCast?.length,g.id+': missing POV/speaking target');
+  check(['address-player','observe-task','npc-dialogue'].includes(g.pov)&&g.speakingTarget&&Array.isArray(g.visibleCast),g.id+': missing POV/speaking target');
   if(g.pov==='address-player')check(g.eyeline==='camera'&&g.speakingTarget==='player',g.id+': player dialogue must address camera');
   check(art.locations[g.scene],g.id+': missing planned scene');
   for(const beat of g.beats??[]){check(!assigned.has(beat),beat+': duplicate coverage');assigned.add(beat);check(art.beatLocations[beat]===g.scene,beat+': planned scene was substituted');}
@@ -81,12 +81,14 @@ if(coverage){
 const levels=[];
 for(const level of sim.levels){
  const scored=level.beats.filter(isScored);
- const ibTemplate=level.generationTemplate==='ib-l1-2026-10-21';
- const expected=ibTemplate?ibMaster.beats.filter(isScored).length:10;
+ const ibTemplate=['ib-l1-2026-10-21','ib-narrative-v2'].includes(level.generationTemplate);
+ const varied=level.generationTemplate==='ib-narrative-v2';
+ const expected=varied?7:ibTemplate?ibMaster.beats.filter(isScored).length:10;
  check(scored.length===expected,level.id+': scored decision count differs from template');
  if(ibTemplate){
   check(level.points===ibMaster.points&&level.noStrikes===ibMaster.noStrikes,level.id+': IB score policy drift');
-  check(JSON.stringify(level.beats.map(b=>[b.kind,Boolean(b.practice)]))===JSON.stringify(ibMaster.beats.map(b=>[b.kind,Boolean(b.practice)])),level.id+': IB slot sequence drift');
+  if(!varied)check(JSON.stringify(level.beats.map(b=>[b.kind,Boolean(b.practice)]))===JSON.stringify(ibMaster.beats.map(b=>[b.kind,Boolean(b.practice)])),level.id+': IB slot sequence drift');
+  else {check(level.beats.length>=16&&level.beats.length<=26,level.id+': narrative beat budget outside 16-26');check(new Set(scored.map(b=>b.kind)).size>=2,level.id+': insufficient task variety');check(!level.beats.some(b=>['chain','bucket','rank'].includes(b.kind)),level.id+': avoid multi-step teaching exercises in this entry chapter');}
   check(level.beats.findIndex(isScored)+1<=6,level.id+': first decision too late');
  }
  check(level.beats.at(-1)?.kind==='review',level.id+': final beat must be review');
@@ -113,6 +115,7 @@ for(const level of sim.levels){
   for(const concept of tr?.teaches??[])taught.add(concept);
   if(isScored(b)){
    n++;check(Math.abs(b.progress-n/expected)<.00001,b.id+': progress metadata');
+   check(!b.artifact,b.id+': scored decisions cannot depend on optional supporting artwork');
    check(b.skills?.length===2&&unique(b.skills)&&b.skills.every(s=>s in SKILL_MEANING),b.id+': invalid skills');
    check(Boolean(b.planLineIfFailed)&&Boolean(b.feedbackCta),b.id+': missing feedback/recovery fields');
    check((tr?.uses?.length??0)>0,b.id+': no teach/test trace');

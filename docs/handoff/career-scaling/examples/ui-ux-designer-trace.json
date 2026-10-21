@@ -8,13 +8,6 @@
     },
     {
       "beat": "UX1-02",
-      "teaches": [
-        "project goal"
-      ],
-      "uses": []
-    },
-    {
-      "beat": "UX1-03",
       "teaches": [],
       "uses": []
     },
@@ -25,71 +18,66 @@
     },
     {
       "beat": "UX1-05",
-      "teaches": [],
+      "teaches": [
+        "research guides the next team change"
+      ],
       "uses": []
     },
     {
       "beat": "UX1-06",
-      "teaches": [],
+      "teaches": [
+        "research guides the next team change"
+      ],
       "uses": [
-        "project goal"
+        "research guides the next team change"
       ]
     },
     {
       "beat": "UX1-07",
       "teaches": [
-        "work terms"
+        "a prototype is a version people can try"
       ],
       "uses": []
     },
     {
-      "beat": "UX1-08",
-      "teaches": [],
-      "uses": []
-    },
-    {
       "beat": "UX1-09",
-      "teaches": [],
+      "teaches": [
+        "a prototype is a version people can try"
+      ],
       "uses": [
-        "work terms"
+        "a prototype is a version people can try"
       ]
     },
     {
       "beat": "UX1-10",
       "teaches": [
-        "controlled comparison"
+        "observed task trouble identifies a discoverability issue"
       ],
       "uses": []
     },
     {
       "beat": "UX1-11",
-      "teaches": [],
+      "teaches": [
+        "observed task trouble identifies a discoverability issue"
+      ],
       "uses": [
-        "controlled comparison"
+        "observed task trouble identifies a discoverability issue"
       ]
     },
     {
       "beat": "UX1-12",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "UX1-13",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "UX1-14",
       "teaches": [
-        "evidence limits"
+        "client claims should match the observed sample"
       ],
       "uses": []
     },
     {
       "beat": "UX1-15",
-      "teaches": [],
+      "teaches": [
+        "client claims should match the observed sample"
+      ],
       "uses": [
-        "evidence limits"
+        "client claims should match the observed sample"
       ]
     },
     {
@@ -99,64 +87,50 @@
     },
     {
       "beat": "UX1-ACT2",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "UX1-18",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "UX1-19",
       "teaches": [
-        "team authority"
+        "keyboard focus must stay visible"
       ],
       "uses": []
     },
     {
       "beat": "UX1-20",
-      "teaches": [],
+      "teaches": [
+        "keyboard focus must stay visible"
+      ],
       "uses": [
-        "team authority"
+        "keyboard focus must stay visible"
       ]
     },
     {
       "beat": "UX1-21",
       "teaches": [
-        "report blocker early"
+        "keyboard-only testing checks focus visibility"
       ],
       "uses": []
     },
     {
       "beat": "UX1-22",
-      "teaches": [],
+      "teaches": [
+        "keyboard-only testing checks focus visibility"
+      ],
       "uses": [
-        "report blocker early"
+        "keyboard-only testing checks focus visibility"
       ]
     },
     {
       "beat": "UX1-23",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "UX1-24",
-      "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "UX1-25",
       "teaches": [
-        "team priorities"
+        "report only what the small test observed"
       ],
       "uses": []
     },
     {
       "beat": "UX1-26",
-      "teaches": [],
+      "teaches": [
+        "report only what the small test observed"
+      ],
       "uses": [
-        "team priorities"
+        "report only what the small test observed"
       ]
     },
     {
@@ -166,6 +140,11 @@
     },
     {
       "beat": "UX1-28",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "UX1-REVIEW",
       "teaches": [],
       "uses": []
     }

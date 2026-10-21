@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, ShieldAlert, CalendarDays, Check, CircleHelp, FileText, Headphones, Layers2, MapPin, MousePointer2, PanelTop, Search, TriangleAlert, Wrench } from "lucide-react";
 import type { InterfaceSpec, WorkArtifact as Artifact } from "./work-artifacts";
 import { WORLD_COLORS } from "@/components/app/worlds";
+import { SceneVignette } from "./SceneVignette";
 import { WorkScreen } from "./WorkScreen";
 import styles from "./WorkArtifact.module.css";
 
@@ -67,6 +68,7 @@ function Screen({ screen }: { screen: InterfaceSpec }) {
 /** Data-driven work evidence; visuals are distinct from the game's action controls. */
 export function WorkArtifact({ artifact:a }: { artifact: Artifact }) {
   const reduced=useReducedMotion();
+  if(a.kind==="scene-context") return <SceneVignette artifact={a}/>;
   const enter=(i=0)=>({initial:reduced?false:{opacity:0,y:7},animate:{opacity:1,y:0},transition:{duration:.28,delay:reduced?0:i*.08}});
   const Icon=a.kind==="sample-hold"?ShieldAlert:a.kind==="work-screen"||a.kind==="sample-results"?PanelTop:a.kind==="register"||a.kind==="panel-plan"||a.kind==="mixture"?FileText:a.kind==="flow"?MapPin:a.kind==="notes"?FileText:a.kind==="comparison"?Layers2:a.kind==="interface"&&a.screen.fidelity==="wireframe"?Layers2:PanelTop;
   return <motion.figure {...enter()} aria-label={a.title} className={styles.artifact} style={{"--work-accent":a.world ? WORLD_COLORS[a.world] : undefined} as CSSProperties} data-medium={a.medium} data-work-artifact={a.id} data-readonly="true">

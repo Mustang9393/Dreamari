@@ -1,0 +1,538 @@
+{
+  "id": "rn-l1",
+  "n": 1,
+  "role": "New Graduate Nurse",
+  "title": "Your First Shift",
+  "blurb": "Join the Four West team for one shift, from morning handover to evening report.",
+  "cover": "/images/play/rn/rebuild-2026-10-21/RN1-04.png",
+  "mood": "day",
+  "hideBand": true,
+  "directed": true,
+  "cinematic": true,
+  "worldTheme": true,
+  "coreKit": true,
+  "quietQuestions": true,
+  "saveSlot": 208,
+  "endings": [
+    {
+      "min": 85,
+      "headline": "A strong first shift",
+      "scoreNote": "Level 1 complete.",
+      "message": "You checked, asked and kept the team informed.",
+      "subline": "Keep building your skills. Later levels are not built yet.",
+      "primary": "Play the shift again",
+      "advances": true
+    },
+    {
+      "min": 0,
+      "headline": "Try the shift again",
+      "scoreNote": "Your shift needs another pass.",
+      "message": "Use the feedback to choose a safer next step.",
+      "subline": "One attempt does not define your future.",
+      "primary": "Try again",
+      "advances": false
+    }
+  ],
+  "points": 6,
+  "noStrikes": true,
+  "qaSkip": true,
+  "scoreTip": "Start at 50. Each scored decision adds or removes 6. Reach 85 to pass.",
+  "generationTemplate": "ib-narrative-v2",
+  "place": "Four West",
+  "cast": {
+    "Rosa": "/images/play/rn/rebuild-2026-10-21/face-rosa.webp",
+    "Denise": "/images/play/rn/rebuild-2026-10-21/face-denise.webp",
+    "Tyler": "/images/play/rn/rebuild-2026-10-21/face-tyler.webp",
+    "Sofia": "/images/play/rn/rebuild-2026-10-21/face-sofia.webp"
+  },
+  "noRepair": true,
+  "preGame": {
+    "startLabel": "Start my shift",
+    "skipLabel": "Start the story",
+    "handoffLine": "Four West · Your first shift",
+    "howToCta": "Start my shift",
+    "ladder": [
+      "New Graduate Nurse",
+      "Staff Nurse",
+      "Charge Nurse",
+      "Nurse Manager"
+    ],
+    "ladderBranches": [
+      {
+        "label": "Leadership path",
+        "roles": "Director of Nursing → Chief Nursing Officer"
+      }
+    ],
+    "ladderNote": "Titles and paths vary by employer. Later levels are planned.",
+    "skills": [
+      "Active Listening",
+      "Critical Thinking",
+      "Teamwork & Collaboration"
+    ],
+    "skillTotal": 15,
+    "lesson": {
+      "title": "What Is a Registered Nurse?",
+      "screens": [
+        {
+          "kind": "say",
+          "heading": "Care, check and communicate.",
+          "body": "Nurses check patients, give care and tell the team when something changes.",
+          "image": "/images/play/rn/rebuild-2026-10-21/RN1-04.png"
+        }
+      ]
+    }
+  },
+  "beats": [
+    {
+      "id": "RN1-01",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Welcome to Riverbend.",
+      "body": "Your first shift starts on Four West.",
+      "cta": "Continue"
+    },
+    {
+      "id": "RN1-02",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "A floor with a view.",
+      "body": "You will work beside Rosa, an experienced nurse.",
+      "cta": "Continue"
+    },
+    {
+      "id": "RN1-03",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "You are part of a team.",
+      "body": "Ask for help when you need it.",
+      "cta": "Continue"
+    },
+    {
+      "id": "RN1-04",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Meet Rosa.",
+      "body": "She will guide you and check your work today.",
+      "cta": "Continue",
+      "castMember": "Rosa"
+    },
+    {
+      "id": "RN1-05",
+      "kind": "choice",
+      "speaker": "Narrator",
+      "layout": "options",
+      "question": "Your shift is starting. What should you do first?",
+      "prompt": "",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Get an update from the night nurse.",
+          "tier": "best",
+          "why": "The handover tells you what changed and what still needs doing."
+        },
+        {
+          "id": "b",
+          "label": "Begin giving medicine alone.",
+          "tier": "wrong",
+          "why": "Get the handover and work with your supervising nurse first."
+        },
+        {
+          "id": "c",
+          "label": "Wait without speaking to anyone.",
+          "tier": "wrong",
+          "why": "Ask for the update so you can begin with the team."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Decision-Making"
+      ],
+      "planLineIfFailed": "you skipped a check or missed a chance to tell the team",
+      "progress": 0.14285714285714285
+    },
+    {
+      "id": "RN1-06",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "A useful update.",
+      "body": "You know which patients need a closer check.",
+      "cta": "Continue",
+      "castMember": "Rosa"
+    },
+    {
+      "id": "RN1-07",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "At the bedside.",
+      "body": "Rosa checks the patient before starting care.",
+      "cta": "Continue",
+      "castMember": "Rosa"
+    },
+    {
+      "id": "RN1-08",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Two checks.",
+      "body": "Use the patient’s name and date of birth to check who they are.",
+      "cta": "Continue",
+      "castMember": "Rosa"
+    },
+    {
+      "id": "RN1-09",
+      "kind": "choice",
+      "speaker": "Narrator",
+      "layout": "blank",
+      "question": "Which two details help confirm a patient’s identity?",
+      "prompt": "",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Their name and date of birth.",
+          "tier": "best",
+          "why": "These identify the person. Follow the hospital’s approved identity-check process."
+        },
+        {
+          "id": "b",
+          "label": "Their room and bed number.",
+          "tier": "wrong",
+          "why": "Rooms and beds can change. They do not identify the person."
+        },
+        {
+          "id": "c",
+          "label": "Their blanket and gown color.",
+          "tier": "wrong",
+          "why": "Clothes and bedding do not identify a patient."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Decision-Making"
+      ],
+      "planLineIfFailed": "you skipped a check or missed a chance to tell the team",
+      "progress": 0.2857142857142857
+    },
+    {
+      "id": "RN1-10",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Write what happened.",
+      "body": "A clear note helps the next nurse understand the change.",
+      "cta": "Continue",
+      "castMember": "Rosa"
+    },
+    {
+      "id": "RN1-11",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Keep records private.",
+      "body": "Open records only when needed for your care duties.",
+      "cta": "Continue",
+      "castMember": "Rosa"
+    },
+    {
+      "id": "RN1-12",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "The floor gets busy.",
+      "body": "Rosa asks you to stay alert for changes.",
+      "cta": "Continue",
+      "castMember": "Rosa"
+    },
+    {
+      "id": "RN1-13",
+      "kind": "choice",
+      "speaker": "Narrator",
+      "layout": "options",
+      "question": "A patient suddenly struggles to breathe. What should you do?",
+      "prompt": "",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Call Rosa and the care team for help now.",
+          "tier": "best",
+          "why": "A sudden change needs prompt attention from the care team."
+        },
+        {
+          "id": "b",
+          "label": "Wait until the next routine check.",
+          "tier": "wrong",
+          "why": "Do not delay telling the care team about a sudden change."
+        },
+        {
+          "id": "c",
+          "label": "Only add a note for later.",
+          "tier": "wrong",
+          "why": "Writing a note does not bring immediate help."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Decision-Making"
+      ],
+      "planLineIfFailed": "you skipped a check or missed a chance to tell the team",
+      "progress": 0.42857142857142855
+    },
+    {
+      "id": "RN1-14",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Ask when unsure.",
+      "body": "Rosa gives you an instruction you do not understand.",
+      "cta": "Continue",
+      "castMember": "Rosa"
+    },
+    {
+      "id": "RN1-15",
+      "kind": "choice",
+      "speaker": "Narrator",
+      "layout": "chat",
+      "question": "You do not understand Rosa’s instruction. What should you say?",
+      "prompt": "",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Please explain before I start.",
+          "tier": "best",
+          "why": "Ask before acting when an instruction is unclear."
+        },
+        {
+          "id": "b",
+          "label": "I will guess what you mean.",
+          "tier": "wrong",
+          "why": "Guessing can put a patient at risk."
+        },
+        {
+          "id": "c",
+          "label": "I will keep quiet.",
+          "tier": "wrong",
+          "why": "Rosa needs to know when you need help."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Decision-Making"
+      ],
+      "planLineIfFailed": "you skipped a check or missed a chance to tell the team",
+      "progress": 0.5714285714285714
+    },
+    {
+      "id": "RN1-16",
+      "kind": "card",
+      "variant": "act",
+      "speaker": "Narrator",
+      "title": "Morning checkpoint.",
+      "body": "Rosa reviews your first four decisions.",
+      "cta": "Continue",
+      "castMember": "Rosa",
+      "review": {
+        "threshold": 68,
+        "intro": {
+          "kicker": "MID-PROJECT REVIEW",
+          "line": "Arjun and Samira check your work."
+        },
+        "progressLine": "Checking your decisions...",
+        "pass": {
+          "title": "A strong first pass.",
+          "body": "Keep going. The next task is ready."
+        },
+        "fail": {
+          "title": "You can recover.",
+          "body": "Use the feedback on your next task."
+        }
+      }
+    },
+    {
+      "id": "RN1-17",
+      "kind": "card",
+      "variant": "act",
+      "speaker": "Narrator",
+      "title": "The afternoon begins.",
+      "body": "Denise will review your notes. Rosa stays available to help.",
+      "cta": "Continue",
+      "castMember": "Rosa"
+    },
+    {
+      "id": "RN1-18",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Meet Denise.",
+      "body": "The nurse manager wants notes the whole team can follow.",
+      "cta": "Continue",
+      "castMember": "Denise"
+    },
+    {
+      "id": "RN1-19",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "A note needs a check.",
+      "body": "Denise asks you to spot a clear mistake.",
+      "cta": "Continue",
+      "castMember": "Denise"
+    },
+    {
+      "id": "RN1-20",
+      "kind": "choice",
+      "speaker": "Narrator",
+      "layout": "document",
+      "question": "Which note needs a time correction?",
+      "prompt": "",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Medicine given tomorrow.",
+          "tier": "best",
+          "why": "A completed action cannot have happened tomorrow. Check the record before changing it."
+        },
+        {
+          "id": "b",
+          "label": "Patient walked at 1 p.m.",
+          "tier": "wrong",
+          "why": "This is a clear time for a completed action."
+        },
+        {
+          "id": "c",
+          "label": "Family called at noon.",
+          "tier": "wrong",
+          "why": "This is a clear time for a completed action."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Decision-Making"
+      ],
+      "planLineIfFailed": "you skipped a check or missed a chance to tell the team",
+      "doc": "Four West · Shift note",
+      "progress": 0.7142857142857143
+    },
+    {
+      "id": "RN1-21",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Meet Tyler.",
+      "body": "The other new nurse is eager to impress the team.",
+      "cta": "Continue",
+      "castMember": "Tyler"
+    },
+    {
+      "id": "RN1-22",
+      "kind": "choice",
+      "speaker": "Narrator",
+      "layout": "options",
+      "question": "Tyler takes credit for your report in a meeting. What should you do?",
+      "prompt": "",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Speak with Rosa calmly after the meeting.",
+          "tier": "best",
+          "why": "Rosa can help clarify the record without disrupting the meeting."
+        },
+        {
+          "id": "b",
+          "label": "Shout over Tyler.",
+          "tier": "wrong",
+          "why": "A public argument distracts the team from patient care."
+        },
+        {
+          "id": "c",
+          "label": "Change the patient record to criticize him.",
+          "tier": "wrong",
+          "why": "Patient records are for care, not a dispute with a colleague."
+        }
+      ],
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Critical Thinking",
+        "Decision-Making"
+      ],
+      "planLineIfFailed": "you skipped a check or missed a chance to tell the team",
+      "progress": 0.8571428571428571
+    },
+    {
+      "id": "RN1-23",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Room 12 needs help.",
+      "body": "Your patient suddenly seems confused and is breathing fast.",
+      "cta": "Continue",
+      "castMember": "Patient"
+    },
+    {
+      "id": "RN1-24",
+      "kind": "pick",
+      "speaker": "Narrator",
+      "question": "Pick two updates the evening nurse needs.",
+      "prompt": "",
+      "pick": 2,
+      "cards": [
+        {
+          "label": "Room 12’s breathing changed and the team responded.",
+          "role": "pick"
+        },
+        {
+          "label": "Room 9 still needs test results checked.",
+          "role": "pick"
+        },
+        {
+          "label": "You liked the view from the staff lounge.",
+          "role": "leave"
+        }
+      ],
+      "whenRight": "Share important changes and unfinished care tasks.",
+      "whenWrong": "Focus on changes and care still due.",
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "skills": [
+        "Active Listening",
+        "Teamwork & Collaboration"
+      ],
+      "planLineIfFailed": "you left out an important handover update",
+      "progress": 1.0
+    },
+    {
+      "id": "RN1-25",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Your shift is complete.",
+      "body": "The team reviews what you did well and what needs work.",
+      "cta": "Continue",
+      "castMember": "Rosa"
+    },
+    {
+      "id": "RN1-26",
+      "kind": "review",
+      "speaker": "System",
+      "title": "Your first-shift review.",
+      "body": "See the result of your seven decisions.",
+      "deciding": "Reviewing your shift...",
+      "decidingNote": "The team reviews your choices."
+    }
+  ]
+}

@@ -37,6 +37,7 @@ const RN_PRE_GAME_ART = {
 
 export function v2PreGameArtFor(simulationId: string, version: ArtVersion = 2): { cover: V2Image; lesson?: V2Image } | undefined {
   if (simulationId !== "registered-nurse") return undefined;
+  return undefined; // RN now uses the full-scene manifest and current level cover.
   return version === 3 ? RN_PRE_GAME_ART : { cover: RN_V1_IMAGES.rn_four_west_station_morning, lesson: RN_V1_IMAGES.rn_room12_anxious_morning };
 }
 
@@ -382,7 +383,7 @@ const V2_ART: Record<string, Record<string, BeatArt>> = {
 
 /** True when this simulation has a v2 art set (and so shows the toggles). */
 export function hasV2Art(simulationId: string): boolean {
-  return simulationId in V2_ART;
+  return simulationId !== "registered-nurse" && simulationId in V2_ART;
 }
 
 /** The v2 scene for a beat, or undefined when the beat keeps its v1 room. */

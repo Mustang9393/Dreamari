@@ -1,353 +1,268 @@
 {
-  "version": 6,
+  "version": 7,
   "career": "ui-ux-designer",
   "levels": [
     "ux-l1"
   ],
-  "template": "ib-l1-2026-10-21",
+  "template": "ib-narrative-v2",
   "groups": [
     {
-      "id": "ux-v6-arrival",
-      "scene": "ux-v6-arrival",
+      "id": "ux-v7-arrival",
+      "scene": "ux-v7-arrival",
       "beats": [
         "UX1-01",
         "UX1-02",
-        "UX1-03",
         "UX1-04"
       ],
-      "purpose": "Arjun welcomes the first-person junior to the premium Northline atelier.",
+      "purpose": "Arjun welcomes the junior to the digital-product studio.",
       "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
       "visibleCast": [
         "Arjun"
-      ]
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
     },
     {
-      "id": "ux-v6-team",
-      "scene": "ux-v6-team",
+      "id": "ux-v7-team",
+      "scene": "ux-v7-team",
       "beats": [
         "UX1-05",
         "UX1-06"
       ],
-      "purpose": "Arjun, Noah and Amina welcome the player and define the launch team.",
+      "purpose": "The project team greets the first-person player.",
       "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
       "visibleCast": [
         "Arjun",
         "Noah",
         "Amina"
-      ]
-    },
-    {
-      "id": "ux-v6-work",
-      "scene": "ux-v6-work",
-      "beats": [
-        "UX1-07",
-        "UX1-08",
-        "UX1-10",
-        "UX1-11",
-        "UX1-27"
       ],
-      "purpose": "Arjun shows supported wireframes and prepares the review.",
-      "required": true,
       "pov": "address-player",
       "speakingTarget": "player",
-      "eyeline": "camera",
-      "visibleCast": [
-        "Arjun"
-      ]
+      "eyeline": "camera"
     },
     {
-      "id": "ux-v6-test",
-      "scene": "ux-v6-test",
+      "id": "ux-v7-work",
+      "scene": "ux-v7-work",
       "beats": [
+        "UX1-07",
         "UX1-09"
       ],
-      "purpose": "Observed usability test: Eleanor tries to reserve; Arjun observes.",
+      "purpose": "Arjun shows a rough music-app sketch.",
       "required": true,
-      "pov": "observe-task",
-      "speakingTarget": "voice-over during observation",
-      "eyeline": "task",
       "visibleCast": [
-        "Arjun",
-        "Eleanor"
-      ]
+        "Arjun"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
     },
     {
-      "id": "ux-v6-review",
-      "scene": "ux-v6-review",
+      "id": "ux-v7-test",
+      "scene": "ux-v7-test",
+      "beats": [
+        "UX1-10",
+        "UX1-11"
+      ],
+      "purpose": "Eleanor tries the app while the player observes.",
+      "required": true,
+      "visibleCast": [
+        "Eleanor"
+      ],
+      "pov": "observe-task",
+      "speakingTarget": "observed task",
+      "eyeline": "task"
+    },
+    {
+      "id": "ux-v7-review",
+      "scene": "ux-v7-review",
       "beats": [
         "UX1-12",
-        "UX1-13",
-        "UX1-14",
         "UX1-15",
         "UX1-MID"
       ],
-      "purpose": "Samira addresses the player during the evidence review and midpoint.",
+      "purpose": "Samira reviews the scope of the finding.",
       "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
       "visibleCast": [
         "Samira"
-      ]
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
     },
     {
-      "id": "ux-v6-peer",
-      "scene": "ux-v6-peer",
+      "id": "ux-v7-access",
+      "scene": "ux-v7-access",
       "beats": [
         "UX1-ACT2",
-        "UX1-18"
-      ],
-      "purpose": "Noah explains his wish to lead the presentation.",
-      "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
-      "visibleCast": [
-        "Noah"
-      ]
-    },
-    {
-      "id": "ux-v6-conflict",
-      "scene": "ux-v6-conflict",
-      "beats": [
-        "UX1-19",
-        "UX1-20"
-      ],
-      "purpose": "The player observes Noah making an unsupported claim to Samira.",
-      "required": true,
-      "pov": "npc-dialogue",
-      "speakingTarget": "Samira",
-      "eyeline": "named colleague",
-      "visibleCast": [
-        "Noah",
-        "Samira"
-      ]
-    },
-    {
-      "id": "ux-v6-deadline",
-      "scene": "ux-v6-deadline",
-      "beats": [
+        "UX1-20",
         "UX1-21",
         "UX1-22"
       ],
-      "purpose": "Amina reports the keyboard blocker before the deadline.",
+      "purpose": "Amina checks keyboard access and discusses the fix.",
       "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
       "visibleCast": [
         "Amina"
-      ]
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
     },
     {
-      "id": "ux-v6-help",
-      "scene": "ux-v6-help",
+      "id": "ux-v7-collab",
+      "scene": "ux-v7-collab",
       "beats": [
         "UX1-23",
-        "UX1-24",
-        "UX1-25",
         "UX1-26"
       ],
-      "purpose": "Amina prepares the checked test notes and asks for help.",
+      "purpose": "The team prepares the findings for the demo.",
       "required": true,
+      "visibleCast": [
+        "Noah",
+        "Amina"
+      ],
       "pov": "address-player",
       "speakingTarget": "player",
-      "eyeline": "camera",
-      "visibleCast": [
-        "Amina"
-      ]
+      "eyeline": "camera"
     },
     {
-      "id": "ux-v6-closing",
-      "scene": "ux-v6-closing",
+      "id": "ux-v7-closing",
+      "scene": "ux-v7-closing",
       "beats": [
+        "UX1-27",
         "UX1-28"
       ],
-      "purpose": "Arjun and Samira close the work before outcome scoring.",
+      "purpose": "Arjun and Samira close the first design project.",
       "required": true,
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera",
       "visibleCast": [
         "Arjun",
         "Samira"
-      ]
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera"
     }
   ],
   "beats": [
     {
       "beat": "UX1-01",
-      "scene": "ux-v6-arrival",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-arrival"
+      "scene": "ux-v7-arrival",
+      "shotGroup": "ux-v7-arrival",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-02",
-      "scene": "ux-v6-arrival",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-arrival"
-    },
-    {
-      "beat": "UX1-03",
-      "scene": "ux-v6-arrival",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-arrival"
+      "scene": "ux-v7-arrival",
+      "shotGroup": "ux-v7-arrival",
+      "artifact": "ux-context-app"
     },
     {
       "beat": "UX1-04",
-      "scene": "ux-v6-arrival",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-arrival"
+      "scene": "ux-v7-arrival",
+      "shotGroup": "ux-v7-arrival",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-05",
-      "scene": "ux-v6-team",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-team"
+      "scene": "ux-v7-team",
+      "shotGroup": "ux-v7-team",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-06",
-      "scene": "ux-v6-team",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-team"
+      "scene": "ux-v7-team",
+      "shotGroup": "ux-v7-team",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-07",
-      "scene": "ux-v6-work",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-work"
-    },
-    {
-      "beat": "UX1-08",
-      "scene": "ux-v6-work",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-work"
+      "scene": "ux-v7-work",
+      "shotGroup": "ux-v7-work",
+      "artifact": "ux-context-wireframe"
     },
     {
       "beat": "UX1-09",
-      "scene": "ux-v6-test",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-test"
+      "scene": "ux-v7-work",
+      "shotGroup": "ux-v7-work",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-10",
-      "scene": "ux-v6-work",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-work"
+      "scene": "ux-v7-test",
+      "shotGroup": "ux-v7-test",
+      "artifact": "ux-context-app"
     },
     {
       "beat": "UX1-11",
-      "scene": "ux-v6-work",
-      "artifact": "ux-prototype-versions",
-      "shotGroup": "ux-v6-work"
+      "scene": "ux-v7-test",
+      "shotGroup": "ux-v7-test",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-12",
-      "scene": "ux-v6-review",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-review"
-    },
-    {
-      "beat": "UX1-13",
-      "scene": "ux-v6-review",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-review"
-    },
-    {
-      "beat": "UX1-14",
-      "scene": "ux-v6-review",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-review"
+      "scene": "ux-v7-review",
+      "shotGroup": "ux-v7-review",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-15",
-      "scene": "ux-v6-review",
-      "artifact": "ux-test-result",
-      "shotGroup": "ux-v6-review"
+      "scene": "ux-v7-review",
+      "shotGroup": "ux-v7-review",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-MID",
-      "scene": "ux-v6-review",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-review"
+      "scene": "ux-v7-review",
+      "shotGroup": "ux-v7-review",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-ACT2",
-      "scene": "ux-v6-peer",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-peer"
-    },
-    {
-      "beat": "UX1-18",
-      "scene": "ux-v6-peer",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-peer"
-    },
-    {
-      "beat": "UX1-19",
-      "scene": "ux-v6-conflict",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-conflict"
+      "scene": "ux-v7-access",
+      "shotGroup": "ux-v7-access",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-20",
-      "scene": "ux-v6-conflict",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-conflict"
+      "scene": "ux-v7-access",
+      "shotGroup": "ux-v7-access",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-21",
-      "scene": "ux-v6-deadline",
-      "artifact": "ux-release-check",
-      "shotGroup": "ux-v6-deadline"
+      "scene": "ux-v7-access",
+      "shotGroup": "ux-v7-access",
+      "artifact": "ux-context-message"
     },
     {
       "beat": "UX1-22",
-      "scene": "ux-v6-deadline",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-deadline"
+      "scene": "ux-v7-access",
+      "shotGroup": "ux-v7-access",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-23",
-      "scene": "ux-v6-help",
-      "artifact": "ux-fixed",
-      "shotGroup": "ux-v6-help"
-    },
-    {
-      "beat": "UX1-24",
-      "scene": "ux-v6-help",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-help"
-    },
-    {
-      "beat": "UX1-25",
-      "scene": "ux-v6-help",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-help"
+      "scene": "ux-v7-collab",
+      "shotGroup": "ux-v7-collab",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-26",
-      "scene": "ux-v6-help",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-help"
+      "scene": "ux-v7-collab",
+      "shotGroup": "ux-v7-collab",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-27",
-      "scene": "ux-v6-work",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-work"
+      "scene": "ux-v7-closing",
+      "shotGroup": "ux-v7-closing",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     },
     {
       "beat": "UX1-28",
-      "scene": "ux-v6-closing",
-      "noArtifactReason": "The scene and concise question supply the required context; no extra visual task.",
-      "shotGroup": "ux-v6-closing"
+      "scene": "ux-v7-closing",
+      "shotGroup": "ux-v7-closing",
+      "noArtifactReason": "The task is fully stated in game text. Supporting graphics are optional atmosphere, not required evidence."
     }
   ],
   "milestones": [

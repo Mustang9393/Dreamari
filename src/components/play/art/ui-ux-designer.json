@@ -3,146 +3,118 @@
   "folder": "ux",
   "spriteStandard": "full-scene",
   "notes": [
-    "v6 IB-template narrative, fixed canonical identity/color references and read-only supporting graphics.",
-    "No runtime sprites. New cameras are visually checked for continuity, never certified pixel-identical."
+    "v7 distinct career tasks, optional decorative scene context, held full paintings below the HUD.",
+    "No runtime sprite/foreground assembly. Canonical v7 identities replace v6 across all entry points."
   ],
   "locations": {
-    "ux-v6-arrival": {
-      "src": "/images/play/ux/v6/arrival.png",
-      "alt": "Arjun welcomes the first-person junior to the premium Northline atelier.",
+    "ux-v7-arrival": {
+      "src": "/images/play/ux/v7/arrival.png",
+      "alt": "Arjun welcomes the junior to the digital-product studio.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.28
+        "y": 0.3
       },
       "locked": true,
       "role": "work-floor"
     },
-    "ux-v6-team": {
-      "src": "/images/play/ux/v6/team.png",
-      "alt": "Arjun, Noah and Amina welcome the player and define the launch team.",
+    "ux-v7-team": {
+      "src": "/images/play/ux/v7/team.png",
+      "alt": "The project team greets the first-person player.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.52,
-        "y": 0.28
+        "x": 0.5,
+        "y": 0.3
       },
       "locked": true,
       "role": "work-floor"
     },
-    "ux-v6-work": {
-      "src": "/images/play/ux/v6/work.png",
-      "alt": "Arjun shows supported wireframes and prepares the review.",
+    "ux-v7-work": {
+      "src": "/images/play/ux/v7/work.png",
+      "alt": "Arjun shows a rough music-app sketch.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.28
+        "y": 0.3
       },
       "locked": true,
       "role": "work-floor"
     },
-    "ux-v6-test": {
-      "src": "/images/play/ux/v6/test.png",
-      "alt": "Observed usability test: Eleanor tries to reserve; Arjun observes.",
+    "ux-v7-test": {
+      "src": "/images/play/ux/v7/test.png",
+      "alt": "Eleanor tries the app while the player observes.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.52,
-        "y": 0.28
+        "x": 0.5,
+        "y": 0.3
       },
       "locked": true,
       "role": "work-floor"
     },
-    "ux-v6-review": {
-      "src": "/images/play/ux/v6/review.png",
-      "alt": "Samira addresses the player during the evidence review and midpoint.",
+    "ux-v7-review": {
+      "src": "/images/play/ux/v7/review.png",
+      "alt": "Samira reviews the scope of the finding.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.28
+        "y": 0.3
       },
       "locked": true,
       "role": "formal-meeting"
     },
-    "ux-v6-peer": {
-      "src": "/images/play/ux/v6/peer.png",
-      "alt": "Noah explains his wish to lead the presentation.",
+    "ux-v7-access": {
+      "src": "/images/play/ux/v7/access.png",
+      "alt": "Amina checks keyboard access and discusses the fix.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.28
+        "y": 0.3
       },
       "locked": true,
       "role": "work-floor"
     },
-    "ux-v6-conflict": {
-      "src": "/images/play/ux/v6/conflict.png",
-      "alt": "The player observes Noah making an unsupported claim to Samira.",
+    "ux-v7-collab": {
+      "src": "/images/play/ux/v7/collab.png",
+      "alt": "The team prepares the findings for the demo.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
-        "x": 0.52,
-        "y": 0.28
+        "x": 0.5,
+        "y": 0.3
       },
       "locked": true,
       "role": "work-floor"
     },
-    "ux-v6-deadline": {
-      "src": "/images/play/ux/v6/deadline.png",
-      "alt": "Amina reports the keyboard blocker before the deadline.",
+    "ux-v7-closing": {
+      "src": "/images/play/ux/v7/closing.png",
+      "alt": "Arjun and Samira close the first design project.",
       "focal": {
         "x": 0.5,
         "y": 0.3
       },
       "mobileFocal": {
         "x": 0.5,
-        "y": 0.28
-      },
-      "locked": true,
-      "role": "work-floor"
-    },
-    "ux-v6-help": {
-      "src": "/images/play/ux/v6/help.png",
-      "alt": "Amina prepares the checked test notes and asks for help.",
-      "focal": {
-        "x": 0.5,
         "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.5,
-        "y": 0.28
-      },
-      "locked": true,
-      "role": "work-floor"
-    },
-    "ux-v6-closing": {
-      "src": "/images/play/ux/v6/closing.png",
-      "alt": "Arjun and Samira close the work before outcome scoring.",
-      "focal": {
-        "x": 0.5,
-        "y": 0.3
-      },
-      "mobileFocal": {
-        "x": 0.52,
-        "y": 0.28
       },
       "locked": true,
       "role": "formal-meeting"
@@ -150,55 +122,47 @@
   },
   "cast": {
     "Arjun": {
-      "face": "/images/play/ux/face-arjun-v6.webp",
+      "face": "/images/play/ux/face-arjun-v7.webp",
       "voicePitch": 420
     },
     "Noah": {
-      "face": "/images/play/ux/face-noah-v6.webp",
-      "voicePitch": 390
+      "face": "/images/play/ux/face-noah-v7.webp",
+      "voicePitch": 455
     },
     "Amina": {
-      "face": "/images/play/ux/face-amina-v6.webp",
-      "voicePitch": 620
+      "face": "/images/play/ux/face-amina-v7.webp",
+      "voicePitch": 490
     },
     "Samira": {
-      "face": "/images/play/ux/face-samira-v6.webp",
-      "voicePitch": 540
+      "face": "/images/play/ux/face-samira-v7.webp",
+      "voicePitch": 525
     },
     "Eleanor": {
-      "face": "/images/play/ux/face-eleanor-v6.webp",
-      "voicePitch": 570
+      "face": "/images/play/ux/face-eleanor-v7.webp",
+      "voicePitch": 560
     }
   },
   "portraitRatios": {},
   "beatLocations": {
-    "UX1-01": "ux-v6-arrival",
-    "UX1-02": "ux-v6-arrival",
-    "UX1-03": "ux-v6-arrival",
-    "UX1-04": "ux-v6-arrival",
-    "UX1-05": "ux-v6-team",
-    "UX1-06": "ux-v6-team",
-    "UX1-07": "ux-v6-work",
-    "UX1-08": "ux-v6-work",
-    "UX1-10": "ux-v6-work",
-    "UX1-11": "ux-v6-work",
-    "UX1-27": "ux-v6-work",
-    "UX1-09": "ux-v6-test",
-    "UX1-12": "ux-v6-review",
-    "UX1-13": "ux-v6-review",
-    "UX1-14": "ux-v6-review",
-    "UX1-15": "ux-v6-review",
-    "UX1-MID": "ux-v6-review",
-    "UX1-ACT2": "ux-v6-peer",
-    "UX1-18": "ux-v6-peer",
-    "UX1-19": "ux-v6-conflict",
-    "UX1-20": "ux-v6-conflict",
-    "UX1-21": "ux-v6-deadline",
-    "UX1-22": "ux-v6-deadline",
-    "UX1-23": "ux-v6-help",
-    "UX1-24": "ux-v6-help",
-    "UX1-25": "ux-v6-help",
-    "UX1-26": "ux-v6-help",
-    "UX1-28": "ux-v6-closing"
+    "UX1-01": "ux-v7-arrival",
+    "UX1-02": "ux-v7-arrival",
+    "UX1-04": "ux-v7-arrival",
+    "UX1-05": "ux-v7-team",
+    "UX1-06": "ux-v7-team",
+    "UX1-07": "ux-v7-work",
+    "UX1-09": "ux-v7-work",
+    "UX1-10": "ux-v7-test",
+    "UX1-11": "ux-v7-test",
+    "UX1-12": "ux-v7-review",
+    "UX1-15": "ux-v7-review",
+    "UX1-MID": "ux-v7-review",
+    "UX1-ACT2": "ux-v7-access",
+    "UX1-20": "ux-v7-access",
+    "UX1-21": "ux-v7-access",
+    "UX1-22": "ux-v7-access",
+    "UX1-23": "ux-v7-collab",
+    "UX1-26": "ux-v7-collab",
+    "UX1-27": "ux-v7-closing",
+    "UX1-28": "ux-v7-closing"
   }
 }

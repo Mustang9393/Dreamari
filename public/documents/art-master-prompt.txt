@@ -1,0 +1,26 @@
+DREAMARI COMPLETE ANIME SCENE
+
+Career / beat: {CAREER, BEAT_ID}
+Story action: {ACTION}
+Location / canonical camera: {LOCATION_AND_CAMERA}
+Time / plausible light: {TIME, WINDOW_DIRECTION, PRACTICALS}
+Visible cast: {NAMES_AND_FIXED_IDENTITIES}
+Drawing reference: {APPROVED UX v3 / RN CHARACTER REFERENCE}
+Identity references: {ONE CANONICAL FACE AND COLOR CROP PER PERSON}
+Room reference: {SELECTED COMPLETE SCENE}
+Allowed edit: {EXACT CHANGE OR NEW CAMERA}
+Output: {DIMENSIONS, FILE_ID}
+
+Paint one complete, opaque 2D anime scene with people, room, furniture and lighting together. The runtime uses this full scene as one background image. Never create separate sprites, character cutouts, counter portraits, unfinished bodies hidden by HUD, or player arms/hands in the foreground. The player is the camera. A person addressing the player looks toward the lens; observed conversations may look at each other. Keep gestures natural and near each character’s body.
+
+Match the approved character style: thin controlled outlines, expressive anime eyes, small nose mark, short line mouth, flat base color and one broad cel shadow. Hair is a few solid masses; blonde hair uses no more than four broad solid masses and no more than two internal hairlines. No glossy strands, painted lips, sculpted cheeks, heavy comic outlines, photoreal skin or 3D.
+
+Maintain each canonical identity in every shot: age, face proportions, skin base and undertone, iris color, brows, hairline and texture, outfit and identifying details. Keep older characters visibly older. Eleanor (60) and Sofia (67) retain clear, consistent age cues in every shot. Keep face, neck and hands consistent under scene light. For the requested Black-cast update, move the cast one shade darker in one canonical palette change and propagate it to every scene and face chip. Keep the shade consistent; preserve skin bases under light and shadow, with no crushed-black shadows.
+
+Create luxurious five-star architecture suited to the real workplace: ivory stone, walnut joinery, brass trim, considered ceilings and beautiful functional furniture. Environment rendering stays selective and anime-flat. No photographic detail, mirror floors, glossy skin, bloom, haze or beams from closed doors. Light should come from plausible windows and practical fixtures.
+
+For Nursing, every window shows the same lake, red-roof houses, trees and green hill. Never substitute a city or parking lot. Preserve room geography, window placement, furniture and exterior. The established RN timeline is early morning through evening; daytime must not become sunrise. Rosa beats 4–17 are morning, Denise 18–20 and Tyler/Room 12 21–23 are afternoon, and 24–26 are evening. Use plausible window and practical light. Reaction art keeps the exact base camera and time.
+
+Compose for the actual game UI: keep the top 20% clear of faces for HUD; keep the bottom 38% clear of faces for dialogue; place main heads around y=.23–.44. Complete bodies, chairs, hands and floor beneath UI areas. Make camera and action fit the beat; avoid a repeated centered-counter template. Do not rely on runtime zoom or crop to make the image fit. Prompt dimensions are not verification; inspect the assembled desktop and phone screens.
+
+Reuse the saved image when identical pixels are required. Fresh generation cannot promise pixel identity. Record source references, full prompt, selected filename, file hash and QA status. Hashes prove provenance, not facial identity or visual quality. Compare every recurring character with the canonical crop and compare room geography and actual UI. Repair drift before integration; repeat visual review after edits. The internal contact sheet is a QA aid, not a human approval gate.

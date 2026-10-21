@@ -4,8 +4,7 @@ import { IB_LEVEL_1 } from "./ib-level-1";
 import { IB_LEVEL_1_V2 } from "./ib-level-1-v2";
 import { IB_LEVEL_2 } from "./ib-level-2";
 import { IB_LEVEL_3 } from "./ib-level-3";
-import { RN_LEVEL_1 } from "./rn-level-1";
-import { RN_LEVEL_1_V2 } from "./rn-level-1-v2";
+import { RN_LEVEL_1_REBUILD } from "./rn-level-1-rebuild";
 import { AMT_LEVEL_1 } from "./amt-level-1";
 import type { Level, Simulation } from "./types";
 
@@ -25,7 +24,7 @@ import type { Level, Simulation } from "./types";
 // expressCut list are exactly what Express played until today. The route
 // layers the new look onto Express as presentation flags only.
 const IB_L1: Level = { ...IB_LEVEL_1_V2, id: IB_LEVEL_1.id, expressCut: IB_LEVEL_1.expressCut, expressSource: IB_LEVEL_1.expressSource };
-const RN_L1: Level = { ...RN_LEVEL_1_V2, id: RN_LEVEL_1.id, expressCut: RN_LEVEL_1.expressCut, expressSource: RN_LEVEL_1 };
+const RN_L1: Level = RN_LEVEL_1_REBUILD;
 
 // The games catalogue. `careerId` is the shared catalogue id, so a game lines
 // up with the same career's report, pathway and plan -- the hub can put the
@@ -68,35 +67,14 @@ export const INVESTMENT_BANKING: Simulation = {
 };
 
 export const REGISTERED_NURSE: Simulation = {
-  id: "registered-nurse",
-  careerId: "registered-nurse",
-  title: "Registered Nurse",
-  world: "Health & Medicine",
-  firm: "Riverbend Medical Center",
-  cover: "/images/play/rn/locations/station-hero.webp",
-  // The locked v2 art (20 Oct 2026, Chandu: "use the latest images that
-  // were created"): the station room with Rosa's late-day layer flattened
-  // into one file, replacing the earlier flat -anime.png of the same beat.
-  thumb: "/images/play/rn/v2/locked-2026-10-19/cover-rosa-proud-station.webp",
-  thumbFocus: "52% 12%",
-  // The trailer (Trailer tab): same seven-beat shape as every career --
-  // the scale, the odds, the cost, the room, the consequence, the person
-  // at the top, the ladder. Reuse only. The two statistic cards ship
-  // WITHOUT their numbers, per the sheet's own rule: no numbers we cannot
-  // source (D04).
-  trailer: [
-    { id: "RN-TR-01", seconds: 4, text: "More people work as nurses than any other job in health care.", art: "/images/play/rn/locations/lobby.jpg" },
-    { id: "RN-TR-02", seconds: 4.5, text: "Nursing schools turn away tens of thousands of people who qualify. Every year." },
-    { id: "RN-TR-03", seconds: 4, text: "Nights. Weekends. Holidays. Twelve hours on your feet.", art: "/images/play/rn/locations/staff-room.jpg" },
-    { id: "RN-TR-04", seconds: 4, text: "Thirty beds. One of them needs you first.", art: "/images/play/rn/locations/corridor.jpg" },
-    { id: "RN-TR-05", seconds: 4.5, text: "The thing you notice, or do not notice, decides what happens next.", art: "/images/play/rn/locations/ward-night.jpg", drain: true },
-    // Yvonne is SEEN here and introduced properly at Level 3.
-    { id: "RN-TR-06", seconds: 4.5, text: "Somewhere above you is the nurse who answers for every floor in this hospital.", art: "/images/play/rn/locations/lobby.jpg", sprite: "/images/play/rn/expressions/yvonne-composed.webp" },
-    { id: "RN-TR-07", seconds: 4, text: "Six levels. New nurse to the top of the hospital. How far will you get?", finale: true },
-  ],
-  levels: [RN_L1],
-  // The real six-rung ladder (Career Ladder tab): nursing genuinely has six.
-  upcoming: ["Staff Nurse", "Charge Nurse", "Nurse Manager", "Director of Nursing", "Chief Nursing Officer"],
+ id: "registered-nurse", careerId: "registered-nurse", title: "Registered Nurse",
+ world: "Health & Medicine", firm: "Riverbend Medical Center",
+ cover: RN_L1.cover!, thumb: RN_L1.cover!, thumbFocus: "50% 30%",
+ trailer: [
+  {id:"RN-TR-01",seconds:4,text:"Your first shift. A team counting on you.",art:RN_L1.cover!},
+  {id:"RN-TR-02",seconds:4,text:"Listen. Check. Speak up.",art:"/images/play/rn/rebuild-2026-10-21/RN1-07.png"},
+  {id:"RN-TR-03",seconds:4,text:"Make the next decision.",art:"/images/play/rn/rebuild-2026-10-21/RN1-21.png",finale:true}
+ ], levels:[RN_L1], upcoming:["Staff Nurse","Charge Nurse","Nurse Manager","Director of Nursing","Chief Nursing Officer"]
 };
 
 export const AVIATION_MAINTENANCE: Simulation = {
@@ -124,7 +102,7 @@ export const UX_DESIGNER: Simulation = {
   // under career simulations, use a good art from the game as the
   // thumbnail"). Arjun sketching wireframe flows says "UX" at a glance, and
   // its sunset studio light sits with the IB tile beside it.
-  "thumb": "/images/play/ux/v6/work.png",
+  "thumb": "/images/play/ux/v7/work.png",
   "thumbFocus": "48% 20%",
   "levels": [UX_LEVEL_1],
   "upcoming": [
@@ -139,37 +117,37 @@ export const UX_DESIGNER: Simulation = {
       "id": "UX-TR-1",
       "seconds": 4,
       "text": "A useful design starts with someone trying to do something.",
-      "art": "/images/play/ux/v6/arrival.png"
+      "art": "/images/play/ux/v7/arrival.png"
     },
     {
       "id": "UX-TR-2",
       "seconds": 4,
       "text": "An attractive page can still get in their way.",
-      "art": "/images/play/ux/v6/test.png"
+      "art": "/images/play/ux/v7/test.png"
     },
     {
       "id": "UX-TR-3",
       "seconds": 4,
       "text": "Listen before you choose a solution.",
-      "art": "/images/play/ux/v6/test.png"
+      "art": "/images/play/ux/v7/test.png"
     },
     {
       "id": "UX-TR-4",
       "seconds": 4,
       "text": "Turn the evidence into something people can try.",
-      "art": "/images/play/ux/v6/arrival.png"
+      "art": "/images/play/ux/v7/arrival.png"
     },
     {
       "id": "UX-TR-5",
       "seconds": 4,
       "text": "One missed detail can stop the whole task.",
-      "art": "/images/play/ux/v6/review.png"
+      "art": "/images/play/ux/v7/review.png"
     },
     {
       "id": "UX-TR-6",
       "seconds": 4,
       "text": "Your team needs to know what you found.",
-      "art": "/images/play/ux/v6/review.png"
+      "art": "/images/play/ux/v7/review.png"
     },
     {
       "id": "UX-TR-7",

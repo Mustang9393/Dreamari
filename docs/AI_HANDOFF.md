@@ -1,3 +1,11 @@
+## 2026-10-21 — Career games rebuilt around short decisions and full-scene art (SOP v1.8)
+
+**Why (Chandu):** “games ... too complex”; “bake characters into images”; and “no ... overlap ... HUD”. The prior career-game rounds carried too many beats and visual controls, while composited characters and floating panels could compete with the play surface.
+
+**Changed:** UX Designer and Food Scientist are 21 beats each; Registered Nurse is 26 beats. Each opens with a choice by beat six, has seven scored decisions worth ±6 from 50, a checkpoint after decision four at 68, and a passing score of 85. Nursing uses one full painting per beat: character faces and bodies are baked into the image, with no runtime sprites or foreground arms. The shift follows one coherent lake-facing hospital timeline. The rejected `revision-2026-10-21` scene set is not routed. Scene graphics provide context; game text contains task facts and answer evidence. Supporting work artifacts remain read-only and add no buttons or tabs. SOP v1.8 records the rebuild and its rationale.
+
+**Validation:** `node --test scripts/qa/work-evidence.test.mjs` passes 8 tests; structural career validation passes for UX and Food Scientist. Nursing's image, copy, scoring, answer-key and coverage checks are prepared; face-chip files were still being added at the time of this entry. Browser replay, live HUD overlap review, and human content/art approval remain pending. See `docs/handoff/career-scaling/README.md` and the coverage/trace examples for implementation evidence.
+
 ## 2026-10-21 — IB master sequence, concise career stories and fixed character identity
 
 **Why:** Chandu: “use the vetted Investment Banking simulation ... 1:1 reference”; “too much copy”; supporting graphics “should not be needing tab and clicking and interaction”; latest: “different skin tones ... skin tone and facial details ... consistent ... Eye colors ... consistent for a character.”

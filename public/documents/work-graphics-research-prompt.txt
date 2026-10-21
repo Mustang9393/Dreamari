@@ -1,0 +1,9 @@
+Research authentic work surfaces for {CAREER}, an entry-level role, and {FICTIONAL PROJECT}.
+
+Use primary sources: official standards and regulator material, government sources, professional bodies, first-party product documentation, manuals and official training resources. Find the screens, files, messages, labels and devices a person in this role actually uses. For every source, record title, URL, retrieval date, the specific fact it supports, role authority and limits. Separate verified work facts from fictional teaching values.
+
+Choose only a few optional graphics that make the setting feel real. A UX app screen can fit an AMPLIFY music-app release; a clean sample label can fit a LUMA drink trial. A nursing ECG-like monitor can provide scene context. These are examples, not required quotas or reusable career-neutral props. Do not add an arbitrary food-product release-approval step.
+
+Graphics are optional context, not required evidence. Keep each around 6–14 visible words. Avoid dense reports, graphs, tables and notes that require decoding. All answer facts belong in the actual game question, which must remain answerable if the graphic is removed. Do not invent measurements, dosages, safety limits, live readings or approvals. No independent interaction or hidden clue.
+
+Save `work-graphics-research.json` and `work-surface-plan.json` with source-backed facts, role authority and limits, chosen surface or reason for none, concise visual brief, story state, and proof that the question works without the visual. Implement using `artifact-master-prompt.txt`. Test the assembled screen at desktop and phone size, including focus order and legibility. Cite research in the production brief; keep source citations out of student-facing copy.
