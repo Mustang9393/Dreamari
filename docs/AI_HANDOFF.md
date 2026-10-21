@@ -1,3 +1,12 @@
+## 2026-10-21: Aurora: the reference photos' fringe colours, brighter base
+
+- `SkyAurora.tsx`: the colour ramp now follows Chandu's two orbit-view borealis references.
+  - Ramp: a near-white cyan base, then teal-green low in the rays, blue through the middle, red-rose at the tips. It's scaled to the rays' real height, since they're short.
+  - Which colour leads wanders slowly along the curtain, so some stretches are greener and some red-tipped.
+- The base is a tad brighter and cyan: seam 0.75, glow 1.05, cap `0.06 + 0.5*exp(-y/0.15)`.
+- Why: Chandu, with the photos, "the aurora can be a tad bit brighter at its base too. Add more of the fringe colors like red and green etc we see?" This supersedes the earlier "DONT DO GREEN" light-only pass.
+- Gotcha: naming the colour `base` silently killed the shader (`base` is already the border height in `curtain()`), so the aurora vanished with no console error. If it ever disappears, check the GLSL compiles.
+
 ## 2026-10-21: Aurora: darker sky, flat base glow on the screen edge
 
 - `look-v2.css`, dark sky: near-black navy all the way down (`#121d33` → `#14213a` → `#162640` → `#172843`), so the aurora glows out of darkness.

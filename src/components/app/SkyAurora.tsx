@@ -13,8 +13,8 @@
 //
 // A small fragment shader: two curtains of light, each with a noise-driven
 // lower edge that folds and drifts, fine vertical rays, a hot near-white
-// lower edge and a falloff upward, in light only: near white where bright,
-// clean blue where faint, no other colours. Subtle ("IT CAN BE A LITTLE
+// lower edge and a falloff upward through the photos' fringe colours
+// (cyan base, teal-green, blue, red-rose tips). Subtle ("IT CAN BE A LITTLE
 // MORE SUBTLE TOO"), composited with `screen` so it adds light to the sky and
 // the stars still show through it.
 //
@@ -68,8 +68,8 @@ float fbm(vec2 p) {
 // Modelled on photos of the borealis (Chandu: "GET THE MATERIALS RIGHT
 // PLEASE REFER ACTUAL PHOTOS OF AURORA BOREALIS"): a curtain is made of fine
 // filaments, its lower border is crisp and the brightest part, the light
-// thins out upward ray by ray, and the colour is light, not paint ("DONT DO
-// GREEN. IT SHOULD JUST BE BRIGHTER LIGHT").
+// thins out upward ray by ray. (A light-only pass, "DONT DO GREEN", was
+// later superseded by Chandu's reference photos: see the colour ramp.)
 vec3 curtain(vec2 uv, float aspect, float t, float k, float lift, float rayScale) {
   float x = uv.x * aspect;
   // the lower border folds and ripples, just above the bottom edge
@@ -103,11 +103,23 @@ vec3 curtain(vec2 uv, float aspect, float t, float k, float lift, float rayScale
   // brightness along the curtain, with gaps, so it never reads as one band
   float along = 0.3 + 0.7 * smoothstep(0.2, 0.62, fbm(vec2(x * 0.7 - t * 0.03 + k * 7.0, 2.0 + k + t * 0.04)));
   float i = (1.4 * body * rays * fil * pulse + 0.9 * seam * (0.45 + 0.55 * rays)) * along;
-  // light, not paint: near white where it is brightest, a clean saturated
-  // sky blue where it is faint, so faint light never turns grey
-  float h = clamp(d / 0.4, 0.0, 1.0);
-  vec3 c = mix(vec3(0.80, 0.92, 1.00), vec3(0.36, 0.66, 1.00), smoothstep(0.0, 0.2, h));
-  c = mix(c, vec3(0.18, 0.48, 1.00), smoothstep(0.2, 0.8, h));
+  // the colour ramp of the reference photos Chandu sent (orbit views of the
+  // borealis: "Add more of the fringe colors like red and green etc we
+  // see?"): a near-white cyan base, teal-green low in the rays, blue
+  // through the middle, red-rose at the tips. Where along the curtain each
+  // colour is strongest wanders slowly, so some stretches are greener and
+  // some red-tipped, the way the photos vary. Faint light stays saturated,
+  // never grey.
+  // (over the rays' real height: they are short)
+  float h = clamp(d / 0.2, 0.0, 1.0);
+  float hue = noise(vec2(wx * 0.7 - t * 0.02 + k * 4.0, 3.0 + t * 0.03));
+  vec3 foot = vec3(0.78, 0.96, 1.00);
+  vec3 green = mix(vec3(0.30, 1.00, 0.70), vec3(0.25, 0.92, 0.95), hue);
+  vec3 blue = vec3(0.26, 0.56, 1.00);
+  vec3 red = mix(vec3(1.00, 0.36, 0.46), vec3(0.95, 0.45, 0.70), hue);
+  vec3 c = mix(foot, green, smoothstep(0.0, 0.12, h));
+  c = mix(c, blue, smoothstep(0.18, 0.5, h) * (0.55 + 0.45 * hue));
+  c = mix(c, red, smoothstep(0.35, 0.85, h) * (0.45 + 0.5 * (1.0 - hue)));
   return c * i;
 }
 
@@ -128,9 +140,11 @@ void main() {
   // the haze of scattered light along the horizon the curtain rises from,
   // in a saturated blue so the bottom glows instead of going grey ("DONT
   // MAKE THE BOTTOM PART MUDDY WITH GREYER MUDDY COLORING")
-  col += vec3(0.72, 0.88, 1.00) * 0.55 * seamL
-       + vec3(0.18, 0.50, 1.00) * 0.9 * glowL
-       + vec3(0.10, 0.36, 1.00) * 0.25 * hazeL;
+  // a tad brighter at the base ("the aurora can be a tad bit brighter at
+  // its base too"), cyan like the references' base glow
+  col += vec3(0.75, 0.94, 1.00) * 0.75 * seamL
+       + vec3(0.20, 0.66, 1.00) * 1.05 * glowL
+       + vec3(0.10, 0.40, 1.00) * 0.28 * hazeL;
   // fade toward the sides and the top of the layer
   float edge = smoothstep(0.0, 0.22, uv.x) * smoothstep(1.0, 0.78, uv.x);
   col *= mix(0.45, 1.0, edge) * smoothstep(0.78, 0.38, uv.y);
@@ -145,7 +159,7 @@ void main() {
   // on the darker sky the aurora carries the blue ("let the aurora carry the
   // light blue instead"), so a little more of its light is let through
   // more at the base, faster fade upward
-  float cap = 0.06 + 0.42 * exp(-uv.y / 0.15);
+  float cap = 0.06 + 0.5 * exp(-uv.y / 0.15);
   col *= min(1.0, cap / max(max(col.r, col.g), max(col.b, 1e-4)));
   gl_FragColor = vec4(col, 1.0);
 }
