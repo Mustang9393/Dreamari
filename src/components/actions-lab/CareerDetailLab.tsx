@@ -30,29 +30,27 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronDown, ChevronRight, Info, Sparkles, ThumbsDown, X } from "lucide-react";
+import { ChevronLeft, ChevronDown, Info, Sparkles, ThumbsDown } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { IconTip } from "@/components/app/IconTip";
+import { FactSheet, PaySheet, SheetHero } from "@/components/career/PaySheet";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
 import { react, useLab } from "./labStore";
 import { CareerHeaderActions } from "./CareerHeaderActions";
 import { careerHref, LabLayer, LabPill } from "./labUi";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
-import { PayMap } from "@/components/career/PayMap";
+import { WhereToStudy } from "@/components/career/WhereToStudy";
 import { statePay } from "@/components/career/statePay";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { resolveCareer, similarCareers, type ResolvedCareer } from "@/components/career/data";
 import type { FactDetails, ProfileRung } from "@/components/career/profiles";
 import { careerSlug } from "@/components/career/slug";
-import { OutlookTab } from "@/components/outlook-lab/OutlookTab";
-import { count, nationalOutlook, pct } from "@/components/career/outlook";
-import { CareerDetailLabV2 } from "./CareerDetailLabV2";
-import { CareerDetailV2Switch } from "@/components/career/CareerDetailV2Switch";
-import { useCareerDetailV2 } from "@/lib/careerDetailV2";
+import { PayGrowth } from "@/components/career/PayGrowth";
+import { nationalOutlook } from "@/components/career/outlook";
 
 // Career Detail, rebuilt 2026-09-02 around the production page's information
 // (dreamonna.com/explore/<slug>; copy and data transcribed in profiles.ts and
@@ -126,6 +124,67 @@ function HeroPhoto({ photo, sizes, className, objectPosition }: { photo: string;
   // header's title covers the lower part, so the face sits higher there
   const phone = className.includes("md:hidden");
   return <FacePhoto src={photo} sizes={sizes} className={className.replace("md:hidden", "").trim()} wrapperClassName={phone ? "md:hidden" : ""} target={phone ? 0.3 : 0.36} fallback={objectPosition} onError={() => setFailed(true)} />;
+}
+
+// The degree fact as the degree alone (20 Oct 2026, Chandu, on "Bachelor's
+// degree for most school and college jobs": "Make it concise and one thing.
+// Say bachelors degree, if theres one more degree list that too, no full
+// sentences"). Up to two credentials, joined with "or"; qualifiers,
+// licences and "+ apprenticeship" tails stay in the degree sheet behind (i).
+const DEGREES: [RegExp, string][] = [
+  [/doctoral|doctorate|ph\.?d|professional degree/i, "Doctorate"],
+  [/law degree|j\.d\./i, "Law degree"],
+  [/master/i, "Master's degree"],
+  [/bachelor/i, "Bachelor's degree"],
+  [/associate/i, "Associate's degree"],
+  [/certificate|certification/i, "Certificate"],
+  [/high school/i, "High school diploma"],
+  [/some college/i, "Some college"],
+  [/no formal|no specific|no degree/i, "No degree needed"],
+];
+export function shortDegree(value: string) {
+  const found = DEGREES.map(([re, name]) => ({ name, at: value.search(re) })).filter((d) => d.at >= 0).sort((x, y) => x.at - y.at);
+  // "Doctoral or professional degree" is one credential, not two
+  const all = [...new Set(found.map((d) => d.name))];
+  // "Some college, no degree" and "No formal degree; a forklift
+  // certification" each name one path, not two choices
+  const names = /^(Some college|No degree needed)$/.test(all[0] ?? "") ? all.slice(0, 1) : all.slice(0, 2);
+  return names.length ? names.join(" or ") : value.split(/[;(,+]| for /)[0].trim();
+}
+
+// ---- Fact strip figure ------------------------------------------------------
+// The quick-fact strip's figure (20 Oct 2026, Chandu: "The numbers are too
+// small in the 4 column header stats. Awkward blank spaces are there too").
+// The figure is the cell's headline, so it outranks its label: the label
+// became a small muted line and the figure a display numeral, set right
+// under the label instead of pinned to the cell's bottom (which left a gap
+// whenever a neighbour's degree line wrapped). "/year" drops to a small
+// suffix. Same day, second pass: the size came down so all four sit on one
+// line ("Bachelor's degree" wrapped at the bigger size).
+function StripFigure({ value, accent }: { value: string; accent: string }) {
+  const m = value.match(/^(.*?)(\/year)$/);
+  const main = m ? m[1] : value;
+  // one size for every cell, so all four figures share one line (Chandu,
+  // 20 Oct 2026: "everything on that row is the same text line ... fix
+  // alignment so everything is consistent"); a single credential never
+  // wraps, only "A or B" may break, and only at the "or"
+  const parts = main.split(/ or /);
+  return (
+    <span className="flex flex-wrap items-baseline gap-x-[6px]">
+      <span
+        className="text-[15px] leading-[22px] font-extrabold tabular-nums sm:text-[20px] sm:leading-[26px] xl:text-[22px] xl:leading-[28px]"
+        style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 55%, #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+      >
+        {parts.map((p, i) => (
+          <span key={i}>
+            {i > 0 && " or "}
+            <span className="whitespace-nowrap">{p}</span>
+          </span>
+        ))}
+      </span>
+      {m && <span className="text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>a year</span>}
+    </span>
+  );
 }
 
 // ---- Key figure: production's gradient numeral, in the world accent -------
@@ -278,37 +337,11 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
 // graphs). State on the left, the figure on the right; a label like "more
 // than usual" stays plain text, a pay figure gets the accent gradient. ----
 
-function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; accent: string }) {
-  // Custom-designed edge case, 22 Sept 2026: a `payByState` object can
-  // exist (so the tab doesn't fall back to TabComingSoon) while its own
-  // `best` array is empty -- a partial-content gap one level down, same
-  // class as DotList's blank-item fallback. Without this, "Best states"
-  // rendered as either a bare heading over nothing, or (with no
-  // `yourStates` either) a section with a tab toggle and no content
-  // beneath it at all.
-  if (rows.length === 0) {
-    return <p className={`${SMALL} italic`} style={{ color: "var(--muted-foreground)" }}>Pay data coming soon.</p>;
-  }
-  return (
-    <ul className="flex flex-col">
-      {rows.map((row) => {
-        const isFigure = /\d/.test(row.pay);
-        return (
-          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-            <span className={`${SMALL} min-w-0 truncate`} style={{ color: "var(--foreground)" }}>{row.state}</span>
-            {isFigure ? <Figure accent={accent}>{row.pay}</Figure> : <span className={`${SMALL} flex-none`} style={{ color: "var(--muted-foreground)" }}>{row.pay}</span>}
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
 // Your states / Whole country: one view switch over the same state data.
-// Shared by the live Pay tab and the outlook lab's Pay & Outlook tab.
-function PayViewToggle({ value, onChange }: { value: "states" | "country"; onChange: (v: "states" | "country") => void }) {
+// Shared by the Pay & Outlook tab and careers without an outlook (Pay only).
+export function PayViewToggle({ value, onChange, label = "Pay by state view", pill = "career-pay-view-pill" }: { value: "states" | "country"; onChange: (v: "states" | "country") => void; label?: string; pill?: string }) {
   return (
-    <div role="tablist" aria-label="Pay by state view" className="dm-glass flex items-center gap-[2px] rounded-[13px] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+    <div role="tablist" aria-label={label} className="dm-glass flex items-center gap-[2px] rounded-[13px] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
       {([["states", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
         <button
           key={id}
@@ -325,7 +358,7 @@ function PayViewToggle({ value, onChange }: { value: "states" | "country"; onCha
              animate and slide over when we switch"). */}
           {value === id && (
             <motion.span
-              layoutId="career-pay-view-pill"
+              layoutId={pill}
               aria-hidden
               className="absolute inset-0 rounded-[10px]"
               style={{ background: "var(--foreground)" }}
@@ -403,49 +436,41 @@ function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null
   );
 }
 
-// The degree sheet: the three door questions, the note, the "not the only
-// route" line, and how people in the job actually finished, as bars.
-function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonNullable<FactDetails["degree"]>; onClose: () => void }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-  if (typeof document === "undefined") return null;
-  return createPortal(
-    <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title" style={{ fontFamily: "var(--font-body)", background: "transparent" }}>
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.62)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
-      <div
-        className="dm-scroll relative z-[1] flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
-        style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", color: "var(--foreground)" }}
-      >
-        <div className="flex items-start justify-between gap-[var(--space-4)]">
-          <div className="flex flex-col gap-[2px]">
-            <h2 id="degree-sheet-title" className={BIG} style={DISPLAY}>What you need to get in</h2>
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{career}</p>
+// The degree sheet behind Typical degree's (i), in the What it pays sheet's
+// frame (Chandu, 20 Oct 2026: "redesign the typical degree (i) popup to be
+// consistent with the what it pays pop up too"): the credential as the
+// headline, how many get in without a bachelor's when the door asks for one,
+// the two door questions side by side, the note, and a row into Education.
+// Same data as before; nothing dropped.
+function DegreeSheet({ career, accent, detail, source, onMore, onClose }: { career: string; accent: string; detail: NonNullable<FactDetails["degree"]>; source?: string; onMore?: () => void; onClose: () => void }) {
+  const short = shortDegree(detail.doorAsksFor);
+  const aboveBachelor = /bachelor|master|doctor|law/i.test(short);
+  return (
+    <FactSheet career={career} accent={accent} title="What you need to get in" source={source} more={onMore ? { label: "Where to study", onClick: onMore } : undefined} onClose={onClose}>
+      <SheetHero
+        label="Typical degree"
+        accent={accent}
+        value={short.split(/ or /).map((p, i) => (
+          <span key={i}>
+            {i > 0 && " or "}
+            <span className="whitespace-nowrap">{p}</span>
+          </span>
+        ))}
+        line={aboveBachelor && detail.noBachelorPct ? `${detail.noBachelorPct} of people in this job got in without a bachelor's degree.` : undefined}
+      />
+      <dl className="grid grid-cols-1 gap-[16px] sm:grid-cols-2">
+        {[["Experience first", detail.experienceFirst], ["Training after hiring", detail.trainingAfterHiring]].map(([k, v]) => (
+          <div key={k} className="flex flex-col gap-[2px]">
+            <dt className="text-[12px] leading-[16px] font-semibold uppercase tracking-[0.04em]" style={{ color: "var(--muted-foreground)" }}>{k}</dt>
+            <dd className="text-[16px] leading-[22px] font-bold">{v}</dd>
           </div>
-          <IconTip label="Close">
-            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)" }}>
-              <X className="h-4 w-4" aria-hidden />
-            </button>
-          </IconTip>
-        </div>
-
-        <dl className="flex flex-col gap-[8px]">
-          {[["The door asks for", detail.doorAsksFor], ["Experience first?", detail.experienceFirst], ["Training after hiring", detail.trainingAfterHiring]].map(([k, v]) => (
-            <div key={k} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-[var(--space-4)]">
-              <dt className={SMALL} style={{ color: "var(--muted-foreground)" }}>{k}</dt>
-              <dd className={`${SMALL} font-semibold`}>{v}</dd>
-            </div>
-          ))}
-        </dl>
-
-        <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{detail.note}</p>
-      </div>
-    </div>,
-    document.body,
+        ))}
+      </dl>
+      {/* a note that points at "the mix below" describes a chart this sheet
+         doesn't draw, and says what the without-a-bachelor's line above
+         already says, so only standalone notes show */}
+      {detail.note && !/\bbelow\b/i.test(detail.note) && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{detail.note}</p>}
+    </FactSheet>
   );
 }
 
@@ -470,7 +495,7 @@ function viewModel(career: ResolvedCareer) {
     whatTheyDo,
     facts: facts.filter((f) => f.value && f.value !== PLACEHOLDER && !/people doing|jobs open/i.test(f.label)),
     payByState: p?.payByState,
-    /** every authored fact, before the strip's filter (the outlook lab reads the counts) */
+    /** every authored fact, before the strip's filter (Pay & Outlook reads the counts) */
     allFacts: facts,
     knowAbout: p?.knowAbout ?? [],
     goodAt: p?.goodAt ?? [],
@@ -489,33 +514,23 @@ function viewModel(career: ResolvedCareer) {
 // The header's summary/scenario line and the Typical Degree/Typical Pay
 // facts stay outside the tab system, always visible above it, the same way
 // College Detail keeps its photo header and action row above its own tabs.
-type CareerTab = "overview" | "education" | "ladder" | "pay" | "software";
+// 21 Oct 2026 (Chandu): "rename education to education & skills and fold
+// software and skills into that tab". Four tabs: the skills lists left
+// Overview and Software lost its own tab; Pay becomes "Pay & Growth" when
+// the career has a BLS outlook. An old ?tab=software link lands on
+// Education & Skills.
+type CareerTab = "overview" | "education" | "ladder" | "pay";
 const CAREER_TABS: { key: CareerTab; label: string }[] = [
   { key: "overview", label: "Overview" },
-  { key: "education", label: "Education" },
+  { key: "education", label: "Education & Skills" },
   { key: "ladder", label: "Career Ladder" },
   { key: "pay", label: "Pay" },
-  { key: "software", label: "Software" },
 ];
 
-// The live page picks its version (lib/careerDetailV2, DEMO-ONLY): this
-// file is the page as it was on the morning of 20 Oct 2026, the default;
-// CareerDetailLabV2 is that day's redesign, behind the v2 switch (Chandu:
-// "put the new career detail under a v2 toggle. Revert the default view to
-// how it was before"). A wrapper, so each version keeps its own hooks.
-export function CareerDetailLab(props: { slug: string; live?: boolean; outlook?: boolean }) {
-  const v2 = useCareerDetailV2();
-  return v2 && !props.outlook ? <CareerDetailLabV2 slug={props.slug} live={props.live} /> : <CareerDetailLabV1 {...props} />;
-}
-
-function CareerDetailLabV1({ slug, live = false, outlook = false }: {
+export function CareerDetailLab({ slug, live = false }: {
   slug: string;
   /** the live /career route: no lab dock, links stay on the live routes */
   live?: boolean;
-  /** DEMO-ONLY: the Career outlook lab (/outlook-lab, hamburger only): the
-   *  Pay tab becomes "Pay & Outlook" and growth joins the quick facts. Off
-   *  everywhere else, so the live page renders exactly as before. */
-  outlook?: boolean;
 }) {
   const router = useRouter();
   const career = resolveCareer(slug);
@@ -526,9 +541,6 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
   const inSheet = useInSheet();
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [openFact, setOpenFact] = useState<keyof FactDetails | null>(null);
-  // Pay by state: the list of your states and the best states, or the whole
-  // country as a shaded map. A view switch over the same data.
-  const [payView, setPayView] = useState<"states" | "country">("states");
   // the (i) that opened the popover, kept in state (not a ref) so render can read it
   const [factAnchor, setFactAnchor] = useState<HTMLElement | null>(null);
   const [tab, setTab] = useState<CareerTab>("overview");
@@ -541,7 +553,8 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
   useEffect(() => {
     if (inSheet) return;
     const q = new URLSearchParams(window.location.search);
-    const want = q.get("tab") as CareerTab | null;
+    const asked = q.get("tab");
+    const want = (asked === "software" ? "education" : asked) as CareerTab | null;
     if (!want || !CAREER_TABS.some((t) => t.key === want)) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time URL read after mount
     setTab(want);
@@ -587,18 +600,15 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
 
   const vm = viewModel(career);
   const pay = statePay(career.slug, pickedStates, vm.payByState);
-  // Outlook lab: the US outlook from the profile's own BLS figures. The live
-  // strip shows degree and pay only; the lab adds growth and yearly openings
-  // back as headline facts (they lead into the tab that explains them)
-  const national = outlook ? nationalOutlook(vm.allFacts, vm.details?.openings?.note) : null;
-  const facts = national
-    ? [...vm.facts, { label: `Job growth by ${national.year}`, value: pct(national.growthPct) }, { label: "Jobs open each year", value: count(national.openings) }]
-    : vm.facts;
-  const tabs = outlook ? CAREER_TABS.map((t) => (t.key === "pay" ? { ...t, label: "Pay & Outlook" } : t)) : CAREER_TABS;
-  // growth and openings open the tab that explains them (they had an (i))
-  const toOutlook = (label: string) => national && /growth|open each year/i.test(label);
-  const openOutlook = () => {
-    setTab("pay");
+  // The US outlook from the profile's own BLS figures. It lives in the Pay &
+  // Growth tab only (21 Oct 2026, Chandu: "Lets remove the outlook stuff
+  // from here", the fact strip): the strip is back to degree and pay.
+  const national = nationalOutlook(vm.allFacts, vm.details?.openings?.note);
+  const facts = vm.facts.map((f) => (/degree/i.test(f.label) ? { ...f, value: shortDegree(f.value) } : f));
+  const tabs = national ? CAREER_TABS.map((t) => (t.key === "pay" ? { ...t, label: "Pay & Growth" } : t)) : CAREER_TABS;
+  const openOutlook = () => openTab("pay");
+  function openTab(key: CareerTab) {
+    setTab(key);
     window.requestAnimationFrame(() => {
       const row = document.getElementById("career-tabs");
       row?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -607,7 +617,7 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
       const strip = on?.closest<HTMLElement>("[role=tablist]") ?? on?.parentElement;
       if (on && strip) strip.scrollTo({ left: on.offsetLeft - (strip.clientWidth - on.offsetWidth) / 2, behavior: "smooth" });
     });
-  };
+  }
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -708,21 +718,20 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
           // column inside the same full-bleed bordered panel -- reproduced
           // live with a synthetic thin-career test entry. grid-cols-1 for
           // the single-fact case only; 2/3/4-fact layouts are unchanged.
-          <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] ${facts.length === 1 ? "grid-cols-1" : "grid-cols-2"} rounded-[var(--radius-lg)] border ${facts.length === 1 ? "" : facts.length === 3 ? "sm:grid-cols-3" : facts.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-4"}`} style={PANEL}>
+          <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] ${facts.length === 1 ? "grid-cols-1" : "grid-cols-2"} rounded-[var(--radius-lg)] border ${facts.length === 1 ? "" : facts.length === 3 ? "sm:grid-cols-3" : facts.length <= 2 ? "sm:grid-cols-2" : "lg:grid-cols-4"}`} style={PANEL}>
             {facts.map((fact, i) => (
               <div
                 key={fact.label}
                 data-fact-cell
-                className={`relative flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${facts.length === 3 ? "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
+                className={`relative flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${facts.length >= 4 ? "lg:border-t-0 lg:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
                 style={{ borderColor: "var(--glass-border)" }}
               >
-                {/* the (i) always sits top-right of the cell, on the label's
-                   first line, whether the label wraps or not; the figure
-                   always sits at the bottom, so figures line up across cells */}
-                <span className="flex items-start justify-between gap-[6px]">
-                  <span className={`${LABEL} min-w-0`}>{fact.label}</span>
-                  {toOutlook(fact.label) && <ChevronRight className="mt-[3px] h-[16px] w-[16px] flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />}
-                  {!toOutlook(fact.label) && factKey(fact.label) && vm.details?.[factKey(fact.label)!] && (
+                {/* label row is one fixed height whether it ends in an (i) or
+                   a chevron, and every figure is one size, so all figures
+                   share one line across the strip */}
+                <span className="flex min-h-[24px] items-center justify-between gap-[6px]">
+                  <span className="min-w-0 text-[14px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.label}</span>
+                  {factKey(fact.label) && vm.details?.[factKey(fact.label)!] && (
                     <IconTip label={`About ${fact.label.toLowerCase()}`}>
                       <button
                         type="button"
@@ -732,7 +741,7 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
                           setFactAnchor(e.currentTarget);
                           setOpenFact((v) => (v === factKey(fact.label) ? null : factKey(fact.label)));
                         }}
-                        className="dm-quiet -mr-[4px] -mt-[1px] flex size-6 flex-none cursor-pointer items-center justify-center rounded-full"
+                        className="dm-quiet -mr-[4px] flex size-6 flex-none cursor-pointer items-center justify-center rounded-full"
                         style={{ color: "var(--muted-foreground)" }}
                       >
                         <Info className="h-[15px] w-[15px]" aria-hidden />
@@ -740,23 +749,19 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
                     </IconTip>
                   )}
                 </span>
-                <span className="mt-auto"><Figure accent={accent}>{fact.value}</Figure></span>
-                {/* outlook lab: the whole cell opens Pay & Outlook */}
-                {toOutlook(fact.label) && (
-                  <button type="button" aria-label={`${fact.label}: see Pay & Outlook`} onClick={openOutlook} className="absolute inset-0 cursor-pointer transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_5%,transparent)]" />
-                )}
+                <StripFigure accent={accent} value={fact.value} />
+                {/* pay only: growth and openings live in the Pay & Growth
+                   tab, so the sheet's last row goes there */}
                 {openFact === "pay" && factKey(fact.label) === "pay" && vm.details?.pay && (
-                  <FactPopover anchor={factAnchor} onClose={() => setOpenFact(null)}>
-                    <dl className="flex flex-col gap-[6px]">
-                      {[["Starting out", vm.details.pay.starting], ["Typical", vm.details.pay.typical], ["Top earners", vm.details.pay.top]].map(([k, v]) => (
-                        <div key={k} className="flex items-baseline justify-between gap-[var(--space-4)]">
-                          <dt className={SMALL} style={{ color: "var(--muted-foreground)" }}>{k}</dt>
-                          <dd><Figure accent={accent}>{v}</Figure></dd>
-                        </div>
-                      ))}
-                    </dl>
-                    {vm.details.pay.note && <p className={`${TINY} mt-[10px]`} style={{ color: "var(--muted-foreground)" }}>{vm.details.pay.note}</p>}
-                  </FactPopover>
+                  <PaySheet
+                    career={career.title}
+                    accent={accent}
+                    pay={vm.details.pay}
+                    source={/Bureau of Labor Statistics/i.test(vm.sources ?? "") ? "U.S. Bureau of Labor Statistics" : undefined}
+                    onMore={national || pay ? () => { setOpenFact(null); openOutlook(); } : undefined}
+                    moreLabel={national ? "Pay and growth by state" : "Pay by state"}
+                    onClose={() => setOpenFact(null)}
+                  />
                 )}
                 {openFact === "openings" && factKey(fact.label) === "openings" && vm.details?.openings && (
                   <FactPopover anchor={factAnchor} onClose={() => setOpenFact(null)}>
@@ -772,46 +777,12 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
           <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={tabs} grow />
         </div>
 
-        {tab === "pay" && !pay && !national && <TabComingSoon title={outlook ? "Pay & Outlook" : "Pay"} career={career.title} />}
+        {tab === "pay" && !pay && !national && <TabComingSoon title="Pay" career={career.title} />}
 
-        {/* the Pay by state section, the same in the outlook lab as on the
-           live page (Chandu, 19 Oct 2026: "that was approved so lets not
-           edit that too much"); the lab's outlook sections follow it */}
-        {tab === "pay" && pay && (
-          <Section
-            id="pay"
-            title={pay.title ?? "Pay by state"}
-            action={
-              <PayViewToggle value={payView} onChange={setPayView} />
-            }
-          >
-            {payView === "states" ? (
-              <div className="flex flex-col gap-[var(--space-6)]">
-                {pay.yourStates && pay.yourStates.length > 0 && (
-                  <div className="flex flex-col gap-[var(--space-2)]">
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Your states</h3>
-                    <PayRows rows={pay.yourStates} accent={accent} />
-                  </div>
-                )}
-                <div className="flex flex-col gap-[var(--space-2)]">
-                  {pay.yourStates && pay.yourStates.length > 0 && <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Best states</h3>}
-                  <PayRows rows={pay.best} accent={accent} />
-                </div>
-              </div>
-            ) : (
-              <PayMap
-                typical={vm.typicalPay}
-                rows={pay.all ?? [...(pay.yourStates ?? []), ...pay.best]}
-                complete={!!pay.all}
-                yourState={pay.yourStates?.[0]?.state}
-                accent={accent}
-                seed={career.slug}
-              />
-            )}
-          </Section>
+        {/* Pay & Growth: one section, one map (see PayGrowth) */}
+        {tab === "pay" && (pay || national) && (
+          <PayGrowth slug={career.slug} accent={accent} typical={vm.typicalPay} pay={pay ?? null} national={national} yourState={pay?.yourStates?.[0]?.state ?? pickedStates[0]} />
         )}
-
-        {tab === "pay" && national && <OutlookTab slug={career.slug} accent={accent} national={national} picked={pickedStates} />}
 
         {tab === "ladder" && vm.ladder.length === 0 && <TabComingSoon title="Career ladder" career={career.title} />}
 
@@ -830,73 +801,49 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
            Detail's own Overview tab groups (Key Facts, one panel per idea),
            just carried over as this page's existing three sections rather
            than reinvented. */}
-        {tab === "overview" && !vm.whatTheyDo && !vm.scenario && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && <TabComingSoon title="Overview" career={career.title} />}
+        {tab === "overview" && !vm.whatTheyDo && !vm.scenario && <TabComingSoon title="Overview" career={career.title} />}
 
-        {tab === "overview" && (vm.whatTheyDo || vm.scenario || vm.knowAbout.length > 0 || vm.goodAt.length > 0) && (
+        {tab === "overview" && (vm.whatTheyDo || vm.scenario) && (
+          <Section id="what-they-do" title="What they actually do">
+            {vm.scenario && <p className={`${SMALL} max-w-[68ch]`}>{vm.scenario}</p>}
+            {vm.whatTheyDo && <p className={`${SMALL} max-w-[68ch]`}>{vm.whatTheyDo}</p>}
+          </Section>
+        )}
+
+        {/* Education & Skills (21 Oct 2026): where to study, then the two
+           skills lists side by side (the same two-list shape Education
+           uses), then the software. Ids stay, so ?section=good-at still
+           lands. */}
+        {tab === "education" && !vm.education && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && vm.software.length === 0 && <TabComingSoon title="Education & Skills" career={career.title} />}
+
+        {tab === "education" && (
           <div className="flex flex-col gap-[var(--space-6)]">
-            {(vm.whatTheyDo || vm.scenario) && (
-              <Section id="what-they-do" title="What they actually do">
-                {vm.scenario && <p className={`${SMALL} max-w-[68ch]`}>{vm.scenario}</p>}
-                {vm.whatTheyDo && <p className={`${SMALL} max-w-[68ch]`}>{vm.whatTheyDo}</p>}
+            {vm.education && (
+              <Section id="education" title="Education">
+                {/* dreamari.com's two lists, every row a door: see WhereToStudy */}
+                <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerSlug={career.slug} />
               </Section>
             )}
-            {vm.knowAbout.length > 0 && (
-              <Section id="know-about" title="What you need to know about">
-                <DotList items={vm.knowAbout} accent={accent} />
-              </Section>
-            )}
-            {vm.goodAt.length > 0 && (
-              <Section id="good-at" title="What you would need to be good at">
-                <DotList items={vm.goodAt} accent={accent} />
+            {/* one Skills section (21 Oct 2026, "this is way too cluttered",
+               "Remove all redundant and extra copy"): three short-headed
+               groups of tags instead of two sections of long bullet lists */}
+            {(vm.knowAbout.length > 0 || vm.goodAt.length > 0 || vm.software.length > 0) && (
+              <Section id="skills" title="Skills">
+                {([["know-about", "Know about", vm.knowAbout], ["good-at", "Good at", vm.goodAt], ["software", "Software", vm.software]] as const).map(([id, label, items]) =>
+                  items.length > 0 ? (
+                    <div key={id} id={id} className="flex scroll-mt-[96px] flex-col gap-[var(--space-2)]">
+                      <h3 className="text-[16px] leading-[22px] font-semibold" style={{ ...DISPLAY, color: accent }}>{label}</h3>
+                      <ul className="flex flex-wrap gap-[8px]">
+                        {items.filter(Boolean).map((t) => (
+                          <li key={t} className="rounded-[10px] border px-[12px] py-[6px] text-[14px] leading-[20px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{t}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null,
+                )}
               </Section>
             )}
           </div>
-        )}
-
-        {tab === "software" && vm.software.length === 0 && <TabComingSoon title="Software" career={career.title} />}
-
-        {tab === "software" && vm.software.length > 0 && (
-          <Section id="software" title="Software you would use">
-            <DotList items={vm.software} accent={accent} />
-          </Section>
-        )}
-
-        {tab === "education" && !vm.education && <TabComingSoon title="Education" career={career.title} />}
-
-        {tab === "education" && vm.education && (
-          <Section id="education" title="Education">
-            <div className="grid gap-[var(--space-6)] sm:grid-cols-2">
-              <div className="flex flex-col gap-[var(--space-3)]">
-                <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>What people study for it</h3>
-                <ul className="flex flex-col gap-[var(--space-2)]">
-                  {vm.education.studies.map((s) => (
-                    <li key={s.name} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
-                      <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
-                      {s.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex flex-col gap-[var(--space-3)]">
-                <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Where you would study it</h3>
-                {/* the credential in words (no school counts, Josh's notes);
-                   each one links to its college page. Those pages are not
-                   designed yet, so the links land on the College Lookup shell
-                   with the credential carried across as a placeholder. */}
-                <ul className="flex flex-col gap-[var(--space-2)]">
-                  {vm.education.where.map((w) => (
-                    <li key={w.credential} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
-                      <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
-                      <Link href={w.href ?? `/colleges?type=${/certif/i.test(w.credential) ? "trade" : /associate/i.test(w.credential) ? "2-year" : "4-year"}`} className="dm-link flex min-h-[28px] items-center gap-[4px]" style={{ color: "var(--foreground)" }}>
-                        {w.credential}
-                        <ChevronRight className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: accent }} />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </Section>
         )}
 
         {/* Not for me, after the student has read about the career, not
@@ -925,20 +872,26 @@ function CareerDetailLabV1({ slug, live = false, outlook = false }: {
                it just hard-clipped at the container edge (16 Sept 2026). */}
             <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
-                <PosterCard key={c.title} career={c} onClick={() => (outlook ? router.push(`/outlook-lab/${careerSlug(c.title)}`) : (live && openCareerPeek(careerSlug(c.title))) || router.push(careerHref(careerSlug(c.title), live)))} />
+                <PosterCard key={c.title} career={c} onClick={() => (live && openCareerPeek(careerSlug(c.title))) || router.push(careerHref(careerSlug(c.title), live))} />
               ))}
             </div>
           </Section>
         )}
 
         {openFact === "degree" && vm.details?.degree && (
-          <DegreeSheet career={career.title} detail={vm.details.degree} onClose={() => setOpenFact(null)} />
+          <DegreeSheet
+            career={career.title}
+            accent={accent}
+            detail={vm.details.degree}
+            source={/Bureau of Labor Statistics/i.test(vm.sources ?? "") ? "U.S. Bureau of Labor Statistics" : undefined}
+            onMore={vm.education ? () => { setOpenFact(null); openTab("education"); } : undefined}
+            onClose={() => setOpenFact(null)}
+          />
         )}
 
         {vm.sources && (
           <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{vm.sources}</p>
         )}
-        {!inSheet && <CareerDetailV2Switch />}
       </main>
 
       {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}

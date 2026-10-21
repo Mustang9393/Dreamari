@@ -1,3 +1,75 @@
+## 2026-10-21: Career Detail, one page: Pay & Growth, Education & Skills, no v1/v2 switch
+
+**Why (Chandu):** on the fact strip, "Lets remove the outlook stuff from here"; on the Pay & Outlook tab, "can we combine pay and outlook somehow? just one map by default and pay and growth instead of outlook and somehow lets just show 1 or 2 main line that describes the growth of the career ... when we hover we can show pay, growth and openings with an arrow to show increase/decrease where we show the pay now", with "use your own judgment to give me the best possible solution"; "rename education to education & skills and fold software and skills into that tab"; "we can remove v2 toggle for career detail and default to this view".
+
+- **One Career Detail page.** The 20 Oct v1 (`CareerDetailLab.tsx` as of 87c005e9), the switch (`lib/careerDetailV2.ts`, `career/CareerDetailV2Switch.tsx`) and `outlook-lab/OutlookTab.tsx` are deleted; `CareerDetailLabV2.tsx` is now `actions-lab/CareerDetailLab.tsx`, exporting `CareerDetailLab`.
+- **Fact strip:** Typical degree and Typical pay only; growth and openings live in the Pay & Growth tab.
+- **Pay & Growth** (`career/PayGrowth.tsx`, replaces the Pay by state section and `career/OutlookTab.tsx`): one map coloured by pay (a By pay / growth / openings dropdown, then a colour legend and dimmed figures, were tried and removed: Chandu found the colours unclear while the numbers stayed put), and above it the chosen state's three figures (the student's state until another is hovered or tapped) in the gradient numeral, each with an arrow against the US: a trend-line icon on growth, plain up/down arrows on pay and openings (openings against the state's share of US jobs, `expectedOpenings` in `outlook.ts`). After review ("this is way too cluttered", "Remove all redundant and extra copy", "the highlight border thing isnt needed", "remove the 5% more jobs in US thing"): no US line or chart, no captions or hint, no top-states list, no Your states list, figures not buttons. CareerOneStop ties wages and projections to one location the same way; Indeed and LinkedIn mark local pay against national with an arrow. `PayMap` gained `payValues`, controlled `active`/`onActive` and `renderReadout`.
+- **Education & Skills:** Education (See N schools), then one Skills section with three short-headed tag groups: Know about, Good at, Software (was two bullet-list sections plus a Software tab). Overview keeps What they actually do. `?tab=software` lands on Education & Skills; `#know-about`, `#good-at`, `#software` ids kept.
+- Checked: tsc, eslint; dark mode at ~580px: Pay & Growth by pay and by growth with a hovered state, top states, Education & Skills. Not checked: desktop width, light mode, Windows/Chromebook. Dev server ran from the terminal on :3016 (all five preview slots were taken by other chats).
+## 2026-10-21: Company video captions and transcripts (WCAG B1)
+
+**Why.** B1 was the last AA blocker in the status report. Chandu: "can we generate them?", then: "Fix the flagged lines you're confident about, wire the captions and transcripts into the players now, and push. I'll spot-check the rest."
+
+**What changed.**
+- **Captions.** All 10 company reels were transcribed locally with Whisper small.en (faster-whisper, the model already cached on the Mac); nothing was uploaded.
+  - The timed WebVTT files are in `public/videos/app/captions/`, placed at 78% height. A `video::cue` style in globals.css gives them a solid backing.
+  - Fixed with certainty: "Kellenova" is now "Kellanova".
+  - The JPMorgan Ohio clip is music only, so it is captioned "[Upbeat music]", and its transcript describes the tour from its frames.
+- **Transcripts.** They are in `src/components/app/videoTranscripts.ts`, with the `captionsFor` and `transcriptFor` helpers.
+- **Players.** `VideoTranscript.tsx` provides `<CaptionTrack>` (default on) and a "Transcript" disclosure. They are wired into the CompanyVideoCards player, the Explore For You reel, Profile's saved-video player and the counselor v5 Videos player. The hover preview card stays aria-hidden and uncaptioned.
+
+**Still to check by ear.**
+- AT&T: "Event pop right now", "leaving to AT&T heaven".
+- EY 2: "thinking involving data science".
+- JPMC London: "What bros?".
+- Kellogg's: "horse-free snacks", "Look at this plan".
+- WildBrain: three lines.
+
+**Validation.**
+- tsc is clean. eslint has no new issues. The production build passes.
+- In the browser pane, the Mars/Kellanova and JPMC London players show their cues on time ("Let's go. Tell me this is not the most beautiful office you've ever seen."), and the Transcript disclosure opens.
+- The Kellanova clip already has burned-in word captions; the closed captions sit under them.
+
+## 2026-10-21: "Training you'll need", not "The degree you'll need"
+
+- Career Education's credential list is now headed "Training you'll need" (WhereToStudy, CareerPeek, CareerDetailExperience), and each row's button reads "See N schools".
+- Why: Chandu, "dont say degree you'll need. It also included trade school, lesser know routes etc so it cant be exclusively about degree." The rows include certificates and apprenticeships, so "degree" was wrong for trades.
+- Verified on /career/carpenter (two certificate rows, "See 1 school"). Lint clean.
+
+## 2026-10-21: Landing hero: Dreamy lower, wider, livelier, plus the night sky
+
+**Why.** Chandu: "dreamy sits too far up and overlaps the scroll down to learn more text. I want dreamy to sit lower, it can be cropped more. We just want the mouth to be visible and the eyes. And it needs to take up more space horizontally ... make it feel more premium than an afterthought and make it more engaging." Then: "add the stars to the landing page too but have them be more animated and engaging but not distracting."
+
+**What changed.**
+- **Size and crop.**
+  - `--mascot-size` (marketing/tokens.css) is now width-driven: 50vw, 88vw under 640px, between 280 and 680px. A height term keeps the visible face under the copy.
+  - The crop is `VISIBLE_FRACTION` .715 (Mascot.tsx), so the bezel cuts just under the mouth. The stage mask runs 69.5% to 79%.
+- **Scroll line removed.** "Scroll Down To Learn More" was sitting on Dreamy's head. Dreamy rising from the edge now does that job.
+- **New touches.**
+  - A horizon glow (`data-hero-horizon`).
+  - A rise-in on load (`.mkt-mascot-rise`).
+  - A perk when Start Journey is hovered or focused (`[data-hero-cta]` with `:has()`, `.mkt-mascot-perk`).
+  - The float is now `motion-safe`.
+- **Night sky.** NightSky has a `lively` mode: cursor parallax by star depth, a shooting star every 9-17s, and a slightly faster turn and twinkle. It sizes to its box. It is mounted inside the hero, over main's opaque dusk surface gradient and under the copy.
+- **Hero height.** The hero min-height is 100dvh + 140px. That gradient fades out over its last 12%, which showed as a dark strip under Dreamy when the hero was exactly one screen tall.
+
+**Validation.**
+- tsc and eslint are clean.
+- Screenshots at 1200x741, 1440x900, 1920x1080 and 390x844.
+- The perk works on hover and on keyboard focus. Under reduced motion there is no perk, rise or float.
+- A shooting star was observed at about 7.4s.
+- Still open: the CTA's BorderBeam spin runs under reduced motion. It is a shared component.
+
+## 2026-10-21: CTA names the goals; career Education says the degree and leads to colleges
+
+**Why (Chandu):** "the cta says see my top 3 but we're taking them to the about me section to select their career and college goal so we need to fix that", and "for career detail page we need to update the copy of 'where you would study' because it shows bachelors degree etc and not where they would study, we still wanna show bachelors etc and lead them from there to colleges they can consider".
+
+- **"Choose my goals"** replaces "See Top 3" on the bar that appears when a career is added to Top 3 (labStore.ts, both the add and the swap), and "Choose my career goal" on Match's last button (V2Flow.tsx, demo). Both land on About Me, which asks for the Career Goal and the College Goal. The Flow Lab keeps "See my Top 3" (it ends on its own Top 3 screen); /match-lab's "Compare My Top 3" is a lab page and was left.
+- **Career page Education** (the default v1, `CareerDetailLab`): the hand-built two lists are replaced by `WhereToStudy`, the version v2 already used. "What people study for it" stays; "Where you would study it" becomes **"The degree you'll need"**: each credential (Bachelor's degree, Master's degree...) with a "See N colleges" button that opens the schools that teach it (training on the job says "no school needed"). Same heading in v2, the older CareerDetailExperience and the career sheet (CareerPeek, whose rows now say "See N colleges").
+- The "See N colleges" buttons were pills (WhereToStudy was only in the lab version when pills were removed); now 10px corners.
+- Checked: tsc, eslint; Investment Banking Education tab (`career-degree-you-need.jpg`: Bachelor's, See 53 colleges; Master's, See 47 colleges); the Top 3 bar label (added, read, undone). Pushed to main on Chandu's go-ahead.
+
 ## 2026-10-21: WCAG 2.2 AA Phase 1 (blockers B2-B9)
 
 **Why.** The status report (`docs/ACCESSIBILITY_STATUS_REPORT_2026-10-21.md`) listed nine things blocking a WCAG 2.2 AA claim. Chandu: "go: start Phase 1, the AA blockers B2-B9 (games first), and push the report commit with it." B1, the video captions, is content work and stays open.

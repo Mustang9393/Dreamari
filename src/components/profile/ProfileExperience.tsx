@@ -73,6 +73,7 @@ import { useTop3FlowV2 } from "@/lib/top3Flow";
 import { togglePlanDone, usePlanDone } from "@/lib/planDone";
 import { setQuietTips, useQuietTips } from "@/lib/quietTips";
 import { setTimersOff, useTimersOff } from "@/components/play/timers";
+import { CaptionTrack, VideoTranscript } from "@/components/app/VideoTranscript";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -3831,7 +3832,8 @@ export function VideosShelf() {
               <span className="flex min-w-0 flex-col"><span className="truncate text-[16px] font-bold">{nowPlaying.title}</span><span className="truncate text-[13px] opacity-80">{nowPlaying.company}</span></span>
               <button type="button" aria-label="Close" autoFocus onClick={() => setPlaying(null)} className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.3)", color: "#fff" }}><X className="h-5 w-5" aria-hidden /></button>
             </div>
-            <video src={nowPlaying.video} poster={nowPlaying.poster} controls autoPlay playsInline className="max-h-[calc(70dvh/var(--vz,1))] w-full rounded-[var(--radius-lg)] bg-black object-contain" />
+            <video src={nowPlaying.video} poster={nowPlaying.poster} controls autoPlay playsInline className="max-h-[calc(72dvh/var(--vz,1))] w-full rounded-[var(--radius-lg)] bg-black object-contain"><CaptionTrack video={nowPlaying.video} /></video>
+            <VideoTranscript video={nowPlaying.video} />
           </div>
         </div>,
         document.body,

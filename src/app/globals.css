@@ -2342,3 +2342,13 @@ label:has(> input[type="search"]:focus-visible) {
     background: Highlight !important;
   }
 }
+
+/* Company video captions (WCAG 1.2.2, 21 Oct 2026): a solid backing so the
+   words read over any frame, a touch smaller than the browser default so
+   two lines fit a 9:16 player. */
+video::cue {
+  background: rgba(5, 8, 20, 0.8);
+  color: #fff;
+  font-size: 0.85em;
+  line-height: 1.35;
+}

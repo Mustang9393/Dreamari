@@ -948,7 +948,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 </ul>
               </div>
               <div className="flex flex-col gap-[var(--space-3)]">
-                <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Where you would study it</h3>
+                <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Training you&apos;ll need</h3>
                 {/* the credential in words (no school counts, Josh's notes);
                    each one links to its college page. Those pages are not
                    designed yet, so the links land on the College Lookup shell

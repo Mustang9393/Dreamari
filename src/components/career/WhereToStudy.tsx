@@ -60,10 +60,10 @@ function CredentialRow({ href, label, n, loading, accent }: { href: string; labe
       <Link href={href} onClick={remember} className="group flex min-h-[52px] items-center justify-between gap-[var(--space-3)] py-[8px]" style={{ color: "var(--foreground)", ["--acc" as string]: accent }}>
         <span className={`${SMALL} min-w-0 font-semibold`}>{label}</span>
         {loading ? (
-          <span aria-hidden className="h-[34px] w-[136px] flex-none animate-pulse rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} />
+          <span aria-hidden className="h-[34px] w-[136px] flex-none animate-pulse rounded-[10px]" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} />
         ) : (
-          <span className="inline-flex h-[34px] flex-none items-center gap-[4px] rounded-full border bg-[color-mix(in_srgb,var(--acc)_12%,transparent)] pr-[10px] pl-[14px] text-[14px] font-semibold whitespace-nowrap tabular-nums transition-colors duration-150 group-hover:bg-[color-mix(in_srgb,var(--acc)_24%,transparent)] group-focus-visible:bg-[color-mix(in_srgb,var(--acc)_24%,transparent)]" style={{ borderColor: "color-mix(in srgb, var(--acc) 45%, transparent)", color: accent }}>
-            {n === null ? "See colleges" : `See ${n.toLocaleString("en-US")} ${n === 1 ? "college" : "colleges"}`}
+          <span className="inline-flex h-[34px] flex-none items-center gap-[4px] rounded-[10px] border bg-[color-mix(in_srgb,var(--acc)_12%,transparent)] pr-[10px] pl-[14px] text-[14px] font-semibold whitespace-nowrap tabular-nums transition-colors duration-150 group-hover:bg-[color-mix(in_srgb,var(--acc)_24%,transparent)] group-focus-visible:bg-[color-mix(in_srgb,var(--acc)_24%,transparent)]" style={{ borderColor: "color-mix(in srgb, var(--acc) 45%, transparent)", color: accent }}>
+            {n === null ? "See schools" : `See ${n.toLocaleString("en-US")} ${n === 1 ? "school" : "schools"}`}
             <ChevronRight aria-hidden className="h-[16px] w-[16px] transition-transform duration-150 group-hover:translate-x-[3px]" />
           </span>
         )}
@@ -93,7 +93,7 @@ export function WhereToStudy({ where, studies, accent, careerSlug }: { where: Wh
       </div>
 
       <div className="flex min-w-0 flex-col gap-[var(--space-3)]">
-        <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Where you would study it</h3>
+        <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Training you&apos;ll need</h3>
         <ul className="-mt-[8px] flex flex-col divide-y divide-[var(--glass-border)]">
           {where.map((w, i) => {
             if (!degreeOf(w.credential)) {
