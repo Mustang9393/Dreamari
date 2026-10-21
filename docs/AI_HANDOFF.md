@@ -1,3 +1,12 @@
+## 2026-10-21: Landing: no seam below the hero
+
+- `look-v2.css` landing changes:
+  - The hero sky (`[data-hero-surface]`) peaks at `#4a7aab` behind Dreamy (78%) and eases back down to the page navy `#131f36` by its bottom edge, ending opaque.
+  - The horizon light (`[data-hero-horizon]`) is centered behind Dreamy and gone before the crop. It was gated to dark only, but the landing is always dark, so the gate is removed.
+  - The marketing scope's `--background` goes from near-black `#000105` to `#131f36`, the colour the hero ends on.
+- Why: Chandu, "the landing page hard cuts the gradient above the fold and I see a sharp line and dark nothingness background when I scroll down past dreamy".
+- Cause: the hero faded to transparent inside its `overflow-hidden` section, with the horizon glow brightest at that crop line. Below it sat `#000105`, so the crop read as a bright edge over black.
+
 ## 2026-10-21: Sky: black above the aurora, blue wash up top
 
 - `look-v2.css`, dark sky (app and Build/Match), with three new layers over the gradient:

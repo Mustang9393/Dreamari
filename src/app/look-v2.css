@@ -69,7 +69,9 @@ html.look-v2.dark {
 /* The app's own token scope (marketing/tokens.css). Doubling the class beats
    tokens.css's .marketing-v2 block whatever the bundle order. */
 html.look-v2 .marketing-v2 {
-  --background: #000105;
+  /* the landing's page navy, the colour its hero ends on, so scrolling past
+     Dreamy lands on the same sky, not near-black (21 Oct 2026) */
+  --background: #131f36;
   --card: #0e1219; /* neutral blue-black, was indigo #151829 */
   --primary: #2f5fb1;
   --accent: #2f5fb1;
@@ -656,14 +658,25 @@ html.look-v2:not(.light) .event-card {
    body copy high up (on #1e375a, 5.7:1 at 74%) and the sky-blue button
    (3.6:1 against the light behind it). */
 html.look-v2 [data-landing-wash] {
-  background: #0f1c31 !important;
+  background: #131f36 !important;
 }
+/* The hero's sky peaks behind Dreamy and eases back down to the page's own
+   navy by its bottom edge (21 Oct 2026, Chandu: "the landing page hard cuts
+   the gradient above the fold and I see a sharp line and dark nothingness
+   background when I scroll down past dreamy"): it used to stop at its
+   brightest and fade to transparent inside the section's overflow crop, so
+   the crop line showed as a bright edge over flat navy. Ending opaque on
+   the page colour leaves nothing to cut. */
 html.look-v2 [data-hero-surface] {
   display: block !important;
   opacity: 1 !important;
-  background: linear-gradient(180deg, #111f36 0%, #172a46 22%, #1e375a 45%, #2b4b78 62%, #3a6290 76%, #4a7aab 88%, rgba(74, 122, 171, 0) 100%) !important;
+  background: linear-gradient(180deg, #111f36 0%, #172a46 20%, #1e375a 40%, #2b4b78 56%, #3a6290 68%, #4a7aab 78%, #44709f 84%, #34567f 90%, #22395a 95%, #131f36 100%) !important;
   -webkit-mask-image: none !important;
   mask-image: none !important;
+}
+/* the horizon light sits behind Dreamy and is gone before the crop */
+html.look-v2 [data-hero-horizon] {
+  background: radial-gradient(60% 46% at 50% 62%, rgba(122, 162, 255, 0.26) 0%, rgba(122, 162, 255, 0.08) 45%, transparent 75%) !important;
 }
 html.look-v2 [data-hero-glow] {
   display: none;
