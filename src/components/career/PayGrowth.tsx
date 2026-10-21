@@ -14,7 +14,8 @@
 // redundant and extra copy" and "the highlight border thing isnt needed":
 //   (No US growth line or chart: Chandu, "remove the 5% more jobs in US
 //   thing"; the arrows already read each state against the US.)
-//   1. One map, coloured by the dropdown: pay, growth or openings.
+//   1. One map, coloured by pay (a growth/openings dropdown was tried and
+//      removed: the numbers stayed put while the colours changed).
 //   2. Above the map, the chosen state's three figures, each with an arrow
 //      against the US (openings against the state's share of US jobs:
 //      "give the openings a year a trend arrow"; each arrow's label says so to
@@ -27,15 +28,12 @@
 
 import { useState } from "react";
 import { ArrowDown, ArrowUp, Minus, TrendingDown, TrendingUp } from "lucide-react";
-import { Listbox } from "@/components/app/Listbox";
 import { DISPLAY, Section } from "@/components/actions-lab/CareerDetailLab";
 import { formatPay, parsePay, PayMap, payValues } from "./PayMap";
 import { count, expectedOpenings, pct, stateOutlook, type NationalOutlook } from "./outlook";
 
 type Metric = "pay" | "growth" | "openings";
 const MUTED = { color: "var(--muted-foreground)" } as const;
-const PICKER = "dm-quiet h-[36px] rounded-[var(--radius-md)] border pr-[10px] pl-[12px] text-[13px] leading-[18px] font-semibold";
-const PICKER_STYLE = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 
 /** -1 below, 0 about the same, 1 above (within 3% counts as the same) */
 const vs = (v: number, us: number, band: number) => (Math.abs(v - us) <= band ? 0 : v > us ? 1 : -1);
@@ -49,7 +47,10 @@ export function PayGrowth({ slug, accent, typical, pay, national, yourState }: {
   national: NationalOutlook | null;
   yourState?: string;
 }) {
-  const [metric, setMetric] = useState<Metric>("pay");
+  // the map is coloured by pay only (21 Oct 2026, Chandu: the By pay /
+  // growth / openings dropdown left the numbers the same while the colours
+  // changed, which read as unclear; "lets remove ... the drop down")
+  const metric: Metric = "pay";
   const [active, setActive] = useState<string | null>(null);
 
   const usPay = parsePay(typical) ?? 0;
@@ -73,23 +74,6 @@ export function PayGrowth({ slug, accent, typical, pay, national, yourState }: {
     <Section
       id="pay"
       title={hasStates ? "Pay and growth by state" : (pay?.title ?? "Pay by state")}
-      action={
-        hasStates ? (
-          <Listbox
-            ariaLabel="Color the map by"
-            value={metric}
-            onChange={(v) => setMetric(v as Metric)}
-            options={[
-              { value: "pay", label: "By pay" },
-              { value: "growth", label: "By growth" },
-              { value: "openings", label: "By openings" },
-            ]}
-            className={`${PICKER} w-[136px]`}
-            style={PICKER_STYLE}
-            panelClassName="p-[6px]"
-          />
-        ) : undefined
-      }
     >
 
       {pay && (
