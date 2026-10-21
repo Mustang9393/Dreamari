@@ -13,8 +13,9 @@
 //
 // A small fragment shader: two curtains of light, each with a noise-driven
 // lower edge that folds and drifts, fine vertical rays, a hot near-white
-// lower edge and a falloff upward (ice cyan, then blue, with a trace of
-// aurora green-teal; never purple), composited with `screen` so it adds light to the sky and
+// lower edge and a falloff upward in the reference slide's pale blues, with
+// a trace of aurora green-teal; never purple. Subtle ("IT CAN BE A LITTLE
+// MORE SUBTLE TOO"), composited with `screen` so it adds light to the sky and
 // the stars still show through it.
 //
 // Cost (the Glossary Lab lesson: the lag there was GPU work): rendered at
@@ -87,18 +88,18 @@ vec3 curtain(vec2 uv, float aspect, float t, float k, float lift, float rayScale
   float along = 0.25 + 0.75 * smoothstep(0.2, 0.62, fbm(vec2(x * 0.7 - t * 0.03 + k * 7.0, 2.0 + k + t * 0.04)));
   // the glowing foot the beams rise from
   float i = (body * rays + 0.35 * exp(-abs(d) / 0.06)) * along;
-  // falloff upward: ice-white edge, cyan, then deep blue
+  // falloff upward: pale at the foot, deeper blue up high
   float h = clamp(d / 0.55, 0.0, 1.0);
-  vec3 c = mix(vec3(0.62, 0.95, 1.00), vec3(0.22, 0.76, 1.00), smoothstep(0.0, 0.15, h));
-  c = mix(c, vec3(0.20, 0.46, 1.00), smoothstep(0.12, 0.5, h));
-  c = mix(c, vec3(0.16, 0.36, 0.95), smoothstep(0.45, 1.0, h));
-  // a trace of real aurora green-teal, low in the beams and only in
-  // patches along the curtain (Chandu: "a tiny bit of aurora colors
-  // (NO purple) Very subtly too")
+  // the reference slide's own sky blues, pale at the foot, deeper up high
+  // (Chandu: "I think we've strayed way from this color too much")
+  vec3 c = mix(vec3(0.80, 0.88, 0.98), vec3(0.60, 0.74, 0.94), smoothstep(0.0, 0.15, h));
+  c = mix(c, vec3(0.42, 0.58, 0.86), smoothstep(0.12, 0.6, h));
+  // a trace of aurora green-teal, low and in patches ("a tiny bit of
+  // aurora colors (NO purple) Very subtly too")
   float tint = smoothstep(0.45, 0.8, noise(vec2(x * 0.8 - t * 0.02 + k * 4.0, 3.0)));
-  c = mix(c, vec3(0.30, 0.95, 0.72), 0.22 * tint * (1.0 - smoothstep(0.05, 0.45, h)));
+  c = mix(c, vec3(0.45, 0.85, 0.75), 0.12 * tint * (1.0 - smoothstep(0.05, 0.45, h)));
   // the hot lower edge
-  c += vec3(0.25, 0.32, 0.35) * exp(-abs(d) * 55.0);
+  c += vec3(0.16, 0.18, 0.2) * exp(-abs(d) * 55.0);
   return c * i;
 }
 
@@ -113,9 +114,9 @@ void main() {
   col *= mix(0.45, 1.0, edge) * smoothstep(1.0, 0.55, uv.y);
   // soft highlight roll-off, then the cap that keeps text on the sky AA:
   // full strength only at the foot, lower where text can sit
-  col = 1.0 - exp(-col * 1.5);
+  col = 1.0 - exp(-col * 0.85);
   // (scaled, not clipped per channel, so the colour keeps its hue)
-  float cap = mix(0.36, 0.17, smoothstep(0.08, 0.4, uv.y));
+  float cap = mix(0.12, 0.05, smoothstep(0.06, 0.35, uv.y));
   col *= min(1.0, cap / max(max(col.r, col.g), max(col.b, 1e-4)));
   gl_FragColor = vec4(col, 1.0);
 }

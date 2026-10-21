@@ -1,3 +1,13 @@
+## 2026-10-21: Sky back on the reference slide's colour; aurora quieter
+
+- Dark sky (`src/app/look-v2.css`) is the team's DREAMARI slide gradient again: one linear run `#131f36` → `#1a2c4a` → `#263f62` → `#34557f` → `#41699a`. That drops the cobalt top and the horizon radials from earlier today, and the page tokens follow.
+- `SkyAurora.tsx` is recolored to the slide's pale blues, with no cyan (the green-teal trace is kept at half). It's also much fainter: the brightness cap went from 0.36/0.17 to 0.12/0.05.
+- Why: Chandu, with the slide, "I think we've strayed way from this color too much", then "IT CAN BE A LITTLE MORE SUBTLE TOO", "FIX AND PUSH".
+- AA, sampled:
+  - Down to 80% of the screen height: white 6.5:1+, 82% captions 5.0:1+, links 4.8:1+.
+  - Bottom 10-20%: white 4.5-5.1:1 passes, but 82% captions and `#cbe0fb` links drop to 3.4-4.1:1. That's the reference's own brightness there.
+  - Open item: anything small that sits directly on the sky in the bottom fifth should use full white.
+
 ## 2026-10-21: Cobalt sky and a rendered aurora on the horizon
 
 - Dark Black & Blue sky (`src/app/look-v2.css`, app backdrop and Build/Match): the overhead navy moves from slate `#0f1c31` to cobalt `#0f2150`, and the page tokens follow. That's the same brightness the sky already had a third of the way down, so it stays dark mode, and stars and text keep their contrast (17:1 to 15.5:1).
