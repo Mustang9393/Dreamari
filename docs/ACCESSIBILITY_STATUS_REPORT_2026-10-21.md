@@ -26,15 +26,16 @@ The nine AA blockers B2–B9 are fixed and on main. Only **B1 (video captions an
 
 Game keyboard test (Investment Banker): the start card is modal; after Start, focus lands in the question box once the card has gone; number keys do nothing unless focus is in the box; the verdict is announced once ("Strong move. Plus 6 reputation, now 56. Learn the systems first…"); Continue moves focus to the next screen.
 
-**Still open from Phase 1:** B1 captions; the light-mode leftovers in section 5; counselor phone Insights axis labels; AI loading announcements; menus without arrow keys. Then Phase 2 and 3 as planned.
+**B1 done (21 Oct 2026, later):** captions and transcripts for all 10 company videos are on main; a person still needs to confirm the flagged lines by ear. **Still open from Phase 1:** the light-mode leftovers in section 5; counselor phone Insights axis labels; AI loading announcements; menus without arrow keys. Then Phase 2 and 3 as planned.
 
 ## 1. Summary
 
 | Level | Pass | Partial | Fail | Needs a person to test | Not applicable | Total |
 |---|---|---|---|---|---|---|
-| **WCAG 2.2 A + AA** (after Phase 1) | 28 | 18 | 2 | 2 | 5 | 55 |
+| **WCAG 2.2 A + AA** (after Phase 1 and captions) | 30 | 18 | 0 | 2 | 5 | 55 |
+| WCAG 2.2 A + AA (after Phase 1) | 28 | 18 | 2 | 2 | 5 | 55 |
 | WCAG 2.2 A + AA (before Phase 1) | 23 | 15 | 10 | 2 | 5 | 55 |
-| **WCAG 2.2 AAA** | 3 | 10 | 12 | 1 | 5 | 31 |
+| **WCAG 2.2 AAA** | 4 | 10 | 11 | 1 | 5 | 31 |
 
 **Can Dreamari claim WCAG 2.2 AA today? No, not yet.** It is close, and the remaining work is clear and bounded. Ten AA criteria fail outright. All of them are fixable in code and none needs a redesign. Six of the ten sit in two places:
 - the career simulation games;
@@ -136,8 +137,8 @@ Status: **Pass**, **Partial** (mostly met, named gaps), **Fail**, **Test** (need
 |---|---|---|---|---|
 | 1.1.1 Non-text content | A | Pass | All 185 images have alt text; icon buttons are labelled. Decorative star-field canvases have no label | Add `aria-hidden` to decorative canvases |
 | 1.2.1 Audio-only / video-only | A | N/A | No audio-only or silent video content | – |
-| 1.2.2 Captions (prerecorded) | A | **Fail** | 10 company reels have audio and no captions: AT&T, EY ×2, JPMC ×2, Kellanova, Kellogg's, WildBrain, Aviation ×2 | WebVTT `<track kind="captions">` on each |
-| 1.2.3 Audio description or media alternative | A | **Fail** | Same 10 clips, with no transcripts | A text transcript per clip, linked from the player |
+| 1.2.2 Captions (prerecorded) | A | Pass* | All 10 company reels have WebVTT captions, on by default in every player (`public/videos/app/captions/`, `CaptionTrack`). Generated with Whisper and corrected where certain. *A person must still confirm the flagged lines (`VIDEO_TRANSCRIPTS` header) before a formal claim | Spot-check by ear |
+| 1.2.3 Audio description or media alternative | A | Pass | A full transcript under every player ("Transcript"). The music-only JPMorgan Ohio clip describes what is shown | – |
 | 1.2.4 Captions (live) | AA | N/A | No live media | – |
 | 1.2.5 Audio description | AA | Test | On-screen text in tours may not be spoken | Listen to each clip. If visuals carry meaning, add a described version or put it in the transcript |
 | 1.3.1 Info and relationships | A | Partial | Game screens have no h1 and the question is a `<p>`. On phones, 10 pages hide their only h1. Heading levels skip on Colleges and counselor Meetings. Opportunities date badges use `aria-label` on plain spans (45 per page; also 14 on counselor Explore) | Sim title becomes the h1 and the question an h2. Keep an sr-only h1 on phones. Use `role="img"` or sr-only text on the date badges |
@@ -240,7 +241,7 @@ AAA is aspirational. Fix the cheap items; do not claim AAA conformance.
 |---|---|---|---|
 | 1.2.6 Sign language | Fail | None for the 10 clips | No |
 | 1.2.7 Extended audio description | Fail | None | Covered by transcripts |
-| 1.2.8 Media alternative | Fail | No transcripts | **Yes**: the same work as 1.2.3 |
+| 1.2.8 Media alternative | Pass | Transcripts under every player | Done |
 | 1.2.9 Audio-only (live) | N/A | – | – |
 | 1.3.6 Identify purpose | Partial | Landmarks and autocomplete are mostly present | Mostly done |
 | 1.4.6 Contrast (enhanced, 7:1) | Fail | 177 dark / 575 light below 7:1 | **Yes** for the light tokens (2 values) |

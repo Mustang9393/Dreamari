@@ -11,6 +11,7 @@ import { SurfaceState } from "@/components/app/SurfaceState";
 import { useSavedVideos } from "@/lib/savedVideos";
 import { COMPANY_VIDEOS, type CompanyVideo } from "./companyVideos";
 import { setVideoSoundMuted, useVideoSoundMuted } from "./videoSound";
+import { CaptionTrack, VideoTranscript } from "@/components/app/VideoTranscript";
 
 /** "Videos Inside Leading Companies" (Explore > Browse, directly above
  *  Typical Pay since 11 Sept 2026): the Apple TV "Lean Back & Watch" shape
@@ -307,10 +308,13 @@ function VideoLightbox({ item, onClose }: { item: CompanyVideo; onClose: () => v
             autoPlay
             controls
             playsInline
-            className="aspect-[9/16] max-h-[calc(calc(100dvh/var(--vz,1))-160px)] w-full rounded-[var(--radius-lg)] border object-contain"
+            className="aspect-[9/16] max-h-[calc(calc(100dvh/var(--vz,1))-210px)] w-full rounded-[var(--radius-lg)] border object-contain"
             style={{ background: "#000", borderColor: "rgba(255,255,255,0.14)" }}
-          />
+          >
+            <CaptionTrack video={item.video} />
+          </video>
         </div>
+        <VideoTranscript video={item.video} />
       </div>
     </div>,
     document.body,

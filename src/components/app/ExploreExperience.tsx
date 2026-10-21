@@ -52,6 +52,7 @@ import { careerSlug } from "@/components/career/slug";
 import { simulationFor } from "@/components/play/games";
 import "./app.css";
 import { announce } from "./LiveRegion";
+import { CaptionTrack, VideoTranscript } from "@/components/app/VideoTranscript";
 
 // Explore, both faces of the Figma design:
 //  - "For You" (Explore — v2.1B, 2288:16179): the Env Card reel with the
@@ -1215,7 +1216,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
       className="relative flex h-full w-full flex-col justify-end overflow-hidden border md:rounded-[var(--radius-lg)]"
       style={{ borderColor: "var(--glass-surface-2)", background: "#000" }}
     >
-      <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" loop playsInline preload={active ? "auto" : "none"} />
+      <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" loop playsInline preload={active ? "auto" : "none"}><CaptionTrack video={item.video} /></video>
       {/* top-[86px]: below `lg:` this card is the fixed, viewport-filling
          reel layer (see `.foryou-snap`), sitting directly under
          MobileHeaderShell's floating pill (chrome.tsx, `lg:hidden`, a real
@@ -1248,6 +1249,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
         >
           {item.title}
         </span>
+        <div className="mt-[var(--space-2)]"><VideoTranscript video={item.video} /></div>
       </div>
     </article>
   );

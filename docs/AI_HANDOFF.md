@@ -1,3 +1,27 @@
+## 2026-10-21: Company video captions and transcripts (WCAG B1)
+
+**Why.** B1 was the last AA blocker in the status report. Chandu: "can we generate them?", then: "Fix the flagged lines you're confident about, wire the captions and transcripts into the players now, and push. I'll spot-check the rest."
+
+**What changed.**
+- **Captions.** All 10 company reels were transcribed locally with Whisper small.en (faster-whisper, the model already cached on the Mac); nothing was uploaded.
+  - The timed WebVTT files are in `public/videos/app/captions/`, placed at 78% height. A `video::cue` style in globals.css gives them a solid backing.
+  - Fixed with certainty: "Kellenova" is now "Kellanova".
+  - The JPMorgan Ohio clip is music only, so it is captioned "[Upbeat music]", and its transcript describes the tour from its frames.
+- **Transcripts.** They are in `src/components/app/videoTranscripts.ts`, with the `captionsFor` and `transcriptFor` helpers.
+- **Players.** `VideoTranscript.tsx` provides `<CaptionTrack>` (default on) and a "Transcript" disclosure. They are wired into the CompanyVideoCards player, the Explore For You reel, Profile's saved-video player and the counselor v5 Videos player. The hover preview card stays aria-hidden and uncaptioned.
+
+**Still to check by ear.**
+- AT&T: "Event pop right now", "leaving to AT&T heaven".
+- EY 2: "thinking involving data science".
+- JPMC London: "What bros?".
+- Kellogg's: "horse-free snacks", "Look at this plan".
+- WildBrain: three lines.
+
+**Validation.**
+- tsc is clean. eslint has no new issues. The production build passes.
+- In the browser pane, the Mars/Kellanova and JPMC London players show their cues on time ("Let's go. Tell me this is not the most beautiful office you've ever seen."), and the Transcript disclosure opens.
+- The Kellanova clip already has burned-in word captions; the closed captions sit under them.
+
 ## 2026-10-21: "Training you'll need", not "The degree you'll need"
 
 - Career Education's credential list is now headed "Training you'll need" (WhereToStudy, CareerPeek, CareerDetailExperience), and each row's button reads "See N schools".
