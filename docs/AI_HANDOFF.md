@@ -1,3 +1,27 @@
+## 2026-10-21: Landing hero: Dreamy lower, wider, livelier, plus the night sky
+
+**Why.** Chandu: "dreamy sits too far up and overlaps the scroll down to learn more text. I want dreamy to sit lower, it can be cropped more. We just want the mouth to be visible and the eyes. And it needs to take up more space horizontally ... make it feel more premium than an afterthought and make it more engaging." Then: "add the stars to the landing page too but have them be more animated and engaging but not distracting."
+
+**What changed.**
+- **Size and crop.**
+  - `--mascot-size` (marketing/tokens.css) is now width-driven: 50vw, 88vw under 640px, between 280 and 680px. A height term keeps the visible face under the copy.
+  - The crop is `VISIBLE_FRACTION` .715 (Mascot.tsx), so the bezel cuts just under the mouth. The stage mask runs 69.5% to 79%.
+- **Scroll line removed.** "Scroll Down To Learn More" was sitting on Dreamy's head. Dreamy rising from the edge now does that job.
+- **New touches.**
+  - A horizon glow (`data-hero-horizon`).
+  - A rise-in on load (`.mkt-mascot-rise`).
+  - A perk when Start Journey is hovered or focused (`[data-hero-cta]` with `:has()`, `.mkt-mascot-perk`).
+  - The float is now `motion-safe`.
+- **Night sky.** NightSky has a `lively` mode: cursor parallax by star depth, a shooting star every 9-17s, and a slightly faster turn and twinkle. It sizes to its box. It is mounted inside the hero, over main's opaque dusk surface gradient and under the copy.
+- **Hero height.** The hero min-height is 100dvh + 140px. That gradient fades out over its last 12%, which showed as a dark strip under Dreamy when the hero was exactly one screen tall.
+
+**Validation.**
+- tsc and eslint are clean.
+- Screenshots at 1200x741, 1440x900, 1920x1080 and 390x844.
+- The perk works on hover and on keyboard focus. Under reduced motion there is no perk, rise or float.
+- A shooting star was observed at about 7.4s.
+- Still open: the CTA's BorderBeam spin runs under reduced motion. It is a shared component.
+
 ## 2026-10-21: Reviews, all builds: a full page that fills the height and scrolls
 
 **Why (Chandu):** a short document ended early and left a dark empty canvas under it: "instead of this sitting cropped vertically, let it be the full page so the scroll still works but just it doesn't leave a lot of space and uses the height available to it", then "fix and push for all versions".

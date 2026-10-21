@@ -10,7 +10,11 @@ import { type RefObject, useEffect, useRef } from "react";
 // 0.77 the fade band (69.5%..76.5%, see the mask below) sits fully BELOW the mouth:
 // eyes and mouth solid, chin/body dissolving, bottom ~15% of the cloud (raster ends
 // at 84.67%) still cropped so it keeps reading as a peek.
-const VISIBLE_FRACTION = 0.77;
+// 0.715 (21 Oct 2026, Chandu: "I want dreamy to sit lower, it can be cropped
+// more. We just want the mouth to be visible and the eyes"): the bezel now cuts
+// just under the mouth (63.4..68.8% of the artwork), so the stage can be much
+// wider for the same height (tokens.css --mascot-size).
+const VISIBLE_FRACTION = 0.715;
 
 type MascotProps = {
   heroRef: RefObject<HTMLElement | null>;
@@ -214,7 +218,7 @@ export function Mascot({ heroRef }: MascotProps) {
       // no longer crops this element at all — the viewport edge itself is the
       // crop, which is exactly the point. Hidden along with the whole student
       // <main> when the Schools view is active (display:none propagates).
-      className="pointer-events-none fixed bottom-0 left-1/2 z-[1] [transform:translate(-50%,23%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
+      className="pointer-events-none fixed bottom-0 left-1/2 z-[1] [transform:translate(-50%,28.5%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
       // The organic bottom dissolve — ENVIRONMENTAL, on this static stage, not on the
       // float wrapper inside it. Per direct feedback (with a phone screenshot to
       // prove it): a mask glued to the float wrapper travels WITH the bob, so the
@@ -243,8 +247,8 @@ export function Mascot({ heroRef }: MascotProps) {
         // 71% -> 83% leaves ~50% opacity AT the bezel, so the physical screen edge
         // itself makes the final, visible cut — which is the entire point of the
         // fixed-to-viewport design. Everything below 77% is off-screen anyway.
-        WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 71%, transparent 83%)",
-        maskImage: "linear-gradient(to bottom, black 0%, black 71%, transparent 83%)",
+        WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 69.5%, transparent 79%)",
+        maskImage: "linear-gradient(to bottom, black 0%, black 69.5%, transparent 79%)",
         // Cancels this app's own wide-screen zoom (globals.css: 1.1x/1.25x past
         // 1441x800/1800x900), the same fix already applied elsewhere this
         // session to every other `position:fixed` element with local-px
@@ -262,7 +266,12 @@ export function Mascot({ heroRef }: MascotProps) {
         zoom: "calc(1 / var(--vz, 1))",
       }}
     >
-      <div className="absolute inset-0 [animation:mkt-mascot-float_5.5s_ease-in-out_infinite]">
+      {/* Rise: he comes up over the horizon once on arrival. Perk: he lifts
+         and grows a touch while Start Journey is hovered or focused
+         (animations.css). Both are off under reduced motion, as is the bob. */}
+      <div className="mkt-mascot-rise absolute inset-0">
+      <div data-mascot-perk className="mkt-mascot-perk absolute inset-0">
+      <div className="absolute inset-0 motion-safe:[animation:mkt-mascot-float_5.5s_ease-in-out_infinite]">
         {/* Ambient glow lives INSIDE the masked float wrapper, not as a stage-level
            sibling — as a sibling it escaped the mask, still reached past the hero's
            70% crop line at faint opacity, and hard-clipped there as a hairline seam
@@ -290,7 +299,7 @@ export function Mascot({ heroRef }: MascotProps) {
             src="/images/hero-cloud-mascot.png"
             alt="Dreamari mascot, a friendly cloud character"
             fill
-            sizes="460px"
+            sizes="(max-width: 640px) 90vw, 680px"
             className="pointer-events-none object-contain select-none"
             priority
           />
@@ -326,6 +335,8 @@ export function Mascot({ heroRef }: MascotProps) {
             }}
           />
         </div>
+      </div>
+      </div>
       </div>
     </div>
   );
