@@ -28,7 +28,6 @@ const {IB_LEVEL_1_V2:ib}=load(path.join(root,'src/components/play/ib-level-1-v2.
 const levels=[
  load(path.join(root,'src/components/play/ux-level-1.ts')).UX_LEVEL_1,
  load(path.join(root,'src/components/play/food-scientist-level-1.ts')).FOOD_SCIENTIST_LEVEL_1,
- load(path.join(root,'src/components/play/rn-level-1-rebuild.ts')).RN_LEVEL_1_REBUILD,
 ];
 const fixtures=JSON.parse(fs.readFileSync(path.join(root,'docs/handoff/career-scaling/examples/work-graphic-fixtures.json'))).fixtures;
 const scored=b=>['choice','rapid','rank','match','bucket','flags','pick','chain','slider'].includes(b.kind)&&!b.practice;
@@ -62,6 +61,33 @@ for(const level of levels){
   assert(level.preGame.lesson.title.startsWith('What Is a '));assert(level.preGame.ladder.length>=4);
  });
 }
+test('approved Nursing gameplay survives image-only updates',()=>{
+ const approved=load(path.join(root,'src/components/play/rn-level-1-v2.ts')).RN_LEVEL_1_V2;
+ const legacy=load(path.join(root,'src/components/play/rn-level-1.ts')).RN_LEVEL_1;
+ const simulation=load(path.join(root,'src/components/play/games.ts')).REGISTERED_NURSE;
+ const live=simulation.levels[0];
+ assert.equal(simulation.trailer.length,7);
+ assert.equal(simulation.upcoming.length,5);
+ const art=load(path.join(root,'src/components/play/art/registered-nurse.json'));
+ const withoutImage=b=>{const {art, ...content}=b;return content;};
+ assert.equal(live.beats.length,36);
+ assert.deepEqual(live.beats.map(withoutImage),approved.beats.map(withoutImage),'no missing/reordered/rewritten nursing beats');
+ assert.equal(live.beats.filter(scored).length,10);
+ for(const field of ['points','endings','noStrikes','noRepair','plainEndings'])assert.deepEqual(live[field],approved[field],field);
+ assert.equal(live.coreKit,undefined,'bespoke instruments must stay enabled');
+ assert.deepEqual(live.expressSource.beats.map(withoutImage),legacy.beats.map(withoutImage));
+ assert.deepEqual(live.expressCut,legacy.expressCut);
+ for(const kind of ['badge','monitor','lights','wristband','record','sheet'])assert(live.beats.some(b=>b.world?.kind===kind),kind+' restored');
+ for(const beat of [...live.beats,...live.expressSource.beats]){
+  const location=art.locations[art.beatLocations[beat.id]];
+  assert(location,beat.id+': missing new painting');
+  assert(location.src.includes('/rebuild-2026-10-21/'),beat.id+': outdated art');
+  assert(!location.characterAnchor&&!location.characterAnchors,beat.id+': runtime sprite');
+  assert(fs.existsSync(path.join(root,'public',location.src)),beat.id+': image missing');
+  assert(!beat.art,beat.id+': legacy hero picture overrides new painting');
+ }
+ assert.notEqual(live.saveSlot,208,'shortened rebuild progress must not skip restored beats');
+});
 test('supporting graphics validate and render as read-only scene context',()=>{
  for(const a of [...Object.values(FS_ARTIFACTS),...Object.values(UX_ARTIFACTS),...fixtures]){
   assert.deepEqual(artifactProblems(a),[],a.id);

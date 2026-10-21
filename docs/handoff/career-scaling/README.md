@@ -16,3 +16,7 @@ The shareable source of truth is [the Career Simulation Master SOP](../../../out
 The `examples/`, `food-scientist/` and `ux-designer/` folders contain career-specific examples, data, validations and historical iterations. Use them for evidence and patterns, not as a fixed question list or required template. Read the current SOP before reusing any older artifact.
 
 The shareable prompt copies and approved-style image references are also packaged in `public/documents/` for publication.
+
+## Approved game lock
+
+Registered Nurse is an image-only update of the vetted 36-beat script in `rn-level-1-v2.ts` (original 55 script screens), including all ten ±5 decisions and its bespoke ECG, badge, call-light, wristband and report graphics. The shortened 26-beat rebuild is rejected. Preserve the approved Full and Express sequences, questions, answers, scoring, reviews and endings. New-career generation templates never override an approved game. `scripts/qa/work-evidence.test.mjs` verifies live nursing gameplay against both approved sources and requires a current complete painting for every beat.
