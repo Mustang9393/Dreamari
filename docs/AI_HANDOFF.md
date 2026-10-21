@@ -1,3 +1,10 @@
+## 2026-10-21: Pay & Growth, every state shows all three figures
+
+**Why (Chandu):** "I still see only one stat updating when i hover on a state." Two causes. The seeded state outlook left about one state in five (13 for Software Engineer, including Texas, New York and Florida) and a few whole careers without a forecast, on purpose, to show sparse-data handling; in use it read as broken, and the demo rule is mock values over blanks. And the map file names DC "Washington, DC" while the app's lists say "Washington, D.C.", so DC matched no pay or outlook data at all.
+
+- `outlook.ts`: no seeded gaps; every state of every career has a growth and openings figure. The readout still shows NA if the real data lacks one.
+- `PayMap.tsx`: "Washington, DC" maps to "Washington, D.C." (and code DC).
+- Checked: hovered all 51 map states on Software Engineer: all three figures everywhere except Alaska's pay, which BLS does not publish (NA by the 14 Oct rule).
 ## 2026-10-21: WCAG 2.2 Phase 2, pushed as is
 
 **Why.** These are the cheap AAA and robustness items from docs/ACCESSIBILITY_STATUS_REPORT_2026-10-21.md, section 9, Phase 2. Chandu: "Lets skip the caption stuff and push whatever we have in a usable fashion."

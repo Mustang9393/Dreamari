@@ -35,11 +35,14 @@ const STATE_CODES: Record<string, string> = {
   Oregon: "OR", Pennsylvania: "PA", "Rhode Island": "RI", "South Carolina": "SC",
   "South Dakota": "SD", Tennessee: "TN", Texas: "TX", Utah: "UT", Vermont: "VT",
   Virginia: "VA", Washington: "WA", "West Virginia": "WV", Wisconsin: "WI",
-  Wyoming: "WY", "District of Columbia": "DC",
+  Wyoming: "WY", "District of Columbia": "DC", "Washington, DC": "DC",
 };
 
+// the map file names DC "Washington, DC"; the app's state lists (Build,
+// statePay, outlook) say "Washington, D.C.", so DC matched no data and read
+// NA for everything (found 21 Oct 2026)
 function displayName(name: string): string {
-  return name === "District of Columbia" ? "Washington, D.C." : name;
+  return name === "District of Columbia" || name === "Washington, DC" ? "Washington, D.C." : name;
 }
 
 function parsePay(text: string): number | null {
