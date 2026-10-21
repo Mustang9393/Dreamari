@@ -2104,7 +2104,7 @@ export function ReviewBody({ title, body, onNext, reputation, accent = "var(--pr
             <circle cx="66" cy="66" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="8" />
             <circle cx="66" cy="66" r={radius} fill="none" stroke={accent} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - count / 100)} style={{ filter: `drop-shadow(0 0 ${decidingNow ? 18 : 10}px color-mix(in srgb, ${accent} 60%, transparent))`, transition: "filter 0.4s" }} />
           </svg>
-          <span className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
+          <span role="img" className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
         </motion.span>
         {/* RN v2 screen 54: "REPUTATION 92". The label sits under the ring:
            inside it, the word ran into the ring's stroke (direct feedback,
@@ -2257,7 +2257,7 @@ export function ScoreGauge({ reputation, band, delta, accent, demo = false, hide
   const radius = 15.5;
   const circumference = 2 * Math.PI * radius;
   return (
-    <span className="relative flex flex-none items-center gap-[6px]" aria-label={`Reputation ${reputation}, ${band}`}>
+    <span role="img" className="relative flex flex-none items-center gap-[6px]" aria-label={`Reputation ${reputation}, ${band}`}>
       {demo && !docked && flight && (
         /* The debut: a big double of the gauge blooms at screen center on
            its own dark disc (legibility over any scene), holds a beat,
@@ -3045,9 +3045,10 @@ export function Hud({
           )}
         </span>
         <span className="min-w-0 flex-1" style={{ textShadow: "0 1px 3px color-mix(in srgb, var(--background) 85%, transparent)" }}>
-          <span className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
+          {/* the page's h1 (WCAG 1.3.1 / 2.4.6): the career being played */}
+          <h1 className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
             {simulation.title}
-          </span>
+          </h1>
           <span className="block truncate text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${accent} 78%, #fff)` }}>
             {sectionLabel ?? `Level ${level.n}`} · {level.role}
             {level.express ? " · Express" : ""}

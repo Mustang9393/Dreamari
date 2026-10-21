@@ -283,12 +283,12 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
  *  for fit. Tinted text on a faint fill so they read without shouting. */
 const CHIP_TONE: Record<CardBadge["tone"], string> = {
   program: "var(--pc-chip-program, #ffffff)",
-  path: "var(--pc-chip-path, #7db2ff)",
+  path: "var(--pc-chip-path, #9cc4ff)",
   reach: "var(--pc-chip-reach, #ffb35c)",
-  target: "var(--pc-chip-path, #7db2ff)",
+  target: "var(--pc-chip-path, #9cc4ff)", // a step lighter than #7db2ff: 4.2:1 on the card scrim (WCAG 1.4.3)
   safety: "var(--pc-chip-safety, #5fd6a8)",
   open: "var(--pc-chip-open, #e6cf6a)",
-  muted: "var(--pc-ink-3, rgba(255,255,255,0.7))",
+  muted: "var(--pc-ink-3, rgba(255,255,255,0.85))",
 };
 function Chip({ label, tone }: CardBadge) {
   const c = CHIP_TONE[tone];

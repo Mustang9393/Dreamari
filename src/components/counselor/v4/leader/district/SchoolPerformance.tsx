@@ -160,7 +160,7 @@ export function SchoolPerformance() {
     <div className="v4-page v4-leader-page v4-sections">
       <SubTabs<Tab> ariaLabel="School performance view" options={TAB_OPTIONS} value={tab} onChange={setTab} />
 
-      <div className="v4-district-toolbar" aria-label="Filter view">
+      <div role="group" className="v4-district-toolbar" aria-label="Filter view">
         <div>
           <Listbox ariaLabel="Grade" value={gradeId} onChange={(v) => setGrade(v === "all" ? "all" : (Number(v) as GradeFilter))} options={GRADE_OPTIONS.map((o) => ({ value: String(o.value), label: o.label }))} />
           <Listbox ariaLabel="School status" value={status} onChange={(v) => setStatus(v as SchoolStatus | "all")} options={SCHOOL_PERFORMANCE_COPY.statusOptions.map((o) => ({ value: o.value, label: o.label }))} />
@@ -171,7 +171,7 @@ export function SchoolPerformance() {
         </div>
         <div aria-live="polite">
           <span className="v4-district-meta"><strong>{SCHOOL_PERFORMANCE_COPY.inViewLabel(rows.length)}</strong> · Academic year {SCHOOL_PERFORMANCE_COPY.academicYearOptions[0]} · {SCHOOL_PERFORMANCE_COPY.dataPeriodLine}</span>
-          <span className="flex flex-wrap items-center gap-x-[14px] gap-y-[4px]" aria-label="Status groups">
+          <span role="img" className="flex flex-wrap items-center gap-x-[14px] gap-y-[4px]" aria-label="Status groups">
             {(Object.keys(SCHOOL_STATUS_LABELS) as SchoolStatus[]).map((k) => (
               <StatusMark key={k} color={STATUS_COLOR[k]}><b className="font-[550] tabular-nums">{counts[k]}</b> {SCHOOL_STATUS_LABELS[k].filter}</StatusMark>
             ))}

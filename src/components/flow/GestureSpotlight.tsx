@@ -3,6 +3,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { GestureHint } from "./GestureHint";
+import { useQuietTips } from "@/lib/quietTips";
 
 // Persists per-device, not per-session -- a drag-to-reorder or drag-to-blank
 // mechanic is genuinely non-obvious the first time, but re-showing it on
@@ -270,7 +271,9 @@ export function Coachmark({
       target rectangle used to position the portaled card and glow. */
   children: React.ReactNode;
 }) {
-  const active = COACHMARKS_ENABLED && activeProp;
+  // the student can turn every tip off (Settings > Accessibility; WCAG 2.2.4)
+  const quiet = useQuietTips();
+  const active = COACHMARKS_ENABLED && activeProp && !quiet;
   const targetRef = useRef<HTMLSpanElement | null>(null);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const spotlightId = useId().replaceAll(":", "");

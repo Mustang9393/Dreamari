@@ -360,9 +360,10 @@ export function Question({ children }: { children: React.ReactNode }) {
   const slot = useContext(PromptSlot);
   return (
     <>
-      <p className="text-[18px] leading-[1.25] font-extrabold whitespace-pre-line sm:text-[21px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+      {/* a real heading, so screen readers can jump straight to the question (WCAG 1.3.1 / 2.4.6) */}
+      <h2 className="text-[18px] leading-[1.25] font-extrabold whitespace-pre-line sm:text-[21px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         {children}
-      </p>
+      </h2>
       {slot}
     </>
   );
@@ -815,7 +816,7 @@ function CheckpointReview({ review, reputation, accent, cta, secondaryCta, secon
             <circle cx="66" cy="66" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="8" />
             <circle cx="66" cy="66" r={radius} fill="none" stroke={accent} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - count / 100)} style={{ filter: `drop-shadow(0 0 10px color-mix(in srgb, ${accent} 60%, transparent))` }} />
           </svg>
-          <span className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
+          <span role="img" className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
         </span>
         <span className="-mt-[6px] text-[11px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--muted-foreground)" }} aria-hidden>Reputation</span>
         <p className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
@@ -1907,7 +1908,7 @@ function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat;
           {sent && (
             <span className="flex items-center gap-[8px] self-start motion-safe:animate-[fade-slide-up_0.3s_ease-out_0.35s_both]">
               {face && <Image src={face} alt="" width={48} height={48} className="h-[22px] w-[22px] rounded-full object-cover object-top" />}
-              <span className="flex gap-[4px] rounded-[14px] px-[12px] py-[10px]" style={{ background: "var(--glass-surface-2)" }} aria-label={`${who.name} is typing`}>
+              <span role="img" className="flex gap-[4px] rounded-[14px] px-[12px] py-[10px]" style={{ background: "var(--glass-surface-2)" }} aria-label={`${who.name} is typing`}>
                 {[0, 1, 2].map((dot) => (
                   <span key={dot} className="h-[6px] w-[6px] rounded-full motion-safe:animate-[play-pulse_0.9s_ease-in-out_infinite]" style={{ background: "var(--muted-foreground)", animationDelay: `${dot * 150}ms` }} />
                 ))}
@@ -2225,6 +2226,11 @@ function Flap({ ch, size, settleMs = 0, color = "#ffd23f" }: { ch: string; size:
   const [shown, setShown] = useState(settleMs > 0 && ch.trim() ? FLAP_GLYPHS[(ch.charCodeAt(0) * 7) % FLAP_GLYPHS.length] : ch);
   useEffect(() => {
     if (!(settleMs > 0) || !ch.trim()) return;
+    // reduced motion: the letter is simply there, no shuffle (WCAG 2.3.3)
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const id = window.setTimeout(() => setShown(ch), 0);
+      return () => window.clearTimeout(id);
+    }
     let n = 0;
     const id = window.setInterval(() => {
       n += 1;
@@ -3929,7 +3935,7 @@ export function BucketBody({ beat, onResolve }: { beat: BucketBeat; onResolve: R
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
       <div className="flex items-center justify-between gap-[var(--space-3)]">
-        <span className="flex items-center gap-[5px]" aria-label={`Item ${at + 1} of ${beat.items.length}`}>
+        <span role="img" className="flex items-center gap-[5px]" aria-label={`Item ${at + 1} of ${beat.items.length}`}>
           {beat.items.map((entry, index) => (
             <span
               key={entry.label}

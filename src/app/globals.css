@@ -2293,3 +2293,52 @@ html {
 @media (max-width: 1023.98px) {
   html { scroll-padding-bottom: 104px; }
 }
+
+/* Reduced motion, everywhere (WCAG 2.3.3 / 2.2.2, audit 21 Oct 2026). The
+   app has 321 @keyframes and only some checked the setting; looping
+   decorations (the landing mascot float, border beams, the Play wash) kept
+   moving. For anyone who asked the system for less motion, every CSS
+   animation and transition jumps to its end state. Framer motion is covered
+   by MotionPrefs in the root layout. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Search pills: the field is borderless inside a bordered label, so the
+   label carries the edge and the focus ring (WCAG 1.4.11 / 2.4.7, audit 21
+   Oct 2026). The beam glow stays as the decoration; this ring is the
+   indicator, and it holds still under reduced motion. */
+label:has(> input[type="search"]) {
+  border-color: color-mix(in srgb, var(--foreground) 50%, transparent) !important;
+}
+label:has(> input[type="search"]:focus-visible) {
+  outline: 2px solid var(--accent-subtle, #2f6bf2);
+  outline-offset: 2px;
+}
+
+/* Windows High Contrast / forced colours (audit 21 Oct 2026). The app marks
+   the current page, the selected tab and pressed toggles with a background
+   fill, and forced colours remove every background, so "where am I" and
+   "what is on" disappeared. In forced colours they get a system-colour
+   outline instead, and the sliding tab ink keeps its Highlight fill. */
+@media (forced-colors: active) {
+  [aria-current="page"],
+  [role="tab"][aria-selected="true"],
+  [aria-pressed="true"],
+  [role="switch"][aria-checked="true"],
+  [role="menuitemradio"][aria-checked="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
+  [data-tab-ink] {
+    forced-color-adjust: none;
+    background: Highlight !important;
+  }
+}

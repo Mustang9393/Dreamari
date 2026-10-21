@@ -281,7 +281,7 @@ function StatusChip({ id, short = false }: { id: string; short?: boolean }) {
 function DateTile({ month, day, size = "md" }: { month: string; day: number; size?: "sm" | "md" }) {
   const sm = size === "sm";
   return (
-    <span aria-label={`${month} ${day}`} className={`flex flex-none flex-col items-center justify-center rounded-[var(--radius-sm)] border ${sm ? "h-[40px] w-[40px]" : "h-[48px] w-[48px]"}`} style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 10%, var(--glass-surface-1))` }}>
+    <span role="img" aria-label={`${month} ${day}`} className={`flex flex-none flex-col items-center justify-center rounded-[var(--radius-sm)] border ${sm ? "h-[40px] w-[40px]" : "h-[48px] w-[48px]"}`} style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 10%, var(--glass-surface-1))` }}>
       <span className={`${sm ? "text-[9px]" : "text-[10px]"} leading-none font-extrabold tracking-[0.08em] uppercase`} style={{ color: accent }}>{month}</span>
       <span className={`${sm ? "text-[15px] mt-[2px]" : "text-[18px] mt-[3px]"} leading-none font-extrabold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{day}</span>
     </span>

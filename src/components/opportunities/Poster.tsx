@@ -61,7 +61,7 @@ function Leaf({ e }: { e: Enriched }) {
   if (t.status === "unknown" || !t.iso) {
     return (
       <span role="img" aria-label="No date yet" className={box} style={glass}>
-        <span className={month} style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.86))" }}>Date</span>
+        <span className={month} style={{ color: "var(--pc-ink-2, rgba(255,255,255,0.95))" }}>Date</span>
         <span aria-hidden className={rule} style={{ background: "var(--pc-rule, rgba(255,255,255,0.22))" }} />
         <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--pc-ink-2, rgba(255,255,255,0.8))" }}>?</span>
       </span>
@@ -100,7 +100,7 @@ export function Poster({ e, status, onOpen, onSave, action, cue, kindLabel }: { 
     const tone = costTone(item.paid);
     figure = PAID[item.paid];
     if (tone === "plain") tint = INK;
-    if (!tone) tint = "var(--pc-ink-3, rgba(255,255,255,0.86))";
+    if (!tone) tint = "var(--pc-ink-2, rgba(255,255,255,0.95))";
   }
   return (
     <HoverBeam strength={0.7}>
@@ -156,7 +156,9 @@ export function Poster({ e, status, onOpen, onSave, action, cue, kindLabel }: { 
              (display: none in dark, see globals.css .photo-frost). */}
           <span className="photo-frost absolute inset-0" />
         </span>
-        <header className="pointer-events-none relative z-[2] flex items-start justify-between p-[12px]">
+        {/* above the card-wide Open button (z-3) so Save is clickable and never
+           covered when focused; the header itself lets clicks through */}
+        <header className="pointer-events-none relative z-[4] flex items-start justify-between p-[12px]">
           <Leaf e={e} />
           {action ? <span className="pointer-events-auto relative z-[4]">{action}</span> : onSave && <span className="pointer-events-auto relative z-[4]"><SaveDot on={!!status} name={item.name} onToggle={onSave} size={36} /></span>}
         </header>
@@ -166,7 +168,7 @@ export function Poster({ e, status, onOpen, onSave, action, cue, kindLabel }: { 
              PAYS YOU it looks really weird" on one line). */}
           {figure && (
             <span className="flex flex-col gap-[1px]">
-              <span className="text-[10px] leading-[13px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.86))" }}>{label}</span>
+              <span className="text-[10px] leading-[13px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--pc-ink-2, rgba(255,255,255,0.95))" }}>{label}</span>
               <span className="text-[21px] leading-[25px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: tint }}>{figure}</span>
             </span>
           )}
@@ -174,14 +176,14 @@ export function Poster({ e, status, onOpen, onSave, action, cue, kindLabel }: { 
              height on every card (Chandu, 6 Oct 2026: "Every card should be
              consistent"). */}
           <span className="line-clamp-2 min-h-[42px] text-[17px] leading-[21px] font-bold" style={{ textWrap: "balance" }}>{item.name}</span>
-          <span className="line-clamp-1 text-[12.5px] leading-[17px]" style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.86))" }}>{who}</span>
+          <span className="line-clamp-1 text-[12.5px] leading-[17px]" style={{ color: "var(--pc-ink-2, rgba(255,255,255,0.95))" }}>{who}</span>
           <span className="mt-[4px] flex min-h-[18px] items-center justify-between gap-[8px] text-[12px] leading-[16px] font-semibold">
             {status && status !== "saved" ? (
               <span className="flex items-center gap-[4px]" style={{ color: status === "won" ? MINT : "var(--pc-link, var(--color-brand-300))" }}>{status === "won" ? <Trophy className="h-3 w-3" aria-hidden /> : <ClipboardCheck className="h-3 w-3" aria-hidden />}{STATUS_WORD[status]}</span>
             ) : cue ? (
               <span className="flex min-w-0 items-center gap-[4px] truncate" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>{cue}</span>
             ) : signal && (strong || fit.when === "later") ? (
-              <span className="flex min-w-0 items-center gap-[4px] truncate" style={{ color: strong ? "var(--pc-link, var(--color-brand-300))" : "var(--pc-ink-3, rgba(255,255,255,0.86))" }}>{strong && <Check className="h-3 w-3 flex-none" strokeWidth={3} aria-hidden />}{signal}</span>
+              <span className="flex min-w-0 items-center gap-[4px] truncate" style={{ color: strong ? "var(--pc-link, var(--color-brand-300))" : "var(--pc-ink-2, rgba(255,255,255,0.95))" }}>{strong && <Check className="h-3 w-3 flex-none" strokeWidth={3} aria-hidden />}{signal}</span>
             ) : <span />}
             {soon && <span className="flex-none font-bold" style={{ color: `var(--pc-chip-reach, ${AMBER})` }}>{time.days === 0 ? "Closes today" : `${time.days} day${time.days === 1 ? "" : "s"} left`}</span>}
           </span>

@@ -207,7 +207,7 @@ export type Signal = { label: string; value: React.ReactNode; small: React.React
  *  columns; on a phone they wrap two to a row. */
 export function SignalStrip({ items, label }: { items: Signal[]; label: string }) {
   return (
-    <div className="v4-signal-strip v4-leader-signals" aria-label={label} style={{ "--signal-cols": items.length } as React.CSSProperties}>
+    <div role="group" className="v4-signal-strip v4-leader-signals" aria-label={label} style={{ "--signal-cols": items.length } as React.CSSProperties}>
       {items.map((s, i) => {
         const body = <><span>{titleCase(s.label)}</span><strong><CountUp value={s.value} /></strong><small>{s.small}</small>{s.onClick && <ArrowUpRight size={16} aria-hidden />}</>;
         return s.onClick
@@ -322,7 +322,7 @@ export function Lane({ label, value, display, sub, color = "var(--v4-cat-1)", ba
   );
   return onClick
     ? <button type="button" className="v4-lane v4-leader-lane" onClick={onClick} aria-label={aria}>{inner}</button>
-    : <div className="v4-lane v4-leader-lane" aria-label={aria}>{inner}</div>;
+    : <div role="group" className="v4-lane v4-leader-lane" aria-label={aria}>{inner}</div>;
 }
 
 /** The scale under a column of lanes. */
@@ -409,7 +409,16 @@ export function TrendLine({ points, format = (v) => `${Math.round(v)}%`, min, ma
   const band = W / Math.max(1, points.length);
   return (
     <figure className="v4-leader-trend" aria-label={label}>
-      <div ref={wrap} className="v4-leader-trend-plot" style={{ height: H }}>
+      {/* keyboard reads the points too (WCAG 2.1.1, audit 21 Oct 2026): focus
+         the plot, then Left/Right walk the values the pointer would hover */}
+      <div role="group" ref={wrap} className="v4-leader-trend-plot" style={{ height: H }} tabIndex={0} aria-label={`${label}. Use left and right arrows to read each point.`}
+        onKeyDown={(e) => {
+          if (e.key !== "ArrowLeft" && e.key !== "ArrowRight" && e.key !== "Home" && e.key !== "End") return;
+          e.preventDefault();
+          const at = hover ?? last;
+          setHover(e.key === "Home" ? 0 : e.key === "End" ? last : Math.max(0, Math.min(last, at + (e.key === "ArrowRight" ? 1 : -1))));
+        }}
+        onBlur={() => setHover(null)}>
         {W > 0 && (
           <svg width={W} height={H} role="img" aria-label={`${label}: ${points.map((p) => `${p.label} ${format(p.value)}`).join(", ")}`} onMouseLeave={() => setHover(null)}>
             {baseline && <line x1={PX} x2={W - PX} y1={y(baseline.value)} y2={y(baseline.value)} className="v4-leader-trend-baseline" />}

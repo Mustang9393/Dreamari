@@ -113,19 +113,19 @@ html.look-v2.light {
      the pale blue tints measured 4.1:1 at #2f5fb1. #2f5fb1 is 6.1:1 on
      white, 5.6:1 on the page, 4.8:1 on the strongest tint (#d4e6fb). */
   --color-action-primary: #2f5fb1;
-  --color-text-brand: #2f5fb1;
+  --color-text-brand: #24508f; /* AAA 7:1 on the light page (was #2f5fb1, 5.7:1; WCAG 1.4.6, audit 21 Oct 2026) */
   --color-match-accent: #2f5fb1;
 }
 
 html.look-v2.light .marketing-v2.themeable {
   --background: #f3f6f9 !important; /* cool white, was lavender-blue #e4eaf8 */
   --foreground: #101a26 !important;
-  --muted-foreground: #4b5664 !important; /* 7.0:1 on white, 6.6:1 on the page */
+  --muted-foreground: #434c58 !important; /* 8.0:1 on white, 7.5:1 on the page: AAA (was #4b5664, 6.6:1 on the page) */
   --card: #ffffff !important;
   --border: #d5dde7 !important;
   --primary: #2f5fb1 !important;
   --accent: #2f5fb1 !important;
-  --accent-subtle: #2f5fb1 !important;
+  --accent-subtle: #24508f !important; /* the text-safe brand, AAA 7:1 (fills keep --primary) */
   --hero-accent-purple: #d3e4f8 !important; /* ice blue */
   --hero-accent-teal: #eaf1f9 !important; /* was blush pink */
   --hero-accent-pink: #eaf1f9 !important;

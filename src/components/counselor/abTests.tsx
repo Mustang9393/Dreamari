@@ -52,7 +52,7 @@ export function ABSwitch<K extends string>({ test, options, fallback, why }: { t
         })}
       </span>
       <IconTip label={why}>
-        <span tabIndex={0} aria-label={`Why this is a test: ${why}`} className="flex size-[26px] cursor-help items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+        <span role="img" tabIndex={0} aria-label={`Why this is a test: ${why}`} className="flex size-[26px] cursor-help items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
           <Info className="h-[15px] w-[15px]" aria-hidden />
         </span>
       </IconTip>

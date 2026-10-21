@@ -35,7 +35,7 @@ import { CareerPeek } from "./CareerPeek";
 import { CompareHighlights } from "./CompareHighlights";
 import { CardDeck } from "@/components/play/PlayHub";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, FileText, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { Accessibility, ArrowLeftRight, FileText, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, ScrollEdges } from "@/components/app/cardChrome";
@@ -71,6 +71,8 @@ import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/res
 import { useBackStep } from "@/lib/backStep";
 import { useTop3FlowV2 } from "@/lib/top3Flow";
 import { togglePlanDone, usePlanDone } from "@/lib/planDone";
+import { setQuietTips, useQuietTips } from "@/lib/quietTips";
+import { setTimersOff, useTimersOff } from "@/components/play/timers";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -362,7 +364,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   }, [tab]);
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
   // Which Settings section the gear menu asked for; Settings scrolls to it.
-  const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
+  // ?tab=settings&section=accessibility opens a section directly (the
+  // Accessibility page links here)
+  const sectionParam = useSearchParams()?.get("section");
+  const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(() => (SETTINGS_SECTIONS.some((x) => x.id === sectionParam) ? (sectionParam as SettingsSection) : null));
   // The tab Settings was opened from (8 Oct 2026, "ALWAYS EVERYTHING SHOULD
   // GO ONLY ONE STEP BACK"): its X and the browser's Back both return there,
   // not to a fixed Top 3. null means Settings was the page's first view (a
@@ -1173,7 +1178,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {/* The count as a small numeral chip, not part of the word
                  (Chandu, 1 Oct 2026: "I don't want it reading like Saved 6");
                  Gmail's and Linear's tab counts. Inherits the tab's ink. */}
-              {item.badge ? <span aria-label={`${item.badge} saved`} className="relative ml-[6px] inline-flex min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10.5px] leading-[16px] font-bold tabular-nums" style={{ background: tab === item.id ? "rgba(255,255,255,0.22)" : "color-mix(in srgb, var(--foreground) 12%, transparent)", color: "var(--ink)" }}>{item.badge}</span> : null}
+              {item.badge ? <span role="img" aria-label={`${item.badge} saved`} className="relative ml-[6px] inline-flex min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10.5px] leading-[16px] font-bold tabular-nums" style={{ background: tab === item.id ? "rgba(255,255,255,0.22)" : "color-mix(in srgb, var(--foreground) 12%, transparent)", color: "var(--ink)" }}>{item.badge}</span> : null}
             </button>
           ))}
         </div>
@@ -3178,7 +3183,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1", topIds = [], onBookM
            the right, the bar under both. */}
         <div className="flex items-baseline justify-between gap-[var(--space-4)]">
           <span className="text-[15px] leading-[22px] tabular-nums" style={{ color: "var(--foreground)" }}>{doneCount} of {allSteps.length} done</span>
-          <span ref={pctRef} className="text-[15px] leading-[22px] font-bold tabular-nums" style={{ color: "var(--foreground)" }} aria-label={`${pct} percent done`}>{pct}%</span>
+          <span role="img" ref={pctRef} className="text-[15px] leading-[22px] font-bold tabular-nums" style={{ color: "var(--foreground)" }} aria-label={`${pct} percent done`}>{pct}%</span>
         </div>
         <SparkBar className="w-full" percent={pct} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
       </div>
@@ -3826,7 +3831,7 @@ export function VideosShelf() {
               <span className="flex min-w-0 flex-col"><span className="truncate text-[16px] font-bold">{nowPlaying.title}</span><span className="truncate text-[13px] opacity-80">{nowPlaying.company}</span></span>
               <button type="button" aria-label="Close" autoFocus onClick={() => setPlaying(null)} className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.3)", color: "#fff" }}><X className="h-5 w-5" aria-hidden /></button>
             </div>
-            <video src={nowPlaying.video} poster={nowPlaying.poster} controls autoPlay playsInline className="max-h-[calc(80dvh/var(--vz,1))] w-full rounded-[var(--radius-lg)] bg-black object-contain" />
+            <video src={nowPlaying.video} poster={nowPlaying.poster} controls autoPlay playsInline className="max-h-[calc(70dvh/var(--vz,1))] w-full rounded-[var(--radius-lg)] bg-black object-contain" />
           </div>
         </div>,
         document.body,
@@ -3985,11 +3990,12 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
 
 // ---- Settings: a full view under the header, prototype stubs ----
 
-type SettingsSection = "answers" | "account" | "privacy" | "danger";
+type SettingsSection = "answers" | "account" | "privacy" | "accessibility" | "danger";
 const SETTINGS_SECTIONS: { id: SettingsSection; label: string; Icon: LucideIcon; divider?: boolean }[] = [
   { id: "answers", label: "Your answers", Icon: Sparkles },
   { id: "account", label: "Account", Icon: UserRound },
   { id: "privacy", label: "Privacy and sharing", Icon: Lock },
+  { id: "accessibility", label: "Accessibility", Icon: Accessibility },
   { id: "danger", label: "Danger zone", Icon: AlertTriangle, divider: true },
 ];
 
@@ -4005,6 +4011,43 @@ function answersSummary(p: StudentProfile): { label: string; value: string }[] {
     { label: "Subjects", value: p.subjects.join(", ") || "Not set" },
     { label: "States", value: p.states.join(", ") || "Not set" },
   ];
+}
+
+/** Settings > Accessibility (audit 21 Oct 2026): the app's own comfort
+ *  switches in one place. Reduced motion, contrast and text size follow the
+ *  device's own settings, so they are explained here rather than duplicated. */
+function AccessibilitySettings() {
+  const quiet = useQuietTips();
+  const timersOff = useTimersOff();
+  const row = "flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)]";
+  const toggle = (on: boolean, label: string, onFlip: () => void) => (
+    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onFlip}
+      className="relative h-[28px] w-[48px] flex-none cursor-pointer rounded-full border transition-colors"
+      style={{ background: on ? "var(--primary)" : "var(--glass-surface-2)", borderColor: on ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 50%, transparent)" }}>
+      <span aria-hidden className="absolute top-[3px] h-[20px] w-[20px] rounded-full transition-[left]" style={{ left: on ? 24 : 3, background: on ? "#fff" : "var(--foreground)" }} />
+    </button>
+  );
+  return (
+    <section id="settings-accessibility" className={SETTINGS_CARD} style={INSET}>
+      <div className={row} style={{ background: "var(--glass-surface-1)" }}>
+        <span className="flex flex-col gap-[2px]">
+          <span className="text-[14px] font-bold">Hide tips and welcome screens</span>
+          <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>No pop-up hints or first-visit welcomes.</span>
+        </span>
+        {toggle(quiet, "Hide tips and welcome screens", () => setQuietTips(!quiet))}
+      </div>
+      <div className={row} style={{ background: "var(--glass-surface-1)" }}>
+        <span className="flex flex-col gap-[2px]">
+          <span className="text-[14px] font-bold">Turn off game timers</span>
+          <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Timed questions wait for you.</span>
+        </span>
+        {toggle(timersOff, "Turn off game timers", () => setTimersOff(!timersOff))}
+      </div>
+      <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
+        Less motion, high contrast and bigger text follow your device settings.
+      </p>
+    </section>
+  );
 }
 
 function SettingsView({ section, onClose }: { section: SettingsSection | null; onClose: () => void }) {
@@ -4199,6 +4242,8 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
         <button type="button" className={ghost} style={ghostStyle}>Sign out</button>
       </section>
       )}
+
+      {show === "accessibility" && <AccessibilitySettings />}
 
       {show === "danger" && (
       <section id="settings-danger" className={SETTINGS_CARD} style={{ background: `color-mix(in srgb, ${DANGER} 6%, var(--inset-surface))`, borderColor: `color-mix(in srgb, ${DANGER} 35%, var(--inset-border))` }}>

@@ -138,6 +138,8 @@ export function Workspace({active,items,children,search,filters,account,org,them
  const area=available.find(a=>a.views.includes(active));
  const title=names[active]??items.find(i=>i.view===active)?.label??"Workspace";
  const router=useRouter();
+ // each view has its own page title (WCAG 2.4.2, audit 21 Oct 2026)
+ useEffect(()=>{document.title=`${title} · Counselor Dashboard · Dreamari`;},[title]);
  // the pages of this area, de-duplicated by name ("progress" is Milestones'
  // By Student reading, so it lights Milestones rather than a second tab)
  const pages=(area?.items??[]).filter(i=>i.view!=="progress");
@@ -145,8 +147,9 @@ export function Workspace({active,items,children,search,filters,account,org,them
  const [searchOpen,setSearchOpen]=useState(false);
  const searchRef=useRef<HTMLDivElement>(null);
  const searchBtn=useRef<HTMLButtonElement>(null);
- // "/" opens the search wherever focus is not already in a field
- useEffect(()=>{const onKey=(e:KeyboardEvent)=>{const t=e.target as HTMLElement|null;if(e.key==="/"&&!(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.isContentEditable))){e.preventDefault();setSearchOpen(true);}};window.addEventListener("keydown",onKey);return()=>window.removeEventListener("keydown",onKey);},[]);
+ // Ctrl/Cmd+K opens the search (was "/", a single-character shortcut a speech
+ // user could fire by accident; WCAG 2.1.4, audit 21 Oct 2026)
+ useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();setSearchOpen(true);}};window.addEventListener("keydown",onKey);return()=>window.removeEventListener("keydown",onKey);},[]);
  // focus the field on open; Escape or a click outside closes it
  useEffect(()=>{if(!searchOpen)return;searchRef.current?.querySelector("input")?.focus();const onDown=(e:PointerEvent)=>{const t=e.target as Node;if(!searchRef.current?.contains(t)&&!(t instanceof Element&&t.closest("[data-v4-search-toggle]")))setSearchOpen(false);};const onKey=(e:KeyboardEvent)=>{if(e.key==="Escape"){setSearchOpen(false);searchBtn.current?.focus();}};document.addEventListener("pointerdown",onDown);window.addEventListener("keydown",onKey);return()=>{document.removeEventListener("pointerdown",onDown);window.removeEventListener("keydown",onKey);};},[searchOpen]);
  const tools=<><IconTip label="Search (/)"><button type="button" data-v4-search-toggle ref={searchBtn} className="v4-round" aria-label="Search students or screens" aria-expanded={searchOpen} onClick={()=>setSearchOpen(o=>!o)}><Search size={18}/></button></IconTip><IconTip label={`Switch to ${theme==="dark"?"light":"dark"} mode`}><button className="v4-round" onClick={onTheme} aria-label={`Switch to ${theme==="dark"?"light":"dark"} mode`}>{theme==="dark"?<Sun size={18}/>:<Moon size={18}/>}</button></IconTip>{items.some(i=>i.view==="settings")&&<IconTip label="Preferences"><Link className="v4-round" href="/counselor?view=settings&v=4" aria-label="Preferences"><SlidersHorizontal size={18}/></Link></IconTip>}<div className="v4-account">{account}</div></>;
@@ -160,7 +163,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
       have in the student section, same design and width etc."): the same
       DesktopNavigation v7 uses, the areas in its centred pill, transparent
       over the sky until scrolled, the tools in its right slot. Search is
-      an icon there now (a 280px field made the band crowded); "/" still
+      an icon there now (a 280px field made the band crowded); Ctrl/Cmd+K still
       opens it. Phones and tablets keep v4's own bar below lg, now see-
       through too. */}
   <DesktopNavigation active={area?.label} items={available.map(a=>({label:a.label,href:`/counselor?view=${a.items[0].view}&v=4`}))} right={<div className="v4-nav-tools">{tools}</div>}/>

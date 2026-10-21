@@ -194,7 +194,7 @@ export function DistrictOverview() {
       <div className="v4-daily-grid">
         <section className="v4-focus-sheet flex flex-col">
           <header className="v4-section-head"><div><h2>{titleCase(DISTRICT_TOP_FIVE.title)}</h2></div><span className="v4-pill">5 of {SCHOOLS.length} schools</span></header>
-          <div className="v4-district-table mt-[22px]" style={TOP_COLS} aria-label={DISTRICT_TOP_FIVE.title}>
+          <div role="group" className="v4-district-table mt-[22px]" style={TOP_COLS} aria-label={DISTRICT_TOP_FIVE.title}>
             <div className="v4-district-thead" aria-hidden><span>School</span><span>Status</span><span>Career Exploration</span><span className="v4-district-r">Planning</span><span className="v4-district-r">Trend</span><span /></div>
             {DISTRICT_TOP_FIVE.rows.map((r, i) => (
               <button key={r.school.id} type="button" className="v4-district-row" onClick={() => open(r.school.id)} aria-label={`${r.openLabel}. ${r.statusLabel}. Career exploration ${r.career.value}%, launch baseline ${r.career.baselineRounded}%. Planning ${r.planning.value}%. ${r.trendAriaLabel}`}>

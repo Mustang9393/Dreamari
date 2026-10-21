@@ -11,10 +11,14 @@ import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession } from "@/components/app/WelcomeSplash";
+import { useQuietTips } from "@/lib/quietTips";
 
 /** The words a lit control already carries in its tooltip, shown once
  *  beside it while the first-visit highlight points at it. */
 export function SpotTip({ side, top = 48, children }: { side: "left" | "right"; /** px below the anchor's top; negative sits above */ top?: number; children: React.ReactNode }) {
+  // hidden when the student turned tips off (Settings > Accessibility; WCAG 2.2.4)
+  const quiet = useQuietTips();
+  if (quiet) return null;
   return (
     <motion.span
       role="status"

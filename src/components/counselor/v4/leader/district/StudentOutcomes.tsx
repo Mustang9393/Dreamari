@@ -150,7 +150,7 @@ export function StudentOutcomes() {
                   />
                 ))
               : GRADES.map((g, i) => (
-                  <div key={g} className="v4-district-lane" aria-label={`Grade ${g}: ${metric.byGrade[i]}%, district rollup ${roll.value}%`}>
+                  <div role="group" key={g} className="v4-district-lane" aria-label={`Grade ${g}: ${metric.byGrade[i]}%, district rollup ${roll.value}%`}>
                     <span className="v4-district-name"><span className="v4-person"><strong>Grade {g}</strong><small>{O.comparison.studentsCaption(DISTRICT_GRADE_STUDENTS[g])}</small></span></span>
                     <DistrictTrack value={metric.byGrade[i]} district={roll.value} />
                     <b>{metric.byGrade[i]}%</b>

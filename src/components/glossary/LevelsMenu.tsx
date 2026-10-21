@@ -651,7 +651,7 @@ export function LevelsMenu({ career, currentLesson, accent, bgVersion }: { caree
                         );
                       })}
                     </div>
-                    <span className="flex-none font-black tabular-nums" style={{ fontFamily: skin.display, fontSize: 15 * skin.scale }} aria-label={`Level ${reached} of ${career.levels.length}`}>
+                    <span role="img" className="flex-none font-black tabular-nums" style={{ fontFamily: skin.display, fontSize: 15 * skin.scale }} aria-label={`Level ${reached} of ${career.levels.length}`}>
                       {reached}<span style={{ color: skin.muted }}>/{career.levels.length}</span>
                     </span>
                   </div>

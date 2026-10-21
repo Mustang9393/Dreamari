@@ -620,7 +620,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               {/* The world, in its accent, right under the title: the same
                  title-then-world pairing the browse cards use everywhere else
                  (direct feedback). */}
-              <span className="text-[12px] leading-[16px] font-semibold tracking-[0.6px] uppercase" style={{ color: `color-mix(in srgb, ${accent} 70%, #ffffff)`, fontFamily: "var(--font-body)" }}>{career.world}</span>
+              <span className="text-[12px] leading-[16px] font-semibold tracking-[0.6px] uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, #ffffff)`, fontFamily: "var(--font-body)" }}>{career.world}</span>
               {vm.summary && <p className={`${LABEL} max-w-[40ch] pt-[2px]`}>{vm.summary}</p>}
               {/* Actions sit under the summary, left-aligned with the text
                  (direct feedback), not floated to the far corner. */}

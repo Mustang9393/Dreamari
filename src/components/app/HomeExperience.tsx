@@ -65,7 +65,7 @@ const SPACE_ACCENTS = [
 // under the light theme.
 function CaptionLabel({ color, children }: { color: string; children: React.ReactNode }) {
   return (
-    <p className="text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color }}>
+    <p className="w-fit rounded-[4px] px-[6px] py-[1px] text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color, background: "rgba(5,8,20,0.45)" }}>
       {children}
     </p>
   );

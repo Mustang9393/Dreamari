@@ -288,7 +288,7 @@ function ResponderStack({ thread, size = 20, max = 3 }: { thread: Thread; size?:
   const people = responderIdentities(thread).slice(0, max);
   if (people.length === 0) return null;
   return (
-    <span className="flex items-center" aria-label={`${people.length === 1 ? "1 person has" : `${people.length} people have`} replied`}>
+    <span role="img" className="flex items-center" aria-label={`${people.length === 1 ? "1 person has" : `${people.length} people have`} replied`}>
       {people.map((p, i) => (
         <span key={p.name + i} className="rounded-full" style={{ marginLeft: i === 0 ? 0 : -Math.round(size * 0.38), zIndex: people.length - i, boxShadow: "0 0 0 2px var(--glass-surface-1)" }}>
           <Avatar name={p.name} size={size} />
@@ -1065,7 +1065,7 @@ function CompactRow({ onOpen, avatarName, title, meta, state, helpful, comments 
          StatusChip's text ("Waiting for an answer") doesn't fit a one-line
          row, but the fact still needs to be visible without opening the
          thread (direct feedback, 8 Sept 2026). */}
-      {state && <span aria-label={STATE_LABEL[state]} className="size-[7px] flex-none rounded-full" style={{ background: STATE_COLOR[state] }} />}
+      {state && <span role="img" aria-label={STATE_LABEL[state]} className="size-[7px] flex-none rounded-full" style={{ background: STATE_COLOR[state] }} />}
       <Avatar name={avatarName} size={24} />
       <span className="min-w-0 flex-1">
         <span className="block min-w-0 truncate text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>
@@ -2905,7 +2905,7 @@ export function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; 
         <div className="relative mt-[14px] flex items-center gap-[clamp(14px,calc(5vw/var(--vz,1)),44px)] text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
           <IconTip label="Comment"><button type="button" onClick={onOpen} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}><MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}</button></IconTip>
           <IconTip label={cardProps.helpful ? "Liked" : "Like"}><button type="button" onClick={cardProps.onHelpful} aria-pressed={cardProps.helpful} aria-label={`Like, ${helpfulTotal.toLocaleString("en-US")} ${pluralize(helpfulTotal, "like")}`} className={`${action} relative z-20 w-fit`} style={{ color: cardProps.helpful ? "var(--accent-subtle)" : undefined }}><ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}</button></IconTip>
-          <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}><Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span></span>
+          <span role="img" className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}><Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span></span>
           <div className="ml-auto flex items-center gap-[var(--space-2)]">
             <IconTip label={cardProps.saved ? "Saved" : "Save"}><button type="button" onClick={cardProps.onSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}><Bookmark className="h-[16px] w-[16px]" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} /></button></IconTip>
             <IconTip label="Share"><button type="button" onClick={() => nav?.share(`?thread=${thread.id}`, thread.title)} aria-label="Share" className="dm-quiet relative z-20 -mr-[6px] flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: quiet }}><Share2 className="h-[16px] w-[16px]" aria-hidden /></button></IconTip>
@@ -3104,7 +3104,7 @@ export function FeedPostRow({
               <ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}
             </button>
           </IconTip>
-          <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}>
+          <span role="img" className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}>
             <Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span>
           </span>
           <div className="ml-auto flex items-center gap-[var(--space-2)]">
@@ -4640,7 +4640,7 @@ function BoardView({
             <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-5)]" style={{ borderColor: RULE }}>
               <div className="flex items-baseline justify-between gap-[10px]">
                 <h3 className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Open now for {community.world}</h3>
-                <Link href="/opportunities" className="dm-link flex-none text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>See all</Link>
+                <Link href="/opportunities" className="dm-link flex-none text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>See all<span className="sr-only"> opportunities</span></Link>
               </div>
               {/* Three quiet rows, not a stack of cards (Chandu: "TOO MUCH CLUTTER, please don't overload the screen"). */}
               <ul className="flex flex-col [&>*+*]:border-t" style={{ ["--feed-rule" as string]: FEED_RULE }}>

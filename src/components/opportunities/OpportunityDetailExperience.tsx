@@ -287,7 +287,7 @@ export function OpportunityDetailExperience({ id }: { id: string }) {
               <div className="hidden flex-col gap-[8px] lg:flex">
                 <a href={item.url} target="_blank" rel="noreferrer" className={`${btn} dm-solid w-full text-white`} style={{ background: ACCENT, borderColor: ACCENT }}>
                   {applyLabel} <ArrowUpRight className="h-4 w-4 flex-none" aria-hidden />
-                </a>
+                <span className="sr-only"> (opens in a new tab)</span></a>
                 <div className="grid grid-cols-2 gap-[8px]">
                   <button type="button" aria-pressed={!!status} onClick={() => setStatus(status ? null : "saved")} className={btn} style={status ? onTone : outline}>
                     {status ? <BookmarkCheck className="h-4 w-4" aria-hidden style={{ color: SOFT }} /> : <Bookmark className="h-4 w-4" aria-hidden />}{saveLabel}
@@ -399,7 +399,7 @@ export function OpportunityDetailExperience({ id }: { id: string }) {
         </IconTip>
         <a href={item.url} target="_blank" rel="noreferrer" className={`${btn} dm-solid min-w-0 flex-1 text-white`} style={{ background: ACCENT, borderColor: ACCENT }}>
           Apply <ArrowUpRight className="h-4 w-4 flex-none" aria-hidden />
-        </a>
+        <span className="sr-only"> (opens in a new tab)</span></a>
       </div>
 
       <MobileNav active="Opportunities" />

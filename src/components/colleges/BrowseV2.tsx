@@ -500,7 +500,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
       </StickyBar>
 
       {(chips.length > 0 || q) && (
-        <div className="-mt-[6px] flex flex-wrap items-center gap-[8px]" aria-label="Applied filters">
+        <div role="group" className="-mt-[6px] flex flex-wrap items-center gap-[8px]" aria-label="Applied filters">
           {chips.map((c) => (
             <button key={c.key} type="button" onClick={c.remove} aria-label={`Remove ${c.label}`} className="dm-quiet flex min-h-[30px] flex-none cursor-pointer items-center gap-[6px] rounded-[8px] px-[11px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: SOFT }}>
               {c.label} <X className="h-3.5 w-3.5" aria-hidden />

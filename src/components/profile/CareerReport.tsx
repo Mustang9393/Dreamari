@@ -120,7 +120,7 @@ function SourceLink({ url, children }: { url: string; children: React.ReactNode 
   return (
     <a href={url} target="_blank" rel="noreferrer" data-print-url={url} className="inline-flex items-center gap-[3px] underline decoration-[color:var(--rule-strong)] underline-offset-2" style={{ color: "var(--ink-soft)" }}>
       {children} <ExternalLink className="h-3 w-3" aria-hidden />
-    </a>
+    <span className="sr-only"> (opens in a new tab)</span></a>
   );
 }
 
