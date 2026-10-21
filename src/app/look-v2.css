@@ -670,7 +670,11 @@ html.look-v2 [data-landing-wash] {
 html.look-v2 [data-hero-surface] {
   display: block !important;
   opacity: 1 !important;
-  background: linear-gradient(180deg, #111f36 0%, #172a46 20%, #1e375a 40%, #2b4b78 56%, #3a6290 68%, #4a7aab 78%, #44709f 84%, #34567f 90%, #22395a 95%, #131f36 100%) !important;
+  /* (an eased tail: the slope flattens to zero at the edge, so the eye
+     sees no line where the fall stops; a linear tail read as one. The last
+     few percent go transparent so the page's own grain shows through on
+     both sides of the edge: an opaque end hid it and left a step) */
+  background: linear-gradient(180deg, #111f36 0%, #172a46 20%, #1e375a 40%, #2b4b78 56%, #3a6290 68%, #4a7aab 78.0%, #4a79aa 80.2%, #4775a4 82.4%, #416b98 84.6%, #395d86 86.8%, #2e4c70 89.0%, #243c5b 91.2%, #1c2e49 93.4%, #16243d 95.6%, rgba(19, 32, 55, 0.6) 97.8%, rgba(19, 31, 54, 0) 100%) !important;
   -webkit-mask-image: none !important;
   mask-image: none !important;
 }

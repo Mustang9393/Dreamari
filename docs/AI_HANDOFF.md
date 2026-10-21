@@ -1,3 +1,10 @@
+## 2026-10-21: Landing: the last line below the hero, removed
+
+- `look-v2.css` `[data-hero-surface]`: two remaining causes of the line Chandu still saw ("there is still a line"):
+  1. A slope break: a linear tail fell steeply, then stopped flat, which reads as a line (a Mach band). The tail is now a smootherstep curve from `#4a7aab` at 78% to navy, so its slope reaches zero at the edge.
+  2. A one-shade step: the opaque hero hid the page's grain, which lifts the area below to `#162135`. The last ~4% now fades to transparent, so the same grain shows on both sides.
+- Verified by pixel sampling: no step larger than one 8-bit unit across the edge.
+
 ## 2026-10-21: Landing: no seam below the hero
 
 - `look-v2.css` landing changes:
