@@ -147,7 +147,7 @@ export function Reviews({ only, milestone }: { only?: (s: CounselorStudent) => b
         </ul>
       </aside>
 
-      <section aria-label="Submission" className={`flex min-w-0 flex-col overflow-hidden ${CARD}`} style={CARD_STYLE}>
+      <section aria-label="Submission" className={`flex min-w-0 flex-col self-start overflow-hidden ${CARD}`} style={CARD_STYLE}>
         {/* the stage's title bar */}
         <header className="flex items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: RULE }}>
           <Link href={studentHref(item.student.id)} className="dm-quiet flex min-w-0 items-center gap-[var(--space-3)] rounded-[var(--radius-md)]">
@@ -170,15 +170,20 @@ export function Reviews({ only, milestone }: { only?: (s: CounselorStudent) => b
            preview and requires a scroll to see the message") */}
         <div className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px]">
           {/* the page at reading size (Chandu: "this preview isn't valuable if
-             it's so zoomed out"): it fills the canvas width up to 100% and
-             ends where the writing ends, not at a blank Letter tail. Reading
+             it's so zoomed out"): a full Letter page, as wide as the canvas
+             up to 100%, so it reads. The canvas fills the whole height of
+             its row and scrolls on its own (Chandu, 21 Oct: "instead of this
+             sitting cropped vertically, let it be the full page so the
+             scroll still works but it doesn't leave a lot of space"). Reading
              the document is the review, so it stays in place, not behind a
              thumbnail and a click (SpeedGrader and Google Classroom grade
              the same way: the paper beside the comment box). */}
-          <div ref={docRef} className="v7-read dm-scroll overflow-y-auto px-[var(--space-5)] py-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)", height: fitH }}>
-            <button type="button" onClick={() => setFull(true)} aria-label={`Open ${item.milestone} full screen`} className="mx-auto block w-full max-w-[816px] cursor-zoom-in text-left">
-              <FitPage shadow="0 1px 2px rgba(0,0,0,0.2), 0 30px 70px -28px rgba(0,0,0,0.75)"><DocumentPage student={item.student} milestone={item.milestone} /></FitPage>
-            </button>
+          <div ref={docRef} className="relative min-w-0" style={{ minHeight: fitH }}>
+            <div className="dm-scroll overflow-y-auto px-[var(--space-5)] py-[var(--space-5)] xl:absolute xl:inset-0" style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }}>
+              <button type="button" onClick={() => setFull(true)} aria-label={`Open ${item.milestone} full screen`} className="mx-auto block w-full max-w-[816px] cursor-zoom-in text-left">
+                <FitPage shadow="0 1px 2px rgba(0,0,0,0.2), 0 30px 70px -28px rgba(0,0,0,0.75)"><DocumentPage student={item.student} milestone={item.milestone} /></FitPage>
+              </button>
+            </div>
           </div>
           <div className="flex min-w-0 flex-col gap-[var(--space-5)] border-t p-[var(--space-5)] xl:border-t-0 xl:border-l" style={{ borderColor: RULE }}>
             <div className="flex flex-col gap-[var(--space-2)]">

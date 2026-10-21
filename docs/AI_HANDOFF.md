@@ -52,6 +52,22 @@
 
 **Next.** Phase 1 of the report's roadmap: B2, B3, B6 and B9 in the games first.
 
+## 2026-10-21: Reviews, all builds: a full page that fills the height and scrolls
+
+**Why (Chandu):** a short document ended early and left a dark empty canvas under it: "instead of this sitting cropped vertically, let it be the full page so the scroll still works but just it doesn't leave a lot of space and uses the height available to it", then "fix and push for all versions".
+
+- **v7 (`v7/Workspace.tsx`, also v4 through `v4/ReviewDesk.tsx`):** the page is a full Letter page again (the `.v7-read` min-height override is gone), at canvas width up to 100%. The canvas fills its row (absolute inset at xl, min-height = room to the bottom of the screen) and scrolls on its own; the card no longer stretches to the queue's height (`self-start`), so Approve stays above the fold.
+- **v5 (`v5/Workspace.tsx`, also v6 through V5Reviews):** the page was shrunk to fit the screen height (too small to read). Its column is now the widest of the three (1.35fr), the page draws at column width, and its box is as tall as the screen allows and scrolls; Full screen stays pinned to the box.
+- Checked: tsc and eslint clean; v7 and v5 Reviews at 1440.
+
+## 2026-10-21: Counselor v7 student profile wears v4's student ID tag
+
+**Why (Chandu):** "can we do the same student ID and counselor ID designs for v7?"
+
+- **Student (`v7/StudentProfile.tsx`):** only the header changed: the focal header card is replaced by v4's `StudentIdCard` (now exported from `v4/StudentProfile.tsx`) on its badge reel at the left, with Prepare meeting, Message and Add note at the header's right as before. Tabs and content are v7's, untouched (Chandu, correcting a first pass that moved them into a side column: "don't change the other content from what was there in v7 before. Just the header becomes the ID card on the left instead"). The tag's styles are v4's (today.css), so it sits in a `data-counselor-version="v4"` wrapper.
+- **Counselor:** v7's My Profile already opens v4's `CounselorProfileSheet` (one component), so the badges match with no change.
+- Checked: tsc and eslint clean; v7 student profile and My Profile at 1440, dark.
+
 ## 2026-10-21 — IB master sequence, concise career stories and fixed character identity
 
 **Why:** Chandu: “use the vetted Investment Banking simulation ... 1:1 reference”; “too much copy”; supporting graphics “should not be needing tab and clicking and interaction”; latest: “different skin tones ... skin tone and facial details ... consistent ... Eye colors ... consistent for a character.”

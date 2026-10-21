@@ -69,8 +69,8 @@ export function Reviews({ only, milestone }: { /** narrows the queue (v4's grade
   const [last, setLast] = useState<{ item: Item; word: string } | null>(null);
   const [full, setFull] = useState(false);
   const item = queue[Math.min(current, queue.length - 1)];
-  // the room from the document's top to the bottom of the screen; the page
-  // takes that height and the matching width (US Letter, 8.5 x 11)
+  // the room from the document's top to the bottom of the screen: the
+  // page's box takes that height and scrolls
   const docRef = useRef<HTMLElement>(null);
   const [fitH, setFitH] = useState<number | undefined>(undefined);
   useLayoutEffect(() => {
@@ -84,7 +84,6 @@ export function Reviews({ only, milestone }: { /** narrows the queue (v4's grade
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [item?.student.id, item?.milestone]);
-  const docW = fitH ? Math.round((fitH * 816) / 1056) : undefined;
 
   const decide = (status: "Approved" | "Changes Requested") => {
     if (!item) return;
@@ -112,16 +111,21 @@ export function Reviews({ only, milestone }: { /** narrows the queue (v4's grade
   const top = item.student.topMatches[0]?.title;
   const due = sub.dueInDays < 0 ? `${-sub.dueInDays} ${sub.dueInDays === -1 ? "day" : "days"} late` : sub.dueInDays === 0 ? "Due today" : `Due in ${sub.dueInDays} ${sub.dueInDays === 1 ? "day" : "days"}`;
   return (
-    // Three columns (Chandu, 7 Oct 2026): the page, sized to the screen's
-    // height so the whole document shows without a scroll; what the student
-    // said and the context around it; and the decision, so feedback and the
-    // buttons never need a scroll either.
-    <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-[auto_minmax(0,1fr)_300px] lg:gap-[var(--space-8)]">
-      <section ref={docRef} aria-label="Submission" className="order-2 flex min-w-0 flex-col lg:order-1" style={docW ? { width: docW } : undefined}>
+    // Three columns (Chandu, 7 Oct 2026): the page; what the student said and
+    // the context around it; and the decision, so feedback and the buttons
+    // never need a scroll. The page is a full Letter page at reading size in
+    // a box as tall as the screen allows, scrolling on its own (21 Oct 2026:
+    // the page shrunk to fit the screen height was too zoomed out to read;
+    // "let it be the full page so the scroll still works but it doesn't
+    // leave a lot of space"), the same as v7's Reviews.
+    <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_300px] lg:gap-[var(--space-8)]">
+      <section ref={docRef} aria-label="Submission" className="order-2 flex min-w-0 flex-col lg:order-1">
         <div className="relative">
+          <div className="dm-scroll overflow-y-auto rounded-[var(--radius-md)]" style={fitH ? { height: fitH } : undefined}>
           <button type="button" onClick={() => setFull(true)} aria-label={`Open ${item.milestone} full screen`} className="block w-full cursor-zoom-in text-left">
-            <FitPage fitHeight={fitH} shadow="0 1px 2px rgba(35,51,46,0.14), 0 22px 56px -22px rgba(35,51,46,0.42)"><DocumentPage student={item.student} milestone={item.milestone} /></FitPage>
+            <FitPage shadow="0 1px 2px rgba(35,51,46,0.14), 0 22px 56px -22px rgba(35,51,46,0.42)"><DocumentPage student={item.student} milestone={item.milestone} /></FitPage>
           </button>
+          </div>
           <button type="button" onClick={() => setFull(true)} className="dm-quiet absolute top-[10px] right-[10px] inline-flex h-8 items-center gap-[6px] rounded-full border px-[10px] text-[12.5px] font-semibold" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <Maximize2 className="h-[13px] w-[13px]" aria-hidden /> Full screen
           </button>

@@ -96,7 +96,7 @@ function ActionButton({ icon: Icon, label, onClick }: { icon: typeof Bell; label
  *  a short cord, and is a light card: the school band, a round photo in the
  *  middle, the name, grade and class year, pathway, status and when they
  *  were last active. Nothing else. */
-function StudentIdCard({ student }: { student: CounselorStudent }) {
+export function StudentIdCard({ student }: { student: CounselorStudent }) {
   const classOf = 2027 + (12 - student.grade);
   return (
     <div className="v4-sid-wrap">
