@@ -66,7 +66,7 @@ function Face({ row, size }: { row: Row; size: number }) {
   // someone outside the roster with no portrait: their initials, never an empty circle
   if (!row.student && (idx === undefined || idx < 0)) {
     const initials = row.name.split(" ").map((p) => p[0]).slice(0, 2).join("");
-    return <span aria-hidden className="flex flex-none items-center justify-center rounded-full font-semibold" style={{ width: size, height: size, fontSize: Math.round(size * 0.36), background: "color-mix(in srgb, var(--primary) 18%, var(--card))", color: "var(--pc-link, var(--color-brand-300))" }}>{initials}</span>;
+    return <span aria-hidden className="flex flex-none items-center justify-center rounded-full font-semibold" style={{ width: size, height: size, fontSize: Math.round(size * 0.36), background: "color-mix(in srgb, var(--primary) 18%, var(--card))", color: "var(--pc-link, var(--color-text-brand))" }}>{initials}</span>;
   }
   return <StudentFace s={row.student ?? { id: row.key, avatarIndex: idx ?? -1 }} size={size} />;
 }

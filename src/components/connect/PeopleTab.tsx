@@ -121,9 +121,13 @@ function FollowCarousel({ pros, follows, onFollow }: { pros: Pro[]; follows: Fol
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </button>
           </IconTip>
-          <span className="flex items-center gap-[6px]" role="tablist" aria-label="Page">
+          {/* each dot sits in a 24px hit area (WCAG 2.5.8, audit 21 Oct 2026: the
+              6px dots were the whole target); the visible dot is unchanged */}
+          <span className="flex items-center" role="tablist" aria-label="Page">
             {Array.from({ length: pageCount }).map((_, i) => (
-              <button key={i} type="button" role="tab" aria-selected={i === clamped} aria-label={`Page ${i + 1}`} onClick={() => setPage(i)} className="dm-quiet size-[6px] cursor-pointer rounded-full" style={{ background: i === clamped ? "var(--primary)" : "var(--glass-border)" }} />
+              <button key={i} type="button" role="tab" aria-selected={i === clamped} aria-label={`Page ${i + 1}`} onClick={() => setPage(i)} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full">
+                <span aria-hidden className="size-[6px] rounded-full" style={{ background: i === clamped ? "var(--primary)" : "var(--glass-border)" }} />
+              </button>
             ))}
           </span>
           <IconTip label="Next">

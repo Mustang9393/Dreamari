@@ -107,6 +107,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               // this button in light mode, and the fill is the simulation's own
               // gradient (app.css, .play-career-world). A fill carries dark ink, so
               // it never needs the text-safe dark rung that read as mud.
+              data-ink={ink === "#fff" ? "light" : "dark"}
               className={`career-play-cta on-dark-media dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] text-[14px] font-bold ${stack ? "max-[480px]:px-2 max-[480px]:whitespace-normal" : "whitespace-nowrap"}`}
               style={{ "--career-play": accent, borderColor: "transparent", color: ink, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` } as CSSProperties}
             >

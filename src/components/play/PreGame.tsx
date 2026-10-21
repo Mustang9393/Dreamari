@@ -194,6 +194,10 @@ export function PreGameFlow({
       // CTA etc, not the blue anywhere"). Re-pointing --primary here also
       // recolours the shared quick-check button inside the lesson.
       style={{ background: "var(--background)", ["--primary" as string]: accent, ["--primary-foreground" as string]: "var(--background)" }}
+      // aria-modal: the game behind is covered, so keyboard and screen-reader
+      // focus stay in this card (DialogFocusHost; WCAG 2.4.11 / 2.4.3, audit
+      // 21 Oct 2026). data-own-history keeps Back leaving the game, as before.
+      aria-modal="true" data-own-history
       role="dialog" aria-label={mode === "howto" ? "How to Play" : mode === "lesson" ? preGame.lesson?.title : `${simulation.title} start`}>
       <AnimatePresence initial={false}>
         <motion.div key={backdrop} aria-hidden className="absolute inset-0 overflow-hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}>

@@ -55,7 +55,8 @@ const RED = "#ff5a5a";
 const AMBER = "#ffb020";
 const GOOD = GREEN;
 const OK_INK = "#2e9e6b";
-const BAD_INK = "#c93838";
+// #ef6464: 4.6:1 on the reader face (#c93838 was 3.5:1; WCAG 1.4.3)
+const BAD_INK = "#ef6464";
 const DUE_INK = "#8a94a6";
 
 export type WorldSkin = { paper: string; paperEdge: string; device: string; glow: string };
@@ -223,7 +224,7 @@ export function VitalsMonitor({ state, time, room, place, accent, outcome = null
   const bad = alarm && !helped;
   const tile = (label: string, value: string | number, unit: string, color: string, flag = false) => (
     <motion.div key={label} className="flex min-w-0 flex-col gap-[2px] rounded-[10px] px-[10px] py-[8px]" style={{ background: "rgba(255,255,255,0.035)", boxShadow: flag ? `inset 0 0 0 1px ${YELLOW}` : "inset 0 0 0 1px rgba(255,255,255,0.07)" }} animate={flag ? { opacity: [1, 0.55, 1] } : { opacity: 1 }} transition={flag ? { duration: 0.9, repeat: Infinity } : undefined}>
-      <span className="text-[9.5px] leading-[12px] font-bold tracking-[0.16em] uppercase" style={{ color: flag ? YELLOW : "rgba(255,255,255,0.5)" }}>{label}</span>
+      <span className="text-[9.5px] leading-[12px] font-bold tracking-[0.16em] uppercase" style={{ color: flag ? YELLOW : "rgba(255,255,255,0.72)" }}>{label}</span>
       <span className="flex items-baseline gap-[3px]">
         <span className="text-[24px] leading-[26px] font-extrabold" style={{ ...MONO, color: flag ? YELLOW : color }}>{value}</span>
         {unit && <span className="text-[10px] font-bold" style={{ color: "rgba(255,255,255,0.4)" }}>{unit}</span>}
@@ -656,7 +657,8 @@ export function IdBadge({ org, role, accent }: { org?: string; role: string; acc
         <span aria-hidden className="-mt-[2px] block h-[7px] w-[22px] rounded-[3px]" style={{ background: "linear-gradient(180deg, #d9dde6, #9aa3b3)" }} />
         <span className="flex w-[196px] flex-col overflow-hidden rounded-[9px]" style={{ background: "#ffffff", boxShadow: "0 22px 40px -18px rgba(0,0,0,0.85), 0 0 0 1px rgba(0,0,0,0.08)" }}>
           <span className="flex h-[26px] items-center justify-between px-[11px]" style={{ background: accent }}>
-            <span className="truncate text-[8.5px] leading-[11px] font-extrabold tracking-[0.14em] text-white uppercase">{name}</span>
+            {/* dark ink on the bright world strip, a darkened world colour on the white card: white and gold measured 1.7-2.5:1 (WCAG 1.4.3) */}
+            <span className="truncate text-[8.5px] leading-[11px] font-extrabold tracking-[0.14em] uppercase" style={{ color: "#0b1020" }}>{name}</span>
             <span aria-hidden className="relative ml-[8px] flex h-[12px] w-[12px] flex-none items-center justify-center rounded-full bg-white/90">
               <span className="block h-[7px] w-[2px] rounded-full" style={{ background: accent }} />
               <span className="absolute block h-[2px] w-[7px] rounded-full" style={{ background: accent }} />
@@ -670,7 +672,7 @@ export function IdBadge({ org, role, accent }: { org?: string; role: string; acc
             <span className="flex min-w-0 flex-1 flex-col gap-[5px]">
               <span aria-hidden className="block h-[8px] w-[82px] rounded-[2px]" style={{ background: "rgba(28,36,51,0.28)" }} />
               <span aria-hidden className="block h-[6px] w-[54px] rounded-[2px]" style={{ background: "rgba(28,36,51,0.16)" }} />
-              <span className="mt-[1px] text-[9.5px] leading-[12px] font-extrabold uppercase" style={{ color: accent }}>{role}</span>
+              <span className="mt-[1px] text-[9.5px] leading-[12px] font-extrabold uppercase" style={{ color: `color-mix(in srgb, ${accent} 50%, #0b1020)` }}>{role}</span>
             </span>
           </span>
           <span aria-hidden className="mx-[11px] mb-[8px] flex h-[14px] items-end gap-[1.5px]">
@@ -689,7 +691,7 @@ export function IdBadge({ org, role, accent }: { org?: string; role: string; acc
       >
         {/* The face flash on contact. */}
         <motion.span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "rgba(255,255,255,0.35)" }} initial={{ opacity: 0 }} animate={stage === "tap" ? { opacity: [0, 0.6, 0] } : { opacity: 0 }} transition={{ duration: 0.5 }} />
-        <span className="text-[7.5px] leading-[10px] font-extrabold tracking-[0.2em] uppercase" style={{ color: "rgba(255,255,255,0.4)" }}>{ok ? "Access" : "Tap ID"}</span>
+        <span className="text-[7.5px] leading-[10px] font-extrabold tracking-[0.2em] uppercase" style={{ color: "rgba(255,255,255,0.78)" }}>{ok ? "Access" : "Tap ID"}</span>
         <span className="relative flex h-[44px] w-[44px] items-center justify-center">
           <motion.span aria-hidden className="absolute inset-[3px] rounded-full" style={{ border: `2px solid ${GOOD}` }} initial={{ scale: 0.7, opacity: 0 }} animate={ok ? { scale: [0.7, 1.45], opacity: [0.9, 0] } : { opacity: 0 }} transition={ok ? { duration: 1.1, repeat: Infinity, repeatDelay: 1.6, ease: "easeOut" } : undefined} />
           <span aria-hidden className="absolute inset-[5px] rounded-full" style={{ background: "radial-gradient(circle at 50% 40%, #3b404b, #1b1e24)", boxShadow: "inset 0 0 0 1.5px rgba(255,255,255,0.14)" }} />

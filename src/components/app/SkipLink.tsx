@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+
 // Keyboard users otherwise tab through the header and nav on every page
 // before reaching content (UX audit, 11 Sept 2026). Visible only on focus.
 // The target is the page's visible <main> (WCAG 2.2 audit, 21 Oct 2026): the
@@ -15,6 +18,13 @@ function target(): HTMLElement | null {
 }
 
 export function SkipLink() {
+  // name the target on every page as it renders, so href="#main" resolves
+  // even before the link is used (axe's skip-link check, audit 21 Oct 2026)
+  const pathname = usePathname();
+  useEffect(() => {
+    const t = window.setTimeout(() => { const main = target(); if (main && !main.id) main.id = "main"; }, 300);
+    return () => window.clearTimeout(t);
+  }, [pathname]);
   return (
     <a
       href="#main"

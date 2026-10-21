@@ -455,7 +455,7 @@ export const AMT_LEVEL_1_V2: Level = {
       noVerdict: true,
       speaker: "Narrator",
       question: "Almost finished.",
-      prompt: "The repair is complete. What’s left? Drag into order.",
+      prompt: "The repair is complete. What’s left? Put them in order.",
       order: ["Complete required check", "Inspect work area", "Account for tools", "Document the work"],
       whenRight: "Checked, cleared, counted, written down. Now the job is finished.",
       whenWrong: "Complete the required check, inspect the work area, account for your tools, then document the work.",

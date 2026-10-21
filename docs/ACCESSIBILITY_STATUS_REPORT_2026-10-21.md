@@ -10,11 +10,30 @@
 
 ---
 
+## Progress: Phase 1 done (21 October 2026)
+
+The nine AA blockers B2–B9 are fixed and on main. Only **B1 (video captions and transcripts)** still blocks an AA claim, and it is content work. Measured on a production build, same 96-scan harness, before → after:
+
+| Measure | Before | After |
+|---|---|---|
+| Real text-contrast failures (dark / light / phone, demo-only and known false positives removed) | 85 / 93 / 61 | 9 / 44 / 24 |
+| Text below AAA 7:1 (all modes) | 874 | 607 |
+| axe `target-size` nodes | 160 | 0 |
+| axe `aria-prohibited-attr` nodes | 186 | 0 |
+| axe `skip-link` | 75 | 0 |
+| Focused element fully covered | 66 | 14 (Opportunities rail Save buttons, to confirm by hand) |
+| Controls under 24px (excluding inline links) | 87 | 82 (mostly inline text links and select labels, which are exempt) |
+
+Game keyboard test (Investment Banker): the start card is modal; after Start, focus lands in the question box once the card has gone; number keys do nothing unless focus is in the box; the verdict is announced once ("Strong move. Plus 6 reputation, now 56. Learn the systems first…"); Continue moves focus to the next screen.
+
+**Still open from Phase 1:** B1 captions; the light-mode leftovers in section 5; counselor phone Insights axis labels; AI loading announcements; menus without arrow keys. Then Phase 2 and 3 as planned.
+
 ## 1. Summary
 
 | Level | Pass | Partial | Fail | Needs a person to test | Not applicable | Total |
 |---|---|---|---|---|---|---|
-| **WCAG 2.2 A + AA** | 23 | 15 | 10 | 2 | 5 | 55 |
+| **WCAG 2.2 A + AA** (after Phase 1) | 28 | 18 | 2 | 2 | 5 | 55 |
+| WCAG 2.2 A + AA (before Phase 1) | 23 | 15 | 10 | 2 | 5 | 55 |
 | **WCAG 2.2 AAA** | 3 | 10 | 12 | 1 | 5 | 31 |
 
 **Can Dreamari claim WCAG 2.2 AA today? No, not yet.** It is close, and the remaining work is clear and bounded. Ten AA criteria fail outright. All of them are fixable in code and none needs a redesign. Six of the ten sit in two places:
@@ -123,16 +142,16 @@ Status: **Pass**, **Partial** (mostly met, named gaps), **Fail**, **Test** (need
 | 1.2.5 Audio description | AA | Test | On-screen text in tours may not be spoken | Listen to each clip. If visuals carry meaning, add a described version or put it in the transcript |
 | 1.3.1 Info and relationships | A | Partial | Game screens have no h1 and the question is a `<p>`. On phones, 10 pages hide their only h1. Heading levels skip on Colleges and counselor Meetings. Opportunities date badges use `aria-label` on plain spans (45 per page; also 14 on counselor Explore) | Sim title becomes the h1 and the question an h2. Keep an sr-only h1 on phones. Use `role="img"` or sr-only text on the date badges |
 | 1.3.2 Meaningful sequence | A | Pass | Visual reorders keep DOM order | – |
-| 1.3.3 Sensory characteristics | A | **Fail** | 6 instructions rely on color, position or sound: Torque "orange marker on the green mark" (with no value text), "Listen for the click", "Tap the blue Reserve button", "Drag into order" | Reword, and give the Torque range `aria-valuetext` ("in the safe band") |
+| 1.3.3 Sensory characteristics | A | Pass | Fixed in Phase 1: Torque reads "Move the slider into the green safe range" and the range announces "In the safe range / Too low / Too high"; "Pull until the wrench clicks"; "Put them in order". ("Tap the blue Reserve button" is a wrong answer in a UX lesson, not an instruction.) | Reword, and give the Torque range `aria-valuetext` ("in the safe band") |
 | 1.3.4 Orientation | AA | Pass | No orientation lock | – |
 | 1.3.5 Identify input purpose | AA | Partial | Signup and resume are fixed. Left: signup birth month/year, and the counselor Settings name, email and school fields | Add `autoComplete` values (`bday-month`/`bday-year`, `name`, `email`, `organization`) |
-| 1.4.1 Use of color | A | **Fail** | Counselor caseload matrix: On Track / Needs Attention / At Risk differ only by fill color, legend included | A glyph or shape per status (✓ ! ×) |
+| 1.4.1 Use of color | A | Pass | Fixed in Phase 1: caseload statuses are a filled square (On Track), a ring (Needs Attention) and a warning triangle (At Risk), in the dots and the key, and they hold up in forced colors | A glyph or shape per status (✓ ! ×) |
 | 1.4.2 Audio control | A | Partial | Game music needs a click and can be muted. Company video cards start playing **on keyboard focus**, and play with sound if the shared sound setting is on | Don't autoplay on focus |
-| 1.4.3 Contrast (minimum) | AA | **Fail** | Failing text elements: 120 desktop dark, 133 desktop light, 72 phone (of 7,234). Details in section 5 | Section 5 |
+| 1.4.3 Contrast (minimum) | AA | Partial | Phase 1 cut real failures from about 239 to about 77 (dark 85→9, light 93→44, phone 61→24). Left: light-mode Leaderboard state chips, small Opportunities date/award labels, counselor phone Insights axis labels (33-40% white), career "Not for me" in light mode, Glossary "Cloud route" chip. Section 5 | Section 5 |
 | 1.4.4 Resize text | AA | Pass | No zoom blocking. At 200% zoom, no page scrolls sideways (all 32 routes) | – |
 | 1.4.5 Images of text | AA | Partial | Company video covers have the title baked into the image, and the HTML title is hidden until the clip plays | Keep the HTML title visible |
 | 1.4.10 Reflow | AA | Pass | Every route works at 320px with no sideways scroll | – |
-| 1.4.11 Non-text contrast | AA | **Fail** | Input borders are 1.34:1 (dark) and 1.37:1 (light); 3:1 is needed. Counselor focus ring and chart series 1 (`--primary` #2f5fb1) measure 2.76:1 on the dark page | Field borders at least rgba(148,194,249,.45) dark and #8a96a6 light. Counselor ring and chart: #8fb3f5 |
+| 1.4.11 Non-text contrast | AA | Partial | Fixed in Phase 1: every text field, select and picker edge is now 50% of the text colour (3:1+ in both themes); counselor focus ring uses the text-safe brand (#cbe0fb dark); counselor chart series 1 is #6f9cf0 in dark. Left: a few search fields whose border is drawn on a wrapper (Colleges, Connect) | Field borders at least rgba(148,194,249,.45) dark and #8a96a6 light. Counselor ring and chart: #8fb3f5 |
 | 1.4.12 Text spacing | AA | Pass | No content clipped under the override, apart from hidden carousel slides | – |
 | 1.4.13 Content on hover or focus | AA | Partial | IconTip, DreamScoreTip, FactPopover and Reactions pass. The counselor Meetings hover card has no Escape | Add Escape and make the card hoverable |
 
@@ -142,24 +161,24 @@ Status: **Pass**, **Partial** (mostly met, named gaps), **Fail**, **Test** (need
 |---|---|---|---|---|
 | 2.1.1 Keyboard | A | Partial | All 16 game interaction types work by keyboard. Gaps: counselor leader trend points are mouse-hover only. 4 `role="menu"` lists have no arrow keys (ForYouSchools, Mentorship ×2, DocumentDesk) | Focusable points or a data table. Arrow keys on menus, or plain button lists |
 | 2.1.2 No keyboard trap | A | Pass | Every modal releases on Escape; no traps found | – |
-| 2.1.4 Character key shortcuts | A | **Fail** | Game number keys (1–9) answer from anywhere on the page, even inside text fields, with no off switch. "/" opens counselor search | Fire only when the play area has focus and no text field is active. Add an off switch next to Timers |
+| 2.1.4 Character key shortcuts | A | Pass | Fixed in Phase 1: number-key answers only work while focus is inside the question box, which takes focus on every new screen, and never inside a text field | Fire only when the play area has focus and no text field is active. Add an off switch next to Timers |
 | 2.2.1 Timing adjustable | A | Partial | Game timers can now be turned off. Left: the Explore reel card flips after 6s, and Undo disappears after 6s, neither pausing on hover or focus | Pause on hover/focus (FeedbackBar already does) |
 | 2.2.2 Pause, stop, hide | A | Partial | The Explore reel video loops with no pause button. The landing-page mascot float and border-beam spin, and the Play "next step" wash, keep animating under reduced motion | Add Play/Pause. Stop the decorative loops under reduced motion |
 | 2.3.1 Three flashes | A | Test | Split-flap tiles reshuffle every 55ms (≈18Hz) for a short burst, probably below the area threshold | Measure. Settle instantly under reduced motion |
 | 2.4.1 Bypass blocks | A | Pass | The skip link works on every page. axe still flags it because `id="main"` is only set when the link takes focus | Put `id="main"` on `<main>` at render |
 | 2.4.2 Page titled | A | Partial | `/` and `/flow` use the generic site title. All counselor views share one title | One title per view |
-| 2.4.3 Focus order | A | Partial | In games, focus is lost on each new question. The game start screen leaves the game behind it reachable by keyboard. The landing page's invisible chapter nav takes focus | Focus the new question heading. Make the background `inert`. `inert` on the hidden nav |
+| 2.4.3 Focus order | A | Pass | Fixed in Phase 1: each new game screen takes focus; the game start card is modal; the landing page chapter nav is inert while hidden | Focus the new question heading. Make the background `inert`. `inert` on the hidden nav |
 | 2.4.4 Link purpose (in context) | A | Pass | Generic "View all" links sit under a heading that names them | – |
 | 2.4.5 Multiple ways | AA | Pass | Main navigation, Explore search, and cross-links | – |
 | 2.4.6 Headings and labels | AA | Partial | Games have no headings | As 1.3.1 |
 | 2.4.7 Focus visible | AA | Partial | The student ring passes in both themes. Colleges and Connect search fields, and resume fields, show focus only as a faint border change | Use a `focus-visible:ring-2` field style |
-| 2.4.11 Focus not obscured (minimum) | AA | **Fail** | Fully covered when focused: game toolbar under the start screen (4 controls), counselor Review Previous/Next/Full screen, the landing chapter nav. There is no `scroll-padding` for the sticky header and phone bottom nav | `inert` on covered layers. `html{scroll-padding-top:90px;scroll-padding-bottom:110px}` |
+| 2.4.11 Focus not obscured (minimum) | AA | Partial | Fixed in Phase 1: game toolbar no longer reachable behind the start card, landing nav inert, `scroll-padding` keeps focus clear of the sticky header and phone tab bar (covered-focus hits 66→14). Left to confirm by hand: Save buttons on the Opportunities card rails (likely the rail clipping, not real cover) | `inert` on covered layers. `html{scroll-padding-top:90px;scroll-padding-bottom:110px}` |
 | 2.5.1 Pointer gestures | A | Pass | Every swipe and drag has a button alternative | – |
 | 2.5.2 Pointer cancellation | A | Pass | Down events only start drags | – |
 | 2.5.3 Label in name | A | Partial | Resume "Tap to read" button is labelled "Read full screen" | Make the label start with the visible text |
 | 2.5.4 Motion actuation | A | N/A | No device-motion input | – |
 | 2.5.7 Dragging movements | AA | Pass | Fixed in round 2: deck buttons, resume reorder, and game tap paths | – |
-| 2.5.8 Target size (minimum) | AA | **Fail** | Connect page dots are 6×6. Phone Explore Save is 23.4px (74 per page). Phone landing "Go to My Top 3 / Plan / Resume" links are 8–11px | 24px hit areas (padding; the visual stays the same) |
+| 2.5.8 Target size (minimum) | AA | Pass | Fixed in Phase 1: Connect page dots and landing stage dots have 24px hit areas; poster Save is 32px (25px on the phone deck). axe target-size: 160 → 0 | 24px hit areas (padding; the visual stays the same) |
 
 ### Understandable
 
@@ -183,8 +202,8 @@ Status: **Pass**, **Partial** (mostly met, named gaps), **Fail**, **Test** (need
 
 | SC | Lvl | Status | Finding | Fix |
 |---|---|---|---|---|
-| 4.1.2 Name, role, value | A | Partial | `aria-label` on role-less spans (Opportunities ×45, counselor Explore ×14, Review "Draft saved"). 4 menus with no keyboard support. Section switcher uses tabs that navigate. Torque range has no value text | As above |
-| 4.1.3 Status messages | AA | **Fail** | Game verdicts ("Not quite" plus why), reputation changes and new questions are silent. AI buttons switch to "Generating…" without announcing it | `role="status"` on the verdict. Announce "Question N" and the loading text |
+| 4.1.2 Name, role, value | A | Partial | Opportunities and counselor date badges now `role="img"` (axe aria-prohibited-attr 186 → 0). Left: 4 menus with no arrow keys, section switcher built as tabs that navigate, Review "Draft saved" dot | As above |
+| 4.1.3 Status messages | AA | Partial | Fixed in Phase 1: game verdicts are read out ("Strong move. Plus 6 reputation, now 56. …") and each new question takes focus. Left: AI "Generating…" states are not announced | `role="status"` on the verdict. Announce "Question N" and the loading text |
 
 ---
 

@@ -70,6 +70,9 @@ export function ChapterRail({ wrapRef }: ChapterRailProps) {
       // since 1024-1279px is exactly that tight range.
       className="fixed top-1/2 right-3 z-40 hidden -translate-y-1/2 flex-col items-center gap-3 transition-opacity duration-300 xl:flex"
       style={{ opacity: visible ? 1 : 0, pointerEvents: visible ? "auto" : "none" }}
+      // faded out = out of the Tab order too (WCAG 2.4.11, audit 21 Oct 2026:
+      // focus was landing on six invisible buttons)
+      inert={!visible}
     >
       <span className="absolute top-0 bottom-0 left-1/2 z-0 w-px -translate-x-1/2" style={{ background: "var(--border)" }} />
       <span

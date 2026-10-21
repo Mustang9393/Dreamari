@@ -46,7 +46,7 @@ import { deleteArchivedProfile, profileArchiveSnapshot, restoreArchivedProfile, 
 import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
 import { liftSplashVeil } from "@/components/app/SplashVeil";
 import { playMilestoneChime } from "@/components/build/sound";
-import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
+import { posterTitleFont, WORLD_COLORS, posterInk, worldInk } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, NOT_IN_REPORT, Portal, cellsFromReport } from "./CareerReport";
@@ -1358,7 +1358,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[15px] font-bold">{career.title}</span>
-                    <span className="truncate text-[12px] font-bold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {interestTier(career.match)}</span>
+                    <span className="truncate text-[12px] font-bold" style={{ color: worldInk(WORLD_COLORS[career.world]) }}>{career.world} · {interestTier(career.match)}</span>
                   </span>
                   <button
                     type="button"
@@ -3942,7 +3942,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
                 <span className="absolute top-[8px] right-[8px] z-10"><SaveButton on={savedCareers.has(career.id)} onToggle={() => toggleSavedCareer(career.id)} size={32} /></span>
                 <span className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px] text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)", paddingTop: "30px" }}>
                   <span className="w-full text-[14px] leading-[16px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
-                  <span className="w-full text-[8px] leading-[11px] font-bold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
+                  <span className="w-full text-[8px] leading-[11px] font-bold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: posterInk(WORLD_COLORS[career.world]) }}>{career.world}</span>
                 </span>
               </span>
               {/* Real bug fix, 27 Sept 2026: at this grid's narrowest columns

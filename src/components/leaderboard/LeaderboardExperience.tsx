@@ -67,6 +67,9 @@ const LEAGUE_COLOR: Record<League, string> = {
   Silver: "#d6dbe6",
   Bronze: "#d9955a",
 };
+// Text in these state, league and medal colours is mixed toward --foreground
+// where it is drawn (WCAG 1.4.3, audit 21 Oct 2026): the pure hues were tuned
+// for the dark sky and measured 1.1-3.9:1 under the light theme.
 const METAL = [LEAGUE_COLOR.Gold, LEAGUE_COLOR.Silver, LEAGUE_COLOR.Bronze];
 // The rivalry's name and its lines (Chandu, 6 Oct 2026: "any popular
 // pop-culture references we can use here for the NY/NJ rivalry?"). The
@@ -218,7 +221,7 @@ function Rivalry() {
     <div className={`flex items-center gap-[14px] sm:gap-[20px] ${align === "right" ? "flex-row-reverse" : ""}`}>
       <StateShield state={state} />
       <div className={`flex flex-col gap-[6px] ${align === "right" ? "items-end" : "items-start"}`}>
-        <CountUp value={count} className="text-[48px] leading-[0.9] font-extrabold tabular-nums sm:text-[64px]" style={{ ...DISPLAY, color: STATE_COLOR[state] }} />
+        <CountUp value={count} className="text-[48px] leading-[0.9] font-extrabold tabular-nums sm:text-[64px]" style={{ ...DISPLAY, color: `color-mix(in srgb, ${STATE_COLOR[state]} 55%, var(--foreground))` }} />
         <span className="text-[13px] font-semibold whitespace-nowrap" style={{ color: leader === state ? "var(--foreground)" : "var(--muted-foreground)" }}>{state}</span>
       </div>
     </div>
@@ -239,7 +242,7 @@ function Rivalry() {
           <motion.span className="absolute inset-y-0 left-0 rounded-full" style={{ background: FLAG["New York"].field }} initial={{ width: "50%" }} animate={{ width: `${nyPct}%` }} transition={{ duration: 1.1, ease: EASE, delay: 0.3 }} />
         </div>
         <p className="text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>
-          <span style={{ color: STATE_COLOR[leader] }} className="font-semibold">{leader}</span> leads by {margin} today. Counting students in Diamond League.
+          <span style={{ color: `color-mix(in srgb, ${STATE_COLOR[leader]} 55%, var(--foreground))` }} className="font-semibold">{leader}</span> leads by {margin} today. Counting students in Diamond League.
         </p>
       </div>
     </section>
@@ -357,7 +360,7 @@ function MyRank({ me }: { me: Ranked }) {
           <LeagueEmblem league={me.league} size={38} />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-[8px]">
-          <span className="text-[11px] font-bold tracking-[0.18em] uppercase" style={{ color }}>My rank</span>
+          <span className="text-[11px] font-bold tracking-[0.18em] uppercase" style={{ color: `color-mix(in srgb, ${color} 55%, var(--foreground))` }}>My rank</span>
           {/* One line on wide screens, Joshua's exact shape; on phones the
               reach drops to its own line and the dots go away. */}
           <span className="flex flex-col gap-y-[4px] text-[19px] leading-[1.25] font-extrabold md:flex-row md:flex-wrap md:items-center md:gap-x-[10px] md:text-[21px] md:whitespace-nowrap" style={DISPLAY}>
@@ -448,9 +451,9 @@ function Row({ s, place, index }: { s: Ranked; place: number; index: number }) {
       <span className="flex min-w-0 items-center gap-[10px]">
         <span className="truncate text-[15px] font-semibold" style={{ color: you ? "var(--foreground)" : metal ? "var(--foreground)" : "color-mix(in srgb, var(--foreground) 92%, transparent)", ...(metal ? { fontWeight: 700 } : {}) }}>{s.name}</span>
         {you && <span className="flex-none text-[10.5px] font-bold tracking-[0.12em]" style={{ color: "var(--color-text-brand)" }}>YOU</span>}
-        <span className="flex-none rounded-[6px] px-[7px] py-[2px] text-[10.5px] font-bold" style={{ background: `color-mix(in srgb, ${FLAG[s.state].field} 22%, transparent)`, color: STATE_COLOR[s.state] }}>{STATE_SHORT[s.state]}</span>
+        <span className="flex-none rounded-[6px] px-[7px] py-[2px] text-[10.5px] font-bold" style={{ background: `color-mix(in srgb, ${FLAG[s.state].field} 22%, transparent)`, color: `color-mix(in srgb, ${STATE_COLOR[s.state]} 55%, var(--foreground))` }}>{STATE_SHORT[s.state]}</span>
       </span>
-      <span className="text-[15px] font-semibold tabular-nums sm:text-[16px]" style={{ ...DISPLAY, color: metal ?? undefined }}>{fmt(s.points)}</span>
+      <span className="text-[15px] font-semibold tabular-nums sm:text-[16px]" style={{ ...DISPLAY, color: metal ? `color-mix(in srgb, ${metal} 55%, var(--foreground))` : undefined }}>{fmt(s.points)}</span>
     </motion.li>
   );
 }
@@ -473,7 +476,7 @@ function Avatar({ s, size, ring }: { s: Standing; size: number; ring?: string })
     <span
       aria-hidden
       className="relative flex flex-none items-center justify-center overflow-hidden rounded-full text-[12px] font-black"
-      style={{ width: size, height: size, background: s.avatar ? "#d9dbe0" : `color-mix(in srgb, ${STATE_COLOR[s.state]} 30%, #1b1e28)`, color: "var(--foreground)", boxShadow: ring ? `0 0 0 2px ${ring}` : undefined }}
+      style={{ width: size, height: size, background: s.avatar ? "#d9dbe0" : `color-mix(in srgb, ${STATE_COLOR[s.state]} 30%, #1b1e28)`, color: "#fff", boxShadow: ring ? `0 0 0 2px ${ring}` : undefined }}
     >
       {s.avatar ? <Image src={studentPortraitSrc(s.avatar)} alt="" fill sizes={`${size * 2}px`} className="object-cover object-top" /> : initials}
     </span>
