@@ -1,3 +1,9 @@
+## 2026-10-21: Dusk sky gets a rising sun at the bottom
+
+- The dark sky (app backdrop and Build/Match's `[data-flow-space]`, `src/app/look-v2.css`) gains a rising-sun glow: a small near-white radial core just below the bottom edge inside a tighter blue halo, over the existing horizon bloom and navy-to-blue gradient.
+- Why: Chandu, "the blue gradient needs one more stage of brighter glow maybe towards the bottom because still still reads a bit gloomy". A first try lifted the whole lower third with a wide saturated blue; Chandu rejected it: "not a flat color uplift but an additional glow maybe a radial one but not overly taking over the footer maybe like a sun rising". So the light is one concentrated source and the corners keep their colour.
+- AA: the core only reaches the last few percent of the screen (under the mobile tab bar). From 8% above the bottom, white text is above 7:1 on the sky. Checked in dark at desktop width, with the page content hidden to see the sky.
+
 ## 2026-10-21: Pay & Growth, every state shows all three figures
 
 **Why (Chandu):** "I still see only one stat updating when i hover on a state." Two causes. The seeded state outlook left about one state in five (13 for Software Engineer, including Texas, New York and Florida) and a few whole careers without a forecast, on purpose, to show sparse-data handling; in use it read as broken, and the demo rule is mock values over blanks. And the map file names DC "Washington, DC" while the app's lists say "Washington, D.C.", so DC matched no pay or outlook data at all.
