@@ -1,3 +1,18 @@
+## 2026-10-21: Aurora beams: rise from the bar, pulse, shorter, soft multicolour
+
+- `SkyAurora.tsx` changes:
+  - The cap is now one smooth curve (`0.05 + 0.27 * exp(-y / 0.24)`) instead of a step, so the beams fade up out of the bright bottom bar. They're also 1.5x brighter.
+  - Each beam pulses in and out on its own noise timing.
+  - The sideways slide is kept, but the sway varies along the curtain, so it doesn't move as one flat sheet.
+  - Beams are shorter: reach `0.1 + 0.27*n`, and the layer fades out by about 45% of the screen.
+  - Soft aurora colours, mixed into the blue at low strength: green low in the beams, teal through the middle, a faint rose at the tips (kept to a trace).
+- Why: Chandu, in order:
+  - "THE BEAMS BRIGHTNESS CAN ORGANICALLY FADE FROM THE BOTTOM BRIGHTER BAR... MAKE SURE THEY GO IN AND OUT OF GLOW SO ITS NOT LIKE A FLAT BRIGHT THING MOVING RIGHT TO LEFT. BUT DONT OVER DO IT"
+  - "DONT DROP THE SLIDE LET THEM MOVE BUT NOT LIKE A FLAT THING"
+  - "GIVE SOFT AURORA LIKE MULTICOLOR BUT KEEP THEM VERY SUBTLE... NO TOO MUCH PURPLE STUFF. REFER ACTUAL AURORA BOREALIS PHOTOS"
+  - "WE CAN REDUCE THE AURORA BEAMS HEIGHTS"
+- The first colour pass at 0.3 mix didn't show up in sampled pixels; it's raised to 0.6, which reads as a faint teal.
+
 ## 2026-10-21: Aurora: a brighter glow along the bottom edge
 
 - `SkyAurora.tsx`: only the foot is brighter. Its glow term is stronger and runs the full width, with the cap raised to 0.32 at the edge, easing to 0.07 within the bottom ~15% of the screen. The beams above are unchanged.

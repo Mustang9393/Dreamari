@@ -14,7 +14,7 @@
 // A small fragment shader: two curtains of light, each with a noise-driven
 // lower edge that folds and drifts, fine vertical rays, a hot near-white
 // lower edge and a falloff upward in the reference slide's pale blues, with
-// a trace of aurora green-teal; never purple. Subtle ("IT CAN BE A LITTLE
+// soft aurora colours mixed in (green, teal, a faint rose at the tips). Subtle ("IT CAN BE A LITTLE
 // MORE SUBTLE TOO"), composited with `screen` so it adds light to the sky and
 // the stars still show through it.
 //
@@ -75,29 +75,42 @@ vec3 curtain(vec2 uv, float aspect, float t, float k, float lift, float rayScale
   float d = uv.y - base;
   // folds: the rays bend with the curtain, so sample them in warped x
   // (only a slight bend: beams stand nearly upright)
-  // the whole curtain drifts sideways and sways
-  float wx = x + t * 0.018 + 0.12 * fbm(vec2(x * 0.9 + k, uv.y * 0.8 + t * 0.06));
+  // the curtain drifts sideways, but sways by different amounts along its
+  // length, so it never slides as one flat sheet
+  float wx = x + t * 0.018 + 0.12 * fbm(vec2(x * 0.9 + k, uv.y * 0.8 + t * 0.06))
+    + 0.05 * sin(t * 0.17 + x * 0.9 + k * 2.3);
   // beams: distinct shafts of light with dark gaps, a finer texture inside
   float r1 = noise(vec2(wx * rayScale, t * 0.22 + k * 5.0));
   float r2 = noise(vec2(wx * rayScale * 3.1, t * 0.5 + k * 11.0));
   float rays = 0.18 + 0.82 * pow(r1, 2.0) * (0.6 + 0.4 * r2);
-  // each beam reaches its own height, some tall, most short
-  float reach = 0.16 + 0.42 * pow(noise(vec2(wx * rayScale * 0.45, k * 3.0 + t * 0.12)), 1.8);
+  // each beam glows up and fades back on its own timing (Chandu: "make sure
+  // they go in and out of glow so its not like a flat bright thing moving
+  // right to left. But dont over do it either")
+  float pulse = 0.3 + 0.7 * smoothstep(0.25, 0.75, noise(vec2(wx * rayScale * 0.6 + 17.0, t * 0.4 + k * 9.0)));
+  rays *= pulse;
+  // each beam reaches its own height, some tall, most short; kept low
+  // ("WE CAN REDUCE THE AURORA BEAMS HEIGHTS. A BIT TOO.")
+  float reach = 0.1 + 0.27 * pow(noise(vec2(wx * rayScale * 0.45, k * 3.0 + t * 0.12)), 1.8);
   float body = d > 0.0 ? exp(-d / reach) : exp(d * 22.0);
   // brightness along the curtain, with gaps, so it never reads as one band
   float along = 0.25 + 0.75 * smoothstep(0.2, 0.62, fbm(vec2(x * 0.7 - t * 0.03 + k * 7.0, 2.0 + k + t * 0.04)));
   // the glowing foot the beams rise from
-  float i = (body * rays + 0.8 * exp(-abs(d) / 0.07)) * (0.4 + 0.6 * along);
+  float i = (1.5 * body * rays + 0.8 * exp(-abs(d) / 0.07)) * (0.4 + 0.6 * along);
   // falloff upward: pale at the foot, deeper blue up high
   float h = clamp(d / 0.55, 0.0, 1.0);
   // the reference slide's own sky blues, pale at the foot, deeper up high
   // (Chandu: "I think we've strayed way from this color too much")
   vec3 c = mix(vec3(0.80, 0.88, 0.98), vec3(0.60, 0.74, 0.94), smoothstep(0.0, 0.15, h));
   c = mix(c, vec3(0.42, 0.58, 0.86), smoothstep(0.12, 0.6, h));
-  // a trace of aurora green-teal, low and in patches ("a tiny bit of
-  // aurora colors (NO purple) Very subtly too")
-  float tint = smoothstep(0.45, 0.8, noise(vec2(x * 0.8 - t * 0.02 + k * 4.0, 3.0)));
-  c = mix(c, vec3(0.45, 0.85, 0.75), 0.12 * tint * (1.0 - smoothstep(0.05, 0.45, h)));
+  // soft aurora colours, the way photos of the borealis have them: green
+  // low in the beams, teal through the middle, a faint rose at the tips;
+  // mixed into the blue at low strength, so barely there but there
+  // ("GIVE SOFT AURORA LIKE MULTICOLOR BUT KEEP THEM VERY SUBTLE BARELY
+  // VISIBLE BUT VISIBLY ALL THE SAME, NO TOO MUCH PURPLE STUFF")
+  float hue = noise(vec2(wx * 0.9 - t * 0.02 + k * 4.0, 3.0 + t * 0.03));
+  vec3 aur = mix(vec3(0.30, 1.00, 0.55), vec3(0.25, 0.90, 0.90), smoothstep(0.1, 0.45, h) * 0.7 + hue * 0.3);
+  aur = mix(aur, vec3(0.92, 0.58, 0.74), smoothstep(0.55, 0.95, h) * 0.45);
+  c = mix(c, aur, 0.6 * (0.5 + 0.5 * hue) * smoothstep(0.0, 0.06, d));
   // the hot lower edge
   c += vec3(0.16, 0.18, 0.2) * exp(-abs(d) * 55.0);
   return c * i;
@@ -111,15 +124,16 @@ void main() {
   col += 0.55 * curtain(uv, aspect, t * 0.8, 1.0, 0.04, 23.0);
   // fade toward the sides and the top of the layer
   float edge = smoothstep(0.0, 0.22, uv.x) * smoothstep(1.0, 0.78, uv.x);
-  col *= mix(0.45, 1.0, edge) * smoothstep(1.0, 0.55, uv.y);
+  col *= mix(0.45, 1.0, edge) * smoothstep(0.78, 0.38, uv.y);
   // soft highlight roll-off, then the cap that keeps text on the sky AA:
   // full strength only at the foot, lower where text can sit
   col = 1.0 - exp(-col * 0.85);
   // (scaled, not clipped per channel, so the colour keeps its hue)
-  // a brighter glow only at the very bottom (Chandu: "WAY TOO SUBTLE NOW,
-  // THE LOWER MOST PART CAN HAVE MAYBE A BRIGHTER GLOW"), the beams above
-  // stay quiet
-  float cap = mix(0.32, 0.07, smoothstep(0.0, 0.2, uv.y));
+  // brightest at the very bottom (Chandu: "WAY TOO SUBTLE NOW, THE LOWER
+  // MOST PART CAN HAVE MAYBE A BRIGHTER GLOW"), then a smooth fade upward
+  // so the beams rise out of that bar instead of starting at a step ("THE
+  // BEAMS BRIGHTNESS CAN ORGANICALLY FADE FROM THE BOTTOM BRIGHTER BAR")
+  float cap = 0.05 + 0.27 * exp(-uv.y / 0.24);
   col *= min(1.0, cap / max(max(col.r, col.g), max(col.b, 1e-4)));
   gl_FragColor = vec4(col, 1.0);
 }
