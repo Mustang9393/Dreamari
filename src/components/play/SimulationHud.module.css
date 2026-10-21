@@ -14,3 +14,9 @@
  .score {grid-column:3;grid-row:2;margin-left:0}
 }
 @media(max-width:359px){.header{padding-inline:10px}.row{column-gap:6px}.navigation,.tools{gap:3px}}
+
+@media(max-width:639px){
+ .row{column-gap:6px}
+ .navigation,.tools{gap:3px}
+ .navigation button,.tools button{width:32px;height:32px}
+}

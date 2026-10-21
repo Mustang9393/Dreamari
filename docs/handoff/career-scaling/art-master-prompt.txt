@@ -1,26 +1,31 @@
 DREAMARI COMPLETE ANIME SCENE
 
-Career / beat: {CAREER, BEAT_ID}
-Story action: {ACTION}
-Location / canonical camera: {LOCATION_AND_CAMERA}
-Time / plausible light: {TIME, WINDOW_DIRECTION, PRACTICALS}
-Visible cast: {NAMES_AND_FIXED_IDENTITIES}
-Drawing reference: {APPROVED UX v3 / RN CHARACTER REFERENCE}
-Identity references: {ONE CANONICAL FACE AND COLOR CROP PER PERSON}
-Room reference: {SELECTED COMPLETE SCENE}
-Allowed edit: {EXACT CHANGE OR NEW CAMERA}
+Career / script screen and runtime beat: {CAREER, SCRIPT_SCREEN_ID, BEAT_ID}
+Story action, cast, emotion and time: {EXACT APPROVED SCREEN DETAILS}
+Cast introduction status: {FIRST APPEARANCE OR FOLLOW-UP; VERIFY AGAINST CAST LEDGER}
+Location / camera: {CANONICAL ROOM AND SHOT}
+Viewport: {LANDSCAPE OR PORTRAIT, TARGET ASPECT}
+Drawing reference: {APPROVED STYLE IMAGE}
+Canonical identities: {FACE/COLOR CROPS FOR EVERY PERSON PRESENT}
+Allowed edit: {IMAGE-ONLY CHANGE}
 Output: {DIMENSIONS, FILE_ID}
 
-Paint one complete, opaque 2D anime scene with people, room, furniture and lighting together. The runtime uses this full scene as one background image. Never create separate sprites, character cutouts, counter portraits, unfinished bodies hidden by HUD, or player arms/hands in the foreground. The player is the camera. A person addressing the player looks toward the lens; observed conversations may look at each other. Keep gestures natural and near each character’s body.
+For an approved game, preserve its script and use the exact cast presence, action, emotion, location and time for this screen. Nursing uses the locked `rn-level-1-v2.ts` script: 36 runtime beats across 55 screens. Image and face-chip updates must map to the source scene; do not change text, questions, answers, score, mechanics or endings. A patient alone during an alarm may be alarmed while Rosa is elsewhere. Never use smiles during a crisis. Keep required ECG, badge, call-light, wristband and report surfaces in the exact state needed by the source screen.
 
-Match the approved character style: thin controlled outlines, expressive anime eyes, small nose mark, short line mouth, flat base color and one broad cel shadow. Hair is a few solid masses; blonde hair uses no more than four broad solid masses and no more than two internal hairlines. No glossy strands, painted lips, sculpted cheeks, heavy comic outlines, photoreal skin or 3D.
+For UX/Food, use the approved staggered introduction order and cast ledger. At a character's first beat, show only that newly introduced named person in a clear solo image. Do not show or name anyone whose first-appearance beat has not arrived; defer group images until every visible person is introduced. Keep mentors recurring, and give each new person follow-up moments before another new name appears. For RN, do not alter or reorder the locked approved script to impose these new-career introduction beats.
 
-Maintain each canonical identity in every shot: age, face proportions, skin base and undertone, iris color, brows, hairline and texture, outfit and identifying details. Keep older characters visibly older. Eleanor (60) and Sofia (67) retain clear, consistent age cues in every shot. Keep face, neck and hands consistent under scene light. For the requested Black-cast update, move the cast one shade darker in one canonical palette change and propagate it to every scene and face chip. Keep the shade consistent; preserve skin bases under light and shadow, with no crushed-black shadows.
+Current UX order: Arjun the mentor in beats 1–4, Noah at 5, Eleanor at 10, Samira at 12, Amina in Act 2. Current Food Scientist order: Ren the mentor in beats 1–4, Imani at 5, Yuki at 12, Luis at 18. These are first-appearance anchors, not permission to add beats. A peer opponent needs a clear narrative reason.
 
-Create luxurious five-star architecture suited to the real workplace: ivory stone, walnut joinery, brass trim, considered ceilings and beautiful functional furniture. Environment rendering stays selective and anime-flat. No photographic detail, mirror floors, glossy skin, bloom, haze or beams from closed doors. Light should come from plausible windows and practical fixtures.
+Paint one complete opaque anime scene with people, room, furniture and light in one image. No sprites, cutout characters, counter portraits, foreground player arms/hands or unfinished bodies. The player is the camera. A speaking colleague looks toward the lens; an observed conversation may look at its participants.
 
-For Nursing, every window shows the same lake, red-roof houses, trees and green hill. Never substitute a city or parking lot. Preserve room geography, window placement, furniture and exterior. The established RN timeline is early morning through evening; daytime must not become sunrise. Rosa beats 4–17 are morning, Denise 18–20 and Tyler/Room 12 21–23 are afternoon, and 24–26 are evening. Use plausible window and practical light. Reaction art keeps the exact base camera and time.
+Use thin controlled outlines, expressive eyes, a small nose mark, short line mouth, flat base color and one broad cel shadow. Blonde hair has no more than four broad solid masses and no more than two internal hairlines. No glossy strands, painted lips, sculpted cheeks, heavy comic outlines, photoreal skin or 3D. Keep canonical face, skin base/undertone, eye color, age, hairline/texture, outfit and details fixed. Eleanor (60) and Sofia (67) must remain visibly older in every shot.
 
-Compose for the actual game UI: keep the top 20% clear of faces for HUD; keep the bottom 38% clear of faces for dialogue; place main heads around y=.23–.44. Complete bodies, chairs, hands and floor beneath UI areas. Make camera and action fit the beat; avoid a repeated centered-counter template. Do not rely on runtime zoom or crop to make the image fit. Prompt dimensions are not verification; inspect the assembled desktop and phone screens.
+For the requested Black-cast update, move the cast one shade darker with a single canonical palette change and propagate that update to every scene and face chip. Keep the adjustment consistent across the cast; preserve the skin base in all lighting and never crush shadows to black.
 
-Reuse the saved image when identical pixels are required. Fresh generation cannot promise pixel identity. Record source references, full prompt, selected filename, file hash and QA status. Hashes prove provenance, not facial identity or visual quality. Compare every recurring character with the canonical crop and compare room geography and actual UI. Repair drift before integration; repeat visual review after edits. The internal contact sheet is a QA aid, not a human approval gate.
+Use luxurious, functional workplace architecture in ivory stone, walnut and brass. Environment detail stays selective and anime-flat. Light comes from plausible windows and practical fixtures. No mirror floors, photoreal textures, bloom, haze, or beams through closed doors. Nursing windows keep the established lake, red-roof homes, trees and green hill.
+
+Generate a dedicated landscape or portrait composition for its target viewport. The scene must fill that viewport at the intended aspect with faces and important characters fully inside frame. Keep the top 20% clear for HUD and bottom 38% clear for dialogue. Never crop faces or use blurred side-fill, black bars or runtime zoom/cropping to fill space.
+
+Keep the HUD, question and dialogue panels centered in the same position across all scenes. Never shift UI left or right to protect a face. Compose the scene around that fixed centered footprint, leaving its zones clear while preserving complete faces and bodies. Success art uses the shared IB monogram/CareerSeal, not a generic trophy.
+
+Record full prompt, source/reference files, selected output, hash and visual review. A hash documents provenance, not identity. Reuse saved files for identical pixels; do not claim a fresh generation guarantees pixel identity. Contact-sheet checks are internal; repair and integrate before final human QA.

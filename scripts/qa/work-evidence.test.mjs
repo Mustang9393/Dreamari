@@ -36,6 +36,10 @@ const words=s=>(s??'').match(/[A-Za-z]+(?:['’][A-Za-z]+)?|\d+/g)??[];
 for(const level of levels){
  test(level.id+': seven scored decisions, midpoint, first choice and passing score',()=>{
   assert.equal(level.generationTemplate,'ib-narrative-v2');
+  assert.equal(level.beats.length,ib.beats.length,'new careers match IB beat count');
+  for(const kind of ['choice','flips','match','rapid','rank'])assert(level.beats.some(b=>b.kind===kind),kind+' variety');
+  const art=load(path.join(root,'src/components/play/art/'+(level.id.startsWith('ux')?'ui-ux-designer':'food-scientist')+'.json'));
+  level.beats.forEach(b=>assert(art.locations[art.beatLocations[b.id]],b.id+': missing scene'));
   assert.equal(level.points,ib.points);assert.equal(level.noStrikes,true);
   const decisions=level.beats.filter(scored);assert.equal(decisions.length,7);
   assert(level.beats.findIndex(scored)+1<=6,'first scored choice should arrive by beat six');
@@ -48,7 +52,7 @@ for(const level of levels){
   assert.equal(decisions[0].kind,'choice');assert(!decisions[0].timer);
   decisions.forEach((b,i)=>{
    assert(Math.abs(b.progress-(i+1)/7)<1e-7,b.id+': score progress');
-   assert(!b.artifact,b.id+': scored answer must not depend on optional supporting art');
+   if(b.artifact){assert.deepEqual(artifactProblems(b.artifact),[]);assert(b.question,'question remains self-contained');}
    if(b.kind==='choice'){assert.equal(b.choices.filter(c=>c.tier==='best').length,1);assert(b.choices.every(c=>c.why));}
    if(b.kind==='pick')assert(b.pick>0&&b.cards.filter(c=>c.role==='pick').length===b.pick,b.id+': pick answer key');
    if(b.kind==='flags')assert(b.rows.some(r=>r.flag)&&b.rows.some(r=>!r.flag)&&b.rows.every(r=>r.why),b.id+': flags answer key');
@@ -81,7 +85,7 @@ test('approved Nursing gameplay survives image-only updates',()=>{
  for(const beat of [...live.beats,...live.expressSource.beats]){
   const location=art.locations[art.beatLocations[beat.id]];
   assert(location,beat.id+': missing new painting');
-  assert(location.src.includes('/rebuild-2026-10-21/'),beat.id+': outdated art');
+  assert(/\/(rebuild-2026-10-21|scene-state-v8)\//.test(location.src),beat.id+': outdated art');
   assert(!location.characterAnchor&&!location.characterAnchors,beat.id+': runtime sprite');
   assert(fs.existsSync(path.join(root,'public',location.src)),beat.id+': image missing');
   assert(!beat.art,beat.id+': legacy hero picture overrides new painting');
@@ -99,4 +103,54 @@ test('supporting graphics validate and render as read-only scene context',()=>{
 test('supporting artifact contracts reject embedded answer keys and interactive demos',()=>{
  assert(artifactProblems({...UX_ARTIFACTS.prototype,demo:{kind:'email-signup'}}).length);
  assert(artifactProblems({...FS_ARTIFACTS.plan,practice:{step:5}}).length);
+});
+
+test('UX visibly distinguishes buried and improved Save without extra controls',()=>{
+ const bad=renderToStaticMarkup(React.createElement(WorkArtifact,{artifact:UX_ARTIFACTS.bad}));
+ const good=renderToStaticMarkup(React.createElement(WorkArtifact,{artifact:UX_ARTIFACTS.improved}));
+ assert(bad.includes('data-scene-state="buried"')&&bad.includes('Long description above Save'));
+ assert(good.includes('data-scene-state="clear"')&&!good.includes('Long description above Save'));
+ assert(bad.indexOf('Long description above Save')<bad.indexOf('Save set'));
+ const q=levels[0].beats.find(b=>b.id==='UX1-11');
+ assert(q.question.includes('below a long description'));assert.equal(q.artifact.state,'buried');
+ assert.equal(q.feedbackArtifacts.best.state,'clear');assert.equal(q.feedbackArtifacts.wrong.state,'buried');
+});
+test('critical nursing art follows cast presence and has a sharp portrait composition',()=>{
+ const art=load(path.join(root,'src/components/play/art/registered-nurse.json'));
+ for(const id of ['RN2-23','RN2-24','RN2-43','RN2-44','RN2-45']){
+  const l=art.locations[art.beatLocations[id]];
+  assert.deepEqual(l.visibleCast,['Room 12 patient']);assert(l.mobileSrc);
+  assert(fs.existsSync(path.join(root,'public',l.mobileSrc)));
+  assert.equal(l.emotion,id==='RN2-23'||id==='RN2-24'?'anxious':'alarm');
+ }
+});
+
+test('completion starts empty and advances regardless of answer reputation',()=>{
+ const {completionPercent}=load(path.join(root,'src/components/play/scoring.ts'));
+ for(const total of [7,10]){assert.equal(completionPercent(0,total),0);assert.equal(completionPercent(total,total),100);assert(Math.abs(completionPercent(1,total)-100/total)<1e-10);}
+ assert.equal(completionPercent(1,0),0);assert.equal(completionPercent(11,10),100);
+});
+
+test('colleagues enter through story events, with work between introductions',()=>{
+ for(const [i,career] of ['ui-ux-designer','food-scientist'].entries()){
+  const level=levels[i], art=load(path.join(root,'src/components/play/art',career+'.json'));
+  const ledger=load(path.join(root,'docs/handoff/career-scaling',career+'-introduction-ledger.json'));
+  const firsts=Object.entries(ledger.cast).map(([name,c])=>({name,...c,index:level.beats.findIndex(b=>b.id===c.first)})).sort((a,b)=>a.index-b.index);
+  assert.equal(firsts[0].name,ledger.mentor);
+  firsts.forEach((c,j)=>{
+   assert(c.index>=0,c.name+' introduction exists');
+   if(j)assert(c.index-firsts[j-1].index>=3,c.name+' needs story space before introduction');
+   const b=level.beats[c.index];assert(JSON.stringify(b).includes(c.name),c.name+' is named at introduction');
+   assert((b.setup??b.title??'').includes(c.name),c.name+' introduction label');
+   assert.deepEqual(art.locations[art.beatLocations[b.id]].visibleCast,[c.name],c.name+' solo first appearance');
+  });
+  level.beats.forEach((b,index)=>{
+   for(const name of art.locations[art.beatLocations[b.id]].visibleCast??[]){
+    const c=firsts.find(c=>c.name===name);assert(c&&c.index<=index,b.id+': unrevealed '+name);
+   }
+   for(const c of firsts)if(index<c.index)assert(!new RegExp('\\b'+c.name+'\\b').test(JSON.stringify(b)),b.id+': early name '+c.name);
+   if(index<4)assert.deepEqual(art.locations[art.beatLocations[b.id]].visibleCast,[ledger.mentor]);
+  });
+  assert(level.endings.some(e=>e.advances&&e.replayOnPass),'passing game can be replayed');
+ }
 });

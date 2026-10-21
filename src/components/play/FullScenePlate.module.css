@@ -1,5 +1,5 @@
 .frame {position:absolute;inset:0;overflow:hidden;transition:filter .25s ease;pointer-events:none}
-.backdrop {object-fit:cover;object-position:var(--scene-position,center);filter:blur(24px);transform:scale(1.08)}
-.image {object-fit:contain;object-position:center top}
-@media(max-width:639px) {.image{top:132px!important;height:calc(100% - 132px)!important;object-position:center top}}
+.picture {position:absolute;inset:0}
+.image {object-fit:cover;object-position:var(--scene-position,center)}
+@media(max-width:639px){.image{object-position:var(--scene-phone-position,center)}}
 @media(prefers-reduced-motion:reduce){.frame{transition:none}}

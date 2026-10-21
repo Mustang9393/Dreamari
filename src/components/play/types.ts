@@ -53,6 +53,8 @@ export type DreamyPose = "happy" | "glasses" | "idea" | "curious" | "alert" | "n
 type BeatBase = {
   /** Read-only, data-driven evidence shared across careers; no independent scoring. */
   artifact?: WorkArtifact;
+  /** Optional passive visual state matching this answer verdict. */
+  feedbackArtifacts?: Partial<Record<Tier, WorkArtifact>>;
   id: string;
   /** Action Prompt (Interaction Rules): the short grey line telling the
    *  student what to do on screens whose action is not a labelled button --
@@ -721,6 +723,8 @@ export type Ending = {
   primary: string;
   /** Advancing to the next level, or replaying this one. */
   advances: boolean;
+  /** A standalone project can replay after success rather than promise an unbuilt level. */
+  replayOnPass?: boolean;
   /** Directed levels: the offer letter shown after the advancing ending's
    *  button (IB: "Unlock Level 2 • Analyst" opens it, "Accept Offer" goes
    *  on). With an offer the ending card prints only its headline, score,

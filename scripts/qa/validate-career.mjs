@@ -88,7 +88,7 @@ for(const level of sim.levels){
  if(ibTemplate){
   check(level.points===ibMaster.points&&level.noStrikes===ibMaster.noStrikes,level.id+': IB score policy drift');
   if(!varied)check(JSON.stringify(level.beats.map(b=>[b.kind,Boolean(b.practice)]))===JSON.stringify(ibMaster.beats.map(b=>[b.kind,Boolean(b.practice)])),level.id+': IB slot sequence drift');
-  else {check(level.beats.length>=16&&level.beats.length<=26,level.id+': narrative beat budget outside 16-26');check(new Set(scored.map(b=>b.kind)).size>=2,level.id+': insufficient task variety');check(!level.beats.some(b=>['chain','bucket','rank'].includes(b.kind)),level.id+': avoid multi-step teaching exercises in this entry chapter');}
+  else {check(level.beats.length===ibMaster.beats.length,level.id+': runtime beat count must match IB');for(const kind of ['choice','flips','match','rapid','rank'])check(level.beats.some(b=>b.kind===kind),level.id+': missing '+kind+' variety');}
   check(level.beats.findIndex(isScored)+1<=6,level.id+': first decision too late');
  }
  check(level.beats.at(-1)?.kind==='review',level.id+': final beat must be review');
@@ -115,7 +115,7 @@ for(const level of sim.levels){
   for(const concept of tr?.teaches??[])taught.add(concept);
   if(isScored(b)){
    n++;check(Math.abs(b.progress-n/expected)<.00001,b.id+': progress metadata');
-   check(!b.artifact,b.id+': scored decisions cannot depend on optional supporting artwork');
+   if(b.artifact)check(b.artifact.kind==='scene-context'&&Boolean(b.question),b.id+': supporting visual needs a self-contained question');
    check(b.skills?.length===2&&unique(b.skills)&&b.skills.every(s=>s in SKILL_MEANING),b.id+': invalid skills');
    check(Boolean(b.planLineIfFailed)&&Boolean(b.feedbackCta),b.id+': missing feedback/recovery fields');
    check((tr?.uses?.length??0)>0,b.id+': no teach/test trace');

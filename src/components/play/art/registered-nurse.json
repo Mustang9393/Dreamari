@@ -345,6 +345,46 @@
         "y": 0.3
       },
       "locked": true
+    },
+    "rn-v8-patient-anxious": {
+      "src": "/images/play/rn/scene-state-v8/patient-anxious-wide.png",
+      "mobileSrc": "/images/play/rn/scene-state-v8/patient-anxious-portrait.png",
+      "alt": "The same patient alone in Room 12, anxious and asking when help returns, hands on bedding; Rosa is elsewhere. Same lake-facing room.",
+      "focal": {
+        "x": 0.55,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.25
+      },
+      "locked": true,
+      "role": "specialist",
+      "visibleCast": [
+        "Room 12 patient"
+      ],
+      "emotion": "anxious",
+      "timeClass": "morning"
+    },
+    "rn-v8-patient-alarm": {
+      "src": "/images/play/rn/scene-state-v8/patient-alarm-wide.png",
+      "mobileSrc": "/images/play/rn/scene-state-v8/patient-alarm-portrait.png",
+      "alt": "The same patient alone in Room 12, confused and breathing fast, hand at chest; Rosa is elsewhere. Same lake-facing room.",
+      "focal": {
+        "x": 0.55,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.25
+      },
+      "locked": true,
+      "role": "specialist",
+      "visibleCast": [
+        "Room 12 patient"
+      ],
+      "emotion": "alarm",
+      "timeClass": "afternoon"
     }
   },
   "cast": {
@@ -399,15 +439,15 @@
     "RN2-04": "rn-rebuild-RN1-04",
     "RN2-05": "rn-rebuild-RN1-05",
     "RN2-06": "rn-rebuild-RN1-02",
-    "RN2-07": "rn-rebuild-RN1-06",
+    "RN2-07": "rn-rebuild-RN1-14",
     "RN2-08": "rn-rebuild-RN1-05",
     "RN2-10": "rn-rebuild-RN1-06",
     "RN2-11": "rn-rebuild-RN1-08",
     "RN2-15": "rn-rebuild-RN1-10",
-    "RN2-17": "rn-rebuild-RN1-12",
+    "RN2-17": "rn-rebuild-RN1-13",
     "RN2-18": "rn-rebuild-RN1-08",
-    "RN2-23": "rn-rebuild-RN1-07",
-    "RN2-24": "rn-rebuild-RN1-07",
+    "RN2-23": "rn-v8-patient-anxious",
+    "RN2-24": "rn-v8-patient-anxious",
     "RN2-26": "rn-rebuild-RN1-12",
     "RN2-28": "rn-rebuild-RN1-16",
     "RN2-29": "rn-rebuild-RN1-17",
@@ -420,11 +460,11 @@
     "RN2-38": "rn-rebuild-RN1-20",
     "RN2-40": "rn-rebuild-RN1-21",
     "RN2-41": "rn-rebuild-RN1-22",
-    "RN2-43": "rn-rebuild-RN1-23",
-    "RN2-44": "rn-rebuild-RN1-23",
-    "RN2-45": "rn-rebuild-RN1-23",
-    "RN2-47": "rn-rebuild-RN1-19",
-    "RN2-48": "rn-rebuild-RN1-19",
+    "RN2-43": "rn-v8-patient-alarm",
+    "RN2-44": "rn-v8-patient-alarm",
+    "RN2-45": "rn-v8-patient-alarm",
+    "RN2-47": "rn-rebuild-RN1-11",
+    "RN2-48": "rn-rebuild-RN1-11",
     "RN2-50": "rn-rebuild-RN1-24",
     "RN2-51": "rn-rebuild-RN1-24",
     "RN2-53": "rn-rebuild-RN1-25",

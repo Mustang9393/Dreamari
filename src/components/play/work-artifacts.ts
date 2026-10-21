@@ -15,7 +15,7 @@ export type InterfaceSpec = {
   detail: string;
 };
 export type WorkArtifact = ArtifactBase & (
-  | { kind: "scene-context"; view: "music-ui" | "wireframe" | "message" | "batch-note" | "sample-codes"; from?:string; line?:string }
+  | { kind: "scene-context"; view: "music-ui" | "wireframe" | "message" | "batch-note" | "sample-codes"; from?:string; line?:string; state?: "buried" | "clear" | "named" | "coded" }
   | { kind: "work-screen"; panels: {label:string; heading:string; detail:string; fields:{label:string; value:string}[]}[] }
   | { kind: "register"; columns:string[]; records:{id:string; values:string[]}[] }
   | { kind: "panel-plan"; legend:string; codes:string[]; question:string; controls:string[] }

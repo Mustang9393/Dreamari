@@ -9,6 +9,12 @@ export const START_REPUTATION = 50;
 export const SCORED_BEATS = 10;
 export const ADVANCE_AT = 85;
 
+/** Completed decisions, independent of the reputation baseline or answer tier. */
+export function completionPercent(completed: number, total: number): number {
+  if (!Number.isFinite(completed) || !Number.isFinite(total) || total <= 0) return 0;
+  return Math.max(0, Math.min(100, completed / total * 100));
+}
+
 // THE STRIKE RULE, separate from ordinary scoring and tracked alongside it:
 // a Wrong answer adds 1 strike, a Risky one adds 2 -- a single reckless call
 // should weigh more than a merely wrong one -- Best/Acceptable add none, and

@@ -1409,7 +1409,7 @@ export function FocusBody({ beat, onNext, accent = "var(--world-business-money-o
 
 // ----------------------------------------------------------- choice: options
 
-export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-business-money-office)", cast }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent?: string; cast?: Record<string, string> }) {
+export function ChoiceBody({ beat, onResolve, locked, graphic, accent = "var(--world-business-money-office)", cast }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; graphic?: ReactNode; accent?: string; cast?: Record<string, string> }) {
   const { directed, cinematic } = usePresentation();
   const choices = useShuffled(beat.choices, beat.id);
   const pickByKey = useCallback(
@@ -1448,6 +1448,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
       <div className="flex flex-col gap-[var(--space-3)]">
         {beat.world && <WorldPanel ui={beat.world} accent={accent} outcome={outcome} />}
         <Question>{beat.question}</Question>
+      {graphic}
         {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
         <div className="flex flex-col items-end gap-[10px]">
           {choices.map((choice, index) => (
@@ -1473,6 +1474,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
     <div className="flex flex-col gap-[var(--space-3)]">
       {beat.world && <WorldPanel ui={beat.world} accent={accent} outcome={outcome} />}
       <Question>{beat.question}</Question>
+      {graphic}
       {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
       {beat.taskCard && <TaskCard lines={beat.taskCard} title={beat.taskCardTitle} />}
       <div className="flex flex-col gap-[8px]">

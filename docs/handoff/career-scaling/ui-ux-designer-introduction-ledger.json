@@ -1,0 +1,61 @@
+{
+  "career": "ui-ux-designer",
+  "mentor": "Arjun",
+  "cast": {
+    "Arjun": {
+      "first": "UX1-01",
+      "role": "Senior UX Designer / mentor",
+      "followups": [
+        "UX1-02",
+        "UX1-03",
+        "UX1-04",
+        "UX1-07",
+        "UX1-25",
+        "UX1-27"
+      ],
+      "trigger": "The player starts a project with one mentor."
+    },
+    "Noah": {
+      "first": "UX1-05",
+      "role": "Junior UX Designer / peer",
+      "followups": [
+        "UX1-13",
+        "UX1-21",
+        "UX1-23"
+      ],
+      "trigger": "The prototype needs a builder; the peer later pushes to ship before a final check."
+    },
+    "Eleanor": {
+      "first": "UX1-10",
+      "role": "Music fan / test participant",
+      "followups": [
+        "UX1-13",
+        "UX1-11"
+      ],
+      "trigger": "The first usability test begins."
+    },
+    "Samira": {
+      "first": "UX1-12",
+      "role": "Design Lead",
+      "followups": [
+        "UX1-14",
+        "UX1-15",
+        "UX1-16",
+        "UX1-24",
+        "UX1-25"
+      ],
+      "trigger": "A finding is ready for the client-review checkpoint."
+    },
+    "Amina": {
+      "first": "UX1-ACT2",
+      "role": "Accessibility Specialist",
+      "followups": [
+        "UX1-18",
+        "UX1-20",
+        "UX1-22",
+        "UX1-23"
+      ],
+      "trigger": "The revised screen now needs a keyboard-access check."
+    }
+  }
+}

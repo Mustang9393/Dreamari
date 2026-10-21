@@ -49,3 +49,15 @@
 .barcode { width:55%; height:12px; background:repeating-linear-gradient(90deg,var(--color-neutral-800) 0 1px,transparent 1px 3px,var(--color-neutral-800) 3px 5px,transparent 5px 7px); }
 @media(max-width:480px) { .music,.wire { padding:12px; }.track {gap:10px}.track strong{font-size:20px}.cover{width:58px;height:58px}.save{padding:7px;font-size:10px}.message p{font-size:13px} }
 @media(prefers-reduced-motion:reduce) { .bars i {animation:none} }
+
+.musicDetails {flex:1;align-items:start}
+.brand small {font-size:9px;font-weight:650;letter-spacing:.06em;color:var(--color-neutral-500)}
+.clearSave,.buriedSave {display:inline-flex;width:max-content;font-size:11px!important;border-radius:5px;padding:5px 10px}
+.clearSave {background:var(--world-tech-engineering-design);color:var(--color-neutral-50)!important;font-weight:700}
+.buriedSave {background:var(--color-neutral-200);color:var(--color-neutral-500)!important;margin-top:3px}
+.longDescription {display:grid;gap:5px;width:100%;padding:5px 0}
+.longDescription i {height:3px;background:var(--color-neutral-300);border-radius:2px;width:100%}
+.longDescription i:last-child {width:70%}
+
+.titleAction {display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%}
+.titleAction strong{font-size:20px}
