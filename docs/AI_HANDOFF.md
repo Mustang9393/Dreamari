@@ -1,3 +1,7 @@
+## 2026-10-21 — Full scene edges and glass HUD
+
+User rejected side bars, image cropping and the hard HUD bar. FullScenePlate now preserves the complete painting on a full-viewport plane; a decorative blurred copy fills aspect-ratio gaps, rather than black letterboxing or cropping the primary image. HUD uses a masked glass scrim fading into the scene, wider control and row gaps, and a two-row control layout below 640px. On phones the primary painting begins below the HUD. Browser checked Nursing RN1-04 at1280x720: no side bars and Rosa’s face is clear. Also checked the actual responsive viewport at390x844: controls fit in two rows, the full painting is visible below the HUD, and no black side bars. This is responsive browser QA, not physical-device or Windows QA.
+
 ## 2026-10-21 — Supporting graphic order
 
 User requested title → graphic → description → CTA. CardBody now owns the optional graphic slot after its title, so passive work graphics appear above prose and navigation instead of after the Continue button. Shared vignette spacing follows the card gap. Browser verified UX1-02 fits without scrolling; TypeScript, scoped lint and tokens pass. Decision controls and scoring are unchanged.

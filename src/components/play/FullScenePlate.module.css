@@ -1,4 +1,5 @@
-.frame {position:absolute;inset:76px 0 0;overflow:hidden;transition:filter .25s ease;pointer-events:none;background:var(--color-neutral-950)}
+.frame {position:absolute;inset:0;overflow:hidden;transition:filter .25s ease;pointer-events:none}
+.backdrop {object-fit:cover;object-position:var(--scene-position,center);filter:blur(24px);transform:scale(1.08)}
 .image {object-fit:contain;object-position:center top}
-@media(max-width:639px) {.frame{top:100px;bottom:auto;height:43svh;min-height:240px}.image{object-fit:contain;object-position:center top}}
+@media(max-width:639px) {.image{top:132px!important;height:calc(100% - 132px)!important;object-position:center top}}
 @media(prefers-reduced-motion:reduce){.frame{transition:none}}

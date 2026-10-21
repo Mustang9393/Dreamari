@@ -16,6 +16,7 @@ import { ErrorView, LoadingView } from "@/components/app/states";
 
 import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO, poseFor, VOICE_PITCH } from "./expressions";
 import { FullScenePlate } from "./FullScenePlate";
+import hudStyles from "./SimulationHud.module.css";
 import { isFullSceneImage, locationFor } from "./locations";
 import { DESKTOP_PLATE_SCALE, FALLBACK_PORTRAIT_RATIO, plateObjectPosition, spriteBox } from "./scenePlacement";
 import { PerformancePlanFlow } from "./PerformancePlanFlow";
@@ -2982,15 +2983,10 @@ export function Hud({
 }) {
   const router = useRouter();
   return (
-    <header className="relative z-20 flex flex-none flex-col gap-[8px] px-3 pt-3 sm:px-5 sm:pt-4">
-      {/* A soft fade from the page ground behind the HUD, plus a text
-         shadow on the title: over a bright office scene the title and level
-         line had nothing under them (light-mode audit finding 4, both
-         themes). A gradient, not a bar, so the scene still reads edge to
-         edge. */}
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[150%]" style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--background) 72%, transparent) 0%, color-mix(in srgb, var(--background) 38%, transparent) 55%, transparent 100%)" }} />
-      <div className="flex items-center gap-[var(--space-3)]">
-        <span className="flex flex-none items-center gap-[6px]">
+    <header className={hudStyles.header}>
+      <span aria-hidden className={hudStyles.scrim} />
+      <div className={hudStyles.row}>
+        <span className={hudStyles.navigation}>
           {/* Always available, mid-level or not: one step back to wherever the
              student opened this game from (Home, Explore, a career page, the
              Play hub), with /play only as the cold-start fallback. The
@@ -3048,7 +3044,7 @@ export function Hud({
             </IconTip>
           )}
         </span>
-        <span className="min-w-0 flex-1" style={{ textShadow: "0 1px 3px color-mix(in srgb, var(--background) 85%, transparent)" }}>
+        <span className={hudStyles.title} style={{ textShadow: "0 1px 3px color-mix(in srgb, var(--background) 85%, transparent)" }}>
           {/* the page's h1 (WCAG 1.3.1 / 2.4.6): the career being played */}
           <h1 className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
             {simulation.title}
@@ -3058,7 +3054,7 @@ export function Hud({
             {level.express ? " · Express" : ""}
           </span>
         </span>
-        <span className="flex flex-none items-center gap-[6px]">
+        <span className={hudStyles.tools}>
           {onOpenConnect && (
             <IconTip label="Demo: jump to Connect">
               <button
@@ -3101,7 +3097,7 @@ export function Hud({
            moved" screen, pull instead of push -- Interaction Rules, 20
            Sept). Untouched full-mode levels keep the gauge inert; their
            spotlight beat still does this job until they get the same pass. */}
-        <span className="relative flex-none">
+        <span className={hudStyles.score}>
           {level.express || level.hideBand ? (
             <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} endings={level.endings} outcomes={level.scoreOutcomes} hideBand={level.hideBand} glow={glow} docCopy={level.directed} />
           ) : (
@@ -3119,7 +3115,7 @@ export function Hud({
           )}
         </span>
       </div>
-      <div className="flex items-center gap-[7px]">
+      <div className={hudStyles.progress}>
         {/* Same spark/flicker language as the Build flow's bar (SparkBar): the
            reputation gaining ground is the run's core reward. Solid in the
            career's own world color -- the HUD reads as that career's world,
