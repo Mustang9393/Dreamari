@@ -98,3 +98,21 @@ export function programmeMajor(name: string): { major: string; world: string } {
     : "Business & Finance";
   return { major, world };
 }
+
+/** Mika's illustrated major cards (21 Oct 2026, Maisha: "For 'Insights' in
+ *  college & career, Mika created cards for Majors"). 3D clay scenes, one
+ *  per major, so a major never looks like a job (careers wear photos).
+ *  Delivered unnamed; matched to majors by what each scene shows. Only
+ *  these majors have a card; the rest stay a quiet line until they get art. */
+export const MAJOR_ART: Record<string, string> = {
+  "Mechanical Engineering": "/images/majors/mechanical-engineering.jpg",
+  Nursing: "/images/majors/nursing.jpg",
+  Accounting: "/images/majors/accounting.jpg",
+  Chemistry: "/images/majors/chemistry.jpg",
+  Finance: "/images/majors/finance.jpg",
+  "Public Health": "/images/majors/public-health.jpg",
+  "Criminal Justice": "/images/majors/criminal-justice.jpg",
+  "Pre-Law": "/images/majors/pre-law.jpg",
+  "Graphic Design": "/images/majors/graphic-design.jpg",
+  "Computer Science": "/images/majors/computer-science.jpg",
+};

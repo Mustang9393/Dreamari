@@ -1,3 +1,11 @@
+## 2026-10-21: v4 College & Career: Top Majors as Mika's illustrated cards
+
+**Why (Maisha):** "For 'Insights' in college & career, Mika created cards for Majors." Chandu shared them unnamed (Career Cards 1 and 2 zips): "They are not named yet but give it a shot and see if you can make them match."
+
+- **Art (`public/images/majors/`):** both zips are the same 10 majors in the same order, zip 1 as 3D clay scenes, zip 2 photoreal. Matched by what each scene shows: Mechanical Engineering, Nursing, Accounting, Chemistry, Finance, Public Health, Criminal Justice, Pre-Law, Graphic Design, Computer Science. The clay set is used, so a major never reads as a job (career cards are photos; Chandu, 10 Oct: "Majors shouldn't use the cards from careers"). Resized to 900px JPEG. The photoreal set is not in the repo.
+- **Cards (`v4/CareerCollegeInsights.tsx` `MajorCards`, `v4/majors.ts` `MAJOR_ART`, `insights2.css` `.v4-mj-*`):** the Top Majors treemap becomes a scrolling row of cards ranked by count (scene, major, "N students"), each opening its students as before; majors with no card yet follow as one quiet line of names and counts so no count is lost. Saved | At their schools switch unchanged.
+- Checked: tsc clean; v4 Insights at desktop, light. Not checked: phone width, dark.
+
 ## 2026-10-21: v4 (restored) gets Maisha's three asks: Home's top cards, Calendar-only Meetings, Assist "Drafts" / "Create"
 
 **Why (Maisha):** "Currently at the very top on Home where you have 13 reviews, 3 meetings this week, 18 students who need you - keep this intact. This is good."; "Under Meetings, lets have 'Calendar' view be the default. I don't think we need the 'Agenda' view at all"; "Under 'Assist' the two tabs lets make it 'Drafts' and 'Create'". Chandu: "Align them properly, like we had before."
