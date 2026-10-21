@@ -364,7 +364,9 @@ export function LabPill({ children, onClick, icon, primary = false, on = false, 
         borderRadius: radius,
         animation: pulse && !on ? "dm-tray-ring 1.6s ease-out 3" : undefined,
         ...(showOff ? { background: "color-mix(in srgb, #E0453C 22%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, #E0453C 60%, transparent)", color: "#fff" } : {}),
-        background: primary && !on ? "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))" : on ? "color-mix(in srgb, var(--primary) 26%, rgba(12,16,35,0.6))" : "rgba(12,16,35,0.55)",
+        // near-opaque so the white label holds 4.5:1 on a light page too, not
+        // only over the dark hero photo (WCAG 1.4.3, audit 21 Oct 2026)
+        background: primary && !on ? "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.88))" : on ? "color-mix(in srgb, var(--primary) 26%, rgba(12,16,35,0.88))" : "rgba(12,16,35,0.85)",
         borderColor: primary && !on ? "color-mix(in srgb, var(--primary) 45%, transparent)" : on ? "color-mix(in srgb, var(--accent-subtle) 70%, transparent)" : "rgba(255,255,255,0.3)",
         color: "#fff",
       }}

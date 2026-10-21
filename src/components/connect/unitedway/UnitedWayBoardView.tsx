@@ -72,7 +72,7 @@ export function Done({ text }: { text: string }) {
 export function DateTile({ month, day, size = "md" }: { month: string; day: number; size?: "sm" | "md" }) {
   const sm = size === "sm";
   return (
-    <span aria-label={`${month} ${day}`} className={`flex flex-none flex-col items-center justify-center rounded-[var(--radius-sm)] border ${sm ? "h-[44px] w-[44px]" : "h-[52px] w-[52px]"}`} style={{ borderColor: `color-mix(in srgb, ${BLUE} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${BLUE} 18%, var(--glass-surface-1))` }}>
+    <span role="img" aria-label={`${month} ${day}`} className={`flex flex-none flex-col items-center justify-center rounded-[var(--radius-sm)] border ${sm ? "h-[44px] w-[44px]" : "h-[52px] w-[52px]"}`} style={{ borderColor: `color-mix(in srgb, ${BLUE} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${BLUE} 18%, var(--glass-surface-1))` }}>
       <span className="text-[10px] leading-none font-extrabold tracking-[0.08em] uppercase" style={{ color: BLUE_TEXT }}>{month}</span>
       <span className={`${sm ? "mt-[3px] text-[16px]" : "mt-[4px] text-[19px]"} leading-none font-extrabold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{day}</span>
     </span>
@@ -955,7 +955,7 @@ function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPo
         <Panel id="uw-partners-title" title={board.partners.title}>
           <div className="flex flex-col gap-[var(--space-3)]">
             <p className="text-[14px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{board.partners.names.map((n, i) => <Fragment key={n}>{i > 0 && " · "}<span className="whitespace-nowrap">{n}</span></Fragment>)}</p>
-            <a href={board.partners.url} target="_blank" rel="noopener noreferrer" className="dm-link flex w-fit items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: BLUE_TEXT }}>{board.partners.more} <ArrowUpRight className="h-3.5 w-3.5" aria-hidden /></a>
+            <a href={board.partners.url} target="_blank" rel="noopener noreferrer" className="dm-link flex w-fit items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: BLUE_TEXT }}>{board.partners.more} <ArrowUpRight className="h-3.5 w-3.5" aria-hidden /><span className="sr-only"> (opens in a new tab)</span></a>
           </div>
         </Panel>
       )}

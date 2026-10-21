@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GripVertical, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { makeId, removeExperience, upsertExperience, type ExperienceType, type ResumeExperience } from "@/lib/resume";
 import { ErrorView } from "@/components/app/states";
+import { announce } from "@/components/app/LiveRegion";
 import { EXPERIENCE_QUESTIONS, EXPERIENCE_TYPES } from "./data";
 import { Field, ResumeModal, TextInput } from "./ui";
 import { IconTip } from "@/components/app/IconTip";
@@ -65,6 +66,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
   async function generate() {
     setGenerating(true);
     setGenError(false);
+    announce("Writing your resume lines."); // the button text change alone is silent (WCAG 4.1.3)
     try {
       const res = await fetch("/api/resume-bullets", {
         method: "POST",
@@ -76,6 +78,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
         setDraft((d) => ({ ...d, bullets: data.bullets!, aiAssisted: !!data.aiAssisted }));
         setOwnLines(false);
         setSub("lines");
+        announce(`${data.bullets.length} lines ready to edit.`);
       } else {
         setGenError(true);
       }

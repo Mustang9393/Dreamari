@@ -116,7 +116,7 @@ export function StudentsRoster() {
                 <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.school.replace(/ High School$/, "")}</td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.careerTrack}</td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)]">
-                  <span className="flex flex-col gap-[4px]" aria-label={`Roadmap ${s.roadmapPct}%`}>
+                  <span role="img" className="flex flex-col gap-[4px]" aria-label={`Roadmap ${s.roadmapPct}%`}>
                     <span className="relative block h-[7px] w-[72px] overflow-hidden rounded-[4px]" style={{ background: "rgba(255,255,255,0.1)", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3)" }} aria-hidden>
                       <span className="absolute inset-y-0 left-0 rounded-[4px]" style={{ width: `${s.roadmapPct}%`, background: "linear-gradient(90deg, color-mix(in srgb, #2F6BF2 70%, transparent), #2F6BF2)", boxShadow: "0 0 8px color-mix(in srgb, #2F6BF2 65%, transparent)" }} />
                     </span>

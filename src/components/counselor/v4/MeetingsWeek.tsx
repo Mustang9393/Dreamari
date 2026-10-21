@@ -161,8 +161,11 @@ export function MeetingsWeek({ meetings, roster, now, done }: { meetings: Meetin
   useEffect(() => {
     if (!hover) return;
     const off = () => setHover(null);
+    // Escape dismisses it without moving focus (WCAG 1.4.13, audit 21 Oct 2026)
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setHover(null); } };
+    window.addEventListener("keydown", onKey, true);
     window.addEventListener("scroll", off, { passive: true, capture: true });
-    return () => window.removeEventListener("scroll", off, { capture: true } as EventListenerOptions);
+    return () => { window.removeEventListener("keydown", onKey, true); window.removeEventListener("scroll", off, { capture: true } as EventListenerOptions); };
   }, [hover]);
 
   return (
@@ -184,10 +187,10 @@ export function MeetingsWeek({ meetings, roster, now, done }: { meetings: Meetin
             </span>
           ) : <span className="cal-count">0 meetings</span>}
           {kinds.length > 0 && (
-            <span className="mtg-kinds" aria-label="Meetings by kind">
+            <span role="img" className="mtg-kinds" aria-label="Meetings by kind">
               {kinds.map(({ k, n }) => (
                 <IconTip key={k} label={`${k}: ${n}`}>
-                  <span className={`mtg-kind ${TONE[k]}`} tabIndex={0} aria-label={`${k}: ${n}`}><i aria-hidden />{n}</span>
+                  <span role="img" className={`mtg-kind ${TONE[k]}`} tabIndex={0} aria-label={`${k}: ${n}`}><i aria-hidden />{n}</span>
                 </IconTip>
               ))}
             </span>
@@ -376,7 +379,7 @@ function DayList({ day, meetings, byId, now, done, nextId, onBook }: { day: stri
                 <small>{m.type} · Grade {s.grade}</small>
                 {m.topic && <small className="mtg-row-topic">“{m.topic}”</small>}
               </span>
-              {!!done[m.id] && <span className="mtg-block-check" aria-label="Done"><Check size={11} strokeWidth={3.2} /></span>}
+              {!!done[m.id] && <span role="img" className="mtg-block-check" aria-label="Done"><Check size={11} strokeWidth={3.2} /></span>}
             </Link>
           </li>
         );

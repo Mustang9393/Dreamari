@@ -55,7 +55,7 @@ export function ReactionSummary({ counts, mine, palette = APP_PALETTE, color = "
   if (!total) return null;
   const top = [...REACTION_KINDS].sort((a, b) => all[b] - all[a]).filter((k) => all[k] > 0).slice(0, 2);
   return (
-    <span className="flex items-center gap-[6px] text-[13px] font-semibold tabular-nums" style={{ color }} aria-label={`${total} reactions`}>
+    <span role="img" className="flex items-center gap-[6px] text-[13px] font-semibold tabular-nums" style={{ color }} aria-label={`${total} reactions`}>
       <span className="flex -space-x-[4px]">{top.map((k) => <ReactionDot key={k} kind={k} size={size} palette={palette} />)}</span>
       <span aria-hidden>{total.toLocaleString("en-US")}</span>
     </span>

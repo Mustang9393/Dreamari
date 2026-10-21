@@ -50,7 +50,7 @@ function Screen({ screen }: { screen: InterfaceSpec }) {
     {screen.fields.length ? <div className={styles.formLayout}>
       <div className={styles.formSummary}>{screen.illustration === "landscape" && <Landscape />}<h4>{screen.heading}</h4><p className={styles.eventMeta}>{screen.description}</p></div>
       <div className={styles.formBody}><div className={styles.fields}>{screen.fields.map((f)=><div key={f.label} className={styles.field}>
-        <div className={styles.fieldLabel}>{f.label} {f.required === "text" ? <span>(required)</span> : <span aria-label="Red required marker" style={{color:"var(--color-feedback-danger-solid)"}}>●</span>}</div>
+        <div className={styles.fieldLabel}>{f.label} {f.required === "text" ? <span>(required)</span> : <span role="img" aria-label="Red required marker" style={{color:"var(--color-feedback-danger-solid)"}}>●</span>}</div>
         <div className={styles.previewField} data-invalid={Boolean(f.error)}>{f.value}</div>
         {f.error && <p className={styles.error}><TriangleAlert aria-hidden />{f.error}</p>}
       </div>)}</div>{action}</div>

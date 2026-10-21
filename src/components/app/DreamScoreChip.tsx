@@ -36,16 +36,16 @@ export function DreamScoreChip({ className = "" }: { className?: string }) {
       style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}
     >
       <DreamScoreTip text={STREAK_TIP}>
-        <span aria-label="12 day streak" className="flex items-center gap-[3px] font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}><StreakBolt size={24} />12</span>
+        <span role="img" aria-label="12 day streak" className="flex items-center gap-[3px] font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}><StreakBolt size={24} />12</span>
       </DreamScoreTip>
       {known ? (
         <DreamScoreTip>
-          <span key={xp} {...{ [DREAM_SCORE_TARGET_ATTR]: "" }} aria-label={`Dream Score ${xp} XP`} className="flex items-center gap-[4px] font-bold motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]">
+          <span role="img" key={xp} {...{ [DREAM_SCORE_TARGET_ATTR]: "" }} aria-label={`Dream Score ${xp} XP`} className="flex items-center gap-[4px] font-bold motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]">
             <XpBadge size={26} />{xp.toLocaleString("en-US")}
           </span>
         </DreamScoreTip>
       ) : (
-        <span aria-label="Loading Dream Score" className="flex items-center gap-[4px]">
+        <span role="img" aria-label="Loading Dream Score" className="flex items-center gap-[4px]">
           <XpBadge size={26} />
           <Shimmer className="h-[12px] w-[28px] rounded-full" />
         </span>

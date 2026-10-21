@@ -8,6 +8,8 @@ import { OfflineBanner } from "@/components/app/SurfaceState";
 import { SkipLink } from "@/components/app/SkipLink";
 import { TabKeys } from "@/components/app/TabKeys";
 import { DialogFocusHost } from "@/components/app/DialogFocusHost";
+import { HeadingFallback } from "@/components/app/HeadingFallback";
+import { MotionPrefs } from "@/components/app/MotionPrefs";
 import { ThemeBoot } from "@/components/app/theme";
 import { LightPulse } from "@/components/app/LightPulse";
 import { ColorThemeSwitch } from "@/components/app/ColorThemeSwitch";
@@ -93,6 +95,7 @@ export default function RootLayout({
         <SkipLink />
         <TabKeys />
         <DialogFocusHost />
+        <HeadingFallback />
         <ThemeBoot />
         <LightPulse />
         <ColorThemeSwitch />
@@ -102,7 +105,7 @@ export default function RootLayout({
         <SplashVeilGuard />
         <LiveRegion />
         <OfflineBanner />
-        {children}
+        <MotionPrefs>{children}</MotionPrefs>
       </body>
     </html>
   );

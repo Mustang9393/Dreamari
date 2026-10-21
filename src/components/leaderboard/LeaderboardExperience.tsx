@@ -451,7 +451,7 @@ function Row({ s, place, index }: { s: Ranked; place: number; index: number }) {
       <span className="flex min-w-0 items-center gap-[10px]">
         <span className="truncate text-[15px] font-semibold" style={{ color: you ? "var(--foreground)" : metal ? "var(--foreground)" : "color-mix(in srgb, var(--foreground) 92%, transparent)", ...(metal ? { fontWeight: 700 } : {}) }}>{s.name}</span>
         {you && <span className="flex-none text-[10.5px] font-bold tracking-[0.12em]" style={{ color: "var(--color-text-brand)" }}>YOU</span>}
-        <span className="flex-none rounded-[6px] px-[7px] py-[2px] text-[10.5px] font-bold" style={{ background: `color-mix(in srgb, ${FLAG[s.state].field} 22%, transparent)`, color: `color-mix(in srgb, ${STATE_COLOR[s.state]} 55%, var(--foreground))` }}>{STATE_SHORT[s.state]}</span>
+        <span className="flex-none rounded-[6px] px-[7px] py-[2px] text-[10.5px] font-bold" style={{ background: `color-mix(in srgb, ${FLAG[s.state].field} 22%, transparent)`, color: `color-mix(in srgb, ${STATE_COLOR[s.state]} 35%, var(--foreground))` }}>{STATE_SHORT[s.state]}</span>
       </span>
       <span className="text-[15px] font-semibold tabular-nums sm:text-[16px]" style={{ ...DISPLAY, color: metal ? `color-mix(in srgb, ${metal} 55%, var(--foreground))` : undefined }}>{fmt(s.points)}</span>
     </motion.li>
@@ -461,7 +461,7 @@ function Row({ s, place, index }: { s: Ranked; place: number; index: number }) {
 /** The league's top three: a small medal in place of the number, a crown on first. */
 function Medal({ place, metal }: { place: number; metal: string }) {
   return (
-    <span className="relative flex h-[30px] w-[30px] items-center justify-center" aria-label={`Rank ${place}`}>
+    <span role="img" className="relative flex h-[30px] w-[30px] items-center justify-center" aria-label={`Rank ${place}`}>
       <span className="absolute inset-0 rounded-full" style={{ background: `linear-gradient(160deg, color-mix(in srgb, ${metal} 70%, white), color-mix(in srgb, ${metal} 75%, black))`, boxShadow: `0 6px 16px -6px ${metal}` }} aria-hidden />
       <span className="relative text-[12px] leading-none font-extrabold tabular-nums" style={{ ...DISPLAY, color: "#0b0d12" }}>{place}</span>
       {place === 1 && <Crown className="absolute -top-[10px] left-1/2 h-[12px] w-[12px] -translate-x-1/2" style={{ color: metal }} fill="currentColor" aria-hidden />}

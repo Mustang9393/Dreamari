@@ -8,6 +8,7 @@ import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "@/components/app/Beam";
 import { createPortal, preload } from "react-dom";
 import styles from "./WelcomeSplash.module.css";
+import { quietTips } from "@/lib/quietTips";
 
 export type SplashSurface = "match" | "matchGrid" | "explore" | "play" | "connect" | "profile" | "resume";
 
@@ -311,7 +312,8 @@ export function FirstVisitSplash({ surface, onOpenChange }: { surface: Exclude<S
   useLayoutEffect(() => {
     let seen = true;
     try {
-      seen = DEMO_ALWAYS_SHOW_SPLASH ? demoSeenThisSession(key) : window.localStorage.getItem(key) === "1";
+      // "Hide tips and welcome screens" (Settings > Accessibility; WCAG 2.2.4)
+      seen = quietTips() || (DEMO_ALWAYS_SHOW_SPLASH ? demoSeenThisSession(key) : window.localStorage.getItem(key) === "1");
     } catch {
       // no storage: show it, it just won't be remembered
       seen = false;

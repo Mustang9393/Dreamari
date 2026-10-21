@@ -630,7 +630,7 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
                 return (
                   <button key={s.id} type="button" role="tab" aria-selected={on} onClick={() => setSection(s.id)} className="myb-nav-item">
                     <span className="myb-nav-title">{s.title}</span>
-                    {changed(s.id) ? <span className="myb-nav-mark" aria-label="Changed" /> : sum ? <Check className="myb-nav-check" strokeWidth={3} aria-label="Answered" /> : null}
+                    {changed(s.id) ? <span role="img" className="myb-nav-mark" aria-label="Changed" /> : sum ? <Check className="myb-nav-check" strokeWidth={3} aria-label="Answered" /> : null}
                   </button>
                 );
               })}

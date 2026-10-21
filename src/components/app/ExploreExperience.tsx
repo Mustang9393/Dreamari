@@ -10,7 +10,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Check, Play, Plus, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, Captions, CaptionsOff, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Check, Pause, Play, Plus, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useDiscoveryNudge } from "@/lib/nudge";
 import { useSavedCareers } from "@/lib/savedCareers";
 import { useTop3 } from "@/lib/useTop3";
@@ -53,6 +53,8 @@ import { simulationFor } from "@/components/play/games";
 import "./app.css";
 import { announce } from "./LiveRegion";
 import { CaptionTrack, VideoTranscript } from "@/components/app/VideoTranscript";
+import { captionsFor } from "@/components/app/videoTranscripts";
+import { setCaptionsOn, useCaptionsOn } from "@/lib/captionsPref";
 
 // Explore, both faces of the Figma design:
 //  - "For You" (Explore — v2.1B, 2288:16179): the Env Card reel with the
@@ -613,11 +615,16 @@ function EnvCard({
   // the two-line description before it moves; only ever advances FORWARD
   // once (the `face !== "Summary"` guard stops it from also auto-reversing
   // or looping), and only while the card is the one actually on screen.
+  // Holds while the pointer or keyboard is on the card, and never runs for
+  // reduced motion (WCAG 2.2.1 / 3.2.5, audit 21 Oct 2026): six seconds is a
+  // reading deadline the student did not ask for.
+  const [held, setHeld] = useState(false);
   useEffect(() => {
-    if (!active || face !== "Summary") return;
+    if (!active || face !== "Summary" || held) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = setTimeout(() => setFace("Details"), AUTOPLAY_MS);
     return () => clearTimeout(t);
-  }, [active, face]);
+  }, [active, face, held]);
   // The progress track's fill animation (below) is keyed on `${face}-
   // ${active}` rather than a separately-tracked counter -- every entry
   // into a face's own timer above corresponds 1:1 to either `face` or
@@ -685,6 +692,10 @@ function EnvCard({
 
   return (
     <article
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHeld(false); }}
       className="relative flex h-full w-full flex-col justify-end gap-[var(--space-6)] overflow-hidden border p-[var(--space-4)] md:rounded-[var(--radius-lg)]"
       style={{ borderColor: "var(--glass-surface-2)", background: "var(--background)" }}
     >
@@ -815,14 +826,14 @@ function EnvCard({
                   <span aria-hidden className="flex w-[34px] gap-[3px]">
                     <span className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.22)" }}>
                       {face === "Summary" ? (
-                        <span key={`s-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
+                        <span key={`s-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms`, animationPlayState: held ? "paused" : "running" }} />
                       ) : (
                         <span className="block h-full w-full rounded-full bg-white" />
                       )}
                     </span>
                     <span className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.22)" }}>
                       {face === "Details" ? (
-                        <span key={`d-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
+                        <span key={`d-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms`, animationPlayState: held ? "paused" : "running" }} />
                       ) : (
                         <span className="block h-full rounded-full bg-white" style={{ width: "0%" }} />
                       )}
@@ -1184,6 +1195,20 @@ function ProgressiveBlur() {
  *  reel shares one preference instead of each clip resetting to muted. */
 function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; active: boolean; soundOn: boolean; onSoundChange: (next: boolean) => void }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  // A looping clip needs a way to stop it (WCAG 2.2.2, audit 21 Oct 2026),
+  // and does not start on its own for anyone who asked for reduced motion.
+  const [paused, setPaused] = useState(false);
+  const captionsShown = useCaptionsOn();
+  // the Pause button follows the video itself (it can stop on its own, or
+  // never start under reduced motion)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const sync = () => setPaused(video.paused);
+    video.addEventListener("play", sync);
+    video.addEventListener("pause", sync);
+    return () => { video.removeEventListener("play", sync); video.removeEventListener("pause", sync); };
+  }, []);
 
   // Starting a clip: reset to the top and (re)attempt playback. Deliberately
   // NOT keyed on `soundOn` -- toggling sound on an already-playing clip must
@@ -1197,6 +1222,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
     }
     video.currentTime = 0;
     video.muted = !soundOn;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     video.play().catch(() => {
       if (!video.muted) {
         video.muted = true;
@@ -1226,6 +1252,37 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
          navbar"). lg:top-4 restores the tight offset once this card is the
          small framed desktop reel instead, which has no overlapping fixed
          header of its own. */}
+      {/* Captions on or off, remembered for every video (lib/captionsPref.ts);
+         this reel has no native controls, so it carries its own CC switch */}
+      {captionsFor(item.video) && (
+        <IconTip label={captionsShown ? "Turn captions off" : "Turn captions on"} className="absolute top-[86px] right-[calc(var(--space-4)+88px)] z-[1] lg:top-[var(--space-4)]">
+          <button
+            type="button"
+            aria-label={captionsShown ? "Turn captions off" : "Turn captions on"}
+            aria-pressed={captionsShown}
+            onClick={() => setCaptionsOn(!captionsShown)}
+            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
+            style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
+          >
+            {captionsShown ? <Captions className="h-4 w-4" aria-hidden /> : <CaptionsOff className="h-4 w-4" aria-hidden />}
+          </button>
+        </IconTip>
+      )}
+      <IconTip label={paused ? "Play video" : "Pause video"} className="absolute top-[86px] right-[calc(var(--space-4)+44px)] z-[1] lg:top-[var(--space-4)]">
+        <button
+          type="button"
+          aria-label={paused ? "Play video" : "Pause video"}
+          onClick={() => {
+            const video = videoRef.current;
+            if (!video) return;
+            if (video.paused) video.play().catch(() => {}); else video.pause();
+          }}
+          className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
+          style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
+        >
+          {paused ? <Play className="h-4 w-4" fill="currentColor" aria-hidden /> : <Pause className="h-4 w-4" fill="currentColor" aria-hidden />}
+        </button>
+      </IconTip>
       <IconTip label={soundOn ? "Mute video" : "Unmute video"} className="absolute top-[86px] right-[var(--space-4)] z-[1] lg:top-[var(--space-4)]">
         <button
           type="button"

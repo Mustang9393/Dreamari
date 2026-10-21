@@ -5,6 +5,7 @@ import { Check, Sparkles } from "lucide-react";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, upsertVersion, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { ErrorView } from "@/components/app/states";
+import { announce } from "@/components/app/LiveRegion";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATES } from "./data";
 import { CARD_CLASS, Field, INSET, selectedRowStyle, TextInput, WizardFooter } from "./ui";
 
@@ -101,6 +102,7 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
   async function matchToJob() {
     if (draft.jobDescription.trim().length === 0) return;
     setMatching(true);
+    announce("Matching your resume to this job."); // the button text change alone is silent (WCAG 4.1.3)
     setMatchError(false);
     try {
       const res = await fetch("/api/resume-tailor", {

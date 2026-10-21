@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { announce } from "./LiveRegion";
 import { IconTip } from "@/components/app/IconTip";
@@ -14,11 +14,18 @@ export function UndoToast({ message, onUndo, onClose, duration = 6000 }: { messa
   // plain Toast showing at the same moment offset instead of overlapping in
   // the same fixed slot (direct report + screenshot, 22 Sept 2026).
   const { offset, z } = useToastStack();
+  // The clock holds while the pointer or keyboard is on the toast (WCAG
+  // 2.2.1, audit 21 Oct 2026): six seconds is not enough to reach Undo by
+  // keyboard or switch. It restarts in full when they leave.
+  const [held, setHeld] = useState(false);
   useEffect(() => {
     announce(`${message}. Undo available.`);
+  }, [message]);
+  useEffect(() => {
+    if (held) return;
     const t = window.setTimeout(onClose, duration);
     return () => window.clearTimeout(t);
-  }, [message, onClose, duration]);
+  }, [message, onClose, duration, held]);
   if (typeof document === "undefined") return null;
   return createPortal(
       // background: transparent -- .marketing-v2 (tokens.css) sets
@@ -31,6 +38,10 @@ export function UndoToast({ message, onUndo, onClose, duration = 6000 }: { messa
       <div className="marketing-v2 themeable pointer-events-none fixed inset-x-0 flex justify-center px-5 bottom-[calc(88px+env(safe-area-inset-bottom)+var(--toast-offset,0px))] md:bottom-[calc(32px+var(--toast-offset,0px))]" style={{ background: "transparent", zIndex: z, "--toast-offset": `${offset}px` } as CSSProperties}>
       <div
         role="status"
+        onMouseEnter={() => setHeld(true)}
+        onMouseLeave={() => setHeld(false)}
+        onFocus={() => setHeld(true)}
+        onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHeld(false); }}
         className="pointer-events-auto flex max-w-[420px] items-center gap-[14px] rounded-[14px] border px-[16px] py-[12px] text-[14px] font-semibold shadow-2xl motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
         style={TOAST_GLASS}
       >

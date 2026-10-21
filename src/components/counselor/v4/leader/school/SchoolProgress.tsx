@@ -256,7 +256,7 @@ export function SchoolProgress() {
           </header>
           <div role="group" aria-label="Filters for the student sample only" className="v4-school-filters">
             {/* One year, so a label and not a control. */}
-            <span className="v4-school-year" aria-label={`${SCHOOL_FILTERS.academicYear.label}: ${ACADEMIC_YEAR_LABEL}`}>{ACADEMIC_YEAR_LABEL}</span>
+            <span role="img" className="v4-school-year" aria-label={`${SCHOOL_FILTERS.academicYear.label}: ${ACADEMIC_YEAR_LABEL}`}>{ACADEMIC_YEAR_LABEL}</span>
             <Listbox ariaLabel={SCHOOL_FILTERS.grade.label} value={grade} onChange={(v) => { setGrade(v); setShowAll(false); }} options={SCHOOL_FILTERS.grade.options.map((o) => ({ value: String(o.value), label: o.label }))} />
             <Listbox ariaLabel={SCHOOL_FILTERS.counselor.label} value={counselor} onChange={(v) => { setCounselor(v); setShowAll(false); }} options={detail.filters.counselorOptions} />
             <Listbox ariaLabel={SCHOOL_FILTERS.studentGroup.label} value={group} onChange={(v) => { setGroup(v as StudentGroupFilter); setShowAll(false); }} options={SCHOOL_FILTERS.studentGroup.options.map((o) => ({ value: o.value, label: o.label }))} />

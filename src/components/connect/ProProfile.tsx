@@ -525,7 +525,7 @@ export function NewFromFollowing({ follows, limit = 4, onFindPeople }: { follows
            feedback, 8 Sept 2026): the capped preview above is a taste, not
            the only place to catch up on everyone followed or get back to
            their profiles. */}
-        <button type="button" onClick={() => nav?.openFollowingFeed()} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
+        <button type="button" onClick={() => nav?.openFollowingFeed()} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all<span className="sr-only"> people you follow</span> <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
       </div>
       <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
         {items.slice(0, limit).map((item) => (

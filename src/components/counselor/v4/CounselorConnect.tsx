@@ -1092,7 +1092,7 @@ function ReplyBox({ row, value, onChange, onSend, hop = 0, drafts = true, childr
       <span className="msg-mascot" aria-hidden><DreamyGlasses size={44} pop={2.2} hop={hop} thinking={drafts && typing} /></span>
       <div className="msg-drafts" role="group" aria-label="Dreamy's drafts" aria-busy={drafts && typing}>
         {drafts && <span className="msg-drafts-says">Dreamy suggests</span>}
-        {drafts && typing && <span className="msg-typing" aria-label="Dreamy is drafting"><i /><i /><i /></span>}
+        {drafts && typing && <span role="img" className="msg-typing" aria-label="Dreamy is drafting"><i /><i /><i /></span>}
         {drafts && !typing && draftsFor(row).map((d) => (
           <button key={d.label} type="button" aria-pressed={value === d.text} className="msg-draft dm-quiet"
             onMouseEnter={() => setPreview(d.text)} onMouseLeave={() => setPreview(null)} onFocus={() => setPreview(d.text)} onBlur={() => setPreview(null)}

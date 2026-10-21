@@ -240,7 +240,7 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
               </ul>
               {d?.address && !d.sample && (
                 <p className="text-[13px] leading-[17px]" style={{ color: "rgba(255,255,255,0.6)" }}>
-                  {x?.links.map ? <a href={x.links.map} target="_blank" rel="noreferrer" className="dm-link underline decoration-[rgba(255,255,255,0.35)] underline-offset-2">{d.address}</a> : d.address}
+                  {x?.links.map ? <a href={x.links.map} target="_blank" rel="noreferrer" className="dm-link underline decoration-[rgba(255,255,255,0.35)] underline-offset-2">{d.address}<span className="sr-only"> (opens in a new tab)</span></a> : d.address}
                 </p>
               )}
               {/* One quiet strip, the career page's (3 Oct 2026, Chandu: "verify if

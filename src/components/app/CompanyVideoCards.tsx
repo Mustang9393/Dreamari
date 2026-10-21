@@ -200,8 +200,6 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
         type="button"
         aria-label={`Play ${item.company}: ${item.title}`}
         onClick={(e) => { e.stopPropagation(); onOpen(); }}
-        onFocus={() => preview(true)}
-        onBlur={() => preview(false)}
         className="absolute inset-0 cursor-pointer rounded-[var(--radius-lg)] focus-visible:outline-offset-[-3px]"
       />
       {/* Top-left: save for later (Profile > Saved > Videos), same corner
@@ -242,11 +240,13 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
           <Play className="ml-[2px] h-[15px] w-[15px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
         </span>
       )}
-      {/* Scrim: the company mark always; the clip's title only while the
-         cover (which bakes its own title in) has faded out for the video. */}
+      {/* Scrim: the company mark and the clip's title, always. The cover bakes
+         its title into the picture, which zoom, high contrast and custom
+         fonts cannot reach, so the real text stays on (WCAG 1.4.5, audit
+         21 Oct 2026). */}
       <span aria-hidden className="absolute inset-x-0 bottom-0 flex flex-col gap-[6px] px-[14px] pt-[40px] pb-[13px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
         <span className="flex h-[15px] items-end self-start"><LetterMark name={item.company} ink="var(--poster-title)" letterHeight={15} /></span>
-        <span className={`text-[14px] leading-[18px] font-semibold transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`} style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{item.title}</span>
+        <span className="text-[14px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{item.title}</span>
       </span>
       </>
       )}

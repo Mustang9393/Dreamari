@@ -28,6 +28,15 @@ Game keyboard test (Investment Banker): the start card is modal; after Start, fo
 
 **B1 done (21 Oct 2026, later):** captions and transcripts for all 10 company videos are on main; a person still needs to confirm the flagged lines by ear. **Still open from Phase 1:** the light-mode leftovers in section 5; counselor phone Insights axis labels; AI loading announcements; menus without arrow keys. Then Phase 2 and 3 as planned.
 
+**Phase 2 progress (21 Oct 2026, on main):**
+- **Text and contrast:** light-mode text tokens at AAA 7:1; screen-reader context on generic links ("View all …"); "(opens in a new tab)" on external links.
+- **Motion and High Contrast:** global reduced motion (`MotionPrefs` plus a CSS reduce rule); forced-colors outlines for the current page, selected tabs and pressed buttons.
+- **Headings:** a screen-reader-only h1 wherever a page hides its own.
+- **Explore reel:** a Pause button, and the 6s auto-flip now holds on hover and focus.
+- **Settings and help:** Profile Settings now has an Accessibility section (hide tips, game timers, video captions on or off), and a public `/accessibility` statement linked from Quick links.
+- **Terms and announcements:** first-use abbreviation expansions (FAFSA, GPA, SAT, ACT, ATS); the AI checks are announced.
+- **Skipped for now:** a CC button on the reel; arrow keys on `role="menu"` lists are covered app-wide by TabKeys but not yet checked by hand.
+
 ## 1. Summary
 
 | Level | Pass | Partial | Fail | Needs a person to test | Not applicable | Total |

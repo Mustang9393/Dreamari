@@ -46,7 +46,7 @@ export function Shelf({ title, line, items, onViewAll, children, focal = false }
           <p className="text-[13px] leading-[18px]" style={MUTED}>{line}</p>
         </div>
         <div className="flex flex-none items-center gap-[8px]">
-          <button type="button" onClick={onViewAll} className="dm-quiet flex cursor-pointer items-center gap-[2px] rounded-[8px] px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>
+          <button type="button" onClick={onViewAll} className="dm-quiet flex cursor-pointer items-center gap-[2px] rounded-[8px] px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all<span className="sr-only"> {title}</span> <ChevronRight className="h-4 w-4" aria-hidden /></button>
           {!(edge.start && edge.end) && <span className="hidden items-center gap-[6px] md:flex">{arrow(-1, edge.start)}{arrow(1, edge.end)}</span>}
         </div>
       </div>

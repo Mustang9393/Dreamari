@@ -412,7 +412,7 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
             <button type="button" onClick={() => go(Math.max(0, index - 1))} disabled={index === 0} className="v4-rs-tool" aria-label="Previous"><ChevronLeft className="h-5 w-5" aria-hidden /></button>
           </IconTip>
           {held ? <button type="button" onClick={() => setSheet(true)} className="v4-rs-tool is-label"><Check className="h-[18px] w-[18px]" aria-hidden />Sent</button> : <button type="button" onClick={() => setSheet(true)} className="v4-rs-tool is-label" aria-haspopup="dialog" aria-expanded={sheet}>
-            <MessageSquareText className="h-[18px] w-[18px]" aria-hidden />Reply{feedback.trim() && <span className="v4-rs-tool-dot" aria-label="Draft saved" />}
+            <MessageSquareText className="h-[18px] w-[18px]" aria-hidden />Reply{feedback.trim() && <span role="img" className="v4-rs-tool-dot" aria-label="Draft saved" />}
           </button>}
           {held
             ? <button type="button" onClick={next} className="v4-rs-tool is-approve">{upNext ? "Next" : "Finish"}<ChevronRight className="h-[18px] w-[18px]" aria-hidden /></button>
