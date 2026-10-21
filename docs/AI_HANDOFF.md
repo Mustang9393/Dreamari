@@ -2,7 +2,7 @@
 
 **Why (Chandu):** "can we do the same student ID and counselor ID designs for v7?"
 
-- **Student (`v7/StudentProfile.tsx`):** the header card is replaced by v4's `StudentIdCard` (now exported from `v4/StudentProfile.tsx`), hanging on its badge reel in a 300px left column, sticky, with Prepare meeting, Message and Add note under it; the tabs take the column beside it. The tag already says name, grade, class year, pathway, status and last active, so the old face/name/status line went rather than repeat it. Its styles are v4's (today.css), so it sits in a `data-counselor-version="v4"` wrapper.
+- **Student (`v7/StudentProfile.tsx`):** only the header changed: the focal header card is replaced by v4's `StudentIdCard` (now exported from `v4/StudentProfile.tsx`) on its badge reel at the left, with Prepare meeting, Message and Add note at the header's right as before. Tabs and content are v7's, untouched (Chandu, correcting a first pass that moved them into a side column: "don't change the other content from what was there in v7 before. Just the header becomes the ID card on the left instead"). The tag's styles are v4's (today.css), so it sits in a `data-counselor-version="v4"` wrapper.
 - **Counselor:** v7's My Profile already opens v4's `CounselorProfileSheet` (one component), so the badges match with no change.
 - Checked: tsc and eslint clean; v7 student profile and My Profile at 1440, dark.
 

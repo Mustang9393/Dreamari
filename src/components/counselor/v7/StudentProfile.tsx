@@ -66,42 +66,36 @@ export function StudentProfile({ studentId, initialTab }: { studentId: string; i
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back
       </button>
 
-      {/* The student's ID tag, the same one v4 uses (21 Oct 2026, Chandu:
-         "can we do the same student ID and counselor ID designs for v7?").
-         It hangs on its badge reel at the left, like the counselor's badge on
-         their profile, and carries who the student is (name, grade and class
-         year, pathway, status, last active), so the old header's face, name
-         and status line would only repeat it. The three actions sit under
-         the tag; the tabs take the column beside it. The tag's styles are
-         v4's own (today.css), scoped to data-counselor-version="v4". */}
-      <div className="grid grid-cols-1 items-start gap-[var(--space-8)] lg:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="mx-auto flex w-full max-w-[320px] flex-col gap-[var(--space-5)] lg:sticky lg:top-[var(--space-8)]">
-          <div data-counselor-version="v4"><StudentIdCard student={row} /></div>
-          <div className="flex flex-col gap-[var(--space-2)]">
-            <PrimaryButton href={briefHref(row.id)} icon={<CalendarCheck className="h-4 w-4" aria-hidden />}>Prepare meeting</PrimaryButton>
-            <div className="grid grid-cols-2 gap-[var(--space-2)]">
-              <QuietButton href={v7("reviews", `&tab=messages&studentId=${encodeURIComponent(row.id)}`)} icon={<MessageCircle className="h-4 w-4" aria-hidden />}>Message</QuietButton>
-              <QuietButton onClick={() => setNoting(true)} icon={<NotebookPen className="h-4 w-4" aria-hidden />}>Add note</QuietButton>
-            </div>
-          </div>
-        </aside>
-
-        <div className="flex min-w-0 flex-col gap-[var(--space-8)]">
-        {/* five tabs fit from 640px; below that they become one dropdown
-           (standing rule: a tab set wider than the screen is a dropdown) */}
-        <div className="hidden sm:block"><TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Student sections" layoutId="v7-student-tabs" soft caps={false} /></div>
-        <div className="sm:hidden">
-          <Listbox ariaLabel="Student section" value={tab} onChange={(v) => setTab(v as Tab)} options={TABS.map((t) => ({ value: t.key, label: t.label }))}
-            className="h-11 w-full rounded-[var(--radius-md)] border px-[12px] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--foreground)" }} />
+      {/* The header is the student's ID tag, the same one v4 uses (21 Oct
+         2026, Chandu: "can we do the same student ID and counselor ID
+         designs for v7?", then "don't change the other content from what was
+         there in v7 before. Just the header becomes the ID card on the left
+         instead"). The tag carries name, grade, status and last active; the
+         three actions stay at the header's right. Everything below is as it
+         was. The tag's styles are v4's own (today.css), scoped to
+         data-counselor-version="v4". */}
+      <header className="flex flex-col gap-[var(--space-5)] lg:flex-row lg:items-center lg:justify-between">
+        <div data-counselor-version="v4" className="mx-auto w-full max-w-[300px] lg:mx-0"><StudentIdCard student={row} /></div>
+        <div className="flex flex-wrap items-center justify-center gap-[var(--space-2)]">
+          <PrimaryButton href={briefHref(row.id)} icon={<CalendarCheck className="h-4 w-4" aria-hidden />}>Prepare meeting</PrimaryButton>
+          <QuietButton href={v7("reviews", `&tab=messages&studentId=${encodeURIComponent(row.id)}`)} icon={<MessageCircle className="h-4 w-4" aria-hidden />}>Message</QuietButton>
+          <QuietButton onClick={() => setNoting(true)} icon={<NotebookPen className="h-4 w-4" aria-hidden />}>Add note</QuietButton>
         </div>
+      </header>
 
-        {tab === "about" ? <AboutMe row={row} onTab={setTab} />
-          : tab === "postsecondary" ? <Postsecondary row={row} />
-          : tab === "career" ? <CareerPlan row={row} />
-          : tab === "courses" ? <Courses row={row} />
-          : <Activity row={row} roster={roster} />}
-        </div>
+      {/* five tabs fit from 640px; below that they become one dropdown
+         (standing rule: a tab set wider than the screen is a dropdown) */}
+      <div className="hidden sm:block"><TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Student sections" layoutId="v7-student-tabs" soft caps={false} /></div>
+      <div className="sm:hidden">
+        <Listbox ariaLabel="Student section" value={tab} onChange={(v) => setTab(v as Tab)} options={TABS.map((t) => ({ value: t.key, label: t.label }))}
+          className="h-11 w-full rounded-[var(--radius-md)] border px-[12px] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--foreground)" }} />
       </div>
+
+      {tab === "about" ? <AboutMe row={row} onTab={setTab} />
+        : tab === "postsecondary" ? <Postsecondary row={row} />
+        : tab === "career" ? <CareerPlan row={row} />
+        : tab === "courses" ? <Courses row={row} />
+        : <Activity row={row} roster={roster} />}
 
       {noting && <NoteSheet row={row} onClose={() => setNoting(false)} />}
     </div>
