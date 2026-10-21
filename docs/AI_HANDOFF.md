@@ -1,3 +1,7 @@
+## 2026-10-22 — Food Scientist in the Play hero row
+
+Chandu requested Food Scientist in the Career Simulations hero row. Removed its hub-only exclusion; it now uses the existing playable card and route on desktop and mobile. The existing live-career filter also removes its old “In the works” placeholder. No game content changed. Validation: scoped ESLint, TypeScript and tokens; this is a catalogue inclusion using the existing shared card.
+
 ## 2026-10-22 — Story-led cast arrivals, IB variety and precise scene context
 
 **Why (Chandu):** “dont introduce everybody in succession at once. Work that into the storyline.” Also keep panels centered, use the monogram success treatment, preserve vetted Nursing gameplay, and show the broken and improved UI clearly.
