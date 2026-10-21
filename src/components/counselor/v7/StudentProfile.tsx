@@ -34,11 +34,11 @@ import { EMPTY_PROFILE } from "@/lib/studentProfile";
 import { signalsFor } from "@/lib/studentSignals";
 import { openCareer, openSchool } from "../v5/ExploreSheets";
 import { notify } from "../v5/LogSheet";
-import { StudentFace } from "../v5/StudentFace";
+import { StudentIdCard } from "../v4/StudentProfile";
 import { flagsFor, useAllMeetings } from "./data";
 import { interestOf, planOf } from "./Students";
 import { coursesToConsider, prefsFor } from "./studentData";
-import { moment, FIGURE, H2, H3, TITLE, CARD, CARD_STYLE, DISPLAY, FIELD_STYLE, Modal, MUTED, OVERLINE, PrimaryButton, QuietButton, RULE, Status, TextLink, briefHref, v7 } from "./ui";
+import { moment, FIGURE, H2, H3, CARD, CARD_STYLE, DISPLAY, FIELD_STYLE, Modal, MUTED, OVERLINE, PrimaryButton, QuietButton, RULE, TextLink, briefHref, v7 } from "./ui";
 
 type Tab = "about" | "postsecondary" | "career" | "courses" | "activity";
 const TABS: { key: Tab; label: string }[] = [
@@ -66,37 +66,42 @@ export function StudentProfile({ studentId, initialTab }: { studentId: string; i
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back
       </button>
 
-      {/* the screen's one focal block (look-v2 data-focal: a brighter rim, a plain shadow) */}
-      <header data-focal className={`relative flex flex-col gap-[var(--space-5)] p-[var(--space-5)] sm:p-[var(--space-6)] lg:flex-row lg:items-center lg:justify-between ${CARD}`} style={{ ...CARD_STYLE, background: "radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%), var(--glass-surface-2)" }}>
-        <div className="flex min-w-0 items-center gap-[var(--space-5)]">
-          <StudentFace s={row} size={84} />
-          <div className="flex min-w-0 flex-col gap-[6px]">
-            <h1 className={TITLE} style={DISPLAY}>{row.name}</h1>
-            <p className="flex flex-wrap items-center gap-x-[10px] gap-y-[2px] text-[15px] leading-[20px]" style={MUTED}>
-              <Status status={row.status} /><span aria-hidden>·</span>Grade {row.grade}
-            </p>
+      {/* The student's ID tag, the same one v4 uses (21 Oct 2026, Chandu:
+         "can we do the same student ID and counselor ID designs for v7?").
+         It hangs on its badge reel at the left, like the counselor's badge on
+         their profile, and carries who the student is (name, grade and class
+         year, pathway, status, last active), so the old header's face, name
+         and status line would only repeat it. The three actions sit under
+         the tag; the tabs take the column beside it. The tag's styles are
+         v4's own (today.css), scoped to data-counselor-version="v4". */}
+      <div className="grid grid-cols-1 items-start gap-[var(--space-8)] lg:grid-cols-[300px_minmax(0,1fr)]">
+        <aside className="mx-auto flex w-full max-w-[320px] flex-col gap-[var(--space-5)] lg:sticky lg:top-[var(--space-8)]">
+          <div data-counselor-version="v4"><StudentIdCard student={row} /></div>
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <PrimaryButton href={briefHref(row.id)} icon={<CalendarCheck className="h-4 w-4" aria-hidden />}>Prepare meeting</PrimaryButton>
+            <div className="grid grid-cols-2 gap-[var(--space-2)]">
+              <QuietButton href={v7("reviews", `&tab=messages&studentId=${encodeURIComponent(row.id)}`)} icon={<MessageCircle className="h-4 w-4" aria-hidden />}>Message</QuietButton>
+              <QuietButton onClick={() => setNoting(true)} icon={<NotebookPen className="h-4 w-4" aria-hidden />}>Add note</QuietButton>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-[var(--space-2)]">
-          <PrimaryButton href={briefHref(row.id)} icon={<CalendarCheck className="h-4 w-4" aria-hidden />}>Prepare meeting</PrimaryButton>
-          <QuietButton href={v7("reviews", `&tab=messages&studentId=${encodeURIComponent(row.id)}`)} icon={<MessageCircle className="h-4 w-4" aria-hidden />}>Message</QuietButton>
-          <QuietButton onClick={() => setNoting(true)} icon={<NotebookPen className="h-4 w-4" aria-hidden />}>Add note</QuietButton>
-        </div>
-      </header>
+        </aside>
 
-      {/* five tabs fit from 640px; below that they become one dropdown
-         (standing rule: a tab set wider than the screen is a dropdown) */}
-      <div className="hidden sm:block"><TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Student sections" layoutId="v7-student-tabs" soft caps={false} /></div>
-      <div className="sm:hidden">
-        <Listbox ariaLabel="Student section" value={tab} onChange={(v) => setTab(v as Tab)} options={TABS.map((t) => ({ value: t.key, label: t.label }))}
-          className="h-11 w-full rounded-[var(--radius-md)] border px-[12px] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--foreground)" }} />
+        <div className="flex min-w-0 flex-col gap-[var(--space-8)]">
+        {/* five tabs fit from 640px; below that they become one dropdown
+           (standing rule: a tab set wider than the screen is a dropdown) */}
+        <div className="hidden sm:block"><TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Student sections" layoutId="v7-student-tabs" soft caps={false} /></div>
+        <div className="sm:hidden">
+          <Listbox ariaLabel="Student section" value={tab} onChange={(v) => setTab(v as Tab)} options={TABS.map((t) => ({ value: t.key, label: t.label }))}
+            className="h-11 w-full rounded-[var(--radius-md)] border px-[12px] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--foreground)" }} />
+        </div>
+
+        {tab === "about" ? <AboutMe row={row} onTab={setTab} />
+          : tab === "postsecondary" ? <Postsecondary row={row} />
+          : tab === "career" ? <CareerPlan row={row} />
+          : tab === "courses" ? <Courses row={row} />
+          : <Activity row={row} roster={roster} />}
+        </div>
       </div>
-
-      {tab === "about" ? <AboutMe row={row} onTab={setTab} />
-        : tab === "postsecondary" ? <Postsecondary row={row} />
-        : tab === "career" ? <CareerPlan row={row} />
-        : tab === "courses" ? <Courses row={row} />
-        : <Activity row={row} roster={roster} />}
 
       {noting && <NoteSheet row={row} onClose={() => setNoting(false)} />}
     </div>

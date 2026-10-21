@@ -1,3 +1,11 @@
+## 2026-10-21: Counselor v7 student profile wears v4's student ID tag
+
+**Why (Chandu):** "can we do the same student ID and counselor ID designs for v7?"
+
+- **Student (`v7/StudentProfile.tsx`):** the header card is replaced by v4's `StudentIdCard` (now exported from `v4/StudentProfile.tsx`), hanging on its badge reel in a 300px left column, sticky, with Prepare meeting, Message and Add note under it; the tabs take the column beside it. The tag already says name, grade, class year, pathway, status and last active, so the old face/name/status line went rather than repeat it. Its styles are v4's (today.css), so it sits in a `data-counselor-version="v4"` wrapper.
+- **Counselor:** v7's My Profile already opens v4's `CounselorProfileSheet` (one component), so the badges match with no change.
+- Checked: tsc and eslint clean; v7 student profile and My Profile at 1440, dark.
+
 ## 2026-10-21 — IB master sequence, concise career stories and fixed character identity
 
 **Why:** Chandu: “use the vetted Investment Banking simulation ... 1:1 reference”; “too much copy”; supporting graphics “should not be needing tab and clicking and interaction”; latest: “different skin tones ... skin tone and facial details ... consistent ... Eye colors ... consistent for a character.”
