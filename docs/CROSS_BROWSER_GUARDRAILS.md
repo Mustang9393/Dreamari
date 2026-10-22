@@ -149,11 +149,20 @@ focus-triggered affordance works the same way for touch as for keyboard.
 **A tab set that doesn't fit becomes a dropdown** (Chandu, 19 Oct 2026:
 "on mobile the tabs should be a dropdown. Otherwise they get cut off. This
 should be the style for every screen where a tab set exceeds screen
-width"). Never a sideways-scrolling tab row with tabs cut off at the edge.
-`Segmented` (`src/components/connect/viz.tsx`) does this by itself: it
-measures its row and swaps to the shared `Listbox` while the tabs overflow.
-A hand-built `role="tablist"` row does not; use `Segmented`, or give it the
-same swap, and check it at 375px.
+width"). Never a sideways-scrolling tab row with tabs cut off inside a
+framed pill. `Segmented` (`src/components/connect/viz.tsx`) does this by
+itself: it measures its row and swaps to the shared `Listbox` while the tabs
+overflow. A hand-built `role="tablist"` row does not; use `Segmented`, or
+give it the same swap, and check it at 375px.
+One sanctioned alternative, under trial on Career Detail (Chandu, 22 Oct
+2026: "keep the tabs for mobile and tablet too instead of the dropdown? But
+not like its cut off inside a pill shape so its not obvious they can
+scroll"): `Segmented`'s `overflow="scroll"` mode. While the tabs overflow it
+drops the frame, runs the row out to the screen's edges (`bleed`), fades
+the edge that has more tabs behind it, lets the next tab peek cut off by
+the screen itself, and scrolls the chosen tab to the middle. Its scrollbar
+is hidden with the paired `flow-scroll` class. Use it only where the
+dropdown has been judged worse; the dropdown stays the default.
 
 ## What to do when you can't reproduce a Windows/Chromebook report
 

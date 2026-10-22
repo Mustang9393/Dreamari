@@ -248,6 +248,20 @@ function TabComingSoon({ title, career }: { title: string; career: string }) {
 // One marker, one line per item. The marker is the world accent so the list
 // reads as this career's without a second color system. Shared by College
 // Detail too (CollegeDetailExperience.tsx imports this directly).
+/** A short-headed group of tags (Software & Skills). */
+function Tags({ id, label, items, accent }: { id?: string; label?: string; items: string[]; accent: string }) {
+  return (
+    <div id={id} className="flex min-w-0 scroll-mt-[96px] flex-col gap-[var(--space-2)]">
+      {label && <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>{label}</h3>}
+      <ul className="flex flex-wrap gap-[8px]">
+        {items.filter(Boolean).map((t) => (
+          <li key={t} className="rounded-[10px] border px-[12px] py-[6px] text-[14px] leading-[20px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{t}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function DotList({ items, accent, leading }: { items: string[]; accent: string; leading?: (item: string) => React.ReactNode }) {
   // Custom-designed edge case, 22 Sept 2026: field-level gaps, not just a
   // whole section missing -- direct report: "sometimes a few points inside
@@ -779,7 +793,12 @@ export function CareerDetailLab({ slug, live = false }: {
         )}
 
         <div id="career-tabs" className="scroll-mt-[96px]">
-          <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={tabs} grow />
+          {/* on a phone the five tabs scroll sideways instead of becoming a
+             dropdown (Chandu, 22 Oct 2026: "keep the tabs for mobile and
+             tablet too instead of the dropdown? But not like its cut off
+             inside a pill shape so its not obvious they can scroll"): see
+             Segmented's scroll mode */}
+          <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={tabs} grow overflow="scroll" bleed="-mx-5 px-5 md:-mx-8 md:px-8" />
         </div>
 
         {tab === "pay" && !pay && !national && <TabComingSoon title="Pay" career={career.title} />}
@@ -826,29 +845,27 @@ export function CareerDetailLab({ slug, live = false }: {
           </Section>
         )}
 
-        {/* Software & Skills (22 Oct 2026): its own tab again. One panel,
-           three short-headed groups of tags (21 Oct 2026, "this is way too
-           cluttered", "Remove all redundant and extra copy"), software
-           first since the tab is named for it. Ids stay, so
-           ?section=good-at still lands. */}
+        {/* Software & Skills (22 Oct 2026): its own tab again, in the shape
+           the team's note asked for ("Skills tab: Top Section: Know about -
+           Good at; Bottom Section: Software"): a Skills panel with Know
+           about and Good at side by side (Education's two-column shape),
+           then a Software panel. Tags, not bullet lists (21 Oct 2026, "this
+           is way too cluttered"). Ids stay, so ?section=good-at still lands. */}
         {tab === "skills" && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && vm.software.length === 0 && <TabComingSoon title="Software & Skills" career={career.title} />}
 
         {tab === "skills" && (
           <div className="flex flex-col gap-[var(--space-6)]">
-            {(vm.knowAbout.length > 0 || vm.goodAt.length > 0 || vm.software.length > 0) && (
-              <Section id="skills" title="Software & Skills">
-                {([["software", "Software", vm.software], ["good-at", "Good at", vm.goodAt], ["know-about", "Know about", vm.knowAbout]] as const).map(([id, label, items]) =>
-                  items.length > 0 ? (
-                    <div key={id} id={id} className="flex scroll-mt-[96px] flex-col gap-[var(--space-2)]">
-                      <h3 className="text-[16px] leading-[22px] font-semibold" style={{ ...DISPLAY, color: accent }}>{label}</h3>
-                      <ul className="flex flex-wrap gap-[8px]">
-                        {items.filter(Boolean).map((t) => (
-                          <li key={t} className="rounded-[10px] border px-[12px] py-[6px] text-[14px] leading-[20px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{t}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null,
-                )}
+            {(vm.knowAbout.length > 0 || vm.goodAt.length > 0) && (
+              <Section id="skills" title="Skills">
+                <div className="grid gap-[var(--space-6)] sm:grid-cols-2">
+                  {vm.knowAbout.length > 0 && <Tags id="know-about" label="Know about" items={vm.knowAbout} accent={accent} />}
+                  {vm.goodAt.length > 0 && <Tags id="good-at" label="Good at" items={vm.goodAt} accent={accent} />}
+                </div>
+              </Section>
+            )}
+            {vm.software.length > 0 && (
+              <Section id="software" title="Software">
+                <Tags items={vm.software} accent={accent} />
               </Section>
             )}
           </div>

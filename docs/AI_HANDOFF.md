@@ -1,3 +1,51 @@
+## 2026-10-22: Career Detail: Skills tab in two panels; the tab row scrolls on phones instead of a dropdown
+
+Branch `career-pay-scan`, on top of the two-panel Pay & Growth commit
+(05fbeaad). Files: `src/components/actions-lab/CareerDetailLab.tsx`
+(Skills tab, tab row), `src/components/connect/viz.tsx` (Segmented's new
+scroll mode), `docs/CROSS_BROWSER_GUARDRAILS.md` (the tab-overflow rule).
+
+- WHY (Chandu, 22 Oct 2026), forwarding the team's older note on the career
+  page: "Education tab: all one section (what people study for it, things
+  you'll need). Skills tab: top section Know about - Good at; bottom
+  section Software. And have a different approach for pay and growth by
+  state." Chandu: "we already addressed most of this ... see if we have
+  anything to improve from here." Education and Pay & Growth already match
+  it; the Skills tab did not (one panel, software first). Then: "can we
+  keep the tabs for mobile and tablet too instead of the dropdown? But not
+  like its cut off inside a pill shape so its not obvious they can scroll?
+  Try again".
+- Software & Skills tab: a Skills panel with Know about and Good at side by
+  side (Education's two-column shape, stacked on a phone), then a Software
+  panel. Tag groups as before. Section ids unchanged (`skills`,
+  `know-about`, `good-at`, `software`), so deep links still land.
+- Tab row: `Segmented` gets `overflow="scroll"` (default stays "dropdown",
+  so no other screen changes) and `bleed`, the caller's page-gutter
+  classes. While the five tabs overflow (phones; at 768 they fit in the
+  frame): the frame goes, the row runs edge to edge, each edge with more
+  tabs behind it fades over the 20px gutter only, so the next tab is seen
+  cut off by the screen itself ("Pay &" peeks at 375), and the chosen tab
+  scrolls to the middle on change. What made the old scrolling row
+  unreadable was the closed frame with a tab clipped inside it; the cut
+  happens at the screen now, where every phone user reads it as "more". The
+  scrollbar is hidden by the paired `flow-scroll` class. Keyboard: the row
+  keeps its roving tabindex (TabKeys moves between tabs) and the chosen tab
+  is scrolled into view, so an off-screen tab is never focused unseen.
+  First attempt faded 36px, which hid the peeking tab entirely; second kept
+  `max-w-full`, which capped the row at the content width so the next tab
+  was clipped, not peeking. Both fixed; measured with the tab rects at 375.
+- Guardrails doc: the "never a sideways-scrolling tab row" rule now names
+  this as the one sanctioned alternative, under trial here; the dropdown
+  stays the default for every other Segmented.
+- Checked on :3019 in dark mode: 375 (Overview, Education, Career Ladder,
+  "Pay &" peeking; tapping Software & Skills centres it with "Ladder" cut
+  on the left), 768 (all five tabs fit in the frame; Skills two columns +
+  Software panel). Scrollbar audit on viz.tsx clean. Light mode not
+  checked.
+- If Chandu likes it, flipping Segmented's default to "scroll" makes it the
+  app-wide rule; every caller then needs a `bleed` matching its page
+  padding.
+
 ## 2026-10-22: Career Detail: Pay & Growth as two panels (Pay by state, Job growth); Education and Software & Skills are two tabs again
 
 Branch `career-pay-scan` (worktree `.worktrees/pay-tab`, dev server
