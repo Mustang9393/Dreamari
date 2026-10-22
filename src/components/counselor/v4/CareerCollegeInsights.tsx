@@ -84,9 +84,9 @@ import { careerById, toV5 } from "@/lib/counselorV5";
 import type { CounselorStudent, PostsecondaryIntent } from "@/lib/counselorRoster";
 import type { ProfileCareer } from "@/components/profile/data";
 import type { CatalogCareer } from "@/components/app/catalog";
-import { MAJOR_ART, majorPoster, programmeMajor, savedMajorsFor } from "./majors";
+import { majorPoster, programmeMajor, savedMajorsFor } from "./majors";
 import { useChartColors } from "./ChartColors";
-import { InterestMeter, Treemap } from "./charts/insightViz";
+import { InterestMeter } from "./charts/insightViz";
 import { FlowSankey } from "./charts/ivFlow";
 import "./insights.css";
 import "./insights2.css";
@@ -378,12 +378,16 @@ function InterestRows() {
         </header>
         {(majorMode === "saved" ? savedMajors : exploredMajors).length === 0
           ? <p className="v4-cc-empty">{majorMode === "saved" ? `No saved majors for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet.`}</p>
-          // Mika's major art in the treemap, its own full-width row under
-          // Schools (21 Oct 2026, Chandu: "its difficult to read. If there
-          // isn't an image for a major remove it... or it should be its own
-          // row below that section"): only majors with art, the name on a
-          // small dark label so it reads over any scene
-          : <Treemap height={320} items={majorItems.filter((m) => MAJOR_ART[m.label]).map((m) => ({ ...m, image: MAJOR_ART[m.label] }))} onOpen={(open) => open()} />}
+          // Word chips with their count, no art (22 Oct 2026, Maisha: "the
+          // top majors cards look a little juvenile and feel out of place
+          // from the rest of the app's aesthetic. If Mika needs to redo
+          // these, lets remove the photos for now till she's done"); the
+          // treemap with MAJOR_ART comes back once the art is redone
+          : <ul className="v4-cc-chips">
+              {majorItems.map((m) => (
+                <li key={m.key}><IconTip label={m.tip}><button type="button" onClick={() => m.data()} className="v4-cc-chip" aria-label={m.aria}>{m.label}<b>{m.value}</b></button></IconTip></li>
+              ))}
+            </ul>}
       </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </>

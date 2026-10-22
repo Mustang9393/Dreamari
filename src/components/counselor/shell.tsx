@@ -27,6 +27,7 @@ import { CHANGE_NOTES, LEADER_OVERVIEW_NOTES, SHARED_DECISIONS } from "./v4/chan
 import { LEADER_ROLE_DESCRIPTIONS } from "@/lib/leaderData";
 import { setCounselorBaseV4 } from "@/lib/counselorBase";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { OppSheetHost } from "./v7/OppSheets";
 import { ExploreSheetHost } from "./v5/ExploreSheets";
 import { LogSheetHost } from "./v5/LogSheet";
 import { CounselorProfileSheet } from "./v4/CounselorProfileSheet";
@@ -62,6 +63,7 @@ const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
   connect: MessageSquare,
   insights: Briefcase,
   explore: Compass,
+  opportunities: Briefcase,
   checkins: HeartHandshake,
   productivity: Layers,
   engagement: Activity,
@@ -98,6 +100,7 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
   insights: { title: "Career + College Insights", subtitle: "Discover what your students are exploring, saving, and aspiring toward — then turn those insights into action." },
   checkins: { title: "Check-ins", subtitle: "How my students say their week is going, who needs a response, and sending the next check-in." },
   explore: { title: "Explore", subtitle: "What's in demand, what's growing and what my students save, so I can answer them on the spot." },
+  opportunities: { title: "Opportunities", subtitle: "Internships, jobs, programs and events for your students, and who applied." },
   productivity: { title: "Productivity Suite", subtitle: "Generate high-quality first drafts for routine counseling tasks — then review, edit, and approve before use." },
   engagement: { title: "Platform Engagement", subtitle: `Login & activity tracking · ${DEMO_SCHOOL}` },
   impact: { title: "My Impact", subtitle: "Your advocacy, in numbers you can share" },
@@ -574,6 +577,8 @@ function GlobalSearch({ search, setSearch, className = "w-[280px]", autoFocus }:
   );
 }
 
+// Opportunities (22 Oct 2026) draws v7's own page head, so v4's title block
+// stays off for it (see the Workspace call below).
 // `showTitle={false}` drops the page title/subtitle block for a view that
 // renders its own header row (the reference's Student Profile shows
 // "← Student Profile" plus its actions inline instead of the Students title).
@@ -623,8 +628,10 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
       {/* v5's log sheet (walk-ins, booking, family, time), used by v4's Overview */}
       <LogSheetHost />
       <ExploreSheetHost />
+      {/* v7's opportunity sheets, for v4's Opportunities tab (22 Oct 2026) */}
+      <OppSheetHost />
       <div className="relative z-[1]">
-      <Workspace active={active} items={menuForRole(account.role, version).map(i => ({view:i.view,label:i.label??VIEW_TITLES[i.view].title}))} org={leaderRole ? v4LeaderOrg.name : ""} areaSet={leaderRole ? LEADER_AREAS[leaderRole] : undefined} theme={theme} onTheme={toggleTheme} showTitle={showTitle}
+      <Workspace active={active} items={menuForRole(account.role, version).map(i => ({view:i.view,label:i.label??VIEW_TITLES[i.view].title}))} org={leaderRole ? v4LeaderOrg.name : ""} areaSet={leaderRole ? LEADER_AREAS[leaderRole] : undefined} theme={theme} onTheme={toggleTheme} showTitle={showTitle && active !== "opportunities"}
         search={<GlobalSearch search={search} setSearch={setSearch} />}
         filters={leaderRole ? <LeaderControls role={leaderRole} /> : V4_INSIGHTS_VIEWS.has(active) ? <InsightsFilters /> : V3_GRADE_FILTER_VIEWS.has(active) && active !== "progress" ? <V4GradePicker gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} /> : null}
         account={<SidebarAccount account={{ name: account.name, school: orgLabel }} />}>
