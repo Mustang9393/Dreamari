@@ -1,3 +1,70 @@
+## 2026-10-22: Career Detail: Pay & Growth as two panels (Pay by state, Job growth); Education and Software & Skills are two tabs again
+
+Branch `career-pay-scan` (worktree `.worktrees/pay-tab`, dev server
+`pay-tab-3019`). Uncommitted until Chandu says done. Files:
+`src/components/career/PayGrowth.tsx` (rewritten),
+`src/components/career/PayMap.tsx` (one small change),
+`src/components/actions-lab/CareerDetailLab.tsx` (tabs).
+
+- WHY (Chandu, 22 Oct 2026): "check the pay tab on the explore careers
+  detail pages. We need to incorporate that data but make it super easy to
+  scan and understand. We dont need to show a huge table thats distracting
+  we need to figure out how to present the data better like the other tabs.
+  Also split education tab and add a software and skills tab and move the
+  relevant information there." Then, on the first pass (one scan column of
+  three figures, each with an arrow against the US and the US figure under
+  it): "the trend arrows apparently are giving too many signals at once and
+  it seems confusing. We can also even split pay part into one section and
+  growth into another if that makes sense, but dont listen to me. Please do
+  your own research, hierarchy, UI, UX everything to make this as useful
+  and low cognitive load as possible."
+- What was wrong with the first pass: one glyph carried two meanings. Next
+  to pay the arrow meant "above the US"; next to growth, a trend line, it
+  read as "going up", so a state growing +2% against a US +4% showed a
+  positive number beside a falling line. Three figures, three arrows, three
+  comparators: nine signals for one state.
+- What the field does (BLS Occupational Outlook Handbook, CareerOneStop,
+  O*NET, Indeed, Glassdoor): one number, one plain-English verdict, a
+  comparison said in words ("12% above the national average"), never as an
+  arrow; a range as a bar with the value marked.
+- WHAT it is now, two panels, each answering one question:
+  - Pay by state ("What would I make?"): the shown state's pay as the one
+    big figure (the student's own state until a state is hovered or
+    tapped), one line of words against the US ("$11K more than the US
+    typical"; within 3% reads "About the same as the US typical"), the
+    house LightRange from the lowest-paying state to the highest with this
+    state as the point, and the map, coloured by pay, at a bit over half
+    the width. Hover a state and the column follows. No arrows. On a phone
+    the column first, the map under it.
+  - Job growth ("Will there be jobs?"): three cells in the fact strip's own
+    shape (label over figure): growth by the forecast year with the one
+    trend icon on the page and the profile's verdict ("Growing about as
+    fast as most jobs"), openings a year in the US, openings a year in the
+    student's state.
+- Cut: the per-state growth percent. It is seeded demo data (outlook.ts)
+  and it was the figure whose arrow contradicted its sign. Real state
+  projections (Projections Central) can bring it back as one line in the
+  state's openings cell. State openings are still seeded (DEMO-ONLY, the
+  mock-over-blank rule). No top-states list (21 Oct), no table, no
+  captions, no hint line.
+- Edge: a career with no state pay gets the Pay panel without a map: US pay
+  with the starting-to-top range from the What it pays figures. `PayMap`
+  now skips its own readout row when `renderReadout` returns null.
+- Tabs: Overview, Education, Career Ladder, Pay (Pay & Growth when the
+  career has a BLS outlook), Software & Skills. Education is the degree and
+  where to study it (WhereToStudy) again; Software & Skills is one panel
+  with three tag groups, Software first since the tab is named for it, then
+  Good at, then Know about. This reverses the 21 Oct fold (Education &
+  Skills) on Chandu's instruction above. Old links still land: ?tab=software,
+  and ?tab=education with a skills section (know-about, good-at, software),
+  open Software & Skills; ?tab=education alone (My Plan's training step)
+  opens Education. At phone width five tabs become the Segmented dropdown,
+  as the house rule says.
+- Checked on :3019 in dark mode: Carpenter desktop and phone (column
+  following the hovered state, range point moving, map, Job growth cells),
+  Education tab, Software & Skills tab, Actor. tsc and eslint clean. Light
+  mode not checked (fast iteration rule).
+
 ## 2026-10-22: Counselor v7 matched to the Replit in function; career sheets on the Top 3 frame; the aurora's white sheet fixed
 
 **Why (Chandu, 22 Oct 2026):** "lets make the v7 1:1 with the replit apart from the cosmetic upgrades and the design system upgrades. Functionality wise." The Replit (https://dceeai.replit.app/dreamari-counselor-dashboard) was walked click by click into `docs/reference/counselor-v7-2026-10-20/replit-functional-inventory-2026-10-22.md` (every tab, dialog, field, toast and state change), then diffed against v7. Also: "The career detail popups in explore in counselor dashboard needs work. Refer how its done for careers in the student app (match/profile top 3 cards have the pop up style). Arrange information like that but keep the content from the existing counselor dashboard side. Try to include some of the useful stuff from v4's career details though. Give the same pop up treatment to v4 but keeps its content as it is." And: "the first 3 cards in v4 and v7 should be more vibrant somehow."

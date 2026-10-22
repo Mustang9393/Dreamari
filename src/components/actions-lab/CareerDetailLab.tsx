@@ -514,18 +514,22 @@ function viewModel(career: ResolvedCareer) {
 // The header's summary/scenario line and the Typical Degree/Typical Pay
 // facts stay outside the tab system, always visible above it, the same way
 // College Detail keeps its photo header and action row above its own tabs.
-// 21 Oct 2026 (Chandu): "rename education to education & skills and fold
-// software and skills into that tab". Four tabs: the skills lists left
-// Overview and Software lost its own tab; Pay becomes "Pay & Growth" when
-// the career has a BLS outlook. An old ?tab=software link lands on
-// Education & Skills.
-type CareerTab = "overview" | "education" | "ladder" | "pay";
+// 21 Oct 2026 (Chandu): the skills lists left Overview; Pay becomes "Pay &
+// Growth" when the career has a BLS outlook.
+// 22 Oct 2026 (Chandu): "split education tab and add a software and skills
+// tab and move the relevant information there". So Education is the degree
+// and where to study it again, and Know about, Good at and Software have
+// their own tab. Old links: ?tab=software, and ?tab=education with a
+// skills section (know-about, good-at, software), land on Software & Skills.
+type CareerTab = "overview" | "education" | "ladder" | "pay" | "skills";
 const CAREER_TABS: { key: CareerTab; label: string }[] = [
   { key: "overview", label: "Overview" },
-  { key: "education", label: "Education & Skills" },
+  { key: "education", label: "Education" },
   { key: "ladder", label: "Career Ladder" },
   { key: "pay", label: "Pay" },
+  { key: "skills", label: "Software & Skills" },
 ];
+const SKILL_SECTIONS = ["skills", "know-about", "good-at", "software"];
 
 export function CareerDetailLab({ slug, live = false }: {
   slug: string;
@@ -554,11 +558,12 @@ export function CareerDetailLab({ slug, live = false }: {
     if (inSheet) return;
     const q = new URLSearchParams(window.location.search);
     const asked = q.get("tab");
-    const want = (asked === "software" ? "education" : asked) as CareerTab | null;
+    const section = q.get("section");
+    const want = (asked === "software" || (asked === "education" && section && SKILL_SECTIONS.includes(section)) ? "skills" : asked) as CareerTab | null;
     if (!want || !CAREER_TABS.some((t) => t.key === want)) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time URL read after mount
     setTab(want);
-    const target = q.get("section") ?? want;
+    const target = section ?? want;
     // a hand-rolled ease in instant steps: a smooth scroll here is cancelled
     // before it moves (the same finding as Profile's easeScrollTo)
     const t = window.setTimeout(() => {
@@ -781,7 +786,7 @@ export function CareerDetailLab({ slug, live = false }: {
 
         {/* Pay & Growth: one section, one map (see PayGrowth) */}
         {tab === "pay" && (pay || national) && (
-          <PayGrowth slug={career.slug} accent={accent} typical={vm.typicalPay} pay={pay ?? null} national={national} yourState={pay?.yourStates?.[0]?.state ?? pickedStates[0]} />
+          <PayGrowth slug={career.slug} accent={accent} typical={vm.typicalPay} pay={pay ?? null} range={vm.details?.pay ?? null} national={national} yourState={pay?.yourStates?.[0]?.state ?? pickedStates[0]} />
         )}
 
         {tab === "ladder" && vm.ladder.length === 0 && <TabComingSoon title="Career ladder" career={career.title} />}
@@ -810,26 +815,29 @@ export function CareerDetailLab({ slug, live = false }: {
           </Section>
         )}
 
-        {/* Education & Skills (21 Oct 2026): where to study, then the two
-           skills lists side by side (the same two-list shape Education
-           uses), then the software. Ids stay, so ?section=good-at still
-           lands. */}
-        {tab === "education" && !vm.education && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && vm.software.length === 0 && <TabComingSoon title="Education & Skills" career={career.title} />}
+        {/* Education (22 Oct 2026, split back out of Education & Skills):
+           what people study for it and where. */}
+        {tab === "education" && !vm.education && <TabComingSoon title="Education" career={career.title} />}
 
-        {tab === "education" && (
+        {tab === "education" && vm.education && (
+          <Section id="education" title="Education">
+            {/* dreamari.com's two lists, every row a door: see WhereToStudy */}
+            <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerSlug={career.slug} />
+          </Section>
+        )}
+
+        {/* Software & Skills (22 Oct 2026): its own tab again. One panel,
+           three short-headed groups of tags (21 Oct 2026, "this is way too
+           cluttered", "Remove all redundant and extra copy"), software
+           first since the tab is named for it. Ids stay, so
+           ?section=good-at still lands. */}
+        {tab === "skills" && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && vm.software.length === 0 && <TabComingSoon title="Software & Skills" career={career.title} />}
+
+        {tab === "skills" && (
           <div className="flex flex-col gap-[var(--space-6)]">
-            {vm.education && (
-              <Section id="education" title="Education">
-                {/* dreamari.com's two lists, every row a door: see WhereToStudy */}
-                <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerSlug={career.slug} />
-              </Section>
-            )}
-            {/* one Skills section (21 Oct 2026, "this is way too cluttered",
-               "Remove all redundant and extra copy"): three short-headed
-               groups of tags instead of two sections of long bullet lists */}
             {(vm.knowAbout.length > 0 || vm.goodAt.length > 0 || vm.software.length > 0) && (
-              <Section id="skills" title="Skills">
-                {([["know-about", "Know about", vm.knowAbout], ["good-at", "Good at", vm.goodAt], ["software", "Software", vm.software]] as const).map(([id, label, items]) =>
+              <Section id="skills" title="Software & Skills">
+                {([["software", "Software", vm.software], ["good-at", "Good at", vm.goodAt], ["know-about", "Know about", vm.knowAbout]] as const).map(([id, label, items]) =>
                   items.length > 0 ? (
                     <div key={id} id={id} className="flex scroll-mt-[96px] flex-col gap-[var(--space-2)]">
                       <h3 className="text-[16px] leading-[22px] font-semibold" style={{ ...DISPLAY, color: accent }}>{label}</h3>
