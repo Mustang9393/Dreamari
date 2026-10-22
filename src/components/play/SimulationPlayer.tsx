@@ -3625,7 +3625,7 @@ export function EndingCard({
       <p className="text-[15.5px] leading-relaxed whitespace-pre-line" style={{ color: "var(--foreground)" }}>
         {ending.message}
       </p>
-      {directed && ending.advances && !ending.offer && fromRole && (next?.role ?? simulation.upcoming[0]) ? (
+      {directed && ending.advances && !ending.offer && !ending.replayOnPass && fromRole && (next?.role ?? simulation.upcoming[0]) ? (
         // Doc screen 39: "clearly show that the student has advanced from
         // Intern -> Analyst".
         <div className="flex items-center gap-[10px] motion-safe:animate-[fade-slide-up_0.5s_ease-out_0.3s_both]">
