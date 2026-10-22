@@ -2056,7 +2056,7 @@ function DragOptionsBody({ beat, onResolve, locked, graphic }: { beat: ChoiceBea
               className={`relative z-30 flex h-[48px] ${beat.dragItem ? "min-w-[80px] rounded-[var(--radius-md)] px-[16px] text-[13px]" : "w-[48px] rounded-full text-[10px] uppercase"} cursor-grab touch-none items-center justify-center font-extrabold tracking-[0.06em] select-none active:cursor-grabbing ${dragging ? "" : "motion-safe:animate-[play-pulse_1.6s_ease-in-out_infinite]"}`}
               style={{
                 background: "var(--primary)",
-                color: "var(--primary-foreground)",
+                color: "var(--color-neutral-50)",
                 boxShadow: dragging
                   ? "0 0 0 6px color-mix(in srgb, var(--primary) 30%, transparent), 0 14px 34px -8px color-mix(in srgb, var(--primary) 85%, transparent)"
                   : "0 6px 18px -6px color-mix(in srgb, var(--primary) 70%, transparent)",
