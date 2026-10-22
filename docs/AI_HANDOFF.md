@@ -1,3 +1,11 @@
+## 2026-10-23 — Portable illustrated-anime art standard v2.3
+
+**Why (Chandu):** A new chat using the SOP produced “hyper realistic backgrounds.” Required explicit Food/UX/Nursing references and prompts for both characters and backgrounds.
+
+Added full-resolution approved game images and a ZIP reference pack. SOP v2.3 requires loading/passing actual images at every generation; text/PDF names alone are not a visual reference. Separate character and environment modules define anime faces, grouped hair, flat cel shadows, painted material planes, restrained reflections and physically plausible soft light. Richness comes from interior design, not photographic texture. They combine into one opaque scene; no sprites. Canonical identities, room geography and viewport masks stay locked. Added side-by-side acceptance/rejection and repair prompt; no promise of identical fresh pixels. Updated standalone/public prompts and the shareable PDF with all three embedded references. Game scripts and game assets unchanged.
+
+**Validation:** Reference images visually inspected. PDF rendered and layout reviewed; pack members and portable reference URLs checked. Public Sites publication preserves existing anyone-with-link audience. No game code changed.
+
 ## 2026-10-22 — Research career tasks without copying IB questions
 
 **Why (Chandu):** “Keep the structure” but make tasks “appropriate ... instead of just copying the same questions”; then “do your own research about what tasks can be used for each career.” The previous exact-layout contract over-applied IB's storage/report exercises. Latest user explicitly authorized “continue and push.”

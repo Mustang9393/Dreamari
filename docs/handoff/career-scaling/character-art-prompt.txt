@@ -1,0 +1,21 @@
+APPROVED REFERENCE PACK — LOAD THE IMAGES BEFORE GENERATING
+
+UX Designer: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/ux-approved-work.png
+Food Scientist: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/food-approved-work.png
+Registered Nurse: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/nurse-approved-corridor.png
+
+Open/download these actual images and inspect them. A PDF thumbnail, game name, URL string or written description alone is not a visual reference input. Pass the selected downloaded image files to the image tool as reference images for EVERY generation and edit. If the tool cannot retrieve them, obtain the files before generating; do not silently substitute a remembered anime style. For this documentation, all three anchor drawing and detail level; none supplies a new career's character identity. Choose one primary full-scene reference for a batch and keep it fixed. Include canonical character and room images for follow-up scenes. Do not promote an unreviewed generated image into the style master.
+
+CHARACTER DRAWING PROMPT — USE WITH THE ENVIRONMENT PROMPT
+
+Inputs: {PRIMARY_APPROVED_SCENE_IMAGE}, {CANONICAL_CHARACTER_IMAGES}, {CHARACTER_ID}, {AGE}, {ETHNICITY}, {SKIN_BASE_AND_UNDERTONE}, {EYE_COLOR}, {FACE_SHAPE}, {HAIR_SILHOUETTE_AND_TEXTURE}, {OUTFIT}, {EXPRESSION}, {ACTION}, {SCENE_LIGHT}.
+
+Draw {CHARACTER_ID} as a hand-drawn 2D television-anime character, matching the actual attached UX Designer / Food Scientist / Registered Nurse reference in facial construction, contour weight and color separation. Keep the same drawing simplicity at final game size. Use clear expressive anime eyes with a simple iris and one small catchlight; a small nose mark and short mouth line; a clearly drawn jaw and chin. No painted lips, modeled cheekbones, realistic skin texture or comic-book hatching.
+
+Use a flat skin base and one broad, clean-edged shadow shape. Let the scene's light tint the lit and shadow colors without repainting the person's complexion. Preserve the canonical face shape, eye color, undertone, hairline, hair length, texture and outfit exactly across scenes. Keep older people visibly older through consistent facial proportions, restrained age lines and posture. Diversity comes from the cast ledger; never use ethnicity as a shortcut for identical faces or eye colors.
+
+Group hair into about four to six large silhouette masses, adapted to its texture. Add only the few interior divisions needed to read the hairstyle. One shadow family and at most one restrained highlight band. Blonde hair stays just as simple as dark hair. No individual flyaways, strand-by-strand highlights, glossy ribbons or dozens of sharp locks. Use a few structural garment folds, with flat fabric colors and a single shadow family; no fabric weave, metallic shine on skin or airbrushed body modeling.
+
+Expression and posture follow {EXPRESSION}/{ACTION}; vary them when the story calls for it. A colleague addressing the unseen player looks toward the camera. Observe a real conversation from the player's viewpoint when characters address each other. No visible player body or long foreground arms. Match light direction and time to {SCENE_LIGHT}.
+
+This describes the character inside one complete scene. Do not output a detached sprite, transparent cutout, bust pasted over furniture, character sheet or isolated portrait unless explicitly requested for an internal identity reference. Clothing and anatomy continue naturally behind real occluding objects. Keep the face clear of the actual HUD/dialogue mask.

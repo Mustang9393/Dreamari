@@ -1,6 +1,6 @@
 # Dreamari career simulation production package
 
-**Current standard: Master SOP v2.2 · 22 October 2026**
+**Current standard: Master SOP v2.3 · 22 October 2026**
 
 The shareable source of truth is [the Career Simulation Master SOP](../../../output/career-master/master-sop.md), with its PDF in `output/career-master/` and published copy at `public/documents/dreamari-master-career-sop.pdf`.
 
@@ -20,3 +20,5 @@ The AI researches, writes, generates, integrates and QA-repairs the whole game. 
 - `work-graphics-research-prompt.txt` researches authentic work surfaces with primary sources.
 
 Prompt and image-reference copies for publishing are in `public/documents/`. The `examples/`, `food-scientist/` and `ux-designer/` folders contain examples and historical iterations; use the current SOP before reusing them.
+
+Art v2.3: load full reference images for UX, Food and Nursing before generation. `character-art-prompt.txt` specifies faces/hair/cel shading; `background-art-prompt.txt` specifies illustrated materials, spatial design and light. Apply both in the same complete-scene generation.
