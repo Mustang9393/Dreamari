@@ -1,3 +1,9 @@
+## 2026-10-23 — One complete scene per generation, never sprite layers
+
+**Why (Chandu):** “full images with characters and backgrounds together not separate layers”; cropped legs/figures still appeared. SOP v2.4 puts the output contract at the top of the document and every art prompt. Character/environment instructions are modules within one generation, never independent assets. Require full standing anatomy and grounded feet, coherent furniture occlusion, wide framing and inspection with HUD/dialogue hidden. Reject waist/knee/ankle cutoffs, floating counter torsos and runtime character overlays. Updated public PDF, prompts and reference ZIP. Documentation only; no game script or image integration changes.
+
+**Validation:** Rendered updated PDF and checked the output contract plus both art modules. The 26-page PDF embeds nine approved examples (six cast scenes and three room views) plus two clearly labeled user-rejected examples. Reference crops are explicitly not framing templates; room-only images guide architecture, not photoreal surface detail. The optional ZIP also contains the updated PDF and approved inputs. Sites publication preserves its public audience.
+
 ## 2026-10-23 — Portable illustrated-anime art standard v2.3
 
 **Why (Chandu):** A new chat using the SOP produced “hyper realistic backgrounds.” Required explicit Food/UX/Nursing references and prompts for both characters and backgrounds.

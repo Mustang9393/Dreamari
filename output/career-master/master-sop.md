@@ -1,8 +1,36 @@
 # Dreamari Career Simulation Master SOP
 
-**Version 2.3 · 22 October 2026 · AI builds and repairs; human QA reviews the finished game**
+**Version 2.4 · 22 October 2026 · AI builds and repairs; human QA reviews the finished game**
 
 This is the shareable production standard for building a complete Level 1 from a career name. The vetted Investment Banking simulation is the gameplay, narrative, sequence, UX and scoring reference. New careers inherit its proven player experience while using their own authentic work, projects, colleagues and varied tasks. This SOP supersedes earlier editions and older exact beat/question lists.
+
+## Reject realism, excess detail and incomplete figures
+
+STYLE FAILURE GATE — REJECT THESE RESULTS
+
+Use the approved images as an upper limit on detail, not a minimum: simplify further when uncertain. In this PDF, extract only pages labeled APPROVED as positive generation references. Pages labeled REJECTED explain failures and must never be supplied as positive style inputs.
+
+Match hand-drawn 2D anime, not a realistic painting with anime eyes. Skin uses flat color plus one clean cel shadow, not airbrushed gradients or sculpted cheeks. Draw the nose and mouth with short simple marks; do not paint lips or detailed nostrils. Hair uses four to six large groups with minimal internal lines. For curls/coils use a few connected silhouette clusters, not dozens of individually shaded ringlets. Clothing needs only the folds that explain the pose; no dense wrinkle networks or shiny fabric modeling. Preserve age and individual identity without adding realism.
+
+Environments must be visibly illustrated at the SAME level of simplification. Use broad painted floor/wall/aircraft/bench planes and sparse clean edges. No stone pores, floor mottling, grunge, dense panel seams, tiny rivets, crisp equipment reflections, photoreal metal or glossy mirrored floors. Keep room function and aircraft/equipment proportions believable while simplifying surface detail. A detailed background with a flat anime person is a failed match. Make design rich through spatial composition, furniture and color, not texture density. Do not use prompt terms such as photorealistic, hyperreal, PBR, ray traced, Octane, Unreal render, ultra-detailed or intricate surfaces.
+
+The approved reference images set face drawing, shading and detail limits only. Do not copy their camera crops: if a reference cuts off a figure, recompose the new scene wider with complete grounded bodies. Reject any hard horizontal cutoff through a person's legs, even if the background continues below it. Reject a portrait plate over a separate room, even if color and lighting match. Transparent layers are not allowed in final scene production.
+
+Before acceptance, compare the output beside the approved references at equal display size, then inspect hair, face, clothing, floor and reflected surfaces closely. Check the entire image with HUD/dialogue hidden. If it has a realistic-render background, excessive hair/fabric detail, a non-anime face or a missing body, it fails. Regenerate/edit the complete scene with the approved references attached; do not pass the failed result forward or call its added detail an upgrade. These are acceptance rules, not a guarantee that any one generation will obey them.
+
+
+## Complete scenes only — hard requirement
+
+MANDATORY OUTPUT CONTRACT: ONE COMPLETE SCENE
+
+Generate exactly one finished, opaque image per story scene. Draw the people, room, furniture, floor and lighting together in the same image. The character and environment instructions below are two sections of ONE prompt for ONE generation call. Never generate them as separate deliverables or combine separate layers afterward.
+
+Do not generate sprites, transparent PNG people, isolated figures, cutout portraits, waist-up assets, cropped character plates or a background intended for a later character overlay. Do not paste a torso onto a counter or hide an unfinished body with the game dialogue box. No runtime character layers, sprite anchors, floating torsos or detached legs. An identity reference is INPUT only; never wire it into the game as scene art.
+
+Stage the camera wide enough to fit each required character naturally in the room. Standing characters must have complete anatomy, with legs and feet inside the image and grounded on the floor. If real furniture legitimately hides part of a body, draw the scene with coherent perspective and natural occlusion; never terminate the body at the furniture edge or place the figure on its surface. Prefer a wider shot when the body would otherwise hit the image boundary. Do not crop a person at the waist, knees or ankles to fill the frame.
+
+Deliver the complete scene at its target landscape or portrait aspect ratio. Keep faces and important actions clear of the HUD and dialogue zones. Review the image with ALL HUD/dialogue panels hidden: it must stand alone as a complete scene, with no missing lower bodies, exposed sprite edges or unnatural cutoffs. If it fails, recompose and regenerate the whole scene or edit the whole scene with its reference attached. Do not repair it by adding UI, zooming, blurring the sides or compositing a different character layer.
+
 
 ## Art handoff for a new chat — mandatory
 
@@ -40,7 +68,7 @@ Carry the same mentor, rival and senior into planned later levels in a continuit
 
 ### What the previous v2.0 wording missed
 
-The actual IB source does not start with a mentor or force several mentor-only opening beats: slots 1-2 establish the workplace and stakes, slot 3 introduces the mentor, slot 4 explains authority, and slot 5 briefly introduces the peer. Its middle teaches vocabulary, practices with a no-verdict matching interaction, and applies it in a four-item timed round. Its later story turns the same characters and workplace tensions into decisions, checkpoint, support ranking and review. The previous v2.0 wording named a 29-beat count and a few character positions but lacked this exact sequence and learning trace; it also read as a character-introduction schedule rather than work-led scenes. Use that narrative order as the source of truth. Version 2.3 corrects an additional failure: forcing every career into IB’s storage and report questions produced noun-swapped quizzes. Keep the narrative purpose; research the job action and choose its control separately.
+The actual IB source does not start with a mentor or force several mentor-only opening beats: slots 1-2 establish the workplace and stakes, slot 3 introduces the mentor, slot 4 explains authority, and slot 5 briefly introduces the peer. Its middle teaches vocabulary, practices with a no-verdict matching interaction, and applies it in a four-item timed round. Its later story turns the same characters and workplace tensions into decisions, checkpoint, support ranking and review. The previous v2.0 wording named a 29-beat count and a few character positions but lacked this exact sequence and learning trace; it also read as a character-introduction schedule rather than work-led scenes. Use that narrative order as the source of truth. Version 2.4 corrects an additional failure: forcing every career into IB’s storage and report questions produced noun-swapped quizzes. Keep the narrative purpose; research the job action and choose its control separately.
 
 For these new-career builds, keep the IB score contract: reputation begins at 50; seven scored decisions change it by +6 or -6; no strikes; checkpoint after four scored decisions at 68; final pass at 85. Practice interactions remain unscored. The progress bar is a separate measure: begin at 0 before any scored decision, then show completed scored decisions out of seven (for example, 1/7 after decision one resolves). Do not seed the progress bar or derive it from reputation. The player's score still starts at 50. Preserve the shared player behavior, option locking, correction, keyboard/touch and result flow.
 
@@ -137,7 +165,7 @@ Deliver a playable QA build, source-backed research brief, script and keys, cove
 ## Appendix A. Copy-ready build prompt
 
 ```text
-Build and deliver one complete Dreamari Level 1 for {CAREER}. Read `output/career-master/master-sop.md`, the latest `docs/AI_HANDOFF.md`, current user feedback, `AGENTS.md`, `docs/HANDOFF_INDEX.md`, the shared simulation engine and the actual Investment Banking Level 1. Choose and record sensible defaults when only a career name is supplied. AI owns research, writing, art, integration, complete-game QA and repair. Do not require intermediate human approval; contact sheets are internal QA.
+Build and deliver one complete Dreamari Level 1 for {CAREER}. Art output is complete opaque scene images only: characters and environments drawn together, never separate sprite/background layers. Do not generate cropped character assets or use UI to hide unfinished bodies. Read `output/career-master/master-sop.md`, the latest `docs/AI_HANDOFF.md`, current user feedback, `AGENTS.md`, `docs/HANDOFF_INDEX.md`, the shared simulation engine and the actual Investment Banking Level 1. Choose and record sensible defaults when only a career name is supplied. AI owns research, writing, art, integration, complete-game QA and repair. Do not require intermediate human approval; contact sheets are internal QA.
 
 For new careers, keep IB’s 29-slot high-level story and learning rhythm, not its banking questions. Slots 1–2 establish workplace/stakes; 3 mentor; 4 junior authority; 5 peer seed; 6 first easy work decision (#1); 7 four job terms; 8 four applied matches, unscored/no verdict; 9 four related rapid items in 45 seconds (#2); 10 a relevant career method/rule; 11 apply it to the assigned work (#3); 12 senior arrival; 13 job evidence/context; 14 authority/ladder; 15 perform or critique career work (#4); 16 midpoint at 68 after four decisions; 17 Act 2; 18–20 returning rival, credit conflict, private response (#5); 21 job-specific deadline complication; 22 propose a bounded solution to the mentor (#6); 23 delivery; 24 colleague needs help; 25 explains the work and your capacity; 26 rank concrete support (#7); 27 mentor notices; 28 completion; 29 final review. Maintain decision positions, learning-before-testing, cast continuity, scoring and progression. Select existing answer controls that fit the work. File storage, document error-spotting and identical question layouts are not mandatory across careers.
 
@@ -159,7 +187,7 @@ For all careers, research entry-level work from primary sources and record title
 
 Write short American English: one task and one instruction, with no repeated title, question, graphic heading or operation prompt. Use story card order title → graphic → description → CTA. Keep questions self-contained and answerable with the graphic removed. Supporting work graphics are optional, native, minimal text and read-only. Use meaningful visible good/bad states when relevant: for a UX save-action task, show a buried Save under long gray copy, then show the improved screen with Save prominent. The question itself supplies the evidence. No dense charts, hidden clues or extra controls.
 
-Before image generation load the three full approved reference images linked in SOP v2.3. Apply `character-art-prompt.txt` and `background-art-prompt.txt` together via `art-master-prompt.txt` for complete opaque scenes. A reference name or PDF text alone is insufficient. Do not interpret luxury as photographic materials or architectural visualization. Match cast presence, emotion, action and time to each approved screen. Crisis scenes have no misplaced smiles; an alarmed patient can be alone if Rosa is elsewhere. Use fixed canonical identity per character. Keep older Eleanor (60) and Sofia (67) visibly and consistently older. For the Black cast, make one canonical update one shade darker and propagate it to every scene and face chip, without crushing shadows into black. Blonde hair uses no more than four broad solid masses and at most two internal hairlines.
+Before image generation load the three full approved reference images linked in SOP v2.4. Apply `character-art-prompt.txt` and `background-art-prompt.txt` together via `art-master-prompt.txt` for complete opaque scenes. A reference name or PDF text alone is insufficient. Do not interpret luxury as photographic materials or architectural visualization. Match cast presence, emotion, action and time to each approved screen. Crisis scenes have no misplaced smiles; an alarmed patient can be alone if Rosa is elsewhere. Use fixed canonical identity per character. Keep older Eleanor (60) and Sofia (67) visibly and consistently older. For the Black cast, make one canonical update one shade darker and propagate it to every scene and face chip, without crushing shadows into black. Blonde hair uses no more than four broad solid masses and at most two internal hairlines.
 
 Generate dedicated landscape and portrait compositions as needed. Each finished scene fills its intended viewport aspect, with clear HUD and dialogue bands and intact faces. No runtime zoom/crop, blurred side-fill, black bars or cropped characters. Do not assemble sprites or foreground player arms. Use luxurious ivory, walnut and brass architecture with selective flat anime environment detail, not photorealism.
 
@@ -174,6 +202,34 @@ Deliver the playable build, source-backed brief, script and keys, task/scene cov
 
 ## Appendix B. Copy-ready character and environment art prompts
 
+### B0. Required style gate
+
+STYLE FAILURE GATE — REJECT THESE RESULTS
+
+Use the approved images as an upper limit on detail, not a minimum: simplify further when uncertain. In this PDF, extract only pages labeled APPROVED as positive generation references. Pages labeled REJECTED explain failures and must never be supplied as positive style inputs.
+
+Match hand-drawn 2D anime, not a realistic painting with anime eyes. Skin uses flat color plus one clean cel shadow, not airbrushed gradients or sculpted cheeks. Draw the nose and mouth with short simple marks; do not paint lips or detailed nostrils. Hair uses four to six large groups with minimal internal lines. For curls/coils use a few connected silhouette clusters, not dozens of individually shaded ringlets. Clothing needs only the folds that explain the pose; no dense wrinkle networks or shiny fabric modeling. Preserve age and individual identity without adding realism.
+
+Environments must be visibly illustrated at the SAME level of simplification. Use broad painted floor/wall/aircraft/bench planes and sparse clean edges. No stone pores, floor mottling, grunge, dense panel seams, tiny rivets, crisp equipment reflections, photoreal metal or glossy mirrored floors. Keep room function and aircraft/equipment proportions believable while simplifying surface detail. A detailed background with a flat anime person is a failed match. Make design rich through spatial composition, furniture and color, not texture density. Do not use prompt terms such as photorealistic, hyperreal, PBR, ray traced, Octane, Unreal render, ultra-detailed or intricate surfaces.
+
+The approved reference images set face drawing, shading and detail limits only. Do not copy their camera crops: if a reference cuts off a figure, recompose the new scene wider with complete grounded bodies. Reject any hard horizontal cutoff through a person's legs, even if the background continues below it. Reject a portrait plate over a separate room, even if color and lighting match. Transparent layers are not allowed in final scene production.
+
+Before acceptance, compare the output beside the approved references at equal display size, then inspect hair, face, clothing, floor and reflected surfaces closely. Check the entire image with HUD/dialogue hidden. If it has a realistic-render background, excessive hair/fabric detail, a non-anime face or a missing body, it fails. Regenerate/edit the complete scene with the approved references attached; do not pass the failed result forward or call its added detail an upgrade. These are acceptance rules, not a guarantee that any one generation will obey them.
+
+
+### B0a. One image job, no sprites or separate layers
+
+MANDATORY OUTPUT CONTRACT: ONE COMPLETE SCENE
+
+Generate exactly one finished, opaque image per story scene. Draw the people, room, furniture, floor and lighting together in the same image. The character and environment instructions below are two sections of ONE prompt for ONE generation call. Never generate them as separate deliverables or combine separate layers afterward.
+
+Do not generate sprites, transparent PNG people, isolated figures, cutout portraits, waist-up assets, cropped character plates or a background intended for a later character overlay. Do not paste a torso onto a counter or hide an unfinished body with the game dialogue box. No runtime character layers, sprite anchors, floating torsos or detached legs. An identity reference is INPUT only; never wire it into the game as scene art.
+
+Stage the camera wide enough to fit each required character naturally in the room. Standing characters must have complete anatomy, with legs and feet inside the image and grounded on the floor. If real furniture legitimately hides part of a body, draw the scene with coherent perspective and natural occlusion; never terminate the body at the furniture edge or place the figure on its surface. Prefer a wider shot when the body would otherwise hit the image boundary. Do not crop a person at the waist, knees or ankles to fill the frame.
+
+Deliver the complete scene at its target landscape or portrait aspect ratio. Keep faces and important actions clear of the HUD and dialogue zones. Review the image with ALL HUD/dialogue panels hidden: it must stand alone as a complete scene, with no missing lower bodies, exposed sprite edges or unnatural cutoffs. If it fails, recompose and regenerate the whole scene or edit the whole scene with its reference attached. Do not repair it by adding UI, zooming, blurring the sides or compositing a different character layer.
+
+
 ### B1. Required reference images
 
 APPROVED REFERENCE PACK — LOAD THE IMAGES BEFORE GENERATING
@@ -184,10 +240,10 @@ Registered Nurse: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/d
 
 Open/download these actual images and inspect them. A PDF thumbnail, game name, URL string or written description alone is not a visual reference input. Pass the selected downloaded image files to the image tool as reference images for EVERY generation and edit. If the tool cannot retrieve them, obtain the files before generating; do not silently substitute a remembered anime style. For this documentation, all three anchor drawing and detail level; none supplies a new career's character identity. Choose one primary full-scene reference for a batch and keep it fixed. Include canonical character and room images for follow-up scenes. Do not promote an unreviewed generated image into the style master.
 
-### B2. Character drawing
+### B2. Character direction inside the same complete scene
 
 ```text
-CHARACTER DRAWING PROMPT — USE WITH THE ENVIRONMENT PROMPT
+CHARACTER DIRECTION WITHIN THE COMPLETE SCENE — NOT A SEPARATE IMAGE JOB
 
 Inputs: {PRIMARY_APPROVED_SCENE_IMAGE}, {CANONICAL_CHARACTER_IMAGES}, {CHARACTER_ID}, {AGE}, {ETHNICITY}, {SKIN_BASE_AND_UNDERTONE}, {EYE_COLOR}, {FACE_SHAPE}, {HAIR_SILHOUETTE_AND_TEXTURE}, {OUTFIT}, {EXPRESSION}, {ACTION}, {SCENE_LIGHT}.
 
@@ -202,10 +258,10 @@ Expression and posture follow {EXPRESSION}/{ACTION}; vary them when the story ca
 This describes the character inside one complete scene. Do not output a detached sprite, transparent cutout, bust pasted over furniture, character sheet or isolated portrait unless explicitly requested for an internal identity reference. Clothing and anatomy continue naturally behind real occluding objects. Keep the face clear of the actual HUD/dialogue mask.
 ```
 
-### B3. Environment drawing
+### B3. Environment direction inside the same complete scene
 
 ```text
-ENVIRONMENT DRAWING PROMPT — USE WITH THE CHARACTER PROMPT
+ENVIRONMENT DIRECTION WITHIN THE COMPLETE SCENE — NOT A SEPARATE IMAGE JOB
 
 Inputs: {PRIMARY_APPROVED_SCENE_IMAGE}, {CANONICAL_ROOM_IMAGE_OR_LAYOUT}, {CAREER}, {ROOM_ID}, {ROOM_FUNCTION}, {REQUIRED_WORK_ITEMS}, {MATERIAL_PALETTE}, {FIXED_WINDOW_VIEW}, {TIME_OF_DAY}, {LIGHT_SOURCE}, {CAMERA}, {VIEWPORT_ASPECT}, {HUD_DIALOGUE_MASK}.
 
@@ -282,6 +338,25 @@ The three current game scenes are embedded in this PDF and available at full res
 - [UX Designer](https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/ux-approved-work.png)
 - [Food Scientist](https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/food-approved-work.png)
 - [Registered Nurse](https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/nurse-approved-corridor.png)
+
+
+### Supplemental cast and room references
+
+The first three scenes remain the primary drawing/detail anchors. Extra cast examples show identity and pose variety. Room-only examples below guide architecture and work function; the explicit low-detail material rules override their floor texture, reflection strength or other fine detail. All are embedded in this PDF. They are reference inputs only, never separate production layers.
+
+- UX: Samira face, grouped hair, skin tone and seated posture. Real desk occlusion; do not copy camera cropping. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/ux-approved-samira.png
+- Food: Imani anime face, darker skin palette, clean coat shadows and expressive posture. Do not copy lower-frame crop. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/food-approved-imani.png
+- Nursing: Denise simplified blonde hair, restrained facial marks and coherent bedside staging. Real bed occlusion differs from a hard figure cutoff. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/nurse-approved-denise.png
+- Architecture reference: studio layout, coordinated furniture, planted zones and framed river view. Simplify rugs, texture and reflections further under the flat-art rules. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/ux-approved-studio.png
+- Architecture reference: food-lab benches, sage storage and tasting room. Keep functional layout; remove floor speckling, tiny equipment details and strong reflections when drawing a new scene. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/food-approved-lab.png
+- Architecture reference: hospital reception, ivory/walnut/brass design and lake geography. Keep the interior design, but reduce floor grain, stone veins and sheen; do not turn it into a hotel or photo render. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/nurse-approved-lobby.png
+
+## Appendix F. Rejected outputs supplied by the user
+
+These are failure examples only, not image-generation style references. Do not attach them as positive references.
+
+- Rejected hangar: too much realistic floor texture, reflections and aircraft surface rendering; excessive garment folds and modeled detail. The fully visible feet do not make the style acceptable.
+- Rejected portrait: detailed ringlets and modeled clothing; most decisively, a hard horizontal cut through the upper legs with floor continuing below the figure. This is a pasted/cropped character plate and must fail.
 
 ## References
 
