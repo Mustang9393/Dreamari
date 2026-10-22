@@ -6,6 +6,7 @@
 import { PeekHost } from "./peek";
 import { NightSky } from "./NightSky";
 import { SkyAurora } from "./SkyAurora";
+import { SkySun, SunSwitch } from "./SkySun";
 
 export function AppBackdrop({ calmSky = false }: { /** a still sky that lights up only on skyMoment() (counselor v7, NightSky.tsx) */ calmSky?: boolean } = {}) {
   return (
@@ -49,7 +50,11 @@ export function AppBackdrop({ calmSky = false }: { /** a still sky that lights u
       {/* Black & Blue, dark: an aurora on the horizon (./SkyAurora.tsx) */}
       <SkyAurora still={calmSky} />
       <NightSky calm={calmSky} />
+      {/* Black & Blue, light: the day sky, sun rays, cirrus and motes (./SkySun.tsx) */}
+      <SkySun still={calmSky} />
     </div>
+    {/* DEMO-ONLY: Top / Low sun switch for vetting the day sky, light only */}
+    <SunSwitch />
     </>
   );
 }

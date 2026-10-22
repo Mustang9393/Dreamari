@@ -969,7 +969,12 @@ function EnvCard({
                          stacked content past the card's bounds and clip
                          something else in it. line-clamp caps it defensively,
                          matching this app's own truncation convention. */}
-                      <p className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
+                      {/* white, not --primary-foreground: in the Black & Blue look
+                         that token is the near-black ink for blue fills, and this
+                         line sits on the photo's scrim (22 Oct 2026, Chandu: "in
+                         dark mode the text i saw was dark where it should have
+                         been white") */}
+                      <p className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.92)" }}>
                         {career.description}
                       </p>
                       {/* Eyebrow (dim, small, uppercase) over the actual value

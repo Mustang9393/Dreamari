@@ -1,0 +1,173 @@
+{
+  "template": "ib-career-tasks-v4",
+  "careers": {
+    "ui-ux-designer": {
+      "level": 1,
+      "stage": "Supervised first week; junior does assigned work and proposes changes for review.",
+      "authorityLimit": "No independent product launch, research sign-off or accessibility certification.",
+      "tasks": [
+        {
+          "beat": "UX1-06",
+          "slot": 6,
+          "objective": "Sketch a wireframe within the assigned scope",
+          "category": "career-work",
+          "sources": [
+            "ux-role"
+          ],
+          "layout": "options",
+          "answerBasis": "A wireframe lets the team review the layout before spending time on polish."
+        },
+        {
+          "beat": "UX1-09",
+          "slot": 9,
+          "objective": "Apply design tools and observe a fan without hints",
+          "category": "career-work",
+          "sources": [
+            "ux-test",
+            "ux-observe"
+          ],
+          "layout": "rapid",
+          "answerBasis": "The first option in each rapid item is correct."
+        },
+        {
+          "beat": "UX1-11",
+          "slot": 11,
+          "objective": "Place Save close to the set it affects",
+          "category": "career-work",
+          "sources": [
+            "ux-role"
+          ],
+          "layout": "options",
+          "answerBasis": "The action stays close to the set it saves and above the long copy."
+        },
+        {
+          "beat": "UX1-15",
+          "slot": 15,
+          "objective": "Choose a neutral test task for the revised prototype",
+          "category": "career-work",
+          "sources": [
+            "ux-test"
+          ],
+          "layout": "options",
+          "answerBasis": "The goal is clear without telling the fan where to click."
+        },
+        {
+          "beat": "UX1-20",
+          "slot": 20,
+          "objective": "Resolve a credit dispute with records and mentor support",
+          "category": "teamwork",
+          "sources": [],
+          "layout": "options",
+          "answerBasis": "Use the record and the right person without turning it into a public fight."
+        },
+        {
+          "beat": "UX1-22",
+          "slot": 22,
+          "objective": "Propose fixing the broken core flow before visual polish",
+          "category": "career-work",
+          "sources": [
+            "ux-role"
+          ],
+          "layout": "chat",
+          "answerBasis": "The client needs to try the core task. Arjun can approve leaving polish for later."
+        },
+        {
+          "beat": "UX1-26",
+          "slot": 26,
+          "objective": "Record keyboard behavior for the specialist without claiming compliance",
+          "category": "career-work",
+          "sources": [
+            "ux-role"
+          ],
+          "layout": "rank",
+          "answerBasis": "You support the actual check and leave final judgment with the specialist."
+        }
+      ]
+    },
+    "food-scientist": {
+      "level": 1,
+      "stage": "Supervised first week; junior does assigned work and proposes changes for review.",
+      "authorityLimit": "No independent recipe changes, tasting clearance, safety judgment or market release.",
+      "tasks": [
+        {
+          "beat": "FS1-06",
+          "slot": 6,
+          "objective": "Prepare labeled samples under the approved plan",
+          "category": "career-work",
+          "sources": [
+            "food-role"
+          ],
+          "layout": "options",
+          "answerBasis": "Your first job is to carry out and record the approved plan."
+        },
+        {
+          "beat": "FS1-09",
+          "slot": 9,
+          "objective": "Distinguish the planned change, constants and sample identity",
+          "category": "career-work",
+          "sources": [
+            "food-role"
+          ],
+          "layout": "rapid",
+          "answerBasis": "The first option in each rapid item is correct."
+        },
+        {
+          "beat": "FS1-11",
+          "slot": 11,
+          "objective": "Apply neutral tasting codes instead of recipe claims",
+          "category": "career-work",
+          "sources": [
+            "food-code"
+          ],
+          "layout": "options",
+          "answerBasis": "A neutral code identifies the sample without advertising a recipe claim."
+        },
+        {
+          "beat": "FS1-15",
+          "slot": 15,
+          "objective": "Catch a code-to-recipe mismatch in the notebook",
+          "category": "career-work",
+          "sources": [
+            "food-role",
+            "food-record"
+          ],
+          "layout": "document",
+          "answerBasis": "The sheet links 742 to extra fruit. This line assigns it to the wrong recipe."
+        },
+        {
+          "beat": "FS1-20",
+          "slot": 20,
+          "objective": "Resolve a credit dispute with records and mentor support",
+          "category": "teamwork",
+          "sources": [],
+          "layout": "options",
+          "answerBasis": "Use the record and the right person without turning it into a public fight."
+        },
+        {
+          "beat": "FS1-22",
+          "slot": 22,
+          "objective": "Flag missing recipe information before using a sample in a comparison",
+          "category": "career-work",
+          "sources": [
+            "food-role",
+            "food-record"
+          ],
+          "layout": "chat",
+          "answerBasis": "A missing recipe prevents a reliable comparison. Ask Ren to review the gap before using it."
+        },
+        {
+          "beat": "FS1-26",
+          "slot": 26,
+          "objective": "Check sample labels against the sheet without guessing",
+          "category": "career-work",
+          "sources": [
+            "food-role",
+            "food-record"
+          ],
+          "layout": "rank",
+          "answerBasis": "You help with a real lab task and preserve uncertain records for review."
+        }
+      ]
+    }
+  }
+}

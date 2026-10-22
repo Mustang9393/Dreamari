@@ -19,6 +19,9 @@ const areas: WorkspaceArea[] = [
   // Explore is its own area, v5's order (8 Oct 2026, Chandu: "explore
   // should be its own tab")
   { label: "Explore", views: ["explore"] },
+  // Opportunities, its own area as in v7 (22 Oct 2026, Maisha: "Please add
+  // opportunities tab to v4")
+  { label: "Opportunities", views: ["opportunities"] },
   // "In v4 change 'Workspace' to 'Prepare.' This should be the place where
   // counselors go to review, communicate, prepare for meetings, and
   // complete their work" (Maisha, 9 Oct 2026).
@@ -68,7 +71,7 @@ export const LEADER_AREAS: Record<"School Leader" | "District Leader", Workspace
 // Connect is Messages, the review desk is Review (her word, 9 Oct 2026:
 // "Meetings → Review → Messages → Assist"), the first tab is Home and the
 // career page is College & Career.
-const names: Partial<Record<CounselorView,string>> = {overview:"Home",students:"Directory",milestones:"Milestones","review-queue":"Review",meetings:"Meetings",connect:"Messages",productivity:"Assist",progress:"Milestones",readiness:"Readiness",insights:"College & Career",explore:"Explore",engagement:"Engagement",impact:"My Impact","school-impact":"School Impact",counselors:"Counselors",settings:"Preferences","leader-progress":"Student Progress",postsecondary:"Career & Postsecondary",team:"Counseling Team","leader-reports":"Reports","school-performance":"School Performance",outcomes:"Student Outcomes",capacity:"Counseling Capacity","district-reports":"Reports"};
+const names: Partial<Record<CounselorView,string>> = {overview:"Home",students:"Directory",milestones:"Milestones","review-queue":"Review",meetings:"Meetings",connect:"Messages",productivity:"Assist",progress:"Milestones",readiness:"Readiness",insights:"College & Career",explore:"Explore",opportunities:"Opportunities",engagement:"Engagement",impact:"My Impact","school-impact":"School Impact",counselors:"Counselors",settings:"Preferences","leader-progress":"Student Progress",postsecondary:"Career & Postsecondary",team:"Counseling Team","leader-reports":"Reports","school-performance":"School Performance",outcomes:"Student Outcomes",capacity:"Counseling Capacity","district-reports":"Reports"};
 
 // One line under each page title that says what the page is for, in the
 // counselor's own voice (Maisha: "When there is a new tab, there is usually
@@ -89,6 +92,7 @@ const purposes: Partial<Record<CounselorView,string>> = {
   productivity:"Generate high-quality first drafts for routine counseling tasks. Review, edit, and approve before use.",
   insights:"Student interests. Ideas for speakers, visits, and programs.",
   explore:"What's in demand in my state, what's rising, and what my students love, so I can answer them on the spot.",
+  opportunities:"Internships, jobs, programs and events near us, who they fit, and where each application stands.",
   engagement:"Student activity and who to reach out to.",
   impact:"The progress and impact of my work.",
   "school-impact":"The difference our counseling team is making, ready to share with leadership.",

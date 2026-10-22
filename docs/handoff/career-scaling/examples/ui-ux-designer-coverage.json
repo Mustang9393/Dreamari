@@ -1,10 +1,10 @@
 {
-  "version": 9,
+  "version": 10,
   "career": "ui-ux-designer",
   "levels": [
     "ux-l1"
   ],
-  "template": "ib-semantic-v3",
+  "template": "ib-career-tasks-v4",
   "groups": [
     {
       "id": "ux-v7-arrival",
@@ -165,169 +165,169 @@
       "beat": "UX1-01",
       "scene": "ux-v9-exterior",
       "shotGroup": "ux-v9-exterior",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-02",
       "scene": "ux-v9-opening",
       "shotGroup": "ux-v9-opening",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-03",
       "scene": "ux-v7-arrival",
       "shotGroup": "ux-v7-arrival",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-04",
       "scene": "ux-v7-arrival",
       "shotGroup": "ux-v7-arrival",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-05",
       "scene": "ux-v8-noah",
       "shotGroup": "ux-v8-noah",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-06",
       "scene": "ux-v7-arrival",
       "shotGroup": "ux-v7-arrival",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-07",
       "scene": "ux-v7-work",
       "shotGroup": "ux-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-08",
       "scene": "ux-v7-work",
       "shotGroup": "ux-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-09",
       "scene": "ux-v7-work",
       "shotGroup": "ux-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-10",
       "scene": "ux-v7-work",
       "shotGroup": "ux-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "artifact": "ux-save-buried"
     },
     {
       "beat": "UX1-11",
       "scene": "ux-v7-work",
       "shotGroup": "ux-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "artifact": "ux-save-buried"
     },
     {
       "beat": "UX1-12",
       "scene": "ux-v7-review",
       "shotGroup": "ux-v7-review",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-13",
       "scene": "ux-v7-review",
       "shotGroup": "ux-v7-review",
-      "artifact": "ux-save-buried"
+      "artifact": "ux-save-clear"
     },
     {
       "beat": "UX1-14",
       "scene": "ux-v7-review",
       "shotGroup": "ux-v7-review",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-15",
       "scene": "ux-v7-review",
       "shotGroup": "ux-v7-review",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "artifact": "ux-save-clear"
     },
     {
       "beat": "UX1-MID",
       "scene": "ux-v7-closing",
       "shotGroup": "ux-v7-closing",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-ACT2",
       "scene": "ux-v9-opening",
       "shotGroup": "ux-v9-opening",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-18",
       "scene": "ux-v8-noah",
       "shotGroup": "ux-v8-noah",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-19",
       "scene": "ux-v9-credit",
       "shotGroup": "ux-v9-credit",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-20",
       "scene": "ux-v9-credit",
       "shotGroup": "ux-v9-credit",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-21",
       "scene": "ux-v9-opening",
       "shotGroup": "ux-v9-opening",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-22",
       "scene": "ux-v7-work",
       "shotGroup": "ux-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-23",
       "scene": "ux-v7-work",
       "shotGroup": "ux-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-24",
       "scene": "ux-v7-access",
       "shotGroup": "ux-v7-access",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-25",
       "scene": "ux-v7-access",
       "shotGroup": "ux-v7-access",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-26",
       "scene": "ux-v7-access",
       "shotGroup": "ux-v7-access",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-27",
       "scene": "ux-v7-work",
       "shotGroup": "ux-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "UX1-28",
       "scene": "ux-v7-closing",
       "shotGroup": "ux-v7-closing",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     }
   ],
   "milestones": [

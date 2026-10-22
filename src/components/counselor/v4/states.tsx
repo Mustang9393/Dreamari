@@ -56,6 +56,7 @@ export const SCREEN_EMPTY: Record<CounselorView, { title: string; body: string; 
   connect: { title: "Every Question Has a Reply", body: "New messages from students land here first.", cta: { label: "Students", view: "students" } },
   checkins: { title: "No Check-ins Yet", body: "Send a check-in and your students' answers land here." },
   explore: { title: "Nothing to Explore Yet", body: "Careers, schools and labor data load from the catalog." },
+  opportunities: { title: "No Opportunities Yet", body: "Local listings load from the opportunity catalog." },
   insights: { title: "No Insights Yet", body: "Saved careers, simulations, majors and schools show once students start exploring." },
   productivity: { title: "Nothing to Draft Yet", body: "Drafts are built from a student's plan; add students first.", cta: { label: "Students", view: "students" } },
   engagement: { title: "No Activity Recorded", body: "Logins and activity show once students use Dreamari." },

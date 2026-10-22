@@ -35,11 +35,11 @@ const words=s=>(s??'').match(/[A-Za-z]+(?:['’][A-Za-z]+)?|\d+/g)??[];
 
 for(const level of levels){
  test(level.id+': seven scored decisions, midpoint, first choice and passing score',()=>{
-  assert.equal(level.generationTemplate,'ib-semantic-v3');
-  assert.deepEqual(level.beats.map(b=>[b.kind,Boolean(b.practice)]),ib.beats.map(b=>[b.kind,Boolean(b.practice)]),'IB interaction/practice sequence');
+  assert.equal(level.generationTemplate,'ib-career-tasks-v4');
+  assert.deepEqual(level.beats.map((b,i)=>scored(b)?i:null).filter(i=>i!==null),ib.beats.map((b,i)=>scored(b)?i:null).filter(i=>i!==null),'IB scored decision positions');
   assert.equal(level.beats[6].cards.length,4);assert.equal(level.beats[7].pairs.length,4);assert(level.beats[7].practice&&level.beats[7].noVerdict);
   assert.equal(level.beats[8].items.length,4);assert.equal(level.beats[8].timer,45);
-  for(const i of [5,10,14,19,21])assert.equal(level.beats[i].layout,ib.beats[i].layout);
+  // Story and scored slots are shared; the job determines the answer surface.
   for(let i=0;i<ib.beats.length;i++)if(ib.beats[i].kind==='card')assert.equal(level.beats[i].variant,ib.beats[i].variant,'IB card treatment at '+(i+1));
   assert.equal(level.beats[13].ladder.length,4);
   assert.equal(level.beats.length,ib.beats.length,'new careers match IB beat count');
@@ -117,8 +117,8 @@ test('UX visibly distinguishes buried and improved Save without extra controls',
  assert(bad.includes('data-scene-state="buried"')&&bad.includes('Long description above Save'));
  assert(good.includes('data-scene-state="clear"')&&!good.includes('Long description above Save'));
  assert(bad.indexOf('Long description above Save')<bad.indexOf('Save set'));
- const q=levels[0].beats.find(b=>b.id==='UX1-15');
- assert(q.question.includes('Save'));assert.equal(levels[0].beats[12].artifact.state,'buried');
+ const q=levels[0].beats.find(b=>b.id==='UX1-11');
+ assert(q.question.includes('Save'));assert.equal(q.artifact.state,'buried');
  assert.equal(q.feedbackArtifacts.best.state,'clear');assert.equal(q.feedbackArtifacts.wrong.state,'buried');
 });
 test('critical nursing art follows cast presence and has a sharp portrait composition',()=>{
@@ -180,4 +180,22 @@ test('arrival establishes each building outside before the interior',()=>{
   assert.equal(outside.role,'arrival');assert(outside.src.endsWith('/building-exterior-v2.png'));assert.deepEqual(outside.visibleCast,[]);
   assert.notEqual(outside.src,inside.src);assert(fs.existsSync(path.join(root,'public',outside.src)));
  }
+});
+
+// The regression was a career-name substitution in IB questions. Preserve the
+// narrative spine while checking actual task contracts and concrete UI states.
+test('career tasks have researched scope and do not duplicate each other',()=>{
+ const contracts=load(path.join(root,'docs/handoff/career-scaling/career-task-contracts.json')).careers;
+ const sources=load(path.join(root,'docs/handoff/career-scaling/career-task-research.json')).sources;
+ for(const [i,career] of ['ui-ux-designer','food-scientist'].entries()){
+  const c=contracts[career],l=levels[i];assert.equal(c.level,l.n);assert(c.stage&&c.authorityLimit);
+  assert.equal(c.tasks.length,l.beats.filter(scored).length);
+  assert(c.tasks.filter(t=>t.category==='career-work').length>=4);
+  for(const t of c.tasks){const b=l.beats[t.slot-1];assert.equal(b.id,t.beat);assert.equal(b.layout??b.kind,t.layout);assert(t.objective&&t.answerBasis);if(t.category==='career-work')assert(t.sources.length&&t.sources.every(id=>sources[id]?.url));}
+ }
+ const stems=l=>l.beats.flatMap(b=>b.items?.map(i=>i.question)??(b.question?[b.question]:[]));
+ const ux=stems(levels[0]);assert(stems(levels[1]).every(q=>!ux.includes(q)),'identical question stems across careers');
+ for(const l of levels)assert(!JSON.stringify(l).includes('Where should you save the client’s private project files?'));
+ const label=levels[1].beats.find(b=>b.id==='FS1-11');assert.equal(label.artifact.state,'named');assert.equal(label.feedbackArtifacts.best.state,'coded');
+ const testTask=levels[0].beats.find(b=>b.id==='UX1-15');assert.equal(testTask.artifact.state,'clear');assert(!testTask.feedbackArtifacts,'a wrong test instruction must not undo the layout');
 });

@@ -13,7 +13,7 @@
   "coreKit": true,
   "quietQuestions": true,
   "qaSkip": true,
-  "saveSlot": 212,
+  "saveSlot": 213,
   "cast": {
     "Ren": "/images/play/fs/face-ren-v7.webp",
     "Yuki": "/images/play/fs/face-yuki-v7.webp",
@@ -113,7 +113,7 @@
   "points": 6,
   "noStrikes": true,
   "scoreTip": "Start at 50. Seven scored decisions change reputation by 6. Matching practice does not change your score. Reach 85.",
-  "generationTemplate": "ib-semantic-v3",
+  "generationTemplate": "ib-career-tasks-v4",
   "beats": [
     {
       "kind": "card",
@@ -151,7 +151,7 @@
       "id": "FS1-04",
       "speaker": "Narrator",
       "title": "Your work goes through Ren.",
-      "body": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment.",
+      "body": "Follow Ren’s trial sheet and label every sample. He approves changes. Ask him before changing the plan or deciding what goes to the client.",
       "castMember": "Ren",
       "ladder": [
         {
@@ -189,25 +189,25 @@
       "kind": "choice",
       "id": "FS1-06",
       "speaker": "Ren",
-      "question": "Before working on the client project, what should you do first?",
+      "question": "Ren gives you an approved drink-trial plan. What should you do first?",
       "choices": [
         {
           "id": "a",
-          "label": "Read the brief and check approved access.",
-          "tier": "best",
-          "why": "You need the task and access before you can do useful work."
+          "label": "Label the samples and follow the trial sheet.",
+          "why": "Your first job is to carry out and record the approved plan.",
+          "tier": "best"
         },
         {
           "id": "b",
-          "label": "Promise the client a finished product.",
-          "tier": "wrong",
-          "why": "You have not checked the work or your authority yet."
+          "label": "Change several ingredients to make it exciting.",
+          "why": "Ren must review changes; extra changes also blur the comparison.",
+          "tier": "wrong"
         },
         {
           "id": "c",
-          "label": "Replace the team’s whole plan.",
-          "tier": "wrong",
-          "why": "First understand the plan and your role."
+          "label": "Tell LUMA the drink is ready to sell.",
+          "why": "A junior trial does not approve a product for sale.",
+          "tier": "wrong"
         }
       ],
       "layout": "options",
@@ -226,7 +226,7 @@
       "speaker": "Ren",
       "castMember": "Ren",
       "title": "Four words for your first assignment.",
-      "setup": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know.",
+      "setup": "Ren walks you through the first fruit-drink comparison.",
       "cards": [
         {
           "term": "Trial",
@@ -234,15 +234,15 @@
         },
         {
           "term": "Variable",
-          "def": "The one thing you change"
+          "def": "The thing changed in this trial"
         },
         {
           "term": "Constant",
-          "def": "A condition you keep the same"
+          "def": "A condition kept the same in this trial"
         },
         {
-          "term": "EOD",
-          "def": "End of the day"
+          "term": "Sample code",
+          "def": "A label that links a sample to its record"
         }
       ],
       "cta": "Continue"
@@ -254,28 +254,28 @@
       "castMember": "Ren",
       "practice": true,
       "noVerdict": true,
-      "setup": "Ren sends your first task list.",
-      "question": "Match each request to the action.",
+      "setup": "Ren asks you to map the trial sheet before work starts.",
+      "question": "Match each part of the plan to its job.",
       "pairs": [
         {
-          "term": "Plan a trial.",
-          "def": "Plan a small test"
+          "term": "Compare two small drink batches.",
+          "def": "Run a trial"
         },
         {
-          "term": "Name the variable.",
-          "def": "Name the one thing being changed"
+          "term": "Change the fruit amount.",
+          "def": "Set the variable"
         },
         {
-          "term": "Keep conditions constant.",
-          "def": "Keep the other condition the same"
+          "term": "Keep mixing time the same.",
+          "def": "Keep a constant"
         },
         {
-          "term": "Send it by EOD.",
-          "def": "Send it by end of day"
+          "term": "Link cup 742 to its recipe.",
+          "def": "Use a sample code"
         }
       ],
-      "whenRight": "You can turn the team’s words into actions.",
-      "whenWrong": "Use the four words you just learned.",
+      "whenRight": "The plan separates what changes, what stays fixed, and how samples are tracked.",
+      "whenWrong": "Check each part against the four terms on the trial sheet.",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -287,146 +287,194 @@
       "kind": "rapid",
       "id": "FS1-09",
       "speaker": "Ren",
-      "setup": "LUMA is a major client. Check how you will communicate before its review.",
+      "setup": "Ren checks the simple trial plan before you prepare the samples.",
       "question": "",
       "timer": 45,
       "items": [
         {
-          "question": "How should you update the project lead?",
+          "question": "The plan changes only fruit amount. What is the variable?",
           "options": [
             {
-              "label": "Lead with the result in a short message.",
+              "label": "Fruit amount.",
               "correct": true,
-              "why": "A short result-first update is easy to act on."
+              "why": "That is the factor deliberately changed in this trial."
             },
             {
-              "label": "Send every note without a summary.",
+              "label": "The sample code.",
               "correct": false,
-              "why": "The lead needs the main point first."
+              "why": "The code identifies the sample; it is not the recipe change."
             },
             {
-              "label": "Wait until the client asks.",
+              "label": "The client name.",
               "correct": false,
-              "why": "The team needs updates before the client review."
+              "why": "The client name is not a trial factor."
             }
           ]
         },
         {
-          "question": "Ren asks about a result you have not checked. What do you say?",
+          "question": "The sheet keeps mixing time the same. What is that condition?",
           "options": [
             {
-              "label": "I’ll check and follow up.",
+              "label": "A constant.",
               "correct": true,
-              "why": "Confirm the fact instead of guessing."
+              "why": "This trial holds mixing time fixed."
             },
             {
-              "label": "It is probably fine.",
+              "label": "The variable.",
               "correct": false,
-              "why": "Probably is not a checked result."
+              "why": "The planned change is fruit amount, not mixing time."
             },
             {
-              "label": "Ask someone else.",
+              "label": "A result.",
               "correct": false,
-              "why": "Take responsibility for closing the gap."
+              "why": "A fixed condition is part of the method, not a result."
             }
           ]
         },
         {
-          "question": "You find a mistake in the client report. What next?",
+          "question": "You record a note about cup 742. What links it to the recipe?",
           "options": [
             {
-              "label": "Correct it and tell the team.",
+              "label": "Its sample code.",
               "correct": true,
-              "why": "Fix the record and flag which version changed."
+              "why": "The code joins the cup, recipe record, and note."
             },
             {
-              "label": "Wait until after the review.",
+              "label": "The cup’s position on the table.",
               "correct": false,
-              "why": "The client could see the mistake first."
+              "why": "Position can change and is not a reliable record link."
             },
             {
-              "label": "Delete the whole project.",
+              "label": "Which drink looks nicest.",
               "correct": false,
-              "why": "Correct the error instead of destroying useful work."
+              "why": "Appearance does not identify the recipe record."
             }
           ]
         },
         {
-          "question": "The brief says EOD. When is it due?",
+          "question": "This trial changes fruit only. Which extra change would blur the comparison?",
           "options": [
             {
-              "label": "By end of day.",
+              "label": "Changing mixing time too.",
               "correct": true,
-              "why": "EOD means end of day."
+              "why": "Then two recipe conditions differ in a trial meant to compare one."
             },
             {
-              "label": "Before the next test starts.",
+              "label": "Recording both sample codes.",
               "correct": false,
-              "why": "That is not what EOD means."
+              "why": "Codes track the comparison without changing the recipe."
             },
             {
-              "label": "Whenever the client replies.",
+              "label": "Using the same mixing time.",
               "correct": false,
-              "why": "EOD sets an end-of-day deadline."
+              "why": "The plan keeps mixing time constant."
             }
           ]
         }
       ],
-      "whenPass": "Clear updates, checked facts, and early warnings earn trust.",
-      "whenFail": "Keep updates short, check unknown facts, and flag errors early.",
+      "whenPass": "You can follow the trial plan and keep each sample tied to its record.",
+      "whenFail": "Separate the planned change, fixed conditions, and sample identity.",
       "progress": 0.2857142857142857,
       "feedback": "",
       "feedbackCta": "Continue",
       "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Written Communication",
-        "Decision-Making"
+        "Critical Thinking",
+        "Active Learning"
       ]
     },
     {
       "kind": "card",
       "id": "FS1-10",
       "speaker": "Ren",
-      "title": "Client files stay in the approved team folder.",
-      "body": "Use the project’s restricted access. Keep files off personal accounts and public chats.",
+      "title": "Use neutral codes for the tasting.",
+      "body": "Ren approves codes 318 and 742. Recipe names can shape expectations. Keep the code-to-recipe key with the team; put only the code on each tasting cup.",
       "cta": "Continue",
-      "variant": "intro"
+      "variant": "intro",
+      "artifact": {
+        "id": "fs-visible-labels",
+        "kind": "scene-context",
+        "view": "sample-codes",
+        "state": "named",
+        "title": "Recipe labels",
+        "caption": "Recipe names before neutral sample codes are applied.",
+        "provenance": "Fictional labels; all task facts appear in the question."
+      }
     },
     {
       "kind": "choice",
       "id": "FS1-11",
       "speaker": "Narrator",
-      "question": "Where should you save the client’s private project files?",
+      "question": "Ren approved codes 318 and 742 for this tasting. Which label belongs on a cup?",
       "choices": [
         {
           "id": "a",
-          "label": "Approved team folder with restricted access.",
-          "tier": "best",
-          "why": "Only the authorized project team should have access."
+          "label": "742",
+          "why": "A neutral code identifies the sample without advertising a recipe claim.",
+          "tier": "best"
         },
         {
           "id": "b",
-          "label": "Your personal cloud drive.",
-          "tier": "wrong",
-          "why": "A personal account is outside the team’s approved access."
+          "label": "The sweeter recipe",
+          "why": "That tells tasters what you expect them to notice.",
+          "tier": "wrong"
         },
         {
           "id": "c",
-          "label": "A public group chat.",
-          "tier": "wrong",
-          "why": "Public sharing exposes the client’s files."
+          "label": "LUMA’s best drink",
+          "why": "That suggests a preferred answer before the tasting.",
+          "tier": "wrong"
         }
       ],
-      "layout": "zones",
-      "dragItem": "Client files",
+      "layout": "options",
       "progress": 0.42857142857142855,
       "feedback": "",
       "feedbackCta": "Continue",
       "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Decision-Making",
+        "Quality Control",
         "Critical Thinking"
-      ]
+      ],
+      "dragEnabled": true,
+      "artifact": {
+        "id": "fs-visible-labels",
+        "kind": "scene-context",
+        "view": "sample-codes",
+        "state": "named",
+        "title": "Recipe labels",
+        "caption": "Recipe names before neutral sample codes are applied.",
+        "provenance": "Fictional labels; all task facts appear in the question."
+      },
+      "feedbackArtifacts": {
+        "best": {
+          "id": "fs-coded-labels",
+          "kind": "scene-context",
+          "view": "sample-codes",
+          "state": "coded",
+          "title": "Coded labels",
+          "caption": "LUMA trial samples use neutral codes 318 and 742.",
+          "provenance": "Fictional sample codes, not safety or tasting clearance."
+        },
+        "wrong": {
+          "id": "fs-visible-labels",
+          "kind": "scene-context",
+          "view": "sample-codes",
+          "state": "named",
+          "title": "Recipe labels",
+          "caption": "Recipe names before neutral sample codes are applied.",
+          "provenance": "Fictional labels; all task facts appear in the question."
+        },
+        "risky": {
+          "id": "fs-visible-labels",
+          "kind": "scene-context",
+          "view": "sample-codes",
+          "state": "named",
+          "title": "Recipe labels",
+          "caption": "Recipe names before neutral sample codes are applied.",
+          "provenance": "Fictional labels; all task facts appear in the question."
+        }
+      },
+      "dragItem": "Sample label"
     },
     {
       "kind": "card",
@@ -443,11 +491,20 @@
       "kind": "card",
       "id": "FS1-13",
       "speaker": "Narrator",
-      "title": "Show what the test actually found.",
-      "body": "A trial compares results. One batch changed the fruit amount. Your report must not say that several ingredients changed.",
+      "title": "Check codes before copying results.",
+      "body": "Ren’s sheet lists 318 as base and 742 as extra fruit. Each code links notes to a recipe. Copy that link exactly; do not swap the samples.",
       "castMember": "Yuki",
       "cta": "Continue",
-      "variant": "character"
+      "variant": "character",
+      "artifact": {
+        "id": "fs-coded-labels",
+        "kind": "scene-context",
+        "view": "sample-codes",
+        "state": "coded",
+        "title": "Coded labels",
+        "caption": "LUMA trial samples use neutral codes 318 and 742.",
+        "provenance": "Fictional sample codes, not safety or tasting clearance."
+      }
     },
     {
       "kind": "card",
@@ -481,44 +538,44 @@
       "kind": "choice",
       "id": "FS1-15",
       "speaker": "Yuki",
-      "question": "Only the fruit amount changed in the trial. Which report line needs fixing?",
+      "question": "Trial sheet: 318 is base; 742 is extra fruit. Which notebook line is wrong?",
       "choices": [
         {
           "id": "a",
-          "label": "We changed fruit, mixing time, and batch size.",
-          "tier": "best",
-          "why": "Only fruit changed. The other conditions stayed the same."
+          "label": "742: base recipe.",
+          "why": "The sheet links 742 to extra fruit. This line assigns it to the wrong recipe.",
+          "tier": "best"
         },
         {
           "id": "b",
-          "label": "We changed the fruit amount.",
-          "tier": "wrong",
-          "why": "That matches the stated trial."
+          "label": "318: base recipe.",
+          "why": "That matches the trial sheet.",
+          "tier": "wrong"
         },
         {
           "id": "c",
-          "label": "Mixing time stayed the same.",
-          "tier": "wrong",
-          "why": "That matches the stated trial."
+          "label": "742: extra fruit.",
+          "why": "That matches the trial sheet.",
+          "tier": "wrong"
         },
         {
           "id": "d",
-          "label": "Next, repeat the comparison.",
-          "tier": "wrong",
-          "why": "A repeat is a proposed next step, not a result."
+          "label": "Both codes copied from Ren’s sheet.",
+          "why": "That describes the record source without changing either recipe link.",
+          "tier": "wrong"
         }
       ],
       "layout": "document",
-      "docStyle": "slide",
-      "doc": "Trial Summary",
       "progress": 0.5714285714285714,
       "feedback": "",
       "feedbackCta": "Continue",
       "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Reading Comprehension",
-        "Critical Thinking"
-      ]
+        "Quality Control",
+        "Reading Comprehension"
+      ],
+      "docStyle": "slide",
+      "doc": "Trial notebook"
     },
     {
       "kind": "card",
@@ -625,8 +682,8 @@
       "kind": "card",
       "id": "FS1-21",
       "speaker": "Narrator",
-      "title": "3:00 P.M. A teammate leaves the project.",
-      "body": "Half the trial report is unfinished. The client review starts at 6:00 P.M.",
+      "title": "3:00 P.M. One trial record is incomplete.",
+      "body": "The fruit amount for 742 is blank. Photos also need tidying. Client review starts at 6:00. Ren must check the missing recipe record.",
       "world": {
         "kind": "clock",
         "now": "3:00 PM",
@@ -641,25 +698,25 @@
       "kind": "choice",
       "id": "FS1-22",
       "speaker": "Narrator",
-      "question": "There is more work than you can finish by six. What do you message Ren?",
+      "question": "Sample 742 has no recorded fruit amount. What should you message Ren?",
       "choices": [
         {
           "id": "a",
-          "label": "Can you help me prioritize what is left?",
-          "tier": "best",
-          "why": "Flag the gap early so the team can protect the most important work."
+          "label": "Can we leave 742 out until we verify its recipe?",
+          "why": "A missing recipe prevents a reliable comparison. Ask Ren to review the gap before using it.",
+          "tier": "best"
         },
         {
           "id": "b",
-          "label": "I’ll finish everything myself.",
-          "tier": "wrong",
-          "why": "That hides the workload problem until the deadline."
+          "label": "I’ll guess the amount from its color.",
+          "why": "Color does not recover the missing recipe record.",
+          "tier": "wrong"
         },
         {
           "id": "c",
-          "label": "We should cancel without telling the team.",
-          "tier": "wrong",
-          "why": "You need direction, not a decision made outside your role."
+          "label": "I’ll use 742 and leave out the missing detail.",
+          "why": "That hides the gap from the person reviewing the comparison.",
+          "tier": "wrong"
         }
       ],
       "layout": "chat",
@@ -679,8 +736,8 @@
       "feedbackCta": "Continue",
       "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Time Management",
-        "Verbal Communication"
+        "Quality Control",
+        "Decision-Making"
       ]
     },
     {
@@ -688,7 +745,7 @@
       "id": "FS1-23",
       "speaker": "Narrator",
       "title": "6:00 P.M. The review pack is ready.",
-      "body": "Ren checks it before the client review. You finished the priority work without hiding what still needs testing.",
+      "body": "Ren keeps 742 out of the comparison until its recipe is checked. The review pack states the gap. Photo polish can wait.",
       "world": {
         "kind": "clock",
         "now": "6:00 PM",
@@ -704,7 +761,7 @@
       "id": "FS1-24",
       "speaker": "Narrator",
       "title": "Luis still needs a hand.",
-      "body": "Luis, the lab technician, has sample records due at 6:40. You have finished your work for today.",
+      "body": "Luis, a lab technician, needs sample labels checked by 6:40. You have finished your work. He owns the final record.",
       "castMember": "Luis",
       "setup": "Luis • Lab Technician",
       "cta": "Continue",
@@ -714,8 +771,8 @@
       "kind": "card",
       "id": "FS1-25",
       "speaker": "Narrator",
-      "title": "Their deadline is close. Yours is not.",
-      "body": "You have time to help with the notes. The work stays with its owner for the final check.",
+      "title": "Check labels against the trial sheet.",
+      "body": "Luis asks you to match each code to the sheet. Set unclear labels aside for him; never fill a gap from memory.",
       "castMember": "Luis",
       "cta": "Continue",
       "variant": "intro"
@@ -724,21 +781,21 @@
       "kind": "rank",
       "id": "FS1-26",
       "speaker": "Narrator",
-      "question": "Rank these responses from best to worst.",
+      "question": "Luis needs sample labels checked. Rank your responses from best to worst.",
       "order": [
-        "Ask which notes you can help organize.",
-        "Wish them luck and leave.",
-        "Laugh at the delay and walk away."
+        "Match codes to the trial sheet; flag unclear labels for Luis.",
+        "Leave all the checks for Luis without offering help.",
+        "Fill missing codes from memory so the labels look complete."
       ],
-      "whenRight": "You had time to help and left final checks with the person responsible.",
-      "whenWrong": "A useful offer of help matters more than a polite goodbye.",
+      "whenRight": "You help with a real lab task and preserve uncertain records for review.",
+      "whenWrong": "Check the sheet and flag gaps. A complete-looking label is not worth a guessed identity.",
       "progress": 1,
       "feedback": "",
       "feedbackCta": "Continue",
       "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Social Awareness",
-        "Critical Thinking"
+        "Quality Control",
+        "Teamwork & Collaboration"
       ]
     },
     {

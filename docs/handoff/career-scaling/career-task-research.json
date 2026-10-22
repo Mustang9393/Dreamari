@@ -1,0 +1,36 @@
+{
+  "reviewed": "2026-10-22",
+  "sources": {
+    "ux-role": {
+      "title": "O*NET: Web and Digital Interface Designers",
+      "url": "https://www.onetonline.org/link/details/15-1255.00",
+      "supports": "Interface planning, usability and application models; occupational context, not a universal junior job description."
+    },
+    "ux-test": {
+      "title": "GOV.UK: Using moderated usability testing",
+      "url": "https://www.gov.uk/service-manual/user-research/using-moderated-usability-testing",
+      "supports": "Agree research questions, observe real tasks, and avoid hints in test goals."
+    },
+    "ux-observe": {
+      "title": "NN/g: Observer Guidelines for Usability Research",
+      "url": "https://www.nngroup.com/articles/observer-guidelines/",
+      "supports": "Record participant behavior rather than substituting guesses."
+    },
+    "food-role": {
+      "title": "O*NET: Food Science Technicians",
+      "url": "https://www.onetonline.org/link/details/19-4013.00",
+      "supports": "Assist food scientists with standardized tests, sample preparation and records. Used to bound supervised Level 1 work, not to equate all scientist and technician roles."
+    },
+    "food-code": {
+      "title": "Iowa State Extension: Sensory Testing in the Winery, Part 2",
+      "url": "https://www.extension.iastate.edu/wine/sensory-testing-winery-part-2",
+      "supports": "Neutral three-digit sample codes and a secure code key reduce expectations. Only this coding method is adapted to the fictional fruit drink, not wine service or tasting instructions."
+    },
+    "food-record": {
+      "title": "Penn State Extension: Troubleshooting Milk Flavor Problems for Small Processors",
+      "url": "https://extension.psu.edu/troubleshooting-milk-flavor-problems-for-small-processors",
+      "supports": "Consistent sample preparation and records identifying samples. Applied only to record discipline; no dairy safety rule is transferred to this drink."
+    }
+  },
+  "limits": "These sources inform methods and role context. All brands, deadlines, codes and events are fictional. Level 1 is a supervised first week. Changing only fruit amount is this exercise\u2019s assigned comparison, not a universal design-of-experiments rule. No tasting, safety, accessibility or market release is approved by the junior."
+}

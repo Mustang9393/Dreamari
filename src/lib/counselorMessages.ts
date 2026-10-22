@@ -10,7 +10,13 @@
 
 import { createLocalRecord } from "./localRecord";
 
-export type SentMessage = { text: string; at: string };
+/** Who a message went to (Joshua, 22 Oct 2026: "the counselor always knows
+ *  exactly who will receive the message before sending it"): the student,
+ *  their guardians, both, and any school staff looped in. Absent on older
+ *  messages, which were student only. */
+export type Audience = { kind: "student" | "guardians" | "both"; guardians: string[]; staff: string[] };
+export const STUDENT_ONLY: Audience = { kind: "student", guardians: [], staff: [] };
+export type SentMessage = { text: string; at: string; audience?: Audience };
 export type Thread = { studentId: string; name: string; messages: SentMessage[] };
 type State = { replies: Record<string, SentMessage>; threads: Thread[] };
 
@@ -24,8 +30,8 @@ export function readMessages(): State {
   return store.read();
 }
 
-export function replyTo(questionId: string, text: string): void {
-  store.update((s) => ({ ...s, replies: { ...s.replies, [questionId]: { text, at: new Date().toISOString() } } }));
+export function replyTo(questionId: string, text: string, audience?: Audience): void {
+  store.update((s) => ({ ...s, replies: { ...s.replies, [questionId]: { text, at: new Date().toISOString(), ...(audience ? { audience } : {}) } } }));
 }
 
 export function undoReply(questionId: string): void {
@@ -37,8 +43,8 @@ export function undoReply(questionId: string): void {
 }
 
 /** Add a message to the student's thread, starting it if needed. */
-export function sendToStudent(studentId: string, name: string, text: string): void {
-  const msg = { text, at: new Date().toISOString() };
+export function sendToStudent(studentId: string, name: string, text: string, audience?: Audience): void {
+  const msg: SentMessage = { text, at: new Date().toISOString(), ...(audience ? { audience } : {}) };
   store.update((s) => {
     const has = s.threads.some((t) => t.studentId === studentId);
     const threads = has ? s.threads.map((t) => (t.studentId === studentId ? { ...t, messages: [...t.messages, msg] } : t)) : [{ studentId, name, messages: [msg] }, ...s.threads];
