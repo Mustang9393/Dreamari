@@ -4,7 +4,7 @@
 
 - **Opportunities (`roles.ts` view "opportunities", `v4/Workspace.tsx` its own area between Explore and Prepare, `CounselorApp.tsx` renders `V7Opportunities`, `shell.tsx` hosts v7's `OppSheetHost` beside the log and explore sheets, plus the icon, title, change note and empty state maps):** v7's screen as is, inside v4's shell, for the School Counselor and Lead Counselor menus.
 - **Home (`v4/Overview.tsx`):** What My Students Are Saving is the Coverflow's row mode (the same sideways shelf Explore uses), not the overlapping carousel.
-- **Insights (`v4/CareerCollegeInsights.tsx`):** Top Majors are word chips with their count again (the `.v4-cc-chip` form from 10 Oct), every chip still opening its students; the treemap with Mika's major art is out until the art is redone (`MAJOR_ART` stays in `majors.ts`).
+- **Insights (`v4/CareerCollegeInsights.tsx`):** Top Majors keep the treemap, now every major as a plain tile with its name and count, no art (Chandu: "remove the images for majors but keep the tree map graph we had before"); `MAJOR_ART` stays in `majors.ts` for when Mika redoes the art.
 - **Checked:** tsc and eslint clean; v4 Opportunities, Home and Insights at 1440 in the pane.
 
 ## 2026-10-22: Counselor v7 directory as one mixed roster; Messages gain an audience

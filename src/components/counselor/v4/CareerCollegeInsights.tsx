@@ -86,7 +86,7 @@ import type { ProfileCareer } from "@/components/profile/data";
 import type { CatalogCareer } from "@/components/app/catalog";
 import { majorPoster, programmeMajor, savedMajorsFor } from "./majors";
 import { useChartColors } from "./ChartColors";
-import { InterestMeter } from "./charts/insightViz";
+import { InterestMeter, Treemap } from "./charts/insightViz";
 import { FlowSankey } from "./charts/ivFlow";
 import "./insights.css";
 import "./insights2.css";
@@ -378,16 +378,12 @@ function InterestRows() {
         </header>
         {(majorMode === "saved" ? savedMajors : exploredMajors).length === 0
           ? <p className="v4-cc-empty">{majorMode === "saved" ? `No saved majors for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet.`}</p>
-          // Word chips with their count, no art (22 Oct 2026, Maisha: "the
-          // top majors cards look a little juvenile and feel out of place
-          // from the rest of the app's aesthetic. If Mika needs to redo
-          // these, lets remove the photos for now till she's done"); the
-          // treemap with MAJOR_ART comes back once the art is redone
-          : <ul className="v4-cc-chips">
-              {majorItems.map((m) => (
-                <li key={m.key}><IconTip label={m.tip}><button type="button" onClick={() => m.data()} className="v4-cc-chip" aria-label={m.aria}>{m.label}<b>{m.value}</b></button></IconTip></li>
-              ))}
-            </ul>}
+          // The treemap, every major, no art (22 Oct 2026, Maisha: "the top
+          // majors cards look a little juvenile ... lets remove the photos
+          // for now till she's done"; Chandu: "remove the images for majors
+          // but keep the tree map graph we had before"). MAJOR_ART comes
+          // back onto the tiles once Mika redoes the art.
+          : <Treemap height={320} items={majorItems} onOpen={(open) => open()} />}
       </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </>
