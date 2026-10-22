@@ -70,7 +70,12 @@ export default function RootLayout({
             // by system preference. The Counselor Dashboard keeps its own saved choice
             // and defaults to light; v7 defaults to dark (Black & Blue). v4 is back on
             // light, its own key (21 Oct 2026: v4 restored for Maisha's demos).
-            __html: `try{var p=location.pathname;var c=p==="/counselor"||p.indexOf("/counselor/")===0;var v=new URLSearchParams(location.search).get("v");var sv=localStorage.getItem("dreamari:counselor-version");var v4=c&&(v? v==="4":sv==="v4");var v7=c&&(v? v==="7":sv==="v7");var t=localStorage.getItem(v7?"dreamari-theme:counselor:v7":v4?"dreamari-theme:counselor:v4":c?"dreamari-theme:counselor":"dreamari-theme");var isBuild=p.startsWith("/flow");if(/^\\/play\\/./.test(p)||t==="dark"||(!t&&!isBuild&&(!c||v7))){document.documentElement.classList.add("dark")}else if(c){document.documentElement.classList.add("light")}}catch(e){}`,
+            // A saved "light" on a student page adds the light class here too
+            // (22 Oct 2026): it used to add nothing and wait for ThemeBoot, so
+            // every light-mode page painted dark first and flipped after
+            // hydration, seconds on a dev server (Chandu: "things are breaking
+            // in lightmode").
+            __html: `try{var p=location.pathname;var c=p==="/counselor"||p.indexOf("/counselor/")===0;var v=new URLSearchParams(location.search).get("v");var sv=localStorage.getItem("dreamari:counselor-version");var v4=c&&(v? v==="4":sv==="v4");var v7=c&&(v? v==="7":sv==="v7");var t=localStorage.getItem(v7?"dreamari-theme:counselor:v7":v4?"dreamari-theme:counselor:v4":c?"dreamari-theme:counselor":"dreamari-theme");var isBuild=p.startsWith("/flow");if(/^\\/play\\/./.test(p)||t==="dark"||(!t&&!isBuild&&(!c||v7))){document.documentElement.classList.add("dark")}else if(t==="light"||c){document.documentElement.classList.add("light")}}catch(e){}`,
           }}
         />
         <script

@@ -471,7 +471,7 @@ export function EmptyGoalCard({ kind, Icon, title, backdrop, art, xp, nudge, bad
       </span>
       {badge && <SpotBadge>{badge}</SpotBadge>}
       <span className="relative mt-auto flex flex-col gap-[6px] p-[var(--space-5)]">
-        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "color-mix(in srgb, var(--accent-subtle) 30%, #fff)" }}>
+        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "color-mix(in srgb, var(--accent-subtle) 30%, var(--scrim-ink, #fff))" }}>
           <Icon className="h-[14px] w-[14px]" aria-hidden /> {kind}
         </span>
         <span className="flex items-end justify-between gap-[var(--space-3)]">
