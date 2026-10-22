@@ -40,7 +40,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
     // The result keeps the headline block in the upper third (where a hero headline
     // reads as a headline) while the toggle sits in the quiet zone between nav and
     // headline rather than glued to either.
-    <section ref={heroRef} className="mkt-snap relative isolate flex min-h-[calc(100dvh+140px)] flex-col overflow-hidden px-6 pt-[calc(clamp(120px,15vh,176px)/var(--vz,1))]">
+    <section ref={heroRef} data-landing-hero className="mkt-snap relative isolate flex min-h-[calc(100dvh+140px)] flex-col overflow-hidden px-6 pt-[calc(clamp(120px,15vh,176px)/var(--vz,1))]">
       {/* color.styles "hero-surface": Purple-dark gradient for hero/featured backgrounds
          (hero-accent-purple -> hero-mid -> background). Vertically masked to fade out
          before the section's own bottom edge — this used to cover Hero's full height
@@ -75,6 +75,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
          copy: a page-level layer sat under that opaque gradient, or over
          later sections' text. Dark Black & Blue only, like everywhere. */}
       <NightSky lively />
+      {/* the aurora is the page's, fixed to the screen's foot (MarketingApp.tsx) */}
       {/* The horizon Dreamy rises out of (21 Oct 2026): a wide, soft light
          at the bottom edge, so the bezel crop reads as a horizon he is
          peeking over, not a cut. Light only, no band of colour. */}

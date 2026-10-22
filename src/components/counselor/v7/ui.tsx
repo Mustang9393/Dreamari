@@ -94,7 +94,7 @@ export function TextLink({ href, children, onClick }: { href?: string; children:
 export function PrimaryButton({ href, onClick, children, icon }: { href?: string; onClick?: () => void; children: React.ReactNode; icon?: React.ReactNode }) {
   const cls = "dm-solid inline-flex min-h-[44px] items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold whitespace-nowrap";
   const style = { background: "var(--primary)", color: "var(--primary-foreground)", fontFamily: "var(--font-body)" };
-  if (href) return <Link href={href} className={cls} style={style}>{icon}{children}</Link>;
+  if (href) return <Link href={href} onClick={onClick} className={cls} style={style}>{icon}{children}</Link>;
   return <button type="button" onClick={onClick} className={`${cls} cursor-pointer`} style={style}>{icon}{children}</button>;
 }
 

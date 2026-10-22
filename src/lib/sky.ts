@@ -58,3 +58,18 @@ export function skyMoment(opts: { x?: number; from?: Element | null; big?: boole
   const x = opts.x ?? (rect ? rect.left + rect.width / 2 : window.innerWidth / 2);
   window.dispatchEvent(new CustomEvent(SKY_EVENT, { detail: { x, big: !!opts.big } }));
 }
+
+// ---- The wake-up on every page (22 Oct 2026). Chandu: "make sure the stars
+// have a different reaction each time ANY page loads all across the app",
+// then, after two showier passes were turned down ("christmas style like
+// flashing", "the stars look weird now revert"): "lets keep the varying
+// animations somehow without it being too mechanical on page loads". So the
+// wave the sky always woke with plays on every page, never quite the same
+// twice (NightSky.tsx wake()). NightSky plays it on mount; shells whose
+// views change without remounting the sky (counselor v7 and v4) call
+// skyArrival() on view change. Moments stay for actions.
+export const SKY_ARRIVAL_EVENT = "dreamari:sky-arrival";
+export function skyArrival(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(SKY_ARRIVAL_EVENT));
+}

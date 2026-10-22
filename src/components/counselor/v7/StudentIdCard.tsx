@@ -17,10 +17,10 @@ const fmtDate = lastActiveLabel;
  *  a short cord, and is a light card: the school band, a round photo in the
  *  middle, the name, grade and class year, pathway, status and when they
  *  were last active. Nothing else. */
-export function StudentIdCard({ student }: { student: CounselorStudent }) {
+export function StudentIdCard({ student, rail = false }: { student: CounselorStudent; /** the profile's rail: the reel hangs above the card instead of taking room over it */ rail?: boolean }) {
   const classOf = 2027 + (12 - student.grade);
   return (
-    <div className="v7-sid-wrap">
+    <div className={`v7-sid-wrap${rail ? " is-rail" : ""}`}>
       <div className="v7-sid-reel" aria-hidden><span className="v7-sid-reel-disc"><i /></span><span className="v7-sid-cord" /><span className="v7-sid-clip" /></div>
       <section className="v7-sid" aria-label={`${student.name}, student ID`}>
         <span className="v7-sid-slot" aria-hidden />

@@ -7,7 +7,7 @@
 // Confirm / Decline answer on a requested meeting are v7's own.
 
 import { useMemo } from "react";
-import { createLocalRecord, isoDay } from "@/lib/localRecord";
+import { createLocalRecord, isoDay, seedHash } from "@/lib/localRecord";
 import { useAddedMeetings, seededMeetings, type Meeting } from "@/lib/counselorMeetings";
 import { MILESTONE_KEYS, milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 
@@ -82,4 +82,29 @@ export function pendingCount(roster: CounselorStudent[]): number {
   let n = 0;
   for (const s of roster) for (const k of MILESTONE_KEYS) if (s.milestones[k as MilestoneKey] === "Pending Review") n++;
   return n;
+}
+
+// DEMO-ONLY: a GPA per student, until the SIS feed carries one. The Replit's
+// directory filters by GPA (3.5+, 3.0 to 3.49, 2.5 to 2.99, below 2.5, not
+// entered); the seed leans on status so the bands look believable, and
+// about one in nine students has none entered.
+export function gpaOf(s: CounselorStudent): number | null {
+  const h = seedHash(`gpa-${s.id}`);
+  if (h % 9 === 0) return null;
+  const base = s.status === "At Risk" ? 2.1 : s.status === "Needs Attention" ? 2.6 : 3.1;
+  return Math.round((base + ((h % 100) / 100) * 0.9) * 10) / 10;
+}
+export type GpaBand = "all" | "3.5" | "3.0" | "2.5" | "low" | "none";
+export const GPA_BANDS: { value: GpaBand; label: string }[] = [
+  { value: "all", label: "Any GPA" }, { value: "3.5", label: "3.5 and up" }, { value: "3.0", label: "3.0 to 3.49" }, { value: "2.5", label: "2.5 to 2.99" }, { value: "low", label: "Below 2.5" }, { value: "none", label: "Not entered" },
+];
+export function inGpaBand(s: CounselorStudent, band: GpaBand): boolean {
+  if (band === "all") return true;
+  const g = gpaOf(s);
+  if (band === "none") return g === null;
+  if (g === null) return false;
+  if (band === "3.5") return g >= 3.5;
+  if (band === "3.0") return g >= 3 && g < 3.5;
+  if (band === "2.5") return g >= 2.5 && g < 3;
+  return g < 2.5;
 }

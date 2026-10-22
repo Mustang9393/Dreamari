@@ -29,7 +29,7 @@ import { logTime } from "@/lib/counselorTimeLog";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { StudentFace } from "../v5/StudentFace";
 import { submissionFor } from "../v5/submission";
-import { V5Messages } from "../v5/Messages";
+import { V7Messages } from "./Messages";
 import { V5Documents } from "../v5/Documents";
 import { CARD, CARD_STYLE, DISPLAY, MUTED, PageHead, QuietButton, RULE, Toggle, studentHref } from "./ui";
 
@@ -42,7 +42,7 @@ export function V7Workspace({ initial }: { initial?: string }) {
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
       <PageHead title={TITLE[tab]} action={<Toggle label="Workspace" value={tab} onChange={setTab} options={[{ key: "reviews", label: "Reviews" }, { key: "messages", label: "Messages" }, { key: "documents", label: "Documents" }]} />} />
       {tab === "reviews" && <Reviews />}
-      {tab === "messages" && <V5Messages desk />}
+      {tab === "messages" && <V7Messages />}
       {tab === "documents" && <V5Documents />}
     </div>
   );

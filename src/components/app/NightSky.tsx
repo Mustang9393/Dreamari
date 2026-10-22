@@ -52,10 +52,16 @@
 import { useEffect, useRef } from "react";
 import { SKY_EVENT } from "@/lib/sky";
 
-type Moment = { x: number; big: boolean; t0: number; /** lively: a shooting star with no wave of light */ shotOnly?: boolean };
+type Moment = {
+  x: number; big: boolean; t0: number;
+  /** lively: a shooting star with no wave of light */ shotOnly?: boolean;
+  /** a page load's own shape: ring speed (px/ms), ring width (px), strength; actions keep the defaults */
+  speed?: number; width?: number; strength?: number;
+};
 const MOMENT_EVENT = SKY_EVENT;
 
 export { skyMoment } from "@/lib/sky";
+import { SKY_ARRIVAL_EVENT } from "@/lib/sky";
 
 const TINTS = [
   { rgb: "255, 255, 255", weight: 0.42 },
@@ -65,6 +71,8 @@ const TINTS = [
 ] as const;
 
 type Star = {
+  /** this star's own timing in a swell, 0..1 */
+  j: number;
   x: number; y: number;
   b: number; // brightness 0..1 (steep curve: most near 0)
   tint: number;
@@ -162,6 +170,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
           s2: 0.7 + Math.random() * 1.6,
           p1: Math.random() * Math.PI * 2,
           p2: Math.random() * Math.PI * 2,
+          j: Math.random(),
         };
       });
     };
@@ -198,20 +207,25 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
       for (const s of stars) {
         let x = s.x + offset;
         if (x > width) x -= width;
-        // a moment's wave: a ring of light travelling out from where it
-        // happened; a star brightens as the ring passes and eases outward
+        // A moment's wave: a ring of light travelling out from where it
+        // happened; a star brightens as the ring passes and eases outward a
+        // touch. The ease is a third of what it was (22 Oct 2026, Chandu,
+        // after a brightness-only swell: "lets revert to our original
+        // animations for the stars, but tone down the bounciness. That was
+        // more evident and visible"): the ring reads, the water does not.
         let boost = 0;
         let push = 0;
         for (const m of moments) {
           if (m.shotOnly) continue;
           const age = now - m.t0;
-          const r = age * 0.85;
+          if (age < 0) continue; // a second ripple waiting its beat
+          const r = age * (m.speed ?? 0.85);
           const d = Math.hypot(x - m.x, s.y + 40);
-          const ring = Math.exp(-(((d - r) / 110) ** 2));
+          const ring = Math.exp(-(((d - r) / (m.width ?? 110)) ** 2));
           const fade = Math.max(0, 1 - age / MOMENT_MS);
-          const k = ring * fade * (m.big ? 1.5 : 1);
+          const k = ring * fade * (m.big ? 1.5 : 1) * (m.strength ?? 1);
           boost += k;
-          push += k * Math.sign(x - m.x) * 5;
+          push += k * Math.sign(x - m.x) * 1.6;
         }
         x += push;
         // lively: near (bright) stars lean further from the cursor than far ones
@@ -283,19 +297,42 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
       draw(time, dt);
     };
 
+    let lastWake = 0;
+    const wake = () => {
+      if (!running || !stars.length) return;
+      const now = performance.now();
+      if (now - lastWake < 800) return; // a mount and a view change at once: one wave
+      lastWake = now;
+      let prev = 0.5;
+      try { prev = Number(sessionStorage.getItem("dreamari-sky-wake") ?? 0.5); } catch { /* storage blocked */ }
+      // anywhere across the middle 80% of the sky, at least a fifth of it away from last time
+      let ox = 0.1 + Math.random() * 0.8;
+      if (Math.abs(ox - prev) < 0.2) ox = prev < 0.5 ? prev + 0.2 + Math.random() * 0.3 : prev - 0.2 - Math.random() * 0.3;
+      try { sessionStorage.setItem("dreamari-sky-wake", String(ox)); } catch { /* storage blocked */ }
+      const shape = { speed: 0.7 + Math.random() * 0.35, width: 95 + Math.random() * 55, strength: 0.85 + Math.random() * 0.3 };
+      moments.push({ x: width * ox, big: false, t0: now, ...shape });
+      if (Math.random() < 0.3) moments.push({ x: width * ox, big: false, t0: now + 380 + Math.random() * 240, speed: shape.speed * 0.9, width: shape.width, strength: shape.strength * 0.45 });
+      if (calm && !animating) { animating = true; last = 0; raf = requestAnimationFrame(frame); }
+    };
+    const onArrival = () => { if (!contained && !reduce.matches) wake(); };
+    window.addEventListener(SKY_ARRIVAL_EVENT, onArrival);
+
     const sync = () => {
       const want = active() && !document.hidden;
       canvas.style.display = active() ? "block" : "none";
       if (want && !running) {
         running = true;
-        // the first page of a visit: the sky wakes up with one soft wave from
-        // the middle, once per browser session (never on every navigation)
-        try {
-          if (!contained && !reduce.matches && !sessionStorage.getItem("dreamari-sky-awake")) {
-            sessionStorage.setItem("dreamari-sky-awake", "1");
-            window.setTimeout(() => window.dispatchEvent(new CustomEvent(MOMENT_EVENT, { detail: { x: window.innerWidth / 2, big: false } })), 700);
-          }
-        } catch { /* storage blocked: no wake-up, nothing else changes */ }
+        // every page wakes the sky with its soft wave (22 Oct 2026, Chandu:
+        // "a different reaction each time ANY page loads", then, after two
+        // showier passes, "revert to the layout and animations before ...
+        // but lets keep the varying animations somehow without it being too
+        // mechanical"): the wave as it always was, never quite the same
+        // twice. It starts somewhere across the upper sky, a little off the
+        // last place, after a short pause that varies, at its own pace and
+        // width, and now and then a softer second ripple follows a beat
+        // behind (a swell, not a ripple). Actions keep their own moments. A
+        // boxed sky stays quiet.
+        if (!contained && !reduce.matches) window.setTimeout(wake, 250 + Math.random() * 500);
         if (reduce.matches || calm) {
           draw(0, 0);
         } else {
@@ -344,6 +381,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", sync);
       window.removeEventListener(MOMENT_EVENT, onMoment);
+      window.removeEventListener(SKY_ARRIVAL_EVENT, onArrival);
       window.removeEventListener("pointermove", onPointer);
     };
   }, [calm, contained, lively]);

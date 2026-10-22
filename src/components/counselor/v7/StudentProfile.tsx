@@ -61,40 +61,71 @@ export function StudentProfile({ studentId, initialTab }: { studentId: string; i
   if (!row) return <div className="py-[var(--space-12)]"><NotFoundView what="student" home="Back to Students" homeHref={v7("students")} /></div>;
 
   return (
-    <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
-      <button type="button" onClick={() => goBackOr(router, v7("students"))} className="dm-link inline-flex w-fit cursor-pointer items-center gap-[6px] text-[14px] font-semibold" style={MUTED}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
-      </button>
-
-      {/* The header is the student's ID tag, the same one v4 uses (21 Oct
-         2026, Chandu: "can we do the same student ID and counselor ID
-         designs for v7?", then "don't change the other content from what was
-         there in v7 before. Just the header becomes the ID card on the left
-         instead"). The tag carries name, grade, status and last active; the
-         three actions stay at the header's right. Everything below is as it
-         was. */}
-      <header className="flex flex-col gap-[var(--space-5)] lg:flex-row lg:items-center lg:justify-between">
-        <div className="mx-auto w-full max-w-[300px] lg:mx-0"><StudentIdCard student={row} /></div>
-        <div className="flex flex-wrap items-center justify-center gap-[var(--space-2)]">
-          <PrimaryButton href={briefHref(row.id)} icon={<CalendarCheck className="h-4 w-4" aria-hidden />}>Prepare meeting</PrimaryButton>
-          <QuietButton href={v7("reviews", `&tab=messages&studentId=${encodeURIComponent(row.id)}`)} icon={<MessageCircle className="h-4 w-4" aria-hidden />}>Message</QuietButton>
+    <div className="flex flex-col gap-[var(--space-6)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
+      {/* One grid, not floating parts (22 Oct 2026, Chandu: "the student
+         profile pages need massive upgrade in layout. Keep the student id but
+         everything else is weirdly placed in random places including the
+         back button etc. Please fix the margins/etc so its consistent
+         everywhere"). The header row is every v7 page's: the way back at the
+         left, the actions at the right, on one baseline. Under it the ID tag
+         is a sticky rail (the column Students' rows share) and the tabs with
+         their content fill the column beside it, so the tag reads as the
+         student's identity on every tab and the content starts at the same
+         line the tag does. Phones stack the same pieces in the same order. */}
+      {/* Phones and tablets (22 Oct 2026, Chandu: "the student profile in
+         tablet and mobile needs work. Very bad and un-intuitive layout and
+         information hierarchy"): the order is who, then what to do, then
+         the sections. Back stays alone on the first line; the ID tag comes
+         next; the three actions sit right under the tag as one row (Prepare
+         lit and wide, Message and Add note as icons with tooltips); then the
+         section picker and its content. From 768px the tag is the left rail
+         and the actions go back up to the header line. */}
+      <header className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <button type="button" onClick={() => goBackOr(router, v7("students"))} className="dm-quiet inline-flex min-h-[40px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] pr-[12px] text-[14px] font-semibold" style={MUTED}>
+          <ArrowLeft className="h-4 w-4" aria-hidden /> Students
+        </button>
+        <div className="hidden flex-wrap items-center gap-[var(--space-2)] md:flex">
           <QuietButton onClick={() => setNoting(true)} icon={<NotebookPen className="h-4 w-4" aria-hidden />}>Add note</QuietButton>
+          <QuietButton href={v7("reviews", `&tab=messages&studentId=${encodeURIComponent(row.id)}`)} icon={<MessageCircle className="h-4 w-4" aria-hidden />}>Message</QuietButton>
+          <PrimaryButton href={briefHref(row.id)} icon={<CalendarCheck className="h-4 w-4" aria-hidden />}>Prepare meeting</PrimaryButton>
         </div>
       </header>
 
-      {/* five tabs fit from 640px; below that they become one dropdown
-         (standing rule: a tab set wider than the screen is a dropdown) */}
-      <div className="hidden sm:block"><TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Student sections" layoutId="v7-student-tabs" soft caps={false} /></div>
-      <div className="sm:hidden">
-        <Listbox ariaLabel="Student section" value={tab} onChange={(v) => setTab(v as Tab)} options={TABS.map((t) => ({ value: t.key, label: t.label }))}
-          className="h-11 w-full rounded-[var(--radius-md)] border px-[12px] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--foreground)" }} />
-      </div>
+      {/* Two rows from 768px: the tabs sit in row 1 beside an empty rail
+         cell, the card and the content share row 2, so the card's top edge
+         is the content's top edge; the lanyard reel hangs above the card
+         into the empty cell (Chandu, 22 Oct 2026: "the id card top border
+         and the other card top borders should align. The lanyard thing can
+         break layout and sit upwards"). Phones keep the DOM order: card,
+         actions, section picker, content. */}
+      <div className="grid grid-cols-1 gap-x-[var(--space-8)] gap-y-[var(--space-6)] md:grid-cols-[280px_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-x-[var(--space-10)]">
+        <aside className="flex flex-col gap-[var(--space-4)] self-start pt-[72px] md:sticky md:top-[96px] md:col-start-1 md:row-start-2 md:pt-0">
+          <div className="mx-auto w-full max-w-[300px] md:mx-0"><StudentIdCard student={row} rail /></div>
+          <div className="mx-auto grid w-full max-w-[300px] grid-cols-[minmax(0,1fr)_auto_auto] gap-[var(--space-2)] md:hidden">
+            <PrimaryButton href={briefHref(row.id)} icon={<CalendarCheck className="h-4 w-4" aria-hidden />}>Prepare meeting</PrimaryButton>
+            <QuietButton label="Message" href={v7("reviews", `&tab=messages&studentId=${encodeURIComponent(row.id)}`)} icon={<MessageCircle className="h-4 w-4" aria-hidden />} />
+            <QuietButton label="Add note" onClick={() => setNoting(true)} icon={<NotebookPen className="h-4 w-4" aria-hidden />} />
+          </div>
+        </aside>
 
-      {tab === "about" ? <AboutMe row={row} onTab={setTab} />
-        : tab === "postsecondary" ? <Postsecondary row={row} />
-        : tab === "career" ? <CareerPlan row={row} />
-        : tab === "courses" ? <Courses row={row} />
-        : <Activity row={row} roster={roster} />}
+        {/* five tabs fit from 640px; below that they become one dropdown
+           (standing rule: a tab set wider than the screen is a dropdown) */}
+        <div className="min-w-0 md:col-start-2 md:row-start-1">
+          <div className="hidden sm:block"><TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Student sections" layoutId="v7-student-tabs" soft caps={false} /></div>
+          <div className="sm:hidden">
+            <Listbox ariaLabel="Student section" value={tab} onChange={(v) => setTab(v as Tab)} options={TABS.map((t) => ({ value: t.key, label: t.label }))}
+              className="h-11 w-full rounded-[var(--radius-md)] border px-[12px] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--foreground)" }} />
+          </div>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-[var(--space-6)] md:col-start-2 md:row-start-2">
+          {tab === "about" ? <AboutMe row={row} onTab={setTab} />
+            : tab === "postsecondary" ? <Postsecondary row={row} />
+            : tab === "career" ? <CareerPlan row={row} />
+            : tab === "courses" ? <Courses row={row} />
+            : <Activity row={row} roster={roster} />}
+        </div>
+      </div>
 
       {noting && <NoteSheet row={row} onClose={() => setNoting(false)} />}
     </div>
@@ -163,7 +194,7 @@ function AboutMe({ row, onTab }: { row: CounselorStudent; onTab: (t: Tab) => voi
   const p = prefsFor(row);
   return (
     <div className="flex flex-col gap-[var(--space-8)]">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
         <Panel title="Postsecondary goal" action={<TextLink onClick={() => onTab("postsecondary")}>View postsecondary plan</TextLink>}>
           <span className={H3} style={DISPLAY}>{planOf(row)}</span>
           <Lines items={[{ label: "Schools saved", value: row.engagement.collegesSaved }, { label: "Applications", value: STATUS_WORD[row.milestones.Applications] }]} />
@@ -255,7 +286,7 @@ function CareerPlan({ row }: { row: CounselorStudent }) {
           </div>
         ) : <p className="text-[15px]" style={MUTED}>No Top 3 yet.</p>}
       </section>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
         <Panel title="Saved careers">
           {saved.length ? (
             <div className="flex flex-wrap gap-[8px]">
@@ -287,7 +318,7 @@ function Courses({ row }: { row: CounselorStudent }) {
   const pct = Math.round((sis.credits.earned / sis.credits.required) * 100);
   return (
     <div className="flex flex-col gap-[var(--space-8)]">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
         <Panel title="Current courses">
           <ul className="flex flex-col">
             {sis.courses.map((c) => (
@@ -355,7 +386,7 @@ function Activity({ row, roster }: { row: CounselorStudent; roster: CounselorStu
           </div>
         ))}
       </dl>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
         <Panel title="Worth a conversation">
           <p className={H3} style={DISPLAY}>{talk.title}</p>
           <p className="text-[14px] leading-[22px]" style={MUTED}>{talk.line}</p>

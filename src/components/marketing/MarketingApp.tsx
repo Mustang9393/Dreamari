@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BuiltByStamp } from "./DreamOpportunity";
 import { hasSavedTheme, setGlobalTheme, useGlobalTheme } from "@/components/app/theme";
 import { Footer } from "./Footer";
 import { Hero } from "./Hero";
+import { SkyAurora } from "@/components/app/SkyAurora";
 import { HowItWorks } from "./HowItWorks";
 import { Nav } from "./Nav";
 import { SchoolsView } from "./SchoolsView";
@@ -36,6 +37,36 @@ export function MarketingApp() {
     return () => {
       delete html.dataset.snapOff;
     };
+  }, [view]);
+
+  // The app's aurora at the foot of the screen for the whole page (22 Oct
+  // 2026, Chandu: "lets use the new backgrounds we made for the app with the
+  // aurora stuff on the landing page"; then, of a first pass that boxed it
+  // inside the hero: "The sharp line under the aurora seperating the line
+  // above the fold etc is bad" and "it should always have the aurora at the
+  // foot of the screen so its visible throughout the scroll. But we need a
+  // cool transition with the cloud etc when i scroll under the fold"). Fixed
+  // to the viewport, so its bottom edge is always the screen's own; and as
+  // Dreamy ducks under the bezel (Mascot.tsx's exit, the hero's bottom edge
+  // climbing the first third of the screen) the aurora flares up to meet
+  // him and settles again: he dives into the light.
+  const auroraGain = useRef(1);
+  useEffect(() => {
+    if (view !== "student") return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const hero = document.querySelector<HTMLElement>("[data-landing-hero]");
+      if (!hero) return;
+      const vh = window.innerHeight || 1;
+      const p = Math.min(1, Math.max(0, (vh - hero.getBoundingClientRect().bottom) / (vh * 0.45)));
+      auroraGain.current = 1 + 1.1 * Math.sin(p * Math.PI);
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
   }, [view]);
 
   return (
@@ -85,12 +116,18 @@ export function MarketingApp() {
         />
       )}
 
+      {view === "student" && (
+        <div aria-hidden className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-[100dvh]">
+          <SkyAurora gainRef={auroraGain} />
+        </div>
+      )}
+
       <Nav view={view} onSchoolsClick={() => setView("schools")} onStudentClick={() => setView("student")} />
 
       {/* Both views stay mounted (toggled with `hidden`, not conditionally rendered) so
           the mascot's rAF loop, IntersectionObservers, and scroll listeners don't tear
           down and reinitialize every time the audience is switched. */}
-      <main hidden={view !== "student"}>
+      <main hidden={view !== "student"} className="relative z-[1]">
         <Hero view={view} onChangeView={setView} />
         <HowItWorks />
         <StudentFinalCTA />
@@ -99,7 +136,7 @@ export function MarketingApp() {
         <BuiltByStamp />
       </main>
 
-      <main hidden={view !== "schools"}>
+      <main hidden={view !== "schools"} className="relative z-[1]">
         <SchoolsView view={view} onChangeView={setView} theme={schoolsTheme} />
       </main>
 

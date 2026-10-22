@@ -59,8 +59,9 @@
      nesting reads as elevation;
    - dialogs and menus (--card) stay opaque, in the blueprint's own hue, so
      nothing behind ever bleeds into text.
-   Every counselor shell keeps a still sky (AppBackdrop calmSky) so the blur
-   never redraws over a moving layer (the Glossary Lab GPU rule).
+   v5 and v6 keep a still sky (AppBackdrop calmSky) so the blur never redraws
+   over a moving layer (the Glossary Lab GPU rule); v7 and v4 run the app's
+   full sky since 22 Oct 2026 (Chandu: "Use the stars etc.").
    `:not(#cc)` matches every page; it is there for its id weight, so these
    rules beat the older per-version card rules (v4's visual-refresh.css and
    layout2.css stack !important at high specificity) without editing them. */

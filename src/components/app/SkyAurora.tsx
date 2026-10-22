@@ -36,15 +36,28 @@ attribute vec2 a;
 void main() { gl_Position = vec4(a, 0.0, 1.0); }
 `;
 
+// 32-bit floats where the GPU offers them (22 Oct 2026, Chandu: "what is
+// this white background i see on counselor dashboard?"): at a real 16-bit
+// mediump (software WebGL, the Mali chips in Chromebooks) the old hash
+// multiplied lattice coordinates by 123 and 456, past the 16-bit range, so
+// fract(inf) was NaN and NaN pixels came out white, a white sheet over the
+// bottom 70% of every screen. Desktop GPUs run mediump as 32-bit, which is
+// why Macs never showed it. The hash now keeps every intermediate small
+// (Dave Hoskins' "hash without sine"), so it is safe at either precision.
 const FRAG = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 uniform vec2 uRes;
 uniform float uTime;
+uniform float uGain;
 
 float hash(vec2 p) {
-  p = fract(p * vec2(123.34, 456.21));
-  p += dot(p, p + 45.32);
-  return fract(p.x * p.y);
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
 }
 float noise(vec2 p) {
   vec2 i = floor(p);
@@ -150,7 +163,7 @@ void main() {
   col *= mix(0.45, 1.0, edge) * smoothstep(0.78, 0.38, uv.y);
   // soft highlight roll-off, then the cap that keeps text on the sky AA:
   // full strength only at the foot, lower where text can sit
-  col = 1.0 - exp(-col * 0.85);
+  col = 1.0 - exp(-col * 0.85 * uGain);
   // (scaled, not clipped per channel, so the colour keeps its hue)
   // brightest at the very bottom (Chandu: "WAY TOO SUBTLE NOW, THE LOWER
   // MOST PART CAN HAVE MAYBE A BRIGHTER GLOW"), then a smooth fade upward
@@ -159,23 +172,35 @@ void main() {
   // on the darker sky the aurora carries the blue ("let the aurora carry the
   // light blue instead"), so a little more of its light is let through
   // more at the base, faster fade upward
-  float cap = 0.06 + 0.5 * exp(-uv.y / 0.15);
+  float cap = (0.06 + 0.5 * exp(-uv.y / 0.15)) * min(uGain, 1.6);
   col *= min(1.0, cap / max(max(col.r, col.g), max(col.b, 1e-4)));
-  gl_FragColor = vec4(col, 1.0);
+  // transparent where there is no light (22 Oct 2026, Chandu: "please dont
+  // do these two halves and sharp line borders"): the canvas used to be
+  // opaque black under a CSS screen blend, and a blend only sees its own
+  // stacking context, so inside any fixed or z-indexed wrapper the black
+  // showed as a hard-edged half. Premultiplied colour with alpha = the
+  // brightest channel composites as light added to whatever is behind,
+  // which is what screen did, with no wrapper rules to get wrong.
+  gl_FragColor = vec4(col, max(max(col.r, col.g), col.b));
 }
 `;
 
 const SCALE = 0.4;
 const FPS = 24;
 
-export function SkyAurora({ still = false }: { /** one frame, no motion (the counselor's calm sky) */ still?: boolean }) {
+export function SkyAurora({ still = false, gainRef }: { /** one frame, no motion (the counselor's calm sky) */ still?: boolean; /** a live brightness multiplier (1 = normal), read every frame: the landing page flares the aurora as Dreamy ducks under the fold */ gainRef?: React.RefObject<number> }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-    const gl = canvas.getContext("webgl", { alpha: false, antialias: false, premultipliedAlpha: false });
-    if (!gl) return;
+    // A canvas whose context never came, failed to link, or was lost must
+    // paint nothing (22 Oct 2026, Chandu: "what is this white background i
+    // see on counselor dashboard?": a dead opaque canvas composited as a
+    // white sheet). Hidden until the first frame draws; hidden again on loss.
+    canvas.style.display = "none";
+    const gl = canvas.getContext("webgl", { alpha: true, antialias: false, premultipliedAlpha: true });
+    if (!gl || gl.isContextLost()) return;
 
     const compile = (type: number, src: string) => {
       const s = gl.createShader(type)!;
@@ -189,6 +214,10 @@ export function SkyAurora({ still = false }: { /** one frame, no motion (the cou
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
     gl.useProgram(prog);
+    let dead = false;
+    let raf = 0;
+    const onLost = (e: Event) => { e.preventDefault(); dead = true; canvas.style.display = "none"; cancelAnimationFrame(raf); };
+    canvas.addEventListener("webglcontextlost", onLost);
     const buf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
@@ -197,6 +226,7 @@ export function SkyAurora({ still = false }: { /** one frame, no motion (the cou
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const uRes = gl.getUniformLocation(prog, "uRes");
     const uTime = gl.getUniformLocation(prog, "uTime");
+    const uGain = gl.getUniformLocation(prog, "uGain");
 
     const root = document.documentElement;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -212,26 +242,28 @@ export function SkyAurora({ still = false }: { /** one frame, no motion (the cou
       }
     };
     const draw = (t: number) => {
+      if (dead) return;
       size();
       gl.uniform2f(uRes, canvas.width, canvas.height);
       gl.uniform1f(uTime, t);
+      gl.uniform1f(uGain, gainRef?.current ?? 1);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
     // a fixed start offset so the first frame is already a good shape
     const t0 = performance.now() - 40_000;
-    let raf = 0;
     let last = 0;
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
       if (now - last < 1000 / FPS) return;
       last = now;
-      draw((now - t0) / 1000);
+      // wrapped every ~2 hours: a 16-bit float holds 16384, and the noise only needs continuity
+      draw(((now - t0) / 1000) % 7200.0);
     };
     const sync = () => {
       cancelAnimationFrame(raf);
       raf = 0;
-      const visible = on();
+      const visible = on() && !dead;
       canvas.style.display = visible ? "" : "none";
       if (!visible) return;
       if (still || reduce.matches || document.hidden) {
@@ -256,9 +288,12 @@ export function SkyAurora({ still = false }: { /** one frame, no motion (the cou
       document.removeEventListener("visibilitychange", sync);
       reduce.removeEventListener("change", sync);
       window.removeEventListener("resize", onResize);
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
+      canvas.removeEventListener("webglcontextlost", onLost);
+      // the context is left to the browser: React's dev double-mount reused
+      // a context the first cleanup had just lost, which was the white sheet
+      canvas.style.display = "none";
     };
-  }, [still]);
+  }, [still, gainRef]);
 
   return (
     <canvas
@@ -266,7 +301,7 @@ export function SkyAurora({ still = false }: { /** one frame, no motion (the cou
       aria-hidden
       data-sky-aurora
       className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%] w-full"
-      style={{ mixBlendMode: "screen", display: "none" }}
+      style={{ display: "none" }}
     />
   );
 }
