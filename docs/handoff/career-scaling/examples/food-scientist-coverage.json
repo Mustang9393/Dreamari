@@ -1,23 +1,18 @@
 {
-  "version": 8,
+  "version": 9,
   "career": "food-scientist",
   "levels": [
     "fs-l1"
   ],
-  "template": "ib-narrative-v2",
+  "template": "ib-semantic-v3",
   "groups": [
     {
       "id": "fs-v7-arrival",
       "scene": "fs-v7-arrival",
       "beats": [
-        "FS1-01",
-        "FS1-02",
         "FS1-03",
         "FS1-04",
-        "FS1-06",
-        "FS1-25",
-        "FS1-26",
-        "FS1-27"
+        "FS1-06"
       ],
       "purpose": "Ren welcomes the junior to a beverage-development lab.",
       "required": true,
@@ -37,9 +32,9 @@
         "FS1-09",
         "FS1-10",
         "FS1-11",
-        "FS1-ACT2",
-        "FS1-21",
-        "FS1-22"
+        "FS1-22",
+        "FS1-23",
+        "FS1-27"
       ],
       "purpose": "Ren prepares small beverage trials at a supported bench.",
       "required": true,
@@ -55,10 +50,9 @@
       "scene": "fs-v7-review",
       "beats": [
         "FS1-12",
+        "FS1-13",
         "FS1-14",
-        "FS1-15",
-        "FS1-MID",
-        "FS1-24"
+        "FS1-15"
       ],
       "purpose": "Yuki plans a neutral tasting review.",
       "required": true,
@@ -73,9 +67,9 @@
       "id": "fs-v7-records",
       "scene": "fs-v7-records",
       "beats": [
-        "FS1-18",
-        "FS1-20",
-        "FS1-23"
+        "FS1-24",
+        "FS1-25",
+        "FS1-26"
       ],
       "purpose": "Luis identifies the missing sample-code record.",
       "required": true,
@@ -91,7 +85,7 @@
       "scene": "fs-v7-collab",
       "beats": [
         "FS1-05",
-        "FS1-13"
+        "FS1-18"
       ],
       "purpose": "Imani discusses the next product trial.",
       "required": true,
@@ -106,7 +100,7 @@
       "id": "fs-v7-closing",
       "scene": "fs-v7-closing",
       "beats": [
-        "FS1-16",
+        "FS1-MID",
         "FS1-28",
         "FS1-REVIEW"
       ],
@@ -119,26 +113,71 @@
       "pov": "address-player",
       "speakingTarget": "player",
       "eyeline": "camera"
+    },
+    {
+      "id": "fs-v9-opening",
+      "scene": "fs-v9-opening",
+      "purpose": "The empty Sprout food development laboratory before your first assignment.",
+      "required": true,
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [],
+      "beats": [
+        "FS1-02",
+        "FS1-ACT2",
+        "FS1-21"
+      ]
+    },
+    {
+      "id": "fs-v9-exterior",
+      "scene": "fs-v9-exterior",
+      "purpose": "Exterior arrival at the sage-green Sprout food research center, matching the autumn lab campus.",
+      "required": true,
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [],
+      "beats": [
+        "FS1-01"
+      ]
+    },
+    {
+      "id": "fs-v9-credit",
+      "scene": "fs-v9-credit",
+      "purpose": "From the player\u2019s unseen viewpoint, Imani presents the report to Yuki at the review desk, while claiming the player\u2019s work.",
+      "required": true,
+      "pov": "npc-dialogue",
+      "speakingTarget": "Yuki",
+      "eyeline": "colleague",
+      "visibleCast": [
+        "Imani",
+        "Yuki"
+      ],
+      "beats": [
+        "FS1-19",
+        "FS1-20"
+      ]
     }
   ],
   "beats": [
     {
       "beat": "FS1-01",
-      "scene": "fs-v7-arrival",
-      "shotGroup": "fs-v7-arrival",
+      "scene": "fs-v9-exterior",
+      "shotGroup": "fs-v9-exterior",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-02",
-      "scene": "fs-v7-arrival",
-      "shotGroup": "fs-v7-arrival",
-      "artifact": "fs-context-note"
+      "scene": "fs-v9-opening",
+      "shotGroup": "fs-v9-opening",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-03",
       "scene": "fs-v7-arrival",
       "shotGroup": "fs-v7-arrival",
-      "artifact": "fs-context-note"
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-04",
@@ -162,7 +201,7 @@
       "beat": "FS1-07",
       "scene": "fs-v7-work",
       "shotGroup": "fs-v7-work",
-      "artifact": "fs-context-codes"
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-08",
@@ -180,13 +219,7 @@
       "beat": "FS1-10",
       "scene": "fs-v7-work",
       "shotGroup": "fs-v7-work",
-      "artifact": "fs-context-note"
-    },
-    {
-      "beat": "FS1-13",
-      "scene": "fs-v7-collab",
-      "shotGroup": "fs-v7-collab",
-      "artifact": "fs-context-codes"
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-11",
@@ -198,13 +231,19 @@
       "beat": "FS1-12",
       "scene": "fs-v7-review",
       "shotGroup": "fs-v7-review",
-      "artifact": "fs-visible-labels"
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+    },
+    {
+      "beat": "FS1-13",
+      "scene": "fs-v7-review",
+      "shotGroup": "fs-v7-review",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-14",
       "scene": "fs-v7-review",
       "shotGroup": "fs-v7-review",
-      "artifact": "fs-context-codes"
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-15",
@@ -214,39 +253,39 @@
     },
     {
       "beat": "FS1-MID",
-      "scene": "fs-v7-review",
-      "shotGroup": "fs-v7-review",
+      "scene": "fs-v7-closing",
+      "shotGroup": "fs-v7-closing",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
-      "beat": "FS1-16",
-      "scene": "fs-v7-closing",
-      "shotGroup": "fs-v7-closing",
-      "artifact": "fs-context-note"
-    },
-    {
       "beat": "FS1-ACT2",
-      "scene": "fs-v7-work",
-      "shotGroup": "fs-v7-work",
+      "scene": "fs-v9-opening",
+      "shotGroup": "fs-v9-opening",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-18",
-      "scene": "fs-v7-records",
-      "shotGroup": "fs-v7-records",
-      "artifact": "fs-context-note"
+      "scene": "fs-v7-collab",
+      "shotGroup": "fs-v7-collab",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+    },
+    {
+      "beat": "FS1-19",
+      "scene": "fs-v9-credit",
+      "shotGroup": "fs-v9-credit",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-20",
-      "scene": "fs-v7-records",
-      "shotGroup": "fs-v7-records",
+      "scene": "fs-v9-credit",
+      "shotGroup": "fs-v9-credit",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-21",
-      "scene": "fs-v7-work",
-      "shotGroup": "fs-v7-work",
-      "artifact": "fs-context-message"
+      "scene": "fs-v9-opening",
+      "shotGroup": "fs-v9-opening",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-22",
@@ -256,32 +295,32 @@
     },
     {
       "beat": "FS1-23",
+      "scene": "fs-v7-work",
+      "shotGroup": "fs-v7-work",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+    },
+    {
+      "beat": "FS1-24",
       "scene": "fs-v7-records",
       "shotGroup": "fs-v7-records",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
-      "beat": "FS1-24",
-      "scene": "fs-v7-review",
-      "shotGroup": "fs-v7-review",
-      "artifact": "fs-context-note"
-    },
-    {
       "beat": "FS1-25",
-      "scene": "fs-v7-arrival",
-      "shotGroup": "fs-v7-arrival",
-      "artifact": "fs-context-note"
+      "scene": "fs-v7-records",
+      "shotGroup": "fs-v7-records",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-26",
-      "scene": "fs-v7-arrival",
-      "shotGroup": "fs-v7-arrival",
+      "scene": "fs-v7-records",
+      "shotGroup": "fs-v7-records",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "FS1-27",
-      "scene": "fs-v7-arrival",
-      "shotGroup": "fs-v7-arrival",
+      "scene": "fs-v7-work",
+      "shotGroup": "fs-v7-work",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {

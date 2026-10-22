@@ -35,7 +35,13 @@ const words=s=>(s??'').match(/[A-Za-z]+(?:['’][A-Za-z]+)?|\d+/g)??[];
 
 for(const level of levels){
  test(level.id+': seven scored decisions, midpoint, first choice and passing score',()=>{
-  assert.equal(level.generationTemplate,'ib-narrative-v2');
+  assert.equal(level.generationTemplate,'ib-semantic-v3');
+  assert.deepEqual(level.beats.map(b=>[b.kind,Boolean(b.practice)]),ib.beats.map(b=>[b.kind,Boolean(b.practice)]),'IB interaction/practice sequence');
+  assert.equal(level.beats[6].cards.length,4);assert.equal(level.beats[7].pairs.length,4);assert(level.beats[7].practice&&level.beats[7].noVerdict);
+  assert.equal(level.beats[8].items.length,4);assert.equal(level.beats[8].timer,45);
+  for(const i of [5,10,14,19,21])assert.equal(level.beats[i].layout,ib.beats[i].layout);
+  for(let i=0;i<ib.beats.length;i++)if(ib.beats[i].kind==='card')assert.equal(level.beats[i].variant,ib.beats[i].variant,'IB card treatment at '+(i+1));
+  assert.equal(level.beats[13].ladder.length,4);
   assert.equal(level.beats.length,ib.beats.length,'new careers match IB beat count');
   for(const kind of ['choice','flips','match','rapid','rank'])assert(level.beats.some(b=>b.kind===kind),kind+' variety');
   const art=load(path.join(root,'src/components/play/art/'+(level.id.startsWith('ux')?'ui-ux-designer':'food-scientist')+'.json'));
@@ -85,7 +91,7 @@ test('approved Nursing gameplay survives image-only updates',()=>{
  for(const beat of [...live.beats,...live.expressSource.beats]){
   const location=art.locations[art.beatLocations[beat.id]];
   assert(location,beat.id+': missing new painting');
-  assert(/\/(rebuild-2026-10-21|scene-state-v8)\//.test(location.src),beat.id+': outdated art');
+  assert(/\/(rebuild-2026-10-21|scene-state-v8|v9)\//.test(location.src),beat.id+': outdated art');
   assert(!location.characterAnchor&&!location.characterAnchors,beat.id+': runtime sprite');
   assert(fs.existsSync(path.join(root,'public',location.src)),beat.id+': image missing');
   assert(!beat.art,beat.id+': legacy hero picture overrides new painting');
@@ -111,8 +117,8 @@ test('UX visibly distinguishes buried and improved Save without extra controls',
  assert(bad.includes('data-scene-state="buried"')&&bad.includes('Long description above Save'));
  assert(good.includes('data-scene-state="clear"')&&!good.includes('Long description above Save'));
  assert(bad.indexOf('Long description above Save')<bad.indexOf('Save set'));
- const q=levels[0].beats.find(b=>b.id==='UX1-11');
- assert(q.question.includes('below a long description'));assert.equal(q.artifact.state,'buried');
+ const q=levels[0].beats.find(b=>b.id==='UX1-15');
+ assert(q.question.includes('Save'));assert.equal(levels[0].beats[12].artifact.state,'buried');
  assert.equal(q.feedbackArtifacts.best.state,'clear');assert.equal(q.feedbackArtifacts.wrong.state,'buried');
 });
 test('critical nursing art follows cast presence and has a sharp portrait composition',()=>{
@@ -139,7 +145,7 @@ test('colleagues enter through story events, with work between introductions',()
   assert.equal(firsts[0].name,ledger.mentor);
   firsts.forEach((c,j)=>{
    assert(c.index>=0,c.name+' introduction exists');
-   if(j)assert(c.index-firsts[j-1].index>=3,c.name+' needs story space before introduction');
+   const expected=[2,4,11,23];assert.equal(c.index,expected[j],c.name+' introduction follows the IB role sequence');
    const b=level.beats[c.index];assert(JSON.stringify(b).includes(c.name),c.name+' is named at introduction');
    assert((b.setup??b.title??'').includes(c.name),c.name+' introduction label');
    assert.deepEqual(art.locations[art.beatLocations[b.id]].visibleCast,[c.name],c.name+' solo first appearance');
@@ -149,8 +155,29 @@ test('colleagues enter through story events, with work between introductions',()
     const c=firsts.find(c=>c.name===name);assert(c&&c.index<=index,b.id+': unrevealed '+name);
    }
    for(const c of firsts)if(index<c.index)assert(!new RegExp('\\b'+c.name+'\\b').test(JSON.stringify(b)),b.id+': early name '+c.name);
-   if(index<4)assert.deepEqual(art.locations[art.beatLocations[b.id]].visibleCast,[ledger.mentor]);
+   if(index<2)assert.deepEqual(art.locations[art.beatLocations[b.id]].visibleCast,[],'establish place and stakes before mentor');
   });
   assert(level.endings.some(e=>e.advances&&e.replayOnPass),'passing game can be replayed');
+ }
+});
+
+test('each tested concept is learned first, and the rival remains in the story',()=>{
+ for(const [i,career] of ['ui-ux-designer','food-scientist'].entries()){
+  const level=levels[i], trace=load(path.join(root,'docs/handoff/career-scaling/examples',career+'-trace.json')).trace;
+  const seen=new Set();
+  for(const b of level.beats){const row=trace.find(t=>t.beat===b.id);assert(row,b.id+' trace');for(const concept of row.uses){assert(seen.has(concept),b.id+' untaught concept '+concept);const ref=row.lessonReferences.find(r=>r.concept===concept);assert(ref,b.id+' missing lesson passage');const source=level.beats.find(s=>s.id===ref.beat);assert(level.beats.indexOf(source)<level.beats.indexOf(b));assert(JSON.stringify(source).includes(ref.quote),b.id+' lesson passage drift');}row.teaches.forEach(t=>seen.add(t));if(scored(b))assert(row.uses.length,b.id+' tested concept');}
+  const c=load(path.join(root,'docs/handoff/career-scaling',career+'-continuity.json'));
+  for(const index of [4,17,18,19])assert(JSON.stringify(level.beats[index]).includes(c.rival),'rival has a causal return at slot '+(index+1));
+  assert.equal(c.builtLevels.length,1);assert.equal(c.futurePlan.playable,false);
+  assert(!level.beats[0].title.toLowerCase().includes('mentor'));
+ }
+});
+
+test('arrival establishes each building outside before the interior',()=>{
+ for(const [career,prefix] of [['ui-ux-designer','UX1'],['food-scientist','FS1'],['registered-nurse','RN2']]){
+  const art=load(path.join(root,'src/components/play/art',career+'.json'));
+  const outside=art.locations[art.beatLocations[prefix+'-01']],inside=art.locations[art.beatLocations[prefix+'-02']];
+  assert.equal(outside.role,'arrival');assert(outside.src.endsWith('/building-exterior-v2.png'));assert.deepEqual(outside.visibleCast,[]);
+  assert.notEqual(outside.src,inside.src);assert(fs.existsSync(path.join(root,'public',outside.src)));
  }
 });

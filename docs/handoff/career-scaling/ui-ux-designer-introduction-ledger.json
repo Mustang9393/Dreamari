@@ -3,59 +3,43 @@
   "mentor": "Arjun",
   "cast": {
     "Arjun": {
-      "first": "UX1-01",
-      "role": "Senior UX Designer / mentor",
+      "first": "UX1-03",
+      "role": "mentor",
       "followups": [
-        "UX1-02",
-        "UX1-03",
         "UX1-04",
         "UX1-07",
-        "UX1-25",
         "UX1-27"
       ],
-      "trigger": "The player starts a project with one mentor."
+      "trigger": "First task handoff after workplace and stakes"
     },
     "Noah": {
       "first": "UX1-05",
-      "role": "Junior UX Designer / peer",
+      "role": "peer-rival",
       "followups": [
-        "UX1-13",
-        "UX1-21",
-        "UX1-23"
+        "UX1-18",
+        "UX1-19",
+        "UX1-20"
       ],
-      "trigger": "The prototype needs a builder; the peer later pushes to ship before a final check."
-    },
-    "Eleanor": {
-      "first": "UX1-10",
-      "role": "Music fan / test participant",
-      "followups": [
-        "UX1-13",
-        "UX1-11"
-      ],
-      "trigger": "The first usability test begins."
+      "trigger": "Shared junior assignment, then a later credit conflict"
     },
     "Samira": {
       "first": "UX1-12",
-      "role": "Design Lead",
+      "role": "senior-evaluator",
       "followups": [
+        "UX1-13",
         "UX1-14",
-        "UX1-15",
-        "UX1-16",
-        "UX1-24",
-        "UX1-25"
+        "UX1-15"
       ],
-      "trigger": "A finding is ready for the client-review checkpoint."
+      "trigger": "Client review makes the senior\u2019s authority relevant"
     },
     "Amina": {
-      "first": "UX1-ACT2",
-      "role": "Accessibility Specialist",
+      "first": "UX1-24",
+      "role": "peer-needing-help",
       "followups": [
-        "UX1-18",
-        "UX1-20",
-        "UX1-22",
-        "UX1-23"
+        "UX1-25",
+        "UX1-26"
       ],
-      "trigger": "The revised screen now needs a keyboard-access check."
+      "trigger": "Your own deadline is met; another colleague still needs support"
     }
   }
 }

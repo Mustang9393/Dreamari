@@ -736,7 +736,7 @@ export type BandName = "At Risk" | "Cautious" | "Respected" | "Trusted";
 
 export type Level = {
   /** Authored sequence and scoring source; validation compares it to vetted IB L1. */
-  generationTemplate?: "ib-l1-2026-10-21" | "ib-narrative-v2";
+  generationTemplate?: "ib-l1-2026-10-21" | "ib-narrative-v2" | "ib-semantic-v3";
   id: string;
   n: number;
   /** "Intern", "Analyst" ... */

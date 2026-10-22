@@ -1,21 +1,18 @@
 {
-  "version": 8,
+  "version": 9,
   "career": "ui-ux-designer",
   "levels": [
     "ux-l1"
   ],
-  "template": "ib-narrative-v2",
+  "template": "ib-semantic-v3",
   "groups": [
     {
       "id": "ux-v7-arrival",
       "scene": "ux-v7-arrival",
       "beats": [
-        "UX1-01",
-        "UX1-02",
         "UX1-03",
         "UX1-04",
-        "UX1-06",
-        "UX1-27"
+        "UX1-06"
       ],
       "purpose": "Arjun welcomes the junior to the digital-product studio.",
       "required": true,
@@ -32,7 +29,12 @@
       "beats": [
         "UX1-07",
         "UX1-08",
-        "UX1-09"
+        "UX1-09",
+        "UX1-10",
+        "UX1-11",
+        "UX1-22",
+        "UX1-23",
+        "UX1-27"
       ],
       "purpose": "Arjun shows a rough music-app sketch.",
       "required": true,
@@ -44,32 +46,13 @@
       "eyeline": "camera"
     },
     {
-      "id": "ux-v7-test",
-      "scene": "ux-v7-test",
-      "beats": [
-        "UX1-10",
-        "UX1-13",
-        "UX1-11"
-      ],
-      "purpose": "Eleanor tries the app while the player observes.",
-      "required": true,
-      "visibleCast": [
-        "Eleanor"
-      ],
-      "pov": "observe-task",
-      "speakingTarget": "observed task",
-      "eyeline": "task"
-    },
-    {
       "id": "ux-v7-review",
       "scene": "ux-v7-review",
       "beats": [
         "UX1-12",
+        "UX1-13",
         "UX1-14",
-        "UX1-15",
-        "UX1-MID",
-        "UX1-16",
-        "UX1-24"
+        "UX1-15"
       ],
       "purpose": "Samira reviews the scope of the finding.",
       "required": true,
@@ -84,10 +67,9 @@
       "id": "ux-v7-access",
       "scene": "ux-v7-access",
       "beats": [
-        "UX1-ACT2",
-        "UX1-18",
-        "UX1-20",
-        "UX1-22"
+        "UX1-24",
+        "UX1-25",
+        "UX1-26"
       ],
       "purpose": "Amina checks keyboard access and discusses the fix.",
       "required": true,
@@ -99,27 +81,10 @@
       "eyeline": "camera"
     },
     {
-      "id": "ux-v7-collab",
-      "scene": "ux-v7-collab",
-      "beats": [
-        "UX1-23"
-      ],
-      "purpose": "The team prepares the findings for the demo.",
-      "required": true,
-      "visibleCast": [
-        "Noah",
-        "Amina"
-      ],
-      "pov": "address-player",
-      "speakingTarget": "player",
-      "eyeline": "camera"
-    },
-    {
       "id": "ux-v7-closing",
       "scene": "ux-v7-closing",
       "beats": [
-        "UX1-25",
-        "UX1-26",
+        "UX1-MID",
         "UX1-28",
         "UX1-REVIEW"
       ],
@@ -146,28 +111,73 @@
       ],
       "beats": [
         "UX1-05",
+        "UX1-18"
+      ]
+    },
+    {
+      "id": "ux-v9-opening",
+      "scene": "ux-v9-opening",
+      "purpose": "The empty Northline design studio before your first assignment.",
+      "required": true,
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [],
+      "beats": [
+        "UX1-02",
+        "UX1-ACT2",
         "UX1-21"
+      ]
+    },
+    {
+      "id": "ux-v9-exterior",
+      "scene": "ux-v9-exterior",
+      "purpose": "Exterior arrival at the riverfront Northline studio, matching its ivory stone, walnut fins, glass and bridge view.",
+      "required": true,
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [],
+      "beats": [
+        "UX1-01"
+      ]
+    },
+    {
+      "id": "ux-v9-credit",
+      "scene": "ux-v9-credit",
+      "purpose": "From the player\u2019s unseen viewpoint, Noah presents the report to Samira at the review desk, while claiming the player\u2019s work.",
+      "required": true,
+      "pov": "npc-dialogue",
+      "speakingTarget": "Samira",
+      "eyeline": "colleague",
+      "visibleCast": [
+        "Noah",
+        "Samira"
+      ],
+      "beats": [
+        "UX1-19",
+        "UX1-20"
       ]
     }
   ],
   "beats": [
     {
       "beat": "UX1-01",
-      "scene": "ux-v7-arrival",
-      "shotGroup": "ux-v7-arrival",
+      "scene": "ux-v9-exterior",
+      "shotGroup": "ux-v9-exterior",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-02",
-      "scene": "ux-v7-arrival",
-      "shotGroup": "ux-v7-arrival",
-      "artifact": "ux-context-app"
+      "scene": "ux-v9-opening",
+      "shotGroup": "ux-v9-opening",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-03",
       "scene": "ux-v7-arrival",
       "shotGroup": "ux-v7-arrival",
-      "artifact": "ux-context-app"
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-04",
@@ -191,7 +201,7 @@
       "beat": "UX1-07",
       "scene": "ux-v7-work",
       "shotGroup": "ux-v7-work",
-      "artifact": "ux-context-wireframe"
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-08",
@@ -207,21 +217,15 @@
     },
     {
       "beat": "UX1-10",
-      "scene": "ux-v7-test",
-      "shotGroup": "ux-v7-test",
-      "artifact": "ux-save-buried"
-    },
-    {
-      "beat": "UX1-13",
-      "scene": "ux-v7-test",
-      "shotGroup": "ux-v7-test",
-      "artifact": "ux-save-buried"
+      "scene": "ux-v7-work",
+      "shotGroup": "ux-v7-work",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-11",
-      "scene": "ux-v7-test",
-      "shotGroup": "ux-v7-test",
-      "artifact": "ux-save-buried"
+      "scene": "ux-v7-work",
+      "shotGroup": "ux-v7-work",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-12",
@@ -230,10 +234,16 @@
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
+      "beat": "UX1-13",
+      "scene": "ux-v7-review",
+      "shotGroup": "ux-v7-review",
+      "artifact": "ux-save-buried"
+    },
+    {
       "beat": "UX1-14",
       "scene": "ux-v7-review",
       "shotGroup": "ux-v7-review",
-      "artifact": "ux-save-clear"
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-15",
@@ -243,74 +253,74 @@
     },
     {
       "beat": "UX1-MID",
-      "scene": "ux-v7-review",
-      "shotGroup": "ux-v7-review",
+      "scene": "ux-v7-closing",
+      "shotGroup": "ux-v7-closing",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
-      "beat": "UX1-16",
-      "scene": "ux-v7-review",
-      "shotGroup": "ux-v7-review",
-      "artifact": "ux-context-app"
-    },
-    {
       "beat": "UX1-ACT2",
-      "scene": "ux-v7-access",
-      "shotGroup": "ux-v7-access",
+      "scene": "ux-v9-opening",
+      "shotGroup": "ux-v9-opening",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-18",
-      "scene": "ux-v7-access",
-      "shotGroup": "ux-v7-access",
-      "artifact": "ux-context-app"
+      "scene": "ux-v8-noah",
+      "shotGroup": "ux-v8-noah",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+    },
+    {
+      "beat": "UX1-19",
+      "scene": "ux-v9-credit",
+      "shotGroup": "ux-v9-credit",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-20",
-      "scene": "ux-v7-access",
-      "shotGroup": "ux-v7-access",
+      "scene": "ux-v9-credit",
+      "shotGroup": "ux-v9-credit",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-21",
-      "scene": "ux-v8-noah",
-      "shotGroup": "ux-v8-noah",
-      "artifact": "ux-context-message"
+      "scene": "ux-v9-opening",
+      "shotGroup": "ux-v9-opening",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-22",
+      "scene": "ux-v7-work",
+      "shotGroup": "ux-v7-work",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+    },
+    {
+      "beat": "UX1-23",
+      "scene": "ux-v7-work",
+      "shotGroup": "ux-v7-work",
+      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+    },
+    {
+      "beat": "UX1-24",
       "scene": "ux-v7-access",
       "shotGroup": "ux-v7-access",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
-      "beat": "UX1-23",
-      "scene": "ux-v7-collab",
-      "shotGroup": "ux-v7-collab",
+      "beat": "UX1-25",
+      "scene": "ux-v7-access",
+      "shotGroup": "ux-v7-access",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
-      "beat": "UX1-24",
-      "scene": "ux-v7-review",
-      "shotGroup": "ux-v7-review",
-      "artifact": "ux-context-message"
-    },
-    {
-      "beat": "UX1-25",
-      "scene": "ux-v7-closing",
-      "shotGroup": "ux-v7-closing",
-      "artifact": "ux-context-wireframe"
-    },
-    {
       "beat": "UX1-26",
-      "scene": "ux-v7-closing",
-      "shotGroup": "ux-v7-closing",
+      "scene": "ux-v7-access",
+      "shotGroup": "ux-v7-access",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {
       "beat": "UX1-27",
-      "scene": "ux-v7-arrival",
-      "shotGroup": "ux-v7-arrival",
+      "scene": "ux-v7-work",
+      "shotGroup": "ux-v7-work",
       "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
     },
     {

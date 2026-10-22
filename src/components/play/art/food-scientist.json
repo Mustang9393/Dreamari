@@ -5,7 +5,9 @@
   "notes": [
     "v7 distinct career tasks, optional decorative scene context, held full paintings below the HUD.",
     "No runtime sprite/foreground assembly. Canonical v7 identities replace v6 across all entry points.",
-    "Story-triggered introductions: mentor first, then one new colleague at a relevant task. No unintroduced faces in mapped scenes. Panels stay centered."
+    "Story-triggered introductions: mentor first, then one new colleague at a relevant task. No unintroduced faces in mapped scenes. Panels stay centered.",
+    "v9 actual IB semantic adaptation: empty opening, brief peer seed, senior review, returning rival, deadline shock and support arc.",
+    "The first story image establishes the actual building exterior, followed by the approved interior; no new script beat."
   ],
   "locations": {
     "fs-v7-arrival": {
@@ -129,6 +131,57 @@
         "Ren",
         "Yuki"
       ]
+    },
+    "fs-v9-opening": {
+      "src": "/images/play/fs/v9/opening-empty.png",
+      "alt": "The empty Sprout food development laboratory, with sage cabinets and a glass tasting room.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true,
+      "role": "work-floor",
+      "visibleCast": []
+    },
+    "fs-v9-exterior": {
+      "src": "/images/play/fs/v9/building-exterior-v2.png",
+      "alt": "Low sage-clad garden research campus; repeated pitched clerestory roof profile; timber entry screens; matching sage lab cupboards and stainless benches. Autumn trees and pale office buildings.",
+      "focal": {
+        "x": 0.55,
+        "y": 0.4
+      },
+      "mobileFocal": {
+        "x": 0.55,
+        "y": 0.4
+      },
+      "locked": true,
+      "role": "arrival",
+      "visibleCast": [],
+      "timeClass": "morning"
+    },
+    "fs-v9-credit": {
+      "src": "/images/play/fs/v9/credit-claim.png",
+      "alt": "From the player\u2019s unseen viewpoint, Imani presents the report to Yuki at the review desk, while claiming the player\u2019s work.",
+      "focal": {
+        "x": 0.53,
+        "y": 0.32
+      },
+      "mobileFocal": {
+        "x": 0.53,
+        "y": 0.32
+      },
+      "locked": true,
+      "role": "formal-meeting",
+      "visibleCast": [
+        "Imani",
+        "Yuki"
+      ],
+      "timeClass": "morning",
+      "emotion": "confident presentation; thoughtful review"
     }
   },
   "cast": {
@@ -151,34 +204,34 @@
   },
   "portraitRatios": {},
   "beatLocations": {
-    "FS1-01": "fs-v7-arrival",
-    "FS1-02": "fs-v7-arrival",
+    "FS1-01": "fs-v9-exterior",
+    "FS1-02": "fs-v9-opening",
+    "FS1-03": "fs-v7-arrival",
     "FS1-04": "fs-v7-arrival",
     "FS1-05": "fs-v7-collab",
     "FS1-06": "fs-v7-arrival",
     "FS1-07": "fs-v7-work",
+    "FS1-08": "fs-v7-work",
     "FS1-09": "fs-v7-work",
     "FS1-10": "fs-v7-work",
     "FS1-11": "fs-v7-work",
     "FS1-12": "fs-v7-review",
-    "FS1-15": "fs-v7-review",
-    "FS1-MID": "fs-v7-review",
-    "FS1-ACT2": "fs-v7-work",
-    "FS1-20": "fs-v7-records",
-    "FS1-21": "fs-v7-work",
-    "FS1-22": "fs-v7-work",
-    "FS1-23": "fs-v7-records",
-    "FS1-26": "fs-v7-arrival",
-    "FS1-27": "fs-v7-arrival",
-    "FS1-28": "fs-v7-closing",
-    "FS1-03": "fs-v7-arrival",
-    "FS1-08": "fs-v7-work",
-    "FS1-13": "fs-v7-collab",
+    "FS1-13": "fs-v7-review",
     "FS1-14": "fs-v7-review",
-    "FS1-16": "fs-v7-closing",
-    "FS1-18": "fs-v7-records",
-    "FS1-24": "fs-v7-review",
-    "FS1-25": "fs-v7-arrival",
+    "FS1-15": "fs-v7-review",
+    "FS1-MID": "fs-v7-closing",
+    "FS1-ACT2": "fs-v9-opening",
+    "FS1-18": "fs-v7-collab",
+    "FS1-19": "fs-v9-credit",
+    "FS1-20": "fs-v9-credit",
+    "FS1-21": "fs-v9-opening",
+    "FS1-22": "fs-v7-work",
+    "FS1-23": "fs-v7-work",
+    "FS1-24": "fs-v7-records",
+    "FS1-25": "fs-v7-records",
+    "FS1-26": "fs-v7-records",
+    "FS1-27": "fs-v7-work",
+    "FS1-28": "fs-v7-closing",
     "FS1-REVIEW": "fs-v7-closing"
   }
 }

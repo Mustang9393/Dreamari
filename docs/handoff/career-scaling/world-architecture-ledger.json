@@ -1,0 +1,44 @@
+{
+  "rule": "Architecture must differ across careers while art style and each building\u2019s established interior/geography stay coherent. Reject repeated generic ivory-glass portico silhouettes.",
+  "buildings": [
+    {
+      "career": "ui-ux-designer",
+      "exterior": "/images/play/ux/v9/building-exterior-v2.png",
+      "architecture": "Restored waterfront red-brick industrial loft; tall dark steel windows; arched entry; modern ivory and walnut studio fit-out.",
+      "geography": "River, distinctive bridge, city tower and green trees",
+      "interiorReference": "/images/play/ux/v9/opening-empty.png",
+      "sourceGeneration": "/Users/chandump/.codex/generated_images/01a1217b-3134-75d0-a1d6-fff858553266/exec-722923d9-06b0-4151-bbb0-02b8e0ed10b5.png",
+      "sha256": "e2eb19cd7fb3add47769a76dd9a68e62b9c4147fd678938d4963f2e8baca8a2a",
+      "cast": [],
+      "time": "Morning arrival",
+      "status": "Selected; generic first exterior rejected",
+      "style": "Same simplified drawn anime; no photoreal material microtexture"
+    },
+    {
+      "career": "food-scientist",
+      "exterior": "/images/play/fs/v9/building-exterior-v2.png",
+      "architecture": "Low sage-clad garden research campus; repeated pitched clerestory roof profile; timber entry screens; matching sage lab cupboards and stainless benches.",
+      "geography": "Autumn trees and pale office buildings",
+      "interiorReference": "/images/play/fs/v9/opening-empty.png",
+      "sourceGeneration": "/Users/chandump/.codex/generated_images/01a1217b-3134-75d0-a1d6-fff858553266/exec-9b86676c-5d4b-4805-a41e-ebf672d92b08.png",
+      "sha256": "22ba8d209e22cc699fd4d70a44a331112fa9678740b3af42f78f4af00b5f7767",
+      "cast": [],
+      "time": "Morning arrival",
+      "status": "Selected; generic first exterior rejected",
+      "style": "Same simplified drawn anime; no photoreal material microtexture"
+    },
+    {
+      "career": "registered-nurse",
+      "exterior": "/images/play/rn/v9/building-exterior-v2.png",
+      "architecture": "Curved ivory patient tower over rounded clinical podium; bronze canopy; tall dark window grid; matching ivory/walnut/brass lobby.",
+      "geography": "Lake, red-roof houses across water and wooded hill",
+      "interiorReference": "/images/play/rn/rebuild-2026-10-21/RN1-01.png",
+      "sourceGeneration": "/Users/chandump/.codex/generated_images/01a1217b-3134-75d0-a1d6-fff858553266/exec-0663ee97-a8fd-4035-afe3-e868062ad2a1.png",
+      "sha256": "8f1943f152c108df66bd0799f6353f87f414a741fe9ef81bec8f2a057059fc2a",
+      "cast": [],
+      "time": "Morning arrival",
+      "status": "Selected; generic first exterior rejected",
+      "style": "Same simplified drawn anime; no photoreal material microtexture"
+    }
+  ]
+}

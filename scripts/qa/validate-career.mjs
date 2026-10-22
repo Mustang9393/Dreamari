@@ -81,7 +81,7 @@ if(coverage){
 const levels=[];
 for(const level of sim.levels){
  const scored=level.beats.filter(isScored);
- const ibTemplate=['ib-l1-2026-10-21','ib-narrative-v2'].includes(level.generationTemplate);
+ const ibTemplate=['ib-l1-2026-10-21','ib-narrative-v2','ib-semantic-v3'].includes(level.generationTemplate);
  const varied=level.generationTemplate==='ib-narrative-v2';
  const expected=varied?7:ibTemplate?ibMaster.beats.filter(isScored).length:10;
  check(scored.length===expected,level.id+': scored decision count differs from template');
@@ -93,7 +93,23 @@ for(const level of sim.levels){
  }
  check(level.beats.at(-1)?.kind==='review',level.id+': final beat must be review');
  check(level.directed&&level.cinematic&&level.worldTheme&&level.coreKit,level.id+': shared presentation flags missing');
- check(bespokeIn(level).length===0,level.id+': bespoke gameplay found');
+ const sanctioned=level.generationTemplate==='ib-semantic-v3';
+ const unexpected=bespokeIn(level).filter(issue=>{
+  if(!sanctioned)return true;
+  const index=level.beats.findIndex(b=>b.id===issue.beat),source=ibMaster.beats[index];
+  if(issue.field==='layout:zones')return source?.layout!=='zones';
+  if(issue.field==='docStyle')return source?.docStyle!==level.beats[index].docStyle;
+  if(issue.field==='world')return source?.world?.kind!==level.beats[index].world.kind;
+  return true;
+ });
+ check(unexpected.length===0,level.id+': unapproved bespoke gameplay found');
+ if(sanctioned){
+  check(level.beats[6].cards?.length===4,level.id+': four vocabulary cards required');
+  check(level.beats[7].practice&&level.beats[7].noVerdict&&level.beats[7].pairs?.length===4,level.id+': four unscored applied vocabulary pairs required');
+  check(level.beats[8].items?.length===4&&level.beats[8].timer===45,level.id+': four timed professional checks required');
+  for(const index of [5,10,14,19,21])check(level.beats[index].layout===ibMaster.beats[index].layout,level.id+': IB question layout drift at '+(index+1));
+ }
+
  check(level.endings.some(e=>e.min===0),level.id+': missing floor ending');check(level.endings.some(e=>e.min===85&&e.advances),level.id+': missing passing ending');
  if(!level.noStrikes)check(PERFORMANCE_PLANS[sim.id]?.[level.n]?.steps?.length===3,level.id+': missing recovery plan');
  let n=0;const taught=new Set();

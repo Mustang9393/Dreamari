@@ -4,189 +4,308 @@
     {
       "beat": "FS1-01",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-02",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-03",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-04",
-      "teaches": [],
-      "uses": []
+      "teaches": [
+        "junior-scope",
+        "mentor-channel",
+        "prioritize-with-mentor"
+      ],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-05",
-      "teaches": [
-        "a fair test changes one factor while holding others steady"
-      ],
-      "uses": []
+      "teaches": [],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-06",
-      "teaches": [
-        "a fair test changes one factor while holding others steady"
-      ],
+      "teaches": [],
       "uses": [
-        "a fair test changes one factor while holding others steady"
+        "junior-scope"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "junior-scope",
+          "beat": "FS1-04",
+          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+        }
       ]
     },
     {
       "beat": "FS1-07",
       "teaches": [
-        "keep batch size and mixing method constant"
+        "Trial",
+        "Variable",
+        "Constant",
+        "EOD",
+        "clear-updates",
+        "confirm-unknowns",
+        "flag-errors"
       ],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-08",
       "teaches": [],
-      "uses": []
+      "uses": [
+        "Trial",
+        "Variable",
+        "Constant",
+        "EOD"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "Trial",
+          "beat": "FS1-07",
+          "quote": "A small test of an idea"
+        },
+        {
+          "concept": "Variable",
+          "beat": "FS1-07",
+          "quote": "The one thing you change"
+        },
+        {
+          "concept": "Constant",
+          "beat": "FS1-07",
+          "quote": "A condition you keep the same"
+        },
+        {
+          "concept": "EOD",
+          "beat": "FS1-07",
+          "quote": "End of the day"
+        }
+      ]
     },
     {
       "beat": "FS1-09",
-      "teaches": [
-        "keep batch size and mixing method constant"
-      ],
+      "teaches": [],
       "uses": [
-        "keep batch size and mixing method constant"
+        "clear-updates",
+        "confirm-unknowns",
+        "flag-errors",
+        "EOD"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "clear-updates",
+          "beat": "FS1-07",
+          "quote": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know."
+        },
+        {
+          "concept": "confirm-unknowns",
+          "beat": "FS1-07",
+          "quote": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know."
+        },
+        {
+          "concept": "flag-errors",
+          "beat": "FS1-07",
+          "quote": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know."
+        },
+        {
+          "concept": "EOD",
+          "beat": "FS1-07",
+          "quote": "End of the day"
+        }
       ]
     },
     {
       "beat": "FS1-10",
       "teaches": [
-        "compare samples with the same mixing steps"
+        "restricted-files"
       ],
-      "uses": []
-    },
-    {
-      "beat": "FS1-13",
-      "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-11",
-      "teaches": [
-        "compare samples with the same mixing steps"
-      ],
+      "teaches": [],
       "uses": [
-        "compare samples with the same mixing steps"
+        "restricted-files"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "restricted-files",
+          "beat": "FS1-10",
+          "quote": "Use the project’s restricted access. Keep files off personal accounts and public chats."
+        }
       ]
     },
     {
       "beat": "FS1-12",
+      "teaches": [],
+      "uses": [],
+      "lessonReferences": []
+    },
+    {
+      "beat": "FS1-13",
       "teaches": [
-        "blind tasting avoids brand influence"
+        "accurate-report"
       ],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-14",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-15",
-      "teaches": [
-        "blind tasting avoids brand influence"
-      ],
+      "teaches": [],
       "uses": [
-        "blind tasting avoids brand influence"
+        "accurate-report"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "accurate-report",
+          "beat": "FS1-13",
+          "quote": "A trial compares results. One batch changed the fruit amount. Your report must not say that several ingredients changed."
+        }
       ]
     },
     {
       "beat": "FS1-MID",
       "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "FS1-16",
-      "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-ACT2",
-      "teaches": [
-        "results need a matching batch record"
-      ],
-      "uses": []
+      "teaches": [],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-18",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
+    },
+    {
+      "beat": "FS1-19",
+      "teaches": [
+        "credit-evidence"
+      ],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-20",
-      "teaches": [
-        "results need a matching batch record"
-      ],
+      "teaches": [],
       "uses": [
-        "results need a matching batch record"
+        "mentor-channel",
+        "credit-evidence"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "mentor-channel",
+          "beat": "FS1-04",
+          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+        },
+        {
+          "concept": "credit-evidence",
+          "beat": "FS1-19",
+          "quote": "You wrote the trial notes. Now Imani tells Yuki, “I put that report together.” Your saved file shows your work."
+        }
       ]
     },
     {
       "beat": "FS1-21",
-      "teaches": [
-        "separate known results from untested claims"
-      ],
-      "uses": []
+      "teaches": [],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-22",
-      "teaches": [
-        "separate known results from untested claims"
-      ],
+      "teaches": [],
       "uses": [
-        "separate known results from untested claims"
+        "prioritize-with-mentor",
+        "mentor-channel"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "prioritize-with-mentor",
+          "beat": "FS1-04",
+          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+        },
+        {
+          "concept": "mentor-channel",
+          "beat": "FS1-04",
+          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+        }
       ]
     },
     {
       "beat": "FS1-23",
-      "teaches": [
-        "a promising small trial needs more testing"
-      ],
-      "uses": []
+      "teaches": [],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-24",
-      "teaches": [],
-      "uses": []
+      "teaches": [
+        "capacity-to-help"
+      ],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-25",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-26",
-      "teaches": [
-        "a promising small trial needs more testing"
-      ],
+      "teaches": [],
       "uses": [
-        "a promising small trial needs more testing"
+        "capacity-to-help"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "capacity-to-help",
+          "beat": "FS1-24",
+          "quote": "Luis, the lab technician, has sample records due at 6:40. You have finished your work for today."
+        }
       ]
     },
     {
       "beat": "FS1-27",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-28",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "FS1-REVIEW",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     }
   ]
 }

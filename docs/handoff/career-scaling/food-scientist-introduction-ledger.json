@@ -3,46 +3,43 @@
   "mentor": "Ren",
   "cast": {
     "Ren": {
-      "first": "FS1-01",
-      "role": "Senior Food Scientist / mentor",
+      "first": "FS1-03",
+      "role": "mentor",
       "followups": [
-        "FS1-02",
-        "FS1-03",
         "FS1-04",
         "FS1-07",
-        "FS1-21",
-        "FS1-25",
         "FS1-27"
       ],
-      "trigger": "The player joins a supervised small trial."
+      "trigger": "First task handoff after workplace and stakes"
     },
     "Imani": {
       "first": "FS1-05",
-      "role": "Junior Food Scientist / trial partner",
+      "role": "peer-rival",
       "followups": [
-        "FS1-13"
+        "FS1-18",
+        "FS1-19",
+        "FS1-20"
       ],
-      "trigger": "The small-batch comparison needs prepared samples."
+      "trigger": "Shared junior assignment, then a later credit conflict"
     },
     "Yuki": {
       "first": "FS1-12",
-      "role": "Senior Food Scientist / tasting reviewer",
+      "role": "senior-evaluator",
       "followups": [
+        "FS1-13",
         "FS1-14",
-        "FS1-15",
-        "FS1-16",
-        "FS1-24"
+        "FS1-15"
       ],
-      "trigger": "The samples are ready for the tasting plan."
+      "trigger": "Client review makes the senior\u2019s authority relevant"
     },
     "Luis": {
-      "first": "FS1-18",
-      "role": "Lab Technician / records owner",
+      "first": "FS1-24",
+      "role": "peer-needing-help",
       "followups": [
-        "FS1-20",
-        "FS1-23"
+        "FS1-25",
+        "FS1-26"
       ],
-      "trigger": "A missing recipe entry creates a traceability problem."
+      "trigger": "Your own deadline is met; another colleague still needs support"
     }
   }
 }

@@ -4,189 +4,308 @@
     {
       "beat": "UX1-01",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-02",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-03",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-04",
-      "teaches": [],
-      "uses": []
+      "teaches": [
+        "junior-scope",
+        "mentor-channel",
+        "prioritize-with-mentor"
+      ],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-05",
-      "teaches": [
-        "research guides the next team change"
-      ],
-      "uses": []
+      "teaches": [],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-06",
-      "teaches": [
-        "research guides the next team change"
-      ],
+      "teaches": [],
       "uses": [
-        "research guides the next team change"
+        "junior-scope"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "junior-scope",
+          "beat": "UX1-04",
+          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+        }
       ]
     },
     {
       "beat": "UX1-07",
       "teaches": [
-        "a prototype is a version people can try"
+        "Wireframe",
+        "Prototype",
+        "Usability test",
+        "EOD",
+        "clear-updates",
+        "confirm-unknowns",
+        "flag-errors"
       ],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-08",
       "teaches": [],
-      "uses": []
+      "uses": [
+        "Wireframe",
+        "Prototype",
+        "Usability test",
+        "EOD"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "Wireframe",
+          "beat": "UX1-07",
+          "quote": "A rough screen layout"
+        },
+        {
+          "concept": "Prototype",
+          "beat": "UX1-07",
+          "quote": "A design people can try"
+        },
+        {
+          "concept": "Usability test",
+          "beat": "UX1-07",
+          "quote": "Watching someone try a task"
+        },
+        {
+          "concept": "EOD",
+          "beat": "UX1-07",
+          "quote": "End of the day"
+        }
+      ]
     },
     {
       "beat": "UX1-09",
-      "teaches": [
-        "a prototype is a version people can try"
-      ],
+      "teaches": [],
       "uses": [
-        "a prototype is a version people can try"
+        "clear-updates",
+        "confirm-unknowns",
+        "flag-errors",
+        "EOD"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "clear-updates",
+          "beat": "UX1-07",
+          "quote": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know."
+        },
+        {
+          "concept": "confirm-unknowns",
+          "beat": "UX1-07",
+          "quote": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know."
+        },
+        {
+          "concept": "flag-errors",
+          "beat": "UX1-07",
+          "quote": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know."
+        },
+        {
+          "concept": "EOD",
+          "beat": "UX1-07",
+          "quote": "End of the day"
+        }
       ]
     },
     {
       "beat": "UX1-10",
       "teaches": [
-        "observed task trouble identifies a discoverability issue"
+        "restricted-files"
       ],
-      "uses": []
-    },
-    {
-      "beat": "UX1-13",
-      "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-11",
-      "teaches": [
-        "observed task trouble identifies a discoverability issue"
-      ],
+      "teaches": [],
       "uses": [
-        "observed task trouble identifies a discoverability issue"
+        "restricted-files"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "restricted-files",
+          "beat": "UX1-10",
+          "quote": "Use the project’s restricted access. Keep files off personal accounts and public chats."
+        }
       ]
     },
     {
       "beat": "UX1-12",
+      "teaches": [],
+      "uses": [],
+      "lessonReferences": []
+    },
+    {
+      "beat": "UX1-13",
       "teaches": [
-        "client claims should match the observed sample"
+        "accurate-report"
       ],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-14",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-15",
-      "teaches": [
-        "client claims should match the observed sample"
-      ],
+      "teaches": [],
       "uses": [
-        "client claims should match the observed sample"
+        "accurate-report"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "accurate-report",
+          "beat": "UX1-13",
+          "quote": "Two fans needed a hint to find Save below long copy. A usability test records what people did. Your report must match."
+        }
       ]
     },
     {
       "beat": "UX1-MID",
       "teaches": [],
-      "uses": []
-    },
-    {
-      "beat": "UX1-16",
-      "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-ACT2",
-      "teaches": [
-        "keyboard focus must stay visible"
-      ],
-      "uses": []
+      "teaches": [],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-18",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
+    },
+    {
+      "beat": "UX1-19",
+      "teaches": [
+        "credit-evidence"
+      ],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-20",
-      "teaches": [
-        "keyboard focus must stay visible"
-      ],
+      "teaches": [],
       "uses": [
-        "keyboard focus must stay visible"
+        "mentor-channel",
+        "credit-evidence"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "mentor-channel",
+          "beat": "UX1-04",
+          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+        },
+        {
+          "concept": "credit-evidence",
+          "beat": "UX1-19",
+          "quote": "You wrote the test findings. Now Noah tells Samira, “I put that report together.” Your saved file shows your work."
+        }
       ]
     },
     {
       "beat": "UX1-21",
-      "teaches": [
-        "keyboard-only testing checks focus visibility"
-      ],
-      "uses": []
+      "teaches": [],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-22",
-      "teaches": [
-        "keyboard-only testing checks focus visibility"
-      ],
+      "teaches": [],
       "uses": [
-        "keyboard-only testing checks focus visibility"
+        "prioritize-with-mentor",
+        "mentor-channel"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "prioritize-with-mentor",
+          "beat": "UX1-04",
+          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+        },
+        {
+          "concept": "mentor-channel",
+          "beat": "UX1-04",
+          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+        }
       ]
     },
     {
       "beat": "UX1-23",
-      "teaches": [
-        "report only what the small test observed"
-      ],
-      "uses": []
+      "teaches": [],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-24",
-      "teaches": [],
-      "uses": []
+      "teaches": [
+        "capacity-to-help"
+      ],
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-25",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-26",
-      "teaches": [
-        "report only what the small test observed"
-      ],
+      "teaches": [],
       "uses": [
-        "report only what the small test observed"
+        "capacity-to-help"
+      ],
+      "lessonReferences": [
+        {
+          "concept": "capacity-to-help",
+          "beat": "UX1-24",
+          "quote": "Amina, an accessibility specialist, has keyboard-check notes due at 6:40. You have finished your work for today."
+        }
       ]
     },
     {
       "beat": "UX1-27",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-28",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     },
     {
       "beat": "UX1-REVIEW",
       "teaches": [],
-      "uses": []
+      "uses": [],
+      "lessonReferences": []
     }
   ]
 }

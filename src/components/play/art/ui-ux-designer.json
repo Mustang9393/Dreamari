@@ -5,7 +5,9 @@
   "notes": [
     "v7 distinct career tasks, optional decorative scene context, held full paintings below the HUD.",
     "No runtime sprite/foreground assembly. Canonical v7 identities replace v6 across all entry points.",
-    "Story-triggered introductions: mentor first, then one new colleague at a relevant task. No unintroduced faces in mapped scenes. Panels stay centered."
+    "Story-triggered introductions: mentor first, then one new colleague at a relevant task. No unintroduced faces in mapped scenes. Panels stay centered.",
+    "v9 actual IB semantic adaptation: empty opening, brief peer seed, senior review, returning rival, deadline shock and support arc.",
+    "The first story image establishes the actual building exterior, followed by the approved interior; no new script beat."
   ],
   "locations": {
     "ux-v7-arrival": {
@@ -164,6 +166,57 @@
       "visibleCast": [
         "Noah"
       ]
+    },
+    "ux-v9-opening": {
+      "src": "/images/play/ux/v9/opening-empty.png",
+      "alt": "The empty Northline digital design studio, with its riverfront windows and modern workspaces.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.3
+      },
+      "locked": true,
+      "role": "work-floor",
+      "visibleCast": []
+    },
+    "ux-v9-exterior": {
+      "src": "/images/play/ux/v9/building-exterior-v2.png",
+      "alt": "Restored waterfront red-brick industrial loft; tall dark steel windows; arched entry; modern ivory and walnut studio fit-out. River, distinctive bridge, city tower and green trees.",
+      "focal": {
+        "x": 0.55,
+        "y": 0.4
+      },
+      "mobileFocal": {
+        "x": 0.55,
+        "y": 0.4
+      },
+      "locked": true,
+      "role": "arrival",
+      "visibleCast": [],
+      "timeClass": "morning"
+    },
+    "ux-v9-credit": {
+      "src": "/images/play/ux/v9/credit-claim.png",
+      "alt": "From the player\u2019s unseen viewpoint, Noah presents the report to Samira at the review desk, while claiming the player\u2019s work.",
+      "focal": {
+        "x": 0.53,
+        "y": 0.32
+      },
+      "mobileFocal": {
+        "x": 0.53,
+        "y": 0.32
+      },
+      "locked": true,
+      "role": "formal-meeting",
+      "visibleCast": [
+        "Noah",
+        "Samira"
+      ],
+      "timeClass": "morning",
+      "emotion": "confident presentation; thoughtful review"
     }
   },
   "cast": {
@@ -190,34 +243,34 @@
   },
   "portraitRatios": {},
   "beatLocations": {
-    "UX1-01": "ux-v7-arrival",
-    "UX1-02": "ux-v7-arrival",
+    "UX1-01": "ux-v9-exterior",
+    "UX1-02": "ux-v9-opening",
+    "UX1-03": "ux-v7-arrival",
     "UX1-04": "ux-v7-arrival",
     "UX1-05": "ux-v8-noah",
     "UX1-06": "ux-v7-arrival",
     "UX1-07": "ux-v7-work",
-    "UX1-09": "ux-v7-work",
-    "UX1-10": "ux-v7-test",
-    "UX1-11": "ux-v7-test",
-    "UX1-12": "ux-v7-review",
-    "UX1-15": "ux-v7-review",
-    "UX1-MID": "ux-v7-review",
-    "UX1-ACT2": "ux-v7-access",
-    "UX1-20": "ux-v7-access",
-    "UX1-21": "ux-v8-noah",
-    "UX1-22": "ux-v7-access",
-    "UX1-23": "ux-v7-collab",
-    "UX1-26": "ux-v7-closing",
-    "UX1-27": "ux-v7-arrival",
-    "UX1-28": "ux-v7-closing",
-    "UX1-03": "ux-v7-arrival",
     "UX1-08": "ux-v7-work",
-    "UX1-13": "ux-v7-test",
+    "UX1-09": "ux-v7-work",
+    "UX1-10": "ux-v7-work",
+    "UX1-11": "ux-v7-work",
+    "UX1-12": "ux-v7-review",
+    "UX1-13": "ux-v7-review",
     "UX1-14": "ux-v7-review",
-    "UX1-16": "ux-v7-review",
-    "UX1-18": "ux-v7-access",
-    "UX1-24": "ux-v7-review",
-    "UX1-25": "ux-v7-closing",
+    "UX1-15": "ux-v7-review",
+    "UX1-MID": "ux-v7-closing",
+    "UX1-ACT2": "ux-v9-opening",
+    "UX1-18": "ux-v8-noah",
+    "UX1-19": "ux-v9-credit",
+    "UX1-20": "ux-v9-credit",
+    "UX1-21": "ux-v9-opening",
+    "UX1-22": "ux-v7-work",
+    "UX1-23": "ux-v7-work",
+    "UX1-24": "ux-v7-access",
+    "UX1-25": "ux-v7-access",
+    "UX1-26": "ux-v7-access",
+    "UX1-27": "ux-v7-work",
+    "UX1-28": "ux-v7-closing",
     "UX1-REVIEW": "ux-v7-closing"
   }
 }

@@ -1,0 +1,29 @@
+{
+  "career": "ui-ux-designer",
+  "builtLevels": [
+    1
+  ],
+  "mentor": "Arjun",
+  "rival": "Noah",
+  "senior": "Samira",
+  "project": "AMPLIFY",
+  "level1": {
+    "seed": "UX1-05",
+    "rivalReturn": "UX1-18",
+    "conflict": "UX1-19",
+    "response": "UX1-20",
+    "outcome": "UX1-REVIEW"
+  },
+  "futurePlan": {
+    "playable": false,
+    "carryForward": [
+      "Arjun remains the mentor",
+      "Noah stays a competent colleague competing for recognition",
+      "Samira remembers the player\u2019s evidence and judgment"
+    ],
+    "unresolved": [
+      "How the rival reacts to the private correction",
+      "Who earns more responsibility on the next client project"
+    ]
+  }
+}

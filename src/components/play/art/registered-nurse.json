@@ -5,7 +5,8 @@
   "notes": [
     "One complete opaque painting per RN1 beat. No runtime people or arms.",
     "rebuild-2026-10-21 is the timeline/identity repair; rejected revision-2026-10-21 is never routed.",
-    "Approved RN2 gameplay (36 beats / original 55 script screens) is restored unchanged. RN2 routing reuses the new complete paintings; no shortened rebuild script is live."
+    "Approved RN2 gameplay (36 beats / original 55 script screens) is restored unchanged. RN2 routing reuses the new complete paintings; no shortened rebuild script is live.",
+    "The first story image establishes the actual building exterior, followed by the approved interior; no new script beat."
   ],
   "locations": {
     "rn-rebuild-RN1-01": {
@@ -385,6 +386,22 @@
       ],
       "emotion": "alarm",
       "timeClass": "afternoon"
+    },
+    "rn-v9-exterior": {
+      "src": "/images/play/rn/v9/building-exterior-v2.png",
+      "alt": "Curved ivory patient tower over rounded clinical podium; bronze canopy; tall dark window grid; matching ivory/walnut/brass lobby. Lake, red-roof houses across water and wooded hill.",
+      "focal": {
+        "x": 0.55,
+        "y": 0.4
+      },
+      "mobileFocal": {
+        "x": 0.55,
+        "y": 0.4
+      },
+      "locked": true,
+      "role": "arrival",
+      "visibleCast": [],
+      "timeClass": "morning"
     }
   },
   "cast": {
@@ -407,7 +424,7 @@
   },
   "portraitRatios": {},
   "beatLocations": {
-    "RN1-01": "rn-rebuild-RN1-01",
+    "RN1-01": "rn-v9-exterior",
     "RN1-02": "rn-rebuild-RN1-02",
     "RN1-03": "rn-rebuild-RN1-03",
     "RN1-04": "rn-rebuild-RN1-07",
@@ -433,7 +450,7 @@
     "RN1-24": "rn-rebuild-RN1-24",
     "RN1-25": "rn-rebuild-RN1-25",
     "RN1-26": "rn-rebuild-RN1-26",
-    "RN2-01": "rn-rebuild-RN1-01",
+    "RN2-01": "rn-v9-exterior",
     "RN2-02": "rn-rebuild-RN1-02",
     "RN2-03": "rn-rebuild-RN1-03",
     "RN2-04": "rn-rebuild-RN1-04",

@@ -1,0 +1,29 @@
+{
+  "career": "food-scientist",
+  "builtLevels": [
+    1
+  ],
+  "mentor": "Ren",
+  "rival": "Imani",
+  "senior": "Yuki",
+  "project": "LUMA",
+  "level1": {
+    "seed": "FS1-05",
+    "rivalReturn": "FS1-18",
+    "conflict": "FS1-19",
+    "response": "FS1-20",
+    "outcome": "FS1-REVIEW"
+  },
+  "futurePlan": {
+    "playable": false,
+    "carryForward": [
+      "Ren remains the mentor",
+      "Imani stays a competent colleague competing for recognition",
+      "Yuki remembers the player\u2019s evidence and judgment"
+    ],
+    "unresolved": [
+      "How the rival reacts to the private correction",
+      "Who earns more responsibility on the next client project"
+    ]
+  }
+}

@@ -1,0 +1,411 @@
+{
+  "source": "src/components/play/ib-level-1-v2.ts",
+  "slots": [
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-01",
+      "slot": 1,
+      "ibSlot": 1,
+      "role": "workplace-welcome"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-02",
+      "slot": 2,
+      "ibSlot": 2,
+      "role": "stakes"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-03",
+      "slot": 3,
+      "ibSlot": 3,
+      "role": "mentor-introduction"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-04",
+      "slot": 4,
+      "ibSlot": 4,
+      "role": "mentor-authority"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-05",
+      "slot": 5,
+      "ibSlot": 5,
+      "role": "peer-seed"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-06",
+      "slot": 6,
+      "ibSlot": 6,
+      "role": "first-day-scope"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-07",
+      "slot": 7,
+      "ibSlot": 7,
+      "role": "four-term-lesson"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-08",
+      "slot": 8,
+      "ibSlot": 8,
+      "role": "applied-vocabulary-practice"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-09",
+      "slot": 9,
+      "ibSlot": 9,
+      "role": "four-question-professional-round"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-10",
+      "slot": 10,
+      "ibSlot": 10,
+      "role": "privacy-rule"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-11",
+      "slot": 11,
+      "ibSlot": 11,
+      "role": "privacy-application"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-12",
+      "slot": 12,
+      "ibSlot": 12,
+      "role": "senior-arrival"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-13",
+      "slot": 13,
+      "ibSlot": 13,
+      "role": "senior-standard"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-14",
+      "slot": 14,
+      "ibSlot": 14,
+      "role": "senior-authority"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-15",
+      "slot": 15,
+      "ibSlot": 15,
+      "role": "senior-evidence-review"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-MID",
+      "slot": 16,
+      "ibSlot": 16,
+      "role": "midpoint"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-ACT2",
+      "slot": 17,
+      "ibSlot": 17,
+      "role": "second-act"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-18",
+      "slot": 18,
+      "ibSlot": 18,
+      "role": "rival-return"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-19",
+      "slot": 19,
+      "ibSlot": 19,
+      "role": "rival-action"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-20",
+      "slot": 20,
+      "ibSlot": 20,
+      "role": "rival-response"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-21",
+      "slot": 21,
+      "ibSlot": 21,
+      "role": "deadline-shock"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-22",
+      "slot": 22,
+      "ibSlot": 22,
+      "role": "deadline-message"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-23",
+      "slot": 23,
+      "ibSlot": 23,
+      "role": "delivery"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-24",
+      "slot": 24,
+      "ibSlot": 24,
+      "role": "peer-need"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-25",
+      "slot": 25,
+      "ibSlot": 25,
+      "role": "priority-contrast"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-26",
+      "slot": 26,
+      "ibSlot": 26,
+      "role": "team-support"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-27",
+      "slot": 27,
+      "ibSlot": 27,
+      "role": "mentor-observes"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-28",
+      "slot": 28,
+      "ibSlot": 28,
+      "role": "chapter-complete"
+    },
+    {
+      "career": "ui-ux-designer",
+      "beat": "UX1-REVIEW",
+      "slot": 29,
+      "ibSlot": 29,
+      "role": "final-decision"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-01",
+      "slot": 1,
+      "ibSlot": 1,
+      "role": "workplace-welcome"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-02",
+      "slot": 2,
+      "ibSlot": 2,
+      "role": "stakes"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-03",
+      "slot": 3,
+      "ibSlot": 3,
+      "role": "mentor-introduction"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-04",
+      "slot": 4,
+      "ibSlot": 4,
+      "role": "mentor-authority"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-05",
+      "slot": 5,
+      "ibSlot": 5,
+      "role": "peer-seed"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-06",
+      "slot": 6,
+      "ibSlot": 6,
+      "role": "first-day-scope"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-07",
+      "slot": 7,
+      "ibSlot": 7,
+      "role": "four-term-lesson"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-08",
+      "slot": 8,
+      "ibSlot": 8,
+      "role": "applied-vocabulary-practice"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-09",
+      "slot": 9,
+      "ibSlot": 9,
+      "role": "four-question-professional-round"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-10",
+      "slot": 10,
+      "ibSlot": 10,
+      "role": "privacy-rule"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-11",
+      "slot": 11,
+      "ibSlot": 11,
+      "role": "privacy-application"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-12",
+      "slot": 12,
+      "ibSlot": 12,
+      "role": "senior-arrival"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-13",
+      "slot": 13,
+      "ibSlot": 13,
+      "role": "senior-standard"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-14",
+      "slot": 14,
+      "ibSlot": 14,
+      "role": "senior-authority"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-15",
+      "slot": 15,
+      "ibSlot": 15,
+      "role": "senior-evidence-review"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-MID",
+      "slot": 16,
+      "ibSlot": 16,
+      "role": "midpoint"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-ACT2",
+      "slot": 17,
+      "ibSlot": 17,
+      "role": "second-act"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-18",
+      "slot": 18,
+      "ibSlot": 18,
+      "role": "rival-return"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-19",
+      "slot": 19,
+      "ibSlot": 19,
+      "role": "rival-action"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-20",
+      "slot": 20,
+      "ibSlot": 20,
+      "role": "rival-response"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-21",
+      "slot": 21,
+      "ibSlot": 21,
+      "role": "deadline-shock"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-22",
+      "slot": 22,
+      "ibSlot": 22,
+      "role": "deadline-message"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-23",
+      "slot": 23,
+      "ibSlot": 23,
+      "role": "delivery"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-24",
+      "slot": 24,
+      "ibSlot": 24,
+      "role": "peer-need"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-25",
+      "slot": 25,
+      "ibSlot": 25,
+      "role": "priority-contrast"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-26",
+      "slot": 26,
+      "ibSlot": 26,
+      "role": "team-support"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-27",
+      "slot": 27,
+      "ibSlot": 27,
+      "role": "mentor-observes"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-28",
+      "slot": 28,
+      "ibSlot": 28,
+      "role": "chapter-complete"
+    },
+    {
+      "career": "food-scientist",
+      "beat": "FS1-REVIEW",
+      "slot": 29,
+      "ibSlot": 29,
+      "role": "final-decision"
+    }
+  ]
+}

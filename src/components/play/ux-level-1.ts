@@ -1,13 +1,12 @@
 import type { Level } from "./types";
-import { UX_ARTIFACTS } from "./ux-work-artifacts";
-// IB flow with short, career-specific, one-step decisions.
+// Mirrors the actual approved IB Level 1 semantic and interaction sequence.
 export const UX_LEVEL_1: Level = {
   "id": "ux-l1",
   "n": 1,
   "role": "Junior UX Designer",
-  "title": "Before the first song",
-  "blurb": "Help music fans save a festival set for offline listening.",
-  "cover": "/images/play/ux/v7/arrival.png",
+  "title": "The AMPLIFY brief",
+  "blurb": "Your first week at Northline. Win trust, handle a rival, and deliver for AMPLIFY.",
+  "cover": "/images/play/ux/v9/building-exterior-v2.png",
   "mood": "day",
   "hideBand": true,
   "directed": true,
@@ -15,7 +14,7 @@ export const UX_LEVEL_1: Level = {
   "worldTheme": true,
   "coreKit": true,
   "quietQuestions": true,
-  "saveSlot": 211,
+  "saveSlot": 212,
   "cast": {
     "Arjun": "/images/play/ux/face-arjun-v7.webp",
     "Noah": "/images/play/ux/face-noah-v7.webp",
@@ -26,7 +25,7 @@ export const UX_LEVEL_1: Level = {
   "preGame": {
     "startLabel": "Start my first day",
     "skipLabel": "Start the story",
-    "handoffLine": "AMPLIFY festival set",
+    "handoffLine": "Your first week at Northline starts now.",
     "howToCta": "Start the project",
     "ladder": [
       "Junior UX Designer",
@@ -35,9 +34,9 @@ export const UX_LEVEL_1: Level = {
       "Lead / Principal UX Designer"
     ],
     "skills": [
-      "Critical Thinking",
-      "Active Listening",
-      "Problem-Solving"
+      "Decision-Making",
+      "Active Learning",
+      "Critical Thinking"
     ],
     "skillTotal": 15,
     "lesson": {
@@ -90,11 +89,11 @@ export const UX_LEVEL_1: Level = {
   "endings": [
     {
       "min": 85,
-      "headline": "A set worth saving",
-      "scoreNote": "Your project passes.",
-      "message": "You helped the team make a clearer design.",
-      "subline": "Level 1 complete. Later projects are not built yet.",
-      "primary": "Play the project again",
+      "headline": "Your next assignment is earned.",
+      "scoreNote": "You earn a place on the next project.",
+      "message": "Samira wants you on the next client team. Arjun stays your guide, and Noah will be working alongside you.",
+      "subline": "Level 1 complete. The next chapter is planned, not playable yet.",
+      "primary": "Play Level 1 again",
       "advances": true,
       "replayOnPass": true
     },
@@ -102,8 +101,8 @@ export const UX_LEVEL_1: Level = {
       "min": 40,
       "headline": "Revise and retry",
       "scoreNote": "The project needs another pass.",
-      "message": "Use the feedback to improve your next attempt.",
-      "subline": "You can try again.",
+      "message": "Arjun asks you to try again. Check the brief, use the evidence, and ask for help before the deadline.",
+      "subline": "Replay Level 1 with what you learned.",
       "primary": "Try again",
       "advances": false
     },
@@ -120,468 +119,703 @@ export const UX_LEVEL_1: Level = {
   "points": 6,
   "noStrikes": true,
   "qaSkip": true,
-  "scoreTip": "Start at 50. Each scored decision adds or removes 6. Reach 85 to pass.",
-  "generationTemplate": "ib-narrative-v2",
+  "scoreTip": "Start at 50. Seven scored decisions change reputation by 6. Matching practice does not change your score. Reach 85.",
+  "generationTemplate": "ib-semantic-v3",
   "beats": [
     {
       "kind": "card",
-      "variant": "character",
-      "speaker": "Narrator",
-      "title": "Your mentor, Arjun.",
-      "body": "Arjun guides your first project at Northline. He will review your plan and help you learn from each test.",
-      "cta": "Continue",
       "id": "UX1-01",
-      "setup": "Arjun • Senior UX Designer",
-      "castMember": "Arjun"
+      "speaker": "Narrator",
+      "title": "Welcome to UX Design.",
+      "body": "Your first week at Northline starts today. Your team builds a music-app demo for AMPLIFY.",
+      "variant": "intro",
+      "bodyLarge": true,
+      "cta": "Continue"
     },
     {
       "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "The festival is tonight.",
-      "body": "AMPLIFY needs fans to save a set before losing cell service. Your test could prevent a messy launch.",
-      "cta": "Continue",
       "id": "UX1-02",
-      "artifact": UX_ARTIFACTS.app
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Arjun",
-      "title": "Start with the fan’s task.",
-      "body": "Arjun asks you to learn where saving gets confusing before the team changes the screen.",
-      "cta": "Continue",
-      "id": "UX1-03",
-      "artifact": UX_ARTIFACTS.app
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Arjun",
-      "title": "One clear goal.",
-      "body": "Watch a fan try to save a festival set. I’ll help you turn what happens into a useful finding.",
-      "cta": "Continue",
-      "id": "UX1-04"
-    },
-    {
-      "kind": "card",
-      "variant": "character",
       "speaker": "Narrator",
-      "title": "Meet your fellow junior.",
-      "body": "Noah builds the prototype. You watch fans try it, then share what needs work.",
+      "title": "One week. One place on the next project.",
+      "body": "AMPLIFY reviews the work Friday. Both juniors want to join the next client team. Your decisions will shape who gets trusted.",
+      "bodyLarge": true,
       "cta": "Continue",
+      "variant": "intro"
+    },
+    {
+      "kind": "card",
+      "id": "UX1-03",
+      "speaker": "Arjun",
+      "title": "Arjun has your first assignment.",
+      "body": "Arjun is a senior UX designer. He guides your work and reviews it before it reaches the client.",
+      "castMember": "Arjun",
+      "setup": "Arjun • Senior UX Designer",
+      "variant": "character",
+      "cta": "Continue"
+    },
+    {
+      "kind": "card",
+      "id": "UX1-04",
+      "speaker": "Narrator",
+      "title": "Your work goes through Arjun.",
+      "body": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment.",
+      "castMember": "Arjun",
+      "ladder": [
+        {
+          "label": "Junior UX Designer • You",
+          "lit": true
+        },
+        {
+          "label": "UX Designer",
+          "lit": false
+        },
+        {
+          "label": "Senior UX Designer • Arjun",
+          "lit": true
+        },
+        {
+          "label": "Design Lead",
+          "lit": false
+        }
+      ],
+      "cta": "Continue",
+      "variant": "character"
+    },
+    {
+      "kind": "card",
       "id": "UX1-05",
+      "speaker": "Narrator",
+      "title": "Another junior starts beside you.",
+      "body": "Noah is working on AMPLIFY too. You exchange a quick hello before the first assignment.",
       "setup": "Noah • Junior UX Designer",
-      "castMember": "Noah"
+      "castMember": "Noah",
+      "cta": "Continue",
+      "variant": "intro"
     },
     {
       "kind": "choice",
-      "speaker": "Narrator",
-      "layout": "options",
-      "question": "Fans need music without service. What should you watch them try?",
+      "id": "UX1-06",
+      "speaker": "Arjun",
+      "question": "Before working on the client project, what should you do first?",
       "choices": [
         {
           "id": "a",
-          "label": "Save a set, then open it offline.",
+          "label": "Read the brief and check approved access.",
           "tier": "best",
-          "why": "That task tests the actual need."
+          "why": "You need the task and access before you can do useful work."
         },
         {
           "id": "b",
-          "label": "Choose a favorite album cover.",
+          "label": "Promise the client a finished product.",
           "tier": "wrong",
-          "why": "A cover preference does not test offline listening."
+          "why": "You have not checked the work or your authority yet."
         },
         {
           "id": "c",
-          "label": "Rate the app’s colors.",
+          "label": "Replace the team’s whole plan.",
           "tier": "wrong",
-          "why": "Color ratings do not test the task."
+          "why": "First understand the plan and your role."
         }
       ],
+      "layout": "options",
+      "progress": 0.14285714285714285,
       "feedback": "",
       "feedbackCta": "Continue",
+      "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Critical Thinking",
-        "Decision-Making"
-      ],
-      "id": "UX1-06",
-      "progress": 0.14285714285714285,
-      "planLineIfFailed": "you made a claim before checking what happened",
-      "prompt": ""
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Arjun",
-      "title": "Start with a sketch.",
-      "body": "A wireframe is a rough layout. A prototype is a version people can try.",
-      "cta": "Continue",
-      "id": "UX1-07",
-      "artifact": UX_ARTIFACTS.wireframe
+        "Decision-Making",
+        "Critical Thinking"
+      ]
     },
     {
       "kind": "flips",
+      "id": "UX1-07",
       "speaker": "Arjun",
-      "title": "Three words for the test.",
+      "castMember": "Arjun",
+      "title": "Four words for your first assignment.",
+      "setup": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know.",
       "cards": [
-        { "term": "Wireframe", "def": "A rough screen layout." },
-        { "term": "Prototype", "def": "A design people can try." },
-        { "term": "Usability test", "def": "Watch someone try a real task." }
+        {
+          "term": "Wireframe",
+          "def": "A rough screen layout"
+        },
+        {
+          "term": "Prototype",
+          "def": "A design people can try"
+        },
+        {
+          "term": "Usability test",
+          "def": "Watching someone try a task"
+        },
+        {
+          "term": "EOD",
+          "def": "End of the day"
+        }
       ],
-      "cta": "Continue",
-      "id": "UX1-08"
+      "cta": "Continue"
     },
     {
       "kind": "match",
-      "speaker": "Narrator",
-      "question": "Match each test note to what it tells the team.",
+      "id": "UX1-08",
+      "speaker": "Arjun",
+      "castMember": "Arjun",
+      "practice": true,
+      "noVerdict": true,
+      "setup": "Arjun sends your first task list.",
+      "question": "Match each request to the action.",
       "pairs": [
-        { "term": "Where the fan taps", "def": "The action they took" },
-        { "term": "Set opens offline", "def": "The task result" },
-        { "term": "Fan asks where to save", "def": "A point of confusion" },
-        { "term": "Designer likes blue", "def": "A personal preference" }
-      ],
-      "whenRight": "Actions and results help explain whether the task works.",
-      "whenWrong": "Record what happened. Keep guesses and preferences separate.",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": ["Critical Thinking", "Problem-Solving"],
-      "id": "UX1-09",
-      "progress": 0.2857142857142857,
-      "planLineIfFailed": "you made a claim before checking what happened",
-      "prompt": ""
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "Meet Eleanor, a music fan.",
-      "body": "Eleanor taps the cover twice. “Where do I save this?” Save sits below a long description.",
-      "cta": "Continue",
-      "id": "UX1-10",
-      "artifact": UX_ARTIFACTS.bad
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "Watch before changing the screen.",
-      "body": "Eleanor is still looking for Save. Record what she tries before Noah moves the control.",
-      "cta": "Continue",
-      "id": "UX1-13",
-      "artifact": UX_ARTIFACTS.bad
-    },
-    {
-      "kind": "choice",
-      "speaker": "Narrator",
-      "layout": "options",
-      "question": "Save sits below a long description. Which change should you test first?",
-      "choices": [
         {
-          "id": "a",
-          "label": "Move Save beside the set title.",
-          "tier": "best",
-          "why": "One clear change tests whether people can find it."
+          "term": "Sketch a wireframe.",
+          "def": "Draw a rough screen layout"
         },
         {
-          "id": "b",
-          "label": "Change every label and color.",
-          "tier": "wrong",
-          "why": "Many changes make the result harder to explain."
+          "term": "Try the prototype.",
+          "def": "Open the design people can try"
         },
         {
-          "id": "c",
-          "label": "Remove offline saving.",
-          "tier": "wrong",
-          "why": "That removes the feature fans need."
+          "term": "Run a usability test.",
+          "def": "Watch someone attempt the task"
+        },
+        {
+          "term": "Send it by EOD.",
+          "def": "Send it by end of day"
         }
       ],
+      "whenRight": "You can turn the team’s words into actions.",
+      "whenWrong": "Use the four words you just learned.",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
-        "Critical Thinking",
-        "Decision-Making"
+        "Reading Comprehension",
+        "Active Learning"
+      ]
+    },
+    {
+      "kind": "rapid",
+      "id": "UX1-09",
+      "speaker": "Arjun",
+      "setup": "AMPLIFY is a major client. Check how you will communicate before its review.",
+      "question": "",
+      "timer": 45,
+      "items": [
+        {
+          "question": "How should you update the project lead?",
+          "options": [
+            {
+              "label": "Lead with the result in a short message.",
+              "correct": true,
+              "why": "A short result-first update is easy to act on."
+            },
+            {
+              "label": "Send every note without a summary.",
+              "correct": false,
+              "why": "The lead needs the main point first."
+            },
+            {
+              "label": "Wait until the client asks.",
+              "correct": false,
+              "why": "The team needs updates before the client review."
+            }
+          ]
+        },
+        {
+          "question": "Arjun asks about a result you have not checked. What do you say?",
+          "options": [
+            {
+              "label": "I’ll check and follow up.",
+              "correct": true,
+              "why": "Confirm the fact instead of guessing."
+            },
+            {
+              "label": "It is probably fine.",
+              "correct": false,
+              "why": "Probably is not a checked result."
+            },
+            {
+              "label": "Ask someone else.",
+              "correct": false,
+              "why": "Take responsibility for closing the gap."
+            }
+          ]
+        },
+        {
+          "question": "You find a mistake in the client report. What next?",
+          "options": [
+            {
+              "label": "Correct it and tell the team.",
+              "correct": true,
+              "why": "Fix the record and flag which version changed."
+            },
+            {
+              "label": "Wait until after the review.",
+              "correct": false,
+              "why": "The client could see the mistake first."
+            },
+            {
+              "label": "Delete the whole project.",
+              "correct": false,
+              "why": "Correct the error instead of destroying useful work."
+            }
+          ]
+        },
+        {
+          "question": "The brief says EOD. When is it due?",
+          "options": [
+            {
+              "label": "By end of day.",
+              "correct": true,
+              "why": "EOD means end of day."
+            },
+            {
+              "label": "Before the next test starts.",
+              "correct": false,
+              "why": "That is not what EOD means."
+            },
+            {
+              "label": "Whenever the client replies.",
+              "correct": false,
+              "why": "EOD sets an end-of-day deadline."
+            }
+          ]
+        }
       ],
-      "id": "UX1-11",
-      "artifact": UX_ARTIFACTS.bad,
-      "feedbackArtifacts": { best: UX_ARTIFACTS.improved, wrong: UX_ARTIFACTS.bad, risky: UX_ARTIFACTS.bad },
-      "progress": 0.42857142857142855,
-      "planLineIfFailed": "you made a claim before checking what happened",
-      "prompt": ""
-    },
-    {
-      "kind": "card",
-      "variant": "character",
-      "speaker": "Narrator",
-      "title": "Samira leads the client review.",
-      "body": "She decides what the client sees. Your finding needs to be clear enough for her to use.",
-      "cta": "Continue",
-      "castMember": "Samira",
-      "id": "UX1-12",
-      "setup": "Samira • Design Lead"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Samira",
-      "title": "Keep the finding small.",
-      "body": "Two fans tried the update. Both found Save and opened the set offline. That is a useful first result.",
-      "cta": "Continue",
-      "id": "UX1-14",
-      "artifact": UX_ARTIFACTS.improved
-    },
-    {
-      "kind": "rank",
-      "speaker": "Narrator",
-      "question": "Rank the claims from best supported to least supported.",
-      "order": [
-        "Both fans saved the set.",
-        "The update may help fans find Save.",
-        "Every fan will find Save."
-      ],
-      "whenRight": "Lead with the result, then name a careful next possibility.",
-      "whenWrong": "Two tests support the result for those fans, not a claim about everyone.",
+      "whenPass": "Clear updates, checked facts, and early warnings earn trust.",
+      "whenFail": "Keep updates short, check unknown facts, and flag errors early.",
+      "progress": 0.2857142857142857,
       "feedback": "",
       "feedbackCta": "Continue",
-      "skills": ["Critical Thinking", "Problem-Solving"],
-      "id": "UX1-15",
-      "progress": 0.5714285714285714,
-      "planLineIfFailed": "you made a claim before checking what happened",
-      "prompt": ""
+      "planLineIfFailed": "you missed a step the team needed",
+      "skills": [
+        "Written Communication",
+        "Decision-Making"
+      ]
     },
     {
       "kind": "card",
-      "variant": "act",
-      "speaker": "System",
-      "title": "Checkpoint reached.",
-      "body": "",
+      "id": "UX1-10",
+      "speaker": "Arjun",
+      "title": "Client files stay in the approved team folder.",
+      "body": "Use the project’s restricted access. Keep files off personal accounts and public chats.",
       "cta": "Continue",
+      "variant": "intro"
+    },
+    {
+      "kind": "choice",
+      "id": "UX1-11",
+      "speaker": "Narrator",
+      "question": "Where should you save the client’s private project files?",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Approved team folder with restricted access.",
+          "tier": "best",
+          "why": "Only the authorized project team should have access."
+        },
+        {
+          "id": "b",
+          "label": "Your personal cloud drive.",
+          "tier": "wrong",
+          "why": "A personal account is outside the team’s approved access."
+        },
+        {
+          "id": "c",
+          "label": "A public group chat.",
+          "tier": "wrong",
+          "why": "Public sharing exposes the client’s files."
+        }
+      ],
+      "layout": "zones",
+      "dragItem": "Client files",
+      "progress": 0.42857142857142855,
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "planLineIfFailed": "you missed a step the team needed",
+      "skills": [
+        "Decision-Making",
+        "Critical Thinking"
+      ]
+    },
+    {
+      "kind": "card",
+      "id": "UX1-12",
+      "speaker": "Samira",
+      "title": "Samira arrives for the client review.",
+      "body": "The Design Lead needs a clear, accurate report before the client sees it.",
+      "castMember": "Samira",
+      "setup": "Samira • Design Lead",
+      "variant": "character",
+      "cta": "Continue"
+    },
+    {
+      "kind": "card",
+      "id": "UX1-13",
+      "speaker": "Narrator",
+      "title": "Show what the test actually found.",
+      "body": "Two fans needed a hint to find Save below long copy. A usability test records what people did. Your report must match.",
+      "castMember": "Samira",
+      "cta": "Continue",
+      "variant": "character",
+      "artifact": {
+        "id": "ux-save-buried",
+        "kind": "scene-context",
+        "view": "music-ui",
+        "state": "buried",
+        "title": "Current layout",
+        "caption": "Current AMPLIFY layout: Save sits below a long description.",
+        "provenance": "Fictional UI reproducing the problem stated in the question."
+      }
+    },
+    {
+      "kind": "card",
+      "id": "UX1-14",
+      "speaker": "Narrator",
+      "title": "Samira chooses the next client team.",
+      "body": "Arjun reviews your work. Samira looks for sound judgment and clear evidence before giving you more responsibility.",
+      "castMember": "Samira",
+      "ladder": [
+        {
+          "label": "Junior UX Designer • You",
+          "lit": true
+        },
+        {
+          "label": "UX Designer",
+          "lit": false
+        },
+        {
+          "label": "Senior UX Designer • Arjun",
+          "lit": true
+        },
+        {
+          "label": "Design Lead • Samira",
+          "lit": true
+        }
+      ],
+      "cta": "Continue",
+      "variant": "character"
+    },
+    {
+      "kind": "choice",
+      "id": "UX1-15",
+      "speaker": "Samira",
+      "question": "Two fans needed a hint to find Save. Which report line needs fixing?",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Both fans saved without help.",
+          "tier": "best",
+          "why": "Both needed a hint. The report must record what actually happened."
+        },
+        {
+          "id": "b",
+          "label": "We watched two fans try to save.",
+          "tier": "wrong",
+          "why": "That matches the stated test."
+        },
+        {
+          "id": "c",
+          "label": "Both fans needed a hint to find Save.",
+          "tier": "wrong",
+          "why": "That accurately records the problem."
+        },
+        {
+          "id": "d",
+          "label": "Next, test a clearer Save placement.",
+          "tier": "wrong",
+          "why": "A next test is a proposal, not a claim that it already worked."
+        }
+      ],
+      "layout": "document",
+      "docStyle": "slide",
+      "doc": "Test Summary",
+      "progress": 0.5714285714285714,
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "planLineIfFailed": "you missed a step the team needed",
+      "skills": [
+        "Reading Comprehension",
+        "Critical Thinking"
+      ],
+      "feedbackArtifacts": {
+        "best": {
+          "id": "ux-save-clear",
+          "kind": "scene-context",
+          "view": "music-ui",
+          "state": "clear",
+          "title": "Revised layout",
+          "caption": "A proposed clearer Save layout for the next test, not a proven result.",
+          "provenance": "Fictional proposed UI revision. The report records the observed test; no claim of improved results."
+        },
+        "wrong": {
+          "id": "ux-save-buried",
+          "kind": "scene-context",
+          "view": "music-ui",
+          "state": "buried",
+          "title": "Current layout",
+          "caption": "Current AMPLIFY layout: Save sits below a long description.",
+          "provenance": "Fictional UI reproducing the problem stated in the question."
+        },
+        "risky": {
+          "id": "ux-save-buried",
+          "kind": "scene-context",
+          "view": "music-ui",
+          "state": "buried",
+          "title": "Current layout",
+          "caption": "Current AMPLIFY layout: Save sits below a long description.",
+          "provenance": "Fictional UI reproducing the problem stated in the question."
+        }
+      }
+    },
+    {
+      "kind": "card",
+      "id": "UX1-MID",
+      "speaker": "System",
+      "title": "",
+      "body": "",
+      "variant": "act",
       "review": {
         "threshold": 68,
         "intro": {
           "kicker": "MID-PROJECT REVIEW",
-          "line": "Arjun and Samira check your work."
+          "line": "Arjun and Samira review your first decisions."
         },
-        "progressLine": "Checking your decisions...",
+        "progressLine": "Reviewing your work...",
         "pass": {
-          "title": "A strong first pass.",
-          "body": "Keep going. The next task is ready."
+          "title": "You passed the first review.",
+          "note": "Checkpoint saved.",
+          "body": "The next client assignment is still yours to earn."
         },
         "fail": {
-          "title": "You can recover.",
-          "body": "Use the feedback on your next task."
+          "title": "You can still turn this around.",
+          "body": "Use the feedback in the second half."
         }
       },
-      "id": "UX1-MID"
+      "cta": "Continue project",
+      "secondaryCta": "Finish Later",
+      "secondaryHref": "/play"
     },
     {
       "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "The finding goes into the demo.",
-      "body": "Samira records that both fans found Save and labels it an early result for the client.",
-      "cta": "Continue",
-      "id": "UX1-16",
-      "artifact": UX_ARTIFACTS.app
-    },
-    {
-      "kind": "card",
-      "variant": "character",
-      "speaker": "Narrator",
-      "title": "Amina checks access.",
-      "body": "She helps people use the app in different ways. Today, you will check the keyboard path.",
-      "cta": "Continue",
       "id": "UX1-ACT2",
-      "setup": "Amina • Accessibility Specialist",
-      "castMember": "Amina"
+      "speaker": "System",
+      "title": "The second half of your first week.",
+      "body": "The report is taking shape. Now the pressure shifts to the team.",
+      "variant": "act",
+      "cta": "Continue"
     },
     {
       "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "Try Save without a mouse.",
-      "body": "Amina reaches Save with Tab, but cannot see which control is selected.",
-      "cta": "Continue",
-      "castMember": "Amina",
       "id": "UX1-18",
-      "artifact": UX_ARTIFACTS.app
-    },
-    {
-      "kind": "choice",
-      "speaker": "Narrator",
-      "layout": "chat",
-      "question": "Tab reaches Save, but the selected control is invisible. What should the team change?",
-      "choices": [
-        {
-          "id": "a",
-          "label": "Add a clear focus outline.",
-          "tier": "best",
-          "why": "A visible focus mark shows the selected control."
-        },
-        {
-          "id": "b",
-          "label": "Require everyone to use a mouse.",
-          "tier": "wrong",
-          "why": "Some people cannot use a mouse."
-        },
-        {
-          "id": "c",
-          "label": "Hide the Save button.",
-          "tier": "wrong",
-          "why": "Hiding it makes the task harder."
-        }
-      ],
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": [
-        "Critical Thinking",
-        "Decision-Making"
-      ],
-      "id": "UX1-20",
-      "progress": 0.7142857142857143,
-      "planLineIfFailed": "you made a claim before checking what happened",
-      "prompt": ""
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "Noah wants to send it now.",
-      "body": "The festival deadline is close. Arjun asks you to check the keyboard path before the demo goes out.",
-      "cta": "Continue",
-      "id": "UX1-21",
+      "speaker": "Noah",
+      "title": "Noah wants that next assignment too.",
+      "body": "Noah is quick and confident. The client review is a chance to stand out, and sharing credit is not the plan.",
       "castMember": "Noah",
-      "artifact": UX_ARTIFACTS.message
+      "setup": "Noah • Junior UX Designer",
+      "cta": "Continue",
+      "variant": "character"
     },
     {
-      "kind": "rapid",
+      "kind": "card",
+      "id": "UX1-19",
       "speaker": "Narrator",
-      "question": "Check the keyboard path.",
-      "items": [
-        {
-          "question": "What shows which control is selected?",
-          "options": [
-            { "label": "A visible focus outline.", "correct": true, "why": "The outline shows keyboard focus." },
-            { "label": "A color change only on mouse hover.", "correct": false, "why": "Mouse hover does not show keyboard focus." }
-          ]
-        },
-        {
-          "question": "How does Noah move to the next control?",
-          "options": [
-            { "label": "Press Tab.", "correct": true, "why": "Tab moves keyboard focus forward." },
-            { "label": "Move the pointer.", "correct": false, "why": "Pointer movement does not test keyboard access." }
-          ]
-        },
-        {
-          "question": "What should happen when Save has focus?",
-          "options": [
-            { "label": "Enter activates Save.", "correct": true, "why": "A keyboard user needs to activate the focused control." },
-            { "label": "Only a mouse click can activate it.", "correct": false, "why": "The task must work without a mouse." }
-          ]
-        }
-      ],
-      "whenPass": "The focus is visible, moves by keyboard, and activates the control.",
-      "whenFail": "Check the visible focus, Tab movement, and keyboard activation.",
-      "feedback": "",
-      "feedbackCta": "Continue",
-      "skills": ["Critical Thinking", "Problem-Solving"],
-      "id": "UX1-22",
-      "progress": 0.8571428571428571,
-      "planLineIfFailed": "you skipped the keyboard check"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Narrator",
-      "title": "The check is complete.",
-      "body": "Amina confirms the focus stays visible. Noah adds the change to the demo.",
+      "title": "The next morning, you hear your work claimed.",
+      "body": "You wrote the test findings. Now Noah tells Samira, “I put that report together.” Your saved file shows your work.",
+      "castMember": "Noah",
       "cta": "Continue",
-      "id": "UX1-23"
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Samira",
-      "title": "Prepare the client update.",
-      "body": "Samira wants the result, what it means, and the next check in a few clear lines.",
-      "cta": "Continue",
-      "castMember": "Samira",
-      "id": "UX1-24",
-      "artifact": UX_ARTIFACTS.message
-    },
-    {
-      "kind": "card",
-      "variant": "intro",
-      "speaker": "Arjun",
-      "title": "The client team is here.",
-      "body": "AMPLIFY’s festival team is ready to review the update. Samira brings your notes into the room.",
-      "cta": "Continue",
-      "id": "UX1-25",
-      "artifact": UX_ARTIFACTS.wireframe
+      "variant": "intro"
     },
     {
       "kind": "choice",
-      "layout": "boss",
+      "id": "UX1-20",
       "speaker": "Narrator",
-      "id": "UX1-26",
-      "progress": 1,
-      "question": "What should you tell the client about two fans completing the task?",
-      "prompt": "",
+      "question": "Noah took credit for your report. What should you do?",
       "choices": [
         {
           "id": "a",
-          "label": "Both finished. Next, test with more fans.",
+          "label": "Share the file history with Arjun privately.",
           "tier": "best",
-          "why": "State the result and the next check without overclaiming."
+          "why": "Use the record and the right person without turning it into a public fight."
         },
         {
           "id": "b",
-          "label": "The design works for every fan.",
+          "label": "Accuse Noah in front of the client.",
           "tier": "wrong",
-          "why": "Two tests cannot show what every fan will do."
+          "why": "A client meeting is not the place to settle a team dispute."
         },
         {
           "id": "c",
-          "label": "There is nothing left to improve.",
+          "label": "Post about it online.",
           "tier": "wrong",
-          "why": "A useful result still needs further checks."
+          "why": "That exposes private work and makes the conflict public."
+        },
+        {
+          "id": "d",
+          "label": "Change the report to make the rival look bad.",
+          "tier": "wrong",
+          "why": "Sabotage damages the client’s work and your own trust."
         }
       ],
+      "layout": "options",
+      "pivotal": true,
+      "keepScene": true,
+      "progress": 0.7142857142857143,
       "feedback": "",
       "feedbackCta": "Continue",
+      "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Verbal Communication",
-        "Critical Thinking"
-      ],
-      "planLineIfFailed": "you made a claim beyond the test"
+        "Social Awareness",
+        "Decision-Making"
+      ]
     },
     {
       "kind": "card",
-      "variant": "intro",
+      "id": "UX1-21",
       "speaker": "Narrator",
-      "title": "A place on the team.",
-      "body": "Arjun thanks you for making the work clearer for everyone.",
+      "title": "3:00 P.M. A teammate leaves the project.",
+      "body": "Half the prototype review is unfinished. The client review starts at 6:00 P.M.",
+      "world": {
+        "kind": "clock",
+        "now": "3:00 PM",
+        "deadline": "6:00 PM",
+        "deadlineLabel": "Review due",
+        "showNow": false
+      },
       "cta": "Continue",
-      "id": "UX1-27"
+      "variant": "intro"
+    },
+    {
+      "kind": "choice",
+      "id": "UX1-22",
+      "speaker": "Narrator",
+      "question": "There is more work than you can finish by six. What do you message Arjun?",
+      "choices": [
+        {
+          "id": "a",
+          "label": "Can you help me prioritize what is left?",
+          "tier": "best",
+          "why": "Flag the gap early so the team can protect the most important work."
+        },
+        {
+          "id": "b",
+          "label": "I’ll finish everything myself.",
+          "tier": "wrong",
+          "why": "That hides the workload problem until the deadline."
+        },
+        {
+          "id": "c",
+          "label": "We should cancel without telling the team.",
+          "tier": "wrong",
+          "why": "You need direction, not a decision made outside your role."
+        }
+      ],
+      "layout": "chat",
+      "chatWith": {
+        "name": "Arjun",
+        "role": "Senior UX Designer"
+      },
+      "world": {
+        "kind": "clock",
+        "now": "3:20 PM",
+        "deadline": "6:00 PM",
+        "deadlineLabel": "Review due",
+        "showNow": false
+      },
+      "progress": 0.8571428571428571,
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "planLineIfFailed": "you missed a step the team needed",
+      "skills": [
+        "Time Management",
+        "Verbal Communication"
+      ]
     },
     {
       "kind": "card",
-      "variant": "chapter",
+      "id": "UX1-23",
       "speaker": "Narrator",
-      "title": "The music is about to start.",
-      "body": "Your test notes are in the demo. See how your decisions held up.",
-      "cta": "See my result",
-      "id": "UX1-28"
+      "title": "6:00 P.M. The review pack is ready.",
+      "body": "Arjun checks it before the client review. You finished the priority work without hiding what still needs testing.",
+      "world": {
+        "kind": "clock",
+        "now": "6:00 PM",
+        "status": "delivered",
+        "deadlineLabel": "Review pack",
+        "showNow": false
+      },
+      "cta": "Continue",
+      "variant": "intro"
+    },
+    {
+      "kind": "card",
+      "id": "UX1-24",
+      "speaker": "Narrator",
+      "title": "Amina still needs a hand.",
+      "body": "Amina, an accessibility specialist, has keyboard-check notes due at 6:40. You have finished your work for today.",
+      "castMember": "Amina",
+      "setup": "Amina • Accessibility Specialist",
+      "cta": "Continue",
+      "variant": "intro"
+    },
+    {
+      "kind": "card",
+      "id": "UX1-25",
+      "speaker": "Narrator",
+      "title": "Their deadline is close. Yours is not.",
+      "body": "You have time to help with the notes. The work stays with its owner for the final check.",
+      "castMember": "Amina",
+      "cta": "Continue",
+      "variant": "intro"
+    },
+    {
+      "kind": "rank",
+      "id": "UX1-26",
+      "speaker": "Narrator",
+      "question": "Rank these responses from best to worst.",
+      "order": [
+        "Ask which notes you can help organize.",
+        "Wish them luck and leave.",
+        "Laugh at the delay and walk away."
+      ],
+      "whenRight": "You had time to help and left final checks with the person responsible.",
+      "whenWrong": "A useful offer of help matters more than a polite goodbye.",
+      "progress": 1,
+      "feedback": "",
+      "feedbackCta": "Continue",
+      "planLineIfFailed": "you missed a step the team needed",
+      "skills": [
+        "Social Awareness",
+        "Critical Thinking"
+      ]
+    },
+    {
+      "kind": "card",
+      "id": "UX1-27",
+      "speaker": "Narrator",
+      "title": "Arjun noticed how you handled it.",
+      "body": "Your response under pressure matters, even when the client is not watching.",
+      "castMember": "Arjun",
+      "reactsTo": "UX1-26",
+      "cta": "Continue",
+      "variant": "intro"
+    },
+    {
+      "kind": "card",
+      "id": "UX1-28",
+      "speaker": "Narrator",
+      "title": "Your first week is complete.",
+      "body": "Arjun sends your work to Samira. The next assignment depends on the trust you built this week.",
+      "castMember": "Arjun",
+      "variant": "chapter",
+      "celebrate": true,
+      "cta": "Begin final review"
     },
     {
       "kind": "review",
+      "id": "UX1-REVIEW",
       "speaker": "System",
-      "title": "Your first design project.",
-      "body": "See the result of your seven decisions.",
-      "deciding": "Reviewing your work...",
-      "decidingNote": "The team checks your design decisions.",
-      "id": "UX1-REVIEW"
+      "title": "Northline is choosing the next project team.",
+      "body": "Your reputation helps decide what happens next.",
+      "deciding": "Decision in progress...",
+      "decidingNote": "The team reviews your work and how you handled pressure."
     }
   ]
 };

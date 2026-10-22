@@ -32,7 +32,7 @@ const RN_L1: Level = {
   ...RN_LEVEL_1_V2,
   id: RN_LEVEL_1.id,
   saveSlot: 209,
-  cover: "/images/play/rn/rebuild-2026-10-21/RN1-04.png",
+  cover: "/images/play/rn/v9/building-exterior-v2.png",
   cast: {
     Rosa: "/images/play/rn/rebuild-2026-10-21/face-rosa.webp",
     Denise: "/images/play/rn/rebuild-2026-10-21/face-denise.webp",
@@ -53,7 +53,7 @@ const RN_L1: Level = {
   expressCut: RN_LEVEL_1.expressCut,
   expressSource: {
     ...RN_LEVEL_1,
-    cover: "/images/play/rn/rebuild-2026-10-21/RN1-04.png",
+    cover: "/images/play/rn/v9/building-exterior-v2.png",
     cast: {
       Rosa: "/images/play/rn/rebuild-2026-10-21/face-rosa.webp",
       Denise: "/images/play/rn/rebuild-2026-10-21/face-denise.webp",
