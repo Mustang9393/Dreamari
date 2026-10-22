@@ -60,7 +60,8 @@ import {
   type ReelItem,
   type VideoReel,
 } from "@/components/app/catalog";
-import { WORLD_LABELS } from "@/components/app/worlds";
+import { TEXT_SCRIM, WORLD_LABELS } from "@/components/app/worlds";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import { buildTradesRails, filterByPath, isPathChoice, type PathChoice } from "@/components/app/careerPath";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "@/components/app/careerSearch";
@@ -412,52 +413,80 @@ function SearchResults({ query, hits, onQuery, heading, onBack, backLabel = "All
       ) : query.trim() ? (
         <div className="flex flex-col gap-[var(--space-4)]">
           <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Try a career, a world like Arts or Finance, or something you like doing, like drawing or coding.</p>
-          <SuggestedSearches onQuery={onQuery} compact />
+          <SuggestedSearches onQuery={onQuery} />
         </div>
       ) : null}
     </section>
   );
 }
 
-/** The one small "Suggested searches" section. `compact` is the inline
- *  version under a search with no match. */
-function SuggestedSearches({ onQuery, compact = false }: { onQuery: (q: string) => void; compact?: boolean }) {
-  const chips = TOP_SEARCHES.map((t) => <FilterPill key={t} label={t} selected={false} onClick={() => onQuery(t)} />);
-  if (compact) {
-    return (
-      <div className="flex flex-wrap items-center gap-[8px]">
-        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Try one of these:</span>
-        {chips}
-      </div>
-    );
-  }
-  // Netflix's "Top searches": each row is a search you can run, shown with
-  // the career's own photo, its name and its world, so the empty search
-  // page reads as complete and visual without coloured blocks (5 Oct 2026,
-  // Joshua: "like Netflix or Apple TV: focused, minimal").
+/** "Try one of these": the chip row under a search with no match. (The
+ *  full photo "Suggested searches" section this used to render on the
+ *  empty search page was removed on 22 Oct 2026 for the category tiles.) */
+function SuggestedSearches({ onQuery }: { onQuery: (q: string) => void }) {
   return (
-    <section aria-label="Suggested searches" className="flex w-full flex-col gap-[var(--space-3)]">
-      <h2 className="text-[18px] leading-[24px] font-extrabold sm:text-[20px]" style={{ fontFamily: "var(--font-display)" }}>Suggested searches</h2>
-      <ul className="grid w-full grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-3">
-        {TOP_SEARCHES.map((t) => {
-          const career = ALL_CATALOG_CAREERS.find((c) => c.title === t);
+    <div className="flex flex-wrap items-center gap-[8px]">
+      <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Try one of these:</span>
+      {TOP_SEARCHES.map((t) => <FilterPill key={t} label={t} selected={false} onClick={() => onQuery(t)} />)}
+    </div>
+  );
+}
+
+// -- Browse by category tiles (22 Oct 2026) -----------------------------
+// Chandu: "remove the suggested searches from when the user clicks on the
+// search bar and show categories as tiles like in dreamonna.com". So the
+// empty search page is one thing: every career world as a photo tile, in
+// the same Netflix shape the suggestion rows had (a real career photo, the
+// name over the house scrim), never a coloured block (Chandu, 5 Oct 2026:
+// "I dont like the colored category tiles"). One recognisable career per
+// world fronts its tile; the count under the name tells a student how much
+// is behind it. Tapping a tile opens the same world grid the old picker
+// did (SearchResults with a Back link), so nothing downstream changed.
+const WORLD_HERO: Record<string, string> = {
+  "Tech & Engineering": "Software Engineer",
+  "Health & Medicine": "Registered Nurse",
+  "Business & Finance": "Investment Banking",
+  "Arts, Media & Sport": "Film Director",
+  "Science & Research": "Chemist",
+  "Teaching & Education": "Elementary School Teacher",
+  "Building & Construction": "Electrician",
+  "Law, Safety & Justice": "Firefighter",
+  "Food & Cooking": "Executive Chef",
+  "Farming, Animals & Nature": "Veterinarian",
+  "Counseling & Social Work": "Therapist",
+  "Driving, Flying & Shipping": "Airline Pilot",
+  "Factories & Making Things": "Welder",
+  "Fixing Machines & Engines": "Auto Mechanic",
+  "Personal Care & Community Services": "Hairstylist",
+};
+const CATEGORY_WORLDS = WORLD_LABELS.filter((w) => w !== "All");
+
+function CategoryTiles({ onPick }: { onPick: (world: string) => void }) {
+  return (
+    <section aria-label="Browse by category" className="flex w-full flex-col gap-[var(--space-3)]">
+      <h2 className="text-[18px] leading-[24px] font-extrabold sm:text-[20px]" style={{ fontFamily: "var(--font-display)" }}>Browse by category</h2>
+      <ul className="grid w-full grid-cols-2 gap-[10px] sm:grid-cols-3 sm:gap-[12px] lg:grid-cols-5">
+        {CATEGORY_WORLDS.map((world) => {
+          const inWorld = ALL_CATALOG_CAREERS.filter((c) => c.world === world);
+          const hero = inWorld.find((c) => c.title === WORLD_HERO[world]) ?? inWorld.find((c) => c.photo);
           return (
-            <li key={t}>
-              <button
-                type="button"
-                onClick={() => onQuery(t)}
-                className="dm-quiet group flex w-full cursor-pointer items-center gap-[14px] rounded-[12px] p-[6px] pr-[12px] text-left"
-                style={{ fontFamily: "var(--font-body)" }}
-              >
-                <span className="relative h-[60px] w-[96px] flex-none overflow-hidden rounded-[8px]" style={{ background: "var(--glass-surface-2)" }}>
-                  {career && <Image src={career.photo} alt="" fill sizes="96px" className="object-cover object-[50%_25%]" />}
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-[15.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{t}</span>
-                  {career && <span className="truncate text-[12.5px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{career.world}</span>}
-                </span>
-                <Search className="h-4 w-4 flex-none opacity-60 transition-opacity group-hover:opacity-100" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-              </button>
+            <li key={world} className="h-full">
+              <HoverBeam strength={0.8} className="h-full">
+                <button
+                  type="button"
+                  onClick={() => onPick(world)}
+                  aria-label={`${world}, ${inWorld.length} careers`}
+                  className="dm-tap group relative flex aspect-[4/3] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[12px] p-[12px] text-left"
+                  style={{ background: "var(--glass-surface-2)", fontFamily: "var(--font-body)" }}
+                >
+                  {hero && <Image src={hero.photo} alt="" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw" className="object-cover object-[50%_30%] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]" />}
+                  <span aria-hidden className="absolute inset-0" style={{ background: TEXT_SCRIM }} />
+                  <span className="relative flex min-w-0 flex-col gap-[2px]">
+                    <span className="text-[14px] leading-[18px] font-extrabold sm:text-[15px] sm:leading-[19px]" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{world}</span>
+                    <span className="text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "rgba(255,255,255,0.72)" }}>{inWorld.length} careers</span>
+                  </span>
+                </button>
+              </HoverBeam>
             </li>
           );
         })}
@@ -465,8 +494,6 @@ function SuggestedSearches({ onQuery, compact = false }: { onQuery: (q: string) 
     </section>
   );
 }
-
-const CATEGORY_OPTIONS = WORLD_LABELS.filter((w) => w !== "All").map((w) => ({ value: w, label: w }));
 const FILTER_FIELD = "h-10 w-full rounded-[var(--radius-md)] border px-[12px] text-[13px] font-semibold";
 const FILTER_FIELD_STYLE: React.CSSProperties = { background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" };
 
@@ -536,21 +563,12 @@ function SearchPanel({ query, onQuery }: { query: string; onQuery: (q: string) =
     // with nothing typed, so a click on empty page space doesn't drop it.
     return <div data-search-browsing className="w-full"><SearchResults query="" heading={world} hits={hits} onQuery={onQuery} onBack={() => { setWorld("All"); setFiltersOpen(false); }} backLabel="Back" tools={tools} toolsPanel={toolsPanel} /></div>;
   }
+  // Nothing typed: the category tiles alone. The "Suggested searches" rows
+  // that sat above the old picker are gone from this state (Chandu, 22 Oct
+  // 2026); the compact "Try one of these" still backs a search with no match.
   return (
-    <div className="filters-reveal flex w-full flex-col gap-[var(--space-6)]">
-      <SuggestedSearches onQuery={onQuery} />
-      {/* Browse by category: one plain picker, no coloured blocks (Chandu:
-         "I dont like the colored category tiles"; Joshua: "One simple
-         Browse by Category option underneath"). */}
-      <Listbox
-        ariaLabel="Browse by category"
-        value=""
-        onChange={setWorld}
-        options={CATEGORY_OPTIONS}
-        placeholder="Browse by category"
-        className="h-11 w-full rounded-[var(--radius-md)] border px-[16px] text-[15px] font-semibold sm:w-[280px] [&>span:first-child]:!opacity-100"
-        style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
-      />
+    <div className="filters-reveal w-full">
+      <CategoryTiles onPick={setWorld} />
     </div>
   );
 }
