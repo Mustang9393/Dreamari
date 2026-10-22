@@ -1,3 +1,7 @@
+## 2026-10-22: v7 is the default counselor dashboard
+
+**Why (Chandu):** "make v7 the default view on vercel for counselor dashboards." `version.tsx` `DEFAULT_VERSION` is "v7": `/counselor` with no `?v=` opens v7, and v7's own URLs drop the `v` param; v4 is `?v=4` and still a pill in the dock. Only the dock's pill remembers a choice (a new storage key, so stale v4 picks from before today are dropped); a `?v=4` link opens v4 for that visit only, so a shared link never pins a browser to v4. Hard-coded `?v=4` links inside v4's own files are unchanged.
+
 ## 2026-10-22: v4 gets an Opportunities tab, a scrolling Saving row and photo-free majors (Maisha, for the noon demo)
 
 **Why (Maisha, Slack, 22 Oct 2026):** "Please add opportunities tab to v4. On home have 'What My Students Are Saving' cards look like explore where we can scroll horizontally as opposed to the overlap. Under 'Insights' the top majors cards look a little juvenile and feel out of place from the rest of the app's aesthetic. If Mika needs to redo these, lets remove the photos for now till she's done. Please push these by 11:30."

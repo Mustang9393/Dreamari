@@ -74,9 +74,15 @@ const V2_ENABLED = false;
 // (unset, no URL param) is v2 for the same reason. Flip back to `true`
 // to bring the pill and the v1 default back exactly as they were.
 const V1_ENABLED = false;
-const DEFAULT_VERSION: CounselorVersion = "v4";
+// v7 is the default (22 Oct 2026, Chandu: "make v7 the default view on
+// vercel for counselor dashboards"): /counselor with no ?v= opens Joshua's
+// official direction; v4 stays one pill away and at ?v=4. A browser that
+// picked a version from the dock keeps its pick (STORAGE_KEY).
+const DEFAULT_VERSION: CounselorVersion = "v7";
 
-const STORAGE_KEY = "dreamari:counselor-version";
+// A new key with the v7 default (22 Oct 2026), so every browser lands on v7
+// until it picks from the dock; the old key's stale v4 picks are left behind.
+const STORAGE_KEY = "dreamari:counselor-version-2";
 
 // `ready` flips once the real value has been read after mount. Anything
 // that would redirect based on the version (CounselorApp's role-gated view
@@ -133,13 +139,8 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading client-only storage/URL after mount, same justification as CounselorApp's hydrated flag
     setVersionState(next);
     setReady(true);
-    if (fromUrl) {
-      try {
-        window.localStorage.setItem(STORAGE_KEY, fromUrl);
-      } catch {
-        // storage blocked; the URL still carries it for this load
-      }
-    }
+    // a ?v= link opens that build for this visit only; only the dock's pill
+    // (setVersion) remembers a choice, so a shared v4 link never pins v4
   }, []);
 
   const setVersion = (v: CounselorVersion) => {
