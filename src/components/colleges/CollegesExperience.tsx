@@ -154,9 +154,9 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
       {/* compare bar */}
       {compare.length > 0 && !compareOpen && (
         <div className="fixed inset-x-0 bottom-[84px] z-[60] flex justify-center px-5 md:bottom-[28px]">
-          <div className="flex w-full max-w-[560px] items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[10px]" style={{ ...PANEL, background: "rgba(14,12,32,0.92)" }}>
+          <div className="flex w-full max-w-[560px] items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[10px]" style={{ ...PANEL, background: "rgb(var(--scrim-rgb, 14 12 32) / calc(0.92 * var(--scrim-glass-gain, 1)))" }}>
             <span className="flex min-w-0 items-center gap-[8px]">
-              <span className="flex -space-x-2">{compared.map((c) => <span key={c.slug} className="flex size-[28px] items-center justify-center rounded-full border text-[11px] font-extrabold" style={{ background: ACCENT, borderColor: "#0e0c20", color: "var(--primary-foreground)" }}>{c.name[0]}</span>)}</span>
+              <span className="flex -space-x-2">{compared.map((c) => <span key={c.slug} className="flex size-[28px] items-center justify-center rounded-full border text-[11px] font-extrabold" style={{ background: ACCENT, borderColor: "var(--scrim-deep, #0e0c20)", color: "var(--primary-foreground)" }}>{c.name[0]}</span>)}</span>
               <span className="truncate text-[14px] leading-[18px] font-semibold">{compare.length} of 3 picked</span>
             </span>
             <span className="flex items-center gap-[8px]">

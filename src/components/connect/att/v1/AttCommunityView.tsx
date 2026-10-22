@@ -1016,7 +1016,7 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
   const toggleSave = (id: string) => setSaves((m) => ({ ...m, [id]: !m[id] }));
   const togglePlan = (id: string) => setPlan((m) => ({ ...m, [id]: !m[id] }));
   const toggleFollow = (id: string) => setFollows((m) => ({ ...m, [id]: !m[id] }));
-  const ink = "#f6f5fb";
+  const ink = "var(--scrim-ink, #f6f5fb)"; // white in dark, navy ink on the light frost
 
   // A person's profile is the same page every other professional has, with
   // Back returning to the board exactly as it was (direct feedback, 17 Sept

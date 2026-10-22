@@ -1030,7 +1030,7 @@ function EnvCard({
                       aria-label="Previous: summary"
                       onClick={jumpTo("Summary")}
                       className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
-                      style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Summary" ? 0.4 : 1 }}
+                      style={{ background: "rgb(var(--scrim-rgb, 8 10 22) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.28))", color: "var(--scrim-ink, #fff)", opacity: face === "Summary" ? 0.4 : 1 }}
                     >
                       <ChevronLeft className="h-[18px] w-[18px] lg:h-[14px] lg:w-[14px]" aria-hidden />
                     </button>
@@ -1059,7 +1059,7 @@ function EnvCard({
                       aria-label="Next: more info"
                       onClick={jumpTo("Details")}
                       className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
-                      style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Details" ? 0.4 : 1 }}
+                      style={{ background: "rgb(var(--scrim-rgb, 8 10 22) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.28))", color: "var(--scrim-ink, #fff)", opacity: face === "Details" ? 0.4 : 1 }}
                     >
                       <ChevronRight className="h-[18px] w-[18px] lg:h-[14px] lg:w-[14px]" aria-hidden />
                     </button>
@@ -1178,7 +1178,7 @@ function EnvCard({
                       {/* No "Because you saved X" line here: the match band
                          above already says why (Chandu, 1 Oct 2026: "we
                          already show strong match etc."). */}
-                      <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
+                      <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--scrim-ink, #ffffff)" }}>
                         {career.title}
                       </h2>
                       {/* Custom-designed edge case, 22 Sept 2026: this sits in a
@@ -1203,7 +1203,7 @@ function EnvCard({
                          use brightness too"). */}
                       <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
                         <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Median salary</span>
-                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.salary}</span>
+                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.98))" }}>{career.salary}</span>
                       </div>
                     </div>
                     {/* justify-center: Details has less content than Summary
@@ -1219,11 +1219,11 @@ function EnvCard({
                     <div aria-hidden={face !== "Details"} className="flex flex-none flex-col justify-center gap-[var(--space-3)]" style={{ width: "50%" }}>
                       <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
                         <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Major</span>
-                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.major}</span>
+                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.98))" }}>{career.major}</span>
                       </div>
                       <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
                         <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Main skills</span>
-                        <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.mainSkills}</span>
+                        <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.98))" }}>{career.mainSkills}</span>
                       </div>
                     </div>
                   </div>
@@ -1246,10 +1246,10 @@ function EnvCard({
                   className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
                   /* solid dark glass in BOTH themes: the faint white-alpha surface
                      disappeared against the photos (founder feedback) */
-                  style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
+                  style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.72 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.30))", backdropFilter: "blur(10px)" }}
                 >
                   {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
-                  <Play className="h-[15px] w-[15px] flex-none" fill="#F4F7FF" style={{ color: "#F4F7FF" }} aria-hidden />
+                  <Play className="h-[15px] w-[15px] flex-none" fill="#F4F7FF" style={{ color: "var(--scrim-ink, #F4F7FF)" }} aria-hidden />
                   <span className="text-[17px] leading-[23px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
                     Play
                   </span>
@@ -1328,7 +1328,7 @@ function ProgressiveBlur() {
          tint that's okay, subtly"). Own soft-edged band, same feather
          logic as the blur layers, so it ramps in with them rather than
          adding a second seam. */}
-      <div className="absolute inset-0" style={{ background: "rgba(4,6,12,0.16)", maskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)`, WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)` }} />
+      <div className="absolute inset-0" style={{ background: "rgb(var(--scrim-rgb, 4 6 12) / calc(0.16 * var(--scrim-gain, 1)))", maskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)`, WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)` }} />
     </div>
   );
 }
@@ -1402,7 +1402,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
           aria-pressed={soundOn}
           onClick={() => onSoundChange(!soundOn)}
           className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-          style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
+          style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.72 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.30))", color: "var(--scrim-ink, #ffffff)" }}
         >
           {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
         </button>

@@ -46,7 +46,7 @@ export function VideoTranscript({ video }: { video: string }) {
         aria-controls={id}
         onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
         className="dm-quiet flex min-h-[36px] w-fit cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[13px] font-semibold"
-        style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.3)", color: "#fff" }}
+        style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.72 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.3))", color: "var(--scrim-ink, #fff)" }}
       >
         <FileText className="h-[14px] w-[14px]" aria-hidden />
         {open ? "Hide transcript" : "Transcript"}
@@ -58,7 +58,7 @@ export function VideoTranscript({ video }: { video: string }) {
           tabIndex={0}
           onClick={(e) => e.stopPropagation()}
           className="dm-scroll max-h-[min(32dvh,260px)] overflow-y-auto rounded-[var(--radius-md)] border p-[12px] text-[14px] leading-[1.55]"
-          style={{ background: "rgba(5,8,20,0.88)", borderColor: "rgba(255,255,255,0.18)", color: "#fff" }}
+          style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.88 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.18))", color: "var(--scrim-ink, #fff)" }}
         >
           {text}
         </p>

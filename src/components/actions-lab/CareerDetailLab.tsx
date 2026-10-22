@@ -111,7 +111,7 @@ const HERO_FOCUS: Record<string, string> = {
 
 // Custom-designed edge case, 22 Sept 2026: the header photo had no
 // `onError` handling -- unlike Match's grid, this hero already sits on a
-// solid dark base (`#0e0c20`) with its own gradient/blur scrims layered as
+// solid dark base (`var(--scrim-deep, #0e0c20)`) with its own gradient/blur scrims layered as
 // separate elements, so a failed photo doesn't need a new placeholder
 // graphic; it just needs to stop trying to paint a broken image on top of
 // an already-complete backdrop. On failure this renders nothing, and the
@@ -678,23 +678,23 @@ export function CareerDetailLab({ slug, live = false }: {
            lower half. */}
         {/* on-dark-media: the hero is a dark photo in both themes, so it keeps
            the bright world colours in light mode too (app.css, 9 Oct 2026). */}
-        <section data-focal className="on-dark-media relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+        <section data-focal className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--scrim-ink, #fff)", textShadow: CARD_TEXT_SHADOW }}>
           {/* Faces stay in frame (direct feedback): the poster photos carry the
              subject in their upper part, so the crop anchors near the top. On
              phones the photo runs behind the whole card; from md up it sits on
              the right half at its natural framing and fades into the card's
              dark base toward the text, so nothing is cropped to fit a wide
              band. */}
-          <div className="absolute inset-0" aria-hidden style={{ background: "#0e0c20" }}>
+          <div className="absolute inset-0" aria-hidden style={{ background: "var(--scrim-deep, #0e0c20)" }}>
             <HeroPhoto photo={career.photo} sizes="100vw" className="object-cover md:hidden" objectPosition={heroFocus(career.photo)?.mobile ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
             <span className="absolute inset-y-0 right-0 hidden w-[50%] md:block">
               <HeroPhoto photo={career.photo} sizes="520px" className="object-cover" objectPosition={heroFocus(career.photo)?.desktop ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
-              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.45) 26%, transparent 58%)" }} />
+              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, var(--scrim-deep, #0e0c20) 0%, rgb(var(--scrim-rgb, 14 12 32) / calc(0.45 * var(--scrim-gain, 1))) 26%, transparent 58%)" }} />
             </span>
             <CardProgressiveBlur size="52%" />
             {/* lighter than before (direct feedback: the blur and the side fade
                already carry the type, so the photo can show) */}
-            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.86) 0%, rgba(12,16,35,0.5) 32%, rgba(12,16,35,0.1) 60%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.35) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)` }} />
+            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.86 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.5 * var(--scrim-gain, 1))) 32%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.1 * var(--scrim-gain, 1))) 60%, transparent 100%), linear-gradient(to bottom, rgb(var(--scrim-rgb, 10 9 20) / calc(0.35 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 10 9 20) / calc(0.1 * var(--scrim-gain, 1))) 40%, transparent 65%)` }} />
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
@@ -895,7 +895,13 @@ export function CareerDetailLab({ slug, live = false }: {
                Zeroing the margin/padding on desktop, as this rail used to,
                left no trailing space for the last card to fade into --
                it just hard-clipped at the container edge (16 Sept 2026). */}
-            <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
+            {/* The bleed matches the panel's padding exactly (Section:
+               space-5, space-6 from sm). It used to copy `main`'s 32px, 8px
+               more than the panel's 24px, so the cards ran 8px past the
+               panel's border on both sides (22 Oct 2026, Chandu: "the cards
+               in careers like this one are exceeding the border of the
+               card"). */}
+            <div className="poster-row -mx-[var(--space-5)] flex gap-[var(--space-4)] overflow-x-auto px-[var(--space-5)] py-5 [scrollbar-width:none] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
                 <PosterCard key={c.title} career={c} onClick={() => (live && openCareerPeek(careerSlug(c.title))) || router.push(careerHref(careerSlug(c.title), live))} />
               ))}

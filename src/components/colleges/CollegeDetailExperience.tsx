@@ -193,7 +193,7 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
 
         {/* header: the photo runs behind the whole card on phones; from md it
            sits on the right half and fades into the panel toward the text */}
-        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...PANEL, background: "#0e0c20" }}>
+        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...PANEL, background: "var(--scrim-deep, #0e0c20)" }}>
           {/* desktop back sits inside the header over the photo, like the
              phone's back + wordmark row, instead of on its own row above
              the card (direct feedback, 11 Sept 2026) */}
@@ -211,7 +211,7 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
                  little above centre instead of taking a taller header */}
               <CollegePicture c={c} sizes="1100px" priority position={HEADER_FOCUS[c.slug] ?? "50% 38%"} className="absolute inset-0 h-full w-full" />
               <CardProgressiveBlur direction="left" size="62%" />
-              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(14,12,32,0.82) 0%, rgba(14,12,32,0.62) 30%, rgba(14,12,32,0.2) 56%, transparent 76%)" }} />
+              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgb(var(--scrim-rgb, 14 12 32) / calc(0.82 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 14 12 32) / calc(0.62 * var(--scrim-gain, 1))) 30%, rgb(var(--scrim-rgb, 14 12 32) / calc(0.2 * var(--scrim-gain, 1))) 56%, transparent 76%)" }} />
             </span>
             {/* Legibility without dimming the campus (direct feedback, 11 Sept
                2026: header photos "too dim"). No flat wash any more. Phones,
@@ -219,8 +219,8 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
                the progressive blur; from md the photo is on the right and
                the title on the panel, so only a light foot gradient stays. */}
             <span className="md:hidden"><CardProgressiveBlur size="58%" /></span>
-            <span className="absolute inset-0 md:hidden" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.7) 28%, rgba(12,16,35,0.3) 52%, transparent 74%)" }} />
-            <span className="absolute inset-0 hidden md:block" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.7) 0%, rgba(12,16,35,0.3) 30%, transparent 58%)" }} />
+            <span className="absolute inset-0 md:hidden" style={{ background: "linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.92 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.7 * var(--scrim-gain, 1))) 28%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.3 * var(--scrim-gain, 1))) 52%, transparent 74%)" }} />
+            <span className="absolute inset-0 hidden md:block" style={{ background: "linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.7 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.3 * var(--scrim-gain, 1))) 30%, transparent 58%)" }} />
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
@@ -232,14 +232,14 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
                    the full column width; inline from sm */}
                 <span className="sm:hidden"><MarkBadge c={c} size={52} ring="light" /></span>
                 <span className="hidden sm:block"><MarkBadge c={c} size={64} ring="light" /></span>
-                <h1 className="text-[34px] leading-[38px] font-extrabold text-balance sm:text-[44px] sm:leading-[48px]" style={{ ...DISPLAY, color: "#fff" }}>{c.name}</h1>
+                <h1 className="text-[34px] leading-[38px] font-extrabold text-balance sm:text-[44px] sm:leading-[48px]" style={{ ...DISPLAY, color: "var(--scrim-ink, #fff)" }}>{c.name}</h1>
               </div>
-              <p className={LABEL} style={{ color: "rgba(255,255,255,0.85)" }}>{c.city}, {c.stateName}</p>
+              <p className={LABEL} style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.85))" }}>{c.city}, {c.stateName}</p>
               <ul className="flex flex-wrap gap-[6px]" aria-label="About this college" style={{ textShadow: "none" }}>
-                {[SIZE_WORD[c.size], ...tags(c)].map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(255,255,255,0.14)", color: "#fff" }}>{t}</li>)}
+                {[SIZE_WORD[c.size], ...tags(c)].map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ background: "var(--scrim-tile-bg, rgba(255,255,255,0.14))", color: "var(--scrim-ink, #fff)" }}>{t}</li>)}
               </ul>
               {d?.address && !d.sample && (
-                <p className="text-[13px] leading-[17px]" style={{ color: "rgba(255,255,255,0.6)" }}>
+                <p className="text-[13px] leading-[17px]" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.6))" }}>
                   {x?.links.map ? <a href={x.links.map} target="_blank" rel="noreferrer" className="dm-link underline decoration-[rgba(255,255,255,0.35)] underline-offset-2">{d.address}<span className="sr-only"> (opens in a new tab)</span></a> : d.address}
                 </p>
               )}

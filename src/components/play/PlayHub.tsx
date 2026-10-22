@@ -894,9 +894,9 @@ export function CornerBadge({ kind, large, faded = false }: { kind: "play" | "lo
     <span
       aria-hidden
       className={`pointer-events-none absolute right-[14px] bottom-[14px] z-[2] flex items-center justify-center rounded-full border backdrop-blur-[6px] transition-[transform,opacity] duration-300 group-hover:scale-110 sm:right-[16px] sm:bottom-[16px] ${size} ${faded ? "opacity-0" : "opacity-100"}`}
-      style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
+      style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.4))" }}
     >
-      {kind === "play" ? <Play className={`ml-[3px] ${glyph}`} fill="currentColor" style={{ color: "#FFFFFF" }} /> : <Lock className={glyph} style={{ color: "#FFFFFF" }} />}
+      {kind === "play" ? <Play className={`ml-[3px] ${glyph}`} fill="currentColor" style={{ color: "var(--scrim-ink, #FFFFFF)" }} /> : <Lock className={glyph} style={{ color: "var(--scrim-ink, #FFFFFF)" }} />}
     </span>
   );
 }
@@ -954,7 +954,7 @@ function FeaturedPlayOverlay({ sim, faded = false, onTrailer }: { sim: Simulatio
           <Link
             href={`/play/${sim.id}?mode=express`}
             className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[13px] text-[11.5px] font-semibold backdrop-blur-[8px]"
-            style={{ background: "rgba(0,0,0,0.78)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
+            style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.78 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.35))", color: "var(--scrim-ink, #FFFFFF)" }}
           >
             <Zap className="h-[13px] w-[13px]" aria-hidden />
             Express mode
@@ -968,7 +968,7 @@ function FeaturedPlayOverlay({ sim, faded = false, onTrailer }: { sim: Simulatio
             type="button"
             onClick={onTrailer}
             className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[13px] text-[11.5px] font-semibold backdrop-blur-[8px]"
-            style={{ background: "rgba(0,0,0,0.78)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
+            style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.78 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.35))", color: "var(--scrim-ink, #FFFFFF)" }}
           >
             <Film className="h-[13px] w-[13px]" aria-hidden />
             Watch trailer

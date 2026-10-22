@@ -211,9 +211,9 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
           aria-label={saved ? `Remove ${item.title} from Saved` : `Save ${item.title}`}
           aria-pressed={saved}
           className="dm-tap flex size-[34px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 hover:scale-110"
-          style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
+          style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.4))" }}
         >
-          <Bookmark className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} fill={saved ? "#FFFFFF" : "none"} />
+          <Bookmark className="h-[15px] w-[15px]" style={{ color: "var(--scrim-ink, #FFFFFF)" }} fill={saved ? "currentColor" : "none"} />
         </button>
       </IconTip>
       {/* Top-right badge: a play glyph before anything has played, then a
@@ -226,18 +226,18 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
             aria-label={elMuted ? "Unmute" : "Mute"}
             aria-pressed={!elMuted}
             className="flex size-[34px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 hover:scale-110"
-            style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
+            style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.4))" }}
           >
-            {elMuted ? <VolumeX className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} /> : <Volume2 className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} />}
+            {elMuted ? <VolumeX className="h-[15px] w-[15px]" style={{ color: "var(--scrim-ink, #FFFFFF)" }} /> : <Volume2 className="h-[15px] w-[15px]" style={{ color: "var(--scrim-ink, #FFFFFF)" }} />}
           </button>
         </IconTip>
       ) : (
         <span
           aria-hidden
           className="pointer-events-none absolute top-[10px] right-[10px] flex size-[34px] items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110"
-          style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
+          style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.4))" }}
         >
-          <Play className="ml-[2px] h-[15px] w-[15px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
+          <Play className="ml-[2px] h-[15px] w-[15px]" fill="currentColor" style={{ color: "var(--scrim-ink, #FFFFFF)" }} />
         </span>
       )}
       {/* Scrim: the company mark and the clip's title, always. The cover bakes
@@ -297,7 +297,7 @@ function VideoLightbox({ item, onClose }: { item: CompanyVideo; onClose: () => v
               aria-label="Close video"
               onClick={onClose}
               className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full border"
-              style={{ background: "rgba(0,0,0,0.5)", borderColor: "rgba(255,255,255,0.3)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}
+              style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.5 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.3))", color: "var(--scrim-ink, #FFFFFF)", backdropFilter: "blur(6px)" }}
             >
               <X className="h-5 w-5" />
             </button>

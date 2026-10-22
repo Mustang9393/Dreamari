@@ -59,14 +59,38 @@ export function CardProgressiveBlur({ direction = "up", size = "52%", maxBlur }:
   );
 }
 
-export const CARD_TEXT_SHADOW = "0 1px 2px rgba(0,0,0,0.7), 0 1px 10px rgba(0,0,0,0.4)";
+// Light mode swaps the black for a navy shadow through --card-text-shadow
+// (look-v2.css, section 7); the literal after the comma is dark's value.
+export const CARD_TEXT_SHADOW = "var(--card-text-shadow, 0 1px 2px rgba(0,0,0,0.7), 0 1px 10px rgba(0,0,0,0.4))";
+
+/** Photo scrim colours (22 Oct 2026, the light-mode pass). Every near-black
+ *  a component paints over or under a photo goes through these, so the light
+ *  look can swap the whole set for its cobalt (look-v2.css, section 7) while
+ *  dark keeps each site's exact literal as the fallback.
+ *  - SCRIM_DEEP: the solid base a photo fades into (dark #0e0c20)
+ *  - scrim(channels, alpha): a ramp stop or a glass chip, e.g.
+ *    scrim("12 16 35", 0.86) === rgba(12,16,35,0.86) in dark */
+export const SCRIM_DEEP = "var(--scrim-deep, #0e0c20)";
+/** The type on a scrim: white in dark, navy ink on the light frost. */
+export const SCRIM_INK = "var(--scrim-ink, #fff)";
+export const SCRIM_INK_SOFT = "var(--scrim-ink-soft, rgba(255,255,255,0.86))";
+/** A chip's edge on a scrim (white-alpha in dark, a navy hairline in light). */
+export const SCRIM_CHIP_EDGE = "var(--scrim-chip-edge, rgba(255,255,255,0.3))";
+export function scrim(darkChannels: string, alpha: number) {
+  return `rgb(var(--scrim-rgb, ${darkChannels}) / calc(${alpha} * var(--scrim-gain, 1)))`;
+}
+/** A glass chip or badge on a photo: the same colour, its own gain (light
+ *  runs these denser, since they also land on the white poster scrim). */
+export function glass(darkChannels: string, alpha: number) {
+  return `rgb(var(--scrim-rgb, ${darkChannels}) / calc(${alpha} * var(--scrim-glass-gain, 1)))`;
+}
 
 /** A soft, multi-stop bottom scrim -- the standard companion to
  *  CardProgressiveBlur. Four stops read as a gradual dim, not a visible
  *  edge, the way a 1-2 stop mask does. */
 export function cardBottomScrim(strength: "regular" | "heavy" = "regular") {
   const base = strength === "heavy" ? 0.82 : 0.55;
-  return `linear-gradient(to top, rgba(14,12,32,${base}) 0%, rgba(14,12,32,${base * 0.58}) 38%, rgba(14,12,32,${base * 0.2}) 68%, transparent 100%)`;
+  return `linear-gradient(to top, ${scrim("14 12 32", base)} 0%, ${scrim("14 12 32", base * 0.58)} 38%, ${scrim("14 12 32", base * 0.2)} 68%, transparent 100%)`;
 }
 
 /** A light top scrim for cards that also carry text up there (a title
@@ -76,7 +100,7 @@ export function cardBottomScrim(strength: "regular" | "heavy" = "regular") {
  *  it, since a shadow alone doesn't guarantee a dark base under every
  *  glyph. */
 export function cardTopScrim() {
-  return "linear-gradient(to bottom, rgba(10,9,20,0.55) 0%, rgba(10,9,20,0.22) 45%, transparent 72%)";
+  return `linear-gradient(to bottom, ${scrim("10 9 20", 0.55)} 0%, ${scrim("10 9 20", 0.22)} 45%, transparent 72%)`;
 }
 
 /** The scroll edges of a panel, frosted the way iOS 26's soft scroll-edge

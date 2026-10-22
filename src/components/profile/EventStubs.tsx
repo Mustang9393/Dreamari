@@ -52,21 +52,21 @@ function Stub({ event, tilt, onQr }: { event: EventBoard; tilt: number; onQr: ()
         href={`/connect?event=${event.id}`}
         aria-label={`Open the ${event.name} board`}
         className="event-stub relative flex h-[268px] w-[176px] flex-col overflow-hidden rounded-[14px]"
-        style={{ background: "#0e0c20", fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW, ["--stub" as string]: "74px" }}
+        style={{ background: "var(--scrim-deep, #0e0c20)", fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW, ["--stub" as string]: "74px" }}
       >
         <EventSurface accent={accent} edge={false} tab={false} />
         {/* body: the date as the hero, then the name */}
         <div className="relative z-10 flex flex-1 flex-col px-[14px] pt-[22px]">
           {day ? (
             <>
-              <span className="text-[44px] leading-[44px] font-extrabold tabular-nums" style={{ color: "#fff" }}>{day}</span>
+              <span className="text-[44px] leading-[44px] font-extrabold tabular-nums" style={{ color: "var(--scrim-ink, #fff)" }}>{day}</span>
               <span className="mt-[2px] text-[11px] leading-[14px] font-bold tracking-[0.12em] uppercase" style={{ color: lit, fontFamily: "var(--font-body)" }}>{rest}</span>
             </>
           ) : (
-            <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}><Calendar className="h-[13px] w-[13px]" aria-hidden /> {event.date}</span>
+            <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.8))", fontFamily: "var(--font-body)" }}><Calendar className="h-[13px] w-[13px]" aria-hidden /> {event.date}</span>
           )}
-          <span className="mt-auto line-clamp-3 text-[15px] leading-[19px] font-extrabold text-balance" style={{ color: "#f6f5fb" }}>{event.name}</span>
-          <span className="mt-[6px] mb-[12px] flex items-center gap-[5px] text-[11.5px] leading-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.72)", fontFamily: "var(--font-body)" }}><MapPin className="h-[12px] w-[12px] flex-none" aria-hidden /> {event.location}</span>
+          <span className="mt-auto line-clamp-3 text-[15px] leading-[19px] font-extrabold text-balance" style={{ color: "var(--scrim-ink, #f6f5fb)" }}>{event.name}</span>
+          <span className="mt-[6px] mb-[12px] flex items-center gap-[5px] text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.72))", fontFamily: "var(--font-body)" }}><MapPin className="h-[12px] w-[12px] flex-none" aria-hidden /> {event.location}</span>
         </div>
         {/* the stub below the tear: lockup, and the way in */}
         <div className="relative z-10 flex flex-none items-center justify-between px-[14px]" style={{ height: "var(--stub)", background: `linear-gradient(180deg, color-mix(in srgb, ${lit} 16%, rgba(255,255,255,0.05)) 0%, color-mix(in srgb, ${lit} 8%, rgba(255,255,255,0.03)) 100%)` }}>
