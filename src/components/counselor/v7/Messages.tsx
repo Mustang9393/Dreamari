@@ -32,17 +32,37 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Check, Paperclip, RotateCcw, Search, Send, X } from "lucide-react";
+import { Check, Paperclip, RotateCcw, Search, Send, UserRound, Users, X } from "lucide-react";
+import { guardiansFor } from "../v5/family";
 import { TextTabs } from "@/components/app/TextTabs";
 import { QUESTIONS } from "@/components/counselor/v4/CounselorConnect";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { avatarIndexForName, type CounselorStudent } from "@/lib/counselorRoster";
-import { draftFor, replyTo, sendToStudent, undoLastMessage, undoReply, useMessages, type SentMessage } from "@/lib/counselorMessages";
+import { draftFor, replyTo, sendToStudent, STUDENT_ONLY, undoLastMessage, undoReply, useMessages, type Audience, type SentMessage } from "@/lib/counselorMessages";
 import { remindFafsa } from "@/lib/counselorFafsa";
 import { createLocalRecord } from "@/lib/localRecord";
 import { logTime } from "@/lib/counselorTimeLog";
 import { StudentFace } from "../v5/StudentFace";
-import { CARD, CARD_STYLE, DISPLAY, MUTED, RULE, studentHref } from "./ui";
+import { CARD, CARD_STYLE, DISPLAY, Modal, MUTED, PrimaryButton, RULE, studentHref } from "./ui";
+
+// DEMO-ONLY: the school staff a counselor can loop in, until staff accounts
+// exist. The two teammates are the ones the counselor's profile names.
+const STAFF = [
+  { name: "Daniel Okafor", role: "Counselor" },
+  { name: "Renee Alvarez", role: "Counselor" },
+  { name: "Priya Natarajan", role: "College and career coordinator" },
+  { name: "Marcus Bell", role: "Assistant principal" },
+  { name: "Elena Costa", role: "School social worker" },
+  { name: "Tom Whitaker", role: "Special education case manager" },
+];
+/** "Omar Hassan · Maria Hassan (mother) · Renee Alvarez": who gets it, in words. */
+function audienceLine(a: Audience, studentName: string, guardians: { name: string; relation: string }[]): string {
+  const parts: string[] = [];
+  if (a.kind !== "guardians") parts.push(studentName);
+  if (a.kind !== "student") parts.push(...a.guardians.map((g) => { const r = guardians.find((x) => x.name === g)?.relation; return r ? `${g} (${r.toLowerCase()})` : g; }));
+  parts.push(...a.staff);
+  return parts.join(" · ");
+}
 
 type Question = (typeof QUESTIONS)[number];
 type Filter = "needs" | "all";
@@ -74,7 +94,7 @@ export function useUnreadCount(): number {
   return QUESTIONS.filter((q) => OPEN.includes(q.status) && UNREAD.includes(q.status) && !replies[q.id] && !seenIds[q.id]).length;
 }
 
-type Line = { from: "them" | "you"; text: string; at: number };
+type Line = { from: "them" | "you"; text: string; at: number; audience?: Audience };
 type Row = {
   key: string;
   kind: "question" | "thread";
@@ -131,6 +151,9 @@ export function V7Messages() {
   const fileInput = useRef<HTMLInputElement>(null);
   // a group message from the directory (&to=id,id): the ids, until sent
   const [group, setGroup] = useState<string[] | null>(null);
+  // who each conversation goes to (Joshua, 22 Oct 2026); student only until changed
+  const [audiences, setAudiences] = useState<Record<string, Audience>>({});
+  const [choosing, setChoosing] = useState(false);
   const [draft, setDraft] = useState("");
   const [draftKey, setDraftKey] = useState<string | null>(null);
   const [last, setLast] = useState<{ key: string; name: string; kind: Row["kind"]; studentId?: string } | null>(null);
@@ -147,14 +170,14 @@ export function V7Messages() {
       const extra = FOLLOW_UPS[q.id] ?? [];
       const reply = replies[q.id];
       const lines: Line[] = [{ from: "them", text: q.question, at: t0 }, ...extra.map((text, i) => ({ from: "them" as const, text, at: t0 + (i + 1) * 300000 }))];
-      if (reply) lines.push({ from: "you", text: reply.text, at: new Date(reply.at).getTime() });
+      if (reply) lines.push({ from: "you", text: reply.text, at: new Date(reply.at).getTime(), audience: reply.audience });
       const open = OPEN.includes(q.status) && !reply;
       const unread = open && UNREAD.includes(q.status) && !seenIds[q.id] ? lines.length : 0;
       return { key: q.id, kind: "question", q, name: q.name, grade: q.grade, student: byName.get(q.name) ?? null, open, unread, lines, at: lines[lines.length - 1].at };
     });
     const ts: Row[] = threads.map((t) => {
       const st = byId.get(t.studentId) ?? null;
-      const lines: Line[] = t.messages.map((m: SentMessage) => ({ from: "you", text: m.text, at: new Date(m.at).getTime() }));
+      const lines: Line[] = t.messages.map((m: SentMessage) => ({ from: "you", text: m.text, at: new Date(m.at).getTime(), audience: m.audience }));
       return { key: threadKey(t.studentId), kind: "thread", studentId: t.studentId, name: t.name, grade: st?.grade ?? 0, student: st, open: false, unread: 0, lines, at: lines[lines.length - 1]?.at ?? now };
     });
     if (pending && !threads.some((t) => t.studentId === pending.id)) ts.unshift({ key: threadKey(pending.id), kind: "thread", studentId: pending.id, name: pending.name, grade: pending.grade, student: pending, open: false, unread: 0, lines: [], at: now });
@@ -236,8 +259,9 @@ export function V7Messages() {
       return;
     }
     if (!selected || !draft.trim()) return;
+    const audience = selected ? audiences[selected.key] : undefined;
     if (selected.kind === "question" && selected.q) {
-      replyTo(selected.q.id, text);
+      replyTo(selected.q.id, text, audience);
       logTime({ activity: "Answered a question", minutes: 5, kind: "indirect", studentId: selected.student?.id });
       setLast({ key: selected.key, name: selected.name, kind: "question" });
       // move on to the next one still waiting
@@ -245,7 +269,7 @@ export function V7Messages() {
       if (next && filter === "needs") setSelectedKey(next.key);
     } else if (selected.student) {
       const id = selected.student.id;
-      sendToStudent(id, selected.name, text);
+      sendToStudent(id, selected.name, text, audience);
       if (draftKey === "fafsa") remindFafsa([id]);
       logTime({ activity: "Messaged a student", minutes: 3, kind: "indirect", studentId: id });
       setLast({ key: selected.key, name: selected.name, kind: "thread", studentId: id });
@@ -350,8 +374,13 @@ export function V7Messages() {
             {selected.lines.map((l, i) => (
               <li key={`${l.at}-${i}`} className={`flex max-w-[88%] items-end gap-[8px] ${l.from === "you" ? "self-end" : ""}`}>
                 {l.from === "them" && <span className="flex-none" style={{ visibility: selected.lines[i + 1]?.from === "them" ? "hidden" : "visible" }}><Face row={selected} size={26} /></span>}
-                <p className={`m-0 px-[14px] py-[9px] text-[15px] leading-[22px] whitespace-pre-wrap ${l.from === "you" ? "rounded-[18px] rounded-br-[6px]" : "rounded-[18px] rounded-bl-[6px]"}`}
-                  style={l.from === "you" ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>{l.text}</p>
+                <span className={`flex min-w-0 flex-col gap-[3px] ${l.from === "you" ? "items-end" : ""}`}>
+                  <p className={`m-0 px-[14px] py-[9px] text-[15px] leading-[22px] whitespace-pre-wrap ${l.from === "you" ? "rounded-[18px] rounded-br-[6px]" : "rounded-[18px] rounded-bl-[6px]"}`}
+                    style={l.from === "you" ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>{l.text}</p>
+                  {l.audience && l.audience.kind !== "student" || (l.audience && l.audience.staff.length > 0) ? (
+                    <span className="px-[4px] text-[12px]" style={MUTED}>To {audienceLine(l.audience!, selected.name, selected.student ? guardiansFor(selected.student) : [])}</span>
+                  ) : null}
+                </span>
               </li>
             ))}
             {!selected.lines.length && <li className="text-[14px]" style={MUTED}>No messages yet.</li>}
@@ -359,6 +388,20 @@ export function V7Messages() {
 
           {canWrite && (
             <div className="mt-auto flex flex-col gap-[var(--space-3)] pt-[var(--space-5)]">
+              {/* who gets it, said before Send (Joshua, 22 Oct 2026: "the
+                 counselor always knows exactly who will receive the message
+                 before sending it"); Change opens the audience sheet */}
+              {selected.student && (() => {
+                const a = audiences[selected.key] ?? STUDENT_ONLY;
+                const gs = guardiansFor(selected.student);
+                return (
+                  <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[4px] text-[13.5px]">
+                    <span className="font-semibold" style={MUTED}>To</span>
+                    <span className="min-w-0 flex-1 truncate">{audienceLine(a, selected.name, gs)}</span>
+                    <button type="button" onClick={() => setChoosing(true)} className="dm-link flex-none cursor-pointer font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>Change</button>
+                  </div>
+                );
+              })()}
               <label className="flex flex-col">
                 <span className="sr-only">Message</span>
                 <textarea ref={box} value={draft} onChange={(e) => setDraft(e.target.value)} rows={3} placeholder={`Message ${first}`} onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) send(); }}
@@ -391,6 +434,77 @@ export function V7Messages() {
           )}
         </aside>
       )}
+      {choosing && selected?.student && (
+        <AudienceSheet student={selected.student} value={audiences[selected.key] ?? STUDENT_ONLY}
+          onSave={(a) => { setAudiences((m) => ({ ...m, [selected.key]: a })); setChoosing(false); }} onClose={() => setChoosing(false)} />
+      )}
     </div>
+  );
+}
+
+/** Who the conversation goes to: the four choices SchooLinks offers, as one
+ *  list of rows with a check, then the staff to loop in (Joshua, 22 Oct 2026:
+ *  "Student Only, Guardians Only, Student + Guardians, Include Other School
+ *  Staff ... Keep the UI simple and explicit"). Guardians come from the
+ *  student's family record; each can be left out. */
+function AudienceSheet({ student, value, onSave, onClose }: { student: CounselorStudent; value: Audience; onSave: (a: Audience) => void; onClose: () => void }) {
+  const guardians = useMemo(() => guardiansFor(student), [student]);
+  const [kind, setKind] = useState<Audience["kind"]>(value.kind);
+  const [gs, setGs] = useState<Set<string>>(() => new Set(value.kind === "student" ? guardians.map((g) => g.name) : value.guardians));
+  const [staffOn, setStaffOn] = useState(value.staff.length > 0);
+  const [staff, setStaff] = useState<Set<string>>(() => new Set(value.staff));
+  const first = student.name.split(" ")[0];
+  const toggle = (set: React.Dispatch<React.SetStateAction<Set<string>>>, id: string) => set((p) => { const n = new Set(p); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const picked: Audience = { kind, guardians: kind === "student" ? [] : guardians.filter((g) => gs.has(g.name)).map((g) => g.name), staff: staffOn ? STAFF.filter((x) => staff.has(x.name)).map((x) => x.name) : [] };
+  const options: { k: Audience["kind"]; title: string; who: string; Icon: typeof UserRound }[] = [
+    { k: "student", title: "Student only", who: student.name, Icon: UserRound },
+    { k: "guardians", title: "Guardians only", who: guardians.map((g) => `${g.name} (${g.relation.toLowerCase()})`).join(", ") || "No guardian on file", Icon: Users },
+    { k: "both", title: "Student and guardians", who: [student.name, ...guardians.map((g) => g.name)].join(", "), Icon: Users },
+  ];
+  return (
+    <Modal overline={`Message ${first}`} title="Who gets this?" onClose={onClose} footer={<PrimaryButton onClick={() => onSave(picked)}>Use this</PrimaryButton>}>
+      <ul className="flex flex-col">
+        {options.map(({ k, title, who, Icon }) => {
+          const on = kind === k;
+          const disabled = k !== "student" && guardians.length === 0;
+          return (
+            <li key={k} className="border-b last:border-b-0" style={{ borderColor: RULE }}>
+              <button type="button" role="radio" aria-checked={on} disabled={disabled} onClick={() => setKind(k)} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] py-[12px] text-left disabled:cursor-not-allowed disabled:opacity-50">
+                <span className="flex size-[36px] flex-none items-center justify-center rounded-full border" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", color: on ? "var(--pc-link, var(--color-text-brand))" : "var(--muted-foreground)" }}><Icon className="h-4 w-4" aria-hidden /></span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="text-[15px] font-semibold">{title}</span>
+                  <span className="truncate text-[13px]" style={MUTED}>{who}</span>
+                </span>
+                {on && <Check className="h-4 w-4 flex-none" style={{ color: "var(--pc-link, var(--color-text-brand))" }} aria-hidden />}
+              </button>
+              {on && k !== "student" && guardians.length > 1 && (
+                <ul className="flex flex-col gap-[6px] pb-[12px] pl-[48px]">
+                  {guardians.map((g) => (
+                    <li key={g.name}><label className="flex cursor-pointer items-center gap-[10px] text-[14px]"><input type="checkbox" checked={gs.has(g.name)} onChange={() => toggle(setGs, g.name)} className="size-[16px] accent-[var(--primary)]" />{g.name} <span style={MUTED}>· {g.relation.toLowerCase()}</span></label></li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
+        <li className="border-t pt-[4px]" style={{ borderColor: RULE }}>
+          <label className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] py-[12px]">
+            <input type="checkbox" checked={staffOn} onChange={(e) => setStaffOn(e.target.checked)} className="ml-[10px] size-[16px] flex-none accent-[var(--primary)]" />
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="text-[15px] font-semibold">Include other school staff</span>
+              <span className="text-[13px]" style={MUTED}>Pick colleagues who should be in this conversation</span>
+            </span>
+          </label>
+          {staffOn && (
+            <ul className="flex flex-col gap-[6px] pb-[12px] pl-[48px]">
+              {STAFF.map((p) => (
+                <li key={p.name}><label className="flex cursor-pointer items-center gap-[10px] text-[14px]"><input type="checkbox" checked={staff.has(p.name)} onChange={() => toggle(setStaff, p.name)} className="size-[16px] accent-[var(--primary)]" />{p.name} <span style={MUTED}>· {p.role}</span></label></li>
+              ))}
+            </ul>
+          )}
+        </li>
+      </ul>
+      <p className="text-[13.5px] font-semibold">Goes to: <span className="font-normal">{audienceLine(picked, student.name, guardians)}</span></p>
+    </Modal>
   );
 }
