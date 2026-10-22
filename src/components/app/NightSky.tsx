@@ -71,6 +71,8 @@ const TINTS = [
 ] as const;
 
 type Star = {
+  /** this star's own timing in a swell, 0..1 */
+  j: number;
   x: number; y: number;
   b: number; // brightness 0..1 (steep curve: most near 0)
   tint: number;
@@ -129,7 +131,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
     let running = false;
     let moments: Moment[] = [];
     let animating = false; // calm mode: only while a moment plays
-    const MOMENT_MS = 2000;
+    const MOMENT_MS = 2400;
     // lively: the eased cursor lean (-1..1) and the next unprompted shooting star
     let leanX = 0, leanY = 0, aimX = 0, aimY = 0;
     let nextShot = performance.now() + 4000 + Math.random() * 5000;
@@ -168,6 +170,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
           s2: 0.7 + Math.random() * 1.6,
           p1: Math.random() * Math.PI * 2,
           p2: Math.random() * Math.PI * 2,
+          j: Math.random(),
         };
       });
     };
@@ -204,23 +207,29 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
       for (const s of stars) {
         let x = s.x + offset;
         if (x > width) x -= width;
-        // a moment's wave: a ring of light travelling out from where it
-        // happened; a star brightens as the ring passes and eases outward
+        // A moment's light (22 Oct 2026, Chandu: "when it does the wave and
+        // also moves like a ripple all bouncy it looks more like water than
+        // the stars"): no ring travelling outward and nothing moves. The
+        // stars near where it happened catch light one by one on their own
+        // loose timing (farther is a little later, with plenty of jitter),
+        // each swelling for a quarter second and settling over a second,
+        // fainter with distance. Page loads and actions use the same swell;
+        // a big moment still adds the shooting star below.
         let boost = 0;
-        let push = 0;
         for (const m of moments) {
           if (m.shotOnly) continue;
           const age = now - m.t0;
-          if (age < 0) continue; // a ripple waiting its beat
-          const r = age * (m.speed ?? 0.85);
+          if (age < 0) continue; // a second swell waiting its beat
           const d = Math.hypot(x - m.x, s.y + 40);
-          const ring = Math.exp(-(((d - r) / (m.width ?? 110)) ** 2));
-          const fade = Math.max(0, 1 - age / MOMENT_MS);
-          const k = ring * fade * (m.big ? 1.5 : 1) * (m.strength ?? 1);
+          const reach = (m.width ?? 110) * 5;
+          if (d > reach) continue;
+          const delay = (d / reach) * 500 / (m.speed ?? 0.85) + s.j * 520;
+          const a = age - delay;
+          if (a < 0) continue;
+          const env = a < 260 ? a / 260 : Math.max(0, 1 - (a - 260) / 1000);
+          const k = env * (1 - 0.55 * (d / reach)) * (m.big ? 1.3 : 1) * (m.strength ?? 1);
           boost += k;
-          push += k * Math.sign(x - m.x) * 5;
         }
-        x += push;
         // lively: near (bright) stars lean further from the cursor than far ones
         const depth = lively ? 4 + s.b * 14 : 0;
         x -= leanX * depth;
@@ -235,7 +244,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
           : 1;
         const alpha = Math.min(1, base * flicker * (1 + boost * 2.2) + boost * 0.25 * vis);
         // a crisp core for every star; a halo only on the bright ones
-        const core = (1.1 + s.b * 2.4) * (1 + boost * 0.7);
+        const core = (1.1 + s.b * 2.4) * (1 + boost * 0.2);
         ctx.globalAlpha = alpha;
         ctx.drawImage(cores[s.tint], x - core / 2, y - core / 2, core, core);
         if (s.b > 0.35 || boost > 0.3) {
@@ -323,7 +332,8 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
         // twice. It starts somewhere across the upper sky, a little off the
         // last place, after a short pause that varies, at its own pace and
         // width, and now and then a softer second ripple follows a beat
-        // behind. Actions keep their own moments. A boxed sky stays quiet.
+        // behind (a swell, not a ripple). Actions keep their own moments. A
+        // boxed sky stays quiet.
         if (!contained && !reduce.matches) window.setTimeout(wake, 250 + Math.random() * 500);
         if (reduce.matches || calm) {
           draw(0, 0);
