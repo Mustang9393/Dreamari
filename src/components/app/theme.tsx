@@ -125,7 +125,25 @@ export function useGlobalTheme() {
 export function ThemeBoot() {
   const pathname = usePathname();
   useEffect(() => {
-    applyTheme(themeFor(pathname ?? location.pathname));
+    const apply = () => applyTheme(themeFor(pathname ?? location.pathname));
+    apply();
+    // When React regenerates the tree after a hydration mismatch (seen on
+    // Home, Explore and Profile in dev, 22 Oct 2026), <html> gets the
+    // server's className back: no theme class and no look class, so a light
+    // page turned dark and the Black & Blue look fell back to v1 until the
+    // next navigation. Put both back whenever they go missing.
+    const root = document.documentElement;
+    const observer = new MutationObserver(() => {
+      if (!root.classList.contains("light") && !root.classList.contains("dark")) apply();
+      try {
+        // DEMO-ONLY: the look switch (layout.tsx); v2 unless v1 was chosen
+        if (!root.classList.contains("look-v2") && localStorage.getItem("dreamari-look") !== "v1") root.classList.add("look-v2");
+      } catch {
+        // private browsing etc.
+      }
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
   }, [pathname]);
   return null;
 }

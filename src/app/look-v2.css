@@ -819,3 +819,21 @@ html.look-v2.light .cpk-art {
 html.look-v2.light [data-focal] img[src*="-white"] {
   filter: invert(0.88) sepia(0.4) saturate(2.2) hue-rotate(190deg);
 }
+/* Night scenes keep the night. tokens.css gives [data-night-scene] (the For
+   You photo reel, a glossary game's chrome) the dark ui tokens in light,
+   because their ground is always a full-bleed photo with dark scrims: so
+   the scrim set goes back to dark's values inside them too, and the frost
+   never reaches a surface that stays dark by design. */
+html.look-v2.light [data-night-scene] {
+  --scrim-deep: #0e0c20;
+  --scrim-rgb: 12 16 35;
+  --scrim-gain: 1;
+  --scrim-glass-gain: 1;
+  --scrim-ink: #ffffff;
+  --scrim-ink-soft: rgba(255, 255, 255, 0.86);
+  --scrim-chip-edge: rgba(255, 255, 255, 0.3);
+  --scrim-tile-bg: rgba(255, 255, 255, 0.09);
+  --scrim-chip-text: linear-gradient(157deg, rgba(255, 255, 255, 1) 12.857%, rgba(255, 255, 255, 0.72) 50%, rgba(255, 255, 255, 0.92) 84.286%);
+  --card-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7), 0 1px 10px rgba(0, 0, 0, 0.4);
+  --card-text-shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
