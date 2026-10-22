@@ -35,6 +35,7 @@ import { useSearchParams } from "next/navigation";
 import { Check, Paperclip, RotateCcw, Search, Send, UserRound, Users, X } from "lucide-react";
 import { guardiansFor } from "../v5/family";
 import { TextTabs } from "@/components/app/TextTabs";
+import { IconTip } from "@/components/app/IconTip";
 import { QUESTIONS } from "@/components/counselor/v4/CounselorConnect";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { avatarIndexForName, type CounselorStudent } from "@/lib/counselorRoster";
@@ -353,8 +354,24 @@ export function V7Messages() {
       )}
       {selected && !group && (
         <aside ref={panel} aria-label="Open conversation" className={`flex min-h-[420px] min-w-0 scroll-mt-[var(--space-8)] flex-col self-start p-[var(--space-6)] lg:sticky lg:top-[96px] ${CARD}`} style={CARD_STYLE}>
-          {/* who */}
+          {/* who; and, only when the conversation goes beyond the student,
+             who else is in it, as small tags under the name the way
+             SchooLinks shows participants, with one quiet icon to change
+             it (Chandu, 22 Oct 2026: "remove the to omar and parents info
+             from messages panel. Keep that extremely intuitive and familiar
+             dont overcomplicate with additional copy"; Joshua's ask was the
+             audience options and knowing who receives, which the tags and
+             the sheet cover) */}
           {(() => {
+            const a = selected.student ? (audiences[selected.key] ?? STUDENT_ONLY) : null;
+            const extra = a && (a.kind !== "student" || a.staff.length > 0);
+            const gs = selected.student ? guardiansFor(selected.student) : [];
+            const tags = !a || !extra ? [] : [
+              ...(a.kind !== "guardians" ? [] : []),
+              ...(a.kind === "guardians" ? [`${selected.name} not included`] : []),
+              ...a.guardians.map((g) => { const r = gs.find((x) => x.name === g)?.relation; return r ? `${g} · ${r.toLowerCase()}` : g; }),
+              ...a.staff,
+            ];
             const who = (
               <>
                 <Face row={selected} size={48} />
@@ -364,9 +381,27 @@ export function V7Messages() {
                 </span>
               </>
             );
-            return selected.student
-              ? <Link href={studentHref(selected.student.id)} className="dm-quiet flex min-w-0 items-center gap-[var(--space-3)] self-start rounded-[var(--radius-md)]">{who}</Link>
-              : <div className="flex min-w-0 items-center gap-[var(--space-3)]">{who}</div>;
+            return (
+              <div className="flex flex-col gap-[var(--space-3)]">
+                <div className="flex items-start justify-between gap-[var(--space-3)]">
+                  {selected.student
+                    ? <Link href={studentHref(selected.student.id)} className="dm-quiet flex min-w-0 items-center gap-[var(--space-3)] self-start rounded-[var(--radius-md)]">{who}</Link>
+                    : <div className="flex min-w-0 items-center gap-[var(--space-3)]">{who}</div>}
+                  {selected.student && (
+                    <IconTip label={extra ? "Change who gets this" : "Add guardians or staff"}>
+                      <button type="button" onClick={() => setChoosing(true)} aria-label={extra ? "Change who gets this" : "Add guardians or staff"} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: extra ? "var(--pc-link, var(--color-text-brand))" : "var(--muted-foreground)" }}>
+                        <Users className="h-[18px] w-[18px]" aria-hidden />
+                      </button>
+                    </IconTip>
+                  )}
+                </div>
+                {tags.length > 0 && (
+                  <ul className="flex flex-wrap gap-[6px]">
+                    {tags.map((t) => <li key={t} className="rounded-full border px-[10px] py-[3px] text-[12.5px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{t}</li>)}
+                  </ul>
+                )}
+              </div>
+            );
           })()}
 
           {/* the chat */}
@@ -377,9 +412,6 @@ export function V7Messages() {
                 <span className={`flex min-w-0 flex-col gap-[3px] ${l.from === "you" ? "items-end" : ""}`}>
                   <p className={`m-0 px-[14px] py-[9px] text-[15px] leading-[22px] whitespace-pre-wrap ${l.from === "you" ? "rounded-[18px] rounded-br-[6px]" : "rounded-[18px] rounded-bl-[6px]"}`}
                     style={l.from === "you" ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>{l.text}</p>
-                  {l.audience && l.audience.kind !== "student" || (l.audience && l.audience.staff.length > 0) ? (
-                    <span className="px-[4px] text-[12px]" style={MUTED}>To {audienceLine(l.audience!, selected.name, selected.student ? guardiansFor(selected.student) : [])}</span>
-                  ) : null}
                 </span>
               </li>
             ))}
@@ -388,20 +420,6 @@ export function V7Messages() {
 
           {canWrite && (
             <div className="mt-auto flex flex-col gap-[var(--space-3)] pt-[var(--space-5)]">
-              {/* who gets it, said before Send (Joshua, 22 Oct 2026: "the
-                 counselor always knows exactly who will receive the message
-                 before sending it"); Change opens the audience sheet */}
-              {selected.student && (() => {
-                const a = audiences[selected.key] ?? STUDENT_ONLY;
-                const gs = guardiansFor(selected.student);
-                return (
-                  <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[4px] text-[13.5px]">
-                    <span className="font-semibold" style={MUTED}>To</span>
-                    <span className="min-w-0 flex-1 truncate">{audienceLine(a, selected.name, gs)}</span>
-                    <button type="button" onClick={() => setChoosing(true)} className="dm-link flex-none cursor-pointer font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>Change</button>
-                  </div>
-                );
-              })()}
               <label className="flex flex-col">
                 <span className="sr-only">Message</span>
                 <textarea ref={box} value={draft} onChange={(e) => setDraft(e.target.value)} rows={3} placeholder={`Message ${first}`} onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) send(); }}

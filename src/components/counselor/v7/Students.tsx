@@ -15,11 +15,10 @@
 //
 // Chandu, on top: "I will default to alphabetical order but we should still
 // surface the ones needing attention first so its brought to the attention
-// of the counselors when they land on the page. Not a different section but
-// surfaced at the top just like SchooLinks has": a strip above the table
-// with the students who need you, neediest first, each opening their
-// profile, and "See all" filtering the table to them. The table under it
-// stays one mixed A to Z list.
+// of the counselors when they land on the page. Not a different section",
+// then "dont make need you first as a row. Just make them populate first
+// in the same table": the one table lists At Risk, then Needs Attention,
+// then On Track, each run A to Z by last name. No strip, no sections.
 //
 // Kept: search, the grade and plan pickers, Export, Message students
 // (select mode, "Message selected · N"), and &status=need from Home, which
@@ -28,10 +27,10 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronRight, Download, MessageSquare, Search, X } from "lucide-react";
+import { Download, MessageSquare, Search, X } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { attentionRank, lastActiveLabel, type CounselorStudent } from "@/lib/counselorRoster";
+import { lastActiveLabel, type CounselorStudent } from "@/lib/counselorRoster";
 import { StudentFace } from "../v5/StudentFace";
 import { flagsFor, gpaOf } from "./data";
 import { StudentProfile } from "./StudentProfile";
@@ -62,6 +61,11 @@ export function lastFirst(name: string): string {
   return i < 0 ? name : `${name.slice(i + 1)}, ${name.slice(0, i)}`;
 }
 const byLastName = (a: CounselorStudent, b: CounselorStudent) => lastFirst(a.name).localeCompare(lastFirst(b.name));
+// Chandu, 22 Oct 2026: "dont make need you first as a row. Just make them
+// populate first in the same table": At Risk first, then Needs Attention,
+// then On Track, each run A to Z by last name; one table, no strip.
+const NEED_ORDER: Record<CounselorStudent["status"], number> = { "At Risk": 0, "Needs Attention": 1, "On Track": 2 };
+const needFirst = (a: CounselorStudent, b: CounselorStudent) => NEED_ORDER[a.status] - NEED_ORDER[b.status] || byLastName(a, b);
 
 /** The Progress column: the one open item, or how many there are. */
 export function progressCell(s: CounselorStudent): string {
@@ -92,15 +96,12 @@ function Directory() {
   const router = useRouter();
   const plans = useMemo(() => [...new Set(roster.map(planOf))].sort(), [roster]);
   const needle = q.trim().toLowerCase();
-  const filtering = !!needle || grade !== "all" || plan !== "all" || status !== "all";
   const list = useMemo(() => roster
     .filter((s) => !needle || s.name.toLowerCase().includes(needle) || lastFirst(s.name).toLowerCase().includes(needle))
     .filter((s) => grade === "all" || String(s.grade) === grade)
     .filter((s) => plan === "all" || planOf(s) === plan)
     .filter((s) => status === "all" || (status === "need" ? s.status !== "On Track" : s.status === status))
-    .sort(byLastName), [roster, needle, grade, plan, status]);
-  // the strip: who needs you, neediest first, whatever the table shows
-  const needYou = useMemo(() => roster.filter((s) => s.status !== "On Track").sort(attentionRank), [roster]);
+    .sort(needFirst), [roster, needle, grade, plan, status]);
   const toggle = (id: string) => setPicked((p) => { const n = new Set(p); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   const messageSelected = () => {
     const ids = [...picked];
@@ -147,42 +148,23 @@ function Directory() {
         </div>
       )}
 
-      {/* who needs you, surfaced above the mixed list (not a section) */}
-      {!filtering && needYou.length > 0 && (
-        <section aria-label="Students who need you" className="flex flex-col gap-[var(--space-2)]">
-          <div className="flex items-center justify-between gap-[var(--space-3)]">
-            <span className="text-[14px] font-semibold">Needs you first <span className="tabular-nums" style={MUTED}>{needYou.length}</span></span>
-            <button type="button" onClick={() => setStatus("need")} className="dm-link inline-flex cursor-pointer items-center gap-[4px] text-[14px] font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>See all<ChevronRight className="h-[15px] w-[15px]" aria-hidden /></button>
-          </div>
-          <ul className="-mx-5 flex gap-[var(--space-2)] overflow-x-auto px-5 pb-[6px] [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
-            {needYou.slice(0, 12).map((s) => (
-              <li key={s.id} className="flex-none">
-                <Link href={studentHref(s.id)} className="dm-quiet flex items-center gap-[10px] rounded-full border py-[6px] pr-[14px] pl-[6px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                  <StudentFace s={s} size={28} />
-                  <span className="flex flex-col">
-                    <span className="text-[13.5px] leading-[17px] font-semibold whitespace-nowrap">{lastFirst(s.name)}</span>
-                    <span className="flex items-center gap-[5px] text-[12px] leading-[15px] whitespace-nowrap" style={MUTED}><span aria-hidden className="size-[6px] rounded-full" style={{ background: STATUS_DOT[s.status] }} />{progressCell(s)}</span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       {list.length ? (
         <div className="flex flex-col gap-[var(--space-3)]">
           <div className={`${CARD} overflow-hidden`} style={CARD_STYLE}>
             <div role="row" className="hidden items-center gap-[14px] border-b px-[var(--space-5)] py-[10px] text-[12px] font-semibold tracking-[0.08em] uppercase md:flex" style={{ ...MUTED, borderColor: RULE }}>
-              <span className="w-[32px] flex-none" />
+              <span className="w-[36px] flex-none" />
               <span className="w-[220px] flex-none">Name</span>
               <span className="w-[72px] flex-none">Grade</span>
               <span className="w-[150px] flex-none">Status</span>
               <span className="min-w-0 flex-1">Progress</span>
               <span className="w-[110px] flex-none text-right">Last activity</span>
             </div>
+            {/* roomy rows in faint alternating bands, so a wide row reads
+               across (Chandu, 22 Oct 2026: "give the rows room to breathe and
+               allow more space between them. Make it very easy to scan. We
+               can even have alternate light and dark bands") */}
             <ul>
-              {list.slice(0, shown).map((s) => <Row key={s.id} s={s} picked={selecting ? picked.has(s.id) : null} onToggle={() => toggle(s.id)} />)}
+              {list.slice(0, shown).map((s, i) => <Row key={s.id} s={s} band={i % 2 === 1} picked={selecting ? picked.has(s.id) : null} onToggle={() => toggle(s.id)} />)}
             </ul>
           </div>
           <div className="flex items-center justify-between gap-[var(--space-3)] text-[14px]" style={MUTED}>
@@ -201,10 +183,11 @@ function Directory() {
 }
 
 /** One line: face, Last, First, grade, status, the one open item, last activity. */
-function Row({ s, picked, onToggle }: { s: CounselorStudent; /** null outside select mode */ picked: boolean | null; onToggle: () => void }) {
+const BAND = { background: "color-mix(in srgb, var(--foreground) 4%, transparent)" } as const;
+function Row({ s, band, picked, onToggle }: { s: CounselorStudent; /** every other row, a faint band */ band: boolean; /** null outside select mode */ picked: boolean | null; onToggle: () => void }) {
   const cells = (
     <>
-      <StudentFace s={s} size={32} />
+      <StudentFace s={s} size={36} />
       <span className="flex min-w-0 flex-1 flex-col md:w-[220px] md:flex-none">
         <span className="truncate text-[15px] font-semibold">{lastFirst(s.name)}</span>
         <span className="truncate text-[13px] md:hidden" style={MUTED}>Grade {s.grade} · {progressCell(s)}</span>
@@ -220,8 +203,8 @@ function Row({ s, picked, onToggle }: { s: CounselorStudent; /** null outside se
   );
   if (picked !== null) {
     return (
-      <li className="border-b last:border-b-0" style={{ borderColor: RULE }}>
-        <label className="dm-quiet flex cursor-pointer items-center gap-[14px] px-[var(--space-5)] py-[11px]">
+      <li style={band ? BAND : undefined}>
+        <label className="dm-quiet flex cursor-pointer items-center gap-[14px] px-[var(--space-5)] py-[16px]">
           <input type="checkbox" checked={picked} onChange={onToggle} aria-label={`Select ${s.name} for a group message`} className="size-[18px] flex-none accent-[var(--primary)]" />
           {cells}
         </label>
@@ -229,8 +212,8 @@ function Row({ s, picked, onToggle }: { s: CounselorStudent; /** null outside se
     );
   }
   return (
-    <li className="border-b last:border-b-0" style={{ borderColor: RULE }}>
-      <Link href={studentHref(s.id)} className="dm-quiet group flex items-center gap-[14px] px-[var(--space-5)] py-[11px]">
+    <li style={band ? BAND : undefined}>
+      <Link href={studentHref(s.id)} className="dm-quiet group flex items-center gap-[14px] px-[var(--space-5)] py-[16px]">
         {cells}
       </Link>
     </li>
