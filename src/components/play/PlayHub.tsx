@@ -32,7 +32,10 @@ import type { Simulation } from "./types";
 // (Career Simulations, matching "simulations stay dominant by default").
 const PLAY_ROW_IDS = ["simulations", "glossary", "soon"];
 
-// Every playable simulation is available in the hero row.
+// Every built simulation sits in the row (22 Oct 2026, Chandu: "please move
+// all of codex's new games into the play tab row instead of hiding in the
+// hamburger menu with appropriate thumbnails"); Food Scientist wears its
+// Level 1 lab arrival scene.
 const HUB_SIMULATIONS = SIMULATIONS;
 
 // TV UX (direct feedback, 21 Sept 2026: "he wants all rows like this" --

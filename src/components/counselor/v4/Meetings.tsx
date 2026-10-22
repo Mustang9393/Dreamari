@@ -18,10 +18,11 @@
 //   a time grid (MeetingsWeek.tsx) with the week's progress in its head.
 // - Two views (10 Oct 2026, Chandu: "meetings feel really dense and
 //   cluttered, maybe calendar is a view they can toggle and the other view
-//   has the things"): Agenda, the default, holds the things (the hero,
+//   has the things"): Agenda holds the things (the hero,
 //   past meetings, a calm list of the next seven days); Calendar holds only
 //   the week grid. A quiet two-icon toggle on the toolbar, not a second
-//   pill row; the choice is remembered per browser (useAB).
+//   pill row. Restored 21 Oct 2026: Calendar stays the default; Agenda
+//   is optional again at Chandu's request.
 // - Needs Outreach: a session, not a list (MeetingsOutreach.tsx). "3 of 11
 //   reached" sparks forward with each invite, the row takes an "Invited"
 //   stamp with a burst and a chime, and Dreamy hops. Reaching everyone
@@ -38,7 +39,8 @@
 
 import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { CalendarPlus, UserRound } from "lucide-react";
+import { CalendarDays, CalendarPlus, List, UserRound } from "lucide-react";
+import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { attentionRank } from "@/lib/counselorRoster";
 import { isPast, useMeetingsDone } from "@/lib/counselorMeetings";
@@ -47,6 +49,7 @@ import { openLog } from "../v5/LogSheet";
 import { SubTabs } from "./SubTabs";
 import { useMeetings } from "../v5/Prepare";
 import { MeetingsWeek } from "./MeetingsWeek";
+import { ComingUp, MeetingsNext } from "./MeetingsNext";
 import { MeetingsOutreach } from "./MeetingsOutreach";
 import { iso, useInvites, useMinuteClock } from "./meetingsModel";
 import "./today.css";
@@ -54,6 +57,8 @@ import "./prepare.css";
 import "./meetings.css";
 
 type View = "upcoming" | "outreach";
+type Mode = "agenda" | "calendar";
+const MODES = [{ key: "calendar" as const, label: "Calendar", Icon: CalendarDays }, { key: "agenda" as const, label: "Agenda", Icon: List }];
 const NEED: Record<string, number> = { "At Risk": 0, "Needs Attention": 1, "On Track": 2 };
 
 export function Meetings() {
@@ -80,6 +85,8 @@ export function Meetings() {
   const toLog = over.filter((m) => !done[m.id]).reverse();
   // the agenda lists the next seven days after the hero's meeting
   const weekOut = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
+  // Always open on Calendar, including for browsers with an old Agenda preference.
+  const [mode, setMode] = useState<Mode>("calendar");
 
   // Needs Outreach: students Dreamari flags with nothing booked into office
   // hours from this week on. Reached = invited this week, or booked or met
@@ -107,14 +114,28 @@ export function Meetings() {
       <div className="prep-toolbar">
         <SubTabs ariaLabel="Meetings view" value={view} onChange={setView} options={[{ key: "upcoming", label: "Upcoming", count: upcoming.length }, { key: "outreach", label: "Needs Outreach", count: toReach.length }]} />
         <div className="prep-toolbar-actions">
+          {view === "upcoming" && (
+            <span className="mtg-mode" role="group" aria-label="Upcoming layout">
+              {MODES.map(({ key, label, Icon }) => (
+                <IconTip key={key} label={label}>
+                  <button type="button" onClick={() => setMode(key)} aria-pressed={mode === key} aria-label={label} className="dm-quiet"><Icon className="h-4 w-4" aria-hidden /></button>
+                </IconTip>
+              ))}
+            </span>
+          )}
           <button type="button" className="prep-action is-quiet" onClick={() => openLog({ mode: "walkin" })}><UserRound className="h-4 w-4" aria-hidden />Log a walk-in</button>
           <button type="button" className="prep-action is-primary" onClick={() => openLog({ mode: "book" })}><CalendarPlus className="h-4 w-4" aria-hidden />Book a meeting</button>
         </div>
       </div>
       {view === "upcoming" ? (
-        // Calendar only (21 Oct 2026, Maisha: "lets have 'Calendar' view be
-        // the default. I don't think we need the 'Agenda' view at all")
-        <MeetingsWeek meetings={meetings} roster={ordered} now={now} done={done} />
+        mode === "calendar" ? (
+          <MeetingsWeek meetings={meetings} roster={ordered} now={now} done={done} />
+        ) : (
+          <div className="mtg-agenda v4-sections">
+            <MeetingsNext next={next} toLog={toLog} anyOver={over.length > 0} byId={byId} now={now} onOutreach={() => setView("outreach")} />
+            <ComingUp meetings={upcoming.slice(1).filter((m) => m.day <= weekOut)} byId={byId} now={now} />
+          </div>
+        )
       ) : (
         <MeetingsOutreach flagged={flagged} invitedIds={invitedIds} bookedIds={bookedIds} monday={monday} now={now} />
       )}

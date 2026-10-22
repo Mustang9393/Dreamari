@@ -8,6 +8,25 @@ UX/Food now use `ib-semantic-v3`: place and stakes precede the mentor, peer seed
 
 **Validation:** 13 regression tests pass, including exact IB kind/practice/layout sequence, four/four/four counts, scoring, lesson passage references, cast entrances/continuity, exterior routes and approved RN gameplay preservation. Both career structural validators pass; TypeScript, scoped lint, tokens and production build pass. Browser observed UX's four word cards, four correct practice matches advancing directly with reputation unchanged, the four-item/45-second/3-of-4 rapid UI, Food's four rapid answers and single +6 result (QA timer-off option restored afterwards), file-zone submission, document error selection and midpoint. These are preview-assisted targeted checks, not certification of every branch or a fresh exhaustive 29-beat playthrough. Master SOP v2.1 PDF/prompts published publicly as Site version17; architecture diversity and exact IB structure are included.
 
+## 2026-10-21: restore optional Agenda in v4 Meetings
+
+**Why (Chandu):** "calendar view is default view now but we lost the agenda view ... bring the agenda view back as an optional toggleable view". The calendar-only change removed the existing layout switch.
+
+**Changed:** restored the existing Calendar / Agenda icon toggle and the original `MeetingsNext` / `ComingUp` agenda. Calendar initializes as the default on every page entry, ignoring the legacy saved Agenda preference. The selection stays while switching between Upcoming and Needs Outreach on this page. Reuses existing components, styling, accessible pressed states and IconTip labels.
+
+**Validation:** TypeScript, scoped ESLint, tokens:check and diff whitespace checks pass. Browser on localhost:3147 confirmed Calendar selected on entry, Agenda renders next meeting / past meetings / coming up, and Calendar renders again after toggling back. No new scrolling containers or positioning code; touched-component scrollbar audit clean. Physical Windows/Chromebook verification not performed.
+
+**Release:** Chandu authorized merging/pushing on 22 October. Merged current main; the only conflict was this append-only handoff, resolved by retaining both entries. No counselor code conflicts.
+
+## 2026-10-22: Play tab: every built game in its row (Food Scientist, Kitchen Terms)
+
+**Why (Chandu):** "please move all of codex's new games into the play tab row instead of hiding in the hamburger menu with appropriate thumbnails." This reverses the 17 Oct rule that kept cover-less games hamburger-only.
+
+- **Food Scientist (`play/PlayHub.tsx`):** `HUB_SIMULATIONS` is every simulation now; Food Scientist wears its Level 1 lab arrival scene (`/images/play/fs/v7/arrival.png`, already its cover). UX Designer and Registered Nurse were already in the row.
+- **Kitchen Terms (`play/games.ts` GLOSSARY_GAMES, `glossary/data.ts` GLOSSARY_HUB_RELEASED):** joins the glossary row and is released. Its cover (`/images/app/glossary-kitchen-thumb-oct22.webp`) is drawn to the 19 Oct set: one isometric object (a steaming pot) on the navy gradient, no Dreamy, no text; Codex can replace it with a matching render.
+- **Hamburger (`app/chrome.tsx`):** the Food Scientist, UX Designer and Registered Nurse QA links are gone; Glossary QA stays under Labs.
+- Checked: tsc clean; /play at 1440 lists both new games and opens their routes.
+
 ## 2026-10-22 — Food Scientist in the Play hero row
 
 Chandu requested Food Scientist in the Career Simulations hero row. Removed its hub-only exclusion; it now uses the existing playable card and route on desktop and mobile. The existing live-career filter also removes its old “In the works” placeholder. No game content changed. Validation: scoped ESLint, TypeScript and tokens; this is a catalogue inclusion using the existing shared card.
