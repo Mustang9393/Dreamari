@@ -131,7 +131,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
     let running = false;
     let moments: Moment[] = [];
     let animating = false; // calm mode: only while a moment plays
-    const MOMENT_MS = 2400;
+    const MOMENT_MS = 2000;
     // lively: the eased cursor lean (-1..1) and the next unprompted shooting star
     let leanX = 0, leanY = 0, aimX = 0, aimY = 0;
     let nextShot = performance.now() + 4000 + Math.random() * 5000;
@@ -207,29 +207,27 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
       for (const s of stars) {
         let x = s.x + offset;
         if (x > width) x -= width;
-        // A moment's light (22 Oct 2026, Chandu: "when it does the wave and
-        // also moves like a ripple all bouncy it looks more like water than
-        // the stars"): no ring travelling outward and nothing moves. The
-        // stars near where it happened catch light one by one on their own
-        // loose timing (farther is a little later, with plenty of jitter),
-        // each swelling for a quarter second and settling over a second,
-        // fainter with distance. Page loads and actions use the same swell;
-        // a big moment still adds the shooting star below.
+        // A moment's wave: a ring of light travelling out from where it
+        // happened; a star brightens as the ring passes and eases outward a
+        // touch. The ease is a third of what it was (22 Oct 2026, Chandu,
+        // after a brightness-only swell: "lets revert to our original
+        // animations for the stars, but tone down the bounciness. That was
+        // more evident and visible"): the ring reads, the water does not.
         let boost = 0;
+        let push = 0;
         for (const m of moments) {
           if (m.shotOnly) continue;
           const age = now - m.t0;
-          if (age < 0) continue; // a second swell waiting its beat
+          if (age < 0) continue; // a second ripple waiting its beat
+          const r = age * (m.speed ?? 0.85);
           const d = Math.hypot(x - m.x, s.y + 40);
-          const reach = (m.width ?? 110) * 5;
-          if (d > reach) continue;
-          const delay = (d / reach) * 500 / (m.speed ?? 0.85) + s.j * 520;
-          const a = age - delay;
-          if (a < 0) continue;
-          const env = a < 260 ? a / 260 : Math.max(0, 1 - (a - 260) / 1000);
-          const k = env * (1 - 0.55 * (d / reach)) * (m.big ? 1.3 : 1) * (m.strength ?? 1);
+          const ring = Math.exp(-(((d - r) / (m.width ?? 110)) ** 2));
+          const fade = Math.max(0, 1 - age / MOMENT_MS);
+          const k = ring * fade * (m.big ? 1.5 : 1) * (m.strength ?? 1);
           boost += k;
+          push += k * Math.sign(x - m.x) * 1.6;
         }
+        x += push;
         // lively: near (bright) stars lean further from the cursor than far ones
         const depth = lively ? 4 + s.b * 14 : 0;
         x -= leanX * depth;
@@ -244,7 +242,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
           : 1;
         const alpha = Math.min(1, base * flicker * (1 + boost * 2.2) + boost * 0.25 * vis);
         // a crisp core for every star; a halo only on the bright ones
-        const core = (1.1 + s.b * 2.4) * (1 + boost * 0.2);
+        const core = (1.1 + s.b * 2.4) * (1 + boost * 0.7);
         ctx.globalAlpha = alpha;
         ctx.drawImage(cores[s.tint], x - core / 2, y - core / 2, core, core);
         if (s.b > 0.35 || boost > 0.3) {
