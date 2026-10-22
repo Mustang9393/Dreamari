@@ -1,10 +1,10 @@
 {
-  "version": 9,
+  "version": 10,
   "career": "food-scientist",
   "levels": [
     "fs-l1"
   ],
-  "template": "ib-semantic-v3",
+  "template": "ib-career-tasks-v4",
   "groups": [
     {
       "id": "fs-v7-arrival",
@@ -165,169 +165,169 @@
       "beat": "FS1-01",
       "scene": "fs-v9-exterior",
       "shotGroup": "fs-v9-exterior",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-02",
       "scene": "fs-v9-opening",
       "shotGroup": "fs-v9-opening",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-03",
       "scene": "fs-v7-arrival",
       "shotGroup": "fs-v7-arrival",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-04",
       "scene": "fs-v7-arrival",
       "shotGroup": "fs-v7-arrival",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-05",
       "scene": "fs-v7-collab",
       "shotGroup": "fs-v7-collab",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-06",
       "scene": "fs-v7-arrival",
       "shotGroup": "fs-v7-arrival",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-07",
       "scene": "fs-v7-work",
       "shotGroup": "fs-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-08",
       "scene": "fs-v7-work",
       "shotGroup": "fs-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-09",
       "scene": "fs-v7-work",
       "shotGroup": "fs-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-10",
       "scene": "fs-v7-work",
       "shotGroup": "fs-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "artifact": "fs-visible-labels"
     },
     {
       "beat": "FS1-11",
       "scene": "fs-v7-work",
       "shotGroup": "fs-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "artifact": "fs-visible-labels"
     },
     {
       "beat": "FS1-12",
       "scene": "fs-v7-review",
       "shotGroup": "fs-v7-review",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-13",
       "scene": "fs-v7-review",
       "shotGroup": "fs-v7-review",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "artifact": "fs-coded-labels"
     },
     {
       "beat": "FS1-14",
       "scene": "fs-v7-review",
       "shotGroup": "fs-v7-review",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-15",
       "scene": "fs-v7-review",
       "shotGroup": "fs-v7-review",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-MID",
       "scene": "fs-v7-closing",
       "shotGroup": "fs-v7-closing",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-ACT2",
       "scene": "fs-v9-opening",
       "shotGroup": "fs-v9-opening",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-18",
       "scene": "fs-v7-collab",
       "shotGroup": "fs-v7-collab",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-19",
       "scene": "fs-v9-credit",
       "shotGroup": "fs-v9-credit",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-20",
       "scene": "fs-v9-credit",
       "shotGroup": "fs-v9-credit",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-21",
       "scene": "fs-v9-opening",
       "shotGroup": "fs-v9-opening",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-22",
       "scene": "fs-v7-work",
       "shotGroup": "fs-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-23",
       "scene": "fs-v7-work",
       "shotGroup": "fs-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-24",
       "scene": "fs-v7-records",
       "shotGroup": "fs-v7-records",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-25",
       "scene": "fs-v7-records",
       "shotGroup": "fs-v7-records",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-26",
       "scene": "fs-v7-records",
       "shotGroup": "fs-v7-records",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-27",
       "scene": "fs-v7-work",
       "shotGroup": "fs-v7-work",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     },
     {
       "beat": "FS1-28",
       "scene": "fs-v7-closing",
       "shotGroup": "fs-v7-closing",
-      "noArtifactReason": "The question or dialogue is the focus; no additional work surface is needed."
+      "noArtifactReason": "The concise task or dialogue supplies the evidence; no extra work surface is needed."
     }
   ],
   "milestones": [

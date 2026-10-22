@@ -1439,7 +1439,7 @@ export function ChoiceBody({ beat, onResolve, locked, graphic, accent = "var(--w
   if (beat.layout === "zones") return <ZonesBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
   if (beat.layout === "move") return <MoveBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
   if (beat.layout === "chat") return <ChatBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} cast={cast} />;
-  if (beat.dragEnabled) return <DragOptionsBody beat={beat} onResolve={onResolve} locked={locked} />;
+  if (beat.dragEnabled) return <DragOptionsBody beat={beat} onResolve={onResolve} locked={locked} graphic={graphic} />;
   // v3 (cinematic): when every answer is something you SAY, the answers are
   // your speech bubbles, right-aligned with the tail toward you (Nintendo
   // Labo, Venba, Oxenfree), not a stack of tiles.
@@ -1990,7 +1990,7 @@ function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat;
  *  that card and springs the token back; a right drop locks. Every card
  *  is also a plain tap target, so a missed drag never strands anyone
  *  (same fallback CheckBeat's own drag method already relies on). */
-function DragOptionsBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
+function DragOptionsBody({ beat, onResolve, locked, graphic }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; graphic?: ReactNode }) {
   const choices = useShuffled(beat.choices, beat.id);
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [over, setOver] = useState<number | null>(null);
@@ -2028,6 +2028,7 @@ function DragOptionsBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onReso
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
+      {graphic}
       <div className="flex flex-col gap-[14px]">
         <div className="flex justify-center rounded-[var(--radius-lg)] border border-dashed py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)" }}>
           {locked !== null ? (
@@ -2052,16 +2053,17 @@ function DragOptionsBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onReso
                 setOver(null);
                 dropAt(pointer.clientX, pointer.clientY);
               }}
-              className={`relative z-30 flex h-[48px] w-[48px] cursor-grab touch-none items-center justify-center rounded-full text-[10px] font-extrabold tracking-[0.06em] text-white uppercase select-none active:cursor-grabbing ${dragging ? "" : "motion-safe:animate-[play-pulse_1.6s_ease-in-out_infinite]"}`}
+              className={`relative z-30 flex h-[48px] ${beat.dragItem ? "min-w-[80px] rounded-[var(--radius-md)] px-[16px] text-[13px]" : "w-[48px] rounded-full text-[10px] uppercase"} cursor-grab touch-none items-center justify-center font-extrabold tracking-[0.06em] select-none active:cursor-grabbing ${dragging ? "" : "motion-safe:animate-[play-pulse_1.6s_ease-in-out_infinite]"}`}
               style={{
                 background: "var(--primary)",
+                color: "var(--primary-foreground)",
                 boxShadow: dragging
                   ? "0 0 0 6px color-mix(in srgb, var(--primary) 30%, transparent), 0 14px 34px -8px color-mix(in srgb, var(--primary) 85%, transparent)"
                   : "0 6px 18px -6px color-mix(in srgb, var(--primary) 70%, transparent)",
               }}
-              aria-label="Drag this token onto an answer, or tap an answer"
+              aria-label={`Drag ${beat.dragItem ?? "this token"} onto an answer, or tap an answer`}
             >
-              Drag
+              {beat.dragItem ?? "Drag"}
             </motion.button>
           )}
         </div>
