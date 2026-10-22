@@ -122,13 +122,13 @@ function breakableTitle(title: string): string {
 export function OpenCue() {
   return (
     <>
-      <span aria-hidden className="poster-dim pointer-events-none absolute inset-0 z-[1]" style={{ background: "rgba(5,8,20,0.32)" }} />
+      <span aria-hidden className="poster-dim pointer-events-none absolute inset-0 z-[1]" style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.32 * var(--scrim-glass-gain, 1)))" }} />
       <span
         aria-hidden
         className="poster-cue pointer-events-none absolute top-1/2 left-1/2 z-[2] flex size-[52px] items-center justify-center rounded-full border backdrop-blur-[6px]"
-        style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.5)", boxShadow: "0 10px 28px -8px rgba(0,0,0,0.7)" }}
+        style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.5))", boxShadow: "0 10px 28px -8px rgba(0,0,0,0.7)" }}
       >
-        <ChevronRight className="ml-[2px] h-[26px] w-[26px]" strokeWidth={2.75} style={{ color: "#FFFFFF" }} />
+        <ChevronRight className="ml-[2px] h-[26px] w-[26px]" strokeWidth={2.75} style={{ color: "var(--scrim-ink, #FFFFFF)" }} />
       </span>
     </>
   );
@@ -142,7 +142,7 @@ function PosterSave({ on, title, onToggle }: { on: boolean; title: string; onTog
   return (
     <button type="button" aria-pressed={on} aria-label={on ? `Remove ${title} from Saved` : `Save ${title}`} onClick={(e) => { e.stopPropagation(); onToggle(); }}
       className={`poster-save ${on ? "poster-save--on" : ""} dm-quiet absolute top-2 right-2 z-[6] flex size-[32px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]`}
-      style={{ background: on ? "color-mix(in srgb, var(--primary) 70%, rgba(5,8,20,0.7))" : "rgba(5,8,20,0.55)", borderColor: on ? "var(--primary)" : "rgba(255,255,255,0.22)", color: "#fff" }}>
+      style={{ background: on ? "color-mix(in srgb, var(--primary) 70%, rgb(var(--scrim-rgb, 5 8 20) / calc(0.7 * var(--scrim-glass-gain, 1))))" : "rgb(var(--scrim-rgb, 5 8 20) / calc(0.55 * var(--scrim-glass-gain, 1)))", borderColor: on ? "var(--primary)" : "rgba(255,255,255,0.22)", color: "var(--scrim-ink, #fff)" }}>
       {on ? <BookmarkCheck className="h-[14px] w-[14px]" aria-hidden /> : <Bookmark className="h-[14px] w-[14px]" aria-hidden />}
     </button>
   );
@@ -155,13 +155,13 @@ export function PosterChip({ text }: { text: string }) {
   return (
     <span
       className="absolute top-2 left-2 z-[1] rounded-[var(--radius-sm)] border px-[12px] py-[4px] backdrop-blur-[10px]"
-      style={{ background: "rgba(5,8,20,0.78)", borderColor: "rgba(255,255,255,0.16)" }}
+      style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.78 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.16))" }}
     >
       <span
         className="text-[19px] leading-[24px] font-extrabold whitespace-nowrap"
         style={{
           fontFamily: "var(--font-display)",
-          backgroundImage: "linear-gradient(157deg, rgba(255,255,255,1) 12.857%, rgba(255,255,255,0.72) 50%, rgba(255,255,255,0.92) 84.286%)",
+          backgroundImage: "var(--scrim-chip-text, linear-gradient(157deg, rgba(255,255,255,1) 12.857%, rgba(255,255,255,0.72) 50%, rgba(255,255,255,0.92) 84.286%))",
           WebkitBackgroundClip: "text",
           backgroundClip: "text",
           color: "transparent",

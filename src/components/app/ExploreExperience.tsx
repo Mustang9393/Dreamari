@@ -528,7 +528,7 @@ const REEL_PHOTO_FOCUS: Record<string, string> = {};
 // dark tint (below) now carries more of this job, so the shadow doesn't have
 // to (direct instruction, 23 Sept 2026: "don't make it look like we
 // overindexed on shadows").
-const LEGIBLE_TEXT_SHADOW = "0 1px 3px rgba(0,0,0,0.55)";
+const LEGIBLE_TEXT_SHADOW = "var(--card-text-shadow-soft, 0 1px 3px rgba(0,0,0,0.55))";
 
 // Shared by the autoplay timer and the progress track's own fill animation
 // duration below, so the two can never drift apart.
@@ -819,7 +819,7 @@ function EnvCard({
                     aria-label="Previous: summary"
                     onClick={jumpTo("Summary")}
                     className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full lg:size-4"
-                    style={{ color: face === "Summary" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
+                    style={{ color: face === "Summary" ? "rgba(255,255,255,0.35)" : "var(--scrim-ink-soft, rgba(255,255,255,0.9))" }}
                   >
                     <ChevronLeft className="h-4 w-4 lg:h-3 lg:w-3" aria-hidden />
                   </button>
@@ -844,7 +844,7 @@ function EnvCard({
                     aria-label="Next: more info"
                     onClick={jumpTo("Details")}
                     className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full lg:size-4"
-                    style={{ color: face === "Details" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
+                    style={{ color: face === "Details" ? "rgba(255,255,255,0.35)" : "var(--scrim-ink-soft, rgba(255,255,255,0.9))" }}
                   >
                     <ChevronRight className="h-4 w-4 lg:h-3 lg:w-3" aria-hidden />
                   </button>
@@ -959,7 +959,7 @@ function EnvCard({
                     style={{ width: "200%", transform: face === "Summary" ? "translateX(0)" : "translateX(-50%)" }}
                   >
                     <div aria-hidden={face !== "Summary"} className="flex flex-none flex-col gap-[var(--space-2)]" style={{ width: "50%" }}>
-                      <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
+                      <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--scrim-ink, #ffffff)" }}>
                         {career.title}
                       </h2>
                       {/* Custom-designed edge case, 22 Sept 2026: this sits in a
@@ -969,7 +969,12 @@ function EnvCard({
                          stacked content past the card's bounds and clip
                          something else in it. line-clamp caps it defensively,
                          matching this app's own truncation convention. */}
-                      <p className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
+                      {/* white, not --primary-foreground: in the Black & Blue look
+                         that token is the near-black ink for blue fills, and this
+                         line sits on the photo's scrim (22 Oct 2026, Chandu: "in
+                         dark mode the text i saw was dark where it should have
+                         been white") */}
+                      <p className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--scrim-ink-soft, rgba(255,255,255,0.92))" }}>
                         {career.description}
                       </p>
                       {/* Eyebrow (dim, small, uppercase) over the actual value
@@ -980,7 +985,7 @@ function EnvCard({
                          use brightness too"). */}
                       <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
                         <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Median salary</span>
-                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.salary}</span>
+                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.98))" }}>{career.salary}</span>
                       </div>
                     </div>
                     {/* justify-center: Details has less content than Summary
@@ -996,11 +1001,11 @@ function EnvCard({
                     <div aria-hidden={face !== "Details"} className="flex flex-none flex-col justify-center gap-[var(--space-3)]" style={{ width: "50%" }}>
                       <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
                         <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Major</span>
-                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.major}</span>
+                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.98))" }}>{career.major}</span>
                       </div>
                       <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
                         <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Main skills</span>
-                        <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.mainSkills}</span>
+                        <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.98))" }}>{career.mainSkills}</span>
                       </div>
                     </div>
                   </div>
@@ -1090,10 +1095,10 @@ function EnvCard({
                   className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
                   /* solid dark glass in BOTH themes: the faint white-alpha surface
                      disappeared against the photos (founder feedback) */
-                  style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
+                  style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.72 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.30))", backdropFilter: "blur(10px)" }}
                 >
                   {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
-                  <Play className="h-[15px] w-[15px] flex-none" fill="#F4F7FF" style={{ color: "#F4F7FF" }} aria-hidden />
+                  <Play className="h-[15px] w-[15px] flex-none" fill="#F4F7FF" style={{ color: "var(--scrim-ink, #F4F7FF)" }} aria-hidden />
                   <span className="text-[17px] leading-[23px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
                     Play
                   </span>
@@ -1172,7 +1177,7 @@ function ProgressiveBlur() {
          tint that's okay, subtly"). Own soft-edged band, same feather
          logic as the blur layers, so it ramps in with them rather than
          adding a second seam. */}
-      <div className="absolute inset-0" style={{ background: "rgba(4,6,12,0.16)", maskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)`, WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)` }} />
+      <div className="absolute inset-0" style={{ background: "rgb(var(--scrim-rgb, 4 6 12) / calc(0.16 * var(--scrim-gain, 1)))", maskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)`, WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)` }} />
     </div>
   );
 }
@@ -1262,7 +1267,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
             aria-pressed={captionsShown}
             onClick={() => setCaptionsOn(!captionsShown)}
             className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-            style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
+            style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.72 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.30))", color: "var(--scrim-ink, #ffffff)" }}
           >
             {captionsShown ? <Captions className="h-4 w-4" aria-hidden /> : <CaptionsOff className="h-4 w-4" aria-hidden />}
           </button>
@@ -1278,7 +1283,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
             if (video.paused) video.play().catch(() => {}); else video.pause();
           }}
           className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-          style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
+          style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.72 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.30))", color: "var(--scrim-ink, #ffffff)" }}
         >
           {paused ? <Play className="h-4 w-4" fill="currentColor" aria-hidden /> : <Pause className="h-4 w-4" fill="currentColor" aria-hidden />}
         </button>
@@ -1290,7 +1295,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
           aria-pressed={soundOn}
           onClick={() => onSoundChange(!soundOn)}
           className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-          style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
+          style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.72 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.30))", color: "var(--scrim-ink, #ffffff)" }}
         >
           {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
         </button>

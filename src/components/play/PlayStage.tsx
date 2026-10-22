@@ -278,8 +278,8 @@ function StageCard({ candidate, title, world, cover, focus, centre, pulseKey, on
         <Link href={`/play/${candidate.sim.id}`} className={`${frame} cursor-pointer`} style={frameStyle} onClick={(e) => { if (blocked()) e.preventDefault(); }} draggable={false}>
           {face}
           <span className="sr-only">Play {title}</span>
-          <span aria-hidden className="absolute right-[16px] bottom-[16px] flex size-[56px] items-center justify-center rounded-full border backdrop-blur-[6px]" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.45)" }}>
-            <Play className="ml-[3px] h-[24px] w-[24px]" fill="#fff" style={{ color: "#fff" }} />
+          <span aria-hidden className="absolute right-[16px] bottom-[16px] flex size-[56px] items-center justify-center rounded-full border backdrop-blur-[6px]" style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.45))" }}>
+            <Play className="ml-[3px] h-[24px] w-[24px]" fill="#fff" style={{ color: "var(--scrim-ink, #fff)" }} />
           </span>
         </Link>
       ) : (

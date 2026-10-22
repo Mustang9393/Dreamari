@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Listbox } from "@/components/app/Listbox";
 
@@ -18,7 +18,21 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 // so every number on every dashboard is drawn the same way. Colours come from
 // the caller (the person's world accent); nothing here invents a palette.
 
-export function Segmented<K extends string>({ options, value, onChange, ariaLabel, grow = false, dense = false }: { options: { key: K; label: string; /** unread count, shown as a small badge after the label */ badge?: number }[]; value: K; onChange: (key: K) => void; ariaLabel: string; grow?: boolean; /** tighter padding below sm, so five short tabs fit a 375px phone */ dense?: boolean }) {
+export function Segmented<K extends string>({ options, value, onChange, ariaLabel, grow = false, dense = false, overflow: mode = "dropdown", bleed }: {
+  options: { key: K; label: string; /** unread count, shown as a small badge after the label */ badge?: number }[];
+  value: K;
+  onChange: (key: K) => void;
+  ariaLabel: string;
+  grow?: boolean;
+  /** tighter padding below sm, so five short tabs fit a 375px phone */
+  dense?: boolean;
+  /** what happens when the tabs do not fit: the shared dropdown (default),
+   *  or a sideways-scrolling row that shows it scrolls (see below) */
+  overflow?: "dropdown" | "scroll";
+  /** scroll mode: classes that run the row out to the screen's edges
+   *  (the caller knows its page padding), e.g. "-mx-5 px-5 md:-mx-8 md:px-8" */
+  bleed?: string;
+}) {
   // The filled pill slides between options via a shared layoutId instead of
   // just appearing under whichever one is active (direct feedback: "have
   // whatever highlight we end up keeping for tabs... animate and slide over
@@ -34,8 +48,34 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
   // nothing saying more were there. The row stays mounted (invisible, no
   // height) so it keeps measuring its own content against the space it is
   // given, and the dropdown takes its place until the tabs fit again.
+  // Scroll mode (Chandu, 22 Oct 2026, Career Detail: "can we keep the tabs
+  // for mobile and tablet too instead of the dropdown? But not like its cut
+  // off inside a pill shape so its not obvious they can scroll?"). What made
+  // the old scrolling row unreadable was its frame: a bordered pill that
+  // looked closed, with the last tab clipped inside it. So while the tabs
+  // overflow, the frame goes and the row runs out to the screen's edges
+  // (`bleed`), each edge with more tabs behind it fades out, the last
+  // visible tab is cut by the screen itself (a cue there is more), and the
+  // chosen tab scrolls to the middle when it changes. The tabs keep their
+  // fill and sizes, so the row still reads as the same control.
   const rowRef = useRef<HTMLDivElement>(null);
   const [overflow, setOverflow] = useState(false);
+  const scrolling = overflow && mode === "scroll";
+  const [edge, setEdge] = useState({ start: true, end: false });
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row || !scrolling) return;
+    const read = () => setEdge({ start: row.scrollLeft <= 1, end: row.scrollLeft + row.clientWidth >= row.scrollWidth - 1 });
+    read();
+    row.addEventListener("scroll", read, { passive: true });
+    return () => row.removeEventListener("scroll", read);
+  }, [scrolling, options.length]);
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row || !scrolling) return;
+    const on = row.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (on) row.scrollTo({ left: on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2, behavior: "smooth" });
+  }, [value, scrolling]);
   useLayoutEffect(() => {
     const row = rowRef.current;
     if (!row) return;
@@ -61,11 +101,23 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
          on the counselor Student Profile and My Impact, 26 Sept 2026). */}
       <div
         ref={rowRef}
-        role={overflow ? undefined : "tablist"}
-        aria-label={overflow ? undefined : ariaLabel}
-        aria-hidden={overflow || undefined}
-        className={`flex max-w-full shrink-0 gap-[2px] rounded-[var(--radius-md)] ${overflow ? "invisible h-0 overflow-hidden" : "overflow-x-auto border p-[3px]"} flow-scroll ${grow ? "w-full" : "w-fit"}`}
-        style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
+        role={overflow && !scrolling ? undefined : "tablist"}
+        aria-label={overflow && !scrolling ? undefined : ariaLabel}
+        aria-hidden={(overflow && !scrolling) || undefined}
+        // scroll mode: w-auto, not w-full, so the negative margins in `bleed`
+        // widen the row to the screen's edges instead of only shifting it
+        className={`flex shrink-0 gap-[2px] rounded-[var(--radius-md)] ${overflow ? (scrolling ? `w-auto max-w-none overflow-x-auto py-[3px] ${bleed ?? ""}` : "invisible h-0 max-w-full overflow-hidden") : "max-w-full overflow-x-auto border p-[3px]"} flow-scroll ${scrolling ? "" : grow ? "w-full" : "w-fit"}`}
+        style={
+          scrolling
+            ? {
+                // the fades: a mask, not an overlay, so the tabs stay tappable to
+                // the edge; only as wide as the page gutter, so the next tab is
+                // still seen cut off by the screen (the cue that there is more)
+                maskImage: `linear-gradient(to right, ${edge.start ? "#000" : "transparent"} 0, #000 20px, #000 calc(100% - 20px), ${edge.end ? "#000" : "transparent"} 100%)`,
+                WebkitMaskImage: `linear-gradient(to right, ${edge.start ? "#000" : "transparent"} 0, #000 20px, #000 calc(100% - 20px), ${edge.end ? "#000" : "transparent"} 100%)`,
+              }
+            : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }
+        }
       >
         {options.map((option) => {
           const on = option.key === value;
@@ -75,13 +127,13 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
               type="button"
               role="tab"
               // roving: only the selected tab is a Tab stop; the arrows (TabKeys) move between them
-              tabIndex={overflow ? -1 : on || (!options.some((o) => o.key === value) && option === options[0]) ? 0 : -1}
+              tabIndex={overflow && !scrolling ? -1 : on || (!options.some((o) => o.key === value) && option === options[0]) ? 0 : -1}
               aria-selected={on}
               onClick={() => onChange(option.key)}
-              className={`dm-seg relative flex min-h-[34px] ${on ? "cursor-default" : "cursor-pointer"} items-center justify-center rounded-[var(--radius-sm)] ${dense ? "px-[7px] sm:px-[14px]" : "px-[14px]"} text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}
+              className={`dm-seg relative flex min-h-[34px] ${on ? "cursor-default" : "cursor-pointer"} items-center justify-center rounded-[var(--radius-sm)] ${dense ? "px-[7px] sm:px-[14px]" : "px-[14px]"} text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow && !scrolling ? "flex-1" : "flex-none"}`}
               style={{ color: on ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
             >
-              {on && !overflow && (
+              {on && (!overflow || scrolling) && (
                 <motion.span
                   layoutId={`segmented-pill-${uid} data-fill-light`}
                   aria-hidden
@@ -98,7 +150,7 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
           );
         })}
       </div>
-      {overflow && (
+      {overflow && !scrolling && (
         <Listbox
           ariaLabel={ariaLabel}
           value={value}

@@ -167,11 +167,16 @@ export function PayMap({
          especially on tablet and mobile it overlaps the map"): its own row
          above the map, never on it, at display size. It shows the student's
          state until another is hovered or tapped, so it is never empty. */}
-      {renderReadout ? (
-        <div className="mb-[var(--space-3)] border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }} aria-live="polite">
-          {renderReadout(active ?? yourState ?? null, !active && !!yourState)}
-        </div>
-      ) : (() => {
+      {renderReadout ? (() => {
+        // a caller that draws its own readout elsewhere (Pay & Growth's scan
+        // column, 22 Oct 2026) returns null here, and the row goes away too
+        const row = renderReadout(active ?? yourState ?? null, !active && !!yourState);
+        return row ? (
+          <div className="mb-[var(--space-3)] border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }} aria-live="polite">
+            {row}
+          </div>
+        ) : null;
+      })() : (() => {
         const shown = active ?? yourState ?? null;
         const v = shown ? values.get(shown) : undefined;
         return (

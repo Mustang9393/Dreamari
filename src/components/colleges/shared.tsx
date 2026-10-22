@@ -95,7 +95,7 @@ export function CollegePicture({ c, sizes, priority = false, className = "", pos
   // Missing and failed photos share the branded placeholder.
   const [imgFailed, setImgFailed] = useState(false);
   return (
-    <span className={`relative block overflow-hidden ${className}`} style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 22%, #0e0c20) 100%)" }} aria-hidden>
+    <span className={`relative block overflow-hidden ${className}`} style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, var(--scrim-deep, #0e0c20)) 0%, var(--scrim-deep, #0e0c20) 60%, color-mix(in srgb, var(--hero-accent-teal) 22%, var(--scrim-deep, #0e0c20)) 100%)" }} aria-hidden>
       {img && !imgFailed ? (
         <Image src={img} alt="" fill sizes={sizes} priority={priority} className="object-cover" style={position ? { objectPosition: position } : undefined} onError={() => setImgFailed(true)} />
       ) : (
@@ -116,7 +116,7 @@ export function SaveButton({ on, onToggle, size = 40 }: { on: boolean; onToggle:
         aria-label={label}
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggle(); }}
         className="dm-quiet flex flex-none cursor-pointer items-center justify-center rounded-full border"
-        style={{ width: size, height: size, borderColor: on ? ACCENT : "rgba(255,255,255,0.22)", background: on ? "color-mix(in srgb, var(--primary) 22%, rgba(12,16,35,0.6))" : "rgba(12,16,35,0.55)", color: on ? SOFT : "#fff", backdropFilter: "blur(8px)" }}
+        style={{ width: size, height: size, borderColor: on ? ACCENT : "rgba(255,255,255,0.22)", background: on ? "color-mix(in srgb, var(--primary) 22%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.6 * var(--scrim-glass-gain, 1))))" : "rgb(var(--scrim-rgb, 12 16 35) / calc(0.55 * var(--scrim-glass-gain, 1)))", color: on ? SOFT : "#fff", backdropFilter: "blur(8px)" }}
       >
         <Bookmark className="h-[18px] w-[18px]" fill={on ? "currentColor" : "none"} aria-hidden />
       </button>
@@ -416,11 +416,11 @@ export function SchoolCard({
            the poster-card hover rules (dim + cue) from globals.css. */}
         {/* the dim covers the whole photo run, not just the cue band: a
            band-sized dim drew a hard line across the picture on hover */}
-        <span className="poster-dim pointer-events-none absolute inset-0 z-[1]" style={{ background: "rgba(5,8,20,0.28)" }} />
+        <span className="poster-dim pointer-events-none absolute inset-0 z-[1]" style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.28 * var(--scrim-glass-gain, 1)))" }} />
         <span className="absolute inset-x-0 top-0 h-[150px]">
           <span
             className="poster-cue pointer-events-none absolute top-1/2 left-1/2 z-[2] flex h-[40px] items-center gap-[4px] rounded-full border pl-[16px] pr-[12px] text-[13.5px] font-bold whitespace-nowrap backdrop-blur-[8px]"
-            style={{ background: "rgba(5,8,20,0.62)", borderColor: "rgba(255,255,255,0.5)", color: "#fff", boxShadow: "0 10px 28px -8px rgba(0,0,0,0.7)", textShadow: "none" }}
+            style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.62 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.5))", color: "var(--scrim-ink, #fff)", boxShadow: "0 10px 28px -8px rgba(0,0,0,0.7)", textShadow: "none" }}
           >
             View school <ChevronRight className="h-[16px] w-[16px]" strokeWidth={2.75} aria-hidden />
           </span>
@@ -465,7 +465,7 @@ export function SchoolCard({
           <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--pc-ink, #FFFFFF)" }}>
             <span className="truncate">{program}</span>
             <span className="flex h-[16px] w-[16px] flex-none items-center justify-center rounded-full" style={{ background: ACCENT }} aria-hidden>
-              <Check className="h-[10px] w-[10px]" strokeWidth={3.5} style={{ color: "#fff" }} />
+              <Check className="h-[10px] w-[10px]" strokeWidth={3.5} style={{ color: "var(--scrim-ink, #fff)" }} />
             </span>
           </span>
         )}

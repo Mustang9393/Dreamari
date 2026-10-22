@@ -188,20 +188,29 @@ html.look-v2 [data-space-backdrop] {
   display: none !important;
 }
 
-/* Light: cool white with the same frame as dark, in ice blue (reference 2's
-   wash): a glow under the header and a fainter one at the bottom edge. */
+/* Light: the day sky (AppBackdrop.tsx, SkySun.tsx), the night's twin (22 Oct
+   2026, Chandu: "something of a night and day mode"). A day sky is deepest
+   blue straight up and white at the horizon, the reverse of night, so the
+   blue sits behind the header and a pale haze on the bottom edge. This CSS
+   is the whole day without WebGL; SkySun draws the rays, cirrus and motes
+   over it. The ground stays paper white. */
 html.look-v2.light body {
   background:
-    radial-gradient(ellipse 55% 34% at 50% -6%, #d3e5fa 0, transparent 76%),
-    radial-gradient(ellipse 70% 26% at 50% 108%, #e1ecf9 0, transparent 75%),
-    #f3f6f9;
+    radial-gradient(ellipse 70% 40% at 56% -8%, #bdd6f4 0, #dbe8f8 46%, transparent 78%),
+    radial-gradient(ellipse 80% 22% at 50% 104%, #dfeafa 0, transparent 80%),
+    #eef3f9;
   background-attachment: fixed;
 }
+/* The ground keeps a little of the sky's blue all the way down (22 Oct 2026,
+   Chandu: "i dont want the cards scrims to fade into the background"): white
+   cards and their scrims need a ground a shade cooler than they are. */
 html.look-v2.light [data-app-backdrop] {
   background:
-    radial-gradient(58% 38% at 50% -6%, rgba(39, 128, 236, 0.22) 0%, rgba(39, 128, 236, 0.07) 50%, transparent 78%),
-    radial-gradient(76% 30% at 50% 108%, rgba(39, 128, 236, 0.14) 0%, transparent 76%),
-    #f3f6f9 !important;
+    radial-gradient(70% 40% at 56% -8%, rgba(39, 128, 236, 0.30) 0%, rgba(39, 128, 236, 0.12) 46%, transparent 78%),
+    radial-gradient(90% 30% at 56% -6%, rgba(23, 106, 207, 0.10) 0%, transparent 72%),
+    radial-gradient(80% 22% at 50% 104%, rgba(39, 128, 236, 0.14) 0%, transparent 80%),
+    linear-gradient(to bottom, rgba(39, 128, 236, 0.03) 0%, rgba(39, 128, 236, 0.06) 100%),
+    #eef3f9 !important;
 }
 html.look-v2.light [data-app-backdrop]::after {
   opacity: 0.025;
@@ -740,4 +749,91 @@ html.look-v2 [data-mkt-btn="primary"] {
 }
 html.look-v2.light [data-flow-space] {
   background: #f3f6f9 !important;
+}
+
+/* ---------- 7. Photo scrims in light (22 Oct 2026) ----------
+   Chandu, reviewing the day sky: "the text scrim stuff on the carousels
+   are also still dark we should have a full light mode pass next." The
+   student app's photo surfaces (Home's hero carousel, a career's header,
+   Profile's and Connect's photo cards, the chips and badges that sit on a
+   poster) were drawn dark-first: a near-black base (#0e0c20) under the
+   photo, near-black ramps over it, black glass chips, white type with a
+   black text shadow. On the paper-white page they read as dark mode
+   pasted onto light.
+
+   In light they take the treatment the poster cards already have (the
+   Match card's scrim flipping white was "amazing", tokens.css): the photo
+   fades into the page's own frost (#f4f7ff) and the type is navy ink on
+   it, the same values as the school cards' photo-ink set. A first pass
+   kept the white type and turned the scrim cobalt; Chandu: "i dont like
+   the blue scrim". The components read every one of these through
+   var(--scrim-*, <dark literal>), and the variables are set only here, so
+   dark mode keeps its exact values. */
+html.look-v2.light {
+  /* the base a photo fades into (dark: #0e0c20) */
+  --scrim-deep: #f4f7ff;
+  /* the ramp and glass colour as space-separated channels, for
+     rgb(var(--scrim-rgb, <dark channels>) / <alpha>) (dark: 12 16 35,
+     14 12 32, 10 9 20, 5 8 20 and black, each kept as its own fallback) */
+  --scrim-rgb: 244 247 255;
+  /* frost hides less than black at the same alpha, and the ink needs a
+     pale ground: ramps run at 1.25x their dark alpha (a 72% stop becomes
+     90%; a 55% stop 69%, where the ink still clears 5:1 over a black
+     photo) and the glass chips at 1.6x (a 45% chip becomes 72%: ink on
+     it 7:1 over a black photo, 12:1 over the frost) */
+  --scrim-gain: 1.25;
+  --scrim-glass-gain: 1.6;
+  /* the type on that frost (dark: white at 100 / 86 / 70%) */
+  --scrim-ink: #1d2539;
+  --scrim-ink-soft: #2f384c;
+  --scrim-ink-faint: #3b4457;
+  /* a chip's edge: white-alpha vanishes on white glass, so a navy hairline */
+  --scrim-chip-edge: rgba(29, 37, 57, 0.16);
+  /* no shadow under navy ink on frost (dark keeps its black shadow). A
+     frost halo was tried for text over bright photo patches; Chandu: "too
+     much glow on the career detail pages text and stuff in light mode.
+     Lets not do that." The hero's own ramps (below) carry the carousel. */
+  --card-text-shadow: none;
+  --card-text-shadow-soft: none;
+  /* white-alpha tiles and tags on a photo card (a community's stat tiles,
+     a school's tags) are invisible on the frost: a navy tint instead */
+  --scrim-tile-bg: rgba(29, 37, 57, 0.07);
+  /* the pay chip's figure: a white gradient in dark, flat ink in light */
+  --scrim-chip-text: linear-gradient(#1d2539, #1d2539);
+  /* Home's hero carousel (HeroPanel): the dark ramps thin out from 48%
+     across, where the title still runs (its column is 64% wide), and a
+     white tee or sky behind navy ink there is "blending into the white".
+     Light gets its own ramps, solid under the whole text column and
+     feathered past it, instead of the dark ramps scaled. */
+  --hero-scrim-desktop: linear-gradient(90deg, #f4f7ff 0%, #f4f7ff 34%, rgba(244, 247, 255, 0.92) 48%, rgba(244, 247, 255, 0.6) 60%, rgba(244, 247, 255, 0.22) 70%, transparent 80%), linear-gradient(to top, rgba(244, 247, 255, 0.75) 0%, rgba(244, 247, 255, 0.3) 30%, transparent 55%);
+  --hero-scrim-phone: linear-gradient(to top, #f4f7ff 0%, rgba(244, 247, 255, 0.96) 30%, rgba(244, 247, 255, 0.72) 50%, rgba(244, 247, 255, 0.25) 68%, transparent 100%), linear-gradient(to bottom, rgba(244, 247, 255, 0.5) 0%, rgba(244, 247, 255, 0.15) 40%, transparent 65%);
+}
+/* the Career Peek sheet's art column (app.css .cpk-art) fades into the same base */
+html.look-v2.light .cpk-art {
+  background: var(--scrim-deep);
+}
+/* Partner marks in Home's hero carousel ship as white artwork (jpmc-logo-
+   white.svg, jkcf-white.svg) and vanished on the frost (Chandu: "whatever
+   is before the apply now stuff is still white, maybe its the logos"): in
+   light they are turned to the ink. Dark keeps the white files. */
+html.look-v2.light [data-focal] img[src*="-white"] {
+  filter: invert(0.88) sepia(0.4) saturate(2.2) hue-rotate(190deg);
+}
+/* Night scenes keep the night. tokens.css gives [data-night-scene] (the For
+   You photo reel, a glossary game's chrome) the dark ui tokens in light,
+   because their ground is always a full-bleed photo with dark scrims: so
+   the scrim set goes back to dark's values inside them too, and the frost
+   never reaches a surface that stays dark by design. */
+html.look-v2.light [data-night-scene] {
+  --scrim-deep: #0e0c20;
+  --scrim-rgb: 12 16 35;
+  --scrim-gain: 1;
+  --scrim-glass-gain: 1;
+  --scrim-ink: #ffffff;
+  --scrim-ink-soft: rgba(255, 255, 255, 0.86);
+  --scrim-chip-edge: rgba(255, 255, 255, 0.3);
+  --scrim-tile-bg: rgba(255, 255, 255, 0.09);
+  --scrim-chip-text: linear-gradient(157deg, rgba(255, 255, 255, 1) 12.857%, rgba(255, 255, 255, 0.72) 50%, rgba(255, 255, 255, 0.92) 84.286%);
+  --card-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7), 0 1px 10px rgba(0, 0, 0, 0.4);
+  --card-text-shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.55);
 }

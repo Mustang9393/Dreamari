@@ -50,8 +50,8 @@ export const PHOTO_FOCUS: Record<string, string> = {
 function StatTile({ value, label }: { value: number | string; label: string }) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-sm)] px-[2px] py-[9px]" style={{ background: "rgba(255,255,255,0.09)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
-      <span className="text-[17px] leading-[21px] font-extrabold tabular-nums" style={{ color: "#FFFFFF" }}>{value}</span>
-      <span className="max-w-full truncate text-[10.5px] leading-[14px] font-semibold tracking-[-0.01em]" style={{ color: "rgba(255,255,255,0.7)" }}>{label}</span>
+      <span className="text-[17px] leading-[21px] font-extrabold tabular-nums" style={{ color: "var(--scrim-ink, #FFFFFF)" }}>{value}</span>
+      <span className="max-w-full truncate text-[10.5px] leading-[14px] font-semibold tracking-[-0.01em]" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.7))" }}>{label}</span>
     </div>
   );
 }
@@ -78,7 +78,7 @@ function MoreMarks({ className, missing, names, open, onToggle, onClose }: { cla
         aria-expanded={open}
         onClick={onToggle}
         className="dm-quiet flex h-[28px] cursor-pointer items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold"
-        style={{ background: open ? "rgba(255,255,255,0.24)" : "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", color: "#FFFFFF" }}
+        style={{ background: open ? "rgba(255,255,255,0.24)" : "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", color: "var(--scrim-ink, #FFFFFF)" }}
       >
         +{missing}{missing === 1 || className.includes("460px]:flex") ? " more" : ""}
       </button>
@@ -86,12 +86,12 @@ function MoreMarks({ className, missing, names, open, onToggle, onClose }: { cla
         role={open ? "dialog" : "tooltip"}
         aria-label="More companies"
         className={`absolute bottom-[calc(100%+8px)] left-0 z-30 flex-wrap items-center gap-[6px] rounded-[var(--radius-md)] border p-[8px] ${open ? "flex pr-[34px]" : "pointer-events-none hidden group-hover/more:flex group-focus-within/more:flex"}`}
-        style={{ background: "rgba(12,16,35,0.96)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.7)", minWidth: 120 }}
+        style={{ background: "rgb(var(--scrim-rgb, 12 16 35) / calc(0.96 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.16))", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.7)", minWidth: 120 }}
       >
         {names.map((name) => <CompanyChip key={name} name={name} tone="frost" />)}
         {open && (
           <IconTip label="Close" className="absolute top-[6px] right-[6px]">
-            <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.12)", color: "#fff" }}>
+            <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.12)", color: "var(--scrim-ink, #fff)" }}>
               <X className="h-3.5 w-3.5" aria-hidden />
             </button>
           </IconTip>
@@ -136,7 +136,7 @@ function CommunityThumb({ community }: { community: Community }) {
 
 // Same structural fix as Career Detail's HeroPhoto / ProProfile's
 // CoverImage: this card's own root already has a solid dark base
-// (`#0e0c20`) with its gradient scrim as a separate sibling, so a failed
+// (`var(--scrim-deep, #0e0c20)`) with its gradient scrim as a separate sibling, so a failed
 // cover just needs to stop painting a broken image over an
 // already-complete backdrop.
 function CommunityCover({ community }: { community: Community }) {
@@ -173,7 +173,7 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
   return (
     <div
       className="dm-tap group @container relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
-      style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
+      style={{ background: "var(--scrim-deep, #0e0c20)", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
     >
       {/* Our full-bleed photo, but dimmed and frosted so type wins: the photo
          runs at reduced brightness, the poster card's progressive blur
@@ -190,7 +190,7 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
         <CardProgressiveBlur size="34%" />
         <span
           className="absolute inset-0"
-          style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.78) 24%, rgba(12,16,35,0.26) 48%, rgba(12,16,35,0.04) 68%, transparent 100%), ${cardTopScrim()}` }}
+          style={{ background: `linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.94 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.78 * var(--scrim-gain, 1))) 24%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.26 * var(--scrim-gain, 1))) 48%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.04 * var(--scrim-gain, 1))) 68%, transparent 100%), ${cardTopScrim()}` }}
         />
       </span>
       {/* the whole card is the tap target (direct feedback) */}
@@ -205,7 +205,7 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
         <Image src={community.brandMark} alt={community.professionalsFrom[0] ?? ""} width={96} height={40} unoptimized className="absolute top-[16px] right-[18px] z-20 h-[26px] w-auto" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.45))" }} />
       )}
       {featured && (
-        <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-[var(--radius-sm)] px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: "rgba(9,10,20,0.72)", color: "#FFFFFF" }}>
+        <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-[var(--radius-sm)] px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: "rgb(var(--scrim-rgb, 9 10 20) / calc(0.72 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink, #FFFFFF)" }}>
           <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
         </span>
       )}
@@ -214,10 +214,10 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
          stat tiles; the companies row; one action at the right. */}
       <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
         {/* the title carries the card: bigger than anything under it */}
-        <h3 className={`text-[24px] leading-[28px] font-extrabold text-balance ${featured || community.brandMark ? "pr-[104px]" : ""}`} style={{ color: "#FFFFFF" }}>{community.name.replace(/ Careers$/, "")}</h3>
+        <h3 className={`text-[24px] leading-[28px] font-extrabold text-balance ${featured || community.brandMark ? "pr-[104px]" : ""}`} style={{ color: "var(--scrim-ink, #FFFFFF)" }}>{community.name.replace(/ Careers$/, "")}</h3>
         {/* a private community says so, quietly, under its name */}
         {community.access === "private" && (
-          <span className="mt-[8px] inline-flex w-fit items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[11.5px] leading-[16px] font-semibold" style={{ background: "rgba(9,10,20,0.55)", color: "rgba(255,255,255,0.92)", backdropFilter: "blur(6px)", textShadow: "none", fontFamily: "var(--font-body)" }}>
+          <span className="mt-[8px] inline-flex w-fit items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[11.5px] leading-[16px] font-semibold" style={{ background: "rgb(var(--scrim-rgb, 9 10 20) / calc(0.55 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink-soft, rgba(255,255,255,0.92))", backdropFilter: "blur(6px)", textShadow: "none", fontFamily: "var(--font-body)" }}>
             <Lock className="h-[11px] w-[11px]" aria-hidden /> Private · Invite only
           </span>
         )}
@@ -272,7 +272,7 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
             onClick={onOpen}
             aria-label={`Open ${community.name}`}
             className="dm-quiet group/cta flex min-h-[36px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[11px] text-[13px] leading-[18px] font-bold whitespace-nowrap transition-[filter] duration-200 group-hover:brightness-125 @[400px]:gap-[7px] @[400px]:px-[14px]"
-            style={{ background: `color-mix(in srgb, ${accent} 26%, rgba(12,16,35,0.78))`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 45%, rgba(255,255,255,0.18))`, color: "#FFFFFF" }}
+            style={{ background: `color-mix(in srgb, ${accent} 26%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.78 * var(--scrim-glass-gain, 1))))`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 45%, rgba(255,255,255,0.18))`, color: "var(--scrim-ink, #FFFFFF)" }}
           >
             Open <ArrowUpRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px] group-hover/cta:translate-x-[2px] group-hover/cta:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
           </button>

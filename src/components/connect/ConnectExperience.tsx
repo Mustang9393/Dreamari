@@ -651,11 +651,11 @@ export function QrSheet({ name, seed, accent, lead, partner, onClose }: { name: 
   return createPortal(
     <div role="dialog" aria-modal="true" aria-label={`${name} QR code`} className="fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-5)] backdrop-blur-[28px]" style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }} onClick={onClose}>
       <IconTip label="Close" className="absolute top-[var(--space-4)] right-[var(--space-4)]">
-        <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full border" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.24)", color: "#fff" }}>
+        <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full border" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.24)", color: "var(--scrim-ink, #fff)" }}>
           <X className="h-5 w-5" />
         </button>
       </IconTip>
-      <div className="relative w-full max-w-[320px] overflow-hidden rounded-[var(--radius-lg)] motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "#0e0c20", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }} onClick={(e) => e.stopPropagation()}>
+      <div className="relative w-full max-w-[320px] overflow-hidden rounded-[var(--radius-lg)] motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--scrim-deep, #0e0c20)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }} onClick={(e) => e.stopPropagation()}>
         <EventSurface accent={accent} />
         <div className="relative z-10 flex flex-col items-center gap-[var(--space-4)] p-[var(--space-6)]">
           <span className="relative block rounded-[12px] p-[10px]" style={{ background: "#ffffff" }}>
@@ -665,7 +665,7 @@ export function QrSheet({ name, seed, accent, lead, partner, onClose }: { name: 
             </span>
           </span>
           <EventMarks lead={lead} partner={partner} />
-          <p className="text-center text-[15px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{name}</p>
+          <p className="text-center text-[15px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--scrim-ink, #fff)" }}>{name}</p>
         </div>
       </div>
     </div>,
@@ -683,7 +683,7 @@ export function EventSurface({ accent, edge = true, tab = true }: { accent: stri
     <>
       <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 70% at 100% 0%, color-mix(in srgb, ${lit} var(--ev-glow-a, 58%), transparent) 0%, color-mix(in srgb, ${lit} var(--ev-glow-b, 18%), transparent) 42%, transparent 72%)` }} />
       <span aria-hidden className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(135deg, var(--ev-hatch, rgba(255,255,255,0.055)) 0 1px, transparent 1px 14px)" }} />
-      <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--ev-floor, rgba(12,16,35,0.85)) 0%, var(--ev-floor-mid, rgba(12,16,35,0.35)) 45%, transparent 100%)" }} />
+      <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--ev-floor, rgb(var(--scrim-rgb, 12 16 35) / calc(0.85 * var(--scrim-gain, 1)))) 0%, var(--ev-floor-mid, rgb(var(--scrim-rgb, 12 16 35) / calc(0.35 * var(--scrim-gain, 1)))) 45%, transparent 100%)" }} />
       <span aria-hidden className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: "var(--ev-grain, 0.18)" as unknown as number }} />
       {tab && <span aria-hidden className="absolute top-0 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: lit, left: "var(--tab-x, 50%)" }} />}
       {/* the card's edge, drawn here so every event surface gets the same one
@@ -2427,7 +2427,7 @@ function AskForm({
                 {text.length > 220 && <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{280 - text.length}</span>}
                 {onCancel && <button type="button" onClick={onCancel} className="dm-quiet min-h-[40px] cursor-pointer rounded-[var(--radius-md)] px-[12px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>}
                 <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId, career ?? undefined)} className={`min-h-[40px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
-                  <span style={{ color: "#FFFFFF" }}>Post</span>
+                  <span style={{ color: "var(--scrim-ink, #FFFFFF)" }}>Post</span>
                 </PrimaryCta>
               </span>
             </div>
@@ -2518,7 +2518,7 @@ function AskForm({
       <span className={`flex items-center gap-[var(--space-2)] ${narrow ? "ml-auto" : ""}`}>
           {onCancel && <button type="button" onClick={onCancel} className="dm-quiet min-h-[44px] cursor-pointer rounded-[var(--radius-md)] px-[14px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>}
           <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId, career ?? undefined)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
-        <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></span>
+        <span className="flex items-center gap-[6px]" style={{ color: "var(--scrim-ink, #FFFFFF)" }}>Post <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></span>
       </PrimaryCta>
       </span>
     </div>
@@ -4271,15 +4271,15 @@ function LaunchVoteCard() {
   return (
     <div
       className="group relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
-      style={{ background: "#0e0c20", border: "1px solid color-mix(in srgb, var(--primary) 45%, transparent)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW, fontFamily: "var(--font-display)" }}
+      style={{ background: "var(--scrim-deep, #0e0c20)", border: "1px solid color-mix(in srgb, var(--primary) 45%, transparent)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW, fontFamily: "var(--font-display)" }}
     >
       <span aria-hidden className="absolute inset-0">
         <Image src="/images/connect/covers/photo4-event-door.webp" alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "68% 45%", filter: "brightness(0.6) saturate(0.85)" }} />
         <CardProgressiveBlur size="74%" />
-        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.88) 40%, rgba(12,16,35,0.5) 70%, rgba(12,16,35,0.2) 100%), ${cardTopScrim()}` }} />
+        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.96 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.88 * var(--scrim-gain, 1))) 40%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.5 * var(--scrim-gain, 1))) 70%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.2 * var(--scrim-gain, 1))) 100%), ${cardTopScrim()}` }} />
       </span>
       <div className="relative z-10 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]">
-        <h3 className="text-[24px] leading-[28px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>What should we launch next?</h3>
+        <h3 className="text-[24px] leading-[28px] font-extrabold text-balance" style={{ color: "var(--scrim-ink, #FFFFFF)" }}>What should we launch next?</h3>
         <ul className="mt-auto flex flex-col gap-[6px] pt-[var(--space-4)]" style={{ textShadow: "none" }}>
           {LAUNCH_CANDIDATES.map((c) => {
             const votes = c.votes + (picked === c.id ? 1 : 0);
@@ -4291,11 +4291,11 @@ function LaunchVoteCard() {
                   disabled={picked !== null}
                   onClick={() => { dispatchAuroraPulse("cta"); setPicked(c.id); }}
                   className={`dm-quiet relative flex min-h-[40px] w-full cursor-pointer items-center justify-between gap-[10px] overflow-hidden rounded-[var(--radius-sm)] px-[12px] text-left text-[14px] leading-[18px] font-semibold disabled:cursor-default ${mine ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
-                  style={{ background: "rgba(12,16,35,0.58)", boxShadow: `inset 0 0 0 1px ${mine ? "var(--primary)" : "rgba(255,255,255,0.12)"}`, color: "#FFFFFF" }}
+                  style={{ background: "rgb(var(--scrim-rgb, 12 16 35) / calc(0.58 * var(--scrim-glass-gain, 1)))", boxShadow: `inset 0 0 0 1px ${mine ? "var(--primary)" : "rgba(255,255,255,0.12)"}`, color: "var(--scrim-ink, #FFFFFF)" }}
                 >
                   {picked && <span aria-hidden className="absolute inset-y-0 left-0 rounded-[var(--radius-sm)]" style={{ width: `${(votes / top) * 100}%`, background: mine ? "color-mix(in srgb, var(--primary) 45%, transparent)" : "rgba(255,255,255,0.08)", transition: "width 600ms cubic-bezier(0.16,1,0.3,1)" }} />}
                   <span className="relative flex items-center gap-[8px]">{mine && <CheckCircle2 className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />}{c.name}</span>
-                  <span className="relative text-[12px] tabular-nums" style={{ color: "rgba(255,255,255,0.7)" }}>{picked ? `${votes} votes` : "Vote"}</span>
+                  <span className="relative text-[12px] tabular-nums" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.7))" }}>{picked ? `${votes} votes` : "Vote"}</span>
                 </button>
               </li>
             );
@@ -4435,13 +4435,13 @@ function BoardView({
       <section
         aria-label="Community overview"
         className="group relative flex min-h-[260px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)] sm:min-h-[300px] sm:px-[var(--space-8)] sm:py-[var(--space-6)]"
-        style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${communityAccent(community)} 40%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
+        style={{ background: "var(--scrim-deep, #0e0c20)", border: `1px solid color-mix(in srgb, ${communityAccent(community)} 40%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
       >
         {/* taller, like the career and college headers: the photo gets room to
            breathe and the title sits low on the frost */}
         <Image src={bannerCover ?? community.photo} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
         <CardProgressiveBlur size="64%" />
-        <span aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.9) 0%, rgba(12,16,35,0.6) 40%, rgba(12,16,35,0.18) 70%, transparent 100%), ${cardTopScrim()}` }} />
+        <span aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.9 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.6 * var(--scrim-gain, 1))) 40%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.18 * var(--scrim-gain, 1))) 70%, transparent 100%), ${cardTopScrim()}` }} />
         <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${bannerInk} 18%, transparent)` }} />
         <div className="relative z-10 flex items-center gap-[var(--space-5)]">
           <div className="min-w-0 flex-1 self-start pt-[8px]">
@@ -4840,15 +4840,15 @@ function EventView({
          tabs, then the conversation. No rings, no QR, no separate gallery
          heading. */}
       {!preview && event.photos ? (
-        <section aria-label="Event" className="relative flex min-h-[300px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-6)] sm:min-h-[340px]" style={{ background: "#0e0c20", textShadow: CARD_TEXT_SHADOW, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)" }}>
+        <section aria-label="Event" className="relative flex min-h-[300px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-6)] sm:min-h-[340px]" style={{ background: "var(--scrim-deep, #0e0c20)", textShadow: CARD_TEXT_SHADOW, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)" }}>
           <button type="button" onClick={() => setPhotoOpen(0)} aria-label={`Open photos from ${event.name}`} className="absolute inset-0 cursor-pointer">
             <Image src={event.photos.images[0]} alt="" fill priority sizes="1280px" className="object-cover" />
           </button>
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,8,22,0.92) 0%, rgba(8,8,22,0.55) 45%, rgba(8,8,22,0.05) 80%)" }} />
           <div className="pointer-events-none absolute top-[var(--space-5)] right-[var(--space-6)] z-10"><EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} /></div>
           <div className="pointer-events-none relative z-10 flex flex-col gap-[6px]">
-            <h1 className="text-[30px] leading-[34px] font-extrabold text-balance sm:text-[36px] sm:leading-[40px]" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{event.name}</h1>
-            <p className="text-[14px] leading-[20px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{[event.date, event.location].filter(Boolean).join(" · ")}{typeof event.students === "number" ? ` · ${event.students} students` : ""}</p>
+            <h1 className="text-[30px] leading-[34px] font-extrabold text-balance sm:text-[36px] sm:leading-[40px]" style={{ fontFamily: "var(--font-display)", color: "var(--scrim-ink, #fff)" }}>{event.name}</h1>
+            <p className="text-[14px] leading-[20px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.85))" }}>{[event.date, event.location].filter(Boolean).join(" · ")}{typeof event.students === "number" ? ` · ${event.students} students` : ""}</p>
           </div>
         </section>
       ) : (
@@ -5176,10 +5176,10 @@ function EventView({
             <div role="dialog" aria-modal="true" aria-label={`Photo ${photoOpen + 1} of ${event.photos.count}`} className="marketing-v2 themeable fixed inset-0 z-[95] flex flex-col items-center justify-center p-4 sm:p-8" style={{ background: "rgba(6,7,16,0.6)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}>
               <button type="button" aria-label="Close" onClick={() => setPhotoOpen(null)} className="absolute inset-0 cursor-default backdrop-blur-[28px]" />
               <div className="relative z-[1] flex w-full max-w-[1100px] flex-col gap-[var(--space-3)]">
-                <div className="flex items-center justify-between text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
+                <div className="flex items-center justify-between text-[13px] leading-[18px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.8))" }}>
                   <span>{event.name} · Photo {photoOpen + 1} of {event.photos.count}</span>
                   <IconTip label="Close">
-                    <button type="button" onClick={() => setPhotoOpen(null)} aria-label="Close" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.1)", color: "#FFFFFF" }}>
+                    <button type="button" onClick={() => setPhotoOpen(null)} aria-label="Close" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.1)", color: "var(--scrim-ink, #FFFFFF)" }}>
                       <X className="h-4 w-4" aria-hidden />
                     </button>
                   </IconTip>
@@ -5195,12 +5195,12 @@ function EventView({
                   <div className="relative w-full flex-none overflow-hidden rounded-[var(--radius-lg)]" style={{ aspectRatio: "16 / 9", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }}>
                     <Image key={photoOpen} src={event.photos.images[photoOpen % event.photos.images.length]} alt="" fill sizes="1100px" className="object-cover motion-safe:animate-[fade-slide-up_0.35s_ease-out_both]" priority />
                     <IconTip label="Previous" className="absolute top-1/2 left-3 -translate-y-1/2">
-                      <button type="button" aria-label="Previous photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i - 1 + event.photos!.images.length) % event.photos!.images.length))} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
+                      <button type="button" aria-label="Previous photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i - 1 + event.photos!.images.length) % event.photos!.images.length))} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgb(var(--scrim-rgb, 9 10 20) / calc(0.6 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink, #FFFFFF)" }}>
                         <ChevronLeft className="h-5 w-5" aria-hidden />
                       </button>
                     </IconTip>
                     <IconTip label="Next" className="absolute top-1/2 right-3 -translate-y-1/2">
-                      <button type="button" aria-label="Next photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i + 1) % event.photos!.images.length))} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
+                      <button type="button" aria-label="Next photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i + 1) % event.photos!.images.length))} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgb(var(--scrim-rgb, 9 10 20) / calc(0.6 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink, #FFFFFF)" }}>
                         <ChevronRight className="h-5 w-5" aria-hidden />
                       </button>
                     </IconTip>
@@ -5971,12 +5971,12 @@ export function JoinSheet({ community, onClose, onJoin }: { community: Community
     <div ref={dialogRef} tabIndex={-1} className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={community.name}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="dm-scroll relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[480px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-        <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: "#0e0c20", fontFamily: "var(--font-display)" }}>
+        <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: "var(--scrim-deep, #0e0c20)", fontFamily: "var(--font-display)" }}>
           <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
-          <span aria-hidden className="absolute inset-0" style={{ background: "rgba(14,12,32,0.55)" }} />
-          <h2 className="relative z-10 min-w-0 flex-1 text-[16px] leading-[21px] font-extrabold" style={{ color: "#f6f5fb", textShadow: CARD_TEXT_SHADOW }}>{community.name}</h2>
+          <span aria-hidden className="absolute inset-0" style={{ background: "rgb(var(--scrim-rgb, 14 12 32) / calc(0.55 * var(--scrim-glass-gain, 1)))" }} />
+          <h2 className="relative z-10 min-w-0 flex-1 text-[16px] leading-[21px] font-extrabold" style={{ color: "var(--scrim-ink, #f6f5fb)", textShadow: CARD_TEXT_SHADOW }}>{community.name}</h2>
           <IconTip label="Close" className="z-10">
-            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(246,245,251,0.18)", color: "#f6f5fb" }}>
+            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(246,245,251,0.18)", color: "var(--scrim-ink, #f6f5fb)" }}>
               <X className="h-4 w-4" aria-hidden />
             </button>
           </IconTip>

@@ -228,7 +228,11 @@ export function Overview(){
      "Keep the V4 carousel design displaying the top 10 most-saved careers"). */}
   <section className="v4-today-rail" aria-label="What my students are saving">
    <header className="v4-section-head"><div><h2>What My Students Are Saving</h2></div><Jump onClick={()=>go("explore")}>Explore</Jump></header>
-   <Coverflow mode="cover" label="Most saved careers" items={saved.map(({career,students:n},k)=>({key:career.id,rank:k+1,title:career.title,world:career.world,photo:career.photo,focus:career.photoFocus,stat:{value:String(n),label:n===1?"Student":"Students"},onOpen:()=>openCareer({title:career.title,world:career.world,photo:career.photo},saved.map(x=>({title:x.career.title,world:x.career.world,photo:x.career.photo})))}))}/>
+   {/* a row that scrolls sideways, like Explore's shelves, not the
+      overlapping carousel (22 Oct 2026, Maisha: "On home have 'What My
+      Students Are Saving' cards look like explore where we can scroll
+      horizontally as opposed to the overlap") */}
+   <Coverflow mode="row" roomy label="Most saved careers" items={saved.map(({career,students:n},k)=>({key:career.id,rank:k+1,title:career.title,world:career.world,photo:career.photo,focus:career.photoFocus,stat:{value:String(n),label:n===1?"Student":"Students"},onOpen:()=>openCareer({title:career.title,world:career.world,photo:career.photo},saved.map(x=>({title:x.career.title,world:x.career.world,photo:x.career.photo})))}))}/>
   </section>
   {/* v5's simulation cards in place of Most Watched (Maisha, 9 Oct 2026:
      "Replace V4's 'Most Watched by My Students' section with V5's 'Most

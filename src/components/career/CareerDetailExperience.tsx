@@ -98,7 +98,7 @@ const HERO_FOCUS: Record<string, string> = {
 
 // Custom-designed edge case, 22 Sept 2026: the header photo had no
 // `onError` handling -- unlike Match's grid, this hero already sits on a
-// solid dark base (`#0e0c20`) with its own gradient/blur scrims layered as
+// solid dark base (`var(--scrim-deep, #0e0c20)`) with its own gradient/blur scrims layered as
 // separate elements, so a failed photo doesn't need a new placeholder
 // graphic; it just needs to stop trying to paint a broken image on top of
 // an already-complete backdrop. On failure this renders nothing, and the
@@ -155,7 +155,7 @@ function IconButton({ label, active = false, onClick, children }: { label: strin
         aria-pressed={active}
         onClick={onClick}
         className="dm-quiet flex size-11 flex-none cursor-pointer items-center justify-center rounded-full border"
-        style={{ background: "rgba(12,16,35,0.45)", borderColor: active ? "var(--accent-subtle)" : "rgba(255,255,255,0.3)", color: active ? "var(--accent-subtle)" : "#fff" }}
+        style={{ background: "rgb(var(--scrim-rgb, 12 16 35) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: active ? "var(--accent-subtle)" : "rgba(255,255,255,0.3)", color: active ? "var(--accent-subtle)" : "#fff" }}
       >
         {children}
       </button>
@@ -597,17 +597,17 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
              the right half at its natural framing and fades into the card's
              dark base toward the text, so nothing is cropped to fit a wide
              band. */}
-          <div className="absolute inset-0" aria-hidden style={{ background: "#0e0c20" }}>
+          <div className="absolute inset-0" aria-hidden style={{ background: "var(--scrim-deep, #0e0c20)" }}>
             <HeroPhoto photo={career.photo} sizes="100vw" className="object-cover md:hidden" objectPosition={heroFocus(career.photo)?.mobile ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
             <span className="absolute inset-y-0 right-0 hidden w-[50%] md:block">
               <HeroPhoto photo={career.photo} sizes="520px" className="object-cover" objectPosition={heroFocus(career.photo)?.desktop ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
-              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.45) 26%, transparent 58%)" }} />
+              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, var(--scrim-deep, #0e0c20) 0%, rgb(var(--scrim-rgb, 14 12 32) / calc(0.45 * var(--scrim-gain, 1))) 26%, transparent 58%)" }} />
             </span>
             <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 60% at 100% 0, color-mix(in srgb, ${accent} 13%, transparent), transparent 70%)` }} />
             <CardProgressiveBlur size="52%" />
             {/* lighter than before (direct feedback: the blur and the side fade
                already carry the type, so the photo can show) */}
-            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.86) 0%, rgba(12,16,35,0.5) 32%, rgba(12,16,35,0.1) 60%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.35) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)` }} />
+            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.86 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.5 * var(--scrim-gain, 1))) 32%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.1 * var(--scrim-gain, 1))) 60%, transparent 100%), linear-gradient(to bottom, rgb(var(--scrim-rgb, 10 9 20) / calc(0.35 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 10 9 20) / calc(0.1 * var(--scrim-gain, 1))) 40%, transparent 65%)` }} />
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
@@ -620,7 +620,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               {/* The world, in its accent, right under the title: the same
                  title-then-world pairing the browse cards use everywhere else
                  (direct feedback). */}
-              <span className="text-[12px] leading-[16px] font-semibold tracking-[0.6px] uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, #ffffff)`, fontFamily: "var(--font-body)" }}>{career.world}</span>
+              <span className="text-[12px] leading-[16px] font-semibold tracking-[0.6px] uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, var(--scrim-ink, #ffffff))`, fontFamily: "var(--font-body)" }}>{career.world}</span>
               {vm.summary && <p className={`${LABEL} max-w-[40ch] pt-[2px]`}>{vm.summary}</p>}
               {/* Actions sit under the summary, left-aligned with the text
                  (direct feedback), not floated to the far corner. */}
@@ -634,7 +634,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   type="button"
                   onClick={() => router.push(`/play?focus=${encodeURIComponent(simulationFor(career.slug)?.id ?? career.slug)}`)}
                   className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
-                  style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
+                  style={{ background: "color-mix(in srgb, var(--primary) 32%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.6 * var(--scrim-glass-gain, 1))))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "var(--scrim-ink, #fff)" }}
                 >
                   <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
                 </button>
@@ -646,7 +646,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   type="button"
                   onClick={() => router.push(`/play/glossary/${career.slug}`)}
                   className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
-                  style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
+                  style={{ borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.3))", background: "rgb(var(--scrim-rgb, 12 16 35) / calc(0.55 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink, #fff)" }}
                 >
                   <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
                 </button>
@@ -663,7 +663,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   type="button"
                   onClick={() => setConnectOpen(true)}
                   className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
-                  style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
+                  style={{ borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.3))", background: "rgb(var(--scrim-rgb, 12 16 35) / calc(0.55 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink, #fff)" }}
                 >
                   <Users className="h-4 w-4" aria-hidden /> Connect
                 </button>
@@ -984,14 +984,16 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         <Section title="Careers like this one">
           <SurfaceState id={11} isEmpty={similar.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")}>
-            {/* md:-mx-8 md:px-8 (not md:mx-0 md:px-0) -- mirrors `main`'s own
-               md:px-8 so the rail bleeds to the true edge and re-pads back to
-               the same content line, the same convention every other card
-               rail in the app uses (Home, College Detail's Similar Schools).
-               Zeroing the margin/padding on desktop, as this rail used to,
-               left no trailing space for the last card to fade into --
-               it just hard-clipped at the container edge (16 Sept 2026). */}
-            <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
+            {/* The rail bleeds to the panel's own edge and re-pads back to
+               the same content line, so the last card scrolls off under the
+               border instead of hard-clipping at the content column (16 Sept
+               2026). The bleed matches the panel's padding exactly
+               (Section: space-5, space-6 from sm): it used to copy `main`'s
+               32px, 8px more than the panel's 24px, so the cards ran 8px past
+               the panel's border on both sides (22 Oct 2026, Chandu: "the
+               cards in careers like this one are exceeding the border of the
+               card"). */}
+            <div className="poster-row -mx-[var(--space-5)] flex gap-[var(--space-4)] overflow-x-auto px-[var(--space-5)] py-5 [scrollbar-width:none] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
                 <PosterCard key={c.title} career={c} onClick={() => (openCareerPeek(careerSlug(c.title)) || router.push(`/career/${careerSlug(c.title)}`))} />
               ))}

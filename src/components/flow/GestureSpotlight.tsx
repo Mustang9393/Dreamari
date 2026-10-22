@@ -123,7 +123,7 @@ export function GestureSpotlight({
       <div className="pointer-events-none fixed inset-0 z-[200] motion-safe:animate-[fade-slide-up_0.28s_ease]" aria-hidden>
         <div className="absolute flex items-center gap-3" style={{ left: rect.left + 22, top, transform: "translate(0, -50%)" }}>
           <GestureHint direction={direction} color="#ffffff" size={hintSize} distance={hintDistance} />
-          <span className="rounded-[var(--radius-sm)] px-3.5 py-2 text-[14px] font-bold whitespace-nowrap text-white" style={{ background: "rgba(0,0,0,0.62)" }}>
+          <span className="rounded-[var(--radius-sm)] px-3.5 py-2 text-[14px] font-bold whitespace-nowrap text-white" style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.62 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink, #fff)" }}>
             {label}
           </span>
         </div>
@@ -155,7 +155,7 @@ export function GestureSpotlight({
         }}
       >
         <GestureHint direction={direction} color="#ffffff" size={hintSize} distance={hintDistance} />
-        <span className="rounded-[var(--radius-sm)] px-3.5 py-2 text-[14px] font-bold whitespace-nowrap text-white" style={{ background: "rgba(0,0,0,0.62)" }}>
+        <span className="rounded-[var(--radius-sm)] px-3.5 py-2 text-[14px] font-bold whitespace-nowrap text-white" style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.62 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink, #fff)" }}>
           {label}
         </span>
       </div>

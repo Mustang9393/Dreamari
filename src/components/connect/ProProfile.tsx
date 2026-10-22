@@ -672,7 +672,7 @@ export function SubTabs<K extends string>({ options, value, onChange, ariaLabel 
 // Custom-designed edge case, 22 Sept 2026: no onError handling -- this is
 // the full-bleed hero background of every pro's profile page. Same
 // structural fix as Career Detail's HeroPhoto: the section this sits in
-// already has a solid dark base (`#0e0c20`) with its own gradient scrim
+// already has a solid dark base (`var(--scrim-deep, #0e0c20)`) with its own gradient scrim
 // as a separate sibling element, so a failed cover doesn't need a new
 // placeholder graphic, it just needs to stop trying to paint a broken
 // image over an already-complete backdrop. Keyed by `src` so switching
@@ -687,7 +687,7 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
   const tier = volunteerTier(pro);
   const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
   const views = Math.round(pro.studentsReached * 3.8);
-  const ink = "#FFFFFF";
+  const ink = "var(--scrim-ink, #FFFFFF)"; // white in dark, navy ink on the light frost
   const soft = "rgba(255,255,255,0.78)";
   const rule = "rgba(255,255,255,0.18)";
   const coverKey = `dreamari:pro-cover:${pro.id}`;
@@ -712,14 +712,14 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
   };
 
   return (
-    <section aria-label="Profile" className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "rgba(255,255,255,0.16)", background: "#0e0c20", color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}>
+    <section aria-label="Profile" className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.16))", background: "var(--scrim-deep, #0e0c20)", color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}>
       <div className="absolute inset-0" aria-hidden>
         <CoverImage key={cover} src={cover} />
-        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.82) 40%, rgba(12,16,35,0.3) 78%, rgba(12,16,35,0.08) 100%)" }} />
+        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.96 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.82 * var(--scrim-gain, 1))) 40%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.3 * var(--scrim-gain, 1))) 78%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.08 * var(--scrim-gain, 1))) 100%)" }} />
       </div>
       {/* the professional's own control; students see no controls here */}
       {showCoverControls && (
-        <div className="absolute top-[var(--space-4)] right-[var(--space-4)] z-10 flex items-center rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
+        <div className="absolute top-[var(--space-4)] right-[var(--space-4)] z-10 flex items-center rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgb(var(--scrim-rgb, 9 10 20) / calc(0.55 * var(--scrim-glass-gain, 1)))", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
           <button type="button" aria-label="Change cover photo" aria-expanded={coverOpen} onClick={() => setCoverOpen((o) => !o)} className="dm-quiet flex h-9 cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[14px] font-semibold" style={{ color: coverOpen ? PRO_ACCENT : "rgba(255,255,255,0.86)" }}>
             <ImagePlus className="h-3.5 w-3.5" aria-hidden /> Cover
           </button>
@@ -727,7 +727,7 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
               place (Chandu, 2 Oct 2026: "Edit Profile can sit with the Cover
               CTA"), the same pair the student profile's cover carries. */}
           {onEditProfile && (
-            <button type="button" onClick={onEditProfile} className="dm-quiet flex h-9 cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.86)" }}>
+            <button type="button" onClick={onEditProfile} className="dm-quiet flex h-9 cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[14px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.86))" }}>
               <PenLine className="h-3.5 w-3.5" aria-hidden /> Edit Profile
             </button>
           )}
@@ -773,7 +773,7 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
               <span aria-hidden style={{ color: rule }}>|</span>
               <CompanyMark name={pro.org} ink={ink} height={13} />
               {tier && (
-                <span className="inline-flex items-center gap-[5px] rounded-[6px] px-[8px] py-[3px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ background: "rgba(255,255,255,0.12)", color: ink, border: `1px solid ${rule}` }} title={tier.note}>
+                <span className="inline-flex items-center gap-[5px] rounded-[6px] px-[8px] py-[3px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ background: "var(--scrim-tile-bg, rgba(255,255,255,0.12))", color: ink, border: `1px solid ${rule}` }} title={tier.note}>
                   <TierIcon className="h-[12px] w-[12px]" aria-hidden style={{ color: PRO_ACCENT }} /> {tier.name} volunteer
                 </span>
               )}
@@ -1060,7 +1060,7 @@ export function PartnerView({ org, onBack, backLabel = "Back" }: { org: string; 
             <CompanyChip name={org} tone="surface" size="lg" /> <span>on Dreamari</span>
           </h1>
         </div>
-        <PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]"><span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}><Download className="h-4 w-4" aria-hidden /> Export report</span></PrimaryCta>
+        <PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]"><span className="flex items-center gap-[6px]" style={{ color: "var(--scrim-ink, #FFFFFF)" }}><Download className="h-4 w-4" aria-hidden /> Export report</span></PrimaryCta>
       </div>
 
       {/* goals against targets: the Replit's "North Star" block, as three rows */}
