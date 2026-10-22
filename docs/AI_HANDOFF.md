@@ -1,3 +1,13 @@
+## 2026-10-21: restore optional Agenda in v4 Meetings
+
+**Why (Chandu):** "calendar view is default view now but we lost the agenda view ... bring the agenda view back as an optional toggleable view". The calendar-only change removed the existing layout switch.
+
+**Changed:** restored the existing Calendar / Agenda icon toggle and the original `MeetingsNext` / `ComingUp` agenda. Calendar initializes as the default on every page entry, ignoring the legacy saved Agenda preference. The selection stays while switching between Upcoming and Needs Outreach on this page. Reuses existing components, styling, accessible pressed states and IconTip labels.
+
+**Validation:** TypeScript, scoped ESLint, tokens:check and diff whitespace checks pass. Browser on localhost:3147 confirmed Calendar selected on entry, Agenda renders next meeting / past meetings / coming up, and Calendar renders again after toggling back. No new scrolling containers or positioning code; touched-component scrollbar audit clean. Physical Windows/Chromebook verification not performed.
+
+**Release:** Chandu authorized merging/pushing on 22 October. Merged current main; the only conflict was this append-only handoff, resolved by retaining both entries. No counselor code conflicts.
+
 ## 2026-10-22: Play tab: every built game in its row (Food Scientist, Kitchen Terms)
 
 **Why (Chandu):** "please move all of codex's new games into the play tab row instead of hiding in the hamburger menu with appropriate thumbnails." This reverses the 17 Oct rule that kept cover-less games hamburger-only.
