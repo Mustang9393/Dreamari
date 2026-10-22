@@ -176,8 +176,13 @@ void main() {
       for (int g = 0; g < 4; g++) {
         float gf = float(g);
         if (gf < 2.0 || big > 0.5) {
-        float k = 0.18 + gf * 0.27;
-        vec2 gp = mix(origin, vec2(0.5, 0.5), k);
+        // the chain climbs from the action toward the sun's edge of the
+        // screen (22 Oct 2026, Chandu: "the top sun version's reactions and
+        // lens flare get hidden behind the header etc. Is there a way we can
+        // show the reactions in the visible areas?"): its last ghosts land
+        // in open sky above (or, for a low sun, below) the content
+        float k = 0.3 + gf * 0.23;
+        vec2 gp = mix(origin, vec2(sun.x, mix(0.955, 0.06, low)), k);
         float gr = 0.02 + gf * 0.02;
         float gd = length((uv - gp) * vec2(aspect, 1.0));
         float rim = exp(-sq((gd - gr) / (gr * 0.32)));
@@ -238,8 +243,13 @@ void main() {
       for (int g = 0; g < 4; g++) {
         float gf = float(g);
         if (gf < 2.0 || big > 0.5) {
-        float k = 0.18 + gf * 0.27;
-        vec2 gp = mix(origin, vec2(0.5, 0.5), k);
+        // the chain climbs from the action toward the sun's edge of the
+        // screen (22 Oct 2026, Chandu: "the top sun version's reactions and
+        // lens flare get hidden behind the header etc. Is there a way we can
+        // show the reactions in the visible areas?"): its last ghosts land
+        // in open sky above (or, for a low sun, below) the content
+        float k = 0.3 + gf * 0.23;
+        vec2 gp = mix(origin, vec2(sun.x, mix(0.955, 0.06, low)), k);
         float gr = 0.02 + gf * 0.02;
         float gd = length((uv - gp) * vec2(aspect, 1.0));
         float rim = exp(-sq((gd - gr) / (gr * 0.32)));
@@ -300,8 +310,13 @@ void main() {
       for (int g = 0; g < 4; g++) {
         float gf = float(g);
         if (gf < 2.0 || big > 0.5) {
-        float k = 0.18 + gf * 0.27;
-        vec2 gp = mix(origin, vec2(0.5, 0.5), k);
+        // the chain climbs from the action toward the sun's edge of the
+        // screen (22 Oct 2026, Chandu: "the top sun version's reactions and
+        // lens flare get hidden behind the header etc. Is there a way we can
+        // show the reactions in the visible areas?"): its last ghosts land
+        // in open sky above (or, for a low sun, below) the content
+        float k = 0.3 + gf * 0.23;
+        vec2 gp = mix(origin, vec2(sun.x, mix(0.955, 0.06, low)), k);
         float gr = 0.02 + gf * 0.02;
         float gd = length((uv - gp) * vec2(aspect, 1.0));
         float rim = exp(-sq((gd - gr) / (gr * 0.32)));
@@ -362,8 +377,13 @@ void main() {
       for (int g = 0; g < 4; g++) {
         float gf = float(g);
         if (gf < 2.0 || big > 0.5) {
-        float k = 0.18 + gf * 0.27;
-        vec2 gp = mix(origin, vec2(0.5, 0.5), k);
+        // the chain climbs from the action toward the sun's edge of the
+        // screen (22 Oct 2026, Chandu: "the top sun version's reactions and
+        // lens flare get hidden behind the header etc. Is there a way we can
+        // show the reactions in the visible areas?"): its last ghosts land
+        // in open sky above (or, for a low sun, below) the content
+        float k = 0.3 + gf * 0.23;
+        vec2 gp = mix(origin, vec2(sun.x, mix(0.955, 0.06, low)), k);
         float gr = 0.02 + gf * 0.02;
         float gd = length((uv - gp) * vec2(aspect, 1.0));
         float rim = exp(-sq((gd - gr) / (gr * 0.32)));
@@ -422,7 +442,10 @@ void main() {
   float along = 0.85 + 0.15 * noise(vec2(dist * 3.0 - t * 0.05, ra * 0.2));
   // the light falls off smoothly with distance from the sun
   float reach = mix(exp(-max(0.0, dist - 0.08) / 0.42), exp(-uv.y / 0.5), low);
-  float rayEnv = pulse * along * reach * (1.0 + 1.2 * breakLocal + 0.9 * flare);
+  // a surging shaft reaches further down the page for the moment, so the
+  // reaction shows in the gutters beside the content, not only behind the header
+  reach *= 1.0 + 0.9 * clamp(breakLocal, 0.0, 1.0);
+  float rayEnv = pulse * along * reach * (1.0 + 1.2 * breakLocal + 0.5 * flare);
   float rays = shaft * rayEnv;
   vec3 raysRGB = shaftRGB * rayEnv;
   vec3 rayLight = vec3(1.0, 0.985, 0.93);
@@ -484,6 +507,9 @@ void main() {
   float alpha = topA;
   // a low sun: its rays rise through the page, held back where content sits
   alpha = max(alpha, low * clamp(rays, 0.0, 1.0) * (1.0 - 0.5 * content));
+  // a top sun's surging shafts carry their light down the page too, only
+  // while the moment plays and only as far as the surge reaches
+  alpha = max(alpha, (1.0 - low) * clamp(rays, 0.0, 1.0) * clamp(breakLocal, 0.0, 1.0) * 0.9 * (1.0 - 0.5 * content));
   alpha = max(alpha, low * clamp(bloom, 0.0, 1.0));
   // a thin paler hem where the layer fades in the clouds, so no band shows
   alpha = max(alpha, c * 0.6 * smoothstep(0.5, 0.64, uv.y));
