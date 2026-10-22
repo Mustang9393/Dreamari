@@ -115,8 +115,11 @@ function CareerSheet({ list, index, onIndex, onClose, state, saves }: { list: Ca
   const active = tabs.some((t) => t.key === tab) ? tab : "students";
   const ask = (p?.knowAbout ?? []).slice(0, 3).map((k) => `Do you like ${k.charAt(0).toLowerCase()}${k.slice(1)}?`);
   return (
+    // refined: the Top 3 Career Peek's frame as the student sees it (22 Oct
+    // 2026, Chandu: "Give the same pop up treatment to v4 but keep its
+    // content as it is"); the content below is unchanged
     <Sheet<CareerTab>
-      id={career.title} accent={accent} chip={career.world} title={career.title} titleStyle={posterTitleFont(career.world)}
+      id={career.title} accent={accent} chip={career.world} title={career.title} titleStyle={posterTitleFont(career.world)} refined
       art={<FacePhoto src={career.photo} sizes="(max-width: 1023px) 100vw, 420px" className="object-cover" priority />}
       lede={p?.summary} facts={facts} tabs={tabs} tab={active} onTab={setTab}
       count={list.length} index={index} onIndex={(i) => { setTab("students"); onIndex(i); }} onClose={onClose}

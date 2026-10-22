@@ -105,18 +105,40 @@ export function V7Home() {
  *  is biggest, who is next, how many are at risk). The text link at the foot
  *  became a corner arrow: the whole card is the link, the arrow says so, and
  *  no words compete with the page's one lit action. */
+// Vibrant (22 Oct 2026, Chandu: "the first 3 cards in v4 and v7 should be
+// more vibrant somehow. Because right now they are muted compared to the
+// career cards below"): the glass stays, but each card carries a bloom of
+// the brand blue from its top-left corner, a brighter blue edge, and the
+// figure is the sheet's gradient numeral (SheetHero) with a soft blue halo,
+// so the three read as lit objects next to the photo posters. Blue only:
+// the status colours stay on the one at-risk dot (the counselor budget).
+const STAT_STYLE: React.CSSProperties = {
+  ...CARD_STYLE,
+  borderColor: "color-mix(in srgb, var(--primary) 42%, var(--glass-border))",
+  background: "radial-gradient(130% 110% at 0% 0%, color-mix(in srgb, var(--primary) 34%, transparent), transparent 58%), radial-gradient(90% 80% at 100% 110%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 60%), var(--glass-surface-2)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 24px 48px -28px color-mix(in srgb, var(--primary) 55%, transparent)",
+};
+const STAT_FIGURE: React.CSSProperties = {
+  ...DISPLAY,
+  backgroundImage: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 45%, #ffffff) 0%, var(--primary) 100%)",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  color: "transparent",
+  filter: "drop-shadow(0 0 14px color-mix(in srgb, var(--primary) 45%, transparent))",
+};
+
 export function Stat({ href, label, value, line, go, figure }: { href: string; label: string; value: number; line: React.ReactNode; go: string; /** the card's hover constellation */ figure: keyof typeof FIGURES }) {
   const shown = useCountUp(value);
   return (
-    <HoverBeam strength={0.6}>
-      <Link href={href} aria-label={`${value} ${label.toLowerCase()}. ${go}`} className={`dm-tap group relative flex h-full flex-col gap-[var(--space-2)] overflow-hidden p-[var(--space-6)] ${CARD}`} style={CARD_STYLE}>
+    <HoverBeam strength={0.9}>
+      <Link href={href} aria-label={`${value} ${label.toLowerCase()}. ${go}`} className={`dm-tap group relative flex h-full flex-col gap-[var(--space-2)] overflow-hidden p-[var(--space-6)] ${CARD} v7-stat`} style={STAT_STYLE}>
         <span className="flex items-center justify-between gap-[var(--space-3)]">
-          <span className="text-[14px] font-semibold" style={MUTED}>{label}</span>
-          <span aria-hidden className="flex size-[32px] flex-none items-center justify-center rounded-full border transition-colors group-hover:border-[color:var(--color-text-brand)]" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.86 }}>{label}</span>
+          <span aria-hidden className="flex size-[32px] flex-none items-center justify-center rounded-full border transition-colors group-hover:border-[color:var(--color-text-brand)]" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 14%, transparent)" }}>
             <ArrowUpRight className="h-[15px] w-[15px] transition-transform group-hover:translate-x-[1px] group-hover:-translate-y-[1px]" />
           </span>
         </span>
-        <span className={`${FIGURE} pt-[var(--space-2)]`} style={DISPLAY}><span className="sr-only">{value}</span><span aria-hidden>{shown}</span></span>
+        <span className={`${FIGURE} w-fit pt-[var(--space-2)]`} style={STAT_FIGURE}><span className="sr-only">{value}</span><span aria-hidden>{shown}</span></span>
         <span className="relative z-[1] truncate text-[14px] leading-[20px]" style={MUTED}>{line}</span>
         <Constellation figure={figure} />
       </Link>

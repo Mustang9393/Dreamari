@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { createContext, useContext, useEffect } from "react";
 import { IconTip } from "@/components/app/IconTip";
+import { useScrolled } from "@/components/app/chrome";
+import { skyArrival } from "@/lib/sky";
 import { SlidersHorizontal, Sun, Moon } from "lucide-react";
 import type { CounselorView } from "../roles";
 import "./visual-refresh.css";
@@ -121,8 +123,13 @@ export function Workspace({active,items,children,search,filters,account,org,them
  const title=names[active]??items.find(i=>i.view===active)?.label??"Workspace";
  // each view has its own page title (WCAG 2.4.2, audit 21 Oct 2026)
  useEffect(()=>{document.title=`${title} · Counselor Dashboard · Dreamari`;},[title]);
+ // every view is a page to the counselor: the sky greets each one (lib/sky.ts)
+ useEffect(()=>{skyArrival();},[active]);
+ // the top bar frosts once the page scrolls, like the student app's (v4.css .v4-nav-island)
+ const scrolled=useScrolled();
  return <div className="v4-workspace" data-visual-refresh="calm">
-  <header className="v4-navigation">
+  <header className="v4-navigation" data-scrolled={scrolled?"true":"false"}>
+   <div className="v4-nav-island">
    <div className="v4-nav-main">
     {/* The real Dreamari mark and wordmark (4 Oct 2026, Chandu: "add the
            proper dreamari logo and wordmark instead of the generic thing"),
@@ -142,6 +149,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
     <div className="v4-nav-tools"><IconTip label={`Switch to ${theme==="dark"?"light":"dark"} mode`}><button className="v4-round" onClick={onTheme} aria-label={`Switch to ${theme==="dark"?"light":"dark"} mode`}>{theme==="dark"?<Sun size={18}/>:<Moon size={18}/>}</button></IconTip>{items.some(i=>i.view==="settings")&&<IconTip label="Preferences"><Link className="v4-round" href="/counselor?view=settings&v=4" aria-label="Preferences"><SlidersHorizontal size={18}/></Link></IconTip>}<div className="v4-account">{account}</div></div>
    </div>
    <div className="v4-nav-context"><nav className="v4-secondary-nav dm-scroll" aria-label="Tools in this area">{area && area.items.length>1?area.items.map(i=><Link key={i.view} href={`/counselor?view=${i.view}&v=4`} aria-current={active===i.view?"page":undefined}>{names[i.view]??i.label}</Link>):org?<span className="v4-org">{org}</span>:null}</nav><div className="v4-search">{search}</div></div>
+   </div>
   </header>
   <main id="main" className={`v4-main v4-view-${active}`}>
    {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div><h1>{title}</h1>{purposes[active]&&<p className="v4-page-purpose">{purposes[active]}</p>}</div><div className="v4-page-controls">{AVATAR_VIEWS.has(active)&&<AvatarStylePicker/>}{filters}</div></div>}

@@ -30,6 +30,13 @@ export type Meeting = {
   minutes: number;
   /** a line the student wrote when booking */
   topic: string;
+  // Optional, from the counselor's Book a meeting sheet (22 Oct 2026, v7
+  // matched to the Replit's Add meeting: Meeting Type and Location). Seeded
+  // and student-booked meetings leave both unset.
+  /** how the meeting happens */
+  format?: "In person" | "Virtual";
+  /** where: "Counselor office", a video call link, a room */
+  place?: string;
 };
 
 export type OfficeHours = { weekday: number; from: string; to: string }[];

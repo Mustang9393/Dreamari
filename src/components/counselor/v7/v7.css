@@ -1,11 +1,14 @@
 /* Counselor v7 surfaces (20 Oct 2026, Chandu: "can we have a more
    translucent/blurred background type surfaces for dark mode?").
    Dark Black & Blue only: a translucent blue-black with a real backdrop blur,
-   so the night sky shows through softly instead of sharp. This is safe only
-   because v7's sky is calm (AppBackdrop calmSky, NightSky.tsx): a still layer
-   behind the blur costs nothing frame to frame; it animates only for a
-   skyMoment's ~2s. A thin top highlight gives the glass an edge without a
-   glow. Light mode keeps its surfaces. */
+   so the night sky shows through softly instead of sharp. Until 22 Oct 2026
+   v7's sky was calm (AppBackdrop calmSky): a still layer behind the blur
+   costs nothing frame to frame. Now it is the app's full sky, aurora and
+   stars moving (Chandu: "use the stars etc." on the counselor pages), so the
+   blur redraws under a moving layer, as the student app's glass already does.
+   If that lags on Chromebooks, the first lever is a smaller blur radius here,
+   the second is `calmSky` again. A thin top highlight gives the glass an edge
+   without a glow. Light mode keeps its surfaces. */
 html.look-v2:not(.light) .v7-glass {
   /* navy glass on the dusk sky (21 Oct 2026), same as calm.css */
   background: rgba(19, 33, 58, 0.58) !important;
@@ -13,6 +16,11 @@ html.look-v2:not(.light) .v7-glass {
   -webkit-backdrop-filter: blur(22px) saturate(140%);
   backdrop-filter: blur(22px) saturate(140%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 40px -24px rgba(0, 0, 0, 0.7);
+}
+/* Home's three stat cards keep their blue bloom over the glass (Home.tsx STAT_STYLE) */
+html.look-v2:not(.light) .v7-glass.v7-stat {
+  background: radial-gradient(130% 110% at 0% 0%, color-mix(in srgb, var(--primary) 34%, transparent), transparent 58%), radial-gradient(90% 80% at 100% 110%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 60%), rgba(19, 33, 58, 0.58) !important;
+  border-color: color-mix(in srgb, var(--primary) 42%, rgba(148, 194, 249, 0.14)) !important;
 }
 /* Windows high contrast and anyone who asks for less transparency: solid */
 @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
@@ -40,6 +48,12 @@ html.light .v7-now-star {background:radial-gradient(circle,var(--primary) 0 26%,
 
 /* The student ID tag (StudentIdCard.tsx), moved from v4/today.css */
 .v7-sid-wrap {display:flex;flex-direction:column;align-items:center}
+/* the profile's rail (22 Oct 2026, Chandu: "the id card top border and the
+   other card top borders should align. The lanyard thing can break layout
+   and sit upwards"): the reel leaves the flow and hangs above the card, so
+   the card's top edge is the wrapper's top edge */
+.v7-sid-wrap.is-rail {position:relative}
+.v7-sid-wrap.is-rail .v7-sid-reel {position:absolute;bottom:100%;left:0;right:0;margin-bottom:-14px}
 .v7-sid-reel {position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;margin-bottom:-14px;pointer-events:none}
 .v7-sid-reel-disc {display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#d6dbe6 55%,#a7aebd);box-shadow:inset 0 1px 0 #fff,inset 0 -2px 4px rgba(0,0,0,.18),0 6px 14px -6px rgba(20,30,70,.45)}
 .v7-sid-reel-disc i {width:16px;height:16px;border-radius:50%;background:var(--primary);box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}

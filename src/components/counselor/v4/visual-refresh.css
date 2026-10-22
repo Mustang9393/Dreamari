@@ -3,11 +3,11 @@
    hierarchy. Scoped to this Workspace so embedded v4 tools keep their skin.
    Specificity is intentional: v4.css's legacy surface reset uses !important. */
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-main { max-width:1440px; padding-top:32px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-nav-main { min-height:70px; padding-block:10px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-nav-main { min-height:62px; padding-block:8px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-primary-nav { border:0; background:transparent; padding:0; gap:8px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-primary-nav a { padding:9px 19px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-primary-nav a[aria-current="page"] { box-shadow:none; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-nav-context { padding-bottom:7px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-nav-context { padding-bottom:8px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading { margin-bottom:36px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading h1 { font-size:38px; margin-block:8px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-page-heading p { font-size:13px; line-height:1.5; }

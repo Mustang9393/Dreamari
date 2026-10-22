@@ -127,7 +127,8 @@ function ShortlistButton({ id, name }: { id: string; name: string }) {
 
 type CareerTab = "students" | "path" | "guide";
 
-export function V7CareerSheet({ list, index, saves, state, onClose }: CareerSheetProps) {
+/** Superseded 22 Oct 2026 by CareerSheet.tsx (the Top 3 frame); kept for the school sheet's shared pieces. */
+export function V7CareerSheetFact({ list, index, saves, state, onClose }: CareerSheetProps) {
   const career = list[index];
   const savers = useSavers();
   const roster = useReviewedRoster();

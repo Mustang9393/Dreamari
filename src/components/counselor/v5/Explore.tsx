@@ -137,6 +137,25 @@ type OpenCareer = (c: CatalogCareer, row?: CatalogCareer[]) => void;
 
 const TRADES_OPTION = "__trades";
 /** v7's one picker in place of a row of pills */
+// The Replit's Education filter (22 Oct 2026, v7 only: Chandu, "do not make
+// those left open decision updates to v4"), read from each career's profile
+// fact ("Typical degree"); a career with no profile passes every option.
+const EDU_OPTIONS = [
+  { value: "all", label: "Any education" }, { value: "bachelor", label: "Bachelor's degree" }, { value: "graduate", label: "Graduate degree" },
+  { value: "apprenticeship", label: "Apprenticeship" }, { value: "certificate", label: "Certificate" }, { value: "hs", label: "High school / training" }, { value: "associate", label: "Associate degree" },
+];
+function eduOf(c: CatalogCareer): string {
+  const v = (careerProfile(careerSlug(c.title))?.facts.find((f) => /degree|education|training/i.test(f.label))?.value ?? "").toLowerCase();
+  if (!v) return "";
+  if (/master|doctor|graduate|m\.d\.|j\.d\.|ph\.d|law school|medical school|residency|dds|dvm|pharm/.test(v)) return "graduate";
+  if (/bachelor/.test(v)) return "bachelor";
+  if (/associate/.test(v)) return "associate";
+  if (/apprentice/.test(v)) return "apprenticeship";
+  if (/certificate|licens|postsecondary|vocational|training program|flight school|academy|credential/.test(v)) return "certificate";
+  if (/high school|diploma|on-the-job|ged/.test(v)) return "hs";
+  return "";
+}
+
 function PickerBox({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
   return (
     <Listbox ariaLabel={label} value={value} onChange={onChange} options={options}
@@ -153,6 +172,7 @@ function Careers({ path: pathProp, onOpen, after, compact = false, picker = fals
   const page = compact ? 12 : PAGE;
   const [query, setQuery] = useState("");
   const [world, setWorldRaw] = useState("All");
+  const [edu, setEdu] = useState("all");
   // the picker's "Skilled trades" option is the pathway switch, folded in
   const path: Pathway = picker && world === TRADES_OPTION ? "trades" : pathProp;
   const setWorld = setWorldRaw;
@@ -164,10 +184,12 @@ function Careers({ path: pathProp, onOpen, after, compact = false, picker = fals
     return ALL_CATALOG_CAREERS.filter((c) =>
       (path === "all" || isTradeCareer(c)) &&
       (worldShown === "All" || c.world === worldShown) &&
+      (edu === "all" || (eduOf(c) || edu) === edu) &&
       (!q || (subjectWorlds ? subjectWorlds.includes(c.world) : `${c.title} ${c.world}`.toLowerCase().includes(q))));
-  }, [query, path, worldShown]);
+  }, [query, path, worldShown, edu]);
   const subject = SUBJECTS[query.trim().toLowerCase()];
-  const browsing = !query.trim();
+  // an education pick is a search too: the flat list, not the curated shelves
+  const browsing = !query.trim() && edu === "all";
   return (
     // v4-sections and v4-section-lead only take effect inside v4's
     // workspace (visual-refresh.css, "Section rhythm"): v4 puts a hairline
@@ -179,6 +201,7 @@ function Careers({ path: pathProp, onOpen, after, compact = false, picker = fals
             <SearchField value={query} onChange={(v) => { setQuery(v); setShown(page); }} placeholder="A career or a subject like Math" />
             <PickerBox label="Career world" value={world} onChange={(w) => { setWorld(w); setShown(page); }}
               options={[{ value: "All", label: "All worlds" }, { value: TRADES_OPTION, label: "Skilled trades" }, ...WORLD_COUNTS.map(([w]) => ({ value: w, label: w }))]} />
+            <PickerBox label="Education" value={edu} onChange={(v) => { setEdu(v); setShown(page); }} options={EDU_OPTIONS} />
           </div>
         ) : (
           <>
@@ -197,7 +220,7 @@ function Careers({ path: pathProp, onOpen, after, compact = false, picker = fals
           ? <h2 className={H2} style={{ fontFamily: "var(--font-display)" }}>{world === TRADES_OPTION ? "All Skilled Trades" : worldShown === "All" ? "All Careers" : `All of ${worldShown}`}</h2>
           : <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{list.length} careers{subject ? ` where ${query.trim()} matters` : worldShown !== "All" ? ` in ${worldShown}` : ""}</p>}
         {list.length === 0 ? (
-          <div className="py-[var(--space-8)]"><EmptyView tier={5} query={query} line="Try a subject, a world or another career." cta="Clear search" onAction={() => { setQuery(""); setWorld("All"); }} /></div>
+          <div className="py-[var(--space-8)]"><EmptyView tier={5} query={query} line="Try a subject, a world or another career." cta="Clear search" onAction={() => { setQuery(""); setWorld("All"); setEdu("all"); }} /></div>
         ) : (
           <>
             <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fill,minmax(176px,1fr))] sm:gap-[var(--space-5)]">
