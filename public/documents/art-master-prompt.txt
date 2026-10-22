@@ -1,3 +1,13 @@
+REQUIRED CAST AND ANIME DRAWING CHECK
+
+Keep hair in four to six broad silhouette groups, with only a few internal divisions, one shadow family and at most one restrained highlight band. Do not add strand-by-strand rendering, glossy ribbons, many tiny locks or individually shaded ringlets. Preserve straight, wavy, curly and coily textures by changing the grouped silhouette, not by increasing detail.
+
+Faces must remain drawn 2D anime: clear anime eye construction, a simple nose mark, short mouth lines and a deliberately drawn jaw/chin. No painted lips, realistic nostrils, sculpted cheek planes, airbrushed skin or comic-book hatching. Vary face proportions for identity and age without switching rendering style. Older characters must stay visibly older. Use the approved references as the upper detail limit.
+
+Create a cast ledger across the whole career library before generation. Vary ethnicity, gender, age, very light through very dark skin tones, hair texture, face shape, eye color, posture and expression. Do not repeat one demographic as every mentor or give every character the same head tilt and eyes. Eye colors are individual design choices, not racial rules. Lock each person's natural skin base/undertone, face proportions, eye color and hair silhouette in a canonical reference; scene lighting must not change identity. Introduce one new person through the story at a time. Compare every recurring appearance against its own canonical image, never against an unrelated cast member.
+
+Reject the scene if hair detail escalates, a face stops reading as anime, age changes, skin/eyes drift, or the cast ledger collapses into repeated identities. Repair before integration. Keep the one-image complete-scene rule: these cast instructions do not authorize sprites or separate character output.
+
 STYLE FAILURE GATE — REJECT THESE RESULTS
 
 Use the approved images as an upper limit on detail, not a minimum: simplify further when uncertain. In this PDF, extract only pages labeled APPROVED as positive generation references. Pages labeled REJECTED explain failures and must never be supplied as positive style inputs.

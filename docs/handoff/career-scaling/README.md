@@ -1,6 +1,6 @@
 # Dreamari career simulation production package
 
-**Current standard: Master SOP v2.4 · 22 October 2026**
+**Current standard: Master SOP v2.5 · 22 October 2026**
 
 The shareable source of truth is [the Career Simulation Master SOP](../../../output/career-master/master-sop.md), with its PDF in `output/career-master/` and published copy at `public/documents/dreamari-master-career-sop.pdf`.
 

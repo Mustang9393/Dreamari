@@ -1,3 +1,7 @@
+## 2026-10-23 — Anime cast and researched starting-role gates v2.5
+
+Chandu reinforced simple hair, anime face shapes, varied diversity and actual first-level career research. SOP/prompts now require grouped hair across textures, flat anime facial construction, cross-library cast planning and per-person identity locks. Added a sourced starting-role section: IB Intern; new graduate Registered Nurse; researched junior/intern UX; a verified food-science entry route without equating technicians and scientists. Every level requires stage-specific sources, authority limits and a task/source/review-owner contract. Preserves approved gameplay and full-scene-only art. PDF retains all nine approved references and two failure examples. Documentation only; no game scripts or art regenerated.
+
 ## 2026-10-23 — One complete scene per generation, never sprite layers
 
 **Why (Chandu):** “full images with characters and backgrounds together not separate layers”; cropped legs/figures still appeared. SOP v2.4 puts the output contract at the top of the document and every art prompt. Character/environment instructions are modules within one generation, never independent assets. Require full standing anatomy and grounded feet, coherent furniture occlusion, wide framing and inspection with HUD/dialogue hidden. Reject waist/knee/ankle cutoffs, floating counter torsos and runtime character overlays. Updated public PDF, prompts and reference ZIP. Documentation only; no game script or image integration changes.
