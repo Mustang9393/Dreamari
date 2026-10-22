@@ -1,3 +1,12 @@
+## 2026-10-22: Play tab: every built game in its row (Food Scientist, Kitchen Terms)
+
+**Why (Chandu):** "please move all of codex's new games into the play tab row instead of hiding in the hamburger menu with appropriate thumbnails." This reverses the 17 Oct rule that kept cover-less games hamburger-only.
+
+- **Food Scientist (`play/PlayHub.tsx`):** `HUB_SIMULATIONS` is every simulation now; Food Scientist wears its Level 1 lab arrival scene (`/images/play/fs/v7/arrival.png`, already its cover). UX Designer and Registered Nurse were already in the row.
+- **Kitchen Terms (`play/games.ts` GLOSSARY_GAMES, `glossary/data.ts` GLOSSARY_HUB_RELEASED):** joins the glossary row and is released. Its cover (`/images/app/glossary-kitchen-thumb-oct22.webp`) is drawn to the 19 Oct set: one isometric object (a steaming pot) on the navy gradient, no Dreamy, no text; Codex can replace it with a matching render.
+- **Hamburger (`app/chrome.tsx`):** the Food Scientist, UX Designer and Registered Nurse QA links are gone; Glossary QA stays under Labs.
+- Checked: tsc clean; /play at 1440 lists both new games and opens their routes.
+
 ## 2026-10-22 — Food Scientist in the Play hero row
 
 Chandu requested Food Scientist in the Career Simulations hero row. Removed its hub-only exclusion; it now uses the existing playable card and route on desktop and mobile. The existing live-career filter also removes its old “In the works” placeholder. No game content changed. Validation: scoped ESLint, TypeScript and tokens; this is a catalogue inclusion using the existing shared card.

@@ -500,9 +500,10 @@ export function hasGlossary(slug: string): boolean {
 // tiles in play tab open them up otherwise add them in succession to that
 // row"), then "Only use games with thumbnail art in the play tab": Medical,
 // Flight and Tech have tiles with Chandu's thumbnails and open their games.
-// Culinary is the test world with no thumbnail, so it stays QA-only
-// (hamburger, Glossary QA). SOP Prompt E (7c) releases a new world here.
-export const GLOSSARY_HUB_RELEASED = ["finance", "nursing", "aviation", "software"];
+// Culinary (Kitchen Terms) joined on 22 Oct 2026 with its own cover (Chandu:
+// "move all of codex's new games into the play tab row"). SOP Prompt E (7c)
+// releases a new world here.
+export const GLOSSARY_HUB_RELEASED = ["finance", "nursing", "aviation", "software", "culinary"];
 
 /** True when the hub may open this career's glossary as a real game. */
 export function isGlossaryReleased(slug: string): boolean {

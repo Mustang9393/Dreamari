@@ -210,10 +210,8 @@ const QUICK_LINKS = [
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-grid" },
   { label: "Play", href: "/play" },
-  // DEMO-ONLY: Level 1 draft for discussion and QA (19 Oct 2026).
-  { label: "Food Scientist · QA draft", href: "/play/food-scientist" },
-  { label: "UX Designer · QA draft", href: "/play/ui-ux-designer" },
-  { label: "Registered Nurse · QA", href: "/play/registered-nurse" },
+  // Food Scientist, UX Designer and Registered Nurse moved to the Play tab's
+  // row (22 Oct 2026); they no longer need their own links here.
   { label: "Career game master SOP (PDF)", href: "/documents/dreamari-master-career-sop.pdf" },
   // DEMO-ONLY lab build of AMT Level 1 (5 Oct 2026): the detailed take with
   // the task card and the hands-on torque wrench; live Level 1 follows the

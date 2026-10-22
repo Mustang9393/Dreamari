@@ -281,12 +281,13 @@ export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; c
   { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/glossary-medical-thumb-oct19.webp" },
   { careerSlug: "airline-pilot", title: "Flight Terms", sub: "Learn key aviation terms", cover: "/images/app/glossary-flight-thumb-oct19.webp" },
   { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/glossary-tech-thumb-oct19.webp" },
-  // Only glossaries with real thumbnail art sit in this row (Chandu, 17 Oct
-  // 2026: "For everything without a thumbnail for the cards, send them to
-  // hamburger access only link. Only use games with thumbnail art in the
-  // play tab"). Kitchen Terms (industry slug "culinary"), the test world,
-  // has no cover and plays from the hamburger's Glossary QA link. A new world
-  // joins this row through SOP Prompt E (7c), Part 6.
+  // Kitchen Terms joined the row on 22 Oct 2026 (Chandu: "please move all of
+  // codex's new games into the play tab row instead of hiding in the
+  // hamburger menu with appropriate thumbnails"). Its cover is drawn to the
+  // Oct 19 set: one isometric object (a steaming pot) on the navy gradient,
+  // no Dreamy, no text. A new world joins this row through SOP Prompt E
+  // (7c), Part 6.
+  { careerSlug: "culinary", title: "Kitchen Terms", sub: "Learn key kitchen terms", cover: "/images/app/glossary-kitchen-thumb-oct22.webp" },
   // Private Equity removed from this row (direct feedback, 9 Sept 2026) --
   // still gets the plain career-simulation "Soon" placeholder elsewhere.
 ];
