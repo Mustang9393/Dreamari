@@ -664,7 +664,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     () => [...savedCareerIds].reverse().map((id) => ALL_PROFILE_CAREERS.find((career) => career.id === id)).filter((career): career is ProfileCareer => !!career && !top3.includes(career.id)),
     [savedCareerIds, top3],
   );
-  const savedTotal = savedLocker.length;
+  // the Saved tab and its badge count every saved career, the Top 3 ones
+  // included (22 Oct 2026, Chandu: "the saved careers arent showing up in
+  // the profile when somebody comes from match": Match's three saves were
+  // all in the Top 3, so the tab hid them all); savedLocker stays the list
+  // of what can still be added to the Top 3
+  const savedTotal = useMemo(() => [...savedCareerIds].filter((id) => ALL_PROFILE_CAREERS.some((career) => career.id === id)).length, [savedCareerIds]);
   // The Add sheet says "from Saved", so it lists what Saved lists and
   // nothing else (Joshua, 4 Oct 2026: it showed HR Manager, Art Director and
   // others the student never saved).
@@ -1256,7 +1261,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {bookingOpen && <BookCounselorSheet onClose={() => setBookingOpen(false)} />}
         {tab === "locker" && (
           <motion.div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker" initial={panelPhase === "in" ? { opacity: 0, x: 28 } : false} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}>
-            <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("top3")} embedded />
+            <LockerTab locker={locker} top3Count={top3.length} top3Ids={top3} addToTop3={addToTop3} onClose={() => setTab("top3")} embedded />
           </motion.div>
         )}
         {tab === "resume" && (
@@ -3844,7 +3849,7 @@ export function VideosShelf() {
   );
 }
 
-export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = false }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void; /** inside a tab (v2) or under Top 3 (v3): no close button */ embedded?: boolean }) {
+export function LockerTab({ locker, top3Count, top3Ids = [], addToTop3, onClose, embedded = false }: { locker: ProfileCareer[]; top3Count: number; /** the Top 3's ids: a saved career already there says so instead of offering Add */ top3Ids?: string[]; addToTop3: (id: string) => void; onClose: () => void; /** inside a tab (v2) or under Top 3 (v3): no close button */ embedded?: boolean }) {
   const router = useRouter();
   const flowV2 = useTop3FlowV2();
   // The locker holds everything a student saves across Dreamari, grouped
@@ -3869,7 +3874,10 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
   // v2 (layoutVersion.tsx): the careers shelf is what the student
   // actually saved, newest first, so "View saved" lands on the career they
   // just saved. v1 keeps its demo list of every career from their activity.
-  const careers = embedded ? [...savedCareers].reverse().map((id) => locker.find((c) => c.id === id)).filter((c): c is ProfileCareer => !!c) : locker;
+  // every saved career, the Top 3 ones included (they were hidden here
+  // because `locker` leaves the Top 3 out, which emptied the tab after
+  // Match, 22 Oct 2026)
+  const careers = embedded ? [...savedCareers].reverse().map((id) => ALL_PROFILE_CAREERS.find((c) => c.id === id)).filter((c): c is ProfileCareer => !!c) : locker;
   const SHELF_COUNT: Record<typeof shelf, number> = { careers: careers.length, schools: savedSchools.size, opportunities: savedOpportunities, videos: savedVideos.size, events: stubCount, connect: connectSaves.length };
   // 8 Oct 2026 (Zack Akil review, 7 Oct: saved cards open their item, and
   // Back must return to the same spot): an opportunity, event or Connect
@@ -3973,6 +3981,11 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
                 )}
                 {/* Labelled, not an icon alone: the swap arrows were not
                    understood (direct feedback, 11 Sept 2026). */}
+                {top3Ids.includes(career.id) ? (
+                  <span className="flex h-8 w-full items-center justify-center gap-[5px] rounded-[var(--radius-md)] text-[12px] font-bold whitespace-nowrap" style={{ color: "var(--accent-subtle)" }}>
+                    <Check className="h-[13px] w-[13px]" aria-hidden /> In your Top 3
+                  </span>
+                ) : (
                 <button
                   type="button"
                   onClick={() => addToTop3(career.id)}
@@ -3982,6 +3995,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
                 >
                   {top3Count >= 3 ? <><ArrowLeftRight className="h-[13px] w-[13px]" aria-hidden /> Swap in</> : <><Plus className="h-[13px] w-[13px]" aria-hidden /> Add to Top 3</>}
                 </button>
+                )}
               </span>
             </div>
           ))}

@@ -51,3 +51,19 @@ export function useSavedCareers(): [Set<string>, (careerId: string) => void] {
   };
   return [saved, toggle];
 }
+
+/** Save several careers at once, outside React (Match's Top 3 handoff,
+ *  22 Oct 2026, Chandu: "the saved careers arent showing up in the profile
+ *  when somebody comes from match"): a swipe right on Match is a save, so
+ *  those careers land in the one saved store the Saved tab reads, not only
+ *  in the Top 3. Quiet: no sky moment, the handoff has its own. */
+export function saveCareers(ids: string[]): void {
+  try {
+    const current = new Set(JSON.parse(readRaw()) as string[]);
+    ids.forEach((id) => current.add(id));
+    window.localStorage.setItem(KEY, JSON.stringify([...current]));
+  } catch {
+    /* private mode */
+  }
+  window.dispatchEvent(new Event(EVENT));
+}

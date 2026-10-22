@@ -96,22 +96,6 @@ export function MatchConnectModules() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="MatchGrid" file="src/components/match-lab/MatchGrid.tsx" purpose="The dormant six-card grid Match used before Mini Explore replaced it: every career visible at once, a corner select control, a detail modal." when="Not linked anywhere live; kept for comparison.">
-        <StateGrid>
-          <StateCell label="Default">
-            <NotRendered reason="No route mounts this component anymore (unlike MatchLab, which still has /match-lab) -- there is no live page to load, so this stays a stand-in rather than a LiveRoute." see="src/components/match-lab/MatchGrid.tsx" />
-          </StateCell>
-        </StateGrid>
-      </Specimen>
-
-      <Specimen name="MatchLab" file="src/components/match-lab/MatchLab.tsx" purpose="The original swipe-deck Match prototype (v3): like/pass gestures, a manage sheet for reordering saves." when="Not linked anywhere live; kept for comparison.">
-        <StateGrid>
-          <StateCell label="Default" pad={false} minH={440}>
-            <LiveRoute href="/match-lab" height={440} />
-          </StateCell>
-        </StateGrid>
-      </Specimen>
-
       <Specimen name="V2Flow" file="src/components/flow-lab/V2Flow.tsx" purpose="The Flow Lab's own BUILD -> MINI EXPLORE -> SAVED -> RANK -> MY PROFILE walkthrough, replayable and isolated from the real demo." when="Prototyping the Match flow end to end, isolated from the live app.">
         <StateGrid>
           <StateCell label="Default" pad={false} minH={440}>

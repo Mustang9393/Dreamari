@@ -11,6 +11,7 @@ import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { demoPicks } from "@/components/flow-lab/lab";
 import { V2Flow } from "@/components/flow-lab/V2Flow";
 import { picksParam, writePicks } from "@/lib/picks";
+import { saveCareers } from "@/lib/savedCareers";
 
 // ---------------------------------------------------------------------------
 // THE Match experience since 27 Sept 2026: Joshua's Mini Explore, simplified
@@ -39,6 +40,7 @@ export function MiniExploreMatch() {
     // the first save arrives as #1 (focus) instead of being re-sorted by
     // match strength: Profile shows exactly the sequence the student made.
     writePicks({ ids: picks, focus: picks[0] });
+    saveCareers(picks);
     setTimeout(() => router.push(`/profile?picks=${picksParam(picks)}&focus=${encodeURIComponent(picks[0])}&tab=top3&welcome=1`), 260);
   };
   return (

@@ -370,20 +370,16 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
             // squeezing. Below lg: the student's worlds on one row (their
             // track scrolls sideways if it must), then Explore all and its
             // dropdown together on the next, always fully on screen.
-            <>
-              <div className="hidden w-max max-w-none flex-nowrap items-center gap-2 lg:flex">
-                {/* Coming back to Explore all is the mix again, whatever was picked before. */}
-                <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: key === EXPLORE_ALL ? "" : s.moreWorld }))} options={tabs} />
-                {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
-              </div>
-              <div className="flex flex-col gap-2 lg:hidden">
-                {state.worlds.length > 0 && <Segmented ariaLabel="Your worlds" value={isAll ? "" : state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: "" }))} options={state.worlds.map((w) => ({ key: w, label: w }))} />}
-                <div className="flex flex-nowrap items-center gap-2">
-                  <Segmented ariaLabel="Explore all" value={isAll ? EXPLORE_ALL : ""} onChange={() => setState((s) => ({ ...s, activeTab: EXPLORE_ALL, moreWorld: "" }))} options={[{ key: EXPLORE_ALL, label: EXPLORE_ALL }]} />
-                  {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
-                </div>
-              </div>
-            </>
+            // One row at every width (22 Oct 2026, Chandu: "please dont do
+            // the tabs in match screen on two rows ever"): the worlds,
+            // Explore all and its industry dropdown sit on one line; when
+            // the line is wider than the screen, Segmented folds itself
+            // into a dropdown rather than wrapping.
+            <div className="flex min-w-0 flex-nowrap items-center gap-2">
+              {/* Coming back to Explore all is the mix again, whatever was picked before. */}
+              <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: key === EXPLORE_ALL ? "" : s.moreWorld }))} options={tabs} />
+              {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
+            </div>
           }
         >
           <SurfaceState id={17} isEmpty={ranked.length === 0} what="career" onEmptyAction={chooseAnotherWorld}>

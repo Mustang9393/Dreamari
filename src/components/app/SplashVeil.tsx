@@ -31,7 +31,6 @@ export const SPLASH_ROUTES: Record<string, string> = {
   "/play": "dreamari:welcome:play",
   "/connect": "dreamari:welcome:connect",
   "/resume-builder": "dreamari:welcome:resume",
-  "/match-lab": "dreamari:welcome:match",
   // No "/match-grid": it renders Mini Explore now, which has no welcome
   // (MiniExploreMatch.tsx), so the veil had nothing to lift it and blurred
   // Match for its full 4s safety timeout on every visit (2 Oct 2026,
