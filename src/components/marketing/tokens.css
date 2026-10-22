@@ -339,15 +339,13 @@ html.light .marketing-v2.themeable {
   /* Reaches solid sooner than the dark scrim (7 Oct 2026): the navy title
      sits higher on the photo at phone widths, where a 0.62 frost over a dark
      photo left it under 3:1. */
-  /* Toned down 23 Oct 2026 (Chandu: "the white text scrim on the career
-     cards in explore are sort of blending in a bit too much"): the frost
-     ran to solid #f7f9ff, the page's own white, so the lower half of every
-     card merged with the ground. The frost is now a shade cooler than the
-     page (#e4ecf8) and stops at 0.9, so a hint of the photo stays under
-     the title and the card keeps its edge. Ink #1d2539 on 0.84 of this
-     frost over a black photo is about 9:1; the title never sits above the
-     0.84 stop (the scrim is at least 119px with the title from 56px). */
-  --poster-scrim: linear-gradient(180deg, rgba(228, 236, 248, 0) 0%, rgba(228, 236, 248, 0.6) 18%, rgba(228, 236, 248, 0.84) 40%, rgba(228, 236, 248, 0.9) 100%);
+  /* Stays white (23 Oct 2026, Chandu: "i think keep the white scrim. But
+     make sure it doesnt blend too much into its background"): a cooler,
+     thinner frost was tried and reverted the same day; the blending came
+     from the card's light-mode edge (a white-alpha border on a white
+     scrim on a pale page, globals.css), which now carries a navy hairline
+     and a resting shadow instead. */
+  --poster-scrim: linear-gradient(180deg, rgba(247, 249, 255, 0) 0%, rgba(247, 249, 255, 0.74) 20%, rgba(247, 249, 255, 0.94) 38%, #f7f9ff 58%);
   --poster-title: #1d2539;
   /* World palette, light rungs (2026-08-22, recomputed against BOTH real
      light surfaces text sits on — the page background #f4f7ff AND the
