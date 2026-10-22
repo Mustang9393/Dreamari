@@ -32,7 +32,7 @@ export const careerButtonInk = (world: string) => DARK_INK.has(world) ? "#0b0d12
 
 type Tone = { fg: string; border: string; quiet: string; primary: string; skeleton: string; rule: string; ink?: string; nudge?: string };
 const TONES: Record<"photo" | "card", Tone> = {
-  photo: { fg: "#fff", border: "rgba(255,255,255,0.3)", quiet: "rgba(12,16,35,0.55)", primary: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", skeleton: "rgba(255,255,255,0.12)", rule: "rgba(255,255,255,0.14)" },
+  photo: { fg: "var(--scrim-ink, #fff)", border: "var(--scrim-chip-edge, rgba(255,255,255,0.3))", quiet: "rgb(var(--scrim-rgb, 12 16 35) / calc(0.55 * var(--scrim-glass-gain, 1)))", primary: "color-mix(in srgb, var(--primary) 32%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.6 * var(--scrim-glass-gain, 1))))", skeleton: "rgba(255,255,255,0.12)", rule: "rgba(255,255,255,0.14)" },
   card: { fg: "var(--foreground)", border: "var(--glass-border)", quiet: "var(--glass-surface-1)", primary: "color-mix(in srgb, var(--primary) 26%, var(--glass-surface-1))", skeleton: "var(--glass-surface-2)", rule: "var(--glass-border)", ink: "var(--foreground)", nudge: "var(--muted-foreground)" },
 };
 

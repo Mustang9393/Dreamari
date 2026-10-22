@@ -40,7 +40,7 @@ import { useBackStep } from "@/lib/backStep";
 const accent = D.PROGRAM.brand;
 const GOOD = "var(--world-food-farming-nature)";
 const RULE = "var(--inset-border)";
-const INK = "#f6f5fb";
+const INK = "var(--scrim-ink, #f6f5fb)"; // white in dark, navy ink on the light frost
 const ITEM = { background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", boxShadow: "0 14px 32px -22px rgba(0,0,0,0.6)" } as const;
 const PANEL = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" } as const;
 
@@ -251,7 +251,7 @@ function PartnerLockup({ tile, height }: { tile: D.ProgramTile; height: number }
  *  and a single frosted status line instead of three stat tiles. */
 export function ProgramTile({ tile, onOpen }: { tile: D.ProgramTile; onOpen: () => void }) {
   const yours = tile.state === "yours";
-  const stateTone = yours ? GOOD : tile.state === "enrolling" ? accent : "rgba(255,255,255,0.7)";
+  const stateTone = yours ? GOOD : tile.state === "enrolling" ? accent : "var(--scrim-ink-soft, rgba(255,255,255,0.7))";
   const stateLabel = yours ? "Your program" : tile.state === "enrolling" ? "Enrolling" : "Coming soon";
   return (
     <button type="button" onClick={onOpen} className={`dm-tap group relative flex w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] text-left ${yours ? "min-h-[320px] sm:min-h-[340px]" : "min-h-[300px]"}`} style={{ background: "#0e0c20", boxShadow: `inset 0 0 0 1px ${yours ? `color-mix(in srgb, ${accent} 45%, rgba(255,255,255,0.14))` : "rgba(255,255,255,0.14)"}, 0 18px 44px -22px rgba(0,0,0,0.65)`, textShadow: CARD_TEXT_SHADOW }}>
@@ -270,10 +270,10 @@ export function ProgramTile({ tile, onOpen }: { tile: D.ProgramTile; onOpen: () 
         <span className="text-[11px] leading-[15px] font-extrabold tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${accent} 75%, ${INK})`, fontFamily: "var(--font-body)" }}>{tile.kind} · {tile.company === "Coach" ? "Coach Foundation" : tile.company}</span>
         <span className={`font-extrabold text-balance ${yours ? "text-[28px] leading-[32px]" : "text-[24px] leading-[28px]"}`} style={{ color: INK }}>{tile.title}</span>
         <span className="max-w-[56ch] text-[13.5px] leading-[19px] font-semibold" style={{ color: `color-mix(in srgb, ${INK} 80%, transparent)`, fontFamily: "var(--font-body)" }}>{tile.line}</span>
-        <span className="mt-[8px] flex items-center justify-between gap-[10px] rounded-[var(--radius-sm)] px-[12px] py-[8px] text-[12.5px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.09)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.78)", fontFamily: "var(--font-body)", textShadow: "none" }}>
+        <span className="mt-[8px] flex items-center justify-between gap-[10px] rounded-[var(--radius-sm)] px-[12px] py-[8px] text-[12.5px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.09)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)", color: "var(--scrim-ink-soft, rgba(255,255,255,0.78))", fontFamily: "var(--font-body)", textShadow: "none" }}>
           {/* one status, nothing else: the counts and cadence live in the banner */}
-          <span className="flex items-center gap-[6px] font-bold whitespace-nowrap" style={{ color: stateTone }}>{yours && <span aria-hidden className="size-[6px] rounded-full" style={{ background: GOOD }} />}{!yours && tile.state === "soon" && <Lock className="h-3 w-3" aria-hidden />}{stateLabel}{tile.meta && <span className="font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>· {tile.meta}</span>}</span>
-          <span className="flex flex-none items-center gap-[3px] font-bold" style={{ color: "#FFFFFF" }}>{yours ? "Open" : "Details"} <ChevronRight className="h-[14px] w-[14px] transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
+          <span className="flex items-center gap-[6px] font-bold whitespace-nowrap" style={{ color: stateTone }}>{yours && <span aria-hidden className="size-[6px] rounded-full" style={{ background: GOOD }} />}{!yours && tile.state === "soon" && <Lock className="h-3 w-3" aria-hidden />}{stateLabel}{tile.meta && <span className="font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.7))" }}>· {tile.meta}</span>}</span>
+          <span className="flex flex-none items-center gap-[3px] font-bold" style={{ color: "var(--scrim-ink, #FFFFFF)" }}>{yours ? "Open" : "Details"} <ChevronRight className="h-[14px] w-[14px] transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
         </span>
       </span>
     </button>
@@ -1135,9 +1135,9 @@ const PrepFoot = forwardRef<HTMLSpanElement, { label: string; title: string; why
   return (
     <span ref={ref} className="relative z-[2] flex flex-col gap-[4px] px-[16px] pt-[56px] pb-[14px]">
       <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: tone ?? accent }}>{label}</span>
-      <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{title}</span>
-      <span className="text-[12.5px] leading-[17px]" style={{ color: "rgba(255,255,255,0.78)" }}>{why}</span>
-      <span className="mt-[6px] flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "#FFFFFF" }}>{cta} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
+      <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--scrim-ink, #FFFFFF)" }}>{title}</span>
+      <span className="text-[12.5px] leading-[17px]" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.78))" }}>{why}</span>
+      <span className="mt-[6px] flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--scrim-ink, #FFFFFF)" }}>{cta} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
     </span>
   );
 });

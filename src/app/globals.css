@@ -2060,11 +2060,11 @@ html.light [data-app-backdrop] {
    black drop shadows. In light they keep their contrast (white type on a
    deep scrim) but the deep is brand navy, and the shadow is a soft blue
    lift like v4's glass panels. */
-html.light .marketing-v2 :is([style*="background:#0e0c20"], [style*="background: rgb(14, 12, 32)"]) { background: #16204a !important; }
+/* (22 Oct 2026: the two attribute hooks that recoloured literal "#0e0c20"
+   and "rgba(12,16,35,0.96)" inline styles are gone; the photo surfaces now
+   read their base and ramps from --scrim-deep / --scrim-rgb, set in
+   look-v2.css section 7. The shadow hook below still applies.) */
 html.light .marketing-v2 :is([style*="rgba(0,0,0,0.65)"], [style*="rgba(0, 0, 0, 0.65)"]) { box-shadow: 0 24px 48px -28px rgba(30, 48, 120, 0.55) !important; }
-html.light .marketing-v2 :is([style*="rgba(12,16,35,0.96)"], [style*="rgba(12, 16, 35, 0.96)"]) {
-  background: linear-gradient(to top, rgba(20, 32, 78, 0.95) 0%, rgba(20, 32, 78, 0.84) 28%, rgba(20, 32, 78, 0.45) 52%, rgba(20, 32, 78, 0.1) 72%, transparent 92%) !important;
-}
 html.light .dm-glass,
 html.light .dm-glass-2,
 html.light .dm-glass-3 {

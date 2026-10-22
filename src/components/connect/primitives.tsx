@@ -720,7 +720,7 @@ export function CompanyChip({ name, tone = "photo", size = "md" }: { name: strin
       style={{
         height: dims.h,
         paddingInline: dims.px,
-        background: frost ? "rgba(255,255,255,0.12)" : onPhoto ? "rgba(12,16,35,0.55)" : "var(--glass-surface-1)",
+        background: frost ? "rgba(255,255,255,0.12)" : onPhoto ? "rgb(var(--scrim-rgb, 12 16 35) / calc(0.55 * var(--scrim-glass-gain, 1)))" : "var(--glass-surface-1)",
         borderColor: frost ? "transparent" : onPhoto ? "rgba(255,255,255,0.16)" : "var(--glass-border)",
         backdropFilter: frost ? "blur(10px)" : undefined,
         WebkitBackdropFilter: frost ? "blur(10px)" : undefined,
@@ -769,7 +769,7 @@ export function CompanyChip({ name, tone = "photo", size = "md" }: { name: strin
           <span
             aria-hidden
             className="pointer-events-none absolute -top-[30px] left-0 rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[11px] leading-[14px] font-semibold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover/chip:opacity-100 group-focus-visible/chip:opacity-100"
-            style={{ background: "rgba(9,10,20,0.92)", color: "#FFFFFF", boxShadow: "0 6px 16px -8px rgba(0,0,0,0.8)" }}
+            style={{ background: "rgb(var(--scrim-rgb, 9 10 20) / calc(0.92 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink, #FFFFFF)", boxShadow: "0 6px 16px -8px rgba(0,0,0,0.8)" }}
           >
             {name}
           </span>

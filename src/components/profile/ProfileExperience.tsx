@@ -804,7 +804,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {/* ---- Header in the career page's language: the cover photo runs
              behind the card and dissolves upward through the progressive blur;
              the name sits on the photo; the student picks a cover from the set. ---- */}
-        <section className={`relative overflow-hidden rounded-[var(--radius-lg)] border ${buildIn(1).className}`} style={{ ...buildIn(1).style, borderColor: `color-mix(in srgb, ${heroAccent} 40%, rgba(255,255,255,0.16))`, background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+        <section className={`relative overflow-hidden rounded-[var(--radius-lg)] border ${buildIn(1).className}`} style={{ ...buildIn(1).style, borderColor: `color-mix(in srgb, ${heroAccent} 40%, rgba(255,255,255,0.16))`, background: "var(--scrim-deep, #0e0c20)", color: "var(--scrim-ink, #fff)", textShadow: CARD_TEXT_SHADOW }}>
           <div className="absolute inset-0" aria-hidden>
             {/* both layers stay mounted; A/B crossfades between them */}
             <img
@@ -827,7 +827,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               }}
             />
             <CardProgressiveBlur size="66%" />
-            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.9) 0%, rgba(12,16,35,0.62) 34%, rgba(12,16,35,0.12) 64%, transparent 100%), linear-gradient(90deg, color-mix(in srgb, ${heroAccent} 14%, transparent), transparent 60%)` }} />
+            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.9 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.62 * var(--scrim-gain, 1))) 34%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.12 * var(--scrim-gain, 1))) 64%, transparent 100%), linear-gradient(90deg, color-mix(in srgb, ${heroAccent} 14%, transparent), transparent 60%)` }} />
           </div>
           {/* Was a flat 280/312px floor with no upper bound -- roughly 2x
              taller than a real LinkedIn cover renders at the same viewport
@@ -842,7 +842,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                the cover photo, so it keeps the dark UI tokens in light mode
                too (Saved and Settings used --muted-foreground, which turned
                dark grey on the dark pill; 26 Sept 2026). */}
-            <div data-night-scene className="absolute top-[var(--space-4)] right-[var(--space-4)] flex max-w-[calc(100%-32px)] flex-wrap items-center justify-end gap-[6px] rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", textShadow: "none" }}>
+            <div data-night-scene className="absolute top-[var(--space-4)] right-[var(--space-4)] flex max-w-[calc(100%-32px)] flex-wrap items-center justify-end gap-[6px] rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgb(var(--scrim-rgb, 9 10 20) / calc(0.55 * var(--scrim-glass-gain, 1)))", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", textShadow: "none" }}>
               <span className="relative">
                 <button
                   type="button"
@@ -850,11 +850,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   aria-expanded={coverOpen}
                   onClick={() => setCoverOpen((open) => !open)}
                   className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
-                  style={{ color: coverOpen ? "var(--accent-subtle)" : "rgba(255,255,255,0.86)" }}
+                  style={{ color: coverOpen ? "var(--accent-subtle)" : "var(--scrim-ink-soft, rgba(255,255,255,0.86))" }}
                 >
                   {/* The dot, not the shimmer (Chandu, 2 Oct 2026: "give the blue
                      dot to the cover button and the shimmer to My Build"). */}
-                  {coverNudge && <span aria-hidden className="absolute top-[4px] right-[4px] size-[7px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 0 2px rgba(9,10,20,0.8)" }} />}
+                  {coverNudge && <span aria-hidden className="absolute top-[4px] right-[4px] size-[7px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 0 2px rgb(var(--scrim-rgb, 9 10 20) / calc(0.8 * var(--scrim-glass-gain, 1)))" }} />}
                   <ImagePlus className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" />{" "}
                   {/* The sweep fills the text with currentColor + a white
                      glint (dm-text-nudge, background-clip: text), so it
@@ -1050,7 +1050,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               </span>
               <span className="flex min-w-0 flex-1 flex-col gap-[2px] pb-[4px]">
                 <h2 className="text-[28px] leading-[32px] font-extrabold tracking-[-0.02em] text-balance sm:text-[36px] sm:leading-[40px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
-                <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{STUDENT.school}</span>
+                <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.82))" }}>{STUDENT.school}</span>
               </span>
             </div>
             {/* the three facts as the community cards' tiles: icon in the
@@ -1069,15 +1069,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                 // "12 day streak · Active 142 of 190 days" (direct feedback, 5 Sept 2026)
                 { Icon: Flame, value: `${STUDENT.streakDays}`, label: "day streak", short: null as string | null, verified: false, sub: "Active 142 of 190 days" as string | null, valueFirst: true },
               ].map((fact) => (
-                <div key={fact.label} className={`flex min-w-0 items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] py-[7px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px] ${fact.valueFirst ? "flex-[1.5]" : "flex-1"}`} style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
+                <div key={fact.label} className={`flex min-w-0 items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] py-[7px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px] ${fact.valueFirst ? "flex-[1.5]" : "flex-1"}`} style={{ background: "rgb(var(--scrim-rgb, 12 16 35) / calc(0.58 * var(--scrim-glass-gain, 1)))", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
                   <fact.Icon className="h-[13px] w-[13px] flex-none sm:h-[15px] sm:w-[15px]" aria-hidden style={{ color: heroAccent }} />
-                  <dt className={`flex min-w-0 items-center gap-[4px] truncate text-[10.5px] leading-[14px] font-semibold sm:text-[12.5px] sm:leading-[16px] ${fact.valueFirst ? "order-3" : ""}`} style={{ color: "rgba(255,255,255,0.7)" }}>
+                  <dt className={`flex min-w-0 items-center gap-[4px] truncate text-[10.5px] leading-[14px] font-semibold sm:text-[12.5px] sm:leading-[16px] ${fact.valueFirst ? "order-3" : ""}`} style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.7))" }}>
                     {fact.short ? <><span className="sm:hidden">{fact.short}</span><span className="hidden sm:inline">{fact.label}</span></> : fact.label}
                     {fact.sub && <span className="hidden lg:inline"> · {fact.sub}</span>}
                     {fact.verified && <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>}
                   </dt>
                   {/* the streak reads "12 day streak": its number comes before its words */}
-                  <dd className={`flex flex-none items-baseline text-[14px] leading-[18px] font-extrabold tabular-nums sm:text-[18px] sm:leading-[22px] ${fact.valueFirst ? "order-2 -mr-[1px]" : "ml-auto"}`} style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+                  <dd className={`flex flex-none items-baseline text-[14px] leading-[18px] font-extrabold tabular-nums sm:text-[18px] sm:leading-[22px] ${fact.valueFirst ? "order-2 -mr-[1px]" : "ml-auto"}`} style={{ fontFamily: "var(--font-display)", color: "var(--scrim-ink, #FFFFFF)" }}>
                     {fact.value}
                   </dd>
                 </div>
@@ -1827,7 +1827,7 @@ export function Top3Tab({
                 >
                   <div
                     className={`flex h-[36px] items-center rounded-full border ${taught && spot === "move" && top3.length > 1 ? "dm-spot" : ""}`}
-                    style={{ background: "rgba(5,8,20,0.62)", borderColor: isFocus ? `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))` : "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+                    style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.62 * var(--scrim-glass-gain, 1)))", borderColor: isFocus ? `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))` : "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
                   >
                     {top3.length > 1 && (
                       <IconTip label={index === 0 ? "Already #1" : `Move to #${index}`}>
@@ -1837,7 +1837,7 @@ export function Top3Tab({
                           disabled={index === 0}
                           onClick={() => move(id, -1)}
                           className={`dm-quiet flex size-[34px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30 ${showHint && index === 1 ? "dm-slot-pulse-faint" : ""}`}
-                          style={{ color: "#fff" }}
+                          style={{ color: "var(--scrim-ink, #fff)" }}
                         >
                           <ChevronUp className={`h-4 w-4 lg:hidden ${taught && spot === "move" && index > 0 ? "dm-lean-up" : ""}`} aria-hidden />
                           <ChevronLeft className={`hidden h-4 w-4 lg:block ${taught && spot === "move" && index > 0 ? "dm-lean-left" : ""}`} aria-hidden />
@@ -1861,7 +1861,7 @@ export function Top3Tab({
                           disabled={index === top3.length - 1}
                           onClick={() => move(id, 1)}
                           className="dm-quiet flex size-[34px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30"
-                          style={{ color: "#fff" }}
+                          style={{ color: "var(--scrim-ink, #fff)" }}
                         >
                           <ChevronDown className={`h-4 w-4 lg:hidden ${taught && spot === "move" && index === 0 ? "dm-lean-down" : ""}`} aria-hidden />
                           <ChevronRight className={`hidden h-4 w-4 lg:block ${taught && spot === "move" && index === 0 ? "dm-lean-right" : ""}`} aria-hidden />
@@ -1883,7 +1883,7 @@ export function Top3Tab({
                     aria-label={`Remove ${career.title} from Top 3`}
                     onClick={() => remove(id)}
                     className={`dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full border ${taught && spot === "remove" ? "dm-spot" : ""}`}
-                    style={{ background: "rgba(5,8,20,0.62)", borderColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: "#fff" }}
+                    style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.62 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.22))", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: "var(--scrim-ink, #fff)" }}
                   >
                     <X className="h-4 w-4" aria-hidden />
                   </button>
@@ -1994,7 +1994,7 @@ export function Top3Tab({
                 href={`/play?focus=${sim ? sim.id : id}`}
                 aria-label={`Play ${career.title}`}
                 className="dm-solid mt-[var(--space-1)] flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
-                style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
+                style={{ background: "color-mix(in srgb, var(--primary) 32%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.6 * var(--scrim-glass-gain, 1))))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "var(--scrim-ink, #fff)" }}
               >
                 <Play className="h-[14px] w-[14px] flex-none" fill="currentColor" aria-hidden /> Play
               </Link>
@@ -3806,7 +3806,7 @@ export function VideosShelf() {
         <div key={v.video} className="relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
           <button type="button" aria-label={`Play ${v.title}`} onClick={() => setPlaying(v.video)} className="dm-tap group relative block aspect-[3/4] w-full cursor-pointer">
             <Image src={v.poster} alt="" fill sizes="220px" className="object-cover" />
-            <span aria-hidden className="absolute top-1/2 left-1/2 flex size-[48px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px]" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.5)", color: "#fff" }}><Play className="ml-[2px] h-[20px] w-[20px]" fill="currentColor" /></span>
+            <span aria-hidden className="absolute top-1/2 left-1/2 flex size-[48px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px]" style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.5))", color: "var(--scrim-ink, #fff)" }}><Play className="ml-[2px] h-[20px] w-[20px]" fill="currentColor" /></span>
           </button>
           {/* Same unsave gap as SchoolsShelf (direct feedback, 21 Sept 2026). */}
           <IconTip label="Remove" className="absolute top-[8px] right-[8px] z-10">
@@ -3815,7 +3815,7 @@ export function VideosShelf() {
             aria-label="Remove from saved"
             onClick={() => toggleSaved(v.video)}
             className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
-            style={{ borderColor: "rgba(255,255,255,0.22)", background: "rgba(12,16,35,0.55)", color: "#fff", backdropFilter: "blur(8px)" }}
+            style={{ borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.22))", background: "rgb(var(--scrim-rgb, 12 16 35) / calc(0.55 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink, #fff)", backdropFilter: "blur(8px)" }}
           >
             <X className="h-[16px] w-[16px]" aria-hidden />
           </button>
@@ -3832,7 +3832,7 @@ export function VideosShelf() {
           <div className="relative flex max-h-full w-full max-w-[460px] flex-col gap-[10px]">
             <div className="flex items-center justify-between gap-[10px] text-white">
               <span className="flex min-w-0 flex-col"><span className="truncate text-[16px] font-bold">{nowPlaying.title}</span><span className="truncate text-[13px] opacity-80">{nowPlaying.company}</span></span>
-              <button type="button" aria-label="Close" autoFocus onClick={() => setPlaying(null)} className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.3)", color: "#fff" }}><X className="h-5 w-5" aria-hidden /></button>
+              <button type="button" aria-label="Close" autoFocus onClick={() => setPlaying(null)} className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.3)", color: "var(--scrim-ink, #fff)" }}><X className="h-5 w-5" aria-hidden /></button>
             </div>
             <video src={nowPlaying.video} poster={nowPlaying.poster} controls autoPlay playsInline className="max-h-[calc(72dvh/var(--vz,1))] w-full rounded-[var(--radius-lg)] bg-black object-contain"><CaptionTrack video={nowPlaying.video} /></video>
             <VideoTranscript video={nowPlaying.video} />
