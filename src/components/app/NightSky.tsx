@@ -234,9 +234,11 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
         let x = s.x + offset;
         if (x > width) x -= width;
         // a moment's wave: a ring of light travelling out from where it
-        // happened; a star brightens as the ring passes and eases outward
+        // happened; a star brightens as the ring passes. Brightness only:
+        // the stars hold still (22 Oct 2026, Chandu: "lets not have bouncy
+        // stuff happen? just the lights have to get brighter and fade. The
+        // stars can remain stationary"); the outward nudge is gone.
         let boost = 0;
-        let push = 0;
         for (const m of moments) {
           if (m.shotOnly) continue;
           const age = now - m.t0;
@@ -247,9 +249,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
           const fade = Math.max(0, 1 - age / MOMENT_MS);
           const k = ring * fade * (m.big ? 1.5 : 1) * (m.strength ?? 1);
           boost += k;
-          push += k * Math.sign(x - m.x) * 5;
         }
-        x += push;
         // lively: near (bright) stars lean further from the cursor than far ones
         const depth = lively ? 4 + s.b * 14 : 0;
         x -= leanX * depth;
