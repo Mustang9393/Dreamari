@@ -2113,6 +2113,13 @@ html.light .marketing-v2 :is([style*="background:var(--glass-surface-2)"], [styl
    outline, and their hover lift is a navy-tinted shadow plus white ring,
    not 75% black plus a blue ring. Dark mode is untouched. */
 html.light .marketing-v2 .poster-card { border-color: rgba(255, 255, 255, 0.75) !important; }
+/* At rest the white rim vanishes where the white scrim meets the pale page,
+   so the lower half of a poster card merged with the ground (23 Oct 2026,
+   Chandu: "keep the white scrim. But make sure it doesnt blend too much
+   into its background"). A navy-tinted resting shadow and an 8% navy ring
+   draw the edge without a dark border (the 7 Oct rule above); hover keeps
+   its own, stronger lift. */
+html.light .marketing-v2 .poster-card { box-shadow: 0 16px 34px -20px rgba(40, 54, 110, 0.45), 0 0 0 1px rgba(40, 54, 110, 0.08); }
 html.light .marketing-v2 .poster-card.poster-card:is(:hover, :focus-visible),
 html.light .marketing-v2 .poster-wrap:hover .poster-card.poster-card {
   box-shadow: 0 24px 44px -22px rgba(40, 54, 110, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
