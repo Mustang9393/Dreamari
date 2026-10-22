@@ -268,7 +268,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
         const on = tab === key;
         return (
           <button key={key} type="button" role="tab" aria-selected={on} onClick={() => switchTab(key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[7px] rounded-[10px] px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap sm:px-[16px]" style={on ? { background: ACCENT, color: "var(--primary-foreground)" } : { color: "var(--foreground)" }}>
-            {LABEL[key]}<span className="text-[12px] font-semibold tabular-nums" style={{ color: on ? "#fff" : "var(--muted-foreground)" }}>{counts[key]}</span>
+            {LABEL[key]}<span className="text-[12px] font-semibold tabular-nums" style={{ color: on ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{counts[key]}</span>
           </button>
         );
       })}

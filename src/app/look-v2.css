@@ -188,20 +188,29 @@ html.look-v2 [data-space-backdrop] {
   display: none !important;
 }
 
-/* Light: cool white with the same frame as dark, in ice blue (reference 2's
-   wash): a glow under the header and a fainter one at the bottom edge. */
+/* Light: the day sky (AppBackdrop.tsx, SkySun.tsx), the night's twin (22 Oct
+   2026, Chandu: "something of a night and day mode"). A day sky is deepest
+   blue straight up and white at the horizon, the reverse of night, so the
+   blue sits behind the header and a pale haze on the bottom edge. This CSS
+   is the whole day without WebGL; SkySun draws the rays, cirrus and motes
+   over it. The ground stays paper white. */
 html.look-v2.light body {
   background:
-    radial-gradient(ellipse 55% 34% at 50% -6%, #d3e5fa 0, transparent 76%),
-    radial-gradient(ellipse 70% 26% at 50% 108%, #e1ecf9 0, transparent 75%),
-    #f3f6f9;
+    radial-gradient(ellipse 70% 40% at 56% -8%, #bdd6f4 0, #dbe8f8 46%, transparent 78%),
+    radial-gradient(ellipse 80% 22% at 50% 104%, #dfeafa 0, transparent 80%),
+    #eef3f9;
   background-attachment: fixed;
 }
+/* The ground keeps a little of the sky's blue all the way down (22 Oct 2026,
+   Chandu: "i dont want the cards scrims to fade into the background"): white
+   cards and their scrims need a ground a shade cooler than they are. */
 html.look-v2.light [data-app-backdrop] {
   background:
-    radial-gradient(58% 38% at 50% -6%, rgba(39, 128, 236, 0.22) 0%, rgba(39, 128, 236, 0.07) 50%, transparent 78%),
-    radial-gradient(76% 30% at 50% 108%, rgba(39, 128, 236, 0.14) 0%, transparent 76%),
-    #f3f6f9 !important;
+    radial-gradient(70% 40% at 56% -8%, rgba(39, 128, 236, 0.30) 0%, rgba(39, 128, 236, 0.12) 46%, transparent 78%),
+    radial-gradient(90% 30% at 56% -6%, rgba(23, 106, 207, 0.10) 0%, transparent 72%),
+    radial-gradient(80% 22% at 50% 104%, rgba(39, 128, 236, 0.14) 0%, transparent 80%),
+    linear-gradient(to bottom, rgba(39, 128, 236, 0.03) 0%, rgba(39, 128, 236, 0.06) 100%),
+    #eef3f9 !important;
 }
 html.look-v2.light [data-app-backdrop]::after {
   opacity: 0.025;
