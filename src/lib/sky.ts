@@ -61,13 +61,14 @@ export function skyMoment(opts: { x?: number; from?: Element | null; big?: boole
 
 // ---- Arrivals (22 Oct 2026, Chandu: "make sure the stars have a different
 // reaction each time ANY page loads all across the app. Not the same pulse
-// or shooting star stuff that are mapped to actions"). An arrival is the
-// sky's own greeting when a screen opens: one of seven effects in
-// NightSky.tsx (a sweep across, a cascade down or up, a constellation
-// lighting star by star, a bloom, a shimmer, a drift, a rise), picked at
-// random and never the same kind twice in a row. NightSky plays one on
-// mount; shells whose tabs do not remount the sky (counselor v7 and v4)
-// call skyArrival() on every view change. Moments stay for actions.
+// or shooting star stuff that are mapped to actions"; then, of a pass with
+// seven flashier kinds, "the christmas style like flashing is too much on
+// the stars, lets just do the original pulse we had for page loads. but
+// maybe vary it somehow each time"). An arrival is the sky's own soft wave
+// when a screen opens, varied each time in where it starts, its speed,
+// width and strength, sometimes with a gentle second ripple; never a
+// shooting star. NightSky plays one on mount; shells whose tabs do not
+// remount the sky (counselor v7 and v4) call skyArrival() on view change.
 export const SKY_ARRIVAL_EVENT = "dreamari:sky-arrival";
 export function skyArrival(): void {
   if (typeof window === "undefined") return;

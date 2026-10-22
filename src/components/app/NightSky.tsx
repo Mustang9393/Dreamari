@@ -52,9 +52,12 @@
 import { useEffect, useRef } from "react";
 import { SKY_EVENT } from "@/lib/sky";
 
-type Moment = { x: number; big: boolean; t0: number; /** lively: a shooting star with no wave of light */ shotOnly?: boolean };
-const ARRIVALS = ["sweep", "cascade", "constellation", "bloom", "shimmer", "drift", "rise"] as const;
-type Arrival = { kind: (typeof ARRIVALS)[number]; t0: number; dir: 1 | -1; cx: number; picks: number[]; ms: number };
+type Moment = {
+  x: number; big: boolean; t0: number;
+  /** lively: a shooting star with no wave of light */ shotOnly?: boolean;
+  /** an arrival's own shape (a page load): ring speed in px/ms, ring width in px, strength 0..1.3; actions use the defaults */
+  speed?: number; width?: number; strength?: number;
+};
 const MOMENT_EVENT = SKY_EVENT;
 
 export { skyMoment } from "@/lib/sky";
@@ -127,8 +130,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
     let moments: Moment[] = [];
     let animating = false; // calm mode: only while a moment plays
     const MOMENT_MS = 2000;
-    // the arrival playing now (see startArrival), if any
-    let arrival: Arrival | null = null;
+    let lastArrival = 0;
     // lively: the eased cursor lean (-1..1) and the next unprompted shooting star
     let leanX = 0, leanY = 0, aimX = 0, aimY = 0;
     let nextShot = performance.now() + 4000 + Math.random() * 5000;
@@ -185,64 +187,32 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
 
     const DRIFT = lively ? 0.9 : 0.45; // px per second: the sky turning, not anything flying
 
-    // An arrival: the sky's greeting when a screen opens, never the same kind
-    // twice running (the last kind is kept for the session). Each kind is a
-    // per-star brightness (aBoost), a visibility ramp (aAlpha) and, for the
-    // drift, a sideways nudge, all over 1.6 to 2.6 seconds, then gone.
+    // An arrival (22 Oct 2026): the sky's greeting when a screen opens. The
+    // same soft wave the first visit always had (Chandu, after a pass with
+    // seven flashier kinds: "the christmas style like flashing is too much
+    // on the stars, lets just do the original pulse we had for page loads.
+    // but maybe vary it somehow each time"), varied each time: where it
+    // starts (the middle, a third in from either edge, or an edge), how
+    // fast and wide the ring runs, how strong it is, and now and then a
+    // gentler second ripple a beat behind. Never a shooting star; that
+    // belongs to actions. The last start point is kept for the session so
+    // two loads in a row never greet from the same place.
     const startArrival = () => {
       if (reduce.matches || !stars.length) return;
       const now = performance.now();
-      if (arrival && now - arrival.t0 < 800) return; // a mount and a view change at once: one greeting
-      let lastKind = "";
-      try { lastKind = sessionStorage.getItem("dreamari-sky-arrival") ?? ""; } catch { /* storage blocked */ }
-      const pool = ARRIVALS.filter((k) => k !== lastKind);
-      const kind = pool[Math.floor(Math.random() * pool.length)];
-      try { sessionStorage.setItem("dreamari-sky-arrival", kind); } catch { /* storage blocked */ }
-      const picks = new Set<number>();
-      while (picks.size < Math.min(8, stars.length)) picks.add(Math.floor(Math.random() * stars.length));
-      arrival = { kind, t0: now, dir: Math.random() < 0.5 ? 1 : -1, cx: width * (0.2 + Math.random() * 0.6), picks: [...picks], ms: kind === "constellation" ? 2600 : kind === "rise" ? 1800 : 2000 };
+      if (now - lastArrival < 800) return; // a mount and a view change at once: one greeting
+      lastArrival = now;
+      const origins = [0.5, 0.3, 0.7, 0.08, 0.92];
+      let prev = -1;
+      try { prev = Number(sessionStorage.getItem("dreamari-sky-arrival") ?? -1); } catch { /* storage blocked */ }
+      const pool = origins.filter((_, i) => i !== prev);
+      const i = Math.floor(Math.random() * pool.length);
+      const ox = pool[i];
+      try { sessionStorage.setItem("dreamari-sky-arrival", String(origins.indexOf(ox))); } catch { /* storage blocked */ }
+      const shape = { speed: 0.6 + Math.random() * 0.5, width: 90 + Math.random() * 80, strength: 0.75 + Math.random() * 0.5 };
+      moments.push({ x: width * ox, big: false, t0: now, ...shape });
+      if (Math.random() < 0.35) moments.push({ x: width * ox, big: false, t0: now + 420, speed: shape.speed * 0.85, width: shape.width, strength: shape.strength * 0.5 });
       if (calm && !animating) { animating = true; last = 0; raf = requestAnimationFrame(frame); }
-    };
-    /** this star's part in the arrival: [extra brightness, visibility 0..1, sideways px] */
-    const arrive = (i: number, s: Star, x: number, now: number): [number, number, number] => {
-      if (!arrival) return [0, 1, 0];
-      const age = now - arrival.t0;
-      if (age > arrival.ms) { arrival = null; return [0, 1, 0]; }
-      const p = age / arrival.ms;
-      const fade = 1 - p * p;
-      switch (arrival.kind) {
-        case "sweep": { // a band of light crossing the sky
-          const front = arrival.dir > 0 ? width * (-0.15 + p * 1.3) : width * (1.15 - p * 1.3);
-          return [1.4 * Math.exp(-(((x - front) / (width * 0.1)) ** 2)), 1, 0];
-        }
-        case "cascade": { // stars light from the top down, or the horizon up
-          const front = arrival.dir > 0 ? height * 0.55 * p : height * 0.55 * (1 - p);
-          return [1.3 * Math.exp(-(((s.y - front) / 50) ** 2)), 1, 0];
-        }
-        case "constellation": { // eight stars, one after another, each holding a beat
-          const k = arrival.picks.indexOf(i);
-          if (k < 0) return [0, 1, 0];
-          const a = age - k * 190;
-          if (a < 0 || a > 1100) return [0, 1, 0];
-          return [2.2 * Math.sin(Math.PI * (a / 1100)), 1, 0];
-        }
-        case "bloom": { // a soft disk of light opening from one point
-          const r = width * 0.5 * p;
-          const d = Math.hypot(x - arrival.cx, s.y + 30);
-          return [1.1 * Math.max(0, 1 - d / Math.max(1, r)) * fade, 1, 0];
-        }
-        case "shimmer": // everything scintillates fast, then settles
-          return [0.9 * (0.5 + 0.5 * Math.sin(age / 70 + s.p1 * 7)) * fade, 1, 0];
-        case "drift": { // the sky turns a little, lit, then holds
-          const e = 1 - (1 - p) ** 3;
-          return [0.35 * fade, 1, arrival.dir * 14 * e];
-        }
-        case "rise": { // the stars come up out of the dark, the bright ones last
-          const a = Math.min(1, Math.max(0, (age - s.b * 600) / 700));
-          return [0.4 * (1 - a) * (1 - p), a, 0];
-        }
-      }
-      return [0, 1, 0];
     };
 
     const draw = (time: number, dt: number) => {
@@ -260,8 +230,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
         }
       }
       moments = moments.filter((m) => now - m.t0 < MOMENT_MS);
-      for (let i = 0; i < stars.length; i++) {
-        const s = stars[i];
+      for (const s of stars) {
         let x = s.x + offset;
         if (x > width) x -= width;
         // a moment's wave: a ring of light travelling out from where it
@@ -271,22 +240,21 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
         for (const m of moments) {
           if (m.shotOnly) continue;
           const age = now - m.t0;
-          const r = age * 0.85;
+          if (age < 0) continue; // a ripple waiting its beat
+          const r = age * (m.speed ?? 0.85);
           const d = Math.hypot(x - m.x, s.y + 40);
-          const ring = Math.exp(-(((d - r) / 110) ** 2));
+          const ring = Math.exp(-(((d - r) / (m.width ?? 110)) ** 2));
           const fade = Math.max(0, 1 - age / MOMENT_MS);
-          const k = ring * fade * (m.big ? 1.5 : 1);
+          const k = ring * fade * (m.big ? 1.5 : 1) * (m.strength ?? 1);
           boost += k;
           push += k * Math.sign(x - m.x) * 5;
         }
-        const [aBoost, aAlpha, aPush] = arrive(i, s, x, now);
-        boost += aBoost;
-        x += push + aPush;
+        x += push;
         // lively: near (bright) stars lean further from the cursor than far ones
         const depth = lively ? 4 + s.b * 14 : 0;
         x -= leanX * depth;
         const y = s.y - leanY * depth * 0.6;
-        const vis = visibility(x, y) * aAlpha;
+        const vis = visibility(x, y);
         // brightness 0..1 to alpha; faint stars sit near the edge of seeing
         const base = (0.13 + s.b * 0.72) * vis;
         // scintillation: only brighter stars, irregular, never a pulse
@@ -337,7 +305,7 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
     const active = () => root.classList.contains("look-v2") && !root.classList.contains("light");
 
     const frame = (time: number) => {
-      if (calm && !moments.length && !arrival) {
+      if (calm && !moments.length) {
         // the moment is over: one still frame, then nothing until the next
         animating = false;
         draw(time, 0);
