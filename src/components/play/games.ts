@@ -107,7 +107,7 @@ export const INVESTMENT_BANKING: Simulation = {
 export const REGISTERED_NURSE: Simulation = {
  id: "registered-nurse", careerId: "registered-nurse", title: "Registered Nurse",
  world: "Health & Medicine", firm: "Riverbend Medical Center",
- cover: RN_L1.cover!, thumb: RN_L1.cover!, thumbFocus: "50% 30%",
+ cover: RN_L1.cover!, thumb: "/images/play/rn/rebuild-2026-10-21/RN1-04.png", thumbFocus: "47% 30%",
  trailer: [
   { id: "RN-TR-01", seconds: 4, text: "More people work as nurses than any other job in health care.", art: "/images/play/rn/rebuild-2026-10-21/RN1-01.png" },
   { id: "RN-TR-02", seconds: 4.5, text: "Nursing schools turn away tens of thousands of people who qualify. Every year." },
@@ -203,7 +203,7 @@ export const UX_DESIGNER: Simulation = {
 export const FOOD_SCIENTIST: Simulation = {
   id: "food-scientist", careerId: "food-scientist", title: "Food Scientist",
   world: "Farming, Animals & Nature", firm: "Sprout Lab",
-  cover: FOOD_SCIENTIST_LEVEL_1.cover!, thumb: FOOD_SCIENTIST_LEVEL_1.cover!, thumbFocus: "48% 25%",
+  cover: FOOD_SCIENTIST_LEVEL_1.cover!, thumb: "/images/play/fs/v7/work.png", thumbFocus: "48% 30%",
   levels: [FOOD_SCIENTIST_LEVEL_1],
   upcoming: ["Planned: repeatability study", "Planned: process scale-up", "Planned: product review"],
 };

@@ -1,3 +1,9 @@
+## 2026-10-22 — Character scenes for Play thumbnails
+
+**Why (Chandu):** “the thumbnails in the play tab shouldnt be shots of the building but one with a character or two something that gives context.” Nursing now uses approved Rosa-in-scrubs corridor art; Food Scientist uses approved Ren-at-the-trial-bench art. UX, IB and Aviation already have contextual character/task thumbnails. Explicit thumbnail assets stay separate from exterior opening covers so future cover changes do not replace the catalogue art.
+
+**Validation:** Visually inspected both selected images. Scoped ESLint, TypeScript, token checks and diff whitespace checks pass. Game scenes, script and opening covers unchanged.
+
 ## 2026-10-22 — Rebuild UX/Food from IB's actual semantic sequence
 
 **Why (Chandu):** “Why are the words being taught only 3 as opposed to the IB simulations 4?” and “logic of the script and storyline [must] follow the same structure as the IB game.” Matching only 29 beats was insufficient. Directly audited `ib-level-1-v2.ts` and the rival/client continuity in IB Levels 2–3; see `career-scaling/ib-parity-audit.md` and `ib-slot-adaptations.json`.
