@@ -17,6 +17,8 @@ export type CharacterSlot = { x: number; baselineY: number; heightFrac: number; 
 
 export type SceneLocation = {
   src: string;
+  /** Dedicated portrait composition; never a blurred filler or torso crop. */
+  mobileSrc?: string;
   alt: string;
   /** desktop and tablet (640px and up) */
   focal: FocalPoint;

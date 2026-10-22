@@ -502,9 +502,9 @@ export type BuildSection = "interests" | "subjects" | "workVibe" | "skills" | "s
 // Skills, Software, School and Internships & jobs edit the Preferences
 // store; Work style also edits two of its fields (team size, environment).
 export const BUILD_SECTIONS: { id: BuildSection; title: string; question: string; subtitle?: string; sprite: string; cite?: string }[] = [
-  { id: "interests", title: "Career fields", question: "Which career fields interest you?", subtitle: "Choose up to 3", sprite: STAGE_DREAMY.interests.sprite, cite: "Harvard FAS Mignone + O*NET Interest Profiler" },
+  { id: "interests", title: "Career fields", question: "Which career fields interest you?", subtitle: "Choose up to 3", sprite: STAGE_DREAMY.interests.sprite, cite: "Question informed by Harvard University Mignone Center + O*NET" },
   { id: "subjects", title: "Subjects", question: "Which subjects do you enjoy?", subtitle: "Choose up to 2", sprite: STAGE_DREAMY.subjects.sprite },
-  { id: "workVibe", title: "Work style", question: "Where do you work best?", subtitle: "Pick one from each row.", sprite: STAGE_DREAMY.workVibe.sprite, cite: "MIT CAPD Self Assessment + O*NET Work Styles" },
+  { id: "workVibe", title: "Work style", question: "Where do you work best?", subtitle: "Pick one from each row.", sprite: STAGE_DREAMY.workVibe.sprite, cite: "Question informed by MIT CAPD + O*NET" },
   { id: "skills", title: "Skills", question: "What are you good at, and what do you want to build?", sprite: STAGE_DREAMY.subjects.sprite },
   { id: "software", title: "Software", question: "What software do you know, or want to learn?", sprite: "/images/dreamy/v2/dreamy-glasses.webp" },
   { id: "education", title: "Education", question: "How many years of education are you open to after high school?", sprite: STAGE_DREAMY.education.sprite },

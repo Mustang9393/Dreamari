@@ -43,3 +43,7 @@ export function locationFor(beatId: string): LocationArt | undefined {
 // a landscape conversation together instead of cropping to one torso.
 const FULL_SCENE_SOURCES = new Set(CAREER_ART.filter(art => art.spriteStandard === "full-scene").flatMap(art => Object.values(art.locations).map(location => location.src)));
 export function isFullSceneImage(src: string): boolean { return FULL_SCENE_SOURCES.has(src); }
+
+/** A separately composed phone painting, when authored for this shot. */
+const PORTRAIT_SCENES = new Map(CAREER_ART.flatMap(art => Object.values(art.locations).filter(location => location.mobileSrc).map(location => [location.src, location.mobileSrc!] as const)));
+export function portraitFor(src: string): string | undefined { return PORTRAIT_SCENES.get(src); }

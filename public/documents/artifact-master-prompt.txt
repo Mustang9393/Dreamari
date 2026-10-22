@@ -1,18 +1,20 @@
 OPTIONAL NATIVE WORK GRAPHIC
 
-Career / beat: {CAREER, BEAT_ID}
+Career / script screen: {CAREER, SCRIPT_SCREEN_ID}
 Project: {PROJECT}
-Work surface: {REAL APP, MESSAGE, SHORT NOTE, LABEL OR RELEVANT MONITOR}
-Purpose in the scene: {ATMOSPHERE OR CONTEXT}
-Source and limits: {PRIMARY SOURCE, FACT SUPPORTED, ROLE AUTHORITY, FICTIONAL VALUES}
-Native implementation: {SHARED RENDERER / TOKENS}
+Work surface and state: {REAL APP, MESSAGE, SHORT NOTE, LABEL OR RELEVANT MONITOR}
+Purpose: {SCENE CONTEXT OR TASK STATE}
+Source, authority and limits: {PRIMARY SOURCE / FICTIONAL TRAINING DATA}
+Implementation: {SHARED NATIVE RENDERER / TOKENS}
 
-Create a small optional context visual for a real work surface used by an entry-level {CAREER}. It may be an app screen, rough wireframe, short message, concise notepad, sample label or relevant monitor. It adds atmosphere and context. Nursing’s ECG-like display is one career-specific example, not a template. If the visual adds no useful context, omit it.
+Create a small optional native context visual for a real entry-level work surface. It adds atmosphere or shows a relevant good/bad UI state; it is never a required evidence source or second task. Use primary-source research and identify any fictional data. If nothing relevant helps, omit it.
 
-Use about 6–14 visible words, strong hierarchy and enough whitespace to read at game size. Avoid dense graphs, tables, paragraphs, repeated task titles, equipment drawings and long notes. Make a UX interface look like a real UI; make a wireframe visibly rough. Do not make decoration look like a live measurement.
+Tie the graphic to an actual work beat, not a character-introduction card. Do not show or name a cast member before their first-appearance beat in the cast ledger.
 
-The question contains every fact needed to answer. The visual is not a second task, hidden clue, answer key or evidence gate; removing it cannot change the correct answer. Do not invent clinical readings, dosages, safety thresholds, technical limits or release approval. Mark fictional training values as fictional when needed.
+Keep gameplay panels centered and consistently positioned across scenes. Do not move UI left or right to protect faces or make room for this graphic; artwork and optional context fit around the fixed centered HUD/dialogue footprint.
 
-Implement with native HTML/CSS/text, semantic tokens and a shared renderer. No embedded independent buttons, tabs, typing, reset, mandatory exploration or playable demo. Only actual game controls accept answers or advance. Do not create extra focus targets. Supply a concise text equivalent and scene mapping. Verify legibility, focus behavior and lack of duplicated copy on desktop and phone. Record the source, supported fact and limits. The final human reviews the assembled game; no intermediate approval gate.
+For UX examples, show the actual relevant states. A poor state may bury a Save action under long gray description lines; the improved state makes Save prominent. Keep the important visual difference legible at game size. The question text still states the task and evidence.
 
-On story cards, use this reading order: title → supporting graphic → short description → CTA. Keep graphics inside the card, never below its CTA. Decision screens keep the question and answer controls prominent.
+For story cards, keep order title → graphic → description → CTA. Place the optional visual between title and description, never below the CTA. Keep around 6–14 visible words, concise labels, whitespace and clear hierarchy. Use relevant screen states; avoid generic filler, dense graphs, tables, paragraphs, duplicated instructions, decorative equipment and fabricated readings.
+
+The game question contains all answer facts and remains answerable if the graphic is removed. No hidden clues, independent buttons/tabs, typing, reset, mandatory exploration or embedded prototype. Only actual game controls interact. Use native HTML/CSS/text, semantic tokens and existing shared renderers. Provide a short text equivalent and test legibility/focus on desktop and phone.

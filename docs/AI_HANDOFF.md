@@ -6,7 +6,42 @@
 
 **Validation:** TypeScript, scoped ESLint, tokens:check and diff whitespace checks pass. Browser on localhost:3147 confirmed Calendar selected on entry, Agenda renders next meeting / past meetings / coming up, and Calendar renders again after toggling back. No new scrolling containers or positioning code; touched-component scrollbar audit clean. Physical Windows/Chromebook verification not performed.
 
-**Next:** review and merge the focused restoration PR; no direct main push.
+**Release:** Chandu authorized merging/pushing on 22 October. Merged current main; the only conflict was this append-only handoff, resolved by retaining both entries. No counselor code conflicts.
+
+## 2026-10-22: Play tab: every built game in its row (Food Scientist, Kitchen Terms)
+
+**Why (Chandu):** "please move all of codex's new games into the play tab row instead of hiding in the hamburger menu with appropriate thumbnails." This reverses the 17 Oct rule that kept cover-less games hamburger-only.
+
+- **Food Scientist (`play/PlayHub.tsx`):** `HUB_SIMULATIONS` is every simulation now; Food Scientist wears its Level 1 lab arrival scene (`/images/play/fs/v7/arrival.png`, already its cover). UX Designer and Registered Nurse were already in the row.
+- **Kitchen Terms (`play/games.ts` GLOSSARY_GAMES, `glossary/data.ts` GLOSSARY_HUB_RELEASED):** joins the glossary row and is released. Its cover (`/images/app/glossary-kitchen-thumb-oct22.webp`) is drawn to the 19 Oct set: one isometric object (a steaming pot) on the navy gradient, no Dreamy, no text; Codex can replace it with a matching render.
+- **Hamburger (`app/chrome.tsx`):** the Food Scientist, UX Designer and Registered Nurse QA links are gone; Glossary QA stays under Labs.
+- Checked: tsc clean; /play at 1440 lists both new games and opens their routes.
+
+## 2026-10-22 — Food Scientist in the Play hero row
+
+Chandu requested Food Scientist in the Career Simulations hero row. Removed its hub-only exclusion; it now uses the existing playable card and route on desktop and mobile. The existing live-career filter also removes its old “In the works” placeholder. No game content changed. Validation: scoped ESLint, TypeScript and tokens; this is a catalogue inclusion using the existing shared card.
+
+## 2026-10-22 — Story-led cast arrivals, IB variety and precise scene context
+
+**Why (Chandu):** “dont introduce everybody in succession at once. Work that into the storyline.” Also keep panels centered, use the monogram success treatment, preserve vetted Nursing gameplay, and show the broken and improved UI clearly.
+
+UX and Food now each have 29 runtime beats matching IB, seven scored decisions, vocabulary flips, matching, ranking and rapid checks. Arjun / Ren are established alone first. Noah joins prototype work; Eleanor arrives for testing; Samira leads review; Amina enters for keyboard access. Food introduces Imani for sample work, Yuki for tasting review and Luis only when the batch record is missing. Cast ledgers and a regression reject premature name mentions or visible colleagues. A new solo Noah painting replaces the early group image. Gameplay stays centered. Passing endings use CareerSeal and an active replay button. Completion starts at zero independently of reputation.
+
+Passive work graphics stay concise. UX wrong feedback retains the buried Save layout; correct feedback shows Save beside the title. Food separates named from coded samples. Nursing's approved 36 beats / 55 script screens and original questions remain intact; four new bedside images show the patient alone with appropriate distress, plus dedicated sharp portrait compositions. FullScenePlate removes blurred duplicate side fill and uses a full-bleed sharp painting; this still uses cover at other aspect ratios, so arbitrary viewport character framing is not certified.
+
+**Validation:** 11 regression tests pass; UX/Food structural validators pass (420/398 assertions); Production build, TypeScript, scoped ESLint and tokens pass. Browser observed a solo Noah introduction with centered dialogue and zero completion, and wrong UX feedback showing the current buried Save design. Earlier targeted runtime checks exercised all UX scored interaction types and Food's passing outcome; these were preview-assisted checks, not exhaustive fresh playthroughs of every branch. Nursing patient portrait and emergency ECG were checked earlier; physical devices / Windows remain untested. Game commit d5e6dfb reached production READY and the published solo Noah introduction was verified. Master SOP v2.0 is a nine-page PDF with reference art and four prompts. Its final clarification requires task-triggered entrances with meaningful gameplay between arrivals, not spaced introduction cards.
+
+## 2026-10-21 — Restore vetted Nursing gameplay; images only
+
+**Why (Chandu):** “registered nurse was vetted and approved. Only update the images ... bring back ... name tags, door bells, ecg ... original script and questions.” The previous simplification mistakenly replaced its approved gameplay. Nursing now uses the intact `rn-level-1-v2.ts` again: all 36 runtime beats covering the original 55 script screens, ten ±5 scored decisions, two applied practice decisions, matching/vocabulary/rapid/ranking/pick interactions, midpoint review, final review and original endings. Its original seven-card trailer and six-rung career ladder are restored; later nursing roles were always upcoming, not built levels. Express keeps its separate approved source/cut list.
+
+Only image fields, cast face chips and a fresh Full-mode save slot (209) differ from the approved source. Every Full/Express beat routes to the current complete anime paintings; legacy bedside hero photos cannot override them. No sprites are added. ECG, badge, wristband, call-light board, record sheet and report UI are enabled by the approved data. The glass HUD and title → graphic → description → CTA polish remain.
+
+**Validation:** regression compares every live Full/Express gameplay object against its approved source excluding image fields, checks all image routes/files, exact scored count/scoring/endings, original trailer/ladder and bespoke instruments. Browser observed the restored animated ECG, timed emergency question and +5 feedback; call-light ordering/submission works. Production build, scoped lint, tokens and regression tests pass. This is targeted restoration QA, not a claim of a fresh exhaustive 36-beat browser playthrough. Master generation prompt and handoff now exempt approved Nursing from new-career simplification templates.
+
+## 2026-10-21 — Full scene edges and glass HUD
+
+User rejected side bars, image cropping and the hard HUD bar. FullScenePlate now preserves the complete painting on a full-viewport plane; a decorative blurred copy fills aspect-ratio gaps, rather than black letterboxing or cropping the primary image. HUD uses a masked glass scrim fading into the scene, wider control and row gaps, and a two-row control layout below 640px. On phones the primary painting begins below the HUD. Browser checked Nursing RN1-04 at1280x720: no side bars and Rosa’s face is clear. Also checked the actual responsive viewport at390x844: controls fit in two rows, the full painting is visible below the HUD, and no black side bars. This is responsive browser QA, not physical-device or Windows QA.
 
 ## 2026-10-21 — Supporting graphic order
 

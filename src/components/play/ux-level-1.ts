@@ -15,7 +15,7 @@ export const UX_LEVEL_1: Level = {
   "worldTheme": true,
   "coreKit": true,
   "quietQuestions": true,
-  "saveSlot": 504,
+  "saveSlot": 211,
   "cast": {
     "Arjun": "/images/play/ux/face-arjun-v7.webp",
     "Noah": "/images/play/ux/face-noah-v7.webp",
@@ -95,7 +95,8 @@ export const UX_LEVEL_1: Level = {
       "message": "You helped the team make a clearer design.",
       "subline": "Level 1 complete. Later projects are not built yet.",
       "primary": "Play the project again",
-      "advances": true
+      "advances": true,
+      "replayOnPass": true
     },
     {
       "min": 40,
@@ -124,12 +125,14 @@ export const UX_LEVEL_1: Level = {
   "beats": [
     {
       "kind": "card",
-      "variant": "intro",
+      "variant": "character",
       "speaker": "Narrator",
-      "title": "Your first day.",
-      "body": "Arjun, your mentor, welcomes you to Northline’s music-app design team.",
+      "title": "Your mentor, Arjun.",
+      "body": "Arjun guides your first project at Northline. He will review your plan and help you learn from each test.",
       "cta": "Continue",
-      "id": "UX1-01"
+      "id": "UX1-01",
+      "setup": "Arjun • Senior UX Designer",
+      "castMember": "Arjun"
     },
     {
       "kind": "card",
@@ -144,20 +147,32 @@ export const UX_LEVEL_1: Level = {
     {
       "kind": "card",
       "variant": "intro",
-      "speaker": "Narrator",
-      "title": "Samira leads the review.",
-      "body": "Samira leads the client demo. Your findings will shape what the team presents.",
+      "speaker": "Arjun",
+      "title": "Start with the fan’s task.",
+      "body": "Arjun asks you to learn where saving gets confusing before the team changes the screen.",
+      "cta": "Continue",
+      "id": "UX1-03",
+      "artifact": UX_ARTIFACTS.app
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Arjun",
+      "title": "One clear goal.",
+      "body": "Watch a fan try to save a festival set. I’ll help you turn what happens into a useful finding.",
       "cta": "Continue",
       "id": "UX1-04"
     },
     {
       "kind": "card",
-      "variant": "intro",
+      "variant": "character",
       "speaker": "Narrator",
-      "title": "You have a team.",
-      "body": "Noah builds the prototype. Amina checks access. Your research guides their next change.",
+      "title": "Meet your fellow junior.",
+      "body": "Noah builds the prototype. You watch fans try it, then share what needs work.",
       "cta": "Continue",
-      "id": "UX1-05"
+      "id": "UX1-05",
+      "setup": "Noah • Junior UX Designer",
+      "castMember": "Noah"
     },
     {
       "kind": "choice",
@@ -206,36 +221,32 @@ export const UX_LEVEL_1: Level = {
       "artifact": UX_ARTIFACTS.wireframe
     },
     {
-      "kind": "pick",
+      "kind": "flips",
+      "speaker": "Arjun",
+      "title": "Three words for the test.",
+      "cards": [
+        { "term": "Wireframe", "def": "A rough screen layout." },
+        { "term": "Prototype", "def": "A design people can try." },
+        { "term": "Usability test", "def": "Watch someone try a real task." }
+      ],
+      "cta": "Continue",
+      "id": "UX1-08"
+    },
+    {
+      "kind": "match",
       "speaker": "Narrator",
-      "question": "Choose two things to record during an offline-save test.",
-      "whenRight": "Actions and results show whether the task works.",
-      "whenWrong": "Record what happened during the task, not guesses or preferences.",
+      "question": "Match each test note to what it tells the team.",
+      "pairs": [
+        { "term": "Where the fan taps", "def": "The action they took" },
+        { "term": "Set opens offline", "def": "The task result" },
+        { "term": "Fan asks where to save", "def": "A point of confusion" },
+        { "term": "Designer likes blue", "def": "A personal preference" }
+      ],
+      "whenRight": "Actions and results help explain whether the task works.",
+      "whenWrong": "Record what happened. Keep guesses and preferences separate.",
       "feedback": "",
       "feedbackCta": "Continue",
-      "skills": [
-        "Critical Thinking",
-        "Problem-Solving"
-      ],
-      "pick": 2,
-      "cards": [
-        {
-          "label": "Where the fan taps.",
-          "role": "pick"
-        },
-        {
-          "label": "Whether the set opens offline.",
-          "role": "pick"
-        },
-        {
-          "label": "Your guess about their age.",
-          "role": "leave"
-        },
-        {
-          "label": "Which color you like.",
-          "role": "leave"
-        }
-      ],
+      "skills": ["Critical Thinking", "Problem-Solving"],
       "id": "UX1-09",
       "progress": 0.2857142857142857,
       "planLineIfFailed": "you made a claim before checking what happened",
@@ -245,11 +256,21 @@ export const UX_LEVEL_1: Level = {
       "kind": "card",
       "variant": "intro",
       "speaker": "Narrator",
-      "title": "Eleanor misses the control.",
-      "body": "The fan taps the cover twice. “Where do I save this?” The Save control sits below a long description.",
+      "title": "Meet Eleanor, a music fan.",
+      "body": "Eleanor taps the cover twice. “Where do I save this?” Save sits below a long description.",
       "cta": "Continue",
       "id": "UX1-10",
-      "artifact": UX_ARTIFACTS.app
+      "artifact": UX_ARTIFACTS.bad
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Watch before changing the screen.",
+      "body": "Eleanor is still looking for Save. Record what she tries before Noah moves the control.",
+      "cta": "Continue",
+      "id": "UX1-13",
+      "artifact": UX_ARTIFACTS.bad
     },
     {
       "kind": "choice",
@@ -283,6 +304,8 @@ export const UX_LEVEL_1: Level = {
         "Decision-Making"
       ],
       "id": "UX1-11",
+      "artifact": UX_ARTIFACTS.bad,
+      "feedbackArtifacts": { best: UX_ARTIFACTS.improved, wrong: UX_ARTIFACTS.bad, risky: UX_ARTIFACTS.bad },
       "progress": 0.42857142857142855,
       "planLineIfFailed": "you made a claim before checking what happened",
       "prompt": ""
@@ -290,42 +313,38 @@ export const UX_LEVEL_1: Level = {
     {
       "kind": "card",
       "variant": "character",
-      "speaker": "Samira",
-      "title": "The design lead joins.",
-      "body": "Samira wants your finding, not a long report.",
+      "speaker": "Narrator",
+      "title": "Samira leads the client review.",
+      "body": "She decides what the client sees. Your finding needs to be clear enough for her to use.",
       "cta": "Continue",
       "castMember": "Samira",
-      "id": "UX1-12"
+      "id": "UX1-12",
+      "setup": "Samira • Design Lead"
     },
     {
-      "kind": "flags",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Samira",
+      "title": "Keep the finding small.",
+      "body": "Two fans tried the update. Both found Save and opened the set offline. That is a useful first result.",
+      "cta": "Continue",
+      "id": "UX1-14",
+      "artifact": UX_ARTIFACTS.improved
+    },
+    {
+      "kind": "rank",
       "speaker": "Narrator",
-      "question": "Two fans finished the test. Flag both claims that go beyond that result.",
-      "whenRight": "Keep the finding as narrow as the evidence.",
-      "whenWrong": "Flag the claims about every fan and never failing.",
+      "question": "Rank the claims from best supported to least supported.",
+      "order": [
+        "Both fans saved the set.",
+        "The update may help fans find Save.",
+        "Every fan will find Save."
+      ],
+      "whenRight": "Lead with the result, then name a careful next possibility.",
+      "whenWrong": "Two tests support the result for those fans, not a claim about everyone.",
       "feedback": "",
       "feedbackCta": "Continue",
-      "skills": [
-        "Critical Thinking",
-        "Problem-Solving"
-      ],
-      "rows": [
-        {
-          "label": "Both fans saved the set.",
-          "flag": false,
-          "why": "That describes the observed result."
-        },
-        {
-          "label": "Every fan will find Save.",
-          "flag": true,
-          "why": "Two people cannot represent every fan."
-        },
-        {
-          "label": "The app never fails offline.",
-          "flag": true,
-          "why": "This test did not cover every offline situation."
-        }
-      ],
+      "skills": ["Critical Thinking", "Problem-Solving"],
       "id": "UX1-15",
       "progress": 0.5714285714285714,
       "planLineIfFailed": "you made a claim before checking what happened",
@@ -358,12 +377,35 @@ export const UX_LEVEL_1: Level = {
     },
     {
       "kind": "card",
-      "variant": "act",
-      "speaker": "System",
-      "title": "A new snag.",
-      "body": "The button is easier to find. Now Amina checks whether everyone can reach it.",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "The finding goes into the demo.",
+      "body": "Samira records that both fans found Save and labels it an early result for the client.",
       "cta": "Continue",
-      "id": "UX1-ACT2"
+      "id": "UX1-16",
+      "artifact": UX_ARTIFACTS.app
+    },
+    {
+      "kind": "card",
+      "variant": "character",
+      "speaker": "Narrator",
+      "title": "Amina checks access.",
+      "body": "She helps people use the app in different ways. Today, you will check the keyboard path.",
+      "cta": "Continue",
+      "id": "UX1-ACT2",
+      "setup": "Amina • Accessibility Specialist",
+      "castMember": "Amina"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "Try Save without a mouse.",
+      "body": "Amina reaches Save with Tab, but cannot see which control is selected.",
+      "cta": "Continue",
+      "castMember": "Amina",
+      "id": "UX1-18",
+      "artifact": UX_ARTIFACTS.app
     },
     {
       "kind": "choice",
@@ -405,46 +447,47 @@ export const UX_LEVEL_1: Level = {
       "kind": "card",
       "variant": "intro",
       "speaker": "Narrator",
-      "title": "Noah asks for help.",
-      "body": "“How do we check the fix before the festival team sees it?”",
+      "title": "Noah wants to send it now.",
+      "body": "The festival deadline is close. Arjun asks you to check the keyboard path before the demo goes out.",
       "cta": "Continue",
       "id": "UX1-21",
+      "castMember": "Noah",
       "artifact": UX_ARTIFACTS.message
     },
     {
-      "kind": "choice",
-      "layout": "options",
+      "kind": "rapid",
       "speaker": "Narrator",
-      "id": "UX1-22",
-      "progress": 0.8571428571428571,
-      "question": "Noah uses only a keyboard. How should he check the new focus outline?",
-      "prompt": "",
-      "choices": [
+      "question": "Check the keyboard path.",
+      "items": [
         {
-          "id": "a",
-          "label": "Press Tab and watch which control is selected.",
-          "tier": "best",
-          "why": "The outline should show where keyboard focus is."
+          "question": "What shows which control is selected?",
+          "options": [
+            { "label": "A visible focus outline.", "correct": true, "why": "The outline shows keyboard focus." },
+            { "label": "A color change only on mouse hover.", "correct": false, "why": "Mouse hover does not show keyboard focus." }
+          ]
         },
         {
-          "id": "b",
-          "label": "Only move the mouse over the button.",
-          "tier": "wrong",
-          "why": "A mouse check does not test keyboard focus."
+          "question": "How does Noah move to the next control?",
+          "options": [
+            { "label": "Press Tab.", "correct": true, "why": "Tab moves keyboard focus forward." },
+            { "label": "Move the pointer.", "correct": false, "why": "Pointer movement does not test keyboard access." }
+          ]
         },
         {
-          "id": "c",
-          "label": "Ask whether the colors look stylish.",
-          "tier": "wrong",
-          "why": "Style alone does not show whether the control is usable."
+          "question": "What should happen when Save has focus?",
+          "options": [
+            { "label": "Enter activates Save.", "correct": true, "why": "A keyboard user needs to activate the focused control." },
+            { "label": "Only a mouse click can activate it.", "correct": false, "why": "The task must work without a mouse." }
+          ]
         }
       ],
+      "whenPass": "The focus is visible, moves by keyboard, and activates the control.",
+      "whenFail": "Check the visible focus, Tab movement, and keyboard activation.",
       "feedback": "",
       "feedbackCta": "Continue",
-      "skills": [
-        "Critical Thinking",
-        "Problem-Solving"
-      ],
+      "skills": ["Critical Thinking", "Problem-Solving"],
+      "id": "UX1-22",
+      "progress": 0.8571428571428571,
       "planLineIfFailed": "you skipped the keyboard check"
     },
     {
@@ -455,6 +498,27 @@ export const UX_LEVEL_1: Level = {
       "body": "Amina confirms the focus stays visible. Noah adds the change to the demo.",
       "cta": "Continue",
       "id": "UX1-23"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Samira",
+      "title": "Prepare the client update.",
+      "body": "Samira wants the result, what it means, and the next check in a few clear lines.",
+      "cta": "Continue",
+      "castMember": "Samira",
+      "id": "UX1-24",
+      "artifact": UX_ARTIFACTS.message
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Arjun",
+      "title": "The client team is here.",
+      "body": "AMPLIFY’s festival team is ready to review the update. Samira brings your notes into the room.",
+      "cta": "Continue",
+      "id": "UX1-25",
+      "artifact": UX_ARTIFACTS.wireframe
     },
     {
       "kind": "choice",

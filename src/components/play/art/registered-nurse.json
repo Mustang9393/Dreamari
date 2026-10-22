@@ -4,7 +4,8 @@
   "spriteStandard": "full-scene",
   "notes": [
     "One complete opaque painting per RN1 beat. No runtime people or arms.",
-    "rebuild-2026-10-21 is the timeline/identity repair; rejected revision-2026-10-21 is never routed."
+    "rebuild-2026-10-21 is the timeline/identity repair; rejected revision-2026-10-21 is never routed.",
+    "Approved RN2 gameplay (36 beats / original 55 script screens) is restored unchanged. RN2 routing reuses the new complete paintings; no shortened rebuild script is live."
   ],
   "locations": {
     "rn-rebuild-RN1-01": {
@@ -344,6 +345,46 @@
         "y": 0.3
       },
       "locked": true
+    },
+    "rn-v8-patient-anxious": {
+      "src": "/images/play/rn/scene-state-v8/patient-anxious-wide.png",
+      "mobileSrc": "/images/play/rn/scene-state-v8/patient-anxious-portrait.png",
+      "alt": "The same patient alone in Room 12, anxious and asking when help returns, hands on bedding; Rosa is elsewhere. Same lake-facing room.",
+      "focal": {
+        "x": 0.55,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.25
+      },
+      "locked": true,
+      "role": "specialist",
+      "visibleCast": [
+        "Room 12 patient"
+      ],
+      "emotion": "anxious",
+      "timeClass": "morning"
+    },
+    "rn-v8-patient-alarm": {
+      "src": "/images/play/rn/scene-state-v8/patient-alarm-wide.png",
+      "mobileSrc": "/images/play/rn/scene-state-v8/patient-alarm-portrait.png",
+      "alt": "The same patient alone in Room 12, confused and breathing fast, hand at chest; Rosa is elsewhere. Same lake-facing room.",
+      "focal": {
+        "x": 0.55,
+        "y": 0.3
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.25
+      },
+      "locked": true,
+      "role": "specialist",
+      "visibleCast": [
+        "Room 12 patient"
+      ],
+      "emotion": "alarm",
+      "timeClass": "afternoon"
     }
   },
   "cast": {
@@ -369,28 +410,65 @@
     "RN1-01": "rn-rebuild-RN1-01",
     "RN1-02": "rn-rebuild-RN1-02",
     "RN1-03": "rn-rebuild-RN1-03",
-    "RN1-04": "rn-rebuild-RN1-04",
-    "RN1-05": "rn-rebuild-RN1-05",
-    "RN1-06": "rn-rebuild-RN1-06",
-    "RN1-07": "rn-rebuild-RN1-07",
-    "RN1-08": "rn-rebuild-RN1-08",
-    "RN1-09": "rn-rebuild-RN1-09",
-    "RN1-10": "rn-rebuild-RN1-10",
-    "RN1-11": "rn-rebuild-RN1-11",
-    "RN1-12": "rn-rebuild-RN1-12",
-    "RN1-13": "rn-rebuild-RN1-13",
-    "RN1-14": "rn-rebuild-RN1-14",
-    "RN1-15": "rn-rebuild-RN1-15",
-    "RN1-16": "rn-rebuild-RN1-16",
-    "RN1-17": "rn-rebuild-RN1-17",
+    "RN1-04": "rn-rebuild-RN1-07",
+    "RN1-05": "rn-rebuild-RN1-23",
+    "RN1-06": "rn-rebuild-RN1-04",
+    "RN1-07": "rn-rebuild-RN1-05",
+    "RN1-08": "rn-rebuild-RN1-06",
+    "RN1-09": "rn-rebuild-RN1-05",
+    "RN1-10": "rn-rebuild-RN1-06",
+    "RN1-11": "rn-rebuild-RN1-06",
+    "RN1-12": "rn-rebuild-RN1-08",
+    "RN1-13": "rn-rebuild-RN1-10",
+    "RN1-14": "rn-rebuild-RN1-08",
+    "RN1-15": "rn-rebuild-RN1-12",
+    "RN1-16": "rn-rebuild-RN1-17",
+    "RN1-17": "rn-rebuild-RN1-11",
     "RN1-18": "rn-rebuild-RN1-18",
-    "RN1-19": "rn-rebuild-RN1-19",
+    "RN1-19": "rn-rebuild-RN1-18",
     "RN1-20": "rn-rebuild-RN1-20",
     "RN1-21": "rn-rebuild-RN1-21",
     "RN1-22": "rn-rebuild-RN1-22",
     "RN1-23": "rn-rebuild-RN1-23",
     "RN1-24": "rn-rebuild-RN1-24",
     "RN1-25": "rn-rebuild-RN1-25",
-    "RN1-26": "rn-rebuild-RN1-26"
+    "RN1-26": "rn-rebuild-RN1-26",
+    "RN2-01": "rn-rebuild-RN1-01",
+    "RN2-02": "rn-rebuild-RN1-02",
+    "RN2-03": "rn-rebuild-RN1-03",
+    "RN2-04": "rn-rebuild-RN1-04",
+    "RN2-05": "rn-rebuild-RN1-05",
+    "RN2-06": "rn-rebuild-RN1-02",
+    "RN2-07": "rn-rebuild-RN1-14",
+    "RN2-08": "rn-rebuild-RN1-05",
+    "RN2-10": "rn-rebuild-RN1-06",
+    "RN2-11": "rn-rebuild-RN1-08",
+    "RN2-15": "rn-rebuild-RN1-10",
+    "RN2-17": "rn-rebuild-RN1-13",
+    "RN2-18": "rn-rebuild-RN1-08",
+    "RN2-23": "rn-v8-patient-anxious",
+    "RN2-24": "rn-v8-patient-anxious",
+    "RN2-26": "rn-rebuild-RN1-12",
+    "RN2-28": "rn-rebuild-RN1-16",
+    "RN2-29": "rn-rebuild-RN1-17",
+    "RN2-30": "rn-rebuild-RN1-17",
+    "RN2-32": "rn-rebuild-RN1-11",
+    "RN2-33": "rn-rebuild-RN1-11",
+    "RN2-35": "rn-rebuild-RN1-18",
+    "RN2-36": "rn-rebuild-RN1-18",
+    "RN2-37": "rn-rebuild-RN1-19",
+    "RN2-38": "rn-rebuild-RN1-20",
+    "RN2-40": "rn-rebuild-RN1-21",
+    "RN2-41": "rn-rebuild-RN1-22",
+    "RN2-43": "rn-v8-patient-alarm",
+    "RN2-44": "rn-v8-patient-alarm",
+    "RN2-45": "rn-v8-patient-alarm",
+    "RN2-47": "rn-rebuild-RN1-11",
+    "RN2-48": "rn-rebuild-RN1-11",
+    "RN2-50": "rn-rebuild-RN1-24",
+    "RN2-51": "rn-rebuild-RN1-24",
+    "RN2-53": "rn-rebuild-RN1-25",
+    "RN2-54": "rn-rebuild-RN1-26",
+    "RN1-04b": "rn-rebuild-RN1-07"
   }
 }

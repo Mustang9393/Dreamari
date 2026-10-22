@@ -12,6 +12,11 @@
       "uses": []
     },
     {
+      "beat": "UX1-03",
+      "teaches": [],
+      "uses": []
+    },
+    {
       "beat": "UX1-04",
       "teaches": [],
       "uses": []
@@ -40,6 +45,11 @@
       "uses": []
     },
     {
+      "beat": "UX1-08",
+      "teaches": [],
+      "uses": []
+    },
+    {
       "beat": "UX1-09",
       "teaches": [
         "a prototype is a version people can try"
@@ -53,6 +63,11 @@
       "teaches": [
         "observed task trouble identifies a discoverability issue"
       ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-13",
+      "teaches": [],
       "uses": []
     },
     {
@@ -72,6 +87,11 @@
       "uses": []
     },
     {
+      "beat": "UX1-14",
+      "teaches": [],
+      "uses": []
+    },
+    {
       "beat": "UX1-15",
       "teaches": [
         "client claims should match the observed sample"
@@ -86,10 +106,20 @@
       "uses": []
     },
     {
+      "beat": "UX1-16",
+      "teaches": [],
+      "uses": []
+    },
+    {
       "beat": "UX1-ACT2",
       "teaches": [
         "keyboard focus must stay visible"
       ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-18",
+      "teaches": [],
       "uses": []
     },
     {
@@ -122,6 +152,16 @@
       "teaches": [
         "report only what the small test observed"
       ],
+      "uses": []
+    },
+    {
+      "beat": "UX1-24",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "UX1-25",
+      "teaches": [],
       "uses": []
     },
     {

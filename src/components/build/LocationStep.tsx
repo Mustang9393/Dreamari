@@ -289,7 +289,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
         />
       )}
 
-      <Citation>MIT CAPD Job Search + BLS OEWS</Citation>
+      <Citation>Question informed by MIT CAPD + BLS OEWS</Citation>
       </GlassCard>
       </div>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!selected} onSkip={onSkip} />

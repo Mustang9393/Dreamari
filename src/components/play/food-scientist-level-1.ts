@@ -16,7 +16,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
   "coreKit": true,
   "quietQuestions": true,
   "qaSkip": true,
-  "saveSlot": 604,
+  "saveSlot": 211,
   "cast": {
     "Ren": "/images/play/fs/face-ren-v7.webp",
     "Yuki": "/images/play/fs/face-yuki-v7.webp",
@@ -52,7 +52,7 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
         {
           "kind": "say",
           "heading": "Keep records. Know your role.",
-          "body": "You record and compare. Ren guides lab work. Yuki approves tasting and checks safety claims.",
+          "body": "You record and compare. Your mentor guides lab work. Senior staff review the results and decide the next tests.",
           "image": "/images/play/fs/v7/arrival.png"
         },
         {
@@ -91,7 +91,8 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "message": "You helped the team choose a sound next test.",
       "subline": "Level 1 complete. Later projects are not built yet.",
       "primary": "Play the project again",
-      "advances": true
+      "advances": true,
+      "replayOnPass": true
     },
     {
       "min": 40,
@@ -119,12 +120,14 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
   "beats": [
     {
       "kind": "card",
-      "variant": "intro",
+      "variant": "character",
       "speaker": "Narrator",
-      "title": "Welcome to Sprout Lab.",
-      "body": "Ren, your mentor, welcomes you to a premium café’s drink-development team.",
+      "title": "Your mentor, Ren.",
+      "body": "Ren guides your first drink trial at Sprout Lab. He will help you make a fair comparison.",
       "cta": "Continue",
-      "id": "FS1-01"
+      "id": "FS1-01",
+      "setup": "Ren • Senior Food Scientist",
+      "castMember": "Ren"
     },
     {
       "kind": "card",
@@ -139,20 +142,32 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "kind": "card",
       "variant": "intro",
-      "speaker": "Narrator",
-      "title": "Yuki checks the next step.",
-      "body": "She approves tasting and further tests. You prepare trials and record what happens.",
+      "speaker": "Ren",
+      "title": "Make every cup consistent.",
+      "body": "The café needs a drink the team can prepare the same way each time.",
+      "cta": "Continue",
+      "id": "FS1-03",
+      "artifact": FS_ARTIFACTS.note
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Ren",
+      "title": "Your part in the trial.",
+      "body": "You prepare small batches and record what happens. I’ll check the plan with you before the tasting.",
       "cta": "Continue",
       "id": "FS1-04"
     },
     {
       "kind": "card",
-      "variant": "intro",
+      "variant": "character",
       "speaker": "Narrator",
-      "title": "Work with the team.",
-      "body": "Imani prepares the samples. Luis keeps the batch records. You help make the test fair.",
+      "title": "Meet your trial partner.",
+      "body": "Imani prepares the samples. You compare what happens when one ingredient changes.",
       "cta": "Continue",
-      "id": "FS1-05"
+      "id": "FS1-05",
+      "setup": "Imani • Junior Food Scientist",
+      "castMember": "Imani"
     },
     {
       "kind": "choice",
@@ -201,37 +216,32 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "artifact": FS_ARTIFACTS.codes
     },
     {
-      "kind": "slider",
-      "speaker": "Narrator",
-      "question": "A trial totals 100 g. Fruit is 15 g. How much base keeps the total at 100 g?",
-      "steps": [
-        {
-          "label": "80 g",
-          "tier": "wrong",
-          "why": "80 plus 15 is only 95."
-        },
-        {
-          "label": "85 g",
-          "tier": "best",
-          "why": "85 plus 15 is 100."
-        },
-        {
-          "label": "90 g",
-          "tier": "wrong",
-          "why": "90 plus 15 is 105."
-        },
-        {
-          "label": "95 g",
-          "tier": "wrong",
-          "why": "95 plus 15 is 110."
-        }
+      "kind": "flips",
+      "speaker": "Ren",
+      "title": "Three words for a fair trial.",
+      "cards": [
+        { "term": "Batch", "def": "One prepared amount of a product." },
+        { "term": "Variable", "def": "The one thing changed in a comparison." },
+        { "term": "Repeat", "def": "Run the same test again to check a result." }
       ],
+      "cta": "Continue",
+      "id": "FS1-08"
+    },
+    {
+      "kind": "match",
+      "speaker": "Narrator",
+      "question": "Match each trial note to its job.",
+      "pairs": [
+        { "term": "Fruit amount", "def": "The variable being changed" },
+        { "term": "Batch size", "def": "A condition kept the same" },
+        { "term": "Taste score", "def": "A result to record" },
+        { "term": "Run the test again", "def": "Repeat the comparison" }
+      ],
+      "whenRight": "A clear record shows what changed and what the team measured.",
+      "whenWrong": "Name the changed ingredient, the steady conditions, and the result separately.",
       "feedback": "",
       "feedbackCta": "Continue",
-      "skills": [
-        "Problem-Solving",
-        "Critical Thinking"
-      ],
+      "skills": ["Problem-Solving", "Critical Thinking"],
       "id": "FS1-09",
       "progress": 0.2857142857142857,
       "planLineIfFailed": "you made a claim before checking what happened",
@@ -246,6 +256,17 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "cta": "Continue",
       "id": "FS1-10",
       "artifact": FS_ARTIFACTS.note
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Imani",
+      "title": "The samples are ready.",
+      "body": "I’ve prepared the coded cups and recorded both recipes. Now we can compare the batches fairly.",
+      "cta": "Continue",
+      "castMember": "Imani",
+      "id": "FS1-13",
+      "artifact": FS_ARTIFACTS.codes
     },
     {
       "kind": "choice",
@@ -286,42 +307,40 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     {
       "kind": "card",
       "variant": "character",
-      "speaker": "Yuki",
-      "title": "Yuki joins the tasting plan.",
-      "body": "She wants people to judge the drink, not the brand.",
+      "speaker": "Narrator",
+      "title": "Yuki leads the tasting review.",
+      "body": "She checks what the results really show. Your notes will help her choose the next test.",
       "cta": "Continue",
       "castMember": "Yuki",
-      "id": "FS1-12"
+      "id": "FS1-12",
+      "setup": "Yuki • Senior Food Scientist",
+      "artifact": FS_ARTIFACTS.named
     },
     {
-      "kind": "flags",
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Yuki",
+      "title": "Keep the tasting neutral.",
+      "body": "Yuki asks the team to use codes and avoid hints that could sway a taster.",
+      "cta": "Continue",
+      "castMember": "Yuki",
+      "id": "FS1-14",
+      "artifact": FS_ARTIFACTS.codes
+    },
+    {
+      "kind": "rank",
       "speaker": "Narrator",
-      "question": "Flag both tasting-plan choices that could sway people’s answers.",
-      "whenRight": "Neutral labels and instructions keep the tasting fairer.",
-      "whenWrong": "Flag the praise label and sharing your preference.",
+      "question": "Rank the tasting setups from fairest to least fair.",
+      "order": [
+        "Coded cups, same instructions, no hints.",
+        "Coded cups, but share your own favorite.",
+        "Call one sample “the premium recipe.”"
+      ],
+      "whenRight": "Neutral codes and instructions leave more room for an honest comparison.",
+      "whenWrong": "A label or your preference can sway the tasting. Keep the setup neutral.",
       "feedback": "",
       "feedbackCta": "Continue",
-      "skills": [
-        "Critical Thinking",
-        "Problem-Solving"
-      ],
-      "rows": [
-        {
-          "label": "Call one sample “the premium recipe.”",
-          "flag": true,
-          "why": "That name can affect expectations."
-        },
-        {
-          "label": "Use matching coded cups.",
-          "flag": false,
-          "why": "Matching cups and codes make comparison fairer."
-        },
-        {
-          "label": "Say which sample you prefer first.",
-          "flag": true,
-          "why": "Your preference can influence the taster."
-        }
-      ],
+      "skills": ["Critical Thinking", "Problem-Solving"],
       "id": "FS1-15",
       "progress": 0.5714285714285714,
       "planLineIfFailed": "you made a claim before checking what happened",
@@ -354,12 +373,34 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
     },
     {
       "kind": "card",
+      "variant": "intro",
+      "speaker": "Narrator",
+      "title": "The first tasting is logged.",
+      "body": "Yuki checks the sample codes and notes. Ren reviews the early result with you before the next task.",
+      "cta": "Continue",
+      "id": "FS1-16",
+      "artifact": FS_ARTIFACTS.note
+    },
+    {
+      "kind": "card",
       "variant": "act",
       "speaker": "System",
       "title": "A surprise in the notes.",
       "body": "The first tasting is done. One result does not match the batch record.",
       "cta": "Continue",
       "id": "FS1-ACT2"
+    },
+    {
+      "kind": "card",
+      "variant": "character",
+      "speaker": "Narrator",
+      "title": "Luis tracks the batch records.",
+      "body": "He links each sample code to its recipe. One entry is missing, and he needs your help.",
+      "cta": "Continue",
+      "castMember": "Luis",
+      "id": "FS1-18",
+      "setup": "Luis • Lab Technician",
+      "artifact": FS_ARTIFACTS.note
     },
     {
       "kind": "choice",
@@ -441,6 +482,21 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
               "why": "One test does not cover every product question."
             }
           ]
+        },
+        {
+          "question": "One batch tastes sweeter today. What can you report?",
+          "options": [
+            {
+              "label": "This batch tasted sweeter in today’s test.",
+              "correct": true,
+              "why": "That states the observation and its limit."
+            },
+            {
+              "label": "Everyone will find it sweeter every time.",
+              "correct": false,
+              "why": "One batch and one tasting do not support that claim."
+            }
+          ]
         }
       ],
       "whenPass": "Keep each claim tied to its test.",
@@ -464,6 +520,27 @@ export const FOOD_SCIENTIST_LEVEL_1: Level = {
       "body": "Luis links 742 to its original recipe. Yuki can now review the comparison.",
       "cta": "Continue",
       "id": "FS1-23"
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Yuki",
+      "title": "The record clears up the result.",
+      "body": "The code now matches its recipe. We can review what the tasting shows and what still needs a test.",
+      "cta": "Continue",
+      "castMember": "Yuki",
+      "id": "FS1-24",
+      "artifact": FS_ARTIFACTS.note
+    },
+    {
+      "kind": "card",
+      "variant": "intro",
+      "speaker": "Ren",
+      "title": "Recommend a careful next step.",
+      "body": "The café schedules another prep run for tomorrow. Yuki asks what the team should put on its follow-up list.",
+      "cta": "Continue",
+      "id": "FS1-25",
+      "artifact": FS_ARTIFACTS.note
     },
     {
       "kind": "choice",

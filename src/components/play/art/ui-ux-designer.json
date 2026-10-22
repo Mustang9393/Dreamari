@@ -4,7 +4,8 @@
   "spriteStandard": "full-scene",
   "notes": [
     "v7 distinct career tasks, optional decorative scene context, held full paintings below the HUD.",
-    "No runtime sprite/foreground assembly. Canonical v7 identities replace v6 across all entry points."
+    "No runtime sprite/foreground assembly. Canonical v7 identities replace v6 across all entry points.",
+    "Story-triggered introductions: mentor first, then one new colleague at a relevant task. No unintroduced faces in mapped scenes. Panels stay centered."
   ],
   "locations": {
     "ux-v7-arrival": {
@@ -19,7 +20,10 @@
         "y": 0.3
       },
       "locked": true,
-      "role": "work-floor"
+      "role": "work-floor",
+      "visibleCast": [
+        "Arjun"
+      ]
     },
     "ux-v7-team": {
       "src": "/images/play/ux/v7/team.png",
@@ -33,7 +37,12 @@
         "y": 0.3
       },
       "locked": true,
-      "role": "work-floor"
+      "role": "work-floor",
+      "visibleCast": [
+        "Arjun",
+        "Noah",
+        "Amina"
+      ]
     },
     "ux-v7-work": {
       "src": "/images/play/ux/v7/work.png",
@@ -47,7 +56,10 @@
         "y": 0.3
       },
       "locked": true,
-      "role": "work-floor"
+      "role": "work-floor",
+      "visibleCast": [
+        "Arjun"
+      ]
     },
     "ux-v7-test": {
       "src": "/images/play/ux/v7/test.png",
@@ -61,7 +73,10 @@
         "y": 0.3
       },
       "locked": true,
-      "role": "work-floor"
+      "role": "work-floor",
+      "visibleCast": [
+        "Eleanor"
+      ]
     },
     "ux-v7-review": {
       "src": "/images/play/ux/v7/review.png",
@@ -75,7 +90,10 @@
         "y": 0.3
       },
       "locked": true,
-      "role": "formal-meeting"
+      "role": "formal-meeting",
+      "visibleCast": [
+        "Samira"
+      ]
     },
     "ux-v7-access": {
       "src": "/images/play/ux/v7/access.png",
@@ -89,7 +107,10 @@
         "y": 0.3
       },
       "locked": true,
-      "role": "work-floor"
+      "role": "work-floor",
+      "visibleCast": [
+        "Amina"
+      ]
     },
     "ux-v7-collab": {
       "src": "/images/play/ux/v7/collab.png",
@@ -103,7 +124,11 @@
         "y": 0.3
       },
       "locked": true,
-      "role": "work-floor"
+      "role": "work-floor",
+      "visibleCast": [
+        "Noah",
+        "Amina"
+      ]
     },
     "ux-v7-closing": {
       "src": "/images/play/ux/v7/closing.png",
@@ -117,7 +142,28 @@
         "y": 0.3
       },
       "locked": true,
-      "role": "formal-meeting"
+      "role": "formal-meeting",
+      "visibleCast": [
+        "Arjun",
+        "Samira"
+      ]
+    },
+    "ux-v8-noah": {
+      "src": "/images/play/ux/v8/noah-introduction.png",
+      "alt": "Noah, the junior UX designer in a pale blue shirt, meets the player alone at the prototype workspace.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.25
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.25
+      },
+      "locked": true,
+      "role": "work-floor",
+      "visibleCast": [
+        "Noah"
+      ]
     }
   },
   "cast": {
@@ -147,8 +193,8 @@
     "UX1-01": "ux-v7-arrival",
     "UX1-02": "ux-v7-arrival",
     "UX1-04": "ux-v7-arrival",
-    "UX1-05": "ux-v7-team",
-    "UX1-06": "ux-v7-team",
+    "UX1-05": "ux-v8-noah",
+    "UX1-06": "ux-v7-arrival",
     "UX1-07": "ux-v7-work",
     "UX1-09": "ux-v7-work",
     "UX1-10": "ux-v7-test",
@@ -158,11 +204,20 @@
     "UX1-MID": "ux-v7-review",
     "UX1-ACT2": "ux-v7-access",
     "UX1-20": "ux-v7-access",
-    "UX1-21": "ux-v7-access",
+    "UX1-21": "ux-v8-noah",
     "UX1-22": "ux-v7-access",
     "UX1-23": "ux-v7-collab",
-    "UX1-26": "ux-v7-collab",
-    "UX1-27": "ux-v7-closing",
-    "UX1-28": "ux-v7-closing"
+    "UX1-26": "ux-v7-closing",
+    "UX1-27": "ux-v7-arrival",
+    "UX1-28": "ux-v7-closing",
+    "UX1-03": "ux-v7-arrival",
+    "UX1-08": "ux-v7-work",
+    "UX1-13": "ux-v7-test",
+    "UX1-14": "ux-v7-review",
+    "UX1-16": "ux-v7-review",
+    "UX1-18": "ux-v7-access",
+    "UX1-24": "ux-v7-review",
+    "UX1-25": "ux-v7-closing",
+    "UX1-REVIEW": "ux-v7-closing"
   }
 }

@@ -1,0 +1,48 @@
+{
+  "career": "food-scientist",
+  "mentor": "Ren",
+  "cast": {
+    "Ren": {
+      "first": "FS1-01",
+      "role": "Senior Food Scientist / mentor",
+      "followups": [
+        "FS1-02",
+        "FS1-03",
+        "FS1-04",
+        "FS1-07",
+        "FS1-21",
+        "FS1-25",
+        "FS1-27"
+      ],
+      "trigger": "The player joins a supervised small trial."
+    },
+    "Imani": {
+      "first": "FS1-05",
+      "role": "Junior Food Scientist / trial partner",
+      "followups": [
+        "FS1-13"
+      ],
+      "trigger": "The small-batch comparison needs prepared samples."
+    },
+    "Yuki": {
+      "first": "FS1-12",
+      "role": "Senior Food Scientist / tasting reviewer",
+      "followups": [
+        "FS1-14",
+        "FS1-15",
+        "FS1-16",
+        "FS1-24"
+      ],
+      "trigger": "The samples are ready for the tasting plan."
+    },
+    "Luis": {
+      "first": "FS1-18",
+      "role": "Lab Technician / records owner",
+      "followups": [
+        "FS1-20",
+        "FS1-23"
+      ],
+      "trigger": "A missing recipe entry creates a traceability problem."
+    }
+  }
+}

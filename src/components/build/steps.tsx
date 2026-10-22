@@ -118,7 +118,7 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
           columns="grid-cols-2 lg:grid-cols-3"
           onPick={react}
         />
-        <Citation>Harvard FAS Mignone + O*NET Interest Profiler</Citation>
+        <Citation>Question informed by Harvard University Mignone Center + O*NET</Citation>
       </GlassCard>
       </div>
       <StepFooter onNext={onNext} nextDisabled={state.interests.length === 0} onSkip={onSkip} />
@@ -243,7 +243,7 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
             </div>
           </div>
         </div>
-        <Citation>MIT CAPD Self Assessment + O*NET Work Styles</Citation>
+        <Citation>Question informed by MIT CAPD + O*NET</Citation>
       </GlassCard>
       </div>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!state.energy || !state.teamStyle} onSkip={onSkip} />

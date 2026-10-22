@@ -16,6 +16,7 @@ import { ErrorView, LoadingView } from "@/components/app/states";
 
 import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO, poseFor, VOICE_PITCH } from "./expressions";
 import { FullScenePlate } from "./FullScenePlate";
+import hudStyles from "./SimulationHud.module.css";
 import { isFullSceneImage, locationFor } from "./locations";
 import { DESKTOP_PLATE_SCALE, FALLBACK_PORTRAIT_RATIO, plateObjectPosition, spriteBox } from "./scenePlacement";
 import { PerformancePlanFlow } from "./PerformancePlanFlow";
@@ -66,7 +67,7 @@ import {
   setMuted,
   subscribeMuted,
 } from "./sound";
-import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, STRIKE_TRIGGER, TIER_STRIKES, bandFor, clamp, endingFor } from "./scoring";
+import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, STRIKE_TRIGGER, TIER_STRIKES, bandFor, clamp, completionPercent, endingFor } from "./scoring";
 import { SKILL_MEANING } from "./skills";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type Ending, type Level, type Mood, type Simulation, type Tier } from "./types";
 import { ConnectInterstitial } from "./ConnectInterstitial";
@@ -1959,7 +1960,7 @@ function BeatBody({
     if (beat.kind === "reveal") return <RevealBody beat={beat} onNext={onNext} />;
     if (beat.kind === "flips") return <FlipsBody beat={beat} accent={accent} onNext={onNext} />;
     if (beat.kind === "focus") return <FocusBody beat={beat} accent={accent} onNext={onNext} />;
-    if (beat.kind === "choice") return <ChoiceBody beat={beat} accent={accent} cast={cast} onResolve={onResolve} locked={locked} />;
+    if (beat.kind === "choice") return <ChoiceBody beat={beat} accent={accent} cast={cast} onResolve={onResolve} locked={locked} graphic={beat.artifact ? <WorkArtifact artifact={beat.artifact} /> : undefined} />;
     if (beat.kind === "match") return <MatchBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} onClockHold={onClockHold} />;
     if (beat.kind === "chain") return <ChainBody beat={beat} onResolve={onResolve} />;
@@ -1973,7 +1974,7 @@ function BeatBody({
     return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} style={beat.kind === "review" ? beat.style : undefined} deciding={beat.kind === "review" ? beat.deciding : undefined} decidingNote={beat.kind === "review" ? beat.decidingNote : undefined} />;
   })();
   // Story graphics belong between the title and description, before the CTA.
-  const body = beat.artifact && beat.kind !== "card" ? <div className="flex min-w-0 flex-col">{content}<WorkArtifact artifact={beat.artifact} /></div> : content;
+  const body = beat.artifact && beat.kind !== "card" && beat.kind !== "choice" ? <div className="flex min-w-0 flex-col">{content}<WorkArtifact artifact={beat.artifact} /></div> : content;
   if (!prompt) return body;
   // Directed: heading first, then its instruction (both v2 scripts), or the
   // instruction IS the heading (RN v2 screen 33).
@@ -2982,15 +2983,10 @@ export function Hud({
 }) {
   const router = useRouter();
   return (
-    <header className="relative z-20 flex flex-none flex-col gap-[8px] px-3 pt-3 sm:px-5 sm:pt-4">
-      {/* A soft fade from the page ground behind the HUD, plus a text
-         shadow on the title: over a bright office scene the title and level
-         line had nothing under them (light-mode audit finding 4, both
-         themes). A gradient, not a bar, so the scene still reads edge to
-         edge. */}
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[150%]" style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--background) 72%, transparent) 0%, color-mix(in srgb, var(--background) 38%, transparent) 55%, transparent 100%)" }} />
-      <div className="flex items-center gap-[var(--space-3)]">
-        <span className="flex flex-none items-center gap-[6px]">
+    <header className={hudStyles.header}>
+      <span aria-hidden className={hudStyles.scrim} />
+      <div className={hudStyles.row}>
+        <span className={hudStyles.navigation}>
           {/* Always available, mid-level or not: one step back to wherever the
              student opened this game from (Home, Explore, a career page, the
              Play hub), with /play only as the cold-start fallback. The
@@ -3048,7 +3044,7 @@ export function Hud({
             </IconTip>
           )}
         </span>
-        <span className="min-w-0 flex-1" style={{ textShadow: "0 1px 3px color-mix(in srgb, var(--background) 85%, transparent)" }}>
+        <span className={hudStyles.title} style={{ textShadow: "0 1px 3px color-mix(in srgb, var(--background) 85%, transparent)" }}>
           {/* the page's h1 (WCAG 1.3.1 / 2.4.6): the career being played */}
           <h1 className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
             {simulation.title}
@@ -3058,7 +3054,7 @@ export function Hud({
             {level.express ? " · Express" : ""}
           </span>
         </span>
-        <span className="flex flex-none items-center gap-[6px]">
+        <span className={hudStyles.tools}>
           {onOpenConnect && (
             <IconTip label="Demo: jump to Connect">
               <button
@@ -3101,7 +3097,7 @@ export function Hud({
            moved" screen, pull instead of push -- Interaction Rules, 20
            Sept). Untouched full-mode levels keep the gauge inert; their
            spotlight beat still does this job until they get the same pass. */}
-        <span className="relative flex-none">
+        <span className={hudStyles.score}>
           {level.express || level.hideBand ? (
             <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} endings={level.endings} outcomes={level.scoreOutcomes} hideBand={level.hideBand} glow={glow} docCopy={level.directed} />
           ) : (
@@ -3119,12 +3115,11 @@ export function Hud({
           )}
         </span>
       </div>
-      <div className="flex items-center gap-[7px]">
-        {/* Same spark/flicker language as the Build flow's bar (SparkBar): the
-           reputation gaining ground is the run's core reward. Solid in the
-           career's own world color -- the HUD reads as that career's world,
-           not a generic tier color (Chandu, 7 Sept 2026). */}
-        <SparkBar className="flex-1" percent={reputation} height={6} track="var(--color-glass-border-raised)" fill={accent} glow={accent} />
+      <div className={hudStyles.progress}>
+        {/* Completion starts at zero; reputation is the separate score gauge. */}
+        <div className="flex-1" role="progressbar" aria-label="Decisions completed" aria-valuemin={0} aria-valuemax={dots.total} aria-valuenow={scored} aria-valuetext={`${scored} of ${dots.total} decisions completed`}>
+          <SparkBar percent={completionPercent(scored, dots.total)} height={6} track="var(--color-glass-border-raised)" fill={accent} glow={accent} />
+        </div>
         <span role="img" className="flex flex-none items-center gap-[3px]" aria-label={`${scored} of ${dots.total} decisions made`}>
           {/* Every third dot is a checkpoint: the run is saved at each beat, and
              marking them makes that visible instead of hoping the player trusts
@@ -3477,6 +3472,7 @@ export function FeedbackSheet({
             </span>
           )}
         </p>
+        {beat.feedbackArtifacts?.[result.tier] && <WorkArtifact artifact={beat.feedbackArtifacts[result.tier]!} />}
         <p className="text-[15.5px] leading-relaxed font-semibold whitespace-pre-line" style={{ color: "var(--foreground)" }}>
           {result.why}
         </p>
@@ -3567,10 +3563,8 @@ export function EndingCard({
   onReplay: () => void;
 }) {
   const Icon = ending.advances ? Trophy : reputation >= 60 ? Briefcase : FileText;
-  // The core kit keeps the plain icon tile and burst: the firm's foil seal
-  // is drawn per firm (coreKit.ts).
-  const { cinematic: cinematicLevel, coreKit: coreKitEnd } = usePresentation();
-  const cinematicEnd = cinematicLevel && !coreKitEnd;
+  // Cinematic careers share the IB monogram seal, using their own firm identity.
+  const { cinematic: cinematicEnd } = usePresentation();
   const router = useRouter();
   useEffect(() => {
     if (ending.advances) playFanfare();
@@ -3659,6 +3653,8 @@ export function EndingCard({
             {ending.offer ? "Unlock" : "Start"} Level {next.n} {directed ? "\u2022" : "\u00b7"} {next.role}
             <ChevronRight className="h-[17px] w-[17px]" aria-hidden />
           </button>
+        ) : ending.advances && ending.replayOnPass ? (
+          <button type="button" onClick={onReplay} className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold" style={{background:"var(--primary)",color:"var(--primary-foreground)"}}>{ending.primary}</button>
         ) : ending.advances ? (
           <span
             className="flex w-full items-center justify-center gap-[8px] rounded-[var(--radius-sm)] px-[18px] py-[13px] text-[16px] font-extrabold opacity-55"

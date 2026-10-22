@@ -16,6 +16,11 @@ export const FS_ARTIFACTS = {
     "caption": "Coded sample labels. Illustrative context only; no answer information.",
     "provenance": "Fictional project atmosphere, not a live screen or measurement."
   },
+  named: {
+    id: "fs-visible-labels", kind: "scene-context", view: "sample-codes", state: "named",
+    title: "Named recipe labels", caption: "Visible recipe names before the tasting uses neutral codes.",
+    provenance: "Fictional tasting labels; preparation facts remain in the question."
+  },
   "message": {
     "id": "fs-context-message",
     "kind": "scene-context",

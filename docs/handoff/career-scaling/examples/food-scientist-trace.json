@@ -12,6 +12,11 @@
       "uses": []
     },
     {
+      "beat": "FS1-03",
+      "teaches": [],
+      "uses": []
+    },
+    {
       "beat": "FS1-04",
       "teaches": [],
       "uses": []
@@ -40,6 +45,11 @@
       "uses": []
     },
     {
+      "beat": "FS1-08",
+      "teaches": [],
+      "uses": []
+    },
+    {
       "beat": "FS1-09",
       "teaches": [
         "keep batch size and mixing method constant"
@@ -53,6 +63,11 @@
       "teaches": [
         "compare samples with the same mixing steps"
       ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-13",
+      "teaches": [],
       "uses": []
     },
     {
@@ -72,6 +87,11 @@
       "uses": []
     },
     {
+      "beat": "FS1-14",
+      "teaches": [],
+      "uses": []
+    },
+    {
       "beat": "FS1-15",
       "teaches": [
         "blind tasting avoids brand influence"
@@ -86,10 +106,20 @@
       "uses": []
     },
     {
+      "beat": "FS1-16",
+      "teaches": [],
+      "uses": []
+    },
+    {
       "beat": "FS1-ACT2",
       "teaches": [
         "results need a matching batch record"
       ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-18",
+      "teaches": [],
       "uses": []
     },
     {
@@ -122,6 +152,16 @@
       "teaches": [
         "a promising small trial needs more testing"
       ],
+      "uses": []
+    },
+    {
+      "beat": "FS1-24",
+      "teaches": [],
+      "uses": []
+    },
+    {
+      "beat": "FS1-25",
+      "teaches": [],
       "uses": []
     },
     {

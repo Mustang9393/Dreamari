@@ -4,7 +4,8 @@ import { IB_LEVEL_1 } from "./ib-level-1";
 import { IB_LEVEL_1_V2 } from "./ib-level-1-v2";
 import { IB_LEVEL_2 } from "./ib-level-2";
 import { IB_LEVEL_3 } from "./ib-level-3";
-import { RN_LEVEL_1_REBUILD } from "./rn-level-1-rebuild";
+import { RN_LEVEL_1 } from "./rn-level-1";
+import { RN_LEVEL_1_V2 } from "./rn-level-1-v2";
 import { AMT_LEVEL_1 } from "./amt-level-1";
 import type { Level, Simulation } from "./types";
 
@@ -24,7 +25,44 @@ import type { Level, Simulation } from "./types";
 // expressCut list are exactly what Express played until today. The route
 // layers the new look onto Express as presentation flags only.
 const IB_L1: Level = { ...IB_LEVEL_1_V2, id: IB_LEVEL_1.id, expressCut: IB_LEVEL_1.expressCut, expressSource: IB_LEVEL_1.expressSource };
-const RN_L1: Level = RN_LEVEL_1_REBUILD;
+// Nursing gameplay is vetted: restore its authored sequence and instruments.
+// The art pass only changes pictures; a new save slot avoids resuming an index
+// from the rejected shortened rebuild into this longer approved sequence.
+const RN_L1: Level = {
+  ...RN_LEVEL_1_V2,
+  id: RN_LEVEL_1.id,
+  saveSlot: 209,
+  cover: "/images/play/rn/rebuild-2026-10-21/RN1-04.png",
+  cast: {
+    Rosa: "/images/play/rn/rebuild-2026-10-21/face-rosa.webp",
+    Denise: "/images/play/rn/rebuild-2026-10-21/face-denise.webp",
+    Tyler: "/images/play/rn/rebuild-2026-10-21/face-tyler.webp",
+  },
+  // Complete paintings resolve per beat through the art manifest. Retire the
+  // two legacy bedside hero photos so they cannot override the new scenes.
+  beats: RN_LEVEL_1_V2.beats.map(beat => beat.art ? { ...beat, art: undefined } : beat),
+  preGame: RN_LEVEL_1_V2.preGame ? {
+    ...RN_LEVEL_1_V2.preGame,
+    lesson: RN_LEVEL_1_V2.preGame.lesson ? {
+      ...RN_LEVEL_1_V2.preGame.lesson,
+      screens: RN_LEVEL_1_V2.preGame.lesson.screens.map(screen => ({
+        ...screen, image: "/images/play/rn/rebuild-2026-10-21/RN1-07.png",
+      })),
+    } : undefined,
+  } : undefined,
+  expressCut: RN_LEVEL_1.expressCut,
+  expressSource: {
+    ...RN_LEVEL_1,
+    cover: "/images/play/rn/rebuild-2026-10-21/RN1-04.png",
+    cast: {
+      Rosa: "/images/play/rn/rebuild-2026-10-21/face-rosa.webp",
+      Denise: "/images/play/rn/rebuild-2026-10-21/face-denise.webp",
+      Tyler: "/images/play/rn/rebuild-2026-10-21/face-tyler.webp",
+      Yvonne: RN_LEVEL_1.cast!.Yvonne,
+    },
+    beats: RN_LEVEL_1.beats.map(beat => beat.art ? { ...beat, art: undefined } : beat),
+  },
+};
 
 // The games catalogue. `careerId` is the shared catalogue id, so a game lines
 // up with the same career's report, pathway and plan -- the hub can put the
@@ -71,9 +109,13 @@ export const REGISTERED_NURSE: Simulation = {
  world: "Health & Medicine", firm: "Riverbend Medical Center",
  cover: RN_L1.cover!, thumb: RN_L1.cover!, thumbFocus: "50% 30%",
  trailer: [
-  {id:"RN-TR-01",seconds:4,text:"Your first shift. A team counting on you.",art:RN_L1.cover!},
-  {id:"RN-TR-02",seconds:4,text:"Listen. Check. Speak up.",art:"/images/play/rn/rebuild-2026-10-21/RN1-07.png"},
-  {id:"RN-TR-03",seconds:4,text:"Make the next decision.",art:"/images/play/rn/rebuild-2026-10-21/RN1-21.png",finale:true}
+  { id: "RN-TR-01", seconds: 4, text: "More people work as nurses than any other job in health care.", art: "/images/play/rn/rebuild-2026-10-21/RN1-01.png" },
+  { id: "RN-TR-02", seconds: 4.5, text: "Nursing schools turn away tens of thousands of people who qualify. Every year." },
+  { id: "RN-TR-03", seconds: 4, text: "Nights. Weekends. Holidays. Twelve hours on your feet.", art: "/images/play/rn/rebuild-2026-10-21/RN1-16.png" },
+  { id: "RN-TR-04", seconds: 4, text: "Thirty beds. One of them needs you first.", art: "/images/play/rn/rebuild-2026-10-21/RN1-12.png" },
+  { id: "RN-TR-05", seconds: 4.5, text: "The thing you notice, or do not notice, decides what happens next.", art: "/images/play/rn/rebuild-2026-10-21/RN1-23.png", drain: true },
+  { id: "RN-TR-06", seconds: 4.5, text: "Somewhere above you is the nurse who answers for every floor in this hospital.", art: "/images/play/rn/rebuild-2026-10-21/RN1-01.png" },
+  { id: "RN-TR-07", seconds: 4, text: "Six levels. New nurse to the top of the hospital. How far will you get?", finale: true },
  ], levels:[RN_L1], upcoming:["Staff Nurse","Charge Nurse","Nurse Manager","Director of Nursing","Chief Nursing Officer"]
 };
 
@@ -239,12 +281,13 @@ export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; c
   { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/glossary-medical-thumb-oct19.webp" },
   { careerSlug: "airline-pilot", title: "Flight Terms", sub: "Learn key aviation terms", cover: "/images/app/glossary-flight-thumb-oct19.webp" },
   { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/glossary-tech-thumb-oct19.webp" },
-  // Only glossaries with real thumbnail art sit in this row (Chandu, 17 Oct
-  // 2026: "For everything without a thumbnail for the cards, send them to
-  // hamburger access only link. Only use games with thumbnail art in the
-  // play tab"). Kitchen Terms (industry slug "culinary"), the test world,
-  // has no cover and plays from the hamburger's Glossary QA link. A new world
-  // joins this row through SOP Prompt E (7c), Part 6.
+  // Kitchen Terms joined the row on 22 Oct 2026 (Chandu: "please move all of
+  // codex's new games into the play tab row instead of hiding in the
+  // hamburger menu with appropriate thumbnails"). Its cover is drawn to the
+  // Oct 19 set: one isometric object (a steaming pot) on the navy gradient,
+  // no Dreamy, no text. A new world joins this row through SOP Prompt E
+  // (7c), Part 6.
+  { careerSlug: "culinary", title: "Kitchen Terms", sub: "Learn key kitchen terms", cover: "/images/app/glossary-kitchen-thumb-oct22.webp" },
   // Private Equity removed from this row (direct feedback, 9 Sept 2026) --
   // still gets the plain career-simulation "Soon" placeholder elsewhere.
 ];
