@@ -66,15 +66,25 @@ export function GlowStroke({ d, color = GLOW.blue, width = 2.5, from = 0.45, qui
  *  colour and then into a soft halo. Emissive and flat: no off-centre
  *  highlight, no rim, no shadow ("I want them to be made of LIGHT", not a
  *  3D solid bead). */
-export function Orb({ cx, cy, r = 6, color = GLOW.blue, pulse, className }: { cx: number; cy: number; r?: number; color?: string; pulse?: boolean; className?: string }) {
+export function Orb({ cx, cy, r = 6, color = GLOW.blue, pulse, className, halo = 7, soft = false }: { cx: number; cy: number; r?: number; color?: string; pulse?: boolean; className?: string; /** the halo's radius as a multiple of r (v4's charts keep 7) */ halo?: number; /** a halo that fades from the first pixel, no bright inner disc (counselor v7's Analytics, 22 Oct 2026: "reduce the glow around the dots ... so the circular glow doesn't look so sharp") */ soft?: boolean }) {
   const id = useUid();
   return (
     <g className={["gl-orb", className ?? ""].join(" ")}>
       <defs>
         <radialGradient id={`gl-oh-${id}`}>
-          <stop offset="0%" stopColor={color} stopOpacity=".6" />
-          <stop offset="30%" stopColor={color} stopOpacity=".2" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
+          {soft ? (
+            <>
+              <stop offset="0%" stopColor={color} stopOpacity=".32" />
+              <stop offset="45%" stopColor={color} stopOpacity=".1" />
+              <stop offset="100%" stopColor={color} stopOpacity="0" />
+            </>
+          ) : (
+            <>
+              <stop offset="0%" stopColor={color} stopOpacity=".6" />
+              <stop offset="30%" stopColor={color} stopOpacity=".2" />
+              <stop offset="100%" stopColor={color} stopOpacity="0" />
+            </>
+          )}
         </radialGradient>
         <radialGradient id={`gl-ob-${id}`}>
           {/* white-hot in dark; in light a saturated core, or it reads hollow */}
@@ -83,7 +93,7 @@ export function Orb({ cx, cy, r = 6, color = GLOW.blue, pulse, className }: { cx
           <stop offset="100%" stopColor={color} />
         </radialGradient>
       </defs>
-      <circle cx={cx} cy={cy} r={r * 7} fill={`url(#gl-oh-${id})`} className="gl-orb-halo" />
+      <circle cx={cx} cy={cy} r={r * halo} fill={`url(#gl-oh-${id})`} className="gl-orb-halo" />
       {pulse && <circle cx={cx} cy={cy} r={r} fill={color} className="gl-orb-pulse" />}
       <circle cx={cx} cy={cy} r={r} fill={`url(#gl-ob-${id})`} className="gl-orb-body" />
     </g>

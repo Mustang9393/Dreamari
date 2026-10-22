@@ -123,7 +123,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
  const title=names[active]??items.find(i=>i.view===active)?.label??"Workspace";
  // each view has its own page title (WCAG 2.4.2, audit 21 Oct 2026)
  useEffect(()=>{document.title=`${title} · Counselor Dashboard · Dreamari`;},[title]);
- // every view is a page to the counselor: the sky greets each one (lib/sky.ts)
+ // every view is a page to the counselor: the sky wakes for each one (lib/sky.ts)
  useEffect(()=>{skyArrival();},[active]);
  // the top bar frosts once the page scrolls, like the student app's (v4.css .v4-nav-island)
  const scrolled=useScrolled();

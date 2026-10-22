@@ -357,7 +357,7 @@ function Marks({ points, label, height = 220 }: { points: Measure[]; label: stri
             <GlowStroke d={monotone(pts)} width={3} from={0.55} />
             {points.map((p, i) => (
               <g key={p.label}>
-                <Orb cx={xs[i]} cy={pts[i].y} r={6} />
+                <Orb cx={xs[i]} cy={pts[i].y} r={4} halo={4} soft />
                 <text x={xs[i]} y={pts[i].y - 16} textAnchor="middle" fontSize={13} fontWeight={700} fill="currentColor" style={{ fontVariantNumeric: "tabular-nums" }}>{p.value}%</text>
                 <text x={xs[i]} y={bottom + 22} textAnchor="middle" fontSize={12} fontWeight={600} fill="var(--muted-foreground)">{p.label}</text>
               </g>

@@ -55,7 +55,7 @@ import { SKY_EVENT } from "@/lib/sky";
 type Moment = {
   x: number; big: boolean; t0: number;
   /** lively: a shooting star with no wave of light */ shotOnly?: boolean;
-  /** an arrival's own shape (a page load): ring speed in px/ms, ring width in px, strength 0..1.3; actions use the defaults */
+  /** a page load's own shape: ring speed (px/ms), ring width (px), strength; actions keep the defaults */
   speed?: number; width?: number; strength?: number;
 };
 const MOMENT_EVENT = SKY_EVENT;
@@ -130,7 +130,6 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
     let moments: Moment[] = [];
     let animating = false; // calm mode: only while a moment plays
     const MOMENT_MS = 2000;
-    let lastArrival = 0;
     // lively: the eased cursor lean (-1..1) and the next unprompted shooting star
     let leanX = 0, leanY = 0, aimX = 0, aimY = 0;
     let nextShot = performance.now() + 4000 + Math.random() * 5000;
@@ -187,34 +186,6 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
 
     const DRIFT = lively ? 0.9 : 0.45; // px per second: the sky turning, not anything flying
 
-    // An arrival (22 Oct 2026): the sky's greeting when a screen opens. The
-    // same soft wave the first visit always had (Chandu, after a pass with
-    // seven flashier kinds: "the christmas style like flashing is too much
-    // on the stars, lets just do the original pulse we had for page loads.
-    // but maybe vary it somehow each time"), varied each time: where it
-    // starts (the middle, a third in from either edge, or an edge), how
-    // fast and wide the ring runs, how strong it is, and now and then a
-    // gentler second ripple a beat behind. Never a shooting star; that
-    // belongs to actions. The last start point is kept for the session so
-    // two loads in a row never greet from the same place.
-    const startArrival = () => {
-      if (reduce.matches || !stars.length) return;
-      const now = performance.now();
-      if (now - lastArrival < 800) return; // a mount and a view change at once: one greeting
-      lastArrival = now;
-      const origins = [0.5, 0.3, 0.7, 0.08, 0.92];
-      let prev = -1;
-      try { prev = Number(sessionStorage.getItem("dreamari-sky-arrival") ?? -1); } catch { /* storage blocked */ }
-      const pool = origins.filter((_, i) => i !== prev);
-      const i = Math.floor(Math.random() * pool.length);
-      const ox = pool[i];
-      try { sessionStorage.setItem("dreamari-sky-arrival", String(origins.indexOf(ox))); } catch { /* storage blocked */ }
-      const shape = { speed: 0.6 + Math.random() * 0.5, width: 90 + Math.random() * 80, strength: 0.75 + Math.random() * 0.5 };
-      moments.push({ x: width * ox, big: false, t0: now, ...shape });
-      if (Math.random() < 0.35) moments.push({ x: width * ox, big: false, t0: now + 420, speed: shape.speed * 0.85, width: shape.width, strength: shape.strength * 0.5 });
-      if (calm && !animating) { animating = true; last = 0; raf = requestAnimationFrame(frame); }
-    };
-
     const draw = (time: number, dt: number) => {
       ctx.clearRect(0, 0, width, height);
       if (!calm) offset = (offset + DRIFT * dt) % width;
@@ -234,11 +205,9 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
         let x = s.x + offset;
         if (x > width) x -= width;
         // a moment's wave: a ring of light travelling out from where it
-        // happened; a star brightens as the ring passes. Brightness only:
-        // the stars hold still (22 Oct 2026, Chandu: "lets not have bouncy
-        // stuff happen? just the lights have to get brighter and fade. The
-        // stars can remain stationary"); the outward nudge is gone.
+        // happened; a star brightens as the ring passes and eases outward
         let boost = 0;
+        let push = 0;
         for (const m of moments) {
           if (m.shotOnly) continue;
           const age = now - m.t0;
@@ -249,7 +218,9 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
           const fade = Math.max(0, 1 - age / MOMENT_MS);
           const k = ring * fade * (m.big ? 1.5 : 1) * (m.strength ?? 1);
           boost += k;
+          push += k * Math.sign(x - m.x) * 5;
         }
+        x += push;
         // lively: near (bright) stars lean further from the cursor than far ones
         const depth = lively ? 4 + s.b * 14 : 0;
         x -= leanX * depth;
@@ -319,14 +290,41 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
       draw(time, dt);
     };
 
+    let lastWake = 0;
+    const wake = () => {
+      if (!running || !stars.length) return;
+      const now = performance.now();
+      if (now - lastWake < 800) return; // a mount and a view change at once: one wave
+      lastWake = now;
+      let prev = 0.5;
+      try { prev = Number(sessionStorage.getItem("dreamari-sky-wake") ?? 0.5); } catch { /* storage blocked */ }
+      // anywhere across the middle 80% of the sky, at least a fifth of it away from last time
+      let ox = 0.1 + Math.random() * 0.8;
+      if (Math.abs(ox - prev) < 0.2) ox = prev < 0.5 ? prev + 0.2 + Math.random() * 0.3 : prev - 0.2 - Math.random() * 0.3;
+      try { sessionStorage.setItem("dreamari-sky-wake", String(ox)); } catch { /* storage blocked */ }
+      const shape = { speed: 0.7 + Math.random() * 0.35, width: 95 + Math.random() * 55, strength: 0.85 + Math.random() * 0.3 };
+      moments.push({ x: width * ox, big: false, t0: now, ...shape });
+      if (Math.random() < 0.3) moments.push({ x: width * ox, big: false, t0: now + 380 + Math.random() * 240, speed: shape.speed * 0.9, width: shape.width, strength: shape.strength * 0.45 });
+      if (calm && !animating) { animating = true; last = 0; raf = requestAnimationFrame(frame); }
+    };
+    const onArrival = () => { if (!contained && !reduce.matches) wake(); };
+    window.addEventListener(SKY_ARRIVAL_EVENT, onArrival);
+
     const sync = () => {
       const want = active() && !document.hidden;
       canvas.style.display = active() ? "block" : "none";
       if (want && !running) {
         running = true;
-        // every screen opens with an arrival (22 Oct 2026; was one wake-up
-        // wave per browser session). A boxed sky (a sheet) keeps quiet.
-        if (!contained) window.setTimeout(startArrival, 350);
+        // every page wakes the sky with its soft wave (22 Oct 2026, Chandu:
+        // "a different reaction each time ANY page loads", then, after two
+        // showier passes, "revert to the layout and animations before ...
+        // but lets keep the varying animations somehow without it being too
+        // mechanical"): the wave as it always was, never quite the same
+        // twice. It starts somewhere across the upper sky, a little off the
+        // last place, after a short pause that varies, at its own pace and
+        // width, and now and then a softer second ripple follows a beat
+        // behind. Actions keep their own moments. A boxed sky stays quiet.
+        if (!contained && !reduce.matches) window.setTimeout(wake, 250 + Math.random() * 500);
         if (reduce.matches || calm) {
           draw(0, 0);
         } else {
@@ -353,8 +351,6 @@ export function NightSky({ calm = false, contained = false, lively = false }: { 
       }
     };
     window.addEventListener(MOMENT_EVENT, onMoment);
-    const onArrival = () => { if (running && !contained) startArrival(); };
-    window.addEventListener(SKY_ARRIVAL_EVENT, onArrival);
     if (lively && !calm && window.matchMedia("(pointer: fine)").matches) window.addEventListener("pointermove", onPointer, { passive: true });
 
     seed();

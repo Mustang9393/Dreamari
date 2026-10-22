@@ -59,16 +59,15 @@ export function skyMoment(opts: { x?: number; from?: Element | null; big?: boole
   window.dispatchEvent(new CustomEvent(SKY_EVENT, { detail: { x, big: !!opts.big } }));
 }
 
-// ---- Arrivals (22 Oct 2026, Chandu: "make sure the stars have a different
-// reaction each time ANY page loads all across the app. Not the same pulse
-// or shooting star stuff that are mapped to actions"; then, of a pass with
-// seven flashier kinds, "the christmas style like flashing is too much on
-// the stars, lets just do the original pulse we had for page loads. but
-// maybe vary it somehow each time"). An arrival is the sky's own soft wave
-// when a screen opens, varied each time in where it starts, its speed,
-// width and strength, sometimes with a gentle second ripple; never a
-// shooting star. NightSky plays one on mount; shells whose tabs do not
-// remount the sky (counselor v7 and v4) call skyArrival() on view change.
+// ---- The wake-up on every page (22 Oct 2026). Chandu: "make sure the stars
+// have a different reaction each time ANY page loads all across the app",
+// then, after two showier passes were turned down ("christmas style like
+// flashing", "the stars look weird now revert"): "lets keep the varying
+// animations somehow without it being too mechanical on page loads". So the
+// wave the sky always woke with plays on every page, never quite the same
+// twice (NightSky.tsx wake()). NightSky plays it on mount; shells whose
+// views change without remounting the sky (counselor v7 and v4) call
+// skyArrival() on view change. Moments stay for actions.
 export const SKY_ARRIVAL_EVENT = "dreamari:sky-arrival";
 export function skyArrival(): void {
   if (typeof window === "undefined") return;

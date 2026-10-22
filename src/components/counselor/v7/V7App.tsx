@@ -82,7 +82,7 @@ export function V7App({ view }: { view: string | undefined }) {
   const inbox = <NavIconButton label="Messages" badge={unread} onClick={() => router.push(v7("workspace", "&tab=messages"))}><Send className="h-5 w-5" aria-hidden /></NavIconButton>;
   const studentId = params.get("studentId") ?? undefined;
   const tab = params.get("tab") ?? undefined;
-  // every view is a page to the counselor: the sky greets each one (lib/sky.ts)
+  // every view is a page to the counselor: the sky wakes for each one (lib/sky.ts)
   useEffect(() => { skyArrival(); }, [view, studentId, tab]);
   const onProfile = view === "profile";
   const onReviews = view === "reviews" || view === "workspace";
