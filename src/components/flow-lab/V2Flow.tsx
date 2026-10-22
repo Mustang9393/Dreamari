@@ -28,7 +28,7 @@
 // 26 Sept 2026, "we can make things so intuitive without it being text
 // heavy" (Joshua, on coachmarks: "maybe... as needed, case by case"). No
 // coachmarks and no hint lines; the screens teach themselves:
-// - Titles state the task ("Save up to 3 careers you’re interested in", "Pick your top 3").
+// - Titles state the task ("Save 1–3 careers you’re interested in", "Pick your top 3").
 // - The card's Save control is a labeled pill, pulsing softly on the first
 //   card until the first save.
 // - The bottom bar's tray shows seven slots filling with each save: the
@@ -134,7 +134,7 @@ const NOTES = {
     "Shown when this browser has no Build answers, and after Restart (prefilled from Build) so a demo can try two worlds. In the product these come from Build itself; the lab never changes the real Build.",
     "Worlds are required; subjects and the college or trades answer sharpen the list.",
   ] },
-  explore: { heading: "Save up to 3 careers you’re interested in", bullets: [
+  explore: { heading: "Save 1–3 careers you’re interested in", bullets: [
     "Opens on your strongest world; your second world is the next tab. A chip on each card says why it's there.",
     "Explore all is for browsing outside your two worlds: a mix across every other industry, none picked for you. Pick an industry to see only that one; All goes back to the mix.",
     "Each card says three things: the career, Learn more, and why it fits you.",
@@ -355,7 +355,7 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
           // LOCKED copy (14 Oct 2026, Joshua via Slack: "Right now, it is not
           // obvious enough what students are supposed to do here ... After this
           // update it will be locked until further notice"). Don't reword.
-          title="Save up to 3 careers you’re interested in"
+          title="Save 1–3 careers you’re interested in"
           hint="We’ll use your picks to recommend similar careers. You can update them later at anytime."
           controls={
             // Nothing in the controls ever clips or wraps (Chandu, 15 Oct 2026,

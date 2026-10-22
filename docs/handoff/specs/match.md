@@ -6,7 +6,7 @@ Status: Locked (27 Sept 2026). Joshua's simplified Mini Explore replaced the six
 Joshua, Slack, 27 Sept 2026: "simplify the current Match / Mini Explore flow and reduce the amount of information students have to process", so "the low-effort student [can] complete Build, save one career, and immediately leave with a Profile and Career Report". "This can replace the current 'MATCH' and be in the actual demo."
 
 ## Mini Explore
-- Title "Save careers you like". World tabs: the student's first Build world, their second, then "Explore all" (any other world, neighbours first).
+- Title "Save 1–3 careers you’re interested in" (23 Oct 2026, Chandu; was "Save up to 3 careers you’re interested in"). World tabs: the student's first Build world, their second, then "Explore all" (any other world, neighbours first).
 - Careers per world ordered by the student's Build answers (`rankForStudent`: matched subjects, then the college/trades answer). DEMO-ONLY: the demo's own careers come first (`demoFirst`), Investment Banking at the top.
 - Six careers at a time; more load in on scroll (`RevealGrid`).
 - Card shows only: Learn more and the title in its world's poster face. No "Fits..." chip (removed 28 Sept 2026: the world chip was implied by the tab, then all chips were dropped), no salary (inconsistent across careers; it lives in the detail modal), no world label (the tab says it). The Build fit still decides the order. Save pill top right, pulsing on the first card until the first save.
