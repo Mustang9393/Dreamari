@@ -18,11 +18,19 @@ function Svg({ size = 24, children, ...rest }: IconProps & { children: React.Rea
   );
 }
 
+/** The filled add/remove badge. The disc is the icon's own ink
+ *  (currentColor: white over a photo or in dark mode, navy on a light card)
+ *  and the plus is cut in the page background, so the two always contrast.
+ *  It used to fill with --primary-foreground, which was white until the
+ *  21 Oct 2026 blue pass turned it navy (dark ink on the periwinkle fills);
+ *  the disc then matched its own plus and read as a plain navy dot
+ *  (Chandu, 23 Oct 2026: "the ask a pro and top 3 icons have a navy blue
+ *  dot instead of the white plus"). */
 function ActionBadge({ remove = false }: { remove?: boolean }) {
   return (
     <>
-      <circle cx="18" cy="18" r="5" fill="var(--primary-foreground)" stroke="none" />
-      <path d={remove ? "M15 18h6" : "M15 18h6M18 15v6"} stroke="var(--color-ink-900)" />
+      <circle cx="18" cy="18" r="5" fill="currentColor" stroke="none" />
+      <path d={remove ? "M15 18h6" : "M15 18h6M18 15v6"} stroke="var(--background)" />
     </>
   );
 }

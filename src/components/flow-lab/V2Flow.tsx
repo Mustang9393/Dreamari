@@ -140,7 +140,7 @@ const NOTES = {
     "Each card says three things: the career, Learn more, and why it fits you.",
     "Tap a card for details. Save adds it to the tray at the bottom, up to 3; the empty slots show how many are left.",
     "Scroll for more. The next careers load in on their own.",
-    "One save is enough to continue. Continue goes straight to your Top Three, ranked in the order you saved; reorder or remove there.",
+    "One save is enough to continue. Continue with 1, 2 or 3 goes straight to your Top Three, ranked in the order you saved; reorder or remove there.",
   ] },
   rank: { heading: "Your top 3, for now", bullets: [
     "Your saved careers, with one empty slot above them per save (two saves, two slots). Tap a card to fill the next slot: first tap is #1.",
@@ -411,7 +411,12 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
           // profile"). Saves cap at 3, so that screen only re-ordered the
           // same cards; the order they were saved in is the starting rank,
           // and Profile's Top 3 is where they reorder or remove.
-          cta={state.saved.length === 0 ? "Save a career" : state.saved.length === 1 ? "Continue" : `See my Top ${state.saved.length}`}
+          // The button counts what they saved: "Continue with 1/2/3"
+          // (Chandu, 23 Oct 2026: "It's not see my top 3 anymore... update to
+          // say continue with (x) the number of whatever they saved"). "See
+          // my Top 3" named a screen that no longer exists; the number says
+          // one save is enough and more are welcome.
+          cta={state.saved.length === 0 ? "Save a career" : `Continue with ${state.saved.length}`}
           ctaDisabled={state.saved.length === 0}
           // Continue unlocks with a soft glow after the first save
           // (Joshua: "I can continue now, but I can also complete my Top 3").

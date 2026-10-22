@@ -12,7 +12,7 @@ Joshua, Slack, 27 Sept 2026: "simplify the current Match / Mini Explore flow and
 - Card shows only: Learn more and the title in its world's poster face. No "Fits..." chip (removed 28 Sept 2026: the world chip was implied by the tab, then all chips were dropped), no salary (inconsistent across careers; it lives in the detail modal), no world label (the tab says it). The Build fit still decides the order. Save pill top right, pulsing on the first card until the first save.
 - Tapping a card opens the detail modal (What You'd Do / Good Fit If You Like / School & Path, with salary there).
 - Up to 3 saves. The bottom bar's tray shows three slots; a fourth save shows "Remove one first to save this career."
-- CTA: "Save a career" (disabled at 0), "Continue" at 1, "See my Top 2" / "See my Top 3" at 2 or 3. Every CTA goes straight to Profile.
+- CTA: "Save a career" (disabled at 0), then "Continue with 1" / "Continue with 2" / "Continue with 3" (23 Oct 2026; was "Continue" at 1 and "See my Top 2/3"). Every CTA goes straight to Profile.
 - No intro splash or coachmarks: the screens teach themselves.
 - No Build answers in this browser (Build skipped): a short stand-in asks for worlds, subjects and college/trades first.
 
