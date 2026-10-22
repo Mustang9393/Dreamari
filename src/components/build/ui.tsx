@@ -305,7 +305,7 @@ export function Citation({ children }: { children: ReactNode }) {
   return (
     <p
       data-quiet-flow-text
-      className="mt-2 bg-transparent text-center text-[11px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] opacity-60"
+      className="mt-2 whitespace-nowrap bg-transparent text-center text-[10px] font-medium tracking-normal text-[var(--color-night-muted-foreground)] opacity-60"
       style={{ background: "transparent" }}
     >
       {children}
