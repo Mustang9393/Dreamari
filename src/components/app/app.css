@@ -1418,3 +1418,43 @@ html.light .event-card {
 @media (prefers-reduced-motion: reduce) { .dm-spot-ring { animation: none; box-shadow: 0 0 0 1px rgba(158, 198, 250, 0.4), 0 0 26px 4px rgba(89, 157, 249, 0.32); }
   .dm-spot { animation: none; box-shadow: 0 0 0 1px rgba(158, 198, 250, 0.6), 0 0 18px 3px rgba(89, 157, 249, 0.5); }
   .dm-spot-soft, .dm-pencil-write, .college-goal-save-lit .school-card [aria-pressed], .dm-lean-up, .dm-lean-down, .dm-lean-left, .dm-lean-right { animation: none; } }
+
+/* Explore search category tiles: the next career's photo sweeps in over the
+   last one behind a feathered diagonal edge, with a faint glint riding the
+   edge, then drifts in close while it holds (Chandu, 23 Oct 2026: "can we
+   have a better transition? The simple fade seems a bit outdated"). Mask
+   position and transform only; no blur (Chromebook GPUs). */
+.dm-face-in {
+  -webkit-mask-image: linear-gradient(100deg, #000 40%, transparent 60%);
+  mask-image: linear-gradient(100deg, #000 40%, transparent 60%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: dm-face-reveal 1150ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+.dm-face-drift {
+  animation: dm-face-drift var(--dm-face-hold, 5200ms) cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+.dm-face-glint {
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.16) 50%, transparent 100%);
+  animation: dm-face-glint 1150ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+@keyframes dm-face-reveal {
+  from { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  to { -webkit-mask-position: 0% 0; mask-position: 0% 0; }
+}
+@keyframes dm-face-drift {
+  from { transform: scale(1.07); }
+  to { transform: scale(1); }
+}
+@keyframes dm-face-glint {
+  0% { transform: translateX(-120%); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(260%); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dm-face-in, .dm-face-drift, .dm-face-glint { animation: none; }
+  .dm-face-glint { opacity: 0; }
+}

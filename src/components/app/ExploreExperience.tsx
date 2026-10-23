@@ -63,6 +63,9 @@ import { buildTradesRails, filterByPath, isPathChoice, type PathChoice } from "@
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "@/components/app/careerSearch";
 import { careerSlug } from "@/components/career/slug";
+// face-aware crops (Apple Vision), the career header's: a 16:9 tile is close
+// to that header's desktop photo box, so the same crop keeps heads in frame
+import { heroFocus } from "@/components/career/heroFocus";
 import { simulationFor } from "@/components/play/games";
 import "@/components/app/app.css";
 import { logActivity } from "@/lib/activityEvents";
@@ -436,6 +439,26 @@ function SuggestedSearches({ onQuery }: { onQuery: (q: string) => void }) {
 // world fronts its tile; the count under the name tells a student how much
 // is behind it. Tapping a tile opens the same world grid the old picker
 // did (SearchResults with a Back link), so nothing downstream changed.
+// 23 Oct 2026 (Chandu): "have them all in unison transition to successive
+// career images cycling together with a nice smooth not too distracting
+// transition with a bit of subtle motion ... So the categories arent always
+// showing just one career? Because some categories encompass different
+// kinds of careers too", and "maybe the tiles can be shorter as well";
+// then, on a first pass that cycled four set careers with a crossfade: "do
+// they keep cycling through all the available careers? There doesnt need
+// to be a set order they have to keep rotating as varied as possible
+// though", and "can we have a better transition? The simple fade seems a
+// bit outdated".
+// So every tile rotates through every career in its world with a photo,
+// the world's hero first, then a shuffle that never puts two similar jobs
+// back to back (Nurse after Nurse Practitioner, Engineer after Engineer),
+// reshuffled each lap. One shared clock turns the whole grid together.
+// The step is a light sweep: the next photo wipes in over the last behind a
+// feathered diagonal edge with a faint glint on it, then drifts in close
+// while it holds (.dm-face-* in app.css). Only the photo on screen, the one
+// under it and the next one (preloading) are mounted. The clock stops while
+// the pointer is over the grid or a tile has focus, while the browser tab is
+// hidden, and under reduced motion.
 const WORLD_HERO: Record<string, string> = {
   "Tech & Engineering": "Software Engineer",
   "Health & Medicine": "Registered Nurse",
@@ -454,30 +477,128 @@ const WORLD_HERO: Record<string, string> = {
   "Personal Care & Community Services": "Hairstylist",
 };
 const CATEGORY_WORLDS = WORLD_LABELS.filter((w) => w !== "All");
+const FACE_HOLD_MS = 5200;
+const FACE_LAPS = 6;
+
+// words that make two job titles "the same kind" when both carry one
+const KIND_STOP = new Set(["and", "or", "of", "the", "&", "a"]);
+const kindWords = (title: string) => new Set(title.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2 && !KIND_STOP.has(w)));
+const alike = (a: CatalogCareer, b: CatalogCareer) => {
+  const wa = kindWords(a.title);
+  return [...kindWords(b.title)].some((w) => wa.has(w));
+};
+
+/** One lap: a shuffle where no career sits next to one of the same kind
+ *  (and the lap never starts with the one the last lap ended on). */
+function varietyLap(pool: CatalogCareer[], after?: CatalogCareer) {
+  const bag = [...pool];
+  for (let i = bag.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [bag[i], bag[j]] = [bag[j], bag[i]];
+  }
+  const out: CatalogCareer[] = [];
+  let last = after;
+  while (bag.length) {
+    const k = bag.findIndex((c) => c !== last && (!last || !alike(c, last)));
+    const [next] = bag.splice(k >= 0 ? k : 0, 1);
+    out.push(next);
+    last = next;
+  }
+  return out;
+}
+
+/** The world's photo sequence: its hero, then lap after lap of every other
+ *  career with a photo, varied. Built once when the tiles mount (search is
+ *  opened by a tap, so this never renders on the server). */
+function faceSequence(world: string, inWorld: CatalogCareer[]) {
+  const withPhoto = inWorld.filter((c) => c.photo);
+  const hero = withPhoto.find((c) => c.title === WORLD_HERO[world]) ?? withPhoto[0];
+  if (!hero) return [];
+  const seq = [hero];
+  for (let lap = 0; lap < FACE_LAPS; lap++) seq.push(...varietyLap(lap === 0 ? withPhoto.filter((c) => c !== hero) : withPhoto, seq[seq.length - 1]));
+  return seq;
+}
+
+/** One clock for every tile, so they turn together. */
+function useFaceClock(paused: boolean) {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (paused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let id = 0;
+    const start = () => {
+      window.clearInterval(id);
+      id = window.setInterval(() => setTick((t) => t + 1), FACE_HOLD_MS);
+    };
+    const onVisibility = () => (document.hidden ? window.clearInterval(id) : start());
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [paused]);
+  return tick;
+}
+
+function FacePhoto({ photo, className }: { photo: string; className?: string }) {
+  return <Image src={photo} alt="" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw" className={`object-cover ${className ?? ""}`} style={{ objectPosition: heroFocus(photo)?.desktop ?? "50% 30%" }} />;
+}
 
 function CategoryTiles({ onPick }: { onPick: (world: string) => void }) {
+  const [held, setHeld] = useState(false);
+  const tick = useFaceClock(held);
+  const [sequences] = useState(() => Object.fromEntries(CATEGORY_WORLDS.map((w) => [w, faceSequence(w, ALL_CATALOG_CAREERS.filter((c) => c.world === w))])));
   return (
     <section aria-label="Browse by category" className="flex w-full flex-col gap-[var(--space-3)]">
       <h2 className="text-[18px] leading-[24px] font-extrabold sm:text-[20px]" style={{ fontFamily: "var(--font-display)" }}>Browse by category</h2>
-      <ul className="grid w-full grid-cols-2 gap-[10px] sm:grid-cols-3 sm:gap-[12px] lg:grid-cols-5">
+      <ul
+        className="grid w-full grid-cols-2 gap-[10px] sm:grid-cols-3 sm:gap-[12px] lg:grid-cols-5"
+        style={{ ["--dm-face-hold" as string]: `${FACE_HOLD_MS}ms` }}
+        onPointerEnter={() => setHeld(true)}
+        onPointerLeave={() => setHeld(false)}
+        onFocus={() => setHeld(true)}
+        onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHeld(false); }}
+      >
         {CATEGORY_WORLDS.map((world) => {
-          const inWorld = ALL_CATALOG_CAREERS.filter((c) => c.world === world);
-          const hero = inWorld.find((c) => c.title === WORLD_HERO[world]) ?? inWorld.find((c) => c.photo);
+          const count = ALL_CATALOG_CAREERS.filter((c) => c.world === world).length;
+          const seq = sequences[world];
+          const at = seq.length ? tick % seq.length : 0;
+          const now = seq[at];
+          const under = tick > 0 && seq.length > 1 ? seq[(at - 1 + seq.length) % seq.length] : null;
+          const next = seq.length > 1 ? seq[(at + 1) % seq.length] : null;
           return (
             <li key={world} className="h-full">
               <HoverBeam strength={0.8} className="h-full">
                 <button
                   type="button"
                   onClick={() => onPick(world)}
-                  aria-label={`${world}, ${inWorld.length} careers`}
-                  className="dm-tap group relative flex aspect-[4/3] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[12px] p-[12px] text-left"
+                  aria-label={`${world}, ${count} careers`}
+                  // shorter than the 4:3 first pass (Chandu, 23 Oct 2026:
+                  // "maybe the tiles can be shorter as well")
+                  className="dm-tap group relative flex aspect-[3/2] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[12px] p-[12px] text-left sm:aspect-[16/9]"
                   style={{ background: "var(--glass-surface-2)", fontFamily: "var(--font-body)" }}
                 >
-                  {hero && <Image src={hero.photo} alt="" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw" className="object-cover object-[50%_30%] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]" />}
+                  <span aria-hidden className="absolute inset-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]">
+                    {/* preloads the next face, out of sight */}
+                    {next && next !== now && next !== under && (
+                      <span key={`next-${next.title}`} className="absolute inset-0 opacity-0"><FacePhoto photo={next.photo} /></span>
+                    )}
+                    {under && under !== now && (
+                      <span key={`under-${under.title}`} className="absolute inset-0"><FacePhoto photo={under.photo} /></span>
+                    )}
+                    {now && (
+                      // keyed by the tick, so each step replays the sweep
+                      <span key={`now-${tick}`} className={`absolute inset-0 overflow-hidden ${tick > 0 ? "dm-face-in" : ""}`}>
+                        <span className="dm-face-drift absolute inset-0"><FacePhoto photo={now.photo} /></span>
+                        {tick > 0 && <span className="dm-face-glint absolute inset-y-0 left-0 w-[45%]" />}
+                      </span>
+                    )}
+                  </span>
                   <span aria-hidden className="absolute inset-0" style={{ background: TEXT_SCRIM }} />
                   <span className="relative flex min-w-0 flex-col gap-[2px]">
                     <span className="text-[14px] leading-[18px] font-extrabold sm:text-[15px] sm:leading-[19px]" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{world}</span>
-                    <span className="text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "rgba(255,255,255,0.72)" }}>{inWorld.length} careers</span>
+                    <span className="text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "rgba(255,255,255,0.72)" }}>{count} careers</span>
                   </span>
                 </button>
               </HoverBeam>
