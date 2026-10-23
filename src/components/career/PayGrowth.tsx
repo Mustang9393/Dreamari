@@ -53,9 +53,10 @@
 //     sentences to read right now ... I like the bar stuff but its the
 //     other info im a bit worried about", so every sentence went. The US
 //     comparison ("$11K more than the US typical") is a small second fact
-//     beside the figure, "Compared to average +19%" (a US point on the bar,
-//     "+19% vs the US" and a state rank were tried first; see the note at
-//     `vsAvg` for the research behind the wording).
+//     beside the figure, a chip reading "19% above avg" (a US point on the
+//     bar, "+19% vs the US", a state rank and a "▲ 19%" ticker chip were
+//     tried first; see the note at `vsAvg` for the research and the
+//     baseline).
 //     The panel is a label, two figures, the bar and the map. Job growth
 //     keeps one line of words, the verdict.
 // Decluttered without dropping anything: the map's state codes are quiet
@@ -119,10 +120,25 @@ export function PayGrowth({ slug, accent, typical, pay, range, national, yourSta
   // average". Here "national" goes, since "US" confused the reading
   // (Chandu, 23 Oct 2026: "these are all IN the US right?"), and a rank
   // ("8th of 50 states") was turned down the same day ("no rank. Something
-  // simpler. Maybe % above average"). So: "Compared to average" over "+19%",
-  // the sign carrying the direction; within 3% reads "Same". The average
-  // is the career's US typical pay, the figure the fact strip shows.
-  const vsAvg = shown && p !== undefined && usPay ? Math.round(((p - usPay) / usPay) * 100) : null;
+  // simpler. Maybe % above average").
+  //
+  // The average is the mean of the states' own figures when the career has
+  // BLS state data, not the profile's Typical pay. Same day, Chandu, on
+  // Investment Banking: "everything points down and I'm worried the whole
+  // thing might not be accurate". It was the baseline: IB's headline is
+  // the brief's $361,000 while its state figures are BLS wages for the
+  // closest occupation (securities and financial services sales agents,
+  // $59K to $185K), so every state read far below "average". Comparing a
+  // state with the average of the same dataset keeps the chip honest with
+  // the map and the bar whatever the headline says. (The headline-versus-
+  // BLS question itself is Maisha's item 1 for Usman, 20 Oct 2026.)
+  const average = pay?.all && states.length ? [...payBy.values()].reduce((a, b) => a + b, 0) / payBy.size : usPay;
+  const vsAvg = shown && p !== undefined && average ? Math.round(((p - average) / average) * 100) : null;
+  // "19% above avg", not a triangle: an arrow read as a trend over time
+  // (Chandu: "im not sure if it confuses between a trending number or vs
+  // US typical pay"); the one trend icon on the tab stays with Job growth
+  const chip = vsAvg === null || Math.abs(vsAvg) <= 3 ? null : `${Math.abs(vsAvg)}% ${vsAvg > 0 ? "above" : "below"} avg`;
+  const chipWords = vsAvg === null ? "" : Math.abs(vsAvg) <= 3 ? "about average for this job" : `${Math.abs(vsAvg)}% ${vsAvg > 0 ? "above" : "below"} the average state for this job`;
 
   const mine = yourState && national ? stateOutlook(slug, yourState, national) : null;
 
@@ -143,75 +159,75 @@ export function PayGrowth({ slug, accent, typical, pay, range, national, yourSta
            on the right capped at 400px, so the whole panel sits on one
            screen (Chandu, 23 Oct 2026, on the full-width map: "now its too
            big and i cant interact with it on one screen and have to scroll") */}
-        <div className={`grid gap-[var(--space-5)] ${pay ? "md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-x-[var(--space-6)]" : ""}`}>
+        {/* One map, placed by the grid: a phone stacks readout, map, bar;
+           from md the readout and the bar sit top-aligned on the left and
+           the map spans both rows on the right. Two copies of the map used
+           to swap at md, and the copy hidden at mount never measured its
+           state codes, so the labels vanished after a resize (found 23 Oct
+           2026). */}
+        <div className={`grid gap-[var(--space-5)] ${pay ? "md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:grid-rows-[auto_1fr] md:gap-x-[var(--space-6)] md:gap-y-[var(--space-8)]" : ""}`}>
           {/* top-aligned, not centred against the map (Chandu, 23 Oct 2026:
              "aligned to the top rather than central and spaced out evenly") */}
-          <div className="flex flex-col gap-[var(--space-5)] md:order-1 md:justify-start md:gap-[var(--space-8)] md:pt-[var(--space-2)]">
-          <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-6)] gap-y-[6px] md:flex-col md:items-start md:gap-y-[6px]" aria-live="polite">
-            <span className="flex flex-wrap items-baseline gap-x-[10px]">
-              <Numeral accent={accent}>{p !== undefined ? formatPay(p) : "NA"}</Numeral>
-              {p !== undefined && <span className="text-[15px] leading-[22px] font-semibold" style={MUTED}>a year</span>}
-              {vsAvg !== null && Math.abs(vsAvg) > 3 && (
-                // the ticker chip every student knows from a stocks app:
-                // a triangle and a percent, up in the accent, down muted;
-                // the full words are there for hover and screen readers
-                <span
-                  className="self-center rounded-[8px] px-[8px] py-[2px] text-[13px] leading-[18px] font-bold tabular-nums"
-                  style={vsAvg > 0 ? { background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
-                  title={`${Math.abs(vsAvg)}% ${vsAvg > 0 ? "above" : "below"} the US average for this job`}
-                  aria-label={`${Math.abs(vsAvg)}% ${vsAvg > 0 ? "above" : "below"} the US average for this job`}
-                >
-                  <span aria-hidden>{vsAvg > 0 ? "\u25B2" : "\u25BC"} {Math.abs(vsAvg)}%</span>
-                </span>
-              )}
-            </span>
-            {/* a pin before the name, so it reads as a place that changes
-               with the map (Chandu, 23 Oct 2026: "add a pin icon for the
-               state name so its obvious that its the state's name that's
-               changing there") */}
-            <span className="flex items-center gap-[5px] text-[14px] leading-[20px] font-semibold" style={MUTED}>
-              {shown && <MapPin aria-hidden className="size-[14px] flex-none" strokeWidth={2.25} style={{ color: accent }} />}
-              <span>{shown ? (yours ? `${shown}, your state` : shown) : "Across the US"}</span>
-            </span>
-          </div>
-
-          {/* on a phone the map sits between the readout and the bar; from
-             md the bar stays in the left column under the readout */}
-          {pay && (
-            <div className="md:hidden">
-              <PayMap typical={typical} rows={[]} accent={accent} seed={slug} yourState={yourState} active={active} onActive={setActive} figures={{ values: Object.fromEntries(payBy), format: formatPay, prompt: "", label: "Pay by state" }} renderReadout={() => null} />
+          <div className="md:col-start-1 md:row-start-1 md:pt-[var(--space-2)]">
+            <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-6)] gap-y-[6px] md:flex-col md:items-start md:gap-y-[6px]" aria-live="polite">
+              <span className="flex flex-wrap items-baseline gap-x-[10px]">
+                <Numeral accent={accent}>{p !== undefined ? formatPay(p) : "NA"}</Numeral>
+                {p !== undefined && <span className="text-[15px] leading-[22px] font-semibold" style={MUTED}>a year</span>}
+                {chip && (
+                  <span
+                    // on the same baseline as "a year", not centred on the big
+                  // figure (Chandu, 23 Oct 2026: "should align with the 'a
+                  // year'. Otherwise things seem to be wobbly")
+                  className="rounded-[8px] px-[8px] py-[2px] text-[13px] leading-[18px] font-bold tabular-nums"
+                    style={vsAvg! > 0 ? { background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
+                    title={chipWords}
+                    aria-label={chipWords}
+                  >
+                    <span aria-hidden>{chip}</span>
+                  </span>
+                )}
+              </span>
+              {/* a pin before the name, so it reads as a place that changes
+                 with the map (Chandu, 23 Oct 2026: "add a pin icon for the
+                 state name so its obvious that its the state's name that's
+                 changing there") */}
+              <span className="flex items-center gap-[5px] text-[14px] leading-[20px] font-semibold" style={MUTED}>
+                {shown && <MapPin aria-hidden className="size-[14px] flex-none" strokeWidth={2.25} style={{ color: accent }} />}
+                <span>{shown ? (yours ? `${shown}, your state` : shown) : "Across the US"}</span>
+              </span>
             </div>
-          )}
-
-          {shown && lowest && highest && hi > lo ? (
-            <LightRange
-              accent={accent}
-              at={at}
-              // the ends name their states (Chandu, 23 Oct 2026: "highest
-              // and lowest need to show the state names. But how do we do
-              // that without clutter?"): the bar runs low to high, dim to
-              // bright, like the map, so its ends already say lowest and
-              // highest, and the one small word under each end is the state
-              from={{ label: lowest, value: formatPay(lo) }}
-              to={{ label: highest, value: formatPay(hi) }}
-              ariaLabel={`Pay by state runs from ${formatPay(lo)} in ${lowest} to ${formatPay(hi)} in ${highest}${p !== undefined ? `; ${shown} pays ${formatPay(p)}` : ""}${vsAvg !== null ? `, ${Math.abs(vsAvg) <= 3 ? "about the US average" : `${Math.abs(vsAvg)}% ${vsAvg > 0 ? "above" : "below"} the US average`}` : ""}`}
-            />
-          ) : !shown && range ? (
-            <LightRange
-              accent={accent}
-              at={at}
-              from={{ label: "Starting out", value: range.starting }}
-              to={{ label: "Top earners", value: range.top }}
-              ariaLabel={`Starting out ${range.starting}, typical ${range.typical}, top earners ${range.top}`}
-            />
-          ) : null}
           </div>
 
           {pay && (
-            <div className="hidden md:order-2 md:block">
+            <div className="md:col-start-2 md:row-span-2 md:row-start-1">
               <PayMap typical={typical} rows={[]} accent={accent} seed={slug} yourState={yourState} active={active} onActive={setActive} figures={{ values: Object.fromEntries(payBy), format: formatPay, prompt: "", label: "Pay by state" }} renderReadout={() => null} maxHeight={400} />
             </div>
           )}
+
+          <div className="md:col-start-1 md:row-start-2 md:self-start">
+            {shown && lowest && highest && hi > lo ? (
+              <LightRange
+                accent={accent}
+                at={at}
+                // the ends name their states (Chandu, 23 Oct 2026: "highest
+                // and lowest need to show the state names. But how do we do
+                // that without clutter?"): the bar runs low to high, dim to
+                // bright, like the map, so its ends already say lowest and
+                // highest, and the one small word under each end is the state
+                from={{ label: lowest, value: formatPay(lo) }}
+                to={{ label: highest, value: formatPay(hi) }}
+                ariaLabel={`Pay by state runs from ${formatPay(lo)} in ${lowest} to ${formatPay(hi)} in ${highest}${p !== undefined ? `; ${shown} pays ${formatPay(p)}` : ""}${chipWords ? `, ${chipWords}` : ""}`}
+              />
+            ) : !shown && range ? (
+              <LightRange
+                accent={accent}
+                at={at}
+                from={{ label: "Starting out", value: range.starting }}
+                to={{ label: "Top earners", value: range.top }}
+                ariaLabel={`Starting out ${range.starting}, typical ${range.typical}, top earners ${range.top}`}
+              />
+            ) : null}
+          </div>
         </div>
       </Section>
 
@@ -231,7 +247,11 @@ export function PayGrowth({ slug, accent, typical, pay, range, national, yourSta
                   <TrendingUp aria-label="More jobs" strokeWidth={2.5} className="size-[22px] flex-none" style={{ color: accent }} />
                 )}
               </span>
-              <span className="text-[14px] leading-[20px]" style={MUTED}>{national.verdict}</span>
+              {/* two words, never a wrapped sentence with one word hanging
+                 (Chandu, 23 Oct 2026: "i dont want it to wrap and have a
+                 single word hanging off it. We can even consider rephrasing
+                 in simpler terms") */}
+              <span className="text-[14px] leading-[20px] whitespace-nowrap" style={MUTED} title={national.verdict}>{shortVerdict(national)}</span>
             </Cell>
             <Cell label="People doing it">
               <Numeral accent={accent}>{count(national.employment)}</Numeral>
@@ -249,6 +269,22 @@ export function PayGrowth({ slug, accent, typical, pay, range, national, yourSta
       )}
     </>
   );
+}
+
+/** The BLS verdict in two plain words. The profiles carry a sentence
+ *  ("It is growing about as fast as most jobs", "Fewer of these jobs are
+ *  expected, but most openings come from people moving on"); the cell has
+ *  room for a short tag, and the full sentence stays on hover. Matched on
+ *  the sentence first, then on the growth figure when the wording is new. */
+function shortVerdict(n: NationalOutlook) {
+  const v = n.verdict.toLowerCase();
+  if (/much faster/.test(v)) return "Growing very fast";
+  if (/faster/.test(v)) return "Growing fast";
+  if (/about as fast/.test(v)) return "Steady growth";
+  if (/slow/.test(v)) return "Slow growth";
+  if (/steady/.test(v)) return "Holding steady";
+  if (n.change < 0 || /declin|shrink|smaller|fewer/.test(v)) return "Fewer jobs ahead";
+  return n.growthPct >= 8 ? "Growing very fast" : n.growthPct >= 5 ? "Growing fast" : n.growthPct >= 2 ? "Steady growth" : "Slow growth";
 }
 
 /** The page's key-figure gradient numeral, as on the fact strip. */
