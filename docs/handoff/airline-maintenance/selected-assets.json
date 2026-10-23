@@ -1,0 +1,114 @@
+[
+  {
+    "file": "public/images/play/airline-maintenance/exterior-phone-v2.png",
+    "sha256": "58ee1a427675680acdd849f7754df28c1a9eb76b0df83167c30dcf19eb2e30e7",
+    "width": 941,
+    "height": 1672,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/face-caleb-v2.webp",
+    "sha256": "866bae22b82b809f7a54791c8cac536536b905714e79c56312f411b2e5ad1a50",
+    "width": 160,
+    "height": 160,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/face-priya-v2.webp",
+    "sha256": "091ee31271c822f0e2120999d52513180a67bf1217477beb2b7e5e9f62ae6282",
+    "width": 160,
+    "height": 160,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/face-sora-v2.webp",
+    "sha256": "5277a56eeec3117abd9619c51a13b4136e323dd086e417604c914c5cee0c42e2",
+    "width": 160,
+    "height": 160,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/interior-v2.png",
+    "sha256": "06d14787e078bd288c4484a4117cce0a4fdfc433f105119ce2881089f4878647",
+    "width": 1671,
+    "height": 941,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/exterior-v2.png",
+    "sha256": "4b7f67baaf0423c34d65988e9669313ed48c761b24ade01fe65128828600d764",
+    "width": 1672,
+    "height": 941,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/elena-v2.png",
+    "sha256": "4b362bcc6dd5460427417ea968bc0ff1e167930a8c047bdaa6d55eae61fafe5d",
+    "width": 1672,
+    "height": 941,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/elena-phone-v2.png",
+    "sha256": "faf40d99c4e429b81c0652d1df03a01d03392262790ad6728ef99027658cce1f",
+    "width": 941,
+    "height": 1672,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/face-elena-v2.webp",
+    "sha256": "99614a362403361d415fb4ca149a74ca32b8396f1600a0d62a96b5e43c347ea7",
+    "width": 160,
+    "height": 160,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/priya-v2.png",
+    "sha256": "ce4b9016acc75740e35374ef1c3b543382b6fb699467c80f6e60fc3cff59b358",
+    "width": 1672,
+    "height": 941,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/caleb-phone-v2.png",
+    "sha256": "4ec1a5d67a8e1e43e0b5ff7f01c60f6cacce5214f9f8f996b0d6d3fca20caf1b",
+    "width": 941,
+    "height": 1672,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/interior-phone-v2.png",
+    "sha256": "25b9226d7b6e2b4a7d5495e98a91ce3432ec0db4ecf98a27156edf0b5a317329",
+    "width": 941,
+    "height": 1672,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/caleb-v2.png",
+    "sha256": "bb1120ff9e8281bfb20cda62941e43c6382eb66d8a44bccb370fa8997ed66a74",
+    "width": 1672,
+    "height": 941,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/sora-phone-v2.png",
+    "sha256": "0474363350d3a8c71b8390e141cb94a985c9541a970e53bf330810acec637223",
+    "width": 941,
+    "height": 1672,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/priya-phone-v2.png",
+    "sha256": "f0471179352b58e7d7230637b0d8b10d002fa992593d6f0a7e664d203b380cd2",
+    "width": 941,
+    "height": 1672,
+    "opaque": true
+  },
+  {
+    "file": "public/images/play/airline-maintenance/sora-v2.png",
+    "sha256": "01e8ffafd9824809fcdb88e6e16d5869f44c6f302b57eca187e3f2eaba50574b",
+    "width": 1672,
+    "height": 941,
+    "opaque": true
+  }
+]

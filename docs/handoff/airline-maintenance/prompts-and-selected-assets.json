@@ -1,0 +1,319 @@
+{
+  "tool": "built-in image_gen",
+  "primaryStyleReference": "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+  "allApprovedReferences": [
+    "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+    "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/food-approved-work.png",
+    "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/nurse-approved-corridor.png"
+  ],
+  "prompts": [
+    {
+      "id": "exterior",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. Exterior establishing view, NO PEOPLE. Camera outside across the apron showing the complete broad barrel-vault hangar facade, curved blue entrance canopy and open hangar door. Through open door a small parked regional passenger turboprop is visible; left coastal bay, right glazed records wing. Do not draw the interior as the main image. Beautiful welcoming but clearly industrial airline workplace.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png"
+      ]
+    },
+    {
+      "id": "interior",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. Interior establishing view, NO PEOPLE. Camera within hangar toward the far wall. Show the small regional passenger turboprop as a parked complete background aircraft with believable proportions. Large left windows, blue overhead ribs, records alcove and right mezzanine, teal cart to left outside the propeller area, clear walking route. Entire floor simple and matte.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png"
+      ]
+    },
+    {
+      "id": "interior-refined",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. EDIT the supplied interior target. Keep geometry, plane, layout and view exactly, but remove all floor reflections and tiny texture. Floor is FLAT MATTE. No people. The primary UX reference sets drawing style only.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-15375e45-0104-46ec-a6b6-87eb1b196086.png"
+      ]
+    },
+    {
+      "id": "exterior-refined",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. EDIT the supplied exterior target. Keep hangar, aircraft and bay, but simplify apron to flat untextured pale shapes and remove dense roof/floor surface marks. Correct the plane's direction to match the interior layout: nose points toward the hangar's left-window side, tail on right, viewed from exterior. No people.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-60a308b9-39b4-4c4f-9d9e-b00e90519a67.png"
+      ]
+    },
+    {
+      "id": "sora-refined",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. Same interior layout reference, NEW complete image containing ONE person, Sora only: Japanese woman aged 44, warm-beige skin, dark-brown eyes, short black bob in FOUR broad silhouette masses, oval face, navy coveralls over muted teal shirt, black work shoes. She looks visibly middle-aged through mature face proportions and two restrained under-eye marks, no sculpted cheeks. Complete grounded standing body head to feet, center-right at x56%, top of head y22%, feet y75%; calm attentive expression, holding CLOSED teal folder by her side, free hand gestures to unseen learner. Simple nose mark and short mouth line. Eyes meet camera. The rest of the scene continues naturally around her. One clean shadow shape on skin and clothing, very few folds. No other person, no visible player.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-15375e45-0104-46ec-a6b6-87eb1b196086.png"
+      ]
+    },
+    {
+      "id": "caleb",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. Draw a new complete scene in the canonical interior. Preserve room geometry, aircraft direction, window view and fixed tool cart positions from the new interior reference. CHARACTER: Caleb ONLY: Black man aged 25, very dark warm-brown skin, amber-brown anime eyes, broad rounded jaw, short coily black hair represented as FOUR connected broad silhouette clusters, navy coveralls, black work shoes. Holding a closed work folder, one hand on hip, slightly self-assured but professional expression, eyes toward unseen player. No need for detailed coils. Preserve his own identity reference, not Sora's face. STAGING: complete body, both legs and both feet entirely inside image, grounded on the floor. Person's head at y21% and feet at y80%, upper-middle at x56%. Face clear of top 14% and bottom 36% UI bands. Simple drawn anime face, NO painted lips, realistic nostrils or airbrushed cheeks. Sparse structural folds, single clothing shadow. Only ONE person. The old cast reference sets identity ONLY, not drawing detail or camera.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-9b3e6d19-641c-440d-bbee-6fb929f13d7e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/caleb-v2.png"
+      ]
+    },
+    {
+      "id": "elena",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. Draw a new complete scene in the canonical interior. Preserve room geometry, aircraft direction, window view and fixed tool cart positions from the new interior reference. CHARACTER: Elena ONLY: Latina woman aged 59, olive-brown skin, hazel anime eyes, angular long face, short silver-gray hair in FOUR broad groups, clear safety glasses, slate blue work shirt, navy straight work trousers, black work shoes. Keep her visibly 59 through mature facial proportions, two subtle age lines and upright assured posture; NOT a young woman with silver hair. She holds a small boxed kit and a sheet at the records alcove at right; table must not cut body off, place her just in front of it. Thoughtful focused face looking toward unseen player. Preserve her own identity reference. STAGING: complete body, both legs and both feet entirely inside image, grounded on the floor. Person's head at y21% and feet at y80%, upper-middle at x56%. Face clear of top 14% and bottom 36% UI bands. Simple drawn anime face, NO painted lips, realistic nostrils or airbrushed cheeks. Sparse structural folds, single clothing shadow. Only ONE person. The old cast reference sets identity ONLY, not drawing detail or camera.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-9b3e6d19-641c-440d-bbee-6fb929f13d7e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/elena-v2.png"
+      ]
+    },
+    {
+      "id": "priya",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. Draw a new complete scene in the canonical interior. Preserve room geometry, aircraft direction, window view and fixed tool cart positions from the new interior reference. CHARACTER: Priya ONLY: South Asian woman aged 24, deep warm-brown skin, dark-brown anime eyes, rounder face, black hair in a LOW simple bun with FOUR broad masses, navy coveralls over sage shirt, black work shoes. Hold an open blank work folder, free hand asks a question; attentive slightly concerned expression, eyes meet unseen player. She stands by the right records alcove, not in front of a propeller. Preserve her own identity reference, not Sora's face. STAGING: complete body, both legs and both feet entirely inside image, grounded on the floor. Person's head at y21% and feet at y80%, upper-middle at x56%. Face clear of top 14% and bottom 36% UI bands. Simple drawn anime face, NO painted lips, realistic nostrils or airbrushed cheeks. Sparse structural folds, single clothing shadow. Only ONE person. The old cast reference sets identity ONLY, not drawing detail or camera.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-9b3e6d19-641c-440d-bbee-6fb929f13d7e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/priya-v2.png"
+      ]
+    },
+    {
+      "id": "exterior-phone",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. RECOMPOSE the attached canonical exterior landscape scene into ONE finished PORTRAIT 9:16 complete opaque painting for a phone. Do not crop or extend with blurred fill. Keep architecture, aircraft direction, light and geography consistent; wide enough viewpoint for complete grounded anatomy. No people. Exterior from apron showing full hangar curve and bay at left. Aircraft small inside. Top 14% and bottom 38% quiet for UI. Portrait image must stand alone with no missing bodies, no panel dividers, text or watermark.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-39f74f6c-d1b8-46fe-a7ef-2c68f3524dc2.png"
+      ]
+    },
+    {
+      "id": "interior-phone",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. RECOMPOSE the attached canonical interior landscape scene into ONE finished PORTRAIT 9:16 complete opaque painting for a phone. Do not crop or extend with blurred fill. Keep architecture, aircraft direction, light and geography consistent; wide enough viewpoint for complete grounded anatomy. No people. Tall left bay windows, blue ribs and right records alcove remain the same room. Aircraft static behind safe walking route. Top 14% and bottom 38% quiet for UI. Portrait image must stand alone with no missing bodies, no panel dividers, text or watermark.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-9b3e6d19-641c-440d-bbee-6fb929f13d7e.png"
+      ]
+    },
+    {
+      "id": "sora-phone",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. RECOMPOSE the attached canonical sora landscape scene into ONE finished PORTRAIT 9:16 complete opaque painting for a phone. Do not crop or extend with blurred fill. Keep architecture, aircraft direction, light and geography consistent; wide enough viewpoint for complete grounded anatomy. Sora's canonical identity, natural warm-beige skin and mature age 44 remain fixed. Only Sora present. Put head at y23%, full body down to feet at y78%, centered x50%; face clear in top-middle. Folder and calm open-hand greeting remain. Hair four solid masses, face simple anime nose mark, no painted lips.Tall left bay windows, blue ribs and right records alcove remain the same room. Aircraft static behind safe walking route. Top 14% and bottom 38% quiet for UI. Portrait image must stand alone with no missing bodies, no panel dividers, text or watermark.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-30f0db6a-8090-48da-8e08-f747bc9b78fc.png"
+      ]
+    },
+    {
+      "id": "caleb-identity-repair",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. EDIT THIS COMPLETE SCENE using the primary UX image for drawing style and the other image as exact edit target. Keep pose, full anatomy and room unchanged. Correct Caleb's skin to a visibly VERY DARK warm brown base (#4B2F26), with one deep brown cel shadow; face, neck and hands must all agree. Preserve amber-brown eyes. Repaint hair as FOUR large connected coily silhouette clusters, with THREE short internal dividing marks total. No individually drawn tiny locks, ringlets, flyaways or shiny highlights. Simple anime eyes, short nose and mouth marks; NO realistic cheek modeling. Maintain 25-year-old identity. Keep the environment no more detailed than the approved style, floor matte without reflections. This is one finished opaque landscape scene, not a separate person.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-6e982957-7366-46b8-a672-760f43c4cbf6.png"
+      ]
+    },
+    {
+      "id": "elena-identity-repair",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. EDIT THIS COMPLETE SCENE using the primary UX image for drawing style and the other image as exact edit target. Keep pose, full anatomy and room unchanged. Elena must remain VISIBLY 59: mature drawn face proportions with slightly longer lower face, two restrained crow's-feet lines, two small under-eye marks, subtly defined smile lines, upright older posture. No realistic skin shading. Her silver hair MUST be FOUR broad solid groups with at most THREE interior contour lines total, no thin shiny strands or many locks. Keep olive-brown base and hazel eyes, simple flat anime drawing. No painted lips or modeled cheeks. Keep the environment no more detailed than the approved style, floor matte without reflections. This is one finished opaque landscape scene, not a separate person.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-8c44f6a2-d737-45a3-bba6-812761191479.png"
+      ]
+    },
+    {
+      "id": "priya-identity-repair",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. EDIT THIS COMPLETE SCENE using the primary UX image for drawing style and the other image as exact edit target. Keep pose, full anatomy and room unchanged. Correct Priya's skin to a visibly DEEP warm-brown base (#78503C), with one darker warm cel shadow; face, neck and hands must agree. Keep her dark-brown eyes. Hair is a simple grouped low bun, FOUR broad dark masses with just THREE interior dividing marks, no tiny locks or strands. Keep younger round anime face, short nose and mouth marks. Maintain 24-year-old identity. Keep the environment no more detailed than the approved style, floor matte without reflections. This is one finished opaque landscape scene, not a separate person.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-f718d382-3835-404c-971c-dcaedc1ed3bf.png"
+      ]
+    },
+    {
+      "id": "caleb-phone",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. Recompose the attached canonical caleb scene into ONE PORTRAIT 9:16 complete opaque illustration. Preserve this exact person: face proportions, natural skin tone/undertone, eye color, hair, outfit and age. Preserve dark warm-brown skin, amber-brown eyes and coily hair as FOUR connected dark silhouette clusters, no individually shaded ringlets. Same blue-rib hangar, left bay windows, parked white-teal regional passenger aircraft facing left, right records alcove. Only this person. Position centered x50%, head at y23%, feet at y78%; complete body and both shoes well inside image, grounded on flat matte floor. Match original pose/folder/kit, no portrait cutout, missing anatomy, fake blur fill or text. Keep face clear of top14% and bottom38% UI bands. Simplify environment and clothing, broad painted colors and one clean shadow family.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-0ad530ac-2d19-4f2b-a83c-a50ddd905c35.png"
+      ]
+    },
+    {
+      "id": "elena-phone",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. Recompose the attached canonical elena scene into ONE PORTRAIT 9:16 complete opaque illustration. Preserve this exact person: face proportions, natural skin tone/undertone, eye color, hair, outfit and age. She is 59: keep visible mature facial proportions and restrained age marks. Simplify silver hair into FOUR broad solid masses with just THREE interior lines, no glossy thin locks. Same blue-rib hangar, left bay windows, parked white-teal regional passenger aircraft facing left, right records alcove. Only this person. Position centered x50%, head at y23%, feet at y78%; complete body and both shoes well inside image, grounded on flat matte floor. Match original pose/folder/kit, no portrait cutout, missing anatomy, fake blur fill or text. Keep face clear of top14% and bottom38% UI bands. Simplify environment and clothing, broad painted colors and one clean shadow family.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-40d945eb-125e-4350-8b32-aa927eae013d.png"
+      ]
+    },
+    {
+      "id": "priya-phone",
+      "prompt": "Use case: illustration-story. Produce exactly ONE complete opaque game scene. Hand-drawn 2D television anime matching the attached approved UX scene's simple face construction and flat cel colors, and simplify environment surfaces further. Broad painted planes, sparse edges, one shadow family per material, no realistic texture, detailed seams, rivets, mottled floors, mirror reflections, or photographic finish. Premium comes from architecture and composition. Fictional regional passenger airline at a coastal airport: a broad low barrel-vault hangar, sweeping muted blue ribs, tall left windows overlooking a coastal bay and low green hills, right-side glass review mezzanine above a walnut records alcove, teal storage cabinets, warm ivory matte floor with teal work-zone lines. Regional white-and-teal twin-engine passenger turboprop, parked on wheel chocks with engines OFF, no actual brand or logos. Aircraft is background context, no operational procedures depicted. Morning light from left windows and roof glazing, same geography in every scene. No text, HUD, border, player body or foreground arms. Landscape 16:9 composition. Top 14% and bottom 36% are quiet for later UI; focal architecture and any faces belong in upper-middle region. Full scene stands alone with UI hidden. STYLE ACCEPTANCE PRIORITY: repaint floor and apron as a single clean flat pale color with at most TWO broad clean shadow shapes, NO reflected windows, NO highlights, NO sheen, NO mottling or brushed gradients. Draw metal and aircraft with flat colors and one cel shadow. Omit tiny surface lines. Environment must look like painted TV anime background at same simplified detail as the characters. Avoid ornate texture. Recompose the attached canonical priya scene into ONE PORTRAIT 9:16 complete opaque illustration. Preserve this exact person: face proportions, natural skin tone/undertone, eye color, hair, outfit and age. Preserve deep warm-brown skin, dark-brown eyes and the simple LOW bun. Same blue-rib hangar, left bay windows, parked white-teal regional passenger aircraft facing left, right records alcove. Only this person. Position centered x50%, head at y23%, feet at y78%; complete body and both shoes well inside image, grounded on flat matte floor. Match original pose/folder/kit, no portrait cutout, missing anatomy, fake blur fill or text. Keep face clear of top14% and bottom38% UI bands. Simplify environment and clothing, broad painted colors and one clean shadow family.",
+      "references": [
+        "/Users/chandump/Documents/Dreamari/outputs/airline-maintenance-level-1-2026-10-23/references/ux-approved-work.png",
+        "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-9533f6b8-dcee-4978-9b2a-ef6ba6fbe216.png"
+      ]
+    }
+  ],
+  "selected": [
+    {
+      "file": "public/images/play/airline-maintenance/exterior-phone-v2.png",
+      "sha256": "58ee1a427675680acdd849f7754df28c1a9eb76b0df83167c30dcf19eb2e30e7",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/face-caleb-v2.webp",
+      "sha256": "866bae22b82b809f7a54791c8cac536536b905714e79c56312f411b2e5ad1a50",
+      "width": 160,
+      "height": 160,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/face-priya-v2.webp",
+      "sha256": "091ee31271c822f0e2120999d52513180a67bf1217477beb2b7e5e9f62ae6282",
+      "width": 160,
+      "height": 160,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/face-sora-v2.webp",
+      "sha256": "5277a56eeec3117abd9619c51a13b4136e323dd086e417604c914c5cee0c42e2",
+      "width": 160,
+      "height": 160,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/interior-v2.png",
+      "sha256": "06d14787e078bd288c4484a4117cce0a4fdfc433f105119ce2881089f4878647",
+      "width": 1671,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/exterior-v2.png",
+      "sha256": "4b7f67baaf0423c34d65988e9669313ed48c761b24ade01fe65128828600d764",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/elena-v2.png",
+      "sha256": "4b362bcc6dd5460427417ea968bc0ff1e167930a8c047bdaa6d55eae61fafe5d",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/elena-phone-v2.png",
+      "sha256": "faf40d99c4e429b81c0652d1df03a01d03392262790ad6728ef99027658cce1f",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/face-elena-v2.webp",
+      "sha256": "99614a362403361d415fb4ca149a74ca32b8396f1600a0d62a96b5e43c347ea7",
+      "width": 160,
+      "height": 160,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/priya-v2.png",
+      "sha256": "ce4b9016acc75740e35374ef1c3b543382b6fb699467c80f6e60fc3cff59b358",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/caleb-phone-v2.png",
+      "sha256": "4ec1a5d67a8e1e43e0b5ff7f01c60f6cacce5214f9f8f996b0d6d3fca20caf1b",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/interior-phone-v2.png",
+      "sha256": "25b9226d7b6e2b4a7d5495e98a91ce3432ec0db4ecf98a27156edf0b5a317329",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/caleb-v2.png",
+      "sha256": "bb1120ff9e8281bfb20cda62941e43c6382eb66d8a44bccb370fa8997ed66a74",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/sora-phone-v2.png",
+      "sha256": "0474363350d3a8c71b8390e141cb94a985c9541a970e53bf330810acec637223",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/priya-phone-v2.png",
+      "sha256": "f0471179352b58e7d7230637b0d8b10d002fa992593d6f0a7e664d203b380cd2",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "file": "public/images/play/airline-maintenance/sora-v2.png",
+      "sha256": "01e8ffafd9824809fcdb88e6e16d5869f44c6f302b57eca187e3f2eaba50574b",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    }
+  ],
+  "rejected": [
+    "Initial interior: floor reflections; replaced by the refined whole-scene edit.",
+    "Initial exterior: textured apron and reversed aircraft direction; replaced.",
+    "First cast batch: requested skin, hair and age corrections; final whole-scene edits selected."
+  ],
+  "identityRule": "Compare each recurring person with their own canonical image. Shared aviation names continue the same people; they are not unrelated new cast identities.",
+  "productionContract": "One complete opaque scene per generation; no runtime character overlays. Face-chip crops are UI thumbnails only.",
+  "generatedOriginals": [
+    {
+      "id": "exterior",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-39f74f6c-d1b8-46fe-a7ef-2c68f3524dc2.png"
+    },
+    {
+      "id": "interior",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-9b3e6d19-641c-440d-bbee-6fb929f13d7e.png"
+    },
+    {
+      "id": "sora",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-30f0db6a-8090-48da-8e08-f747bc9b78fc.png"
+    },
+    {
+      "id": "exterior-phone",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-a3b43d2d-13dc-454d-a0bd-4775b57fcd68.png"
+    },
+    {
+      "id": "interior-phone",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-f4bb1cf6-23ed-4e5b-87e0-2a35525fcfed.png"
+    },
+    {
+      "id": "sora-phone",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-7a217b45-0784-4c51-9d94-e7514eef17bc.png"
+    },
+    {
+      "id": "caleb",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-0ad530ac-2d19-4f2b-a83c-a50ddd905c35.png"
+    },
+    {
+      "id": "elena",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-40d945eb-125e-4350-8b32-aa927eae013d.png"
+    },
+    {
+      "id": "priya",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-9533f6b8-dcee-4978-9b2a-ef6ba6fbe216.png"
+    },
+    {
+      "id": "caleb-phone",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-9760b900-08fa-405f-894a-e43812ba2a3f.png"
+    },
+    {
+      "id": "elena-phone",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-92a7e108-e343-435c-868e-741416a907f1.png"
+    },
+    {
+      "id": "priya-phone",
+      "generatedOriginal": "/Users/chandump/.codex/generated_images/01a169c2-4947-7522-b04e-2f875b7b1ef3/exec-6c56ca7f-d3cb-4bdd-b20d-819896a5229f.png"
+    }
+  ]
+}

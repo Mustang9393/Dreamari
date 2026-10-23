@@ -1,0 +1,154 @@
+{
+  "trace": [
+    {
+      "beat": "AL1-01"
+    },
+    {
+      "beat": "AL1-02"
+    },
+    {
+      "beat": "AL1-03"
+    },
+    {
+      "beat": "AL1-04",
+      "teaches": [
+        "instructions",
+        "authority"
+      ]
+    },
+    {
+      "beat": "AL1-05"
+    },
+    {
+      "beat": "AL1-06",
+      "uses": [
+        "instructions"
+      ]
+    },
+    {
+      "beat": "AL1-07",
+      "teaches": [
+        "discrepancy",
+        "traceability",
+        "fod",
+        "handoff"
+      ]
+    },
+    {
+      "beat": "AL1-08",
+      "uses": [
+        "discrepancy",
+        "traceability",
+        "fod",
+        "handoff"
+      ]
+    },
+    {
+      "beat": "AL1-09",
+      "uses": [
+        "discrepancy",
+        "traceability",
+        "fod",
+        "handoff"
+      ]
+    },
+    {
+      "beat": "AL1-10",
+      "teaches": [
+        "observe-record-flag"
+      ]
+    },
+    {
+      "beat": "AL1-11",
+      "uses": [
+        "observe-record-flag"
+      ]
+    },
+    {
+      "beat": "AL1-12"
+    },
+    {
+      "beat": "AL1-13",
+      "teaches": [
+        "parts-evidence"
+      ]
+    },
+    {
+      "beat": "AL1-14",
+      "teaches": [
+        "parts-review"
+      ]
+    },
+    {
+      "beat": "AL1-15",
+      "uses": [
+        "parts-evidence",
+        "parts-review"
+      ]
+    },
+    {
+      "beat": "AL1-16"
+    },
+    {
+      "beat": "AL1-17"
+    },
+    {
+      "beat": "AL1-18"
+    },
+    {
+      "beat": "AL1-19",
+      "teaches": [
+        "credit-evidence"
+      ]
+    },
+    {
+      "beat": "AL1-20",
+      "uses": [
+        "credit-evidence"
+      ]
+    },
+    {
+      "beat": "AL1-21",
+      "teaches": [
+        "workload"
+      ]
+    },
+    {
+      "beat": "AL1-22",
+      "uses": [
+        "workload",
+        "handoff",
+        "authority"
+      ]
+    },
+    {
+      "beat": "AL1-23"
+    },
+    {
+      "beat": "AL1-24",
+      "teaches": [
+        "peer-support"
+      ]
+    },
+    {
+      "beat": "AL1-25"
+    },
+    {
+      "beat": "AL1-26",
+      "uses": [
+        "peer-support",
+        "handoff",
+        "authority"
+      ]
+    },
+    {
+      "beat": "AL1-27"
+    },
+    {
+      "beat": "AL1-28"
+    },
+    {
+      "beat": "AL1-29"
+    }
+  ]
+}

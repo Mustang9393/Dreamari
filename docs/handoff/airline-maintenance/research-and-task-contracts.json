@@ -1,0 +1,290 @@
+{
+  "dateChecked": "2026-10-23",
+  "sources": [
+    {
+      "id": "FAA-ENTRY",
+      "title": "Become an Aviation Mechanic",
+      "url": "https://www.faa.gov/mechanics/become",
+      "supportedFact": "Uncertificated work has supervised or organizationally authorized pathways; practical-experience and approved-school routes exist.",
+      "limits": "Supports this selected supervised beginner pathway, not a universal entry title or automatic certification."
+    },
+    {
+      "id": "CFR-43-3",
+      "title": "14 CFR 43.3(d)",
+      "url": "https://www.ecfr.gov/current/title-14/chapter-I/subchapter-C/part-43/section-43.3",
+      "supportedFact": "A certificate holder observes as necessary and is readily available in person; excluded required inspections are not delegated here.",
+      "limits": "Sora conducts the inspection; the learner assists by observing and drafting, never performs a required inspection independently."
+    },
+    {
+      "id": "CFR-43-13",
+      "title": "14 CFR 43.13(a)",
+      "url": "https://www.ecfr.gov/current/title-14/chapter-I/subchapter-C/part-43/section-43.13",
+      "supportedFact": "Maintenance uses current manufacturer instructions or other methods acceptable to the Administrator.",
+      "limits": "General methods source; air carrier program and manual govern real airline assignments. The game teaches only selecting current applicable airline instructions, not any procedure."
+    },
+    {
+      "id": "FAA-PARTS",
+      "title": "AC 20-62E Change 1: Eligibility, Quality, and Identification of Aeronautical Replacement Parts",
+      "url": "https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_20-62E_CHG_1.pdf",
+      "supportedFact": "Part eligibility, identification and traceability require supporting information.",
+      "limits": "Advisory guidance; flagging a mismatch is not proving counterfeiting or determining installation eligibility."
+    },
+    {
+      "id": "FAA-FOD",
+      "title": "FAA Foreign Object Debris Program",
+      "url": "https://www.faa.gov/airports/airport_safety/fod",
+      "supportedFact": "Foreign object debris is material in an inappropriate location that can damage aircraft or injure personnel.",
+      "limits": "Airport guidance supports hazard recognition; it is not an aircraft maintenance procedure."
+    },
+    {
+      "id": "FAA-HF",
+      "title": "AC 120-72A: Maintenance Human Factors Training",
+      "url": "https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-72A.pdf",
+      "supportedFact": "Maintenance human factors training addresses communication, teamwork and following procedures.",
+      "limits": "Advisory training framework, not a mandatory universal handoff form or authorization to sign work."
+    },
+    {
+      "id": "CFR-43-9",
+      "title": "14 CFR 43.9: Maintenance records",
+      "url": "https://www.ecfr.gov/current/title-14/chapter-I/subchapter-C/part-43/section-43.9",
+      "supportedFact": "Records describe work performed and identify the approving person as applicable.",
+      "limits": "Context only: air carriers have their own applicable record systems. This player writes an internal draft, not a regulatory approval entry."
+    },
+    {
+      "id": "FAA-HANDOFF",
+      "title": "FAASTeam ALC-180: Aircraft Maintenance Documentation for AMTs (2012 core course), review section on shift/task turnover",
+      "url": "https://www.faasafety.gov/gslac/alc/course_content.aspx?cID=180&preview=true&sID=526",
+      "supportedFact": "Effective shift/task turnover requires communication and transfer of information about unfinished work; inadequate written and verbal communication can contribute to maintenance errors.",
+      "limits": "Training guidance supports the handoff concept. Gannet's open-check/status/reviewer wording is a fictional local practice, not a mandated universal form."
+    },
+    {
+      "id": "DELTA-ENTRY",
+      "title": "Delta Technical Operations Careers",
+      "url": "https://www.delta.com/us/en/careers/techops-careers",
+      "supportedFact": "Aircraft Support Mechanic is an entry role learning under experienced maintenance technicians and assisting with technical and nontechnical work.",
+      "limits": "One real employer pathway supports the chosen stage; fictional Gannet is not Delta and no hiring, endorsement or certification promise is made."
+    },
+    {
+      "id": "BLS-AMT",
+      "title": "Aircraft and Avionics Equipment Mechanics and Technicians",
+      "url": "https://www.bls.gov/ooh/installation-maintenance-and-repair/aircraft-and-avionics-equipment-mechanics-and-technicians.htm",
+      "supportedFact": "Mechanics work with maintenance instructions and records; work occurs in hangars and on airfields, with several training routes.",
+      "limits": "General occupational duties do not grant a first-week learner independent authority."
+    },
+    {
+      "id": "CFR-121-MANUAL",
+      "title": "14 CFR 121.369: Manual requirements",
+      "url": "https://www.ecfr.gov/current/title-14/chapter-I/subchapter-G/part-121/subpart-L/section-121.369",
+      "supportedFact": "Air carrier maintenance manuals describe maintenance procedures and related responsibilities.",
+      "limits": "The game does not supply an airline manual or claim a universal procedural checklist."
+    },
+    {
+      "id": "FAA-AIRLINE-TRAINING",
+      "title": "FAA AC 120-124: Continuous Airworthiness Maintenance Program Training Program",
+      "url": "https://www.faa.gov/regulations_policies/advisory_circulars/index.cfm/go/document.information/documentID/1042217",
+      "supportedFact": "FAA guidance describes maintenance training for air carrier programs.",
+      "limits": "Supports employer-specific preparation, not a playable maintenance qualification."
+    }
+  ],
+  "roleContract": {
+    "startingRole": "Aircraft Support Mechanic",
+    "pathway": "Selected US airline support-mechanic entry route, with mentoring and assigned support tasks. Not a universal title or hiring requirement.",
+    "prerequisites": "Workplace induction and assigned safe observation position. Support work only; no aircraft-specific technical competence assumed. Employer program and authorization govern real assignments.",
+    "context": "First supervised week at fictional Gannet Regional Airlines; observation, part-label comparison and a draft finding brief for a regional passenger aircraft.",
+    "supervisor": "Sora, appropriately rated certificated mechanic, available in person and personally observing as needed.",
+    "allowed": "Read assigned references, observe alongside Sora, draft factual findings, compare identifiers, flag concerns, communicate open status.",
+    "escalation": "Pause assigned work and consult Sora; Elena coordinates supervisor review.",
+    "outsideRole": "Independent required inspection, diagnosis, repair choice, part eligibility approval, operating aircraft, regulatory sign-off, return-to-service approval."
+  },
+  "fictionalData": [
+    "Gannet Regional Airlines",
+    "all people, setting, deadlines, observations, kit codes K-42 and K-24, and workplace rules",
+    "The marked hold area and finding brief are fictional local training practices."
+  ],
+  "taskContracts": [
+    {
+      "slot": 6,
+      "beat": "AL1-06",
+      "task": "Select the applicable reference",
+      "sourceIds": [
+        "CFR-43-13",
+        "CFR-43-3",
+        "DELTA-ENTRY",
+        "CFR-121-MANUAL"
+      ],
+      "stageFit": "Supervised support work with an explicit reviewer; no independent approval.",
+      "priorTeachingSlots": [
+        4
+      ],
+      "informationSupplied": "Assigned aircraft and visual check",
+      "expectedOutput": "Choose current instructions matching this aircraft and task",
+      "reviewOwner": "Sora",
+      "answerRationale": "A similar aircraft or video does not establish applicability.",
+      "roleAuthority": "Supervised support and draft documentation only; authorized airline staff retain technical decisions and approval.",
+      "interaction": "options",
+      "category": "career-work",
+      "plausibleMistakes": [
+        "A procedure remembered from another aircraft",
+        "An online clip showing a similar check"
+      ]
+    },
+    {
+      "slot": 9,
+      "beat": "AL1-09",
+      "task": "Apply four job terms",
+      "sourceIds": [
+        "FAA-PARTS",
+        "FAA-FOD",
+        "FAA-HF",
+        "CFR-43-9",
+        "FAA-HANDOFF",
+        "DELTA-ENTRY"
+      ],
+      "stageFit": "Supervised support work with an explicit reviewer; no independent approval.",
+      "priorTeachingSlots": [
+        7,
+        8
+      ],
+      "informationSupplied": "Four self-contained situations, including each relevant concept",
+      "expectedOutput": "Record an observation; escalate paperwork mismatch; recognize loose debris; preserve open work",
+      "reviewOwner": "Sora",
+      "answerRationale": "Terms are used in work decisions after explicit teaching and unscored practice.",
+      "roleAuthority": "Supervised support and draft documentation only; authorized airline staff retain technical decisions and approval.",
+      "interaction": "rapid",
+      "category": "career-work",
+      "plausibleMistakes": []
+    },
+    {
+      "slot": 11,
+      "beat": "AL1-11",
+      "task": "Draft an observation",
+      "sourceIds": [
+        "CFR-43-3",
+        "CFR-43-9",
+        "DELTA-ENTRY"
+      ],
+      "stageFit": "Supervised support work with an explicit reviewer; no independent approval.",
+      "priorTeachingSlots": [
+        7,
+        10
+      ],
+      "informationSupplied": "Rub mark on cable cover; no diagnosis supplied",
+      "expectedOutput": "Record the mark and location, ask Sora to assess",
+      "reviewOwner": "Sora",
+      "answerRationale": "Observed condition does not establish electrical failure or airworthiness.",
+      "roleAuthority": "Supervised support and draft documentation only; authorized airline staff retain technical decisions and approval.",
+      "interaction": "options",
+      "category": "career-work",
+      "plausibleMistakes": [
+        "A confirmed electrical failure",
+        "Nothing, because no warning appeared"
+      ]
+    },
+    {
+      "slot": 15,
+      "beat": "AL1-15",
+      "task": "Keep an uncertain kit out of use",
+      "sourceIds": [
+        "FAA-PARTS",
+        "CFR-43-3",
+        "DELTA-ENTRY"
+      ],
+      "stageFit": "Supervised support work with an explicit reviewer; no independent approval.",
+      "priorTeachingSlots": [
+        7,
+        13,
+        14
+      ],
+      "informationSupplied": "Fictional kit label K-42, paperwork K-24; local hold rule supplied in the question.",
+      "expectedOutput": "Place in designated hold area and report exact mismatch",
+      "reviewOwner": "Sora and authorized eligibility reviewer",
+      "answerRationale": "Neither altering paperwork nor visual similarity resolves the mismatch.",
+      "roleAuthority": "Supervised support and draft documentation only; authorized airline staff retain technical decisions and approval.",
+      "interaction": "pick",
+      "category": "career-work",
+      "plausibleMistakes": []
+    },
+    {
+      "slot": 20,
+      "beat": "AL1-20",
+      "task": "Resolve a credit dispute",
+      "sourceIds": [
+        "FAA-HF",
+        "DELTA-ENTRY"
+      ],
+      "stageFit": "Supervised support work with an explicit reviewer; no independent approval.",
+      "priorTeachingSlots": [
+        5,
+        18,
+        19
+      ],
+      "informationSupplied": "Caleb claims brief; saved history shows author",
+      "expectedOutput": "Speak privately with Sora and show evidence",
+      "reviewOwner": "Sora",
+      "answerRationale": "Private facts support teamwork; public accusations and deleting records undermine it.",
+      "roleAuthority": "Supervised support and draft documentation only; authorized airline staff retain technical decisions and approval.",
+      "interaction": "options",
+      "category": "teamwork",
+      "plausibleMistakes": [
+        "Accuse Caleb over the hangar radio",
+        "Remove Caleb\u2019s inspection notes"
+      ]
+    },
+    {
+      "slot": 22,
+      "beat": "AL1-22",
+      "task": "Propose a workload plan",
+      "sourceIds": [
+        "FAA-HF",
+        "CFR-43-3",
+        "FAA-HANDOFF",
+        "DELTA-ENTRY"
+      ],
+      "stageFit": "Supervised support work with an explicit reviewer; no independent approval.",
+      "priorTeachingSlots": [
+        4,
+        7,
+        10,
+        21
+      ],
+      "informationSupplied": "Staff reassignment; open supervised check; brief due this shift",
+      "expectedOutput": "Ask Sora to reprioritize, preserve status and next owner",
+      "reviewOwner": "Sora",
+      "answerRationale": "Deadline does not complete work or expand trainee authority.",
+      "roleAuthority": "Supervised support and draft documentation only; authorized airline staff retain technical decisions and approval.",
+      "interaction": "chat",
+      "category": "career-work",
+      "plausibleMistakes": [
+        "\u201cI\u2019ll mark the check complete to meet the deadline.\u201d",
+        "\u201cI\u2019ll take over the check without supervision.\u201d"
+      ]
+    },
+    {
+      "slot": 26,
+      "beat": "AL1-26",
+      "task": "Support incoming teammate",
+      "sourceIds": [
+        "FAA-HF",
+        "CFR-43-9",
+        "FAA-HANDOFF",
+        "DELTA-ENTRY"
+      ],
+      "stageFit": "Supervised support work with an explicit reviewer; no independent approval.",
+      "priorTeachingSlots": [
+        7,
+        23,
+        24,
+        25
+      ],
+      "informationSupplied": "Priya needs open-check handoff; player has time",
+      "expectedOutput": "Rank direct help first, guide next, abandonment third, false completion last",
+      "reviewOwner": "Sora",
+      "answerRationale": "Support preserves real status; never signs incomplete work complete.",
+      "roleAuthority": "Supervised support and draft documentation only; authorized airline staff retain technical decisions and approval.",
+      "interaction": "rank",
+      "category": "career-work",
+      "plausibleMistakes": []
+    }
+  ],
+  "sourcesChecked": "2026-10-23; FAA, BLS, Delta and air carrier manual/training sources reviewed for this adaptation. Earlier advisory sources retain their documented limits."
+}

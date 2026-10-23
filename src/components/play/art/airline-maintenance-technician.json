@@ -1,0 +1,159 @@
+{
+  "career": "airline-maintenance-technician",
+  "folder": "airline-maintenance",
+  "spriteStandard": "full-scene",
+  "notes": [
+    "SOP v2.6 complete opaque scenes, with dedicated portrait compositions.",
+    "New airline scene assets; no runtime character sprites.",
+    "Regional passenger turboprop; no real airline brand or maintenance procedure depicted."
+  ],
+  "locations": {
+    "al-exterior": {
+      "src": "/images/play/airline-maintenance/exterior-v2.png",
+      "mobileSrc": "/images/play/airline-maintenance/exterior-phone-v2.png",
+      "alt": "People-free barrel-vault maintenance hangar at a coastal airfield.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": []
+    },
+    "al-interior": {
+      "src": "/images/play/airline-maintenance/interior-v2.png",
+      "mobileSrc": "/images/play/airline-maintenance/interior-phone-v2.png",
+      "alt": "People-free hangar with a static white-and-teal regional passenger aircraft and blue tool cart.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": []
+    },
+    "al-sora": {
+      "src": "/images/play/airline-maintenance/sora-v2.png",
+      "mobileSrc": "/images/play/airline-maintenance/sora-phone-v2.png",
+      "alt": "Sora, a middle-aged mechanic in navy coveralls, addresses you beside a blue tool cart.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": [
+        "Sora"
+      ]
+    },
+    "al-caleb": {
+      "src": "/images/play/airline-maintenance/caleb-v2.png",
+      "mobileSrc": "/images/play/airline-maintenance/caleb-phone-v2.png",
+      "alt": "Caleb, a junior technician in navy coveralls, holds a task folder in the hangar.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": [
+        "Caleb"
+      ]
+    },
+    "al-elena": {
+      "src": "/images/play/airline-maintenance/elena-v2.png",
+      "mobileSrc": "/images/play/airline-maintenance/elena-phone-v2.png",
+      "alt": "Elena, an older maintenance supervisor with gray hair and safety glasses, reviews a kit at the records alcove.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": [
+        "Elena"
+      ]
+    },
+    "al-priya": {
+      "src": "/images/play/airline-maintenance/priya-v2.png",
+      "mobileSrc": "/images/play/airline-maintenance/priya-phone-v2.png",
+      "alt": "Priya, a junior technician in navy coveralls, asks for help at the records alcove.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": [
+        "Priya"
+      ]
+    }
+  },
+  "cast": {
+    "Sora": {
+      "face": "/images/play/airline-maintenance/face-sora-v2.webp",
+      "voicePitch": 490
+    },
+    "Caleb": {
+      "face": "/images/play/airline-maintenance/face-caleb-v2.webp",
+      "voicePitch": 370
+    },
+    "Elena": {
+      "face": "/images/play/airline-maintenance/face-elena-v2.webp",
+      "voicePitch": 420
+    },
+    "Priya": {
+      "face": "/images/play/airline-maintenance/face-priya-v2.webp",
+      "voicePitch": 560
+    }
+  },
+  "portraitRatios": {},
+  "beatLocations": {
+    "AL1-01": "al-exterior",
+    "AL1-02": "al-interior",
+    "AL1-03": "al-sora",
+    "AL1-04": "al-sora",
+    "AL1-05": "al-caleb",
+    "AL1-06": "al-sora",
+    "AL1-07": "al-sora",
+    "AL1-08": "al-sora",
+    "AL1-09": "al-sora",
+    "AL1-10": "al-sora",
+    "AL1-11": "al-sora",
+    "AL1-12": "al-elena",
+    "AL1-13": "al-elena",
+    "AL1-14": "al-elena",
+    "AL1-15": "al-elena",
+    "AL1-16": "al-sora",
+    "AL1-17": "al-interior",
+    "AL1-18": "al-caleb",
+    "AL1-19": "al-caleb",
+    "AL1-20": "al-caleb",
+    "AL1-21": "al-interior",
+    "AL1-22": "al-sora",
+    "AL1-23": "al-sora",
+    "AL1-24": "al-priya",
+    "AL1-25": "al-priya",
+    "AL1-26": "al-priya",
+    "AL1-27": "al-sora",
+    "AL1-28": "al-sora"
+  }
+}

@@ -2978,40 +2978,64 @@ export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Res
   const [flash, setFlash] = useState<{ a: { side: Side; term: string }; b: { side: Side; term: string }; ok: boolean } | null>(null);
   const missed = useRef(false);
   const settled = useRef(false);
+  const attemptPending = useRef(false);
+  const matchMisses = useRef(0);
+  const matchTimers = useRef<number[]>([]);
+  const [matchFeedback, setMatchFeedback] = useState("");
+
+  useEffect(() => () => {
+    matchTimers.current.forEach(window.clearTimeout);
+  }, []);
 
   const total = beat.pairs.length;
 
   function attempt(side: Side, term: string) {
-    if (flash || done.includes(term)) return;
+    if (attemptPending.current || flash || settled.current || done.includes(term)) return;
     // Nothing held, or re-picking on the same side: just select.
     if (!picked || picked.side === side) {
       playSelect();
+      setMatchFeedback("");
       setPicked({ side, term });
       return;
     }
     const ok = picked.term === term;
-    if (!ok) missed.current = true;
+    attemptPending.current = true;
+    if (!ok) {
+      missed.current = true;
+      matchMisses.current += 1;
+    }
     if (ok) playCorrect();
     else playWrong();
     setFlash({ a: picked, b: { side, term }, ok });
-    window.setTimeout(() => {
+    if (beat.inlineCorrectionFeedback) {
+      const pair = beat.pairs.find((entry) => entry.term === picked.term);
+      setMatchFeedback(ok ? "That pair matches." : matchMisses.current > 1 && pair
+        ? `Hint: connect ${pair.def.toLowerCase()} with ${pair.term.toLowerCase()}.`
+        : "Not yet. Try a different match for that situation.");
+    }
+    matchTimers.current.push(window.setTimeout(() => {
+      attemptPending.current = false;
       setFlash(null);
       setPicked(null);
       if (!ok) return;
       const cleared = [...done, term];
       setDone(cleared);
+      if (beat.inlineCorrectionFeedback) setMatchFeedback(cleared.length === total
+        ? missed.current ? "Corrected - you've got it." : "All four pairs match."
+        : `${total - cleared.length} pairs left. Keep the matched pairs.`);
       if (cleared.length < total || settled.current) return;
       settled.current = true;
       playSweep();
-      window.setTimeout(() => {
+      matchTimers.current.push(window.setTimeout(() => {
         const firstTry = !missed.current;
         // v2: every pair is now correct, so acknowledge the recovery with
         // partial credit and the existing success line. v1's strict
         // first-attempt rule remains exactly as it was.
-        const tier = firstTry ? "best" : creditCorrections ? "acceptable" : "wrong";
-        onResolve(tier, firstTry || creditCorrections ? beat.whenRight : beat.whenWrong);
-      }, 420);
-    }, ok ? 260 : 520);
+        const correctedPractice = Boolean(beat.practice && beat.inlineCorrectionFeedback);
+        const tier = firstTry || correctedPractice ? "best" : creditCorrections ? "acceptable" : "wrong";
+        onResolve(tier, firstTry || correctedPractice || creditCorrections ? beat.whenRight : beat.whenWrong);
+      }, beat.inlineCorrectionFeedback ? 850 : 420));
+    }, ok ? 260 : 520));
   }
 
   const tileState = (term: string, side: Side): TileState => {
@@ -3028,6 +3052,7 @@ export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Res
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
+      {beat.inlineCorrectionFeedback && <p role="status" aria-live="polite" className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{matchFeedback}</p>}
       {/* One grid, filled column by column, with every row 1fr: all cards
          share the tallest card's height, across both columns (direct
          feedback, 5 Oct 2026: "the cards should all be the same height").

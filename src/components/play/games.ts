@@ -1,3 +1,4 @@
+import { AIRLINE_MAINTENANCE_LEVEL_1 } from "./airline-maintenance-level-1";
 import { AVIATION_FIRST_SHIFT_LEVEL_1 } from "./aviation-first-shift-level-1";
 import { FOOD_SCIENTIST_LEVEL_1 } from "./food-scientist-level-1";
 import { UX_LEVEL_1 } from "./ux-level-1";
@@ -219,9 +220,17 @@ export const AVIATION_FIRST_SHIFT: Simulation = {
  firm: "Gannet Flight Services", cover: AVIATION_FIRST_SHIFT_LEVEL_1.cover!,
  thumb: "/images/play/aviation-first-shift/sora-v2.png", thumbFocus: "50% 24%", levels: [AVIATION_FIRST_SHIFT_LEVEL_1], upcoming: []
 };
-// Whole-game variants belong behind the existing career tile.
+export const AIRLINE_MAINTENANCE: Simulation = {
+  id: "airline-maintenance-technician", careerId: "airline-maintenance-technician",
+  title: "Airline Maintenance Technician", world: "Fixing Machines & Engines",
+  firm: "Gannet Regional Airlines", cover: AIRLINE_MAINTENANCE_LEVEL_1.cover!,
+  thumb: "/images/play/airline-maintenance/sora-v2.png", thumbFocus: "50% 30%",
+  levels: [AIRLINE_MAINTENANCE_LEVEL_1], upcoming: [],
+};
+
+// Whole-game variants stay behind the existing aviation tile.
 export const SIMULATION_V2: Record<string, Simulation> = {
-  "aviation-maintenance-technician": AVIATION_FIRST_SHIFT,
+  "aviation-maintenance-technician": AIRLINE_MAINTENANCE,
 };
 
 export const SIMULATIONS: Simulation[] = [FOOD_SCIENTIST, INVESTMENT_BANKING, REGISTERED_NURSE, AVIATION_MAINTENANCE, UX_DESIGNER];
@@ -260,7 +269,8 @@ export function simThumb(sim: Simulation): { src: string; focus: string } {
 export function simulationFor(id: string, version?: string): Simulation | undefined {
   if (version === "2" && SIMULATION_V2[id]) return SIMULATION_V2[id];
   return SIMULATIONS.find((simulation) => simulation.id === id || simulation.careerId === id)
-    ?? Object.values(SIMULATION_V2).find((simulation) => simulation.id === id);
+    ?? Object.values(SIMULATION_V2).find((simulation) => simulation.id === id)
+    ?? (id === AVIATION_FIRST_SHIFT.id ? AVIATION_FIRST_SHIFT : undefined);
 }
 
 /** A career's world by slug, checked across every catalogue that carries

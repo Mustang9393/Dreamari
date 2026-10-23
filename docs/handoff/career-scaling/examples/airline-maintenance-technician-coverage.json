@@ -1,0 +1,291 @@
+{
+  "career": "airline-maintenance-technician",
+  "sopVersion": "2.6",
+  "groups": [
+    {
+      "id": "al-exterior",
+      "scene": "al-exterior",
+      "required": true,
+      "purpose": "People-free barrel-vault maintenance hangar at a coastal airfield.",
+      "beats": [
+        "AL1-01"
+      ],
+      "pov": "observe-task",
+      "speakingTarget": "work",
+      "eyeline": "task",
+      "visibleCast": []
+    },
+    {
+      "id": "al-interior",
+      "scene": "al-interior",
+      "required": true,
+      "purpose": "People-free hangar with a static white-and-teal regional passenger aircraft and blue tool cart.",
+      "beats": [
+        "AL1-02",
+        "AL1-17",
+        "AL1-21"
+      ],
+      "pov": "observe-task",
+      "speakingTarget": "work",
+      "eyeline": "task",
+      "visibleCast": []
+    },
+    {
+      "id": "al-sora",
+      "scene": "al-sora",
+      "required": true,
+      "purpose": "Sora, a middle-aged mechanic in navy coveralls, addresses you beside a blue tool cart.",
+      "beats": [
+        "AL1-03",
+        "AL1-04",
+        "AL1-06",
+        "AL1-07",
+        "AL1-08",
+        "AL1-09",
+        "AL1-10",
+        "AL1-11",
+        "AL1-16",
+        "AL1-22",
+        "AL1-23",
+        "AL1-27",
+        "AL1-28"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Sora"
+      ]
+    },
+    {
+      "id": "al-caleb",
+      "scene": "al-caleb",
+      "required": true,
+      "purpose": "Caleb, a junior technician in navy coveralls, holds a task folder in the hangar.",
+      "beats": [
+        "AL1-05",
+        "AL1-18",
+        "AL1-19",
+        "AL1-20"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Caleb"
+      ]
+    },
+    {
+      "id": "al-elena",
+      "scene": "al-elena",
+      "required": true,
+      "purpose": "Elena, an older maintenance supervisor with gray hair and safety glasses, reviews a kit at the records alcove.",
+      "beats": [
+        "AL1-12",
+        "AL1-13",
+        "AL1-14",
+        "AL1-15"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Elena"
+      ]
+    },
+    {
+      "id": "al-priya",
+      "scene": "al-priya",
+      "required": true,
+      "purpose": "Priya, a junior technician in navy coveralls, asks for help at the records alcove.",
+      "beats": [
+        "AL1-24",
+        "AL1-25",
+        "AL1-26"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Priya"
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "beat": "AL1-01",
+      "scene": "al-exterior",
+      "shotGroup": "al-exterior",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-02",
+      "scene": "al-interior",
+      "shotGroup": "al-interior",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-17",
+      "scene": "al-interior",
+      "shotGroup": "al-interior",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-21",
+      "scene": "al-interior",
+      "shotGroup": "al-interior",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-03",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-04",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-06",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-07",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-08",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-09",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-10",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-11",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-16",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-22",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-23",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-27",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-28",
+      "scene": "al-sora",
+      "shotGroup": "al-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-05",
+      "scene": "al-caleb",
+      "shotGroup": "al-caleb",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-18",
+      "scene": "al-caleb",
+      "shotGroup": "al-caleb",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-19",
+      "scene": "al-caleb",
+      "shotGroup": "al-caleb",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-20",
+      "scene": "al-caleb",
+      "shotGroup": "al-caleb",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-12",
+      "scene": "al-elena",
+      "shotGroup": "al-elena",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-13",
+      "scene": "al-elena",
+      "shotGroup": "al-elena",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-14",
+      "scene": "al-elena",
+      "shotGroup": "al-elena",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-15",
+      "scene": "al-elena",
+      "shotGroup": "al-elena",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-24",
+      "scene": "al-priya",
+      "shotGroup": "al-priya",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-25",
+      "scene": "al-priya",
+      "shotGroup": "al-priya",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AL1-26",
+      "scene": "al-priya",
+      "shotGroup": "al-priya",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    }
+  ],
+  "milestones": [
+    {
+      "beat": "AL1-16",
+      "afterDecisions": 4,
+      "threshold": 68
+    }
+  ]
+}

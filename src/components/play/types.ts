@@ -501,6 +501,8 @@ export type InspectBeat = BeatBase & {
 /** Tap a term, then its definition. Nothing scores until Check Matches. All
  *  pairs must be right. */
 export type MatchBeat = BeatBase & {
+  /** Opt-in practice acknowledgement; preserves scoring and the no-verdict flow. */
+  inlineCorrectionFeedback?: boolean;
   kind: "match";
   question: string;
   pairs: { term: string; def: string }[];

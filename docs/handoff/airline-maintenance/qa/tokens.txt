@@ -1,0 +1,10 @@
+
+> dreamari@0.1.0 tokens:check
+> npm run tokens:validate && node design-tokens/scripts/build-tokens.mjs --check
+
+
+> dreamari@0.1.0 tokens:validate
+> node design-tokens/scripts/validate-tokens.mjs
+
+Validated 508 DTCG tokens across five files, both modes, aliases, composites, descriptions, path parity, and required text contrast.
+Generated token artifacts are current.

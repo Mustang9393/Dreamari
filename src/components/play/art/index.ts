@@ -1,3 +1,4 @@
+import airlineMaintenance from "./airline-maintenance-technician.json";
 import aviationFirstShift from "./aviation-maintenance-technician-first-shift.json";
 import foodScientist from "./food-scientist.json";
 import uxDesigner from "./ui-ux-designer.json";
@@ -11,7 +12,7 @@ export type { CareerArt, CastMember, CharacterSlot, FocalPoint, SceneLocation } 
 // Every career's art manifest. Adding a career: drop its JSON here (made by
 // `node scripts/play-art/new-career.mjs <career>` and filled by the
 // pipeline) and add it to this list. Nothing else in the engine changes.
-export const CAREER_ART: CareerArt[] = [aviationFirstShift as CareerArt, foodScientist as CareerArt, investmentBanking as CareerArt, registeredNurse as CareerArt, aviationMaintenance as CareerArt, uxDesigner as CareerArt];
+export const CAREER_ART: CareerArt[] = [airlineMaintenance as CareerArt, aviationFirstShift as CareerArt, foodScientist as CareerArt, investmentBanking as CareerArt, registeredNurse as CareerArt, aviationMaintenance as CareerArt, uxDesigner as CareerArt];
 
 /** The full-figure standard's default slot: head-to-hips across the frame,
  *  face in the upper third, legs behind the dialogue box. Every sprite made

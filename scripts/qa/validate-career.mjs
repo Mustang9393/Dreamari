@@ -22,6 +22,7 @@ const sim=simulationFor(career);if(!sim)throw Error('Unknown career: '+career);
 const {bespokeIn}=load(path.join(root,'src/components/play/coreKit.ts'));
 const {SKILL_MEANING}=load(path.join(root,'src/components/play/skills.ts'));
 const {WORLD_COLORS}=load(path.join(root,'src/components/app/worlds.ts'));
+const {locationFor}=load(path.join(root,'src/components/play/locations.ts'));
 const {PERFORMANCE_PLANS}=load(path.join(root,'src/components/play/performance-plan.ts'));
 const artPath=process.argv[5]??path.join(root,'src/components/play/art',sim.careerId+'.json');
 const art=JSON.parse(fs.readFileSync(artPath,'utf8'));
@@ -128,6 +129,7 @@ for(const level of sim.levels){
   if(b.timer)check(['choice','rapid','flags','pick'].includes(b.kind)&&b.timer>0,b.id+': unsupported timer');
   if(b.kind!=='review'){
    check(art.locations[art.beatLocations[b.id]],b.id+': unrouted scene');
+   check(locationFor(b.id)?.src===art.locations[art.beatLocations[b.id]]?.src,b.id+': global scene ID collision or runtime art substitution');
    const row=coverage?.beats.find(r=>r.beat===b.id);check(row&&row.scene===art.beatLocations[b.id]&&coverage.groups.some(g=>g.id===row.shotGroup&&g.beats.includes(b.id)),b.id+': missing/mismatched coverage row');
    check(b.artifact?row?.artifact===b.artifact.id:Boolean(row?.noArtifactReason),b.id+': missing artifact or no-artifact rationale');
   }

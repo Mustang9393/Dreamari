@@ -1,0 +1,26 @@
+✔ exact v2.6 narrative spine, varied job controls and checkpoint location (6.867209ms)
+✔ vocabulary teaches, practices and applies the same four concepts (0.80475ms)
+✔ all 128 scoring combinations respect pass and midpoint boundaries (0.552083ms)
+✔ no scene leaks an unintroduced cast member and every beat routes (1.19925ms)
+✔ every scored task has primary evidence, prior teaching, reviewer and bounded scope (0.953416ms)
+✔ aviation stays silent for main, promotion, retry and unmute; IB keeps its own song (244.027458ms)
+✔ all authored decision outcomes use the fixed six-point scoring tiers (1.78625ms)
+✔ retry cannot expose the optional two-point repair mode or suggest an unbuilt level (6.406375ms)
+✔ exact v2.5 narrative spine, varied job controls and checkpoint location (7.448875ms)
+✔ vocabulary teaches, practices and applies the same four concepts (0.472125ms)
+✔ all 128 scoring combinations respect pass and midpoint boundaries (0.444666ms)
+✔ no scene leaks an unintroduced cast member and every beat routes (7.23075ms)
+✔ every scored task has primary evidence, prior teaching, reviewer and bounded scope (1.184292ms)
+✔ aviation stays silent for main, promotion, retry and unmute; IB keeps its own song (207.799ms)
+✔ all authored decision outcomes use the fixed six-point scoring tiers (0.38725ms)
+✔ retry cannot expose the optional two-point repair mode or suggest an unbuilt level (0.242959ms)
+✔ one aviation hub tile, default v1 is unchanged, new game only opts in at v2 (1.102375ms)
+✔ old first-shift review link resolves; other games and unknown versions retain defaults (0.746292ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2673.869125
