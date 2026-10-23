@@ -5113,8 +5113,42 @@ tokens above, in both modes).
   Preschool or Kindergarten Teacher [Pre-K Teacher], Adult and English
   Language Teacher [ESL Teacher], and so on); where the catalog already
   uses the long form those match on the Career column and need no change.
-- NEXT: Chandu reviews the screenshots, then says push. Decide the two My
-  Build questions above.
+- SAME DAY, second commit (Chandu's review of the first):
+  - Skills chips: "arrange the chips properly, make it symmetrical and
+    aligned uniformly not just cluttered", then "are there better ways of
+    offering the choices that would be more engaging ... that would also
+    work on phones?" Chosen from three options: icon tiles with a picks
+    band, then "yeah build the reactions". The step is now icon tiles
+    (`SKILL_ICONS` in steps.tsx, ChipGrid `compact`: icon above a centered
+    label, five across on desktop, three across on phones, equal cells),
+    with three slot rings on the subtitle line after "Pick up to 3."
+    (`SkillSlots`) that fill with each pick's icon. A separate "Your picks"
+    band with named pills was built first and dropped: on a phone it
+    stacked to three rows and pushed the tiles off screen; the rings carry
+    the cap in one line and the name is on the lit tile. Dreamy says a
+    two-word line per pick (`SKILL_REACTIONS`, `useSkillReaction`), in a
+    house .dm-tip bubble above the heading (QuestionHeading `reaction`;
+    above the sprite it covered the title's first line on phones), with
+    the heart burst the step already fires. ChipGrid's `onPick` now passes
+    the option. Verified headless at 1440x900 and 375x812: no scrolling.
+  - Career Goal (Chandu: "make sure the page scrolls to the cards when
+    they reach the career goal screen"): `useScrollToGoal` in AboutMeTab
+    eases the page so the view's heading sits under the fixed header and
+    the ranking cards fill the screen, on both Career Goal views. Instant
+    rAF steps, since a smooth scroll is cancelled on this page.
+  - My Build (Chandu, via the IB thumbnail session: "yes add to my build
+    but dont remove whats there that was alrady additional. Make it make
+    sense."): `PreferencesTab` BUILD_SECTIONS now mirror Build's order
+    (Subjects, Skills, Career fields, Work style, then the rest) with the
+    new Skills section (`enjoy`: same copy, tiles, slots, lock, shuffle
+    and reaction, reading and writing the same `skills` picks). Nothing
+    removed: Tuition stays, and the old Preferences skills question stays,
+    retitled "Skills to build" (About Me's summary already called it
+    that) so the two read apart. About Me's "What you like" column gains
+    the Skills line. The modal opens on Subjects by default now, the first
+    section.
+- NEXT: Chandu says push. Joshua's "maybe later" results echo is still
+  not built.
 
 
 ### 2026-10-03 Home (v1, the default) restructured: two card languages, one section title

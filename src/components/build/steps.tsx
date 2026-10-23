@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { CardHud, ChipGrid, Citation, ConfirmShimmer, DreamySprite, PARTY_SPRITE, GLASS_CHIP_IDLE_BG, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
-import { ChevronRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
+import { ChevronRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench, Bike, Cog, Coins, Ear, Eye, Flag, Hand, HandHeart, Lightbulb, ListChecks, Megaphone, Puzzle, SearchCheck } from "lucide-react";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
 import { playMilestoneChime, playXpRise } from "./sound";
@@ -69,6 +69,28 @@ export const SUBJECT_ICONS: Record<string, React.ReactNode> = {
   "Foreign Languages": <Languages className="h-4 w-4" />,
   Business: <Briefcase className="h-4 w-4" />,
   Psychology: <Brain className="h-4 w-4" />,
+};
+
+// One picture per skill (Chandu, 23 Oct 2026, choosing icon tiles over a
+// plain grid): 15 words become 15 glanceable tiles, the way Subjects
+// already carries an icon per chip. Everyday objects a 13-year-old knows,
+// not job symbols.
+export const SKILL_ICONS: Record<string, React.ReactNode> = {
+  "Fixing things": <Wrench className="h-5 w-5" />,
+  "Using your hands": <Hand className="h-5 w-5" />,
+  "Picturing things": <Eye className="h-5 w-5" />,
+  "Running machines": <Cog className="h-5 w-5" />,
+  "Spotting mistakes": <SearchCheck className="h-5 w-5" />,
+  "Solving hard problems": <Puzzle className="h-5 w-5" />,
+  "New ideas": <Lightbulb className="h-5 w-5" />,
+  "Understanding people": <Ear className="h-5 w-5" />,
+  "Helping people": <HandHeart className="h-5 w-5" />,
+  "Convincing people": <Megaphone className="h-5 w-5" />,
+  "Teaching others": <GraduationCap className="h-5 w-5" />,
+  "Leading a team": <Flag className="h-5 w-5" />,
+  "Managing money": <Coins className="h-5 w-5" />,
+  "Staying organized": <ListChecks className="h-5 w-5" />,
+  "Being active": <Bike className="h-5 w-5" />,
 };
 
 const WORLD_ACCENTS: Record<string, string> = Object.fromEntries(
@@ -138,22 +160,111 @@ export function InterestsStep({ state, patch, onBack, onNext, react, reactionNon
 // per student, the same for the session (shuffledSkills); all 15 on one
 // screen at 375 and 1440 (ChipGrid compact). Skippable like every step,
 // and Next needs at least one pick, the same rule as Subjects.
+// The three pick slots, on the subtitle line itself (not a panel of their
+// own: on a phone a "Your picks" band with three named pills stacked to
+// three rows and pushed the tiles off screen). Empty slots are numbered
+// dashed rings, so a student sees "three go here" before the first tap and
+// sees the lock coming before the grid greys out; a pick fills its slot
+// with its icon, with the same pop Industries' picks get. The name is on
+// the lit tile right below, so the ring does not repeat it.
+export function SkillSlots({ picks }: { picks: string[] }) {
+  const slots = Array.from({ length: MAX_SKILLS }, (_, i) => picks[i] ?? null);
+  return (
+    <span className="inline-flex items-center gap-1.5 align-middle" role="list" aria-label={`${picks.length} of ${MAX_SKILLS} picked`}>
+      {slots.map((pick, i) =>
+        pick ? (
+          <span
+            key={pick}
+            role="listitem"
+            aria-label={pick}
+            className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full border motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)] [&>svg]:h-[14px] [&>svg]:w-[14px]"
+            style={{
+              borderColor: "var(--color-brand-400)",
+              background: "color-mix(in srgb, var(--color-brand-500) 28%, var(--color-glass-surface-raised))",
+              color: "var(--color-night-foreground)",
+              boxShadow: "0 0 10px 1px color-mix(in srgb, var(--color-brand-400) 45%, transparent)",
+            }}
+          >
+            {SKILL_ICONS[pick]}
+          </span>
+        ) : (
+          <span
+            key={`slot-${i}`}
+            role="listitem"
+            aria-label={`Pick ${i + 1}, empty`}
+            className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full border border-dashed text-[11px] leading-none font-bold"
+            style={{ borderColor: "color-mix(in srgb, var(--color-night-foreground) 32%, transparent)", color: "var(--color-night-muted-foreground)" }}
+          >
+            {i + 1}
+          </span>
+        ),
+      )}
+    </span>
+  );
+}
+
+// Dreamy's line per pick (Chandu, 23 Oct 2026, "build the reactions"): a
+// two-word cheer in a .dm-tip bubble above the sprite, with the heart burst
+// the step already fires. One per skill, so every tap gets its own answer;
+// nothing on deselect. 8th grade, positive, no job words.
+export const SKILL_REACTIONS: Record<string, string> = {
+  "Fixing things": "A fixer!",
+  "Using your hands": "Hands on!",
+  "Picturing things": "Big imagination!",
+  "Running machines": "Machine boss!",
+  "Spotting mistakes": "Eagle eyes!",
+  "Solving hard problems": "Puzzle pro!",
+  "New ideas": "Idea maker!",
+  "Understanding people": "Good listener!",
+  "Helping people": "Big heart!",
+  "Convincing people": "Smooth talker!",
+  "Teaching others": "Born teacher!",
+  "Leading a team": "Team captain!",
+  "Managing money": "Money smart!",
+  "Staying organized": "So organized!",
+  "Being active": "Always moving!",
+};
+const SKILL_REACTION_MS = 1500;
+/** The reaction bubble's state: say(skill) shows that skill's line for a
+ *  beat; a new pick restarts it. Shared by Build's step and My Build. */
+export function useSkillReaction(): [{ text: string; n: number } | null, (skill: string) => void] {
+  const [reaction, setReaction] = useState<{ text: string; n: number } | null>(null);
+  const timer = useRef<number | null>(null);
+  useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
+  const say = (skill: string) => {
+    const text = SKILL_REACTIONS[skill];
+    if (!text) return;
+    setReaction((r) => ({ text, n: (r?.n ?? 0) + 1 }));
+    if (timer.current) window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setReaction(null), SKILL_REACTION_MS);
+  };
+  return [reaction, say];
+}
+
 export function SkillsStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite, onSkip }: StepProps) {
   const [options] = useState(shuffledSkills);
+  const [reaction, say] = useSkillReaction();
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
       <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
-        <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Which of these do you actually enjoy doing?" subtitle="Pick up to 3." />
+        <QuestionHeading
+          sprite={sprite}
+          reactionNonce={reactionNonce}
+          title="Which of these do you actually enjoy doing?"
+          subtitle={<span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">Pick up to 3.<SkillSlots picks={state.skills} /></span>}
+          reaction={reaction}
+        />
         <ChipGrid
           options={options}
           selected={state.skills}
           max={MAX_SKILLS}
           lockAtMax
           compact
+          icons={SKILL_ICONS}
           onChange={(skills) => patch({ skills })}
-          onPick={react}
+          onPick={(skill) => { react(); say(skill); }}
         />
         <Citation>Question informed by O*NET</Citation>
       </GlassCard>

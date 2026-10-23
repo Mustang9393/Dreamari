@@ -81,9 +81,12 @@ function defaultBucket(c: College, gpa: number | null): GoalBucket {
 // header and saved careers in Career Goal, so neither repeats here.
 type BuildLine = { id: BuildSection; label: string };
 const BUILD_GROUPS: { title: string; short: string; lines: BuildLine[] }[] = [
-  // balanced 3 / 3 / 4 (Chandu: "can we arrange the different data better?"):
+  // balanced 4 / 3 / 4 (Chandu: "can we arrange the different data better?"):
   // what you're into, how you'll work, where school takes you
-  { title: "What you like", short: "Likes", lines: [{ id: "interests", label: "Career fields" }, { id: "subjects", label: "Subjects" }, { id: "skills", label: "Skills to build" }] },
+  // Subjects, Skills, Career fields: Build's order since 23 Oct 2026, with
+  // Build's new Skills question (the picks live in the Build answers) ahead
+  // of the Preferences "Skills to build" line
+  { title: "What you like", short: "Likes", lines: [{ id: "subjects", label: "Subjects" }, { id: "enjoy", label: "Skills" }, { id: "interests", label: "Career fields" }, { id: "skills", label: "Skills to build" }] },
   { title: "How you work", short: "Work", lines: [{ id: "workVibe", label: "Work style" }, { id: "software", label: "Software to learn" }, { id: "jobs", label: "Internships & jobs" }] },
   { title: "Your path", short: "Path", lines: [{ id: "education", label: "Education" }, { id: "location", label: "Location" }, { id: "school", label: "School" }, { id: "cost", label: "Tuition" }] },
 ];
@@ -524,6 +527,39 @@ export function NextStepRow({ title, sub, nudge, links }: { title: string; sub?:
 }
 
 
+// The app's fixed header, the same 84px the Settings cards reserve as
+// scroll margin (ProfileExperience SETTINGS_CARD).
+const FIXED_HEADER = 84;
+/** Opening the Career Goal view scrolls the page so the view's own heading
+ *  sits just under the fixed header and the ranking cards fill the screen
+ *  (Chandu, 23 Oct 2026: "make sure the page scrolls to the cards when they
+ *  reach the career goal screen"); before, the view opened wherever About
+ *  Me was scrolled, with the cards' Make my goal button at or past the
+ *  fold. Instant steps on rAF, not a smooth scroll: on this page a smooth
+ *  scroll is cancelled before it moves (ProfileExperience, 2 Oct 2026).
+ *  Runs once per open, a beat after go()'s own nearest-scroll of the panel. */
+function useScrollToGoal(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    let raf = 0;
+    const timer = window.setTimeout(() => {
+      const el = ref.current;
+      if (!el) return;
+      const from = window.scrollY;
+      const to = Math.max(0, el.getBoundingClientRect().top + from - FIXED_HEADER - 12);
+      if (Math.abs(to - from) < 24) return;
+      const start = performance.now();
+      const step = (now: number) => {
+        const p = Math.min(1, (now - start) / 420);
+        const e = 1 - Math.pow(1 - p, 3);
+        window.scrollTo({ top: from + (to - from) * e, behavior: "instant" as ScrollBehavior });
+        if (p < 1) raf = window.requestAnimationFrame(step);
+      };
+      raf = window.requestAnimationFrame(step);
+    }, 40);
+    return () => { window.clearTimeout(timer); window.cancelAnimationFrame(raf); };
+  }, [ref]);
+}
+
 /** v2 Career Goal: the Top 3 cards themselves (with their move, remove and
  *  add nudges), then the #1 confirmed as the goal, then the saved careers
  *  that can still join. Replaces the Top 3 tab. */
@@ -532,10 +568,12 @@ function CareerGoalV2({ top3, saved, slot, onBack, onAddToTop3, goalSet }: {
 }) {
   const router = useRouter();
   const open = (c: ProfileCareer, row: ProfileCareer[]) => { if (!openCareerPeek(c.id, row.map((x) => x.id))) router.push(`/career/${c.id}`); };
+  const heading = useRef<HTMLDivElement | null>(null);
+  useScrollToGoal(heading);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <BackLink onBack={onBack} />
-      <div className="flex flex-col gap-[2px]">
+      <div ref={heading} className="flex flex-col gap-[2px]">
         <h3 className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Goal</h3>
         <p className="text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{goalSet ? "Your #1 is your goal. Move a career to #1 to change it." : "Tap Make my goal on the career you want most."}</p>
       </div>
@@ -759,10 +797,12 @@ function CareerGoalView({ top3, saved, onBack, onAddToTop3, onGoTab }: {
   const router = useRouter();
   const primary = top3[0] ?? null;
   const open = (c: ProfileCareer, row: ProfileCareer[]) => { if (!openCareerPeek(c.id, row.map((x) => x.id))) router.push(`/career/${c.id}`); };
+  const heading = useRef<HTMLHeadingElement | null>(null);
+  useScrollToGoal(heading);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <BackLink onBack={onBack} />
-      <h3 className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Goal</h3>
+      <h3 ref={heading} className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Goal</h3>
 
       {primary ? (
         <div className="relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `color-mix(in srgb, ${WORLD_COLORS[primary.world] ?? "var(--primary)"} 40%, rgba(255,255,255,0.16))`, background: "var(--scrim-deep, #0e0c20)", color: "var(--scrim-ink, #fff)", textShadow: CARD_TEXT_SHADOW }}>
