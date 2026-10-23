@@ -76,3 +76,16 @@ export function skyArrival(): void {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(SKY_ARRIVAL_EVENT));
 }
+
+// ---- A missed streak (23 Oct 2026): the day sky, in its storm mode, answers
+// with sheet lightning in the clouds (SkySun.tsx). Nothing fires this yet:
+// the streak is still the hardcoded 12 (surfaceStates.ts), so call
+// skyStorm() from wherever a streak break is detected once that exists.
+// `from` places the strike above the element; the night sky ignores it.
+export const SKY_STORM_EVENT = "dreamari:sky-storm";
+export function skyStorm(opts: { from?: Element | null } = {}): void {
+  if (typeof window === "undefined") return;
+  const el = opts.from === undefined ? document.activeElement : opts.from;
+  const rect = el && el !== document.body ? el.getBoundingClientRect() : null;
+  window.dispatchEvent(new CustomEvent(SKY_STORM_EVENT, { detail: { x: rect ? rect.left + rect.width / 2 : undefined } }));
+}
