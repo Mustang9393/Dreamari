@@ -456,7 +456,8 @@ function SuggestedSearches({ onQuery }: { onQuery: (q: string) => void }) {
 // The step is a light sweep: the next photo wipes in over the last behind a
 // feathered diagonal edge with a faint glint on it, then drifts in close
 // while it holds (.dm-face-* in app.css). Only the photo on screen, the one
-// under it and the next one (preloading) are mounted. The clock stops while
+// under it and the next one (preloading) are mounted, each element kept
+// across its three roles so a step never remounts an image. The clock stops while
 // the pointer is over the grid or a tile has focus, while the browser tab is
 // hidden, and under reduced motion.
 const WORLD_HERO: Record<string, string> = {
@@ -579,21 +580,37 @@ function CategoryTiles({ onPick }: { onPick: (world: string) => void }) {
                   className="dm-tap group relative flex aspect-[3/2] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[12px] p-[12px] text-left sm:aspect-[16/9]"
                   style={{ background: "var(--glass-surface-2)", fontFamily: "var(--font-body)" }}
                 >
-                  <span aria-hidden className="absolute inset-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]">
-                    {/* preloads the next face, out of sight */}
-                    {next && next !== now && next !== under && (
-                      <span key={`next-${next.title}`} className="absolute inset-0 opacity-0"><FacePhoto photo={next.photo} /></span>
-                    )}
-                    {under && under !== now && (
-                      <span key={`under-${under.title}`} className="absolute inset-0"><FacePhoto photo={under.photo} /></span>
-                    )}
-                    {now && (
-                      // keyed by the tick, so each step replays the sweep
-                      <span key={`now-${tick}`} className={`absolute inset-0 overflow-hidden ${tick > 0 ? "dm-face-in" : ""}`}>
-                        <span className="dm-face-drift absolute inset-0"><FacePhoto photo={now.photo} /></span>
-                        {tick > 0 && <span className="dm-face-glint absolute inset-y-0 left-0 w-[45%]" />}
-                      </span>
-                    )}
+                  {/* isolate: the layers' z-index stays inside the photo, under the
+                     scrim and the name */}
+                  <span aria-hidden className="absolute inset-0 isolate transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]">
+                    {/* Three layers keyed by career, never by the step: the
+                       next face waits invisibly (so it is loaded), becomes
+                       the face that sweeps in, then the face under the next
+                       sweep. Each image element lives across all three roles,
+                       so nothing remounts at a step. Remounting both layers
+                       on every tick painted them blank for a frame before
+                       they decoded, the flicker before each sweep (Chandu,
+                       23 Oct 2026: "the search tiles flicker before they
+                       transition"). */}
+                    {/* in sequence order (under, now, next), so a face keeps
+                       its place among its siblings as it moves through the
+                       roles and React never moves an element either */}
+                    {[
+                      under && under !== now && { c: under, role: "under" as const },
+                      now && { c: now, role: "now" as const },
+                      next && next !== now && next !== under && { c: next, role: "next" as const },
+                    ]
+                      .filter((l): l is { c: CatalogCareer; role: "now" | "under" | "next" } => !!l)
+                      .map(({ c, role }) => (
+                        <span
+                          key={c.title}
+                          className={`absolute inset-0 overflow-hidden ${role === "now" && tick > 0 ? "dm-face-in" : ""}`}
+                          style={{ zIndex: role === "now" ? 2 : role === "under" ? 1 : 0, opacity: role === "next" ? 0 : 1 }}
+                        >
+                          <span className={`absolute inset-0 ${role === "now" ? "dm-face-drift" : ""}`}><FacePhoto photo={c.photo} /></span>
+                          {role === "now" && tick > 0 && <span key={tick} className="dm-face-glint absolute inset-y-0 left-0 w-[45%]" />}
+                        </span>
+                      ))}
                   </span>
                   <span aria-hidden className="absolute inset-0" style={{ background: TEXT_SCRIM }} />
                   <span className="relative flex min-w-0 flex-col gap-[2px]">
