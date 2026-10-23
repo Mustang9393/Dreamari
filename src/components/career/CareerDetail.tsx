@@ -53,6 +53,7 @@ import { resolveCareer, similarCareers, type ResolvedCareer } from "@/components
 import type { FactDetails, ProfileRung } from "@/components/career/profiles";
 import { careerSlug } from "@/components/career/slug";
 import { PayGrowth } from "@/components/career/PayGrowth";
+import { SoftwareTags } from "@/components/career/SoftwareTag";
 import { nationalOutlook } from "@/components/career/outlook";
 
 // Career Detail, rebuilt 2026-09-02 around the production page's information
@@ -487,6 +488,25 @@ function DegreeSheet({ career, accent, detail, source, onMore, onClose }: { care
          doesn't draw, and says what the without-a-bachelor's line above
          already says, so only standalone notes show */}
       {detail.note && !/\bbelow\b/i.test(detail.note) && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{detail.note}</p>}
+      {/* How people in the job actually finished school: dreamonna's
+         education mix, the one block of its degree sheet this page had
+         dropped (23 Oct 2026, Chandu: "are we showing all the necessary and
+         useful data for a student from the dreamonna version?"). Plain rows,
+         biggest share first, no bars (house rule: no plain bars). */}
+      {detail.distribution.some((d) => d.pct > 0) && (
+        <div className="flex flex-col gap-[8px]">
+          <h3 className="text-[12px] leading-[16px] font-semibold uppercase tracking-[0.04em]" style={{ color: "var(--muted-foreground)" }}>How people in this job finished school</h3>
+          <ol className="flex flex-col">
+            {[...detail.distribution].filter((d) => d.pct > 0).sort((a, b) => b.pct - a.pct).map((d) => (
+              <li key={d.label} className="flex items-baseline justify-between gap-[12px] border-t py-[6px] first:border-t-0 first:pt-0" style={{ borderColor: "var(--glass-border)" }}>
+                <span className="text-[14px] leading-[20px]">{d.label}</span>
+                <b className="text-[14px] leading-[20px] font-bold tabular-nums" style={{ color: accent }}>{Math.round(d.pct)}%</b>
+              </li>
+            ))}
+          </ol>
+          {detail.extra && <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{detail.extra}</p>}
+        </div>
+      )}
     </FactSheet>
   );
 }
@@ -864,7 +884,10 @@ export function CareerDetail({ slug }: { slug: string }) {
             )}
             {vm.software.length > 0 && (
               <Section id="software" title="Software">
-                <Tags items={vm.software} accent={accent} />
+                {/* every tag carries a mark: the product's logo, or a category
+                   icon for a kind of tool (23 Oct 2026, Chandu: "reliably show
+                   the logos ... no stupid initials fallback"); see SoftwareTag */}
+                <SoftwareTags items={vm.software} accent={accent} />
               </Section>
             )}
           </div>

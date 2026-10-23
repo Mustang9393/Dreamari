@@ -99,6 +99,7 @@ export function PayMap({
   active: activeProp,
   onActive,
   renderReadout,
+  maxHeight = 560,
 }: {
   /** the career's typical pay, e.g. "$60,580/year" */
   typical: string;
@@ -120,6 +121,9 @@ export function PayMap({
   /** Pay & Growth (21 Oct 2026): the caller draws the readout row (the
    *  shown state's pay, growth and openings together) */
   renderReadout?: (shown: string | null, isYours: boolean) => ReactNode;
+  /** the map's tallest height in px (default 560); Pay & Growth caps it so
+   *  the whole panel fits one screen beside its readout */
+  maxHeight?: number;
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [ownActive, setOwnActive] = useState<string | null>(null);
@@ -192,7 +196,7 @@ export function PayMap({
         );
       })()}
 
-      <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label={figures?.label ?? "Pay by state across the United States"} className="w-full" style={{ maxHeight: 560 }} onMouseLeave={() => setActive(null)}>
+      <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label={figures?.label ?? "Pay by state across the United States"} className="w-full" style={{ maxHeight }} onMouseLeave={() => setActive(null)}>
         {USA.locations.map((location) => {
           const name = displayName(location.name);
           const value = values.get(name);
@@ -238,8 +242,14 @@ export function PayMap({
           if (!raw) return null;
           const move = REPOSITION[location.name];
           const pos = move ? { x: move.tx + move.s * raw.x, y: move.ty + move.s * raw.y } : raw;
+          // the codes are wayfinding, not the data: quiet by default so the
+          // shading reads first, bright only on the shown state and the
+          // student's own (23 Oct 2026, Chandu: declutter Pay & Growth
+          // without losing content)
+          const name = displayName(location.name);
+          const lit = active === name || yourState === name;
           return (
-            <text key={`label-${location.id}`} x={pos.x} y={pos.y} textAnchor="middle" dominantBaseline="central" className="pointer-events-none select-none" style={{ fontSize: 15, fontWeight: 700, fill: "rgba(255,255,255,0.82)", fontFamily: "var(--font-body)" }}>
+            <text key={`label-${location.id}`} x={pos.x} y={pos.y} textAnchor="middle" dominantBaseline="central" className="pointer-events-none select-none transition-[fill] duration-150" style={{ fontSize: lit ? 15 : 13, fontWeight: lit ? 700 : 600, fill: lit ? "rgba(255,255,255,0.96)" : "rgba(255,255,255,0.58)", fontFamily: "var(--font-body)" }}>
               {code}
             </text>
           );

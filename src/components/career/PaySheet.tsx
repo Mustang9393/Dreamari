@@ -163,7 +163,7 @@ export function SheetHero({ label, value, suffix, line, accent }: { label: strin
 export function PaySheet({ career, accent, pay, source, onMore, moreLabel = "Pay by state", onClose }: {
   career: string;
   accent: string;
-  pay: { starting: string; typical: string; top: string };
+  pay: { starting: string; typical: string; top: string; note?: string };
   source?: string;
   /** closes the sheet and opens Pay & Outlook */
   onMore?: () => void;
@@ -185,6 +185,10 @@ export function PaySheet({ career, accent, pay, source, onMore, moreLabel = "Pay
         to={{ label: "Top earners", value: pay.top }}
         ariaLabel={`Starting out ${pay.starting}, typical ${pay.typical}, top earners ${pay.top}`}
       />
+      {/* the profile's own caveat on the figures ("27% work for themselves,
+         so this describes the ones with a boss"): dreamonna shows it under
+         the range, and this sheet had dropped it (23 Oct 2026) */}
+      {pay.note && <p className="text-[14px] leading-[20px]" style={MUTED}>{pay.note}</p>}
     </FactSheet>
   );
 }
