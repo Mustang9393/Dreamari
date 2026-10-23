@@ -3,7 +3,7 @@
   "coverageGroups": 6,
   "artifactBeats": 0,
   "status": "structural checks passed; human and runtime review are separate",
-  "assertions": 411,
+  "assertions": 439,
   "levels": [
     {
       "id": "airline-maintenance-l1",
@@ -19,7 +19,7 @@
     }
   ],
   "sceneAssets": {
-    "af-exterior": {
+    "al-exterior": {
       "src": "/images/play/airline-maintenance/exterior-v2.png",
       "fileSha256": "4b7f67baaf0423c34d65988e9669313ed48c761b24ade01fe65128828600d764",
       "pixelSha256": "ccf7767efa9049a85331f4aac357b25defbcd4d7e50cdba2ce5db0aac8d4855b",
@@ -27,7 +27,7 @@
       "height": 941,
       "opaque": true
     },
-    "af-interior": {
+    "al-interior": {
       "src": "/images/play/airline-maintenance/interior-v2.png",
       "fileSha256": "06d14787e078bd288c4484a4117cce0a4fdfc433f105119ce2881089f4878647",
       "pixelSha256": "f08ef740fc37b05343bef65c6978e59920df3125d9977f6b8b00adf35b0294b1",
@@ -35,7 +35,7 @@
       "height": 941,
       "opaque": true
     },
-    "af-sora": {
+    "al-sora": {
       "src": "/images/play/airline-maintenance/sora-v2.png",
       "fileSha256": "01e8ffafd9824809fcdb88e6e16d5869f44c6f302b57eca187e3f2eaba50574b",
       "pixelSha256": "4e0d2c34d7c51da33f79d0aad7dc59239c76174f692f23d8ea72c8e1003b9dea",
@@ -43,7 +43,7 @@
       "height": 941,
       "opaque": true
     },
-    "af-caleb": {
+    "al-caleb": {
       "src": "/images/play/airline-maintenance/caleb-v2.png",
       "fileSha256": "bb1120ff9e8281bfb20cda62941e43c6382eb66d8a44bccb370fa8997ed66a74",
       "pixelSha256": "4801f4787fcb19f6f7f018dfae8498d712ea36d27a666b89a98aa294bdcfea6c",
@@ -51,7 +51,7 @@
       "height": 941,
       "opaque": true
     },
-    "af-elena": {
+    "al-elena": {
       "src": "/images/play/airline-maintenance/elena-v2.png",
       "fileSha256": "4b362bcc6dd5460427417ea968bc0ff1e167930a8c047bdaa6d55eae61fafe5d",
       "pixelSha256": "e4a8079fbe25fd0a0270ce9fd843e8745c96fc0b839ff5d475b0d5e684da433b",
@@ -59,7 +59,7 @@
       "height": 941,
       "opaque": true
     },
-    "af-priya": {
+    "al-priya": {
       "src": "/images/play/airline-maintenance/priya-v2.png",
       "fileSha256": "ce4b9016acc75740e35374ef1c3b543382b6fb699467c80f6e60fc3cff59b358",
       "pixelSha256": "6b00e727df0bc96427670650addc3227c23e2c91ba7086fd786c181f8a6ae7fa",

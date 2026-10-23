@@ -3010,7 +3010,7 @@ export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Res
     if (beat.inlineCorrectionFeedback) {
       const pair = beat.pairs.find((entry) => entry.term === picked.term);
       setMatchFeedback(ok ? "That pair matches." : matchMisses.current > 1 && pair
-        ? `Hint: connect ${pair.def.toLowerCase()} with ${pair.term.toLowerCase()}.`
+        ? `Hint: match “${pair.term}” with “${pair.def}”.`
         : "Not yet. Try a different match for that situation.");
     }
     matchTimers.current.push(window.setTimeout(() => {
@@ -3156,15 +3156,18 @@ export function RapidBody({ beat, onResolve, remaining, onClockHold }: { beat: R
   const [picked, setPicked] = useState<number | null>(null);
   const need = passThreshold(beat.items.length);
   const settled = useRef(false);
+  const answerLocked = useRef(false);
 
   const finish = useCallback(
-    (correct: number) => {
+    (correct: number, timedOut = false) => {
       if (settled.current) return;
       settled.current = true;
       const pass = correct >= need;
-      onResolve(pass ? "best" : "wrong", pass ? beat.whenPass : beat.whenFail);
+      const reason = timedOut && beat.whenTimeout ? beat.whenTimeout : pass ? beat.whenPass : beat.whenFail;
+      const summary = beat.showRoundSummary ? `${correct} of ${beat.items.length} correct. ${reason}` : reason;
+      onResolve(pass ? "best" : "wrong", summary);
     },
-    [need, onResolve, beat.whenPass, beat.whenFail],
+    [need, onResolve, beat.whenPass, beat.whenFail, beat.whenTimeout, beat.showRoundSummary, beat.items.length],
   );
 
   // The shared clock is owned by the stage. When it runs out mid-set the
@@ -3175,13 +3178,14 @@ export function RapidBody({ beat, onResolve, remaining, onClockHold }: { beat: R
   // fire immediately on mount, resolving the whole set as failed before the
   // player ever saw question one.
   useEffect(() => {
-    if (beat.timer && remaining <= 0) finish(right);
+    if (beat.timer && remaining <= 0) finish(right, true);
   }, [beat.timer, remaining, right, finish]);
 
   const item = items[step];
 
   const pick = useCallback((index: number) => {
-    if (picked !== null || !item) return;
+    if (answerLocked.current || picked !== null || !item) return;
+    answerLocked.current = true;
     setPicked(index);
     const hit = Boolean(item.options[index]?.correct);
     if (hit) playCorrect();
@@ -3202,6 +3206,7 @@ export function RapidBody({ beat, onResolve, remaining, onClockHold }: { beat: R
         else {
           setStep(step + 1);
           setPicked(null);
+          answerLocked.current = false;
         }
       },
       // Longer on a miss: the green answer has to be readable before the next
@@ -3217,6 +3222,7 @@ export function RapidBody({ beat, onResolve, remaining, onClockHold }: { beat: R
     else {
       setStep(step + 1);
       setPicked(null);
+      answerLocked.current = false;
     }
   }, [picked, step, beat.items.length, finish, right, onClockHold]);
 

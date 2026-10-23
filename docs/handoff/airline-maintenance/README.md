@@ -24,7 +24,7 @@ Twelve complete opaque scenes: six landscape paintings and six independently com
 
 The built-in image-generation tool used the actual approved UX scene as its fixed primary style reference, with all three supplied approved scenes inspected. Full room and cast references guided follow-up scenes. First textured/reflected-floor candidates were rejected and repainted as simpler matte planes. No runtime character sprites or separate person overlays are used. Face chips are UI thumbnails derived from the selected complete scenes.
 
-The existing matching control has an opt-in inline correction acknowledgement. Correct pairs remain matched; repeated misses receive a targeted hint; the fully corrected board is acknowledged before it advances directly. Timers are cleared on unmount, and immediate duplicate pair submissions are ignored. Existing first-attempt scoring for other games is unchanged. No new interaction component, color palette or music was added.
+The existing matching control has an opt-in inline correction acknowledgement. Correct pairs remain matched; repeated misses receive a targeted hint; the fully corrected board is acknowledged before it advances directly. Timers are cleared on unmount, and immediate duplicate pair submissions are ignored. Existing first-attempt scoring for other games is unchanged. Rapid rounds optionally show actual totals and distinguish timeouts; an immediate duplicate-answer guard prevents repeated input before render. Other games retain default feedback. No new interaction component, color palette or music was added.
 
 ## Inspectable deliverables
 

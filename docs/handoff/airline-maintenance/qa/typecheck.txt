@@ -1,0 +1,2 @@
+Final production build TypeScript validation passed; see build.txt.
+A redundant standalone tsc --noEmit run was stopped after seven minutes without diagnostics. It is not recorded as a standalone pass.

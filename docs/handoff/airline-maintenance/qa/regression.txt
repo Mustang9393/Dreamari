@@ -1,26 +1,40 @@
-✔ exact v2.6 narrative spine, varied job controls and checkpoint location (6.867209ms)
-✔ vocabulary teaches, practices and applies the same four concepts (0.80475ms)
-✔ all 128 scoring combinations respect pass and midpoint boundaries (0.552083ms)
-✔ no scene leaks an unintroduced cast member and every beat routes (1.19925ms)
-✔ every scored task has primary evidence, prior teaching, reviewer and bounded scope (0.953416ms)
-✔ aviation stays silent for main, promotion, retry and unmute; IB keeps its own song (244.027458ms)
-✔ all authored decision outcomes use the fixed six-point scoring tiers (1.78625ms)
-✔ retry cannot expose the optional two-point repair mode or suggest an unbuilt level (6.406375ms)
-✔ exact v2.5 narrative spine, varied job controls and checkpoint location (7.448875ms)
-✔ vocabulary teaches, practices and applies the same four concepts (0.472125ms)
-✔ all 128 scoring combinations respect pass and midpoint boundaries (0.444666ms)
-✔ no scene leaks an unintroduced cast member and every beat routes (7.23075ms)
-✔ every scored task has primary evidence, prior teaching, reviewer and bounded scope (1.184292ms)
-✔ aviation stays silent for main, promotion, retry and unmute; IB keeps its own song (207.799ms)
-✔ all authored decision outcomes use the fixed six-point scoring tiers (0.38725ms)
-✔ retry cannot expose the optional two-point repair mode or suggest an unbuilt level (0.242959ms)
-✔ one aviation hub tile, default v1 is unchanged, new game only opts in at v2 (1.102375ms)
-✔ old first-shift review link resolves; other games and unknown versions retain defaults (0.746292ms)
-ℹ tests 18
+✔ exact v2.6 narrative spine, varied job controls and checkpoint location (3.375ms)
+✔ vocabulary teaches, practices and applies the same four concepts (0.57625ms)
+✔ all 128 scoring combinations respect pass and midpoint boundaries (0.956542ms)
+✔ no scene leaks an unintroduced cast member and every beat routes (0.609583ms)
+✔ every scored task has primary evidence, prior teaching, reviewer and bounded scope (0.302292ms)
+✔ aviation stays silent for main, promotion, retry and unmute; IB keeps its own song (396.464583ms)
+✔ all authored decision outcomes use the fixed six-point scoring tiers (0.386792ms)
+✔ retry cannot expose the optional two-point repair mode or suggest an unbuilt level (0.251042ms)
+✔ exact v2.5 narrative spine, varied job controls and checkpoint location (2.275292ms)
+✔ vocabulary teaches, practices and applies the same four concepts (0.730958ms)
+✔ all 128 scoring combinations respect pass and midpoint boundaries (3.951958ms)
+✔ no scene leaks an unintroduced cast member and every beat routes (0.470667ms)
+✔ every scored task has primary evidence, prior teaching, reviewer and bounded scope (0.612667ms)
+✔ aviation stays silent for main, promotion, retry and unmute; IB keeps its own song (185.14375ms)
+✔ all authored decision outcomes use the fixed six-point scoring tiers (35.635833ms)
+✔ retry cannot expose the optional two-point repair mode or suggest an unbuilt level (1.618333ms)
+✔ one aviation hub tile, default v1 is unchanged, new game only opts in at v2 (1.869833ms)
+✔ old first-shift review link resolves; other games and unknown versions retain defaults (0.366625ms)
+✔ ux-l1: seven scored decisions, midpoint, first choice and passing score (5.144792ms)
+✔ ux-l1: concise copy and no duplicate instruction (1.530291ms)
+✔ fs-l1: seven scored decisions, midpoint, first choice and passing score (1.278042ms)
+✔ fs-l1: concise copy and no duplicate instruction (0.603625ms)
+✔ approved Nursing gameplay survives image-only updates (296.198458ms)
+✔ supporting graphics validate and render as read-only scene context (92.709333ms)
+✔ supporting artifact contracts reject embedded answer keys and interactive demos (0.901625ms)
+✔ UX visibly distinguishes buried and improved Save without extra controls (9.306958ms)
+✔ critical nursing art follows cast presence and has a sharp portrait composition (2.3615ms)
+✔ completion starts empty and advances regardless of answer reputation (42.521708ms)
+✔ colleagues enter through story events, with work between introductions (4.235709ms)
+✔ each tested concept is learned first, and the rival remains in the story (4.26675ms)
+✔ arrival establishes each building outside before the interior (2.689375ms)
+✔ career tasks have researched scope and do not duplicate each other (5.228166ms)
+ℹ tests 32
 ℹ suites 0
-ℹ pass 18
+ℹ pass 32
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 2673.869125
+ℹ duration_ms 6217.736625

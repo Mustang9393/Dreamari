@@ -160,6 +160,7 @@
       "speaker": "Sora",
       "castMember": "Sora",
       "question": "Match each work situation to the term.",
+      "prompt": "Tap a situation, then its term.",
       "practice": true,
       "noVerdict": true,
       "inlineCorrectionFeedback": true,
@@ -268,6 +269,8 @@
       "id": "AL1-09",
       "progress": 0.2857142857142857,
       "whenPass": "You kept observations, parts records, debris, and open work clear.",
+      "showRoundSummary": true,
+      "whenTimeout": "Time ran out. Unanswered items count as incorrect.",
       "whenFail": "Review the terms and corrections before the next hangar task."
     },
     {

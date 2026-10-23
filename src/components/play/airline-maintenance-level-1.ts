@@ -271,6 +271,8 @@ export const AIRLINE_MAINTENANCE_LEVEL_1: Level = {
       "id": "AL1-09",
       "progress": 0.2857142857142857,
       "whenPass": "You kept observations, parts records, debris, and open work clear.",
+      "showRoundSummary": true,
+      "whenTimeout": "Time ran out. Unanswered items count as incorrect.",
       "whenFail": "Review the terms and corrections before the next hangar task."
     },
     {

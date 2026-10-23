@@ -528,6 +528,9 @@ export type RapidBeat = BeatBase & {
   items: { question: string; options: { label: string; correct: boolean; why: string }[] }[];
   whenPass: string;
   whenFail: string;
+  /** Optional authored timeout explanation and actual-result summary. */
+  whenTimeout?: string;
+  showRoundSummary?: boolean;
   feedback: string;
   feedbackCta: string;
   skills: string[];

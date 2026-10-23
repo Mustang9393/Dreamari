@@ -10,7 +10,7 @@ import sharp from 'sharp';
 const root=process.cwd(), req=createRequire(import.meta.url), cache=new Map();
 function load(file){
  if(file.endsWith('.json'))return JSON.parse(fs.readFileSync(file,'utf8'));
- if(!path.extname(file))file+='.ts';if(cache.has(file))return cache.get(file).exports;
+ if(!path.extname(file))file=fs.existsSync(path.join(file,'index.ts'))?path.join(file,'index.ts'):file+'.ts';if(cache.has(file))return cache.get(file).exports;
  const loadedModule={exports:{}};cache.set(file,loadedModule);
  const js=ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020,esModuleInterop:true}}).outputText;
  const localRequire=(id)=>id.startsWith('.')?load(path.resolve(path.dirname(file),id)):id.startsWith('@/')?load(path.resolve(root,'src',id.slice(2))):req(id);
