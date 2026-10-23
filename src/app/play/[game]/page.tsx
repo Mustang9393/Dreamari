@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { simulationFor } from "@/components/play/games";
+import { simulationFor, SIMULATION_V2 } from "@/components/play/games";
 import { SimulationPlayer } from "@/components/play/SimulationPlayer";
-import { AMT_LEVEL_1_V2 } from "@/components/play/amt-level-1-v2";
 import type { Level } from "@/components/play/types";
 import { toCoreLevel } from "@/components/play/coreKit";
 import { hasV2Art } from "@/components/play/ib-v2-scenes";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
-
-// DEMO-ONLY: ?v=2 lab builds, reached from the Quick links menu. AMT's v2
-// keeps the team's detailed take (task card, hands-on torque wrench) beside
-// the live Level 1, which follows the script screen for screen.
-const LAB_LEVELS: Record<string, Level> = { "aviation-maintenance-technician:1": AMT_LEVEL_1_V2 };
 
 export const metadata: Metadata = {
   title: "Career Simulation · Dreamari",
@@ -30,14 +24,14 @@ export default async function GamePage({
 }) {
   const { game } = await params;
   const query = await searchParams;
-  const simulation = simulationFor(game);
+  const version = Array.isArray(query.v) ? query.v[0] : query.v;
+  const simulation = simulationFor(game, version);
   if (!simulation) notFound();
   const wanted = Number(Array.isArray(query.level) ? query.level[0] : query.level);
   const main = simulation.levels.find((entry) => entry.n === wanted) ?? simulation.levels[0];
-  // IB's and nursing's v2 labs are Level 1 itself now (games.ts). ?v=2
-  // swaps in a lab build only where LAB_LEVELS has one (AMT).
-  const version = Array.isArray(query.v) ? query.v[0] : query.v;
-  const picked = (version === "2" ? LAB_LEVELS[`${simulation.id}:${main.n}`] : undefined) ?? main;
+  const picked = main;
+  const family = Object.entries(SIMULATION_V2).find(([id, variant]) => id === game || variant.id === game);
+  const versionSwitch = family ? { basePath: `/play/${family[0]}`, version: (simulation.id === family[1].id ? 2 : 1) as 1 | 2 } : undefined;
   // Express mode: the same level minus its expressCut teaching screens. Every
   // scored beat, the scoring, the thresholds and the endings are the full
   // level's own -- the beats array is just shorter, and `express: true` tells
@@ -92,7 +86,7 @@ export default async function GamePage({
          find the game (WCAG 2.2 audit, 21 Oct 2026); the player's own
          <header> stops counting as a second page banner inside it */}
       <main>
-        <SimulationPlayer key={level.id} simulation={simulation} level={level} startAt={Array.isArray(query.screen) ? query.screen[0] : query.screen} artVersion={version === "0" || !hasV2Art(simulation.id) ? 1 : simulation.id === "registered-nurse" && version !== "1" ? 3 : 2} />
+        <SimulationPlayer key={level.id} simulation={simulation} level={level} versionSwitch={versionSwitch} startAt={Array.isArray(query.screen) ? query.screen[0] : query.screen} artVersion={version === "0" || !hasV2Art(simulation.id) ? 1 : simulation.id === "registered-nurse" && version !== "1" ? 3 : 2} />
       </main>
     </>
   );

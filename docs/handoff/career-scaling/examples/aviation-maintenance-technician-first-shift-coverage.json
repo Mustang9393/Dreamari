@@ -1,0 +1,291 @@
+{
+  "career": "aviation-maintenance-technician-first-shift",
+  "sopVersion": "2.5",
+  "groups": [
+    {
+      "id": "af-exterior",
+      "scene": "af-exterior",
+      "required": true,
+      "purpose": "People-free barrel-vault maintenance hangar at a coastal airfield.",
+      "beats": [
+        "AF1-01"
+      ],
+      "pov": "observe-task",
+      "speakingTarget": "work",
+      "eyeline": "task",
+      "visibleCast": []
+    },
+    {
+      "id": "af-interior",
+      "scene": "af-interior",
+      "required": true,
+      "purpose": "People-free hangar with a static white-and-teal survey aircraft and blue tool cart.",
+      "beats": [
+        "AF1-02",
+        "AF1-17",
+        "AF1-21"
+      ],
+      "pov": "observe-task",
+      "speakingTarget": "work",
+      "eyeline": "task",
+      "visibleCast": []
+    },
+    {
+      "id": "af-sora",
+      "scene": "af-sora",
+      "required": true,
+      "purpose": "Sora, a middle-aged mechanic in navy coveralls, addresses you beside a blue tool cart.",
+      "beats": [
+        "AF1-03",
+        "AF1-04",
+        "AF1-06",
+        "AF1-07",
+        "AF1-08",
+        "AF1-09",
+        "AF1-10",
+        "AF1-11",
+        "AF1-16",
+        "AF1-22",
+        "AF1-23",
+        "AF1-27",
+        "AF1-28"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Sora"
+      ]
+    },
+    {
+      "id": "af-caleb",
+      "scene": "af-caleb",
+      "required": true,
+      "purpose": "Caleb, a junior technician in navy coveralls, holds a task folder in the hangar.",
+      "beats": [
+        "AF1-05",
+        "AF1-18",
+        "AF1-19",
+        "AF1-20"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Caleb"
+      ]
+    },
+    {
+      "id": "af-elena",
+      "scene": "af-elena",
+      "required": true,
+      "purpose": "Elena, an older maintenance supervisor with gray hair and safety glasses, reviews a kit at the records alcove.",
+      "beats": [
+        "AF1-12",
+        "AF1-13",
+        "AF1-14",
+        "AF1-15"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Elena"
+      ]
+    },
+    {
+      "id": "af-priya",
+      "scene": "af-priya",
+      "required": true,
+      "purpose": "Priya, a junior technician in navy coveralls, asks for help at the records alcove.",
+      "beats": [
+        "AF1-24",
+        "AF1-25",
+        "AF1-26"
+      ],
+      "pov": "address-player",
+      "speakingTarget": "player",
+      "eyeline": "camera",
+      "visibleCast": [
+        "Priya"
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "beat": "AF1-01",
+      "scene": "af-exterior",
+      "shotGroup": "af-exterior",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-02",
+      "scene": "af-interior",
+      "shotGroup": "af-interior",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-17",
+      "scene": "af-interior",
+      "shotGroup": "af-interior",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-21",
+      "scene": "af-interior",
+      "shotGroup": "af-interior",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-03",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-04",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-06",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-07",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-08",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-09",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-10",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-11",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-16",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-22",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-23",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-27",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-28",
+      "scene": "af-sora",
+      "shotGroup": "af-sora",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-05",
+      "scene": "af-caleb",
+      "shotGroup": "af-caleb",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-18",
+      "scene": "af-caleb",
+      "shotGroup": "af-caleb",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-19",
+      "scene": "af-caleb",
+      "shotGroup": "af-caleb",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-20",
+      "scene": "af-caleb",
+      "shotGroup": "af-caleb",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-12",
+      "scene": "af-elena",
+      "shotGroup": "af-elena",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-13",
+      "scene": "af-elena",
+      "shotGroup": "af-elena",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-14",
+      "scene": "af-elena",
+      "shotGroup": "af-elena",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-15",
+      "scene": "af-elena",
+      "shotGroup": "af-elena",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-24",
+      "scene": "af-priya",
+      "shotGroup": "af-priya",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-25",
+      "scene": "af-priya",
+      "shotGroup": "af-priya",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    },
+    {
+      "beat": "AF1-26",
+      "scene": "af-priya",
+      "shotGroup": "af-priya",
+      "noArtifactReason": "All evidence is in native gameplay text; no additional graphic improves this task."
+    }
+  ],
+  "milestones": [
+    {
+      "beat": "AF1-16",
+      "afterDecisions": 4,
+      "threshold": 68
+    }
+  ]
+}
