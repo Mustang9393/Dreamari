@@ -81,9 +81,12 @@ function defaultBucket(c: College, gpa: number | null): GoalBucket {
 // header and saved careers in Career Goal, so neither repeats here.
 type BuildLine = { id: BuildSection; label: string };
 const BUILD_GROUPS: { title: string; short: string; lines: BuildLine[] }[] = [
-  // balanced 3 / 3 / 4 (Chandu: "can we arrange the different data better?"):
+  // balanced 4 / 3 / 4 (Chandu: "can we arrange the different data better?"):
   // what you're into, how you'll work, where school takes you
-  { title: "What you like", short: "Likes", lines: [{ id: "interests", label: "Career fields" }, { id: "subjects", label: "Subjects" }, { id: "skills", label: "Skills to build" }] },
+  // Subjects, Skills, Career fields: Build's order since 23 Oct 2026, with
+  // Build's new Skills question (the picks live in the Build answers) ahead
+  // of the Preferences "Skills to build" line
+  { title: "What you like", short: "Likes", lines: [{ id: "subjects", label: "Subjects" }, { id: "enjoy", label: "Skills" }, { id: "interests", label: "Career fields" }, { id: "skills", label: "Skills to build" }] },
   { title: "How you work", short: "Work", lines: [{ id: "workVibe", label: "Work style" }, { id: "software", label: "Software to learn" }, { id: "jobs", label: "Internships & jobs" }] },
   { title: "Your path", short: "Path", lines: [{ id: "education", label: "Education" }, { id: "location", label: "Location" }, { id: "school", label: "School" }, { id: "cost", label: "Tuition" }] },
 ];
@@ -415,7 +418,7 @@ function BuildBlock({ onOpenBuild }: { onOpenBuild: (section?: BuildSection) => 
 
 /** The house text sweep with its spark (Cover, Explore's For You), on a
  *  label that is waiting for the student. A dimmed base so the glint shows. */
-function NudgeText({ on, base = "rgba(255,255,255,0.7)", children }: { on: boolean; base?: string; children: React.ReactNode }) {
+function NudgeText({ on, base = "var(--scrim-ink-soft, rgba(255,255,255,0.7))", children }: { on: boolean; base?: string; children: React.ReactNode }) {
   return (
     // no text shadow while sweeping: the letters are see-through and a
     // card's shadow showed through them as a dark smudge
@@ -432,7 +435,7 @@ function NudgeText({ on, base = "rgba(255,255,255,0.7)", children }: { on: boole
 
 function XpChip({ amount }: { amount: number }) {
   return (
-    <span className="flex flex-none items-center gap-[4px] rounded-full px-[10px] py-[4px] text-[12.5px] leading-[16px] font-extrabold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 30%, rgba(255,255,255,0.08))", border: "1px solid color-mix(in srgb, var(--primary) 55%, rgba(255,255,255,0.2))", color: "#fff", textShadow: "none" }}>
+    <span className="flex flex-none items-center gap-[4px] rounded-full px-[10px] py-[4px] text-[12.5px] leading-[16px] font-extrabold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 30%, rgba(255,255,255,0.08))", border: "1px solid color-mix(in srgb, var(--primary) 55%, rgba(255,255,255,0.2))", color: "var(--scrim-ink, #fff)", textShadow: "none" }}>
       <span aria-hidden>✦</span>+{amount} XP
     </span>
   );
@@ -467,16 +470,16 @@ export function EmptyGoalCard({ kind, Icon, title, backdrop, art, xp, nudge, bad
             </span>
           </ThemeProvider>
         )}
-        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.9) 0%, rgba(12,16,35,0.35) 50%, rgba(12,16,35,0.1) 100%)" }} />
+        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.9 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.35 * var(--scrim-gain, 1))) 50%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.1 * var(--scrim-gain, 1))) 100%)" }} />
       </span>
       {badge && <SpotBadge>{badge}</SpotBadge>}
       <span className="relative mt-auto flex flex-col gap-[6px] p-[var(--space-5)]">
-        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "color-mix(in srgb, var(--accent-subtle) 30%, #fff)" }}>
+        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "color-mix(in srgb, var(--accent-subtle) 30%, var(--scrim-ink, #fff))" }}>
           <Icon className="h-[14px] w-[14px]" aria-hidden /> {kind}
         </span>
         <span className="flex items-end justify-between gap-[var(--space-3)]">
-          <span className="text-[22px] leading-[27px] font-extrabold tracking-[-0.01em] text-balance" style={{ fontFamily: "var(--font-display)", color: quiet ? "rgba(255,255,255,0.72)" : "#fff" }}>
-            <NudgeText on={nudge} base="rgba(255,255,255,0.6)">{title}</NudgeText>
+          <span className="text-[22px] leading-[27px] font-extrabold tracking-[-0.01em] text-balance" style={{ fontFamily: "var(--font-display)", color: quiet ? "var(--scrim-ink-soft, rgba(255,255,255,0.72))" : "var(--scrim-ink, #fff)" }}>
+            <NudgeText on={nudge} base="var(--scrim-ink-soft, rgba(255,255,255,0.6))">{title}</NudgeText>
           </span>
           {xp ? <XpChip amount={xp} /> : <ChevronRight className="mb-[3px] h-5 w-5 flex-none" aria-hidden />}
         </span>
@@ -484,7 +487,7 @@ export function EmptyGoalCard({ kind, Icon, title, backdrop, art, xp, nudge, bad
     </>
   );
   const className = `dm-tap group relative isolate flex h-full min-h-[220px] w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] border text-left md:min-h-[300px] ${badge ? "dm-spot-ring" : ""}`;
-  const style = { borderColor: nudge ? "color-mix(in srgb, var(--primary) 55%, var(--glass-border))" : "var(--glass-border)", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW } as const;
+  const style = { borderColor: nudge ? "color-mix(in srgb, var(--primary) 55%, var(--glass-border))" : "var(--glass-border)", background: "var(--scrim-deep, #0e0c20)", color: "var(--scrim-ink, #fff)", textShadow: CARD_TEXT_SHADOW } as const;
   return (
     <HoverBeam className="h-full">
       {href ? (
@@ -524,6 +527,39 @@ export function NextStepRow({ title, sub, nudge, links }: { title: string; sub?:
 }
 
 
+// The app's fixed header, the same 84px the Settings cards reserve as
+// scroll margin (ProfileExperience SETTINGS_CARD).
+const FIXED_HEADER = 84;
+/** Opening the Career Goal view scrolls the page so the view's own heading
+ *  sits just under the fixed header and the ranking cards fill the screen
+ *  (Chandu, 23 Oct 2026: "make sure the page scrolls to the cards when they
+ *  reach the career goal screen"); before, the view opened wherever About
+ *  Me was scrolled, with the cards' Make my goal button at or past the
+ *  fold. Instant steps on rAF, not a smooth scroll: on this page a smooth
+ *  scroll is cancelled before it moves (ProfileExperience, 2 Oct 2026).
+ *  Runs once per open, a beat after go()'s own nearest-scroll of the panel. */
+function useScrollToGoal(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    let raf = 0;
+    const timer = window.setTimeout(() => {
+      const el = ref.current;
+      if (!el) return;
+      const from = window.scrollY;
+      const to = Math.max(0, el.getBoundingClientRect().top + from - FIXED_HEADER - 12);
+      if (Math.abs(to - from) < 24) return;
+      const start = performance.now();
+      const step = (now: number) => {
+        const p = Math.min(1, (now - start) / 420);
+        const e = 1 - Math.pow(1 - p, 3);
+        window.scrollTo({ top: from + (to - from) * e, behavior: "instant" as ScrollBehavior });
+        if (p < 1) raf = window.requestAnimationFrame(step);
+      };
+      raf = window.requestAnimationFrame(step);
+    }, 40);
+    return () => { window.clearTimeout(timer); window.cancelAnimationFrame(raf); };
+  }, [ref]);
+}
+
 /** v2 Career Goal: the Top 3 cards themselves (with their move, remove and
  *  add nudges), then the #1 confirmed as the goal, then the saved careers
  *  that can still join. Replaces the Top 3 tab. */
@@ -532,10 +568,12 @@ function CareerGoalV2({ top3, saved, slot, onBack, onAddToTop3, goalSet }: {
 }) {
   const router = useRouter();
   const open = (c: ProfileCareer, row: ProfileCareer[]) => { if (!openCareerPeek(c.id, row.map((x) => x.id))) router.push(`/career/${c.id}`); };
+  const heading = useRef<HTMLDivElement | null>(null);
+  useScrollToGoal(heading);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <BackLink onBack={onBack} />
-      <div className="flex flex-col gap-[2px]">
+      <div ref={heading} className="flex flex-col gap-[2px]">
         <h3 className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Goal</h3>
         <p className="text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{goalSet ? "Your #1 is your goal. Move a career to #1 to change it." : "Tap Make my goal on the career you want most."}</p>
       </div>
@@ -591,12 +629,12 @@ export function GoalCard({ kind, Icon, title, picture, accent, onOpen, openLabel
 }) {
   return (
     <HoverBeam className="h-full">
-      <button type="button" onClick={onOpen} aria-label={`${openLabel}: ${title}`} className="dm-tap group relative flex h-full min-h-[220px] w-full cursor-pointer md:min-h-[300px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 26%, #0e0c20) 0%, #0e0c20 62%)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+      <button type="button" onClick={onOpen} aria-label={`${openLabel}: ${title}`} className="dm-tap group relative flex h-full min-h-[220px] w-full cursor-pointer md:min-h-[300px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 26%, var(--scrim-deep, #0e0c20)) 0%, var(--scrim-deep, #0e0c20) 62%)", color: "var(--scrim-ink, #fff)", textShadow: CARD_TEXT_SHADOW }}>
         {picture && (
           <span aria-hidden className="absolute inset-0">
             <span className={`absolute inset-0 ${focusIn ? "dm-goal-focus-in" : ""}`}>{picture}</span>
             <CardProgressiveBlur size="62%" />
-            <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.55) 40%, rgba(12,16,35,0.05) 75%)" }} />
+            <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.92 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.55 * var(--scrim-gain, 1))) 40%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.05 * var(--scrim-gain, 1))) 75%)" }} />
           </span>
         )}
         <span className="relative flex flex-col gap-[6px] p-[var(--space-5)]">
@@ -759,17 +797,19 @@ function CareerGoalView({ top3, saved, onBack, onAddToTop3, onGoTab }: {
   const router = useRouter();
   const primary = top3[0] ?? null;
   const open = (c: ProfileCareer, row: ProfileCareer[]) => { if (!openCareerPeek(c.id, row.map((x) => x.id))) router.push(`/career/${c.id}`); };
+  const heading = useRef<HTMLHeadingElement | null>(null);
+  useScrollToGoal(heading);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <BackLink onBack={onBack} />
-      <h3 className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Goal</h3>
+      <h3 ref={heading} className="text-[24px] leading-[29px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Goal</h3>
 
       {primary ? (
-        <div className="relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `color-mix(in srgb, ${WORLD_COLORS[primary.world] ?? "var(--primary)"} 40%, rgba(255,255,255,0.16))`, background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+        <div className="relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `color-mix(in srgb, ${WORLD_COLORS[primary.world] ?? "var(--primary)"} 40%, rgba(255,255,255,0.16))`, background: "var(--scrim-deep, #0e0c20)", color: "var(--scrim-ink, #fff)", textShadow: CARD_TEXT_SHADOW }}>
           <span aria-hidden className="absolute inset-0">
             <FacePhoto src={primary.photo} sizes="(min-width: 1024px) 1100px, 100vw" className="object-cover" fallback={primary.photoFocus ?? "50% 30%"} />
             <CardProgressiveBlur size="66%" />
-            <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.5) 45%, transparent 80%)" }} />
+            <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.92 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.5 * var(--scrim-gain, 1))) 45%, transparent 80%)" }} />
           </span>
           <div className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-5)]">
             <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: WORLD_COLORS[primary.world] ? worldInk(WORLD_COLORS[primary.world]) : "var(--accent-subtle)" }}>Primary career</span>
@@ -778,7 +818,7 @@ function CareerGoalView({ top3, saved, onBack, onAddToTop3, onGoTab }: {
               <Link href={`/career/${primary.id}`} className="dm-tap flex min-h-[40px] items-center gap-[3px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
                 Learn more <ChevronRight className="h-4 w-4" aria-hidden />
               </Link>
-              <button type="button" onClick={() => onGoTab("report")} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14px] font-bold" style={{ background: "rgba(255,255,255,0.14)", borderColor: "rgba(255,255,255,0.22)", color: "#fff", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+              <button type="button" onClick={() => onGoTab("report")} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[3px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--scrim-tile-bg, rgba(255,255,255,0.14))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.22))", color: "var(--scrim-ink, #fff)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
                 Career Report <ChevronRight className="h-4 w-4" aria-hidden />
               </button>
             </span>
@@ -904,11 +944,11 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, goa
       ) : (
         <>
           {top ? (
-            <div className="relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "color-mix(in srgb, var(--primary) 40%, rgba(255,255,255,0.16))", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+            <div className="relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "color-mix(in srgb, var(--primary) 40%, rgba(255,255,255,0.16))", background: "var(--scrim-deep, #0e0c20)", color: "var(--scrim-ink, #fff)", textShadow: CARD_TEXT_SHADOW }}>
               <span aria-hidden className="absolute inset-0">
                 <GoalSchoolPicture c={top} sizes="(min-width: 1024px) 1100px, 100vw" align="right" />
                 <CardProgressiveBlur size="66%" />
-                <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.5) 45%, transparent 80%)" }} />
+                <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.92 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.5 * var(--scrim-gain, 1))) 45%, transparent 80%)" }} />
               </span>
               <div className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-5)]">
                 <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>
@@ -917,7 +957,7 @@ export function CollegeGoalView({ goal, onBack, backLabel, embedded = false, goa
                 </span>
                 <span className="flex flex-col gap-[2px]">
                   <span className="text-[22px] leading-[27px] font-extrabold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{top.name}</span>
-                  <span className="text-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{top.city}, {top.state}</span>
+                  <span className="text-[14px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.82))" }}>{top.city}, {top.state}</span>
                 </span>
                 <span className="flex flex-wrap gap-[var(--space-2)]" style={{ textShadow: "none" }}>
                   {/* v2: setting the goal is the card's main action; once set,
@@ -988,7 +1028,7 @@ export function GoalSchoolPicture({ c, sizes, align = "center" }: { c: College; 
  *  (CollegePlaceholder, the lit hall) at hero size, with what goes here. */
 function ArtCard({ eyebrow, title, line, children }: { eyebrow: string; title: string; line: React.ReactNode; children?: React.ReactNode }) {
   return (
-    <div className="relative isolate flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+    <div className="relative isolate flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--scrim-deep, #0e0c20)", color: "var(--scrim-ink, #fff)", textShadow: CARD_TEXT_SHADOW }}>
       <span aria-hidden className="absolute inset-0">
         <HallArt align="right" />
         <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,1,5,0.9) 0%, rgba(0,1,5,0.4) 45%, transparent 80%)" }} />
@@ -997,7 +1037,7 @@ function ArtCard({ eyebrow, title, line, children }: { eyebrow: string; title: s
         <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>{eyebrow}</span>
         <span className="flex flex-col gap-[4px]">
           <span className="text-[22px] leading-[27px] font-extrabold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{title}</span>
-          <span className="text-[14px] leading-[20px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{line}</span>
+          <span className="text-[14px] leading-[20px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.82))" }}>{line}</span>
         </span>
         {children}
       </div>

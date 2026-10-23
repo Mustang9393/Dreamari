@@ -673,9 +673,10 @@ const BUILT_RAIL_PREVIEW = 12;
 
 /** Browse's rails for the switch's state, in page order. */
 function browseRows(path: PathChoice): BrowseRow[] {
-  // CEO (4 Sept 2026): real clips from inside partner companies. Moved
-  // directly above Typical Pay (Joshua, 11 Sept 2026), in the Apple TV
-  // lean-back card shape; the lead card plays muted.
+  // CEO (4 Sept 2026): real clips from inside partner companies, in the
+  // Apple TV lean-back card shape; the lead card plays muted. Placed by
+  // Joshua: above Typical Pay (11 Sept 2026), then above Skilled Trades
+  // (23 Oct 2026).
   const videos: BrowseRow = { id: "videos", kind: "videos", title: "Videos Inside Leading Companies", careers: [] };
 
   if (path === "trades") {
@@ -696,21 +697,24 @@ function browseRows(path: PathChoice): BrowseRow[] {
   }
 
   // Rail order + content per Joshua (2026-08-21): merged recommended rail,
-  // then Tech, Top 10 trending, Might Not Know, Skilled Trades (added
-  // 11 Sept 2026), Videos, Public Service (added 21 Sept 2026), Typical
-  // Pay, Arts. Rank = the slot's place in Joshua's list, fixed (see
-  // TrendingRail).
+  // then Tech, Top 10 trending, Might Not Know, Videos, Skilled Trades
+  // (added 11 Sept 2026; Videos and Trades swapped places per Joshua's
+  // Slack to Chandu, 23 Oct 2026), Public Service (added 21 Sept 2026),
+  // Typical Pay, Arts. Rank = the slot's place in Joshua's list, fixed
+  // (see TrendingRail).
   const posters = (id: string, title: string, careers: CatalogCareer[], peek = false): BrowseRow => ({ id, kind: "posters", title, careers, peek });
   return [
     posters("liked", "Because you liked Business & Finance", BROWSE_BECAUSE_LIKED, true),
     posters("tech", "Tech & Engineering", BROWSE_WORLD_RAIL),
     { id: "trending", kind: "trending", title: TRENDING_TITLE, careers: [], ranked: BROWSE_TRENDING_SLOTS.map((slot, index) => ({ slot, rank: index + 1 })) },
     posters("new", "Careers You Might Not Know", BROWSE_MIGHT_NOT_KNOW),
-    // Trades row (Slack, 11 Sept 2026): its own row, directly above Typical
-    // Pay per the user, and trades are also mixed into the rows above so
-    // they read as equal to everything else on the page.
-    posters("trades", "Skilled Trades", BROWSE_TRADES),
+    // Videos first, then Trades (Joshua, 23 Oct 2026: "swap the positions
+    // of the Videos row and the Skilled Trades row").
     videos,
+    // Trades row (Slack, 11 Sept 2026): its own row, and trades are also
+    // mixed into the rows above so they read as equal to everything else
+    // on the page. The Non-college view above still leads with it.
+    posters("trades", "Skilled Trades", BROWSE_TRADES),
     // Public Service (Slack, 21 Sept 2026): its own row, directly above
     // Typical Pay, not folded into it -- these are civic/public-sector
     // careers, not a pay tier.
@@ -1037,7 +1041,7 @@ function EnvCard({
                       aria-label="Previous: summary"
                       onClick={jumpTo("Summary")}
                       className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
-                      style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Summary" ? 0.4 : 1 }}
+                      style={{ background: "rgb(var(--scrim-rgb, 8 10 22) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.28))", color: "var(--scrim-ink, #fff)", opacity: face === "Summary" ? 0.4 : 1 }}
                     >
                       <ChevronLeft className="h-[18px] w-[18px] lg:h-[14px] lg:w-[14px]" aria-hidden />
                     </button>
@@ -1066,7 +1070,7 @@ function EnvCard({
                       aria-label="Next: more info"
                       onClick={jumpTo("Details")}
                       className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
-                      style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Details" ? 0.4 : 1 }}
+                      style={{ background: "rgb(var(--scrim-rgb, 8 10 22) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.28))", color: "var(--scrim-ink, #fff)", opacity: face === "Details" ? 0.4 : 1 }}
                     >
                       <ChevronRight className="h-[18px] w-[18px] lg:h-[14px] lg:w-[14px]" aria-hidden />
                     </button>
@@ -1185,7 +1189,7 @@ function EnvCard({
                       {/* No "Because you saved X" line here: the match band
                          above already says why (Chandu, 1 Oct 2026: "we
                          already show strong match etc."). */}
-                      <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
+                      <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--scrim-ink, #ffffff)" }}>
                         {career.title}
                       </h2>
                       {/* Custom-designed edge case, 22 Sept 2026: this sits in a
@@ -1195,7 +1199,11 @@ function EnvCard({
                          stacked content past the card's bounds and clip
                          something else in it. line-clamp caps it defensively,
                          matching this app's own truncation convention. */}
-                      <p className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
+                      {/* white, not --primary-foreground: in the Black & Blue look that token is
+                         the near-black ink for blue fills, and this line sits on the photo's scrim
+                         (22 Oct 2026, Chandu: "in dark mode the text i saw was dark where it should
+                         have been white"). /explore serves this lab build live. */}
+                      <p className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.92)" }}>
                         {career.description}
                       </p>
                       {/* Eyebrow (dim, small, uppercase) over the actual value
@@ -1206,7 +1214,7 @@ function EnvCard({
                          use brightness too"). */}
                       <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
                         <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Median salary</span>
-                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.salary}</span>
+                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.98))" }}>{career.salary}</span>
                       </div>
                     </div>
                     {/* justify-center: Details has less content than Summary
@@ -1222,11 +1230,11 @@ function EnvCard({
                     <div aria-hidden={face !== "Details"} className="flex flex-none flex-col justify-center gap-[var(--space-3)]" style={{ width: "50%" }}>
                       <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
                         <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Major</span>
-                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.major}</span>
+                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.98))" }}>{career.major}</span>
                       </div>
                       <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
                         <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Main skills</span>
-                        <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.mainSkills}</span>
+                        <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "var(--scrim-ink-soft, rgba(255,255,255,0.98))" }}>{career.mainSkills}</span>
                       </div>
                     </div>
                   </div>
@@ -1249,10 +1257,10 @@ function EnvCard({
                   className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
                   /* solid dark glass in BOTH themes: the faint white-alpha surface
                      disappeared against the photos (founder feedback) */
-                  style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
+                  style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.72 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.30))", backdropFilter: "blur(10px)" }}
                 >
                   {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
-                  <Play className="h-[15px] w-[15px] flex-none" fill="#F4F7FF" style={{ color: "#F4F7FF" }} aria-hidden />
+                  <Play className="h-[15px] w-[15px] flex-none" fill="#F4F7FF" style={{ color: "var(--scrim-ink, #F4F7FF)" }} aria-hidden />
                   <span className="text-[17px] leading-[23px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
                     Play
                   </span>
@@ -1331,7 +1339,7 @@ function ProgressiveBlur() {
          tint that's okay, subtly"). Own soft-edged band, same feather
          logic as the blur layers, so it ramps in with them rather than
          adding a second seam. */}
-      <div className="absolute inset-0" style={{ background: "rgba(4,6,12,0.16)", maskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)`, WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)` }} />
+      <div className="absolute inset-0" style={{ background: "rgb(var(--scrim-rgb, 4 6 12) / calc(0.16 * var(--scrim-gain, 1)))", maskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)`, WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)` }} />
     </div>
   );
 }
@@ -1405,7 +1413,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
           aria-pressed={soundOn}
           onClick={() => onSoundChange(!soundOn)}
           className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-          style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
+          style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.72 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.30))", color: "var(--scrim-ink, #ffffff)" }}
         >
           {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
         </button>

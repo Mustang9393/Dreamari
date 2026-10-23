@@ -120,6 +120,14 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     ],
     kept: "Every check-in answer, note, alert and the safety steps.",
   },
+  opportunities: {
+    summary: "v7's Opportunities inside v4: local internships, jobs, programs and events, who they fit, and each application's stage.",
+    decisions: [
+      { change: "A new Opportunities area between Explore and Prepare, showing v7's screen as is", why: "Maisha, 22 Oct 2026: \"Please add opportunities tab to v4\"." },
+    ],
+    kept: "Nothing else in v4 moved.",
+    order: "Discover, then Applications.",
+  },
   explore: {
     summary: "Careers and pay in the student app's own look; every card opens a counselor sheet.",
     decisions: [

@@ -50,11 +50,11 @@ import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { NightSky } from "@/components/app/NightSky";
 import { skyMoment } from "@/lib/sky";
-import { EducationGrid, SelectField, SUBJECT_ICONS, VibeButtonRow } from "@/components/build/steps";
+import { EducationGrid, SelectField, SKILL_ICONS, SkillSlots, SUBJECT_ICONS, VibeButtonRow, useSkillReaction } from "@/components/build/steps";
 import { CostSlider } from "@/components/build/CostStep";
 import { STATE_NAMES } from "@/components/build/LocationStep";
 import { GpaField } from "@/components/build/GpaField";
-import { COST_STOPS, ENERGY_OPTIONS, GRADE_OPTIONS, INTEREST_WORLDS, PATH_OPTIONS, STAGE_ACCENTS, STAGE_ACCENTS_V2, STAGE_DREAMY, SUBJECTS, TEAM_OPTIONS, TRAVEL_DISTANCE_OPTIONS, type BuildState, type StageId } from "@/components/build/types";
+import { COST_STOPS, ENERGY_OPTIONS, GRADE_OPTIONS, INTEREST_WORLDS, MAX_SKILLS, PATH_OPTIONS, shuffledSkills, STAGE_ACCENTS, STAGE_ACCENTS_V2, STAGE_DREAMY, SUBJECTS, TEAM_OPTIONS, TRAVEL_DISTANCE_OPTIONS, type BuildState, type StageId } from "@/components/build/types";
 import { useBuildAnswers, useBuildSavedAt, writeBuildAnswers } from "@/lib/buildAnswers";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS } from "./data";
@@ -494,18 +494,26 @@ function SectionFields({ id, draft, patch, patchJobs, namedCareers }: { id: Excl
 // answers, the student profile and the preferences), the foot says what
 // moved, and Saved careers rides along as the ninth section.
 
-export type BuildSection = "interests" | "subjects" | "workVibe" | "skills" | "software" | "education" | "cost" | "location" | "school" | "jobs" | "profile" | "saved";
+export type BuildSection = "subjects" | "enjoy" | "interests" | "workVibe" | "skills" | "software" | "education" | "cost" | "location" | "school" | "jobs" | "profile" | "saved";
 // The sections that edit the Preferences store, not the Build answers. They
 // were the Preferences tab's own (19 Oct 2026, Chandu: "make sure the edit my
 // build has all the data that preferences has, but we dont need a whole
 // preferences tab and then my build in about me. Do all of it in about me").
 // Skills, Software, School and Internships & jobs edit the Preferences
 // store; Work style also edits two of its fields (team size, environment).
+// Order mirrors Build since 23 Oct 2026 (Subjects, Skills, Career fields,
+// Work style, then the rest), with Build's new Skills question added and
+// nothing taken away (Chandu, same day: "yes add to my build but dont remove
+// whats there that was already additional. Make it make sense"). The old
+// Preferences skills question stays, retitled "Skills to build" (About Me
+// already called it that) so the two cannot be confused; Tuition stays
+// here even though Build no longer asks it.
 export const BUILD_SECTIONS: { id: BuildSection; title: string; question: string; subtitle?: string; sprite: string; cite?: string }[] = [
-  { id: "interests", title: "Career fields", question: "Which career fields interest you?", subtitle: "Choose up to 3", sprite: STAGE_DREAMY.interests.sprite, cite: "Question informed by Harvard University Mignone Center + O*NET" },
   { id: "subjects", title: "Subjects", question: "Which subjects do you enjoy?", subtitle: "Choose up to 2", sprite: STAGE_DREAMY.subjects.sprite },
+  { id: "enjoy", title: "Skills", question: "Which of these do you actually enjoy doing?", subtitle: "Pick up to 3.", sprite: STAGE_DREAMY.skills.sprite, cite: "Question informed by O*NET" },
+  { id: "interests", title: "Career fields", question: "Which career fields interest you?", subtitle: "Choose up to 3", sprite: STAGE_DREAMY.interests.sprite, cite: "Question informed by Harvard University Mignone Center + O*NET" },
   { id: "workVibe", title: "Work style", question: "Where do you work best?", subtitle: "Pick one from each row.", sprite: STAGE_DREAMY.workVibe.sprite, cite: "Question informed by MIT CAPD + O*NET" },
-  { id: "skills", title: "Skills", question: "What are you good at, and what do you want to build?", sprite: STAGE_DREAMY.subjects.sprite },
+  { id: "skills", title: "Skills to build", question: "What are you good at, and what do you want to build?", sprite: STAGE_DREAMY.subjects.sprite },
   { id: "software", title: "Software", question: "What software do you know, or want to learn?", sprite: "/images/dreamy/v2/dreamy-glasses.webp" },
   { id: "education", title: "Education", question: "How many years of education are you open to after high school?", sprite: STAGE_DREAMY.education.sprite },
   { id: "cost", title: "Tuition", question: "How much are you comfortable spending on tuition each year?", subtitle: "Choose what feels realistic for you.", sprite: STAGE_DREAMY.cost.sprite },
@@ -518,7 +526,7 @@ export const BUILD_SECTIONS: { id: BuildSection; title: string; question: string
 const WORLD_ACCENT: Record<string, string> = Object.fromEntries(INTEREST_WORLDS.map((w) => [w.label, `var(--color-world-${w.slug})`]));
 const sameAnswers = (a: BuildState, b: BuildState) => JSON.stringify(a) === JSON.stringify(b);
 
-export function BuildModal({ onClose, initialSection = "interests" }: { onClose: () => void; /** About Me's rows open the editor on their own section */ initialSection?: BuildSection }) {
+export function BuildModal({ onClose, initialSection = "subjects" }: { onClose: () => void; /** About Me's rows open the editor on their own section */ initialSection?: BuildSection }) {
   const lookV2 = useLookV2();
   const saved = useBuildAnswers();
   const lastSaved = useBuildSavedAt();
@@ -539,6 +547,10 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
   const [proof, setProof] = useState<string | null>(null);
   const [reactionNonce, setReactionNonce] = useState(0);
   const react = () => setReactionNonce((n) => n + 1);
+  // Skills: the same shuffled order Build showed this session, and Dreamy's
+  // line per pick
+  const [skillOptions] = useState(shuffledSkills);
+  const [skillReaction, saySkill] = useSkillReaction();
   const savedIds = useMemo(() => Array.from(new Set([...picks.ids, ...Array.from(savedCareersSet)])), [picks.ids, savedCareersSet]);
   const savedCareers = useMemo(() => savedIds.map(savedCard), [savedIds]);
   useEffect(() => {
@@ -554,6 +566,7 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
     switch (id) {
       case "interests": return draft.interests.join(" · ");
       case "subjects": return draft.subjects.join(" · ");
+      case "enjoy": return draft.skills.join(" · ");
       case "workVibe": return [draft.energy, draft.teamStyle].filter(Boolean).join(" · ");
       case "education": return draft.education ?? "";
       case "cost": return draft.costIndex >= 0 ? COST_STOPS[draft.costIndex] : "";
@@ -588,7 +601,7 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
   const startIdx = BUILD_SECTIONS.findIndex((s) => s.id === initialSection);
   useBackSteps(Math.max(0, idx - startIdx), () => setSection(BUILD_SECTIONS[Math.max(0, idx - 1)].id));
   // the added sections borrow the nearest Build stage's light
-  const stage: StageId = section === "saved" ? "complete" : section === "skills" || section === "software" ? "subjects" : section === "school" ? "location" : section === "jobs" ? "workVibe" : section;
+  const stage: StageId = section === "saved" ? "complete" : section === "enjoy" ? "skills" : section === "skills" || section === "software" ? "subjects" : section === "school" ? "location" : section === "jobs" ? "workVibe" : section;
   const firstCareer = savedCareers.find((c) => picks.ids[0] === c.id)?.title ?? savedCareers[0]?.title;
 
   // 7 Oct 2026: the sheet is dreamonna's My Build, which is the Build screen
@@ -641,7 +654,13 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
           <div className="myb-pane">
             <div key={section} className="myb-scroll dm-rise">
               <GlassCard>
-              <QuestionHeading sprite={sec.sprite} title={sec.question} subtitle={sec.subtitle} reactionNonce={section === "interests" || section === "subjects" || section === "workVibe" ? reactionNonce : undefined} />
+              <QuestionHeading
+                sprite={sec.sprite}
+                title={sec.question}
+                subtitle={section === "enjoy" ? <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">{sec.subtitle}<SkillSlots picks={draft.skills} /></span> : sec.subtitle}
+                reactionNonce={section === "interests" || section === "subjects" || section === "enjoy" || section === "workVibe" ? reactionNonce : undefined}
+                reaction={section === "enjoy" ? skillReaction : null}
+              />
               {section === "interests" && (
                 <>
                   <PicksBand label="Your picks" count={draft.interests.length} max={3} empty="Pick up to three fields below.">
@@ -657,6 +676,9 @@ export function BuildModal({ onClose, initialSection = "interests" }: { onClose:
               )}
               {section === "subjects" && (
                 <ChipGrid options={SUBJECTS} selected={draft.subjects} max={2} onChange={(subjects) => patch({ subjects })} icons={SUBJECT_ICONS} columns="grid-cols-2 lg:grid-cols-3" onPick={react} />
+              )}
+              {section === "enjoy" && (
+                <ChipGrid options={skillOptions} selected={draft.skills} max={MAX_SKILLS} lockAtMax compact icons={SKILL_ICONS} onChange={(skills) => patch({ skills })} onPick={(skill) => { react(); saySkill(skill); }} />
               )}
               {section === "workVibe" && (
                 <div className="flex flex-col gap-3">
@@ -755,6 +777,7 @@ export function summaryOf(s: BuildState, id: BuildSection, savedCount: number, p
   switch (id) {
     case "interests": return s.interests.join(" · ");
     case "subjects": return s.subjects.join(" · ");
+    case "enjoy": return s.skills.join(" · ");
     case "workVibe": return [s.energy, s.teamStyle].filter(Boolean).join(" · ");
     case "education": return s.education ?? "";
     case "cost": return s.costIndex >= 0 ? COST_STOPS[s.costIndex] : "";

@@ -1,0 +1,284 @@
+{
+  "tool": "built-in imagegen",
+  "sop": "2.5",
+  "date": "2026-10-23",
+  "designFeedback": "the interior design and the hangar design can look better and more sexy. NO hyper realistic drawings though",
+  "music": "No music, per user instruction.",
+  "design": "Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body.",
+  "approvedDrawingReference": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png",
+  "selectedAssets": [
+    {
+      "id": "exterior-landscape",
+      "mode": "landscape",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-69f7a452-f513-462a-83a5-1d9bed39625d.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/exterior-v2.png",
+      "prompt": "One complete opaque 16:9 LANDSCAPE game painting. Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body. People-free EXTERIOR establishing view from outside across the apron. Show entire sculptural building, sky and runway apron, sleek roof silhouette with curved canopy and glazing. Retain low hangar massing and an open aircraft bay, hangar doors functional and wide. FIRST image is existing location to redesign; SECOND is approved anime DRAWING reference only. Simplify surfaces further than the reference; premium visual composition without increasing realism.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a8ae599-5864-4bac-8b24-0744b3e08cb3.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "11edf88d02a3eff2453c85f1cfb37f266b57e3782df40984cc7bccfcf684dc11",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "id": "exterior-portrait",
+      "mode": "portrait",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-ba4672d0-c6c4-4de9-a62b-bf4de0a0c10d.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/exterior-phone-v2.png",
+      "prompt": "Recompose FIRST attached scene into ONE complete opaque 9:16 PORTRAIT illustration. Preserve this exact new premium hangar architecture and its EXTERIOR viewpoint, entire sculptural barrel-vault facade and curved canopy, coastal location, aircraft bay and parked plane. No people. Second image is approved anime style; draw equally or MORE simply. Hand-drawn flat planes, sparse lines and cel shadows, matte floor with broad light shapes, no textures, mirror reflections, realistic render or glossy equipment. Clear sky/architecture in top20%, building/plane in middle and matte apron/floor below. Not a crop or blurred extension. No text, logos, UI, panels or montage.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-69f7a452-f513-462a-83a5-1d9bed39625d.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "643a0a7f6785da3352783e2a11d54a5d261e9f2f7604c68f0f735d35fab2cae1",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "id": "interior-landscape",
+      "mode": "landscape",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a5fac62-af57-4caa-982d-0f4bf05e789e.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/interior-v2.png",
+      "prompt": "One complete opaque 16:9 LANDSCAPE game painting. Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body. People-free INTERIOR master establishing view. Show the big blue arched ribs, left windows, right mezzanine and walnut alcove, teal built-in storage, the static survey airplane with its full wing clearances, and spacious matte floor. FIRST image is existing location to redesign; SECOND is approved anime DRAWING reference only. Simplify surfaces further than the reference; premium visual composition without increasing realism.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-8b086d0c-24ed-4870-83d8-ec2cab48da59.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "1213d6b32be89c02054c673b22801f0eb72ccf99ba675a3e3faf9298ded12392",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "id": "interior-portrait",
+      "mode": "portrait",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-5626b568-d614-4ac3-b808-f89bc1fa986d.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/interior-phone-v2.png",
+      "prompt": "Recompose FIRST attached scene into ONE complete opaque 9:16 PORTRAIT illustration. Preserve this exact new premium hangar architecture and its INTERIOR viewpoint, left coastal windows, blue curved ribs, right walnut records alcove and glass mezzanine, built-in teal storage, white-and-teal parked twin-engine survey plane. No people. Second image is approved anime style; draw equally or MORE simply. Hand-drawn flat planes, sparse lines and cel shadows, matte floor with broad light shapes, no textures, mirror reflections, realistic render or glossy equipment. Clear sky/architecture in top20%, building/plane in middle and matte apron/floor below. Not a crop or blurred extension. No text, logos, UI, panels or montage.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a5fac62-af57-4caa-982d-0f4bf05e789e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "2c3ea57f7f7d2e02ecfd39569b808c3fce5e01c20baf7376b9ceb090e9b2f4d8",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "id": "sora-landscape",
+      "mode": "landscape",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-35d83bbc-3368-4a21-be0e-b1c0643d5313.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/sora-v2.png",
+      "prompt": "Edit the FIRST attached complete scene into ONE new opaque 16:9 LANDSCAPE painting. SECOND image is the redesigned canonical hangar: match its room architecture exactly from this character's viewpoint. THIRD is approved anime drawing reference. Preserve this named character sora's exact canonical identity, age, skin, eyes, face proportions, grouped hair, clothing, expression and complete naturally grounded body from the FIRST image.   Preserve her mature 44-year-old face and simple eye-corner age lines; do not make her a teenager. Redraw the ENTIRE scene as a coherent single image with shared light; no separate people layers. Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body. Put the full standing person just right of center, head at 25% image height, face between 28-36%, shoes around 90%, every body part naturally complete within frame. Keep the bottom dialogue area clear of faces. Stage in the work bay beside a teal tool cart, with the right walnut records mezzanine visible. Do not draw extra people. No new outfit or props. Character and environment equally simplified, broad cel shadows only.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-d29e994d-123d-4165-8406-71f945621f86.png",
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a5fac62-af57-4caa-982d-0f4bf05e789e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "2e3bd733038c2924dfd02ccb43c89c751630f9b98803d66662f4b60664b3f073",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "id": "sora-portrait",
+      "mode": "portrait",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-ae95b626-0efb-4bb8-b880-e75fc7f9516f.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/sora-phone-v2.png",
+      "prompt": "Recompose the FIRST attached full scene into ONE complete opaque 9:16 PORTRAIT painting for a phone. Preserve sora's exact face, age, natural skin base, eye color, hair, outfit and expression from it. Preserve the redesigned room from the SECOND reference, blue arched ribs, left coastal glazing and right walnut mezzanine and records alcove. THIRD reference is approved anime drawing style. Full standing person naturally grounded: head around 27%, face 29-36%, shoes at 76%, no cropping. Top20% only architecture and bottom25% mostly matte floor; keep faces away from UI regions. Entire environment and person drawn TOGETHER, no layering, no cutout. Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body.  Character skin flat with one cel-shadow, grouped hair and sparse clothing folds. No extra people, text, UI, panels, border or montage.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-35d83bbc-3368-4a21-be0e-b1c0643d5313.png",
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a5fac62-af57-4caa-982d-0f4bf05e789e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "7adcde1bf24d6b1fd88de682c1ebcb2adbf08d0102bda54d158028fae4781137",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "id": "caleb-landscape",
+      "mode": "landscape",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-be04aec6-75b7-4308-a757-7b8b7b0ebe2e.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/caleb-v2.png",
+      "prompt": "Edit the FIRST attached complete scene into ONE new opaque 16:9 LANDSCAPE painting. SECOND image is the redesigned canonical hangar: match its room architecture exactly from this character's viewpoint. THIRD is approved anime drawing reference. Preserve this named character caleb's exact canonical identity, age, skin, eyes, face proportions, grouped hair, clothing, expression and complete naturally grounded body from the FIRST image.  Preserve his very dark warm-brown skin; no brightening.  Redraw the ENTIRE scene as a coherent single image with shared light; no separate people layers. Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body. Put the full standing person just right of center, head at 25% image height, face between 28-36%, shoes around 90%, every body part naturally complete within frame. Keep the bottom dialogue area clear of faces. Stage in the work bay beside a teal tool cart, with the right walnut records mezzanine visible. Do not draw extra people. No new outfit or props. Character and environment equally simplified, broad cel shadows only.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-d3636b5f-5970-4bc2-8768-330e74ae0012.png",
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a5fac62-af57-4caa-982d-0f4bf05e789e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "2d5ea7ed4903743b93bec78f5ef40bc3c853f3bca3d76017698ef93181b94792",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "id": "caleb-portrait",
+      "mode": "portrait",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-8be728b5-1cc2-455a-9b0c-0f6080a52e34.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/caleb-phone-v2.png",
+      "prompt": "Recompose the FIRST attached full scene into ONE complete opaque 9:16 PORTRAIT painting for a phone. Preserve caleb's exact face, age, natural skin base, eye color, hair, outfit and expression from it. Preserve the redesigned room from the SECOND reference, blue arched ribs, left coastal glazing and right walnut mezzanine and records alcove. THIRD reference is approved anime drawing style. Full standing person naturally grounded: head around 27%, face 29-36%, shoes at 76%, no cropping. Top20% only architecture and bottom25% mostly matte floor; keep faces away from UI regions. Entire environment and person drawn TOGETHER, no layering, no cutout. Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body.  Character skin flat with one cel-shadow, grouped hair and sparse clothing folds. No extra people, text, UI, panels, border or montage.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-be04aec6-75b7-4308-a757-7b8b7b0ebe2e.png",
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a5fac62-af57-4caa-982d-0f4bf05e789e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "6a97b92856001ace05c8c25c929e4a3f42268d2fd971f8cfae3fcd41be972bba",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "id": "elena-landscape",
+      "mode": "landscape",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-80a1b5c4-b67c-470c-b96a-90e30b0b5b1e.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/elena-v2.png",
+      "prompt": "Edit the FIRST attached complete scene into ONE new opaque 16:9 LANDSCAPE painting. SECOND image is the redesigned canonical hangar: match its room architecture exactly from this character's viewpoint. THIRD is approved anime drawing reference. Preserve this named character elena's exact canonical identity, age, skin, eyes, face proportions, grouped hair, clothing, expression and complete naturally grounded body from the FIRST image.    Redraw the ENTIRE scene as a coherent single image with shared light; no separate people layers. Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body. Put the full standing person just right of center, head at 25% image height, face between 28-36%, shoes around 90%, every body part naturally complete within frame. Keep the bottom dialogue area clear of faces. Stage at the right walnut records alcove, with the glass mezzanine above, plane farther left. Do not draw extra people. No new outfit or props. Character and environment equally simplified, broad cel shadows only.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-c03de906-805f-49d0-939f-39a5b6dd9c36.png",
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a5fac62-af57-4caa-982d-0f4bf05e789e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "75efbb394ba2222f950cbae3ad2c8c09068303e97c0cc023c9c5d99823c37129",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "id": "elena-portrait",
+      "mode": "portrait",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-da72b32a-0a15-42f9-bb16-9fa519ee3bfe.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/elena-phone-v2.png",
+      "prompt": "Recompose the FIRST attached full scene into ONE complete opaque 9:16 PORTRAIT painting for a phone. Preserve elena's exact face, age, natural skin base, eye color, hair, outfit and expression from it. Preserve the redesigned room from the SECOND reference, blue arched ribs, left coastal glazing and right walnut mezzanine and records alcove. THIRD reference is approved anime drawing style. Full standing person naturally grounded: head around 27%, face 29-36%, shoes at 76%, no cropping. Top20% only architecture and bottom25% mostly matte floor; keep faces away from UI regions. Entire environment and person drawn TOGETHER, no layering, no cutout. Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body.  Character skin flat with one cel-shadow, grouped hair and sparse clothing folds. No extra people, text, UI, panels, border or montage.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-80a1b5c4-b67c-470c-b96a-90e30b0b5b1e.png",
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a5fac62-af57-4caa-982d-0f4bf05e789e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "5ddf8fabb12c446cec878bf4161ad4a9d34723222d41a5ec2ce76c71af65ce76",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    },
+    {
+      "id": "priya-landscape",
+      "mode": "landscape",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2eb98165-8936-4022-ae2d-495e151ecd7b.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/priya-v2.png",
+      "prompt": "Edit the FIRST attached complete scene into ONE new opaque 16:9 LANDSCAPE painting. SECOND image is the redesigned canonical hangar: match its room architecture exactly from this character's viewpoint. THIRD is approved anime drawing reference. Preserve this named character priya's exact canonical identity, age, skin, eyes, face proportions, grouped hair, clothing, expression and complete naturally grounded body from the FIRST image. Preserve her newly corrected DEEP warm-brown skin and concerned closed-mouth expression, including hands and forearms.   Redraw the ENTIRE scene as a coherent single image with shared light; no separate people layers. Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body. Put the full standing person just right of center, head at 25% image height, face between 28-36%, shoes around 90%, every body part naturally complete within frame. Keep the bottom dialogue area clear of faces. Stage at the right walnut records alcove, with the glass mezzanine above, plane farther left. Do not draw extra people. No new outfit or props. Character and environment equally simplified, broad cel shadows only.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-f095344c-1ed2-43be-b33f-a38d8ada3f03.png",
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a5fac62-af57-4caa-982d-0f4bf05e789e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "cd204fedf85c5b127e0d450e599ef638dabcc2f1f87c811cbb17df28110ce443",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    {
+      "id": "priya-portrait",
+      "mode": "portrait",
+      "sourcePath": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-eb950fb8-04c7-4b8f-94cb-03b7b5049eba.png",
+      "projectPath": "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/public/images/play/aviation-first-shift/priya-phone-v2.png",
+      "prompt": "Recompose the FIRST attached full scene into ONE complete opaque 9:16 PORTRAIT painting for a phone. Preserve priya's exact face, age, natural skin base, eye color, hair, outfit and expression from it. Preserve the redesigned room from the SECOND reference, blue arched ribs, left coastal glazing and right walnut mezzanine and records alcove. THIRD reference is approved anime drawing style. Full standing person naturally grounded: head around 27%, face 29-36%, shoes at 76%, no cropping. Top20% only architecture and bottom25% mostly matte floor; keep faces away from UI regions. Entire environment and person drawn TOGETHER, no layering, no cutout. Architectural redesign for the same fictional Gannet coastal aviation maintenance hangar. Make it aspirational, stylish and architect-designed, with a low sculptural steel-blue barrel-vault roof and a dramatic cantilevered curved entrance canopy, slender arched structural ribs, high curved clerestory glazing, a restrained ivory-and-deep-teal palette, warm walnut slats in the records/review alcove and thin muted brass accents. Interior: generous aircraft clearances, one elegant walnut-and-glass mezzanine review gallery ONLY on the right wall above the enclosed records alcove, blue structural ribs sweeping over the work bay, integrated teal tool storage with tidy built-in charging and task-light strips, matte pale ivory floor with restrained teal working-zone lines. Keep a functional maintenance bay, never a hotel lobby. Luxury through shape, proportions and purposeful furniture, not surface texture. Parked small white-and-teal survey airplane safely chocked, no engines running. Left side has tall real windows looking toward coastal greenery, blue water and distant hills. Morning light from these windows and roof glazing. Entire image must look HAND-DRAWN 2D ANIME, matching approved reference's face/line quality but SIMPLER environmental surface rendering. Large flat painted planes and ONE cel-shadow family, sparse drawn edges, a few broad light shapes. NO photographic textures, polished metal, tiny rivets, glossy floor, mirror reflections, grain, speckling, bloom, volumetric haze, highly rendered architecture, detailed realistic drawing, or intricate equipment. No text, UI, people except those explicitly requested, or player body. Her skin base is deep warm brown, EXACTLY as in the first reference, not tan. Concerned closed mouth, not a wide smile. Character skin flat with one cel-shadow, grouped hair and sparse clothing folds. No extra people, text, UI, panels, border or montage.",
+      "referencePaths": [
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2eb98165-8936-4022-ae2d-495e151ecd7b.png",
+        "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-2a5fac62-af57-4caa-982d-0f4bf05e789e.png",
+        "/Users/chandump/Documents/Dreamari/work/aviation-sop-level-1/docs/handoff/aviation-first-shift/references/approved-ux-scene-000.png"
+      ],
+      "review": "Reviewed as complete scene with HUD hidden; grounded figures, flat anime drawing, simplified matte surfaces, canonical cast and redesigned room.",
+      "sha256": "0392ccdd1359644870cb5c4532c8ec6cd2c319f0956325495ad8b9315d036f84",
+      "width": 941,
+      "height": 1672,
+      "opaque": true
+    }
+  ],
+  "discardedInitialCandidates": [
+    {
+      "id": "exterior",
+      "prompt": "Use case: illustration-story. Create ONE complete opaque finished 16:9 landscape career game scene, no panels, text, HUD, border, montage or separate sprites. Attached image is DRAWING STYLE ONLY: match its 2D anime eye construction, simple nose mark, short line mouth and controlled linework; simplify its environment even further. Flat base colors plus ONE broad cel shadow. Hair only four to six broad groups, minimal interior marks, no strands or individual ringlets. Broad painted walls, matte floor, aircraft, equipment planes; sparse edges; no photographic surface textures, realistic metal, glossy floors, dense rivets, hatching, painted lips, sculpted skin or elaborate clothing folds. Complete naturally grounded bodies with feet within frame; no body cutoffs, player body or foreground hands. Camera wide: character head around 28% image height, feet around 88%, no face in top 20% or bottom 38%. Character can stand just right of center; native game panels will overlay lower center. Morning daylight through actual hangar skylights. Functional aviation hangar: long low barrel-vault roof, steel-blue curved beams, warm ivory wall planes, tall left clerestory windows, matte pale floor, restrained walnut paperwork alcove at right, one small white and teal twin-engine survey airplane parked on chocks, blue wheeled tool cart safely outside propeller arcs. Aircraft static; no running machinery. Color richness through composition, not texture. No other visible people beyond named cast. Primary subject: People-free establishing exterior of Gannet Flight Services' long low barrel-vault aviation maintenance hangar at a coastal airfield. Steel blue curved roof, ivory piers, broad open aircraft bay, a small white-and-teal parked survey plane seen inside, blue sky and distant coastal grass. No logos, signs or readable text. Welcoming early morning. No humans.",
+      "path": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-68c83150-59d8-4666-8bd0-4157d3590487.png",
+      "status": "Candidate, pending repairs"
+    },
+    {
+      "id": "interior",
+      "prompt": "Use case: illustration-story. Create ONE complete opaque finished 16:9 landscape career game scene, no panels, text, HUD, border, montage or separate sprites. Attached image is DRAWING STYLE ONLY: match its 2D anime eye construction, simple nose mark, short line mouth and controlled linework; simplify its environment even further. Flat base colors plus ONE broad cel shadow. Hair only four to six broad groups, minimal interior marks, no strands or individual ringlets. Broad painted walls, matte floor, aircraft, equipment planes; sparse edges; no photographic surface textures, realistic metal, glossy floors, dense rivets, hatching, painted lips, sculpted skin or elaborate clothing folds. Complete naturally grounded bodies with feet within frame; no body cutoffs, player body or foreground hands. Camera wide: character head around 28% image height, feet around 88%, no face in top 20% or bottom 38%. Character can stand just right of center; native game panels will overlay lower center. Morning daylight through actual hangar skylights. Functional aviation hangar: long low barrel-vault roof, steel-blue curved beams, warm ivory wall planes, tall left clerestory windows, matte pale floor, restrained walnut paperwork alcove at right, one small white and teal twin-engine survey airplane parked on chocks, blue wheeled tool cart safely outside propeller arcs. Aircraft static; no running machinery. Color richness through composition, not texture. No other visible people beyond named cast. Primary subject: People-free interior establishing view from the hangar entrance, with the entire hangar's blue arched beams, left windows, parked white-and-teal survey plane, blue tool cart and right walnut paperwork alcove visible. No humans.",
+      "path": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-865a06be-194c-428e-a762-a5bd7915a0d3.png",
+      "status": "Candidate, pending repairs"
+    },
+    {
+      "id": "sora",
+      "prompt": "Use case: illustration-story. Create ONE complete opaque finished 16:9 landscape career game scene, no panels, text, HUD, border, montage or separate sprites. Attached image is DRAWING STYLE ONLY: match its 2D anime eye construction, simple nose mark, short line mouth and controlled linework; simplify its environment even further. Flat base colors plus ONE broad cel shadow. Hair only four to six broad groups, minimal interior marks, no strands or individual ringlets. Broad painted walls, matte floor, aircraft, equipment planes; sparse edges; no photographic surface textures, realistic metal, glossy floors, dense rivets, hatching, painted lips, sculpted skin or elaborate clothing folds. Complete naturally grounded bodies with feet within frame; no body cutoffs, player body or foreground hands. Camera wide: character head around 28% image height, feet around 88%, no face in top 20% or bottom 38%. Character can stand just right of center; native game panels will overlay lower center. Morning daylight through actual hangar skylights. Functional aviation hangar: long low barrel-vault roof, steel-blue curved beams, warm ivory wall planes, tall left clerestory windows, matte pale floor, restrained walnut paperwork alcove at right, one small white and teal twin-engine survey airplane parked on chocks, blue wheeled tool cart safely outside propeller arcs. Aircraft static; no running machinery. Color richness through composition, not texture. No other visible people beyond named cast. Primary subject: Sora, Japanese woman age 44, light warm-beige skin, dark-brown eyes, rounded-square face, short grouped black bob, navy coveralls over muted teal shirt and black safety shoes. One complete standing person beside blue tool cart, holding a plain closed task folder at her hip, looking toward the player's camera with a composed welcoming expression. Clearly middle-aged, drawn anime. Full legs and feet grounded.",
+      "path": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-48fc512c-4c04-4b8b-9fc3-8f6f79888f74.png",
+      "status": "Candidate, pending repairs"
+    },
+    {
+      "id": "caleb",
+      "prompt": "Use case: illustration-story. Create ONE complete opaque finished 16:9 landscape career game scene, no panels, text, HUD, border, montage or separate sprites. Attached image is DRAWING STYLE ONLY: match its 2D anime eye construction, simple nose mark, short line mouth and controlled linework; simplify its environment even further. Flat base colors plus ONE broad cel shadow. Hair only four to six broad groups, minimal interior marks, no strands or individual ringlets. Broad painted walls, matte floor, aircraft, equipment planes; sparse edges; no photographic surface textures, realistic metal, glossy floors, dense rivets, hatching, painted lips, sculpted skin or elaborate clothing folds. Complete naturally grounded bodies with feet within frame; no body cutoffs, player body or foreground hands. Camera wide: character head around 28% image height, feet around 88%, no face in top 20% or bottom 38%. Character can stand just right of center; native game panels will overlay lower center. Morning daylight through actual hangar skylights. Functional aviation hangar: long low barrel-vault roof, steel-blue curved beams, warm ivory wall planes, tall left clerestory windows, matte pale floor, restrained walnut paperwork alcove at right, one small white and teal twin-engine survey airplane parked on chocks, blue wheeled tool cart safely outside propeller arcs. Aircraft static; no running machinery. Color richness through composition, not texture. No other visible people beyond named cast. Primary subject: Caleb, Black man age 25, very dark warm-brown skin, amber-brown eyes, long oval face, short black coily hair drawn as four broad connected clusters, navy coveralls with sleeves rolled once, gray undershirt, black safety shoes. One complete standing person holding a task folder at his side beside the blue tool cart. Looks toward player camera with a slightly competitive earnest expression, restrained small smile. Full body grounded.",
+      "path": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-142f00db-5948-48d9-b012-f6cd1fc4dbf2.png",
+      "status": "Candidate, pending repairs"
+    },
+    {
+      "id": "elena",
+      "prompt": "Use case: illustration-story. Create ONE complete opaque finished 16:9 landscape career game scene, no panels, text, HUD, border, montage or separate sprites. Attached image is DRAWING STYLE ONLY: match its 2D anime eye construction, simple nose mark, short line mouth and controlled linework; simplify its environment even further. Flat base colors plus ONE broad cel shadow. Hair only four to six broad groups, minimal interior marks, no strands or individual ringlets. Broad painted walls, matte floor, aircraft, equipment planes; sparse edges; no photographic surface textures, realistic metal, glossy floors, dense rivets, hatching, painted lips, sculpted skin or elaborate clothing folds. Complete naturally grounded bodies with feet within frame; no body cutoffs, player body or foreground hands. Camera wide: character head around 28% image height, feet around 88%, no face in top 20% or bottom 38%. Character can stand just right of center; native game panels will overlay lower center. Morning daylight through actual hangar skylights. Functional aviation hangar: long low barrel-vault roof, steel-blue curved beams, warm ivory wall planes, tall left clerestory windows, matte pale floor, restrained walnut paperwork alcove at right, one small white and teal twin-engine survey airplane parked on chocks, blue wheeled tool cart safely outside propeller arcs. Aircraft static; no running machinery. Color richness through composition, not texture. No other visible people beyond named cast. Primary subject: Elena, Latina woman age 59, medium olive-brown skin, hazel eyes, broad face, simple age lines, short grouped silver-gray hair, clear safety glasses, slate work shirt tucked into navy trousers and black safety shoes. One complete standing person at right walnut records alcove holding a small parts packet with an unreadable paper tag. Looks toward camera, thoughtful and authoritative, visibly older. No painted skin modeling. Full body grounded.",
+      "path": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-fa3546c5-64cb-445c-a32b-58b21f7b1cb2.png",
+      "status": "Candidate, pending repairs"
+    },
+    {
+      "id": "priya",
+      "prompt": "Use case: illustration-story. Create ONE complete opaque finished 16:9 landscape career game scene, no panels, text, HUD, border, montage or separate sprites. Attached image is DRAWING STYLE ONLY: match its 2D anime eye construction, simple nose mark, short line mouth and controlled linework; simplify its environment even further. Flat base colors plus ONE broad cel shadow. Hair only four to six broad groups, minimal interior marks, no strands or individual ringlets. Broad painted walls, matte floor, aircraft, equipment planes; sparse edges; no photographic surface textures, realistic metal, glossy floors, dense rivets, hatching, painted lips, sculpted skin or elaborate clothing folds. Complete naturally grounded bodies with feet within frame; no body cutoffs, player body or foreground hands. Camera wide: character head around 28% image height, feet around 88%, no face in top 20% or bottom 38%. Character can stand just right of center; native game panels will overlay lower center. Morning daylight through actual hangar skylights. Functional aviation hangar: long low barrel-vault roof, steel-blue curved beams, warm ivory wall planes, tall left clerestory windows, matte pale floor, restrained walnut paperwork alcove at right, one small white and teal twin-engine survey airplane parked on chocks, blue wheeled tool cart safely outside propeller arcs. Aircraft static; no running machinery. Color richness through composition, not texture. No other visible people beyond named cast. Primary subject: Priya, South Asian woman age 24, deep brown skin with warm undertone, dark-brown eyes, soft round face, black wavy hair gathered in one broad low bun, navy coveralls with a sage undershirt, black safety shoes. One complete standing person beside the walnut records alcove, holding a plain handoff folder, looks toward player camera with a concerned but receptive expression. Full body grounded.",
+      "path": "/Users/chandump/.codex/generated_images/01a168a8-b343-7723-87e4-a5c783e143d5/exec-6b31cc06-2b1e-45ab-bdf2-b8f17abc0159.png",
+      "status": "Candidate, pending repairs"
+    }
+  ],
+  "repairs": [
+    "Interior mistakenly generated for first exterior; replaced with outside establishing view.",
+    "Simplified floor textures and reflections; grouped hair; preserved visibly older Elena.",
+    "Corrected Priya's skin base and expression before redesign; redesigned phone now follows corrected canonical image.",
+    "New architecture propagated as complete-scene edits, not sprites or layers."
+  ],
+  "faceChipDerivation": {
+    "method": "Extract canonical face from the accepted full-scene landscape, resize to 256px WebP; never a runtime scene sprite.",
+    "boxes": {
+      "sora": [
+        870,
+        145,
+        190,
+        190
+      ],
+      "caleb": [
+        870,
+        180,
+        190,
+        190
+      ],
+      "elena": [
+        1030,
+        155,
+        200,
+        200
+      ],
+      "priya": [
+        900,
+        185,
+        190,
+        190
+      ]
+    }
+  }
+}

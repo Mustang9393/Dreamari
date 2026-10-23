@@ -6,6 +6,8 @@
 import { PeekHost } from "./peek";
 import { NightSky } from "./NightSky";
 import { SkyAurora } from "./SkyAurora";
+import { SkySun, SkyFlare } from "./SkySun";
+import { StormVeil } from "./StormVeil";
 
 export function AppBackdrop({ calmSky = false }: { /** a still sky that lights up only on skyMoment() (counselor v7, NightSky.tsx) */ calmSky?: boolean } = {}) {
   return (
@@ -49,7 +51,13 @@ export function AppBackdrop({ calmSky = false }: { /** a still sky that lights u
       {/* Black & Blue, dark: an aurora on the horizon (./SkyAurora.tsx) */}
       <SkyAurora still={calmSky} />
       <NightSky calm={calmSky} />
+      {/* the storm darkens the page itself, fading in with the Storm switch (./StormVeil.tsx) */}
+      <StormVeil />
+      {/* Black & Blue, light: the day sky on the bottom edge and the clouds; dark: the storm only (./SkySun.tsx) */}
+      <SkySun still={calmSky} />
     </div>
+    {/* Black & Blue, light: the lens flare over the page while a moment plays (./SkySun.tsx) */}
+    <SkyFlare />
     </>
   );
 }

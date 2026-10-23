@@ -75,7 +75,7 @@ export function PlayHubCardsGroup() {
       <Specimen
         name="Simulation thumbnails" scale="core"
         file="src/components/play/games.ts"
-        purpose="Simulation.thumb and thumbFocus, read through simThumb(): a v2 scene with the lead character in it, kept apart from cover so the in-game backdrop stays put. IB: Christina at the glass door. RN: Rosa at the station. AMT: the landing-gear inspection pair."
+        purpose="Simulation.thumb and thumbFocus, read through simThumb(): a v2 scene with the lead character in it, kept apart from cover so the in-game backdrop stays put. IB: Christina welcoming you in the Cobalt lobby. RN: Rosa at the station. AMT: the landing-gear inspection pair."
         when={'Every tile that shows a simulation: Play hub, PlayStage, Home, Feed, counselor Most played. Chandu asked that "the compositions work in both 4:5 and 16:9 or whatever proportions the tiles scale to".'}
       >
         <StateGrid min={560}>

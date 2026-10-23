@@ -1,8 +1,59 @@
 # Dreamari Career Simulation Master SOP
 
-**Version 2.1 · 22 October 2026 · AI builds and repairs; human QA reviews the finished game**
+**Version 2.5 · 22 October 2026 · AI builds and repairs; human QA reviews the finished game**
 
 This is the shareable production standard for building a complete Level 1 from a career name. The vetted Investment Banking simulation is the gameplay, narrative, sequence, UX and scoring reference. New careers inherit its proven player experience while using their own authentic work, projects, colleagues and varied tasks. This SOP supersedes earlier editions and older exact beat/question lists.
+
+## Cast drawing and diversity acceptance
+
+REQUIRED CAST AND ANIME DRAWING CHECK
+
+Keep hair in four to six broad silhouette groups, with only a few internal divisions, one shadow family and at most one restrained highlight band. Do not add strand-by-strand rendering, glossy ribbons, many tiny locks or individually shaded ringlets. Preserve straight, wavy, curly and coily textures by changing the grouped silhouette, not by increasing detail.
+
+Faces must remain drawn 2D anime: clear anime eye construction, a simple nose mark, short mouth lines and a deliberately drawn jaw/chin. No painted lips, realistic nostrils, sculpted cheek planes, airbrushed skin or comic-book hatching. Vary face proportions for identity and age without switching rendering style. Older characters must stay visibly older. Use the approved references as the upper detail limit.
+
+Create a cast ledger across the whole career library before generation. Vary ethnicity, gender, age, very light through very dark skin tones, hair texture, face shape, eye color, posture and expression. Do not repeat one demographic as every mentor or give every character the same head tilt and eyes. Eye colors are individual design choices, not racial rules. Lock each person's natural skin base/undertone, face proportions, eye color and hair silhouette in a canonical reference; scene lighting must not change identity. Introduce one new person through the story at a time. Compare every recurring appearance against its own canonical image, never against an unrelated cast member.
+
+Reject the scene if hair detail escalates, a face stops reading as anime, age changes, skin/eyes drift, or the cast ledger collapses into repeated identities. Repair before integration. Keep the one-image complete-scene rule: these cast instructions do not authorize sprites or separate character output.
+
+
+## Reject realism, excess detail and incomplete figures
+
+STYLE FAILURE GATE — REJECT THESE RESULTS
+
+Use the approved images as an upper limit on detail, not a minimum: simplify further when uncertain. In this PDF, extract only pages labeled APPROVED as positive generation references. Pages labeled REJECTED explain failures and must never be supplied as positive style inputs.
+
+Match hand-drawn 2D anime, not a realistic painting with anime eyes. Skin uses flat color plus one clean cel shadow, not airbrushed gradients or sculpted cheeks. Draw the nose and mouth with short simple marks; do not paint lips or detailed nostrils. Hair uses four to six large groups with minimal internal lines. For curls/coils use a few connected silhouette clusters, not dozens of individually shaded ringlets. Clothing needs only the folds that explain the pose; no dense wrinkle networks or shiny fabric modeling. Preserve age and individual identity without adding realism.
+
+Environments must be visibly illustrated at the SAME level of simplification. Use broad painted floor/wall/aircraft/bench planes and sparse clean edges. No stone pores, floor mottling, grunge, dense panel seams, tiny rivets, crisp equipment reflections, photoreal metal or glossy mirrored floors. Keep room function and aircraft/equipment proportions believable while simplifying surface detail. A detailed background with a flat anime person is a failed match. Make design rich through spatial composition, furniture and color, not texture density. Do not use prompt terms such as photorealistic, hyperreal, PBR, ray traced, Octane, Unreal render, ultra-detailed or intricate surfaces.
+
+The approved reference images set face drawing, shading and detail limits only. Do not copy their camera crops: if a reference cuts off a figure, recompose the new scene wider with complete grounded bodies. Reject any hard horizontal cutoff through a person's legs, even if the background continues below it. Reject a portrait plate over a separate room, even if color and lighting match. Transparent layers are not allowed in final scene production.
+
+Before acceptance, compare the output beside the approved references at equal display size, then inspect hair, face, clothing, floor and reflected surfaces closely. Check the entire image with HUD/dialogue hidden. If it has a realistic-render background, excessive hair/fabric detail, a non-anime face or a missing body, it fails. Regenerate/edit the complete scene with the approved references attached; do not pass the failed result forward or call its added detail an upgrade. These are acceptance rules, not a guarantee that any one generation will obey them.
+
+
+## Complete scenes only — hard requirement
+
+MANDATORY OUTPUT CONTRACT: ONE COMPLETE SCENE
+
+Generate exactly one finished, opaque image per story scene. Draw the people, room, furniture, floor and lighting together in the same image. The character and environment instructions below are two sections of ONE prompt for ONE generation call. Never generate them as separate deliverables or combine separate layers afterward.
+
+Do not generate sprites, transparent PNG people, isolated figures, cutout portraits, waist-up assets, cropped character plates or a background intended for a later character overlay. Do not paste a torso onto a counter or hide an unfinished body with the game dialogue box. No runtime character layers, sprite anchors, floating torsos or detached legs. An identity reference is INPUT only; never wire it into the game as scene art.
+
+Stage the camera wide enough to fit each required character naturally in the room. Standing characters must have complete anatomy, with legs and feet inside the image and grounded on the floor. If real furniture legitimately hides part of a body, draw the scene with coherent perspective and natural occlusion; never terminate the body at the furniture edge or place the figure on its surface. Prefer a wider shot when the body would otherwise hit the image boundary. Do not crop a person at the waist, knees or ankles to fill the frame.
+
+Deliver the complete scene at its target landscape or portrait aspect ratio. Keep faces and important actions clear of the HUD and dialogue zones. Review the image with ALL HUD/dialogue panels hidden: it must stand alone as a complete scene, with no missing lower bodies, exposed sprite edges or unnatural cutoffs. If it fails, recompose and regenerate the whole scene or edit the whole scene with its reference attached. Do not repair it by adding UI, zooming, blurring the sides or compositing a different character layer.
+
+
+## Art handoff for a new chat — mandatory
+
+The art standard is the actual approved UX Designer, Food Scientist and Registered Nurse game images below. Download or attach the full images before generation. Merely saying “anime,” “cinematic,” “luxurious,” or naming a game does not establish the rendering style. The PDF includes visual examples; the downloadable reference pack supplies the full images for image-tool input. Keep the illustrated detail level even when designing an opulent new workplace.
+
+- [UX Designer approved scene](https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/ux-approved-work.png)
+- [Food Scientist approved scene](https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/food-approved-work.png)
+- [Registered Nurse approved scene](https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/nurse-approved-corridor.png)
+
+Use Appendix B's reference-loading instructions, character prompt, environment prompt and assembly check together. Both character and environment prompts are detailed independently, but production output is still one complete image with characters baked in. Copying the PDF text without loading the reference images is not a complete art brief. Attach the same approved primary scene to every generation, then add canonical identity and room references. A new chat must not substitute its own idea of premium anime.
 
 ## 1. Goal and decision rights
 
@@ -12,25 +63,25 @@ Use current user feedback and repository handoff documents as the latest authori
 
 ## 2. Gameplay, pacing and progress
 
-The vetted Investment Banking Level 1 (`src/components/play/ib-level-1-v2.ts`) is an exact 29-slot template, not merely a pacing reference. Build exactly 29 runtime beats for new careers such as UX Designer and Food Scientist, preserving this sequence of work and interaction types while replacing banking-specific content with authentic career tasks. Slots 1-2 are establishing workplace welcome and stakes cards with no future character faces. The mentor first appears at slot 3; slot 4 establishes their authority and career ladder. Reach the first easy scored choice at slot 6. Keep copy concise for a US eighth-grade reader.
+The vetted Investment Banking Level 1 (`src/components/play/ib-level-1-v2.ts`) provides the 29-slot narrative and learning spine. Build exactly 29 runtime beats for new careers such as UX Designer and Food Scientist, preserving the story sequence, teaching rhythm and scored checkpoints while researching authentic tasks for the career and level. Slots 1-2 are establishing workplace welcome and stakes cards with no future character faces. The mentor first appears at slot 3; slot 4 establishes their authority and career ladder. Reach the first easy scored choice at slot 6. Keep copy concise for a US eighth-grade reader.
 
 For every career, make the first story image a clear exterior establishing view of the actual workplace; the next establishes its interior and stakes. Shared anime drawing style does not mean shared building design: choose career-appropriate, visibly distinct massing, roofline, facade and material rhythm, and avoid three generic ivory-glass porticos. UX is a restored six-story waterfront red-brick industrial loft with modern ivory/walnut fit-out; Food is a low one-to-two-story sage garden research campus with a sawtooth clerestory roof; RN is a curved eight-story lake-facing patient tower over a rounded clinical podium. Keep each exterior consistent with its interior materials, window grids and geography; preserve RN's established lake-facing view. Use plausible morning light. This adds no beat or people; RN script order remains locked.
 
-### Exact 29-slot IB sequence
+### Shared 29-slot story spine
 
-**Slots 1–10:** 1 workplace welcome; 2 stakes; 3 mentor introduction; 4 mentor authority and career ladder; 5 brief peer cameo; 6 first easy scored choice (#1); 7 four vocabulary cards; 8 four applied matching pairs as practice, with no verdict; 9 four timed rapid items in 45 seconds, scored decision #2; 10 privacy rule.
+**Slots 1–10:** 1 workplace welcome; 2 stakes; 3 mentor introduction; 4 mentor authority and career ladder; 5 brief peer cameo; 6 first easy scored choice (#1); 7 four vocabulary cards; 8 four applied matching pairs as practice, with no verdict; 9 four timed rapid items in 45 seconds, scored decision #2; 10 career method or rule.
 
-**Slots 11–20:** 11 storage-zones choice (#3); 12 senior arrival; 13 senior context and evidence standard; 14 decision authority and ladder; 15 document-accuracy choice (#4); 16 midpoint review at 68, after four scored decisions; 17 short Act 2 transition; 18 returning rival's motivation (not a reintroduction); 19 rival takes credit; 20 private response choice (#5).
+**Slots 11–20:** 11 apply the career rule (#3); 12 senior arrival; 13 senior context and evidence standard; 14 decision authority and ladder; 15 perform or critique career work (#4); 16 midpoint review at 68, after four scored decisions; 17 short Act 2 transition; 18 returning rival's motivation (not a reintroduction); 19 rival takes credit; 20 private response choice (#5).
 
-**Slots 21–29:** 21 deadline and workload shock; 22 mentor chat about priorities (#6); 23 delivery; 24 peer needs help; 25 her-deadline/your-time contrast; 26 rank a supportive response (#7); 27 mentor notices; 28 completion; 29 final review.
+**Slots 21–29:** 21 deadline and workload shock; 22 mentor chat proposing a job-specific solution (#6); 23 delivery; 24 peer needs help; 25 her-deadline/your-time contrast; 26 rank a supportive response (#7); 27 mentor notices; 28 completion; 29 final review.
 
-Keep the teaching trace coherent: teach the actual job-specific concepts in slot 7, practice their application with four realistic pairs in slot 8, then apply the same concepts in slot 9. Do not use placeholder terms or unrelated questions. Practice is unscored and has no verdict screen. Preserve the IB question layouts and decision positions: scored choices at slots 6, 9, 11, 15, 20, 22 and 26, with the rapid round at #2 and the final ranking at #7. The scoring contract is reputation 50, seven decisions worth ±6, midpoint 68 after decision four, final pass 85.
+Keep the teaching trace coherent: teach the actual job-specific concepts in slot 7, practice their application with four realistic pairs in slot 8, then apply the same concepts in slot 9. Do not use placeholder terms or unrelated questions. Practice is unscored and has no verdict screen. Preserve decision positions, while choosing existing question controls that fit the actual work: scored choices at slots 6, 9, 11, 15, 20, 22 and 26, with the rapid round at #2 and the final ranking at #7. The scoring contract is reputation 50, seven decisions worth ±6, midpoint 68 after decision four, final pass 85.
 
 Carry the same mentor, rival and senior into planned later levels in a continuity ledger, preserving their names, roles, identities and relationships. Build Level 1 only; do not build future levels or imply a real unlock that the game has not implemented.
 
 ### What the previous v2.0 wording missed
 
-The actual IB source does not start with a mentor or force several mentor-only opening beats: slots 1-2 establish the workplace and stakes, slot 3 introduces the mentor, slot 4 explains authority, and slot 5 briefly introduces the peer. Its middle teaches vocabulary, practices with a no-verdict matching interaction, and applies it in a four-item timed round. Its later story turns the same characters and workplace tensions into decisions, checkpoint, support ranking and review. The previous v2.0 wording named a 29-beat count and a few character positions but lacked this exact sequence and learning trace; it also read as a character-introduction schedule rather than work-led scenes. Use the slot contract above as the source of truth.
+The actual IB source does not start with a mentor or force several mentor-only opening beats: slots 1-2 establish the workplace and stakes, slot 3 introduces the mentor, slot 4 explains authority, and slot 5 briefly introduces the peer. Its middle teaches vocabulary, practices with a no-verdict matching interaction, and applies it in a four-item timed round. Its later story turns the same characters and workplace tensions into decisions, checkpoint, support ranking and review. The previous v2.0 wording named a 29-beat count and a few character positions but lacked this exact sequence and learning trace; it also read as a character-introduction schedule rather than work-led scenes. Use that narrative order as the source of truth. Version 2.5 corrects an additional failure: forcing every career into IB’s storage and report questions produced noun-swapped quizzes. Keep the narrative purpose; research the job action and choose its control separately.
 
 For these new-career builds, keep the IB score contract: reputation begins at 50; seven scored decisions change it by +6 or -6; no strikes; checkpoint after four scored decisions at 68; final pass at 85. Practice interactions remain unscored. The progress bar is a separate measure: begin at 0 before any scored decision, then show completed scored decisions out of seven (for example, 1/7 after decision one resolves). Do not seed the progress bar or derive it from reputation. The player's score still starts at 50. Preserve the shared player behavior, option locking, correction, keyboard/touch and result flow.
 
@@ -44,7 +95,21 @@ Follow the exact cast, action, emotion, location and time in each approved Nursi
 
 Research entry-level work using primary sources: official professional standards, government and regulator guidance, primary organization documentation, product manuals and official training materials. Record each source title and URL, the fact it supports, the role’s authority and any limit. Distinguish researched facts from fictional training data. A fictional prestigious project may create stakes, but must not imply a real company endorsement or career guarantee.
 
-Give the learner an honest role. Introduce a mentor, authority and colleagues only when they contribute to later work. Avoid repeating the same client, missing-record crisis or peer-misconduct plot across careers. Choose a concrete deliverable and a credible project. Explain the goal and stakes without claiming a junior controls decisions outside their role.
+Give the learner an honest role. Introduce a mentor, authority and colleagues only when they contribute to later work. Keep the established mentor/rival/deadline/support arc, while changing the career-specific work, project and technical complication. Choose a concrete deliverable and a credible project. Explain the goal and stakes without claiming a junior controls decisions outside their role.
+
+### Research and level-fit task contracts
+
+Before drafting questions, independently research what a beginner actually does in the requested career. Use occupational sources for duties and first-party or professional method guides for how the work is done. Record source title, URL, fact supported, stage, authority and limits. Choose an authentic project and design the work before selecting a quiz format. Sources support methods; fictional brand names, codes and results remain clearly marked training data.
+
+For every scored task record: story slot, work objective, prerequisite teaching, supplied facts, player action, answer rationale, plausible mistakes, role authority, review owner, existing interaction and optional visual state. At least four of seven scored decisions must involve actual career work. Common ethics and teamwork can recur, but technical questions must not become the same problem with new nouns. Compare new question stems and option sets against existing careers and inspect the reasoning, not just exact words.
+
+Level 1 is supervised first-week work. The player can sketch, observe, label, prepare, compare, document, flag and propose. A mentor or qualified specialist retains final approval. Later levels increase responsibility only when research supports it. Never ask a junior to approve market release, safety, clinical care or accessibility compliance independently.
+
+UX now uses rough layouts, neutral usability tasks, Save placement, a broken prototype path and keyboard observation notes. Food Scientist uses an assigned small comparison, neutral tasting codes, recipe-code records and missing-record escalation. The UX fourth term is Observation; Food’s is Sample code. Rapid rounds apply those job terms. Slot 10 teaches a relevant method, slot 11 applies it, and slot 15 need not always be a report-error exercise. Keep mentor/rival continuity, midpoint and final review unchanged. Nursing’s approved gameplay remains locked.
+
+For optional graphics, align the state to the task: UX Save placement shows the buried layout before the choice and a proposed clear layout after success; the next test still needs evidence. Choosing a wrong test instruction must not revert a layout. Food’s named labels become neutral codes after the appropriate choice. Graphics stay read-only; each question supplies its essential facts without a graphic.
+
+Research and inspectable task contracts are in `docs/handoff/career-scaling/career-task-research.json` and `career-task-contracts.json`. A passing validator checks structure, evidence references and scope coverage; it is not expert certification. Play the changed controls and check wrong-answer states before release.
 
 ### Work-led cast and continuity
 
@@ -55,6 +120,23 @@ For the current UX Designer sequence, Arjun is the mentor at slot 3, with author
 A small test supports only its observed result. Do not turn one UX session into universal usability, a tasting trial into product release approval, or an unverified reading into a clinical recommendation. Do not invent clinical dosages, thresholds, technical limits, legal rules, salaries or release approval. In nursing content, stay within sourced and role-appropriate basics. For example, the Joint Commission’s identifier guidance and AHRQ’s handoff material can support an identity-check or communication concept; neither authorizes made-up medication values. If evidence is unavailable, say so and design a task that does not need it.
 
 Useful research examples for UX include NN/g’s [Usability Testing 101](https://www.nngroup.com/articles/usability-testing-101/) and [Task Scenarios for Usability Testing](https://www.nngroup.com/articles/task-scenarios-usability-testing/). They support realistic, actionable tasks that do not reveal the answer. For Nursing, use AHRQ PSNet’s [Handoffs](https://psnet.ahrq.gov/primer/handoffs) and the Joint Commission’s [Two Patient Identifiers FAQ](https://www.jointcommission.org/en/knowledge-library/support-center/standards-interpretation/standards-faqs/000001463). Cite evidence in career briefs and graphics research, not in student copy.
+
+## Starting role and level-specific research — required before writing
+
+Level 1 starts at the real beginning of that career pathway. “Beginner” does not mean “intern” in every profession. Keep IB's Intern starting role and Nursing's new graduate Registered Nurse role. Do not relabel an RN as a nursing intern, turn an IB intern into a deal lead, or import another career's tasks to preserve a quiz layout. Existing approved scripts remain locked unless the user authorizes rewriting them.
+
+Starting-role examples for authoring, not a universal title ladder:
+
+- Investment Banking Level 1: Intern. Support assigned team work, check source material, prepare drafts and ask the associate for review. Do not independently price a deal, negotiate or promise a client outcome. [Goldman Sachs student programs](https://www.goldmansachs.com/careers/students.html) documents distinct internship and new-analyst entry routes; the game's Intern stage follows its approved IB script.
+- Registered Nurse Level 1: new graduate Registered Nurse in transition/orientation. Use the vetted nursing game's identity checks, observations, communication and escalation with the established preceptor. Do not substitute a nursing student, invent clinical thresholds, or assume all settings have identical scope. [NCSBN Transition to Practice](https://www.ncsbn.org/nursing-regulation/practice/transition-to-practice.page) supports structured transition for new graduate nurses, not any fictional clinical answer key.
+- UX Designer Level 1: a researched intern or junior designer under a reviewer, consistent with the selected pathway and existing game's junior role. Sketch assigned flows, record observations, revise prototypes and propose tests. A senior reviews launch and research decisions. [GOV.UK usability guidance](https://www.gov.uk/service-manual/user-research/using-moderated-usability-testing) supports realistic tasks and observation without hints; it does not establish a universal job title.
+- Food Scientist Level 1: identify the actual entry route first (intern, trainee, research assistant or supervised junior scientist). Prepare labeled samples, follow an assigned comparison and maintain records where supported by the chosen role. Do not silently equate technician and scientist qualifications or let the beginner approve safety/release. [O*NET Food Science Technicians](https://www.onetonline.org/link/details/19-4013.00) supports supervised test/sample/record duties as a bounded support-work example, not a universal scientist ladder.
+
+For EVERY new career and EVERY later level, independently research the role/stage before drafting activities. Use at least two appropriate primary sources: occupational/professional/regulatory duties plus an actual entry or training pathway, employer program or first-party work-method guide. Record title, URL, date checked, exact supported fact and its limits. If a source describes an experienced professional or adjacent occupation, do not present it as proof of beginner authority; add a stage-specific source or explicitly narrow the task. Do not infer an entire first week from a career title alone.
+
+Create a per-level research contract: starting role, prerequisites assumed, working context, supervisor/reviewer, allowed decisions, escalation route and tasks outside that role. For each task record the source fact, why this role would perform it at this level, information supplied, expected action/output, review owner, prior teaching and answer rationale. Mark invented brands, amounts, deadlines and observations as fictional teaching data. Technical, clinical or regulated facts require the appropriate authoritative source; avoid the task if its answer cannot be supported.
+
+Retain the established high-level IB/Nursing storytelling patterns: meaningful workplace entry, mentor relationship, work-led introductions, teach/practice/apply, rising pressure, colleague tension, checkpoint, collaboration and review. Translate those functions into this career's real work. Do not clone file-storage, report or generic-email questions. Keep first decisions manageable and increase responsibility only at a researched later stage. The first-week scenario may be condensed for play, but must not pretend the beginner owns expert sign-off. Final QA must check the task-stage fit as well as story continuity and eighth-grade clarity.
 
 ## 4. Copy and question design
 
@@ -113,15 +195,39 @@ Deliver a playable QA build, source-backed research brief, script and keys, cove
 ## Appendix A. Copy-ready build prompt
 
 ```text
-Build and deliver one complete Dreamari Level 1 for {CAREER}. Read `output/career-master/master-sop.md`, the latest `docs/AI_HANDOFF.md`, current user feedback, `AGENTS.md`, `docs/HANDOFF_INDEX.md`, the shared simulation engine and the actual Investment Banking Level 1. Choose and record sensible defaults when only a career name is supplied. AI owns research, writing, art, integration, complete-game QA and repair. Do not require intermediate human approval; contact sheets are internal QA.
+## Starting role and level-specific research — required before writing
 
-For a new career, reproduce the exact 29-slot IB template above. Slots 1–2 are workplace welcome/stakes and have no future character faces. Slot 3 introduces the mentor; 4 establishes authority/ladder; 5 is a brief peer cameo; 6 is the first easy scored choice (#1). Slots 7–9 form teach/practice/apply using the same real career concepts: four vocabulary cards, four applied matching pairs as unscored practice with no verdict, then four rapid items in 45 seconds as scored decision #2. Slots 10–15 continue privacy, storage-zones choice #3, senior arrival/context, authority/ladder and document-accuracy choice #4. Slot 16 is the midpoint at 68 after four scored decisions; 17 is a short Act 2 transition. Slots 18–20 are the returning rival's motivation, takes-credit moment and private-response choice #5. Slots 21–23 are deadline/workload shock, mentor priority chat (#6), and delivery. Slots 24–27 are peer needs help, the deadline contrast, supportive-response ranking (#7), and mentor notices. Slots 28–29 are completion and final review. Keep every slot's interaction and question layout. Use one task and one instruction per screen, concise US eighth-grade copy, and role-appropriate evidence.
+Level 1 starts at the real beginning of that career pathway. “Beginner” does not mean “intern” in every profession. Keep IB's Intern starting role and Nursing's new graduate Registered Nurse role. Do not relabel an RN as a nursing intern, turn an IB intern into a deal lead, or import another career's tasks to preserve a quiz layout. Existing approved scripts remain locked unless the user authorizes rewriting them.
 
-Slot 1: workplace exterior; slot 2: interior and stakes. Use career-specific distinct massing, roofline, facade and material rhythm, not a generic ivory-glass portico. UX: six-story waterfront red-brick industrial loft; Food: low sage garden research campus with sawtooth clerestory; RN: curved lake-facing patient tower over rounded clinical podium. Preserve established interior materials, window grids and geography. Same anime drawing style, plausible morning light; no extra beat or face.
+Starting-role examples for authoring, not a universal title ladder:
 
-Keep the IB score contract: reputation 50, seven decisions worth ±6, no strikes, midpoint 68 after decision four and final pass 85. The decision progress bar is independent: starts at 0/7 and advances only when a scored decision resolves. Teach real concepts, practice them, then apply the same concepts; never use placeholders or unrelated questions. Do not shift the slot order or replace it with a generic varied-interaction list.
+- Investment Banking Level 1: Intern. Support assigned team work, check source material, prepare drafts and ask the associate for review. Do not independently price a deal, negotiate or promise a client outcome. [Goldman Sachs student programs](https://www.goldmansachs.com/careers/students.html) documents distinct internship and new-analyst entry routes; the game's Intern stage follows its approved IB script.
+- Registered Nurse Level 1: new graduate Registered Nurse in transition/orientation. Use the vetted nursing game's identity checks, observations, communication and escalation with the established preceptor. Do not substitute a nursing student, invent clinical thresholds, or assume all settings have identical scope. [NCSBN Transition to Practice](https://www.ncsbn.org/nursing-regulation/practice/transition-to-practice.page) supports structured transition for new graduate nurses, not any fictional clinical answer key.
+- UX Designer Level 1: a researched intern or junior designer under a reviewer, consistent with the selected pathway and existing game's junior role. Sketch assigned flows, record observations, revise prototypes and propose tests. A senior reviews launch and research decisions. [GOV.UK usability guidance](https://www.gov.uk/service-manual/user-research/using-moderated-usability-testing) supports realistic tasks and observation without hints; it does not establish a universal job title.
+- Food Scientist Level 1: identify the actual entry route first (intern, trainee, research assistant or supervised junior scientist). Prepare labeled samples, follow an assigned comparison and maintain records where supported by the chosen role. Do not silently equate technician and scientist qualifications or let the beginner approve safety/release. [O*NET Food Science Technicians](https://www.onetonline.org/link/details/19-4013.00) supports supervised test/sample/record duties as a bounded support-work example, not a universal scientist ladder.
 
-Introduce cast through the work, not through a succession of introduction cards; put gameplay between entrances. UX: Arjun mentor 3–4; Noah brief cameo 5 and rival return 18–20; Samira senior 12; Amina peer needing help 24. Food: Ren mentor 3–4; Imani brief cameo 5 and rival return 18–20; Yuki senior 12; Luis peer needing help 24. Noah's prototype work, Samira's review, Amina's keyboard test, Imani's trial, Yuki's tasting and Luis's missing-record task trigger their appearances. Show only the person needed for the work in each slot. Do not force extra introduction/follow-up cards. Carry identities/relationships into a future-level continuity ledger, but build Level 1 only and do not imply an unimplemented unlock. Preserve all 29 slots.
+For EVERY new career and EVERY later level, independently research the role/stage before drafting activities. Use at least two appropriate primary sources: occupational/professional/regulatory duties plus an actual entry or training pathway, employer program or first-party work-method guide. Record title, URL, date checked, exact supported fact and its limits. If a source describes an experienced professional or adjacent occupation, do not present it as proof of beginner authority; add a stage-specific source or explicitly narrow the task. Do not infer an entire first week from a career title alone.
+
+Create a per-level research contract: starting role, prerequisites assumed, working context, supervisor/reviewer, allowed decisions, escalation route and tasks outside that role. For each task record the source fact, why this role would perform it at this level, information supplied, expected action/output, review owner, prior teaching and answer rationale. Mark invented brands, amounts, deadlines and observations as fictional teaching data. Technical, clinical or regulated facts require the appropriate authoritative source; avoid the task if its answer cannot be supported.
+
+Retain the established high-level IB/Nursing storytelling patterns: meaningful workplace entry, mentor relationship, work-led introductions, teach/practice/apply, rising pressure, colleague tension, checkpoint, collaboration and review. Translate those functions into this career's real work. Do not clone file-storage, report or generic-email questions. Keep first decisions manageable and increase responsibility only at a researched later stage. The first-week scenario may be condensed for play, but must not pretend the beginner owns expert sign-off. Final QA must check the task-stage fit as well as story continuity and eighth-grade clarity.
+
+
+Build and deliver one complete Dreamari Level 1 for {CAREER}. Art output is complete opaque scene images only: characters and environments drawn together, never separate sprite/background layers. Do not generate cropped character assets or use UI to hide unfinished bodies. Read `output/career-master/master-sop.md`, the latest `docs/AI_HANDOFF.md`, current user feedback, `AGENTS.md`, `docs/HANDOFF_INDEX.md`, the shared simulation engine and the actual Investment Banking Level 1. Choose and record sensible defaults when only a career name is supplied. AI owns research, writing, art, integration, complete-game QA and repair. Do not require intermediate human approval; contact sheets are internal QA.
+
+For new careers, keep IB’s 29-slot high-level story and learning rhythm, not its banking questions. Slots 1–2 establish workplace/stakes; 3 mentor; 4 junior authority; 5 peer seed; 6 first easy work decision (#1); 7 four job terms; 8 four applied matches, unscored/no verdict; 9 four related rapid items in 45 seconds (#2); 10 a relevant career method/rule; 11 apply it to the assigned work (#3); 12 senior arrival; 13 job evidence/context; 14 authority/ladder; 15 perform or critique career work (#4); 16 midpoint at 68 after four decisions; 17 Act 2; 18–20 returning rival, credit conflict, private response (#5); 21 job-specific deadline complication; 22 propose a bounded solution to the mentor (#6); 23 delivery; 24 colleague needs help; 25 explains the work and your capacity; 26 rank concrete support (#7); 27 mentor notices; 28 completion; 29 final review. Maintain decision positions, learning-before-testing, cast continuity, scoring and progression. Select existing answer controls that fit the work. File storage, document error-spotting and identical question layouts are not mandatory across careers.
+
+RESEARCH THE ACTUAL WORK BEFORE WRITING QUESTIONS. Independently consult primary occupational sources, professional bodies and first-party method guides for {CAREER} at {LEVEL / STAGE}. Record sources, supported facts and limits. Build a task contract for every scored screen: narrative purpose, real job objective, supplied evidence, junior authority, taught concept, expected action, answer rationale, plausible mistakes, control and optional graphic state. Level 1 means supervised beginner work: sketch, observe, prepare, compare, label, record, flag and propose for review. Later levels may plan, supervise or approve only when sourced authority fits. Never give an intern independent launch, clinical, safety or compliance sign-off.
+
+At least four of the seven scored decisions must exercise actual career work; common teamwork and ethics remain where the story needs them. The rapid round applies the four job terms, not generic email etiquette. A junior UX designer may sketch a wireframe, place Save near its content, choose a neutral fan task and propose repairing a broken flow before polish. A supervised food-science junior may follow a small trial plan, apply neutral codes, catch a sample-record mismatch and flag a missing recipe before comparison. These are examples, not tasks to paste into other careers. Compare all question stems and answer sets with existing games: if changing career nouns leaves the same technical question, redesign it. Shared story beats may remain shared; technical decisions need authentic evidence and consequences.
+
+All careers open with a clear workplace exterior, followed by interior/stakes. Shared anime drawing style does not mean shared building design: choose career-specific massing, roofline, facade and material rhythm; do not use three generic ivory-glass porticos. UX: restored six-story waterfront red-brick industrial loft with modern ivory/walnut fit-out. Food: low one-to-two-story sage garden research campus with sawtooth clerestory roof. RN: curved eight-story lake-facing patient tower over rounded clinical podium. Keep each exterior consistent with its established interior materials, window grids and geography; preserve the RN lake-facing view. Use plausible morning light. This uses existing slots; no added beat or face.
+
+Audit the story and teaching arc against `src/components/play/ib-level-1-v2.ts`. Preserve its intentional entrances, practice, checkpoint, rival return, pressure, collaboration and review. Do not copy its storage question or report exercise simply to match a slot. Nursing remains a separate vetted gameplay reference and locked script.
+
+Use the IB scoring foundation: reputation starts at 50, seven scored decisions change it by ±6, no strikes, checkpoint after four at 68, final pass at 85; practice is unscored. The independent decision progress starts at 0/7 and tracks resolved scored decisions; do not derive it from reputation. Write concise US eighth-grade copy with one task and one instruction per screen. Teach real career concepts, practice those concepts, then assess the same concepts; never use placeholder vocabulary or unrelated rapid items.
+
+CAST LEDGER AND WORK-LED ENTRANCES. First appearance is only when the slot's work requires the character; no introduction-card sequence, even if the cards are separated. Gameplay occurs between entrances. Keep slots 1–2 free of character faces. UX: Arjun is mentor at 3, authority at 4; Noah briefly appears through prototype work at 5 and returns as the rival at 18–20; Samira is the senior at 12, introduced through review; Amina is the peer needing help at 24, introduced through keyboard testing. Food Scientist: Ren mentors at 3–4; Imani is a brief rival cameo through the trial at 5 and returns at 18–20; Yuki is senior at 12 through tasting; Luis is peer needing help at 24 through a missing-record task. Create one canonical solo first appearance per person, then follow-ups; no future cast cameos or group portraits before everyone is introduced. Mentor recurs; any rival's opposition needs a story reason. Log these cast identities/relationships for future levels, but build Level 1 only and never imply an unimplemented unlock. Verify every scene against the ledger.
 
 APPROVED NURSING EXCEPTION - IMAGE ONLY: Registered Nurse is a separately vetted and approved game. Keep the original script locked in `src/components/play/rn-level-1-v2.ts` (restored from `ff4b97e`): 36 runtime beats across 55 script screens, ten scored decisions at ±5, two applied practice decisions, matching/vocabulary/rapid/ranking/pick interactions, midpoint/final review and original endings. Retain its original seven-card trailer and six-rung ladder. Do not make Nursing 29 beats or seven decisions. For this approved game, do not change its script, questions, answer keys, score, interaction, reviews, endings, trailer or ladder. Change only images and face chips. Compare all gameplay data to the approved source and verify art against each exact script screen.
 
@@ -129,11 +235,11 @@ For all careers, research entry-level work from primary sources and record title
 
 Write short American English: one task and one instruction, with no repeated title, question, graphic heading or operation prompt. Use story card order title → graphic → description → CTA. Keep questions self-contained and answerable with the graphic removed. Supporting work graphics are optional, native, minimal text and read-only. Use meaningful visible good/bad states when relevant: for a UX save-action task, show a buried Save under long gray copy, then show the improved screen with Save prominent. The question itself supplies the evidence. No dense charts, hidden clues or extra controls.
 
-Use `art-master-prompt.txt` for complete opaque scenes. Match cast presence, emotion, action and time to each approved screen. Crisis scenes have no misplaced smiles; an alarmed patient can be alone if Rosa is elsewhere. Use fixed canonical identity per character. Keep older Eleanor (60) and Sofia (67) visibly and consistently older. For the Black cast, make one canonical update one shade darker and propagate it to every scene and face chip, without crushing shadows into black. Blonde hair uses no more than four broad solid masses and at most two internal hairlines.
+Before image generation load the three full approved reference images linked in SOP v2.5. Apply `character-art-prompt.txt` and `background-art-prompt.txt` together via `art-master-prompt.txt` for complete opaque scenes. A reference name or PDF text alone is insufficient. Do not interpret luxury as photographic materials or architectural visualization. Match cast presence, emotion, action and time to each approved screen. Crisis scenes have no misplaced smiles; an alarmed patient can be alone if Rosa is elsewhere. Use fixed canonical identity per character. Keep older Eleanor (60) and Sofia (67) visibly and consistently older. For the Black cast, make one canonical update one shade darker and propagate it to every scene and face chip, without crushing shadows into black. Blonde hair uses no more than four broad solid masses and at most two internal hairlines.
 
 Generate dedicated landscape and portrait compositions as needed. Each finished scene fills its intended viewport aspect, with clear HUD and dialogue bands and intact faces. No runtime zoom/crop, blurred side-fill, black bars or cropped characters. Do not assemble sprites or foreground player arms. Use luxurious ivory, walnut and brass architecture with selective flat anime environment detail, not photorealism.
 
-Keep UI panels consistently centered; never shift UI left or right to protect faces. Compose artwork around the fixed centered HUD, question and dialogue footprint. Success uses the shared IB monogram/CareerSeal, not a plain trophy.
+Keep gameplay panels consistently centered across scenes; never shift them left or right to protect a face. Compose each art orientation around the fixed centered HUD/question/dialogue footprint. Success uses the shared IB monogram/CareerSeal, never a plain trophy.
 
 For Nursing, preserve the established lake, red-roof houses, trees and green hill outside; use plausible window/practical lighting. Map every image to the script's actual cast, emotion and time. Maintain work surfaces required by the approved story, such as ECG, badge, call-light board, wristband and reports.
 
@@ -142,38 +248,110 @@ Integrate with shared controls and play the full new-career game through pass/fa
 Deliver the playable build, source-backed brief, script and keys, task/scene coverage, cast/room ledgers, prompt and asset records, screenshots, complete-game QA results and open issues. Do not claim fresh generations guarantee identical pixels.
 ```
 
-## Appendix B. Copy-ready complete-scene art prompt
+## Appendix B. Copy-ready character and environment art prompts
+
+### B0. Cast drawing and diversity gate
+
+REQUIRED CAST AND ANIME DRAWING CHECK
+
+Keep hair in four to six broad silhouette groups, with only a few internal divisions, one shadow family and at most one restrained highlight band. Do not add strand-by-strand rendering, glossy ribbons, many tiny locks or individually shaded ringlets. Preserve straight, wavy, curly and coily textures by changing the grouped silhouette, not by increasing detail.
+
+Faces must remain drawn 2D anime: clear anime eye construction, a simple nose mark, short mouth lines and a deliberately drawn jaw/chin. No painted lips, realistic nostrils, sculpted cheek planes, airbrushed skin or comic-book hatching. Vary face proportions for identity and age without switching rendering style. Older characters must stay visibly older. Use the approved references as the upper detail limit.
+
+Create a cast ledger across the whole career library before generation. Vary ethnicity, gender, age, very light through very dark skin tones, hair texture, face shape, eye color, posture and expression. Do not repeat one demographic as every mentor or give every character the same head tilt and eyes. Eye colors are individual design choices, not racial rules. Lock each person's natural skin base/undertone, face proportions, eye color and hair silhouette in a canonical reference; scene lighting must not change identity. Introduce one new person through the story at a time. Compare every recurring appearance against its own canonical image, never against an unrelated cast member.
+
+Reject the scene if hair detail escalates, a face stops reading as anime, age changes, skin/eyes drift, or the cast ledger collapses into repeated identities. Repair before integration. Keep the one-image complete-scene rule: these cast instructions do not authorize sprites or separate character output.
+
+
+### B0a. Required style gate
+
+STYLE FAILURE GATE — REJECT THESE RESULTS
+
+Use the approved images as an upper limit on detail, not a minimum: simplify further when uncertain. In this PDF, extract only pages labeled APPROVED as positive generation references. Pages labeled REJECTED explain failures and must never be supplied as positive style inputs.
+
+Match hand-drawn 2D anime, not a realistic painting with anime eyes. Skin uses flat color plus one clean cel shadow, not airbrushed gradients or sculpted cheeks. Draw the nose and mouth with short simple marks; do not paint lips or detailed nostrils. Hair uses four to six large groups with minimal internal lines. For curls/coils use a few connected silhouette clusters, not dozens of individually shaded ringlets. Clothing needs only the folds that explain the pose; no dense wrinkle networks or shiny fabric modeling. Preserve age and individual identity without adding realism.
+
+Environments must be visibly illustrated at the SAME level of simplification. Use broad painted floor/wall/aircraft/bench planes and sparse clean edges. No stone pores, floor mottling, grunge, dense panel seams, tiny rivets, crisp equipment reflections, photoreal metal or glossy mirrored floors. Keep room function and aircraft/equipment proportions believable while simplifying surface detail. A detailed background with a flat anime person is a failed match. Make design rich through spatial composition, furniture and color, not texture density. Do not use prompt terms such as photorealistic, hyperreal, PBR, ray traced, Octane, Unreal render, ultra-detailed or intricate surfaces.
+
+The approved reference images set face drawing, shading and detail limits only. Do not copy their camera crops: if a reference cuts off a figure, recompose the new scene wider with complete grounded bodies. Reject any hard horizontal cutoff through a person's legs, even if the background continues below it. Reject a portrait plate over a separate room, even if color and lighting match. Transparent layers are not allowed in final scene production.
+
+Before acceptance, compare the output beside the approved references at equal display size, then inspect hair, face, clothing, floor and reflected surfaces closely. Check the entire image with HUD/dialogue hidden. If it has a realistic-render background, excessive hair/fabric detail, a non-anime face or a missing body, it fails. Regenerate/edit the complete scene with the approved references attached; do not pass the failed result forward or call its added detail an upgrade. These are acceptance rules, not a guarantee that any one generation will obey them.
+
+
+### B0a. One image job, no sprites or separate layers
+
+MANDATORY OUTPUT CONTRACT: ONE COMPLETE SCENE
+
+Generate exactly one finished, opaque image per story scene. Draw the people, room, furniture, floor and lighting together in the same image. The character and environment instructions below are two sections of ONE prompt for ONE generation call. Never generate them as separate deliverables or combine separate layers afterward.
+
+Do not generate sprites, transparent PNG people, isolated figures, cutout portraits, waist-up assets, cropped character plates or a background intended for a later character overlay. Do not paste a torso onto a counter or hide an unfinished body with the game dialogue box. No runtime character layers, sprite anchors, floating torsos or detached legs. An identity reference is INPUT only; never wire it into the game as scene art.
+
+Stage the camera wide enough to fit each required character naturally in the room. Standing characters must have complete anatomy, with legs and feet inside the image and grounded on the floor. If real furniture legitimately hides part of a body, draw the scene with coherent perspective and natural occlusion; never terminate the body at the furniture edge or place the figure on its surface. Prefer a wider shot when the body would otherwise hit the image boundary. Do not crop a person at the waist, knees or ankles to fill the frame.
+
+Deliver the complete scene at its target landscape or portrait aspect ratio. Keep faces and important actions clear of the HUD and dialogue zones. Review the image with ALL HUD/dialogue panels hidden: it must stand alone as a complete scene, with no missing lower bodies, exposed sprite edges or unnatural cutoffs. If it fails, recompose and regenerate the whole scene or edit the whole scene with its reference attached. Do not repair it by adding UI, zooming, blurring the sides or compositing a different character layer.
+
+
+### B1. Required reference images
+
+APPROVED REFERENCE PACK — LOAD THE IMAGES BEFORE GENERATING
+
+UX Designer: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/ux-approved-work.png
+Food Scientist: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/food-approved-work.png
+Registered Nurse: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/nurse-approved-corridor.png
+
+Open/download these actual images and inspect them. A PDF thumbnail, game name, URL string or written description alone is not a visual reference input. Pass the selected downloaded image files to the image tool as reference images for EVERY generation and edit. If the tool cannot retrieve them, obtain the files before generating; do not silently substitute a remembered anime style. For this documentation, all three anchor drawing and detail level; none supplies a new career's character identity. Choose one primary full-scene reference for a batch and keep it fixed. Include canonical character and room images for follow-up scenes. Do not promote an unreviewed generated image into the style master.
+
+### B2. Character direction inside the same complete scene
 
 ```text
-DREAMARI COMPLETE ANIME SCENE
+CHARACTER DIRECTION WITHIN THE COMPLETE SCENE — NOT A SEPARATE IMAGE JOB
 
-Career / script screen and runtime beat: {CAREER, SCRIPT_SCREEN_ID, BEAT_ID}
-Story action, cast, emotion and time: {EXACT APPROVED SCREEN DETAILS}
-Location / camera: {CANONICAL ROOM AND SHOT}
-Viewport: {LANDSCAPE OR PORTRAIT, TARGET ASPECT}
-Drawing reference: {APPROVED STYLE IMAGE}
-Canonical identities: {FACE/COLOR CROPS FOR EVERY PERSON PRESENT}
-Allowed edit: {IMAGE-ONLY CHANGE}
-Output: {DIMENSIONS, FILE_ID}
+Inputs: {PRIMARY_APPROVED_SCENE_IMAGE}, {CANONICAL_CHARACTER_IMAGES}, {CHARACTER_ID}, {AGE}, {ETHNICITY}, {SKIN_BASE_AND_UNDERTONE}, {EYE_COLOR}, {FACE_SHAPE}, {HAIR_SILHOUETTE_AND_TEXTURE}, {OUTFIT}, {EXPRESSION}, {ACTION}, {SCENE_LIGHT}.
 
-For an approved game, preserve its script and use the exact cast presence, action, emotion, location and time for this screen. Nursing uses the locked `rn-level-1-v2.ts` script: 36 runtime beats across 55 screens. Image and face-chip updates must map to the source scene; do not change text, questions, answers, score, mechanics or endings. A patient alone during an alarm may be alarmed while Rosa is elsewhere. Never use smiles during a crisis. Keep required ECG, badge, call-light, wristband and report surfaces in the exact state needed by the source screen.
+Draw {CHARACTER_ID} as a hand-drawn 2D television-anime character, matching the actual attached UX Designer / Food Scientist / Registered Nurse reference in facial construction, contour weight and color separation. Keep the same drawing simplicity at final game size. Use clear expressive anime eyes with a simple iris and one small catchlight; a small nose mark and short mouth line; a clearly drawn jaw and chin. No painted lips, modeled cheekbones, realistic skin texture or comic-book hatching.
 
-For UX/Food, follow the exact cast slots in Section 2 and trigger each entrance through the relevant work. These are not a chain of introduction cards. Put gameplay between entrances; do not insert extra follow-up beats to enforce an artificial spacing rule. At first appearance show one new named person alone. No future cast in slots 1–2 or group shot before every visible person has been introduced. Mentors recur; the rival's motivation makes their later opposition credible. Never change or reorder the locked RN sequence to enforce this new-career template.
+Use a flat skin base and one broad, clean-edged shadow shape. Let the scene's light tint the lit and shadow colors without repainting the person's complexion. Preserve the canonical face shape, eye color, undertone, hairline, hair length, texture and outfit exactly across scenes. Keep older people visibly older through consistent facial proportions, restrained age lines and posture. Diversity comes from the cast ledger; never use ethnicity as a shortcut for identical faces or eye colors.
 
-Paint one complete opaque anime scene with people, room, furniture and light in one image. No sprites, cutout characters, counter portraits, foreground player arms/hands or unfinished bodies. The player is the camera. A speaking colleague looks toward the lens; an observed conversation may look at its participants.
+Group hair into about four to six large silhouette masses, adapted to its texture. Add only the few interior divisions needed to read the hairstyle. One shadow family and at most one restrained highlight band. Blonde hair stays just as simple as dark hair. No individual flyaways, strand-by-strand highlights, glossy ribbons or dozens of sharp locks. Use a few structural garment folds, with flat fabric colors and a single shadow family; no fabric weave, metallic shine on skin or airbrushed body modeling.
 
-Gameplay panels stay centered and fixed across scenes. Never move them sideways to protect faces. Compose each orientation around the centered HUD/question/dialogue footprint, keeping those zones clear without cropping any face or person.
+Expression and posture follow {EXPRESSION}/{ACTION}; vary them when the story calls for it. A colleague addressing the unseen player looks toward the camera. Observe a real conversation from the player's viewpoint when characters address each other. No visible player body or long foreground arms. Match light direction and time to {SCENE_LIGHT}.
 
-Use thin controlled outlines, expressive eyes, a small nose mark, short line mouth, flat base color and one broad cel shadow. Blonde hair has no more than four broad solid masses and no more than two internal hairlines. No glossy strands, painted lips, sculpted cheeks, heavy comic outlines, photoreal skin or 3D. Keep canonical face, skin base/undertone, eye color, age, hairline/texture, outfit and details fixed. Eleanor (60) and Sofia (67) must remain visibly older in every shot.
-
-For the requested Black-cast update, move the cast one shade darker with a single canonical palette change and propagate that update to every scene and face chip. Keep the adjustment consistent across the cast; preserve the skin base in all lighting and never crush shadows to black.
-
-Use luxurious, functional workplace architecture in ivory stone, walnut and brass. Environment detail stays selective and anime-flat. Light comes from plausible windows and practical fixtures. No mirror floors, photoreal textures, bloom, haze, or beams through closed doors. Nursing windows keep the established lake, red-roof homes, trees and green hill.
-
-Generate a dedicated landscape or portrait composition for its target viewport. The scene must fill that viewport at the intended aspect with faces and important characters fully inside frame. Keep the top 20% clear for HUD and bottom 38% clear for dialogue. Never crop faces or use blurred side-fill, black bars or runtime zoom/cropping to fill space.
-
-Record full prompt, source/reference files, selected output, hash and visual review. A hash documents provenance, not identity. Reuse saved files for identical pixels; do not claim a fresh generation guarantees pixel identity. Contact-sheet checks are internal; repair and integrate before final human QA.
+This describes the character inside one complete scene. Do not output a detached sprite, transparent cutout, bust pasted over furniture, character sheet or isolated portrait unless explicitly requested for an internal identity reference. Clothing and anatomy continue naturally behind real occluding objects. Keep the face clear of the actual HUD/dialogue mask.
 ```
+
+### B3. Environment direction inside the same complete scene
+
+```text
+ENVIRONMENT DIRECTION WITHIN THE COMPLETE SCENE — NOT A SEPARATE IMAGE JOB
+
+Inputs: {PRIMARY_APPROVED_SCENE_IMAGE}, {CANONICAL_ROOM_IMAGE_OR_LAYOUT}, {CAREER}, {ROOM_ID}, {ROOM_FUNCTION}, {REQUIRED_WORK_ITEMS}, {MATERIAL_PALETTE}, {FIXED_WINDOW_VIEW}, {TIME_OF_DAY}, {LIGHT_SOURCE}, {CAMERA}, {VIEWPORT_ASPECT}, {HUD_DIALOGUE_MASK}.
+
+Paint {ROOM_ID}, a working {ROOM_FUNCTION} for {CAREER}, in the same illustrated 2D anime scene as the attached approved reference. Match its drawn edges, simplified material treatment and broad light shapes. Perspective and attractive architecture may be precise; surfaces must still read as painted shapes. Do not increase realism just because the brief says cinematic, expensive or luxurious.
+
+Show luxury through deliberate design: generous proportions, strong circulation, beautifully framed windows, built-in storage, coordinated furniture, a restrained material palette and a few well-placed statement details. Keep the actual work function credible: a food-development lab has suitable benches and storage; a design studio has design workspaces; a hospital retains clinical circulation and equipment. Never replace a workplace with a generic hotel lobby.
+
+For {MATERIAL_PALETTE}, draw each material using a base color, a broad shadow and a few necessary accents. Stone is a pale color field with sparse large vein hints, not a texture map. Walnut is warm painted panels with only a few grain marks. Brass is a muted flat accent with a narrow highlight. Glass uses a light tint and selective drawn reflection. Floors have soft, low-contrast light shapes, not mirror images. Group foliage into painted leaf masses. Show distant buildings as simplified silhouettes and window groups, not hundreds of sharp windows. Avoid pores, wood-grain maps, tiny bevels, product-render metal, repeated micro-details and razor-sharp reflected objects.
+
+Use a clear foreground, middle ground and background. Reduce contrast and detail with distance through color and edge control; do not simulate a camera's shallow depth of field or blur the characters. A few focal props may be clearer than the room. Keep the environment's surface detail subordinate to the characters and compatible with their flat cel shading. Do not reduce richness by making the room empty: use strong design and a small set of purposeful objects.
+
+Light follows {TIME_OF_DAY} and the actual {LIGHT_SOURCE}. Paint broad window-light patches and clean shadow shapes. Gentle light shafts are allowed only along a plausible path from an open window, glazing or visible skylight; keep them subtle and off faces. Closed opaque doors do not emit sunlight. Night uses practical lights or moonlight rather than golden sunbeams. No global bloom, glowing fog, HDR exposure, lens flare, wet mirror floors, ray-traced reflections, photographic material textures, 3D render or architectural-visualization finish.
+
+Preserve canonical walls, doors, windows, furniture, floor pattern and {FIXED_WINDOW_VIEW}. Change only what this beat authorizes. A time variant relights the same room and outside view; it does not redesign either. Use the requested camera without teleporting the windows or inventing a skyline. Buildings may differ by career but their exteriors must agree with the interiors.
+
+Compose directly for {VIEWPORT_ASPECT} using {HUD_DIALOGUE_MASK}. Keep important faces and actions in its clear region. Fit the full image to that viewport without black bars, blurred side extensions or runtime reframing. For another aspect ratio create a deliberate alternate composition with the same identities and geography.
+```
+
+### B4. Complete-scene assembly and rejection checks
+
+COMPLETE-SCENE ASSEMBLY AND ACCEPTANCE
+
+Combine the character and environment directions in ONE generation, with both reference inputs attached. Output one opaque image containing the specified cast, room, furniture and shared light. A people-free establishing shot uses the same environment module and reference pack. Separate prompts describe separate responsibilities; they do not authorize sprite/background compositing.
+
+Before accepting, compare the output beside the primary approved image at the same displayed game size. Check (1) anime facial construction, (2) hair masses rather than individual strands, (3) flat skin and clothing shadows, (4) drawn material planes instead of photographic surfaces, (5) the same character identity and visible age, (6) canonical room/window continuity, (7) plausible shared light, and (8) clear HUD/CTA space. Inspect both faces and room surfaces at full resolution too. Reject and regenerate or edit if any fail; do not call higher realism an improvement. Keep the approved reference attached during repair, name the failed region and preserve the correct regions. Record prompt, reference IDs and selected output. This reduces drift; repeated fresh generations cannot guarantee identical pixels. Reuse saved accepted pixels for exact repeats.
+
+Suggested repair: “Keep the room layout, camera, people and lighting fixed. Repaint the environment to the attached approved anime reference's material simplicity: broad painted planes, sparse texture, muted reflections. Simplify hair to grouped masses and one shadow family; preserve each face and palette. Do not add realism or extra detail.”
+
+Filled scene brief example: “New junior civil engineer; mentor reviewing a drainage sketch in an aspirational engineering studio at 9 AM. Attach ux-approved-work.png as the drawing/detail master, plus the approved mentor and room references. Character: canonical middle-aged Japanese male, short grouped black hair, brown eyes, focused explanation toward player. Environment: ivory painted wall planes, warm timber panels, matte desk, a few drawing sheets and a simplified river view. Pale morning light enters the actual left windows; no evening gold, mirror floor or photographic textures. Apply both modules unchanged; only career, action, identity and room fields vary.”
 
 ## Appendix C. Copy-ready native work-graphic prompt
 
@@ -216,11 +394,30 @@ Save source facts, authority/limits, scene mapping, concise visual brief and why
 
 ## Appendix E. Approved art-style references
 
-These selected examples anchor the complete-scene anime style. They are approved references, not comparison variants. The PDF embeds labeled thumbnails; full-resolution copies are linked here:
+The three current game scenes are embedded in this PDF and available at full resolution. They anchor character construction and the shared illustrated detail budget, not new character identity.
 
-- [UX v3 arrival - character and environment style](../../public/documents/references/ux-v3-arrival.png)
-- [Nursing morning - Rosa at the station](../../public/documents/references/rn-morning-reference.png)
-- [Investment Banking office - Christina presents](../../public/documents/references/ib-office-reference.webp)
+- [UX Designer](https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/ux-approved-work.png)
+- [Food Scientist](https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/food-approved-work.png)
+- [Registered Nurse](https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/nurse-approved-corridor.png)
+
+
+### Supplemental cast and room references
+
+The first three scenes remain the primary drawing/detail anchors. Extra cast examples show identity and pose variety. Room-only examples below guide architecture and work function; the explicit low-detail material rules override their floor texture, reflection strength or other fine detail. All are embedded in this PDF. They are reference inputs only, never separate production layers.
+
+- UX: Samira face, grouped hair, skin tone and seated posture. Real desk occlusion; do not copy camera cropping. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/ux-approved-samira.png
+- Food: Imani anime face, darker skin palette, clean coat shadows and expressive posture. Do not copy lower-frame crop. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/food-approved-imani.png
+- Nursing: Denise simplified blonde hair, restrained facial marks and coherent bedside staging. Real bed occlusion differs from a hard figure cutoff. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/nurse-approved-denise.png
+- Architecture reference: studio layout, coordinated furniture, planted zones and framed river view. Simplify rugs, texture and reflections further under the flat-art rules. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/ux-approved-studio.png
+- Architecture reference: food-lab benches, sage storage and tasting room. Keep functional layout; remove floor speckling, tiny equipment details and strong reflections when drawing a new scene. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/food-approved-lab.png
+- Architecture reference: hospital reception, ivory/walnut/brass design and lake geography. Keep the interior design, but reduce floor grain, stone veins and sheen; do not turn it into a hotel or photo render. Full image: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/nurse-approved-lobby.png
+
+## Appendix F. Rejected outputs supplied by the user
+
+These are failure examples only, not image-generation style references. Do not attach them as positive references.
+
+- Rejected hangar: too much realistic floor texture, reflections and aircraft surface rendering; excessive garment folds and modeled detail. The fully visible feet do not make the style acceptable.
+- Rejected portrait: detailed ringlets and modeled clothing; most decisively, a hard horizontal cut through the upper legs with floor continuing below the figure. This is a pasted/cropped character plate and must fail.
 
 ## References
 

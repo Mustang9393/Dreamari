@@ -23,7 +23,7 @@ const BOXED = "dm-quiet flex min-h-[44px] min-w-0 cursor-pointer items-center ju
 const TIGHT = " max-sm:min-h-[56px] max-sm:flex-col max-sm:gap-[4px] max-sm:px-[4px] max-sm:text-[12.5px]";
 const boxStyle = (ink: string | undefined, on: boolean) => ({
   borderColor: on ? "color-mix(in srgb, var(--accent-subtle) 70%, transparent)" : ink ? "var(--glass-border)" : "rgba(255,255,255,0.3)",
-  background: on ? "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" : ink ? "var(--glass-surface-1)" : "rgba(12,16,35,0.55)",
+  background: on ? "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" : ink ? "var(--glass-surface-1)" : "rgb(var(--scrim-rgb, 12 16 35) / calc(0.55 * var(--scrim-glass-gain, 1)))",
 });
 
 /** A toggle or action. When on, a fresh hover or keyboard focus shows what a
@@ -41,7 +41,7 @@ export function StripButton({ icon, label, onClick, ariaLabel, on = false, busy 
       onBlur={() => setPeek(false)}
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); armed.current = false; setPeek(false); onClick(); }}
       className={toolbar ? "dm-quiet cpk-toolbar-button" : boxed ? BOXED + (tight ? TIGHT : "") : BASE}
-      style={{ ...(boxed ? boxStyle(ink, on) : {}), color: showOff ? "var(--color-feedback-error)" : ink ?? (on || toolbar ? "#fff" : "rgba(255,255,255,0.86)"), animation: pulse && !on ? `${toolbar ? "cpk-action-ring" : "dm-tray-ring"} 1.6s ease-out 3` : undefined }}>
+      style={{ ...(boxed ? boxStyle(ink, on) : {}), color: showOff ? "var(--color-feedback-error)" : ink ?? (on || toolbar ? "var(--scrim-ink, #fff)" : "var(--scrim-ink-soft, rgba(255,255,255,0.86))"), animation: pulse && !on ? `${toolbar ? "cpk-action-ring" : "dm-tray-ring"} 1.6s ease-out 3` : undefined }}>
       {busy ? <Loader2 className="h-[22px] w-[22px] animate-spin" aria-hidden /> : showOff ? offIcon ?? <X className="h-[22px] w-[22px]" aria-hidden /> : icon}
       <span>{showOff ? offLabel : label}</span>
     </button>
@@ -57,7 +57,7 @@ export function StripLink({ icon, label, href, external = false, ink, boxed = fa
       <span className="text-balance">{label}{external && <ArrowUpRight className="ml-[2px] inline h-[11px] w-[11px] align-[-1px]" aria-hidden />}</span>
     </>
   );
-  const style = { ...(boxed ? boxStyle(ink, false) : {}), color: ink ?? "rgba(255,255,255,0.86)" };
+  const style = { ...(boxed ? boxStyle(ink, false) : {}), color: ink ?? "var(--scrim-ink-soft, rgba(255,255,255,0.86))" };
   const cls = boxed ? BOXED : BASE;
   return external
     ? <a href={href} target="_blank" rel="noreferrer" className={cls} style={style} aria-label={`${label}, opens in a new tab`}>{inner}</a>

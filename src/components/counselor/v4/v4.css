@@ -299,12 +299,15 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
  [data-counselor-version="v4"] .v4-profile{display:grid;grid-template-columns:300px minmax(0,1fr);align-items:start;column-gap:26px}
  [data-counselor-version="v4"] .v4-profile>*{grid-column:2;min-width:0}
  [data-counselor-version="v4"] .v4-profile>.v4-profile-toolbar{grid-column:1/-1}
- [data-counselor-version="v4"] .v4-profile>.v4-profile-identity{grid-column:1;grid-row:2/7;position:sticky;top:150px;height:auto}
+ [data-counselor-version="v4"] .v4-profile>.v4-profile-identity{grid-column:1;grid-row:2/7;position:sticky;top:150px;height:auto;padding-top:0;max-width:none;margin:0}
  [data-counselor-version="v4"] .v4-profile-summary>div:first-child{flex-direction:column;align-items:flex-start;gap:20px}
  [data-counselor-version="v4"] .v4-profile-summary>div:first-child>div{gap:8px}
  [data-counselor-version="v4"] .v4-profile-summary>div:first-child>div>span:first-child{font-size:28px;font-weight:450;line-height:1.15}
  [data-counselor-version="v4"] .v4-profile-summary li{flex-wrap:wrap;line-height:1.6}
 }
+/* The ID card column (StudentIdCard from v7, 23 Oct 2026): a 300px card centred on
+   narrow screens, with room above for the reel that hangs over it (rail) */
+[data-counselor-version="v4"] .v4-profile-identity{width:100%;max-width:300px;margin:0 auto;padding-top:72px}
 /* minmax(0,1fr), not 1fr: a row's min-content width ran the column past
    the phone's edge (9 Oct 2026 QA sweep: the status chip cut off at 390px). */
 @media(max-width:640px){[data-counselor-version="v4"] .v4-student-cards{grid-template-columns:minmax(0,1fr)}[data-counselor-version="v4"] .v4-student-cards li{min-width:0}}

@@ -1,0 +1,15 @@
+✔ exact v2.5 narrative spine, varied job controls and checkpoint location (0.729167ms)
+✔ vocabulary teaches, practices and applies the same four concepts (0.194084ms)
+✔ all 128 scoring combinations respect pass and midpoint boundaries (0.233584ms)
+✔ no scene leaks an unintroduced cast member and every beat routes (0.224416ms)
+✔ every scored task has primary evidence, prior teaching, reviewer and bounded scope (0.139625ms)
+✔ aviation stays silent for main, promotion, retry and unmute; IB keeps its own song (24.705125ms)
+✔ all authored decision outcomes use the fixed six-point scoring tiers (0.251ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 328.039291

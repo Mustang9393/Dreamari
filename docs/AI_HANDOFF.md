@@ -15,6 +15,288 @@
 **Why (Chandu, 22 Oct 2026):** "we need to remove the suggested searches from when the user click on the search bar and show categories as tiles like in dreamonna.com". Since 5 Oct the empty search page stacked a six-row "Suggested searches" list over one "Browse by category" dropdown. Now it is one thing: every career world as a tile (`CategoryTiles` in `src/components/actions-lab/ExploreLab.tsx`), under one "Browse by category" heading. Each tile is a real career photo with the world's name and its career count over the house scrim (same Netflix shape the suggestion rows used), never a coloured block, since Chandu rejected colour tiles on 5 Oct ("I dont like the colored category tiles"). One recognisable career fronts each world (`WORLD_HERO`: Software Engineer, Registered Nurse, Investment Banking, Film Director, Chemist, Elementary School Teacher, Electrician, Firefighter, Executive Chef, Veterinarian, Therapist, Airline Pilot, Welder, Auto Mechanic, Hairstylist), with a fallback to the world's first career with a photo. Grid: 2 across on phones, 3 on tablets, 5 on desktop (15 worlds, three rows). HoverBeam on hover, 4:3 tiles, photo eases up 4% on hover. Tapping a tile opens the same world grid the dropdown did (`SearchResults` with Back and Filters), so nothing downstream changed. The full `SuggestedSearches` photo list is gone; the compact "Try one of these" chips still back a search with no match. `TOP_SEARCHES` in `careerSearch.ts` stays (still used there and by the no-match row). Not seen: dreamonna.com's own tiles, since /explore there is login-gated and Claude in Chrome was not connected, so the tile look follows the house pattern rather than a pixel reference; worth a side-by-side once someone logged in can share a screenshot.
 
 **Validation:** `tsc --noEmit` and ESLint clean on the file. Verified at :3023 (worktree `.worktrees/explore-search-tiles`, branch `explore-search-tiles` from origin/main) at 1280 and 375 wide: tiles render with photos and counts, no console errors, Food & Cooking tile opens its 8-career grid with Back. Uncommitted, awaiting Chandu's look.
+## 2026-10-23: codex/aviation-sop-level-1 merged to main (v1/v2 toggles kept)
+
+**Why (Chandu):** "Please push to main and keep the v1 v2 toggles." The aviation game keeps its v1/v2 switch on the start screen and HUD; v1 stays the default and v2 opens the researched Level 1 simulation. Music stays off. Only this log conflicted on merge; both sides kept.
+
+## 2026-10-23: Day sky reworked: light only on the bottom edge, soft clouds, a lens flare over the page, and a Storm switch (both themes)
+
+**Why (Chandu, 23 Oct 2026, in order):** "the light mode god rays are too much so lets remove the top sun and focus on how we can make the rays look like those sunrise photos from space along the earths atmosphere just like we did for aurora ... We want to keep some of the rainbow stuff though. lens flares where they make sense but visible. Lens flares can happen over the cards/surfaces too"; of a first limb with orange, gold and cyan bands: "too many muddy colors. Lets keep it strictly to light like actual light flow not any colors"; "why did we lose the clouds, keep the clouds but make them sort of interactive or animated. Dont make it look like a 2000s jpeg background of a bible website"; "the clouds are barely visible. Maybe when an action happens they can light up like theres light coming through them. I dont see any light stuff on the bottom of the page either like we had for aurora"; "experiment a rainy clouds with lightning in them when a streak is missed. Put that as a toggle somewhere like we have for the classic/black and blue theme looks"; "a subtler sky blue at the top of the page too and on the rainy toggle the sky can get darker along with the backgrounds. We'll need an equivalent version for the dark mode too. Lightning etc should be like the clouds lighting up not like flat 2d flash graphics"; of the flare, in turn: "too localised so they look like one circle most of the time, no chromatic aberration or dispersion is visible", "too geometric and rigid now and not inclined... too muddy and dark... too colorful and prominent", "too big at places and the shape is squished... Make it feel like light and not just sharp rings", then "lets add some rainbow dispersion. Faint. But visible. Not hard."; "tone down the flashes a bit. We have epilepsy and stuff to think about"; "the rain is too harsh on dark mode, dont make it compete with the page content".
+
+**What the day sky is now (`src/components/app/SkySun.tsx`, two layers from one `layer()` helper; the light frame in `look-v2.css`):**
+- **The bottom edge is light.** White light stands on the bottom edge where the aurora stands at night: a seam, a tall band that streams along the edge and rises in filaments, a halo, and shafts that breathe, all swelling in patches on their own timing (nothing slides sideways). A white sun sits on the edge right of centre with a long glare, a soft column and thin shafts whose edges split a whisper per channel. No colour bands: the page's own blue under it (deepened in the CSS frame) is what makes white read as light. The top sun, its god rays and the Top / Low switch are gone; the top of the page has a soft sky-blue wash.
+- **Clouds are soft density, not shapes.** Cirrus in the top band from two scales of warped noise, feathered, shaded underneath from the density above, evolving as it drifts, leaning a few pixels against the cursor. On a moment they light from behind: the thin parts glow, the lit edges flare, shafts fall through the gaps below the band.
+- **Moments.** A pulse of brightness runs along the limb both ways from where it happened and a silver lining runs through the clouds; a big moment flares the sun's shafts. `lib/sky.ts` carries `y` (the night sky ignores it).
+- **The lens flare lives over the page** (`SkyFlare`, a second canvas, fixed, z-45, pointer-events none, drawn only while a moment plays). The pressed control is the light source: a soft bloom, a wide veiling haze, an eight-point starburst on a big moment, and small round gaussian ghosts spaced by fixed distances along the optical axis (source through the frame's centre), warm at the centre and cool at the edge, breathing and drifting outward. Dispersion is three rims per channel painted as pale tints on white, red outside and blue inside, plus a faint wide spectral arc on a big moment. Painted colour, never added light: on a pale page added light is only ever white, and a saturated channel painted over white goes dark, which was the "muddy" look.
+- **Storm** (`weather.ts`, `WeatherSwitch.tsx` beside Classic, light and dark; `StormVeil.tsx`): the cirrus thickens into a low grey deck (night greys in dark mode), thin sparse rain falls under it only and fades before the content (fainter still at night), and the page itself darkens through a veil that fades in over 1.6 s. Lightning is light inside the deck: a source whose glow falls off with distance and scatters through the density, so the cloud's structure stays visible while it glows, warm-white by day and blue-white at night. One slow swell per strike (180 ms rise, long fall, lift capped), strikes at least 7 s apart, none under reduced motion: WCAG 2.3.1 allows three flashes a second and this is one. `skyStorm()` in `lib/sky.ts` is the hook for a missed streak; nothing fires it yet, the streak is still the hardcoded 12.
+- **Shader rules kept:** no `continue`, moment loops unrolled, no `pow(x, 2.0)`, a mediump-safe hash, the aurora's cost rules; the flare layer is `display:none` between moments.
+
+**Open:** a Chromebook check of both shaders; the flare over very light photos is quiet by design; the storm's rain and deck are an experiment behind the switch and should not ship on by default. Next: the WCAG 2.1 / 2.2 AA and AAA audit Chandu asked for.
+
+## 2026-10-23: v4 student profile uses the same StudentIdCard as v7
+
+**Why (Chandu):** "why is the student id card different in v4? use the same one we use for v7 here." v4 had this card on 20 Oct (46e10317) and lost it in the rollback to its afternoon state for Maisha's demos (7cc0a82f); v7 kept it. Now both builds render one component.
+
+- **`v7/StudentIdCard.tsx` + `v7/studentIdCard.css`:** the card's styles moved out of `v7.css` into a file the component imports itself, so any build that renders the card gets them (v7.css only loads inside V7App).
+- **`v4/StudentProfile.tsx`:** the identity row (avatar, name, grade line, status chip, career-poster cover) is replaced by `<StudentIdCard rail />`, as the 20 Oct version had it; the "Needs you" list sits under it as its own card with a small label. The poster cover went with the identity row. Unused imports and the top-match helper removed.
+- **`v4/v4.css`:** the identity column is a 300px card centred on narrow screens with 72px above for the reel; at 1200px and up it is the sticky left column with no extra padding, so the reel hangs into the toolbar row (to the right of the Back button) and the card's top edge lines up with the content's, as in v7.
+- **Checked on :3089:** `/counselor?view=students&studentId=ref-115&v=4` at 1440 (card top 213 vs content top 218 during the swing, reel clear of Back) and at 375 (card centred, no overflow). tsc and eslint clean.
+
+## 2026-10-23 — Aviation simulation behind the existing game’s v2 toggle
+
+**Why (Chandu):** “push this under a v2 toggle in the flight simulator game.” The researched first-shift story is now opt-in at `/play/aviation-maintenance-technician?v=2`; original aviation remains v1 and the default. One aviation Play tile; shared start-screen/HUD v1/v2 buttons; different script IDs remount and restart safely on switch. Active-version click preserves position. Previous first-shift link remains a review alias. Replaces the old aviation v2 torque lab. Both versions remain silent per the earlier no-music instruction.
+
+**Validation:** rebased on origin/main, 24 regression tests and 411 structural assertions pass; scoped ESLint, TypeScript, tokens and production webpack build pass. Stale generated dev validator for main’s removed match-lab route was moved out of the build cache before rerunning standalone TypeScript. Browser verified default v1, start/HUD switches, correct decision counts and reset, active-version no-op, reload, phone keyboard activation, portrait artwork and no overflow at 1366x768/390x844. Evidence and limits in `docs/handoff/aviation-first-shift/QA.md`. Original aviation/IB/RN authored gameplay unchanged. Push authorized to `codex/aviation-sop-level-1`; no main merge or public deployment.
+
+## 2026-10-23 - Aviation Maintenance Technician Level 1, SOP v2.5
+
+**Why:** User asked to use `master-sop (1).pdf` to create a Level 1 aviation maintenance technician simulation with authentic beginner work and vocabulary. Later steering: "dont give it music yet" and "the interior design and the hangar design can look better and more sexy. NO hyper realistic drawings though".
+
+**Built:** separate `/play/aviation-maintenance-technician-first-shift` route through the existing simulation catalogue/player. Exactly 29 beats, seven +/-6 decisions, four taught terms and four unscored applied matches, four-item/45-second rapid round, observation drafting, parts-identity/records mismatch review, private credit dispute, mentor workload chat and incoming-team support ranking. US supervised practical-experience pathway; in-person certificated mentor owns supervision, authorized staff retain inspection/eligibility/return-to-service decisions. Eight primary sources, per-task evidence/reviewer/scope contracts, script/keys, continuity/room ledger, coverage/learning trace, exact prompts and selected art hashes at `docs/handoff/aviation-first-shift/`.
+
+**Art/music:** twelve complete opaque paintings (six landscape + six independently composed portrait), no runtime people layers. Upgraded sculptural blue hangar canopy/ribs, walnut-and-glass mezzanine and teal storage, matte anime surfaces. Four face chips derived from accepted canonical scenes. Built-in imagegen only. New aviation IDs added to existing silent-simulation list so main, promotion, retry and unmute cannot borrow IB music. Existing IB/RN gameplay unchanged.
+
+**Actual repairs:** unsafe pick originally emitted risky (-7 after shared scaling); authored non-selected roles now emit wrong (-6). Full retry only (`noRepair`) prevents the shared +2 repair option from breaking this SOP contract. `plainEndings` hides generic advancement copy for a one-level story. Added missing rapid feedback and mapped unsupported skill wording to shared skills. A pre-existing untracked older AMT SOP draft also lacked required rapid messages; supplied the two missing fields so the checkout compiles.
+
+**Validation:** structural validator 410 checks/no errors; 21 regression tests pass, including existing protected gameplay/work-evidence checks and eight aviation tests; TypeScript/scoped lint/tokens/webpack production build pass. Browser complete passing run 92 and complete failing production run 8; both reviews, midpoint pass/fail Continue, answer locking, practice correction/no score, rapid outcomes, pick, chat Send, accessible ranking, replay and retry. Final no-repair smoke: preview-assisted slot 26 wrong -> 44 -> final Try again with zero repair controls -> reset 50/0 of 7. Desktop 1366x768 and phone 390x844 inspected; portrait images loaded, no horizontal overflow, keyboard Enter submits first choice, ranking Submit remains in view. Normal timer preference and viewport restored. No console errors/warnings in final production preview. Details and limits in `docs/handoff/aviation-first-shift/QA.md`.
+
+**Limits:** initial successful full run preceded the later architectural repaint and no-repair authoring flag (successful decision keys/scoring unchanged); complete failing run used final architecture and the fixed -6 pick. Live-timer success, actual Windows/ChromeOS/Firefox/Safari, screen-reader speech and physical touch drag remain unverified. Repo demo intentionally starts fresh on page load; do not promise cross-load resume despite inherited checkpoint copy. No public deployment, commit, push or merge.
+
+**Preview:** production server left on `http://localhost:3100/play/aviation-maintenance-technician-first-shift`, with upgraded interior visible in the retained browser tab. Next: human review of assembled career authenticity, learning value and art direction.
+
+## 2026-10-23: Play tab, Investment Banker tile takes the new lobby scene
+
+**Why (Chandu, 23 Oct 2026):** "Please use any of these images for a day in the life of IB thumbnail on PLAY and push." Two renders were offered: Christina alone in the Cobalt lobby (3:2) and Christina with a colleague (16:9). The single-character one was chosen because the tile is cropped from a 5:7 portrait card to a 2.6:1 banner, and a two-person composition loses one of them in portrait.
+
+- **`play/games.ts`:** `INVESTMENT_BANKING.thumb` is now `/images/play/ib/v2/christina-lobby-welcome.webp`, focus `42% 32%` (her face). The in-game `cover` is untouched, so the backdrop behind the levels does not move. Every surface that reads `simThumb()` (Play hero row, Home, the counselor's Most played) picks it up.
+- **Checked on :3031 (dark):** `/play` at 1440 wide (hero card, 16:9) and at 375 (portrait card): face and gesture in frame on both. No console errors.
+
+## 2026-10-23 — Anime cast and researched starting-role gates v2.5
+
+Chandu reinforced simple hair, anime face shapes, varied diversity and actual first-level career research. SOP/prompts now require grouped hair across textures, flat anime facial construction, cross-library cast planning and per-person identity locks. Added a sourced starting-role section: IB Intern; new graduate Registered Nurse; researched junior/intern UX; a verified food-science entry route without equating technicians and scientists. Every level requires stage-specific sources, authority limits and a task/source/review-owner contract. Preserves approved gameplay and full-scene-only art. PDF retains all nine approved references and two failure examples. Documentation only; no game scripts or art regenerated.
+
+## 2026-10-23 — One complete scene per generation, never sprite layers
+
+**Why (Chandu):** “full images with characters and backgrounds together not separate layers”; cropped legs/figures still appeared. SOP v2.4 puts the output contract at the top of the document and every art prompt. Character/environment instructions are modules within one generation, never independent assets. Require full standing anatomy and grounded feet, coherent furniture occlusion, wide framing and inspection with HUD/dialogue hidden. Reject waist/knee/ankle cutoffs, floating counter torsos and runtime character overlays. Updated public PDF, prompts and reference ZIP. Documentation only; no game script or image integration changes.
+
+**Validation:** Rendered updated PDF and checked the output contract plus both art modules. The 26-page PDF embeds nine approved examples (six cast scenes and three room views) plus two clearly labeled user-rejected examples. Reference crops are explicitly not framing templates; room-only images guide architecture, not photoreal surface detail. The optional ZIP also contains the updated PDF and approved inputs. Sites publication preserves its public audience.
+
+## 2026-10-23 — Portable illustrated-anime art standard v2.3
+
+**Why (Chandu):** A new chat using the SOP produced “hyper realistic backgrounds.” Required explicit Food/UX/Nursing references and prompts for both characters and backgrounds.
+
+Added full-resolution approved game images and a ZIP reference pack. SOP v2.3 requires loading/passing actual images at every generation; text/PDF names alone are not a visual reference. Separate character and environment modules define anime faces, grouped hair, flat cel shadows, painted material planes, restrained reflections and physically plausible soft light. Richness comes from interior design, not photographic texture. They combine into one opaque scene; no sprites. Canonical identities, room geography and viewport masks stay locked. Added side-by-side acceptance/rejection and repair prompt; no promise of identical fresh pixels. Updated standalone/public prompts and the shareable PDF with all three embedded references. Game scripts and game assets unchanged.
+
+**Validation:** Reference images visually inspected. PDF rendered and layout reviewed; pack members and portable reference URLs checked. Public Sites publication preserves existing anyone-with-link audience. No game code changed.
+
+## 2026-10-23: Career header takes the light frost (the light-mode pass lands on main); Explore's light card scrim toned down
+
+**Why (Chandu, 23 Oct 2026):** on the Asset Manager page in light mode, "These headers need the same treatment as the carousel in home", then, when a blurred-photo copy was tried behind the title: "no shouldnt it be a light version? refer the hero carousel on home. Didnt we do a white thing? The second photo and blur sort of causes an issue with some careers i think?" And on Explore: "the white text scrim on the career cards in explore are sort of blending in a bit too much? What can we do to tone it down?"
+
+- **The "white thing" was the 22 Oct light-mode pass**, committed on `claude/vibrant-fermat-d4d494` and never merged: `ad052d55` (photo surfaces take the poster cards' frost and navy ink in light, dark byte-identical) and `1ad6a678` (theme class holds from first paint, night scenes keep the night, Profile's chip follows the theme). Both are cherry-picked onto `match-cta` here, so main now has the Home hero and the career header on the same light frost. The branch's first commit (a mirror of the then-uncommitted day sky) was dropped, as its own handoff note asked, since the day sky (`a4cb644b`) is already on main. A blurred-copy-of-the-photo header (Home's dark carousel recipe) was built first and reverted before commit: the dark blur is not the light treatment, and the second blurred subject misreads on some careers.
+- **Explore's light poster scrim stays white; the card gets an edge instead (`marketing/tokens.css`, `globals.css`):** the frost ran to solid `#f7f9ff`, the page's own white, so the lower half of every card merged with the ground. A cooler, thinner frost (`#e4ecf8`, stopping at 0.9) was tried first; Chandu: "i think keep the white scrim. But make sure it doesnt blend too much into its background." The scrim is back to its 7 Oct values. The blend came from the card's light-mode edge: a white-alpha border (the 7 Oct "no dark borders" rule) that vanishes where the white scrim meets the pale page. At rest the card now carries a navy-tinted shadow (`0 16px 34px -20px rgba(40,54,110,0.45)`) and an 8% navy ring, which draw the edge without a dark border; hover keeps its stronger lift. Every PosterCard surface (Home rails, Explore, Play, Profile, Preferences, Flow Lab) shares both rules.
+- **Checked on :3027, light, 1400 wide:** `/career/investment-banking` header (frost + navy ink, photo on the right, the Top 3 and Ask a pro badges navy with a light plus), `/explore?tab=browse` card rows against the page, `/home` hero. Dark checked on the career header before the cherry-pick; the pass itself keeps dark values unchanged. Phone width (375, light): the header runs the photo behind the whole card with the frost ramping up from the foot; the navy title and the actions read, though the amber world label sits a little light on the frost over a busy photo, left for the light-mode QA pass. tsc: the pre-existing `counselor/v6/LineAvatar` missing-module error only. The dev checkout runs with a symlinked `node_modules`, so that module is simply absent here.
+
+## 2026-10-23: Match CTA counts the saves ("Continue with 2"); the Top 3 and Ask a pro badges are white again
+
+**Why (Chandu):** "we still havent fixed the cta on the match screen. Its not see my top 3 anymore. Please fix and update to say continue with (x) the nubmer of whatever they saved." and "the ask a pro and top 3 icons have a navy blue dot instead of the white plus and whatever the other icon had. on career detail page and whatever else." Branch `match-cta`, cut from origin/main (this checkout's `main` is far behind); not pushed.
+
+- **Match CTA (`flow-lab/V2Flow.tsx`, the live Match at `/match-grid`):** the bottom bar read "Continue" at one save and "See my Top 2" / "See my Top 3" at two or three. "See my Top 3" named the ranking screen Joshua removed on 28 Sept; the button now reads "Continue with 1", "Continue with 2", "Continue with 3" ("Save a career", disabled, at zero). The number says one save is enough and more are welcome. Spec `docs/handoff/specs/match.md` updated. The Flow Lab's own ranking screen keeps its "See my Top 3" / "Choose my goals" finish button; it is not the demo path.
+- **Action badges (`app/actionIcons.tsx`):** the add/remove badge on Top3RankAction and AskProAction filled its disc with `--primary-foreground`, which was white until the 21 Oct blue pass (`a67d73c0`) turned it navy so the periwinkle fills carry dark ink. The disc then matched its own plus and read as a plain navy dot. The disc is now the icon's own ink (`currentColor`: white over a photo and in dark mode, navy on a light card) and the plus is cut in `--background`, so the pair always contrasts and no longer depends on a button token. One source fixes every surface that renders `CareerHeaderActions` (career detail, the Profile's CareerPeek, PlayStage, Flow Lab sheets).
+- **Match title (`flow-lab/V2Flow.tsx`):** "Save up to 3 careers you’re interested in" is now "Save 1–3 careers you’re interested in" (Chandu, 23 Oct 2026, verbatim). The range says the same thing as the new CTA: one is enough, three is the cap.
+- **Checked on :3027 (dark):** `/match-grid` reads "Save a career", then "Continue with 1", "Continue with 2" as saves land; `/career/investment-banking` shows a white disc with a navy plus on Top 3 and Ask a pro (computed fill rgb(255,255,255), stroke rgb(19,31,54)), and a white disc with a minus once the career is in the Top 3. Light mode not checked (fast-iteration rule). ESLint clean on both files; tsc run noted below.
+
+## 2026-10-22: Match saves reach the Profile's Saved tab; the old swipe lab is gone; Match tabs on one row
+
+**Why (Chandu):** "the saved careers arent showing up in the profile when somebody comes from match ... make sure when i save careers in the match screen and they arrive to the profile for the career goal and college goal if i move to the saved tab they should see the saved careers there"; "remove match lab etc permanently keep only the latest one"; "for the purposes of the demo there should be business and finance careers in match dont lose that"; "please dont do the tabs in match screen on two rows ever". Chandu: "do not push this", so this batch stays local on counselor-replit-v7.
+
+- **Saved careers (`lib/savedCareers.ts` `saveCareers`, `match-lab/MiniExploreMatch.tsx`, `profile/ProfileExperience.tsx`):** the live Match (`/match-grid`, Mini Explore, which renders Flow Lab's `V2Flow`) wrote its three saves only to the Top 3 picks; the Saved tab reads the saved-careers store and also hid anything already in the Top 3, so a student arriving from Match saw an empty Saved tab. Now Match's hand-off also writes the saves to the saved store, the Saved tab and its badge count every saved career, and a card already in the Top 3 says "In your Top 3" instead of offering Add. The Career Goal's "not yet in the Top 3" list is unchanged.
+- **Labs removed:** `/match-lab` (the swipe deck with its "Your Top 3 Matches" sheet) and the dormant `MatchGrid.tsx` are deleted, with their component-lab specimens and the splash key. `match-lab/data.ts` (the deck, three Business & Finance and three Tech careers) and `MiniExploreMatch.tsx` stay: the deck still feeds Flow Lab, Preferences and Connect, and Business & Finance stays first in Match for the demo. Flow Lab (`/flow-lab`) stays because its `V2Flow` is the live Match.
+- **Match tabs (`flow-lab/V2Flow.tsx`):** the worlds, Explore all and its industry dropdown are one row at every width; when wider than the screen, Segmented folds into a dropdown. The earlier two-row phone layout (worlds on one line, Explore all on the next) is gone.
+- **Checked on :3089:** `/match-grid` at 375 (one tab row, Business & Finance first); saving Investment Banking, Private Equity and Management Analyst then "See my Top 3" lands on the Profile, where Saved shows a badge of 3 and the Careers sub-tab lists all three with "In your Top 3". Committed on counselor-replit-v7, not pushed.
+
+## 2026-10-22: Career Detail: Skills tab in two panels; the tab row scrolls on phones instead of a dropdown
+
+Branch `career-pay-scan`, on top of the two-panel Pay & Growth commit
+(05fbeaad). Files: `src/components/actions-lab/CareerDetailLab.tsx`
+(Skills tab, tab row), `src/components/connect/viz.tsx` (Segmented's new
+scroll mode), `docs/CROSS_BROWSER_GUARDRAILS.md` (the tab-overflow rule).
+
+- WHY (Chandu, 22 Oct 2026), forwarding the team's older note on the career
+  page: "Education tab: all one section (what people study for it, things
+  you'll need). Skills tab: top section Know about - Good at; bottom
+  section Software. And have a different approach for pay and growth by
+  state." Chandu: "we already addressed most of this ... see if we have
+  anything to improve from here." Education and Pay & Growth already match
+  it; the Skills tab did not (one panel, software first). Then: "can we
+  keep the tabs for mobile and tablet too instead of the dropdown? But not
+  like its cut off inside a pill shape so its not obvious they can scroll?
+  Try again".
+- Software & Skills tab: a Skills panel with Know about and Good at side by
+  side (Education's two-column shape, stacked on a phone), then a Software
+  panel. Tag groups as before. Section ids unchanged (`skills`,
+  `know-about`, `good-at`, `software`), so deep links still land.
+- Tab row: `Segmented` gets `overflow="scroll"` (default stays "dropdown",
+  so no other screen changes) and `bleed`, the caller's page-gutter
+  classes. While the five tabs overflow (phones; at 768 they fit in the
+  frame): the frame goes, the row runs edge to edge, each edge with more
+  tabs behind it fades over the 20px gutter only, so the next tab is seen
+  cut off by the screen itself ("Pay &" peeks at 375), and the chosen tab
+  scrolls to the middle on change. What made the old scrolling row
+  unreadable was the closed frame with a tab clipped inside it; the cut
+  happens at the screen now, where every phone user reads it as "more". The
+  scrollbar is hidden by the paired `flow-scroll` class. Keyboard: the row
+  keeps its roving tabindex (TabKeys moves between tabs) and the chosen tab
+  is scrolled into view, so an off-screen tab is never focused unseen.
+  First attempt faded 36px, which hid the peeking tab entirely; second kept
+  `max-w-full`, which capped the row at the content width so the next tab
+  was clipped, not peeking. Both fixed; measured with the tab rects at 375.
+- Guardrails doc: the "never a sideways-scrolling tab row" rule now names
+  this as the one sanctioned alternative, under trial here; the dropdown
+  stays the default for every other Segmented.
+- Checked on :3019 in dark mode: 375 (Overview, Education, Career Ladder,
+  "Pay &" peeking; tapping Software & Skills centres it with "Ladder" cut
+  on the left), 768 (all five tabs fit in the frame; Skills two columns +
+  Software panel). Scrollbar audit on viz.tsx clean. Light mode not
+  checked.
+- If Chandu likes it, flipping Segmented's default to "scroll" makes it the
+  app-wide rule; every caller then needs a `bleed` matching its page
+  padding.
+
+## 2026-10-22: Career Detail: Pay & Growth as two panels (Pay by state, Job growth); Education and Software & Skills are two tabs again
+
+Branch `career-pay-scan` (worktree `.worktrees/pay-tab`, dev server
+`pay-tab-3019`). Uncommitted until Chandu says done. Files:
+`src/components/career/PayGrowth.tsx` (rewritten),
+`src/components/career/PayMap.tsx` (one small change),
+`src/components/actions-lab/CareerDetailLab.tsx` (tabs).
+
+- WHY (Chandu, 22 Oct 2026): "check the pay tab on the explore careers
+  detail pages. We need to incorporate that data but make it super easy to
+  scan and understand. We dont need to show a huge table thats distracting
+  we need to figure out how to present the data better like the other tabs.
+  Also split education tab and add a software and skills tab and move the
+  relevant information there." Then, on the first pass (one scan column of
+  three figures, each with an arrow against the US and the US figure under
+  it): "the trend arrows apparently are giving too many signals at once and
+  it seems confusing. We can also even split pay part into one section and
+  growth into another if that makes sense, but dont listen to me. Please do
+  your own research, hierarchy, UI, UX everything to make this as useful
+  and low cognitive load as possible."
+- What was wrong with the first pass: one glyph carried two meanings. Next
+  to pay the arrow meant "above the US"; next to growth, a trend line, it
+  read as "going up", so a state growing +2% against a US +4% showed a
+  positive number beside a falling line. Three figures, three arrows, three
+  comparators: nine signals for one state.
+- What the field does (BLS Occupational Outlook Handbook, CareerOneStop,
+  O*NET, Indeed, Glassdoor): one number, one plain-English verdict, a
+  comparison said in words ("12% above the national average"), never as an
+  arrow; a range as a bar with the value marked.
+- WHAT it is now, two panels, each answering one question:
+  - Pay by state ("What would I make?"): the shown state's pay as the one
+    big figure (the student's own state until a state is hovered or
+    tapped), one line of words against the US ("$11K more than the US
+    typical"; within 3% reads "About the same as the US typical"), the
+    house LightRange from the lowest-paying state to the highest with this
+    state as the point, and the map, coloured by pay, at a bit over half
+    the width. Hover a state and the column follows. No arrows. On a phone
+    the column first, the map under it.
+  - Job growth ("Will there be jobs?"): three cells in the fact strip's own
+    shape (label over figure): growth by the forecast year with the one
+    trend icon on the page and the profile's verdict ("Growing about as
+    fast as most jobs"), openings a year in the US, openings a year in the
+    student's state.
+- Cut: the per-state growth percent. It is seeded demo data (outlook.ts)
+  and it was the figure whose arrow contradicted its sign. Real state
+  projections (Projections Central) can bring it back as one line in the
+  state's openings cell. State openings are still seeded (DEMO-ONLY, the
+  mock-over-blank rule). No top-states list (21 Oct), no table, no
+  captions, no hint line.
+- Edge: a career with no state pay gets the Pay panel without a map: US pay
+  with the starting-to-top range from the What it pays figures. `PayMap`
+  now skips its own readout row when `renderReadout` returns null.
+- Tabs: Overview, Education, Career Ladder, Pay (Pay & Growth when the
+  career has a BLS outlook), Software & Skills. Education is the degree and
+  where to study it (WhereToStudy) again; Software & Skills is one panel
+  with three tag groups, Software first since the tab is named for it, then
+  Good at, then Know about. This reverses the 21 Oct fold (Education &
+  Skills) on Chandu's instruction above. Old links still land: ?tab=software,
+  and ?tab=education with a skills section (know-about, good-at, software),
+  open Software & Skills; ?tab=education alone (My Plan's training step)
+  opens Education. At phone width five tabs become the Segmented dropdown,
+  as the house rule says.
+- Checked on :3019 in dark mode: Carpenter desktop and phone (column
+  following the hovered state, range point moving, map, Job growth cells),
+  Education tab, Software & Skills tab, Actor. tsc and eslint clean. Light
+  mode not checked (fast iteration rule).
+
+## 2026-10-22: v7 is the default counselor dashboard
+
+**Why (Chandu):** "make v7 the default view on vercel for counselor dashboards." `version.tsx` `DEFAULT_VERSION` is "v7": `/counselor` with no `?v=` opens v7, and v7's own URLs drop the `v` param; v4 is `?v=4` and still a pill in the dock. Only the dock's pill remembers a choice (a new storage key, so stale v4 picks from before today are dropped); a `?v=4` link opens v4 for that visit only, so a shared link never pins a browser to v4. Hard-coded `?v=4` links inside v4's own files are unchanged.
+
+## 2026-10-22: v4 gets an Opportunities tab, a scrolling Saving row and photo-free majors (Maisha, for the noon demo)
+
+**Why (Maisha, Slack, 22 Oct 2026):** "Please add opportunities tab to v4. On home have 'What My Students Are Saving' cards look like explore where we can scroll horizontally as opposed to the overlap. Under 'Insights' the top majors cards look a little juvenile and feel out of place from the rest of the app's aesthetic. If Mika needs to redo these, lets remove the photos for now till she's done. Please push these by 11:30."
+
+- **Opportunities (`roles.ts` view "opportunities", `v4/Workspace.tsx` its own area between Explore and Prepare, `CounselorApp.tsx` renders `V7Opportunities`, `shell.tsx` hosts v7's `OppSheetHost` beside the log and explore sheets, plus the icon, title, change note and empty state maps):** v7's screen as is, inside v4's shell, for the School Counselor and Lead Counselor menus.
+- **Home (`v4/Overview.tsx`):** What My Students Are Saving is the Coverflow's row mode (the same sideways shelf Explore uses), not the overlapping carousel.
+- **Insights (`v4/CareerCollegeInsights.tsx`):** Top Majors keep the treemap, now every major as a plain tile with its name and count, no art (Chandu: "remove the images for majors but keep the tree map graph we had before"); `MAJOR_ART` stays in `majors.ts` for when Mika redoes the art.
+- **Checked:** tsc and eslint clean; v4 Opportunities, Home and Insights at 1440 in the pane.
+
+## 2026-10-22: Counselor v7 directory as one mixed roster; Messages gain an audience
+
+**Why (Usman, Slack, 22 Oct 2026, on the directory):** "I do not think we should permanently separate students into large At Risk / Needs Attention / On Track sections. That forces counselors to scroll through one category before reaching everyone else. Keep one mixed directory and let counselors filter when needed ... Last Name, First Name | Grade | Status | Progress | Last Activity, with filtering instead of permanently separating students into groups." **Chandu:** "I will default to alphabetical order but we should still surface the ones needing attention first so its brought to the attention of the counselors when they land on the page. Not a different section but surfaced at the top just like SchooLinks has." **Joshua (Messages):** "bring in the audience mechanics that SchooLinks uses so counselors can choose who they are communicating with ... Student Only, Guardians Only, Student + Guardians, Include Other School Staff ... the counselor always knows exactly who will receive the message before sending it."
+
+- **Directory (`v7/Students.tsx`):** one table; the students who need you lead it (At Risk, then Needs Attention, then On Track, each run A to Z by last name; Chandu: "dont make need you first as a row. Just make them populate first in the same table", after a first pass with a strip of face chips above the table); names as "Hassan, Omar"; labelled columns Name, Grade, Status (dot and word), Progress, Last activity. Progress is the one open item, or "2 items", "3 items", "4+ items" (the profile has the rest). Rows are roomy (16px) in faint alternating bands with no hairlines, so a wide row reads across (Chandu: "give the rows room to breathe ... Make it very easy to scan. We can even have alternate light and dark bands"). Filters: search, All grades, Status (All statuses, Needs you, At Risk, Needs Attention, On Track; "Needs you" is one more than Usman's four so Home's "Review students" link can land on both groups), Any plan; the GPA picker is gone (GPA stays in the CSV). Career interest and notes are not in the directory. 25 rows then "Show more". The three status groups are gone.
+- **Messages (`v7/Messages.tsx`, `lib/counselorMessages.ts` additive `Audience` on `SentMessage`, `replyTo` and `sendToStudent`):** the audience lives in the conversation header, the way SchooLinks shows participants: one quiet people icon beside the student's name opens the sheet (Student only, Guardians only with each guardian optional, Student and guardians, Include other school staff with a checklist of colleagues; "Goes to:" repeats the result before Use this), and small tags under the name list the extra people only when the conversation goes beyond the student. No "To" copy in the composer or under bubbles (Chandu: "remove the to omar and parents info from messages panel. Keep that extremely intuitive and familiar dont overcomplicate with additional copy"); student-only looks exactly as before. Guardians come from the family record (`v5/family.ts`); staff are DEMO-ONLY (the two teammates the profile names plus four school roles) until staff accounts exist. Every sent message keeps its audience. Group messages from the directory stay student only.
+- **Checked:** directory at 1440 (strip, header, A to Z, 25 of 121) and 375; the audience sheet and a send with student, guardians and a colleague. **Not checked:** light mode.
+
+## 2026-10-22: A day sky for light mode (the night sky's twin), with a Top / Low sun switch to vet; two dark-mode ink fixes
+
+**Why (Chandu, 22 Oct 2026):** "how would we make lightmode as conceptual and creative as the dark mode? I want to do something of a night and day mode. Dark mode has stars, shooting stars, aurora ... I think sunshine instead of the aurora might work but I think we'll need some atmospheric clouds." Light mode had been two pale blue glows on paper white: nothing for frosted glass to blur and nothing for a moment to react through.
+
+**The rule that flips (`src/components/app/SkySun.tsx`, mounted from `AppBackdrop.tsx`; light frame in `look-v2.css` under `html.look-v2.light`):** at night the ground stays black and the sky comes from light added over it. Adding light to white does nothing, so by day the ground stays paper white and the sky comes from air: haze, cloud and shafts of light drawn with depth and shadow. One WebGL fragment shader, built from the aurora's own noise, with the aurora's cost rules (40% resolution, 24fps, full rate only while a moment plays, still for reduced motion and the counselor's calm sky, nothing without WebGL: the CSS frame is then the whole day). Layers: the sun off the edge, never a disc (the stars are not star shaped either), a warm bloom and crepuscular rays; streaky cirrus lit from the sun's side with a pale underside; a haze on the bottom edge; warm motes rising only inside the rays. The CSS frame flipped to day physics: deep blue at the zenith behind the header, white at the horizon, and the ground keeps a little blue all the way down ("i dont want the cards scrims to fade into the background": white cards need a ground a shade cooler than they are).
+
+**Two suns, DEMO-ONLY switch (`SunSwitch` in `SkySun.tsx`, bottom-right chip in light mode; `?sun=top|low` and `localStorage` `dreamari-sun`; top is the default):** Chandu asked "should the rays come from the bottom?" and then, of the first low pass, "the sun rays are too localised at the centre at the bottom ... How can we use the full width and still make it look right?" A point source just under the edge fans into a narrow cone; the low sun sits far below the horizon (y = -1.7) so its rays rise nearly parallel across the full width, with dense shafts, a seam along the whole bottom edge that swells and fades in patches on its own timing ("the arc at the bottom is too uniform ... varying levels of glow ... I dont want a hard horizon"), a cool haze under the light, and a base that is near white with a clear yellow hue ("is the yellow base a little too muddy? should it be brighter at the base with a yellow hue"). The decision on which becomes the default is open: "please have a switch for low and top sun i couldnt vet them."
+
+**Rays are light (Chandu: "the rays are too flat and a bit too much", then "i dont want the rays to be too muddy, it needs to be like light"):** nothing is darkened or textured across a shaft; each is a clean warm-white beam that glows up and fades on its own timing and falls off smoothly along its length. Each colour channel samples the shaft a touch off-angle, so the edges split into a faint spectrum ("add that sort of chromatic rainbow aberration subtly to the ray's edges"), wider while a surge passes.
+
+**Moments (`lib/sky.ts` now carries `y`, where it happened; the night sky ignores it):** the first pass was a ring, like the stars' wave; Chandu: "the pulse right now is more like a dark ripple", then "lets try to make the reactions come from the rays themselves not like a water ripple". So the shafts that pass through where it happened surge and a band of brightness runs along them away from the sun. A lens flare starts at the action ("the lensflare could come from the origin of the action"): a white source bloom, then rainbow-rimmed ghosts strung along the line from there through the middle of the screen, two faint ones for a small moment, the whole chain plus a spectral glint for a big one. Ghosts are a white body of light with a pastel rim painted as coverage, never a dark hue ("make their base LIGHT and not muddy dark colors"): on a pale page added light is only ever white, while a flare ghost against a bright sky is a translucent coloured disc. Page arrivals surge from the edge the light comes from.
+
+**Shader compiler lesson:** the moments loop (`for` over a uniform array with `continue`, a nested ghost loop) rendered on one sun and blanked the whole layer on the other, with no error; probe stages showed valid values on both sides of a line that could not fail. Unrolled with literal indices and no `continue`, and every `pow(x, 2.0)` is a multiply (`sq`), since pow is undefined for a negative base in GLSL ES. Both suns render.
+
+**Two dark-mode ink fixes, found by a contrast walk of Home, Explore, Play, Opportunities, Connect and Profile (Chandu: "in dark mode the text i saw was dark where it should have been white ... Please check everywhere"):** in the Black & Blue look `--primary-foreground` is the near-black ink for blue fills, so it is wrong on anything that is not a blue fill. The For You reel's description line sat on the photo's scrim in that ink (1.06:1; `ExploreLab.tsx`, which `/explore` serves live, and `ExploreExperience.tsx`, same markup): now white. The selected Opportunities tab's count was white on the periwinkle fill (2.1:1; `OpportunitiesExperience.tsx`): now the fill ink. Profile's About Me tab flagged too but that is the sliding indicator fooling the check, not a fault. Every other use of the token is on a `--primary` fill.
+
+**Open:** which sun is the default; the shader has only been seen on this Mac (Chromebook Mali precision untested, though the hash is the aurora's safe one); the Explore welcome splash blurs the whole page, so the sky is soft there by design; a full light-mode pass (carousel scrims and surfaces still read as dark-on-white) is its own task and could not start for lack of disk space for a worktree. Verification: light mode on :3089 (Home, Opportunities, Explore), the switch toggling live, both moments on both suns; `npx tsc --noEmit` clean.
+
+## 2026-10-22 — Research career tasks without copying IB questions
+
+**Why (Chandu):** “Keep the structure” but make tasks “appropriate ... instead of just copying the same questions”; then “do your own research about what tasks can be used for each career.” The previous exact-layout contract over-applied IB's storage/report exercises. Latest user explicitly authorized “continue and push.”
+
+**Changed:** UX/Food use `ib-career-tasks-v4`: same 29 story positions, mentor/peer/senior entrances, four terms, unscored practice, four-item rapid round, seven scored decisions, midpoint, rival, deadline, support and final review. Six of seven scored tasks now exercise each career's own work; only the shared interpersonal credit response remains general. UX: wireframe scope, neutral observation/test prompts, Save placement, broken-flow prioritization, keyboard notes. Food: approved trial plan, variable/constant/sample code, neutral labels, code-to-recipe mismatch, missing-recipe escalation, label checks. New fourth terms are Observation and Sample code. Level 1 stays supervised; mentors/specialists retain sign-off. Sources, limits and per-task rationale live in `career-task-research.json` and `career-task-contracts.json`; teaching traces and examples updated. Save slot 213 restarts revised content.
+
+**UI:** Existing drag options now retain their optional read-only graphic and can show a meaningful `dragItem` label (Save set / Sample label), instead of an unrelated generic token. Same answer selection, tap/keyboard fallback, scoring and fixed centered panels. Browser computed-style inspection caught a low-contrast dark label on the purple work token; the token uses the stable light neutral token. No new scrolling/positioning logic. Approved IB and RN gameplay remain unchanged; their preservation checks pass. No new raster art or scene routes.
+
+**SOP:** v2.2 source, standalone/public build prompt, audit and 11-page PDF updated. Distinguishes shared narrative functions from independent task research, level authority and answer-control choice. Requires task contracts, source-backed method/limits and cross-career question review. PDF rendered and all-page contact inspected; reference artwork remains embedded. Public file is `/documents/dreamari-master-career-sop.pdf` on the main app; prior standalone Sites copy may need republishing.
+
+**Validation:** 14 regression tests pass; UX structural validator 487 checks and Food 471 checks pass. Scoped ESLint, TypeScript, tokens and production build pass. Fresh UX browser run traversed all 29 beats, four vocabulary cards, all four practice pairs, four rapid items with timer enabled, midpoint, rival response, priority chat, rank, final result 92/7-of-7 and replay reset 50/0-of-7. Wrong UX placement retained the buried UI; success showed proposed clear layout. Food preview-assisted checks covered all four rapid items plus timeout, neutral labels, notebook mismatch, wrong missing-record message; correct/incorrect scoring and graphics observed. Food has not had a fresh full-game pass/fail run in this change. Physical Windows/Chromebook and phone checks remain unverified. Screenshot evidence: `/Users/chandump/Documents/Dreamari/outputs/career-tasks-v4/`. UX console had no captured errors.
+
+**Next:** QA career realism, balance and concise copy in the assembled games. Do not reimpose literal IB question/layout equality. Human QA is still required for subject authenticity; structural checks cannot certify that.
+## 2026-10-22: Light mode pass over the student app's photo surfaces (frost and ink, not dark-on-white)
+
+**Why (Chandu, 22 Oct 2026, reviewing the day sky):** "the text scrim stuff on the carousels are also still dark we should have a full light mode pass next." The student app's photo surfaces were drawn dark-first: a near-black base (`#0e0c20`) under the photo, near-black ramps over it, black glass chips and badges, white type with a black text shadow. In light they read as dark mode pasted onto the paper-white page: Home's hero carousel, a career's header (the live `actions-lab/CareerDetailLab`), a school's header, Profile's cover and My Goals cards, Connect's community cards, pro profile header, event board, mentorship cards, the AT&T community header, the Play hub's corner badges and chips, Explore's pay chips and video badges.
+
+**The treatment, and why this one:** in light every photo surface now takes what the poster cards already had (the Match card's scrim flipping white was "amazing", `marketing/tokens.css`): the photo fades into the page's own frost (`#f4f7ff`) and the type is navy ink on it, the same values as the school cards' photo-ink set. A first pass kept the white type and turned the scrim cobalt; Chandu: "i dont like the blue scrim. can we have it be better?" A frost halo text-shadow was then tried where the ramp thins over a bright patch of photo; Chandu: "theres too much glow on the career detail pages text and stuff in light mode. Lets not do that." Dark mode never had the halo: it keeps its original black 2px/10px shadow. Home's hero instead gets its own light ramps (`--hero-scrim-desktop` / `--hero-scrim-phone`), solid under the whole text column and feathered past it, for "some text is blending into the white on the carousel"; the white partner marks in that carousel (`jpmc-logo-white.svg`, `jkcf-white.svg`) are filtered to ink in light ("whatever is before the apply now stuff is still white, maybe its the logos").
+
+**How it is wired (so dark stays byte-identical):** one token set in `src/app/look-v2.css`, section 7, set only under `html.look-v2.light`: `--scrim-deep` (the base), `--scrim-rgb` (ramp and glass channels), `--scrim-gain` / `--scrim-glass-gain` (frost hides less than black at the same alpha, so ramps run at 1.25x and chips at 1.6x their dark alpha), `--scrim-ink` / `--scrim-ink-soft`, `--scrim-chip-edge`, `--scrim-tile-bg`, `--scrim-chip-text`, `--card-text-shadow(-soft)`. Every component reads them through `var(--scrim-*, <its own dark literal>)`: `background: "var(--scrim-deep, #0e0c20)"`, `rgb(var(--scrim-rgb, 12 16 35) / calc(0.86 * var(--scrim-gain, 1)))`, `color: "var(--scrim-ink, #fff)"`. `cardChrome.tsx` exports `SCRIM_DEEP`, `SCRIM_INK`, `SCRIM_INK_SOFT`, `SCRIM_CHIP_EDGE`, `scrim()` and `glass()` for new code; `CARD_TEXT_SHADOW`, `cardBottomScrim()` and `cardTopScrim()` go through the same variables. The two `globals.css` attribute hooks that recoloured literal `#0e0c20` / `rgba(12,16,35,0.96)` inline styles in light are gone (nothing matches them any more; the variables do that job). Verified in dark by resolving every element's inline style the old way on a probe element and comparing computed background, gradient, colour and text-shadow: 0 differences over 7 screens (Home, Explore, Play, career, Profile, Communities, Mentorship, the school sheet), 495+ elements.
+
+**Also in this pass:** the career page's "Careers like this one" rail bled 32px (`main`'s padding) out of a panel padded 24px, so its cards ran 8px past the panel's border on both sides (Chandu: "the cards in careers like this one are exceeding the border of the card"); the bleed now matches the panel's own padding (`space-5`, `space-6` from sm), in both `CareerDetailLab` and the older `CareerDetailExperience`.
+
+**Contrast (WCAG AA, light):** ink `#1d2539` on the frost 13.6:1; on a 69% frost stop over a black photo 5:1; on a 72% glass chip over a black photo 7:1 and over the frost 12:1; the blue Play button is unchanged (white on `#2f5fb1`, 6.1:1). Dark values are unchanged, so dark's existing ratios hold.
+
+**Checked:** tsc clean (the pre-existing `counselor/v6/LineAvatar` missing-module error is unrelated), eslint clean on every touched file (warnings pre-existing); light at 1440: Home (all hero panels), Explore, Play, Opportunities, Connect People / Communities / Mentorship, Profile, the career page, the school page. **Not yet checked / left:** tablet width by eye, the before/after screenshot pairs under `docs/reference/light-mode-pass-2026-10/` (next commit), Windows/ChromeOS.
+
+**Branch note:** the first commit on this branch mirrors the parent session's then-uncommitted day sky (`SkySun.tsx`, the light frame); drop it when that work lands on its own and cherry-pick the commits above it.
 
 ## 2026-10-22 — Character scenes for Play thumbnails
 
@@ -4778,6 +5060,163 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-23 Build: Subjects, Skills (new), Industries; tuition question removed; Explore Videos and Trades swapped; v12 dataset name check
+
+- WHY: Joshua's Slack message to Chandu, 23 Oct 2026. New Build order
+  "Subjects, then Skills (new), then Industries, then the remaining Build
+  questions in their current order"; "remove the yearly tuition / school
+  budget question entirely from Build"; a new Skills question, copy exactly
+  as given ("Which of these do you actually enjoy doing?" / "Pick up to
+  3."); on Explore, "swap the positions of the Videos row and the Skilled
+  Trades row". Joshua: the 15 skills "are already mapped to O*NET for
+  matching, so this is UX integration only".
+- BUILD ORDER (`src/components/build/types.ts` STAGES): welcome, Subjects
+  13%, Skills 25%, Industries 38%, halfway 50%, Work vibe 63%, Education
+  75%, Location 88%, Profile 100%. Seven questions plus the halfway beat
+  fill the same eight slots as before, so the reference percentages did
+  not move. The halfway screen stays at 50% after the third question
+  because its copy says "halfway". Industries (the `interests` stage) now
+  has a Back button; Subjects, first, has none. The per-stage aurora
+  accents stayed with the percentages, not the questions (the color is
+  the progress bar sampled at that percent). Dreamy's lines moved with the
+  order: Subjects gets the warm-up line, Skills "No wrong answers. Pick
+  what feels fun.", Industries "Now pick the fields that pull your
+  attention."
+- TUITION: `CostStep` is no longer mounted in Build and "cost" is out of
+  STAGES. The field (`costIndex`, `COST_STOPS`, `CostSlider`) is KEPT
+  because My Build (Profile > About Me, `PreferencesTab.tsx`) still asks
+  it in its Tuition section and the DEMO_BUILD seed sets it. "cost" also
+  stays in the `StageId` union for that section's accent and Dreamy line.
+  Follow-up for Chandu to decide: whether My Build should drop Tuition
+  too, and whether it should gain the new Skills question (today its
+  "Skills" section is the Preferences question "What are you good at, and
+  what do you want to build?", a different thing).
+- SKILLS STEP (`SkillsStep` in `steps.tsx`): the 15 options are
+  `SKILL_OPTIONS` in types.ts, in Joshua's order for storage; they match
+  the dataset's "Skills" sheet labels one for one (Fixing things =
+  Repairing 2.B.3.l, Helping people = Service Orientation 2.B.1.f, and so
+  on), so no renaming is needed for matching. Rules, each from the Slack
+  message: max 3 (`MAX_SKILLS`); at 3 the other chips grey out until one
+  is deselected (new `lockAtMax` prop on `ChipGrid`; aria-disabled, kept
+  in the tab order; the default elsewhere is still the 24 Sept 2026
+  swap); random order per student, stable within a session
+  (`shuffledSkills()`: one seed in sessionStorage, mulberry32 + Fisher-
+  Yates); all 15 on one screen at 375 and 1440 (new `compact` prop on
+  ChipGrid: wrapped 36px pills, no phone "Show all"). Verified headless at
+  1440x900 and 375x812: the step column's scrollHeight equals its
+  clientHeight on both, so nothing scrolls. Same selection micro-
+  interaction as every other chip (aurora pulse, confirm lift, shimmer).
+  Skippable like every step (the Skip link); Next needs at least one pick,
+  the same rule as Subjects. Citation: "Question informed by O*NET".
+- STORE: `skills: string[]` on `BuildState`, `StudentProfile`
+  (`MAX_SKILLS`, normalized, part of `isEmptyProfile`) and the Build
+  answers store, written next to interests and subjects on Build handoff
+  and on every My Build save. DEMO-ONLY seed (`DEMO_BUILD`): Solving hard
+  problems, Managing money, Leading a team, shaped like the demo
+  student's Investment Banking pick. Nothing reads the picks yet; the
+  results echo Joshua marked "maybe later" ("You picked Helping People
+  and Understanding People...") was not built.
+- EXPLORE: the live Explore is `src/components/actions-lab/ExploreLab.tsx`
+  (`browseRows`), not `ExploreExperience.tsx`; the default view now runs
+  Might Not Know, Videos, Skilled Trades, Public Service. The Non-college
+  view still leads with Skilled Trades (Joshua's curated row, 11 Sept
+  2026), untouched.
+- VALIDATION: `npm run tokens:check` clean. `tsc --noEmit` has one
+  pre-existing error unrelated to this work (`counselor/v6/LineAvatar.tsx`
+  cannot find `@dicebear/lorelei-neutral`; the module is missing from the
+  shared node_modules). Browser check on :3033 (worktree
+  `.worktrees/build-skills`, launch entry `build-skills-3033`): the whole
+  flow clicked through, Subjects 13 to Location 88 with no tuition step.
+  Not pushed.
+- DATASET (`~/Downloads/dreamari_career_database_final_v12.xlsx`, not
+  wired in). Sheets: "Start here" (notes), "Careers" (342 rows, 56
+  columns), "Coverage", "Education mix", "Skills" (the 15 student labels,
+  their O*NET element and ID, column name, average and spread). Careers
+  columns: Group (15), Career, App Display Title, For You and Browse Card,
+  Career Facet, Build Subject (Primary/Secondary), O*NET Subgroup,
+  Industry theme (v2), v2 cluster, v2 accordion group, Theme source, Why
+  it's on the list, Education route, Official occupation, O*NET-SOC, Copy
+  status, Where the copy came from, v2 career it matched, Simple
+  explanation, Real life example, Why it matters, What you do daily, What
+  you need to learn, Best school subjects, Salary explanation, Door says
+  (BLS), Most people in the job hold, % who hold it, % with no
+  bachelor's, Study field, AI-Estimated Salary Note, Search Keywords,
+  Primary Major, College Majors, College Major CIP, Study Tier, Is Trade,
+  Training Route, Explore Category (33), Skill: x15, Top Skills. The
+  sheet's own rule: "Where v2 had a name, v2's name won"; App Display
+  Title is the short form for cards.
+  Compared against the app catalog (`ALL_CATALOG_CAREERS`: catalog.ts +
+  browseLibrary.ts + browseLibrary2026.ts, 349 titles): 324 match the
+  sheet exactly on Career or App Display Title. The differences, for
+  Usman to rename in production (catalog name -> sheet name, display
+  title in brackets where it differs):
+  - AI and Machine Learning Engineer -> AI / Machine Learning Engineer [AI Engineer]
+  - Cyber Security -> Cybersecurity Analyst
+  - Entrepreneur -> Entrepreneur or CEO
+  - Farm & Ranch Manager -> Farmer or Rancher
+  - Investment Banking -> Investment Banking Analyst
+  - Iron Worker -> Ironworker
+  - Park Ranger or Naturalist -> Park Ranger and Naturalist [Park Ranger]
+  - Software Engineer -> Software Developer
+  - Sound Engineering Technician -> Sound Engineer
+  - Sports Medicine Doctor -> Sports Medicine Physician
+  - Therapist -> Therapist or Mental Health Counselor [Mental Health Counselor]
+  - UI/UX Designer -> UX / UI Designer
+  - Management Analyst -> Management Consultant (same SOC, Management Analysts)
+  - Public Relations Manager -> nearest is Public Relations Specialist; the sheet's Public Relations Managers SOC is "Event Marketing Manager"
+  - Pediatric Surgeon -> nearest is Surgeon
+  - Emergency Medicine Doctor -> no sheet row (EMT and Emergency Management Director are different jobs)
+  - HR Manager -> no sheet row (Recruiter is the only Human Resources SOC)
+  - Game Designer, Video Game Designer -> no sheet row (the sheet has Game Producer, Game Programmer, Game QA Tester)
+  - Film Director -> no sheet row (Art Director and Film Editor only)
+  - Data Analyst, Database Architect, Architectural & Engineering Manager, Industrial-Organizational Psychologist, Purchasing Manager -> no sheet row
+  In the sheet but not in the catalog under any name: Sheet Metal Worker,
+  Jewelry Designer and Maker, Facilities Maintenance Technician,
+  Sommelier, Quality Control Lab Analyst [Lab Analyst], Teacher's Aide,
+  Special Education Aide. The sheet also shortens 25 names for cards
+  (Audio and Video Technician [AV Technician], Film and Video Editor [Film
+  Editor], Elevator and Escalator Technician [Elevator Technician],
+  Preschool or Kindergarten Teacher [Pre-K Teacher], Adult and English
+  Language Teacher [ESL Teacher], and so on); where the catalog already
+  uses the long form those match on the Career column and need no change.
+- SAME DAY, second commit (Chandu's review of the first):
+  - Skills chips: "arrange the chips properly, make it symmetrical and
+    aligned uniformly not just cluttered", then "are there better ways of
+    offering the choices that would be more engaging ... that would also
+    work on phones?" Chosen from three options: icon tiles with a picks
+    band, then "yeah build the reactions". The step is now icon tiles
+    (`SKILL_ICONS` in steps.tsx, ChipGrid `compact`: icon above a centered
+    label, five across on desktop, three across on phones, equal cells),
+    with three slot rings on the subtitle line after "Pick up to 3."
+    (`SkillSlots`) that fill with each pick's icon. A separate "Your picks"
+    band with named pills was built first and dropped: on a phone it
+    stacked to three rows and pushed the tiles off screen; the rings carry
+    the cap in one line and the name is on the lit tile. Dreamy says a
+    two-word line per pick (`SKILL_REACTIONS`, `useSkillReaction`), in a
+    house .dm-tip bubble above the heading (QuestionHeading `reaction`;
+    above the sprite it covered the title's first line on phones), with
+    the heart burst the step already fires. ChipGrid's `onPick` now passes
+    the option. Verified headless at 1440x900 and 375x812: no scrolling.
+  - Career Goal (Chandu: "make sure the page scrolls to the cards when
+    they reach the career goal screen"): `useScrollToGoal` in AboutMeTab
+    eases the page so the view's heading sits under the fixed header and
+    the ranking cards fill the screen, on both Career Goal views. Instant
+    rAF steps, since a smooth scroll is cancelled on this page.
+  - My Build (Chandu, via the IB thumbnail session: "yes add to my build
+    but dont remove whats there that was alrady additional. Make it make
+    sense."): `PreferencesTab` BUILD_SECTIONS now mirror Build's order
+    (Subjects, Skills, Career fields, Work style, then the rest) with the
+    new Skills section (`enjoy`: same copy, tiles, slots, lock, shuffle
+    and reaction, reading and writing the same `skills` picks). Nothing
+    removed: Tuition stays, and the old Preferences skills question stays,
+    retitled "Skills to build" (About Me's summary already called it
+    that) so the two read apart. About Me's "What you like" column gains
+    the Skills line. The modal opens on Subjects by default now, the first
+    section.
+- NEXT: Chandu says push. Joshua's "maybe later" results echo is still
+  not built.
+
+
 ### 2026-10-03 Home (v1, the default) restructured: two card languages, one section title
 
 - **Why.** Chandu: "work on the homepage a bit, it feels a little cluttered right now and there's too many graphic directions or visual identities on the same page and it needs better structure." Audit: four card languages (cinematic hero, landscape play cards with a centre badge plus a verb pill, portrait posters, glass icon cards), three section-title treatments (eyebrow+title, eyebrow+title+subtitle, title only), HUD chips on the hero, and the Registered Nurse game twice (hero and rail).
@@ -9479,7 +9918,6 @@ Verified in the browser: 34 > 24 > 16 > 14, strictly descending.
 - Salary renders through the same <Fact> as every other field. It has been
   re-emphasised twice by me and corrected twice. Leave it at body.
 - Emphasis available: weight and brightness. Not size.
-
 
 
 Report scale is now heading / subheading / body / caption, with the rule that a

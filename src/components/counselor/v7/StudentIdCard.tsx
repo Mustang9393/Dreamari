@@ -3,6 +3,7 @@
 // The student's ID tag, kept for v7 when v4 went back to its 20 Oct
 // afternoon state for Maisha's demos (21 Oct 2026). Same design v4 had.
 
+import "./studentIdCard.css";
 import { Avatar } from "../v4/chips";
 import { lastActiveLabel, type CounselorStudent } from "@/lib/counselorRoster";
 

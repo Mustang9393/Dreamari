@@ -5,11 +5,16 @@
 
 export type StageId =
   | "welcome"
-  | "interests"
   | "subjects"
+  | "skills"
+  | "interests"
   | "workVibe"
   | "milestone"
   | "education"
+  // "cost" is no longer a Build stage (Joshua, 23 Oct 2026: the yearly
+  // tuition question is removed from Build). It stays in this union because
+  // My Build (PreferencesTab) still asks it with CostSlider and borrows this
+  // stage's accent and Dreamy line for that section.
   | "cost"
   | "location"
   | "profile"
@@ -24,12 +29,18 @@ export const STAGES: { id: StageId; percent: number; almostDone?: boolean }[] = 
   // abrupt coming out of signup. 0%, not 13% -- the HUD shouldn't look
   // already-underway before a single answer is given.
   { id: "welcome", percent: 0 },
-  { id: "interests", percent: 13 },
-  { id: "subjects", percent: 25 },
-  { id: "workVibe", percent: 38 },
+  // Order per Joshua (Slack to Chandu, 23 Oct 2026): "Subjects, then
+  // Skills (new), then Industries, then the remaining Build questions in
+  // their current order", with the yearly tuition question removed. Seven
+  // questions plus the halfway beat still fill the same eight slots, so the
+  // reference percentages are unchanged. The celebration stays at 50%,
+  // after the third question, because its copy says "halfway".
+  { id: "subjects", percent: 13 },
+  { id: "skills", percent: 25 },
+  { id: "interests", percent: 38 },
   { id: "milestone", percent: 50 },
-  { id: "education", percent: 63 },
-  { id: "cost", percent: 75 },
+  { id: "workVibe", percent: 63 },
+  { id: "education", percent: 75 },
   { id: "location", percent: 88, almostDone: true },
   { id: "profile", percent: 100, almostDone: true },
   { id: "complete", percent: 100 },
@@ -72,6 +83,66 @@ export const SUBJECTS = [
   "Psychology",
 ];
 
+// The Skills question (Joshua, 23 Oct 2026), copy exactly as given. Each
+// label is one of the 15 student-facing O*NET skills in the career
+// dataset's "Skills" sheet ("Fixing things" = Repairing, "Helping people" =
+// Service Orientation, and so on), so the picks join to matching with no
+// renaming. Shown shuffled per student (see shuffledSkills); this is the
+// canonical order for storage and for anything that lists them.
+export const SKILL_OPTIONS = [
+  "Fixing things",
+  "Using your hands",
+  "Picturing things",
+  "Running machines",
+  "Spotting mistakes",
+  "Solving hard problems",
+  "New ideas",
+  "Understanding people",
+  "Helping people",
+  "Convincing people",
+  "Teaching others",
+  "Leading a team",
+  "Managing money",
+  "Staying organized",
+  "Being active",
+];
+export const MAX_SKILLS = 3;
+
+// A different order for every student, the same order for the whole session
+// (Joshua, 23 Oct 2026: "randomize option order per student, stable within a
+// session"), so the first chips on screen do not get picked just for being
+// first. One seed per browser session; Back and forth through Build, or a
+// second run in the same tab, keeps the order a student already saw.
+const SKILLS_SEED_KEY = "dreamari-build-skills-seed";
+export function shuffledSkills(): string[] {
+  if (typeof window === "undefined") return SKILL_OPTIONS;
+  let seed = 0;
+  try {
+    const raw = window.sessionStorage.getItem(SKILLS_SEED_KEY);
+    seed = raw ? Number(raw) : 0;
+    if (!seed) {
+      seed = Math.floor(Math.random() * 2 ** 31) || 1;
+      window.sessionStorage.setItem(SKILLS_SEED_KEY, String(seed));
+    }
+  } catch {
+    seed = Math.floor(Math.random() * 2 ** 31) || 1;
+  }
+  // mulberry32 + Fisher-Yates: small, deterministic for the seed
+  let t = seed;
+  const rand = () => {
+    t = (t + 0x6d2b79f5) | 0;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+  const out = [...SKILL_OPTIONS];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 // Balanced sits in the middle so the slider reads as a spectrum: fast — balanced — calm.
 export const ENERGY_OPTIONS = ["Fast pace", "Balanced", "Calm"];
 export const TEAM_OPTIONS = ["Solo", "Small team", "Big team"];
@@ -85,6 +156,7 @@ export const EDUCATION_OPTIONS: { title: string }[] = [
 ];
 
 // Slider stop labels, in track order. Index -1 = untouched ("Select a range").
+// Build no longer asks this (Joshua, 23 Oct 2026); My Build still does.
 // A YEARLY budget (Slack, 10 Sept 2026): the old wording left it unclear
 // whether the number meant one year, two, or all of school; one clear frame
 // works across 4-year colleges, community colleges and trade schools.
@@ -124,10 +196,12 @@ export const PATH_OPTIONS: { id: "college" | "trades" | "both"; title: string; s
 export type BuildState = {
   interests: string[];
   subjects: string[];
+  /** up to MAX_SKILLS of SKILL_OPTIONS, in the order picked */
+  skills: string[];
   energy: string | null;
   teamStyle: string | null;
   education: string | null;
-  costIndex: number; // -1 until the slider is touched
+  costIndex: number; // -1 until the slider is touched; Build no longer asks it, My Build does
   state: string; // the one state they're open to going to; "" = none picked
   fullName: string;
   email: string;
@@ -141,6 +215,7 @@ export type BuildState = {
 export const INITIAL_BUILD_STATE: BuildState = {
   interests: [],
   subjects: [],
+  skills: [],
   energy: null,
   teamStyle: null,
   education: null,
@@ -160,14 +235,17 @@ export const INITIAL_BUILD_STATE: BuildState = {
 // pink #ff4585, the same three stops the bar renders) — per direct feedback the
 // background should "go off of what the progress bar is showing" rather than cycle
 // through the whole palette. Values are the linear interpolation at 13/25/38/50/
-// 63/75/88/100 percent.
+// 63/75/88/100 percent, keyed by each stage's slot in STAGES (23 Oct 2026
+// reorder: the colors stayed with the percentages, not with the questions).
+// "cost" keeps its old 75% color for My Build's Tuition section.
 export const STAGE_ACCENTS: Record<StageId, string> = {
   welcome: "#2f6bf2",
-  interests: "#4767f3",
-  subjects: "#5d64f4",
-  workVibe: "#7560f5",
+  subjects: "#4767f3",
+  skills: "#5d64f4",
+  interests: "#7560f5",
   milestone: "#8b5cf6",
-  education: "#a956d9",
+  workVibe: "#a956d9",
+  education: "#c550be",
   cost: "#c550be",
   location: "#e34aa0",
   profile: "#ff4585",
@@ -178,11 +256,12 @@ export const STAGE_ACCENTS: Record<StageId, string> = {
 // the references' hue (213deg), with no violet or pink stops.
 export const STAGE_ACCENTS_V2: Record<StageId, string> = {
   welcome: "#176acf",
-  interests: "#1e74dc",
-  subjects: "#2780ec",
-  workVibe: "#3a8cf1",
+  subjects: "#1e74dc",
+  skills: "#2780ec",
+  interests: "#3a8cf1",
   milestone: "#4a96f4",
-  education: "#59a0f8",
+  workVibe: "#59a0f8",
+  education: "#74b0f8",
   cost: "#74b0f8",
   location: "#8abdf9",
   profile: "#9ec6fa",
@@ -192,8 +271,11 @@ export const STAGE_ACCENTS_V2: Record<StageId, string> = {
 // Dreamy's coaching line + expression sprite per stage (sprites in
 // public/images/dreamy/, catalogued from the supplied expression packs).
 export const STAGE_DREAMY: Record<Exclude<StageId, "welcome" | "milestone" | "complete">, { line: string; sprite: string }> = {
-  interests: { line: "Start with what pulls your attention. ✨", sprite: "/images/dreamy/v2/dreamy-happy.webp" },
-  subjects: { line: "Pick the subjects you enjoy most. ✨", sprite: "/images/dreamy/v2/dreamy-glasses.webp" },
+  // Subjects opens Build now (23 Oct 2026), so it carries the warm-up line
+  // and the happy face; Industries, third, gets the glasses.
+  subjects: { line: "Start with the subjects you enjoy most. ✨", sprite: "/images/dreamy/v2/dreamy-happy.webp" },
+  skills: { line: "No wrong answers. Pick what feels fun. ✨", sprite: "/images/dreamy/v2/dreamy-idea.webp" },
+  interests: { line: "Now pick the fields that pull your attention. ✨", sprite: "/images/dreamy/v2/dreamy-glasses.webp" },
   workVibe: { line: "There is no right answer. Just choose what feels like you. ✨", sprite: "/images/dreamy/v2/dreamy-idea.webp" },
   education: { line: "How much education or training feels right? ✨", sprite: "/images/dreamy/v2/dreamy-puzzle.webp" },
   cost: { line: "Choose a range that feels realistic. ✨", sprite: "/images/dreamy/v2/dreamy-curious.webp" },

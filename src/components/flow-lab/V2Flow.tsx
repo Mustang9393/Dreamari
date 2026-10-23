@@ -28,7 +28,7 @@
 // 26 Sept 2026, "we can make things so intuitive without it being text
 // heavy" (Joshua, on coachmarks: "maybe... as needed, case by case"). No
 // coachmarks and no hint lines; the screens teach themselves:
-// - Titles state the task ("Save up to 3 careers you’re interested in", "Pick your top 3").
+// - Titles state the task ("Save 1–3 careers you’re interested in", "Pick your top 3").
 // - The card's Save control is a labeled pill, pulsing softly on the first
 //   card until the first save.
 // - The bottom bar's tray shows seven slots filling with each save: the
@@ -134,13 +134,13 @@ const NOTES = {
     "Shown when this browser has no Build answers, and after Restart (prefilled from Build) so a demo can try two worlds. In the product these come from Build itself; the lab never changes the real Build.",
     "Worlds are required; subjects and the college or trades answer sharpen the list.",
   ] },
-  explore: { heading: "Save up to 3 careers you’re interested in", bullets: [
+  explore: { heading: "Save 1–3 careers you’re interested in", bullets: [
     "Opens on your strongest world; your second world is the next tab. A chip on each card says why it's there.",
     "Explore all is for browsing outside your two worlds: a mix across every other industry, none picked for you. Pick an industry to see only that one; All goes back to the mix.",
     "Each card says three things: the career, Learn more, and why it fits you.",
     "Tap a card for details. Save adds it to the tray at the bottom, up to 3; the empty slots show how many are left.",
     "Scroll for more. The next careers load in on their own.",
-    "One save is enough to continue. Continue goes straight to your Top Three, ranked in the order you saved; reorder or remove there.",
+    "One save is enough to continue. Continue with 1, 2 or 3 goes straight to your Top Three, ranked in the order you saved; reorder or remove there.",
   ] },
   rank: { heading: "Your top 3, for now", bullets: [
     "Your saved careers, with one empty slot above them per save (two saves, two slots). Tap a card to fill the next slot: first tap is #1.",
@@ -355,7 +355,7 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
           // LOCKED copy (14 Oct 2026, Joshua via Slack: "Right now, it is not
           // obvious enough what students are supposed to do here ... After this
           // update it will be locked until further notice"). Don't reword.
-          title="Save up to 3 careers you’re interested in"
+          title="Save 1–3 careers you’re interested in"
           hint="We’ll use your picks to recommend similar careers. You can update them later at anytime."
           controls={
             // Nothing in the controls ever clips or wraps (Chandu, 15 Oct 2026,
@@ -370,20 +370,16 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
             // squeezing. Below lg: the student's worlds on one row (their
             // track scrolls sideways if it must), then Explore all and its
             // dropdown together on the next, always fully on screen.
-            <>
-              <div className="hidden w-max max-w-none flex-nowrap items-center gap-2 lg:flex">
-                {/* Coming back to Explore all is the mix again, whatever was picked before. */}
-                <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: key === EXPLORE_ALL ? "" : s.moreWorld }))} options={tabs} />
-                {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
-              </div>
-              <div className="flex flex-col gap-2 lg:hidden">
-                {state.worlds.length > 0 && <Segmented ariaLabel="Your worlds" value={isAll ? "" : state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: "" }))} options={state.worlds.map((w) => ({ key: w, label: w }))} />}
-                <div className="flex flex-nowrap items-center gap-2">
-                  <Segmented ariaLabel="Explore all" value={isAll ? EXPLORE_ALL : ""} onChange={() => setState((s) => ({ ...s, activeTab: EXPLORE_ALL, moreWorld: "" }))} options={[{ key: EXPLORE_ALL, label: EXPLORE_ALL }]} />
-                  {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
-                </div>
-              </div>
-            </>
+            // One row at every width (22 Oct 2026, Chandu: "please dont do
+            // the tabs in match screen on two rows ever"): the worlds,
+            // Explore all and its industry dropdown sit on one line; when
+            // the line is wider than the screen, Segmented folds itself
+            // into a dropdown rather than wrapping.
+            <div className="flex min-w-0 flex-nowrap items-center gap-2">
+              {/* Coming back to Explore all is the mix again, whatever was picked before. */}
+              <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: key === EXPLORE_ALL ? "" : s.moreWorld }))} options={tabs} />
+              {isAll && <IndustryPicker value={moreWorld} options={others} onChange={(w) => setState((s) => ({ ...s, moreWorld: w }))} />}
+            </div>
           }
         >
           <SurfaceState id={17} isEmpty={ranked.length === 0} what="career" onEmptyAction={chooseAnotherWorld}>
@@ -415,7 +411,12 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
           // profile"). Saves cap at 3, so that screen only re-ordered the
           // same cards; the order they were saved in is the starting rank,
           // and Profile's Top 3 is where they reorder or remove.
-          cta={state.saved.length === 0 ? "Save a career" : state.saved.length === 1 ? "Continue" : `See my Top ${state.saved.length}`}
+          // The button counts what they saved: "Continue with 1/2/3"
+          // (Chandu, 23 Oct 2026: "It's not see my top 3 anymore... update to
+          // say continue with (x) the number of whatever they saved"). "See
+          // my Top 3" named a screen that no longer exists; the number says
+          // one save is enough and more are welcome.
+          cta={state.saved.length === 0 ? "Save a career" : `Continue with ${state.saved.length}`}
           ctaDisabled={state.saved.length === 0}
           // Continue unlocks with a soft glow after the first save
           // (Joshua: "I can continue now, but I can also complete my Top 3").

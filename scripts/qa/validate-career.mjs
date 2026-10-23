@@ -17,8 +17,8 @@ function load(file){
  vm.runInThisContext('(function(exports,require,module,__filename,__dirname){'+js+'\n})',{filename:file})(loadedModule.exports,localRequire,loadedModule,file,path.dirname(file));return loadedModule.exports;
 }
 const career=process.argv[2];if(!career)throw Error('Pass a simulation/catalogue ID.');
-const {SIMULATIONS}=load(path.join(root,'src/components/play/games.ts'));
-const sim=SIMULATIONS.find(s=>s.id===career||s.careerId===career);if(!sim)throw Error('Unknown career: '+career);
+const {SIMULATIONS,SIMULATION_V2={},simulationFor}=load(path.join(root,'src/components/play/games.ts'));
+const sim=simulationFor(career);if(!sim)throw Error('Unknown career: '+career);
 const {bespokeIn}=load(path.join(root,'src/components/play/coreKit.ts'));
 const {SKILL_MEANING}=load(path.join(root,'src/components/play/skills.ts'));
 const {WORLD_COLORS}=load(path.join(root,'src/components/app/worlds.ts'));
@@ -33,7 +33,7 @@ const traceFile=process.argv[4]??path.join(root,'docs/handoff/career-scaling/exa
 const trace=fs.existsSync(traceFile)?JSON.parse(fs.readFileSync(traceFile,'utf8')).trace:[];
 const errors=[];let count=0;
 const check=(ok,message)=>{count++;if(!ok)errors.push(message);};
-const allIds=SIMULATIONS.flatMap(s=>s.levels.flatMap(l=>l.beats.map(b=>b.id)));
+const allIds=[...SIMULATIONS,...Object.values(SIMULATION_V2)].flatMap(s=>s.levels.flatMap(l=>l.beats.map(b=>b.id)));
 const scoredKinds=new Set(['choice','match','rapid','chain','slider','flags','rank','pick','bucket']);
 const isScored=b=>scoredKinds.has(b.kind)&&!b.practice;
 const coreKinds=new Set(['card','flips','focus','reveal','check','review',...scoredKinds]);
@@ -81,19 +81,20 @@ if(coverage){
 const levels=[];
 for(const level of sim.levels){
  const scored=level.beats.filter(isScored);
- const ibTemplate=['ib-l1-2026-10-21','ib-narrative-v2','ib-semantic-v3'].includes(level.generationTemplate);
+ const ibTemplate=['ib-l1-2026-10-21','ib-narrative-v2','ib-semantic-v3','ib-career-tasks-v4'].includes(level.generationTemplate);
  const varied=level.generationTemplate==='ib-narrative-v2';
+ const careerTasks=level.generationTemplate==='ib-career-tasks-v4';
  const expected=varied?7:ibTemplate?ibMaster.beats.filter(isScored).length:10;
  check(scored.length===expected,level.id+': scored decision count differs from template');
  if(ibTemplate){
   check(level.points===ibMaster.points&&level.noStrikes===ibMaster.noStrikes,level.id+': IB score policy drift');
-  if(!varied)check(JSON.stringify(level.beats.map(b=>[b.kind,Boolean(b.practice)]))===JSON.stringify(ibMaster.beats.map(b=>[b.kind,Boolean(b.practice)])),level.id+': IB slot sequence drift');
+  if(!varied&&!careerTasks)check(JSON.stringify(level.beats.map(b=>[b.kind,Boolean(b.practice)]))===JSON.stringify(ibMaster.beats.map(b=>[b.kind,Boolean(b.practice)])),level.id+': IB slot sequence drift');
   else {check(level.beats.length===ibMaster.beats.length,level.id+': runtime beat count must match IB');for(const kind of ['choice','flips','match','rapid','rank'])check(level.beats.some(b=>b.kind===kind),level.id+': missing '+kind+' variety');}
   check(level.beats.findIndex(isScored)+1<=6,level.id+': first decision too late');
  }
  check(level.beats.at(-1)?.kind==='review',level.id+': final beat must be review');
  check(level.directed&&level.cinematic&&level.worldTheme&&level.coreKit,level.id+': shared presentation flags missing');
- const sanctioned=level.generationTemplate==='ib-semantic-v3';
+ const sanctioned=careerTasks||level.generationTemplate==='ib-semantic-v3';
  const unexpected=bespokeIn(level).filter(issue=>{
   if(!sanctioned)return true;
   const index=level.beats.findIndex(b=>b.id===issue.beat),source=ibMaster.beats[index];
@@ -107,7 +108,15 @@ for(const level of sim.levels){
   check(level.beats[6].cards?.length===4,level.id+': four vocabulary cards required');
   check(level.beats[7].practice&&level.beats[7].noVerdict&&level.beats[7].pairs?.length===4,level.id+': four unscored applied vocabulary pairs required');
   check(level.beats[8].items?.length===4&&level.beats[8].timer===45,level.id+': four timed professional checks required');
-  for(const index of [5,10,14,19,21])check(level.beats[index].layout===ibMaster.beats[index].layout,level.id+': IB question layout drift at '+(index+1));
+  if(!careerTasks)for(const index of [5,10,14,19,21])check(level.beats[index].layout===ibMaster.beats[index].layout,level.id+': IB question layout drift at '+(index+1));
+  if(careerTasks){
+   const contract=JSON.parse(fs.readFileSync(path.join(root,'docs/handoff/career-scaling/career-task-contracts.json'))).careers[sim.id];
+   const sources=JSON.parse(fs.readFileSync(path.join(root,'docs/handoff/career-scaling/career-task-research.json'))).sources;
+   check(contract?.level===level.n&&contract.authorityLimit,level.id+': missing stage/authority contract');
+   check(contract.tasks.length===scored.length,level.id+': task contract coverage');
+   check(contract.tasks.filter(t=>t.category==='career-work').length>=4,level.id+': generic tasks crowd out career work');
+   for(const t of contract.tasks){const beat=level.beats[t.slot-1];check(beat?.id===t.beat&&(beat.layout??beat.kind)===t.layout,t.beat+': task/layout drift');check(t.objective&&t.answerBasis,t.beat+': missing rationale');if(t.category==='career-work')check(t.sources.length&&t.sources.every(id=>sources[id]?.url),t.beat+': missing career research');}
+  }
  }
 
  check(level.endings.some(e=>e.min===0),level.id+': missing floor ending');check(level.endings.some(e=>e.min===85&&e.advances),level.id+': missing passing ending');

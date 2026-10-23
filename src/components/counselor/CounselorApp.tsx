@@ -52,6 +52,7 @@ import { DistrictReports as DistrictReportsV4 } from "./v4/leader/district/Distr
 import { Milestones as MilestonesV4 } from "./v4/Milestones";
 import { Meetings as MeetingsV4 } from "./v4/Meetings";
 import { ExploreOpportunity } from "./v4/ExploreOpportunity";
+import { V7Opportunities } from "./v7/Opportunities";
 import { ReviewDesk } from "./v4/ReviewDesk";
 import { CheckInsView } from "./v5/CheckIns";
 import { V5Explore } from "./v5/Explore";
@@ -93,6 +94,9 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
       // v5's Explore inside v4 (7 Oct 2026), v4's own page title above it;
       // Turn Interest into Opportunity under its career rows (9 Oct 2026)
       case "explore": return <V5Explore embedded afterCareers={<ExploreOpportunity />} />;
+      // v7's Opportunities inside v4 (22 Oct 2026, Maisha: "Please add
+      // opportunities tab to v4"); the sheets are hosted by the v4 shell
+      case "opportunities": return <V7Opportunities />;
       // Check-ins left the demo (9 Oct 2026, Maisha); an old link lands on Today
       case "checkins": return <OverviewV4 />;
       case "productivity": return <ProductivitySuiteV4 />;

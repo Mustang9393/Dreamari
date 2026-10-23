@@ -84,7 +84,7 @@ import { careerById, toV5 } from "@/lib/counselorV5";
 import type { CounselorStudent, PostsecondaryIntent } from "@/lib/counselorRoster";
 import type { ProfileCareer } from "@/components/profile/data";
 import type { CatalogCareer } from "@/components/app/catalog";
-import { MAJOR_ART, majorPoster, programmeMajor, savedMajorsFor } from "./majors";
+import { majorPoster, programmeMajor, savedMajorsFor } from "./majors";
 import { useChartColors } from "./ChartColors";
 import { InterestMeter, Treemap } from "./charts/insightViz";
 import { FlowSankey } from "./charts/ivFlow";
@@ -378,12 +378,12 @@ function InterestRows() {
         </header>
         {(majorMode === "saved" ? savedMajors : exploredMajors).length === 0
           ? <p className="v4-cc-empty">{majorMode === "saved" ? `No saved majors for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet.`}</p>
-          // Mika's major art in the treemap, its own full-width row under
-          // Schools (21 Oct 2026, Chandu: "its difficult to read. If there
-          // isn't an image for a major remove it... or it should be its own
-          // row below that section"): only majors with art, the name on a
-          // small dark label so it reads over any scene
-          : <Treemap height={320} items={majorItems.filter((m) => MAJOR_ART[m.label]).map((m) => ({ ...m, image: MAJOR_ART[m.label] }))} onOpen={(open) => open()} />}
+          // The treemap, every major, no art (22 Oct 2026, Maisha: "the top
+          // majors cards look a little juvenile ... lets remove the photos
+          // for now till she's done"; Chandu: "remove the images for majors
+          // but keep the tree map graph we had before"). MAJOR_ART comes
+          // back onto the tiles once Mika redoes the art.
+          : <Treemap height={320} items={majorItems} onOpen={(open) => open()} />}
       </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </>

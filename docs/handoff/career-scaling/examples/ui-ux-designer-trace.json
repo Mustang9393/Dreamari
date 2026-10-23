@@ -23,8 +23,7 @@
       "beat": "UX1-04",
       "teaches": [
         "junior-scope",
-        "mentor-channel",
-        "prioritize-with-mentor"
+        "mentor-channel"
       ],
       "uses": [],
       "lessonReferences": []
@@ -45,7 +44,7 @@
         {
           "concept": "junior-scope",
           "beat": "UX1-04",
-          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+          "quote": "Sketch a rough layout before polishing it. Arjun reviews changes and test plans. Ask him about priorities or problems before the client sees your work."
         }
       ]
     },
@@ -55,10 +54,7 @@
         "Wireframe",
         "Prototype",
         "Usability test",
-        "EOD",
-        "clear-updates",
-        "confirm-unknowns",
-        "flag-errors"
+        "Observation"
       ],
       "uses": [],
       "lessonReferences": []
@@ -70,7 +66,7 @@
         "Wireframe",
         "Prototype",
         "Usability test",
-        "EOD"
+        "Observation"
       ],
       "lessonReferences": [
         {
@@ -86,12 +82,12 @@
         {
           "concept": "Usability test",
           "beat": "UX1-07",
-          "quote": "Watching someone try a task"
+          "quote": "Watch a person try a goal without hints"
         },
         {
-          "concept": "EOD",
+          "concept": "Observation",
           "beat": "UX1-07",
-          "quote": "End of the day"
+          "quote": "What someone did or said, without guessing why"
         }
       ]
     },
@@ -99,38 +95,38 @@
       "beat": "UX1-09",
       "teaches": [],
       "uses": [
-        "clear-updates",
-        "confirm-unknowns",
-        "flag-errors",
-        "EOD"
+        "Wireframe",
+        "Prototype",
+        "Usability test",
+        "Observation"
       ],
       "lessonReferences": [
         {
-          "concept": "clear-updates",
+          "concept": "Wireframe",
           "beat": "UX1-07",
-          "quote": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know."
+          "quote": "A rough screen layout"
         },
         {
-          "concept": "confirm-unknowns",
+          "concept": "Prototype",
           "beat": "UX1-07",
-          "quote": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know."
+          "quote": "A design people can try"
         },
         {
-          "concept": "flag-errors",
+          "concept": "Usability test",
           "beat": "UX1-07",
-          "quote": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know."
+          "quote": "Watch a person try a goal without hints"
         },
         {
-          "concept": "EOD",
+          "concept": "Observation",
           "beat": "UX1-07",
-          "quote": "End of the day"
+          "quote": "What someone did or said, without guessing why"
         }
       ]
     },
     {
       "beat": "UX1-10",
       "teaches": [
-        "restricted-files"
+        "action-placement"
       ],
       "uses": [],
       "lessonReferences": []
@@ -139,13 +135,13 @@
       "beat": "UX1-11",
       "teaches": [],
       "uses": [
-        "restricted-files"
+        "action-placement"
       ],
       "lessonReferences": [
         {
-          "concept": "restricted-files",
+          "concept": "action-placement",
           "beat": "UX1-10",
-          "quote": "Use the project’s restricted access. Keep files off personal accounts and public chats."
+          "quote": "Fans miss Save below a long description. Sketch a clearer position near the set it affects. Arjun reviews the prototype before anyone publishes it."
         }
       ]
     },
@@ -158,7 +154,7 @@
     {
       "beat": "UX1-13",
       "teaches": [
-        "accurate-report"
+        "neutral-test-goal"
       ],
       "uses": [],
       "lessonReferences": []
@@ -173,13 +169,13 @@
       "beat": "UX1-15",
       "teaches": [],
       "uses": [
-        "accurate-report"
+        "neutral-test-goal"
       ],
       "lessonReferences": [
         {
-          "concept": "accurate-report",
+          "concept": "neutral-test-goal",
           "beat": "UX1-13",
-          "quote": "Two fans needed a hint to find Save below long copy. A usability test records what people did. Your report must match."
+          "quote": "The goal is to keep a set for later. Give that goal without naming Save or pointing. Record whether the fan finishes without help."
         }
       ]
     },
@@ -220,18 +216,20 @@
         {
           "concept": "mentor-channel",
           "beat": "UX1-04",
-          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+          "quote": "Sketch a rough layout before polishing it. Arjun reviews changes and test plans. Ask him about priorities or problems before the client sees your work."
         },
         {
           "concept": "credit-evidence",
           "beat": "UX1-19",
-          "quote": "You wrote the test findings. Now Noah tells Samira, “I put that report together.” Your saved file shows your work."
+          "quote": "You wrote the test findings. Now Noah tells Samira, \u201cI put that report together.\u201d Your saved file shows your work."
         }
       ]
     },
     {
       "beat": "UX1-21",
-      "teaches": [],
+      "teaches": [
+        "core-path-priority"
+      ],
       "uses": [],
       "lessonReferences": []
     },
@@ -239,19 +237,19 @@
       "beat": "UX1-22",
       "teaches": [],
       "uses": [
-        "prioritize-with-mentor",
-        "mentor-channel"
+        "mentor-channel",
+        "core-path-priority"
       ],
       "lessonReferences": [
         {
-          "concept": "prioritize-with-mentor",
-          "beat": "UX1-04",
-          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
-        },
-        {
           "concept": "mentor-channel",
           "beat": "UX1-04",
-          "quote": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment."
+          "quote": "Sketch a rough layout before polishing it. Arjun reviews changes and test plans. Ask him about priorities or problems before the client sees your work."
+        },
+        {
+          "concept": "core-path-priority",
+          "beat": "UX1-21",
+          "quote": "Save opens the wrong screen. The cover art also needs polish. Only one fix fits before the 6:00 client review. Arjun must agree to the priority."
         }
       ]
     },
@@ -271,7 +269,9 @@
     },
     {
       "beat": "UX1-25",
-      "teaches": [],
+      "teaches": [
+        "keyboard-observations"
+      ],
       "uses": [],
       "lessonReferences": []
     },
@@ -279,13 +279,19 @@
       "beat": "UX1-26",
       "teaches": [],
       "uses": [
-        "capacity-to-help"
+        "capacity-to-help",
+        "keyboard-observations"
       ],
       "lessonReferences": [
         {
           "concept": "capacity-to-help",
           "beat": "UX1-24",
-          "quote": "Amina, an accessibility specialist, has keyboard-check notes due at 6:40. You have finished your work for today."
+          "quote": "Amina, an accessibility specialist, needs keyboard-check notes by 6:40. You have finished your work. She owns the final check."
+        },
+        {
+          "concept": "keyboard-observations",
+          "beat": "UX1-25",
+          "quote": "Amina asks you to record where keyboard focus stops. Send her those notes. She decides what needs fixing before any accessibility claim."
         }
       ]
     },

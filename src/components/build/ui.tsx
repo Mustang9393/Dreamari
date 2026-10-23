@@ -243,9 +243,12 @@ export function QuestionHeading({
   subtitle,
   sprite,
   reactionNonce,
+  reaction,
 }: {
   title: string;
-  subtitle?: string;
+  /** a string, or a short inline node (Skills puts its three pick slots
+      after "Pick up to 3.") */
+  subtitle?: ReactNode;
   sprite?: string;
   // Omit entirely on steps where a celebratory reaction is the wrong tone
   // (cost, location, education-level, profile) -- those are the flow's
@@ -253,6 +256,10 @@ export function QuestionHeading({
   // Interests/Subjects/Work Vibe, per direct instruction: relevant screens
   // only, not every screen or interaction.
   reactionNonce?: number;
+  /** Dreamy's one-line reaction to the last pick (Skills, 23 Oct 2026):
+      a house .dm-tip bubble that pops above the sprite for a beat, keyed
+      by n so the same line can play twice in a row. */
+  reaction?: { text: string; n: number } | null;
 }) {
   // Left-aligned per the frameless Figma frame (3214-7363) — big, anchored to
   // the same grid as the options below. Dreamy sits beside the question,
@@ -275,12 +282,24 @@ export function QuestionHeading({
     // step, so its own vertical footprint sets a floor under every step's
     // fit at ordinary desktop window heights (as low as ~650-700px usable
     // once browser chrome is subtracted), not just the tallest one.
-    <div className="mb-4 flex items-center gap-3 sm:mb-5 sm:gap-4">
+    <div className="relative mb-4 flex items-center gap-3 sm:mb-5 sm:gap-4">
       {sprite && (
         <div data-dreamy-anchor className="relative h-[52px] w-[52px] flex-none sm:h-[60px] sm:w-[60px]">
           <QuestionSprite key={reacting ? REACTION_SPRITE : sprite} src={reacting ? REACTION_SPRITE : sprite} />
           {reactionNonce !== undefined && <LocalBurst nonce={reactionNonce} />}
         </div>
+      )}
+      {/* Above the whole heading, not the sprite: the sprite is centred on a
+         two-line title, so a bubble over it covered the title's first line
+         on phones. The band above the heading is empty on every step. */}
+      {reaction && (
+        <span
+          key={reaction.n}
+          role="status"
+          className="dm-tip pointer-events-none absolute bottom-full left-0 z-10 mb-2 whitespace-nowrap rounded-full px-3 py-1 text-[12.5px] font-bold motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
+        >
+          {reaction.text}
+        </span>
       )}
       <div>
       <h1 className={`${bricolage.className} text-[24px] leading-[1.08] font-extrabold tracking-tight text-[var(--color-night-foreground)] sm:text-[34px]`}>
@@ -419,6 +438,8 @@ export function ChipGrid({
   icons,
   columns = "grid-cols-1 sm:grid-cols-2",
   onPick,
+  lockAtMax = false,
+  compact = false,
 }: {
   options: string[];
   selected: string[];
@@ -427,7 +448,23 @@ export function ChipGrid({
   accents?: Record<string, string>;
   icons?: Record<string, ReactNode>;
   columns?: string;
-  onPick?: () => void;
+  /** a chip was just picked (not deselected); the option, for a reaction */
+  onPick?: (option: string) => void;
+  /** At the cap, grey the unpicked chips out until one is deselected,
+      instead of the default swap (Joshua's rule for the Skills step,
+      23 Oct 2026: "once 3 are picked the rest grey out until one is
+      deselected"). The swap stays the default everywhere else (24 Sept
+      2026 feedback: deselecting first "creates friction"). */
+  lockAtMax?: boolean;
+  /** Tiles: a uniform grid of equal cells, every option always shown (no
+      phone "Show all"), the option's icon above a centered label and no
+      leading dot, so a long list like the 15 skills fits one screen at 375
+      and 1440 wide (Joshua, 23 Oct 2026) and reads as one aligned block
+      (Chandu, same day: "symmetrical and aligned uniformly, not just
+      cluttered"). Three columns on phones (15 options make five full rows,
+      no orphan), five on larger screens (three rows). Same selection
+      micro-interaction as the default grid. */
+  compact?: boolean;
 }) {
   // Progressive disclosure on phones: long lists show 6 options + one "Show
   // all N" reveal (never a second tier), so the CTA is visible without any
@@ -446,7 +483,7 @@ export function ChipGrid({
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
-  const collapsible = isPhone && options.length > PREVIEW + 1;
+  const collapsible = !compact && isPhone && options.length > PREVIEW + 1;
   const mustExpand = selected.some((option) => options.indexOf(option) >= PREVIEW);
   const expanded = expandedBy !== null || mustExpand;
   const visibleOptions = collapsible && !expanded ? options.slice(0, PREVIEW) : options;
@@ -468,6 +505,9 @@ export function ChipGrid({
       onChange(selected.filter((item) => item !== option));
       return;
     }
+    // Locked: the chip is drawn disabled below and a tap does nothing; the
+    // way in is to deselect one of the picks first.
+    if (atMax && lockAtMax) return;
     // At the cap, the OLDEST pick (selected[0] -- insertion order) is bumped
     // for the new one instead of locking new picks out entirely. Cheap to
     // undo (tap the bumped option again) since this is a max-2/3 list, not a
@@ -477,33 +517,39 @@ export function ChipGrid({
       setJustSwapped(outgoing);
       window.setTimeout(() => setJustSwapped((current) => (current === outgoing ? null : current)), 320);
       dispatchAuroraPulse("select", e);
-      onPick?.();
+      onPick?.(option);
       onChange([...rest, option]);
       return;
     }
     dispatchAuroraPulse("select", e);
-    onPick?.();
+    onPick?.(option);
     onChange([...selected, option]);
   }
 
   return (
     <div>
-      <div ref={gridRef} className={`grid auto-rows-fr gap-1.5 ${columns}`}>
+      <div ref={gridRef} className={compact ? "grid auto-rows-fr grid-cols-3 gap-1.5 sm:grid-cols-5" : `grid auto-rows-fr gap-1.5 ${columns}`}>
         {visibleOptions.map((option, index) => {
         const isSelected = selected.includes(option);
         const accent = accents?.[option] ?? "var(--color-brand-400)";
         const glowing = isSelected && confirming;
         const swappedOut = option === justSwapped;
+        const locked = lockAtMax && atMax && !isSelected;
         return (
           <button
             key={option}
             type="button"
             aria-pressed={isSelected}
+            // aria-disabled, not disabled: a locked chip stays in the tab
+            // order so a keyboard user can still read the full list.
+            aria-disabled={locked || undefined}
             onClick={(e) => toggle(option, e)}
             // No per-chip backdrop-filter: a dozen stacked backdrop-blur layers
             // is a WebKit compositing bomb on phones; the token surface reads
             // fine without it.
-            className={`relative flex h-full min-h-[44px] items-center gap-2.5 rounded-[var(--radius-md)] border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] dm-tap ${
+            className={`relative flex h-full items-center rounded-[var(--radius-md)] border leading-snug font-semibold transition-all duration-150 ${
+              compact ? "min-h-[60px] flex-col justify-center gap-1 px-1.5 py-1.5 text-center text-[12.5px] sm:min-h-[72px] sm:px-2 sm:py-2 sm:text-[13px]" : "min-h-[44px] gap-2.5 px-3 py-2 text-left text-[13.5px] sm:text-[14px]"
+            } ${locked ? "cursor-not-allowed opacity-40" : "dm-tap"} ${
               glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : swappedOut ? "motion-safe:animate-[chip-swap-out_0.32s_ease-out]" : ""
             }`}
             style={{
@@ -517,7 +563,13 @@ export function ChipGrid({
             }}
           >
             <ConfirmShimmer active={glowing} />
-            {icons?.[option] ? (
+            {compact ? (
+              icons?.[option] && (
+                <span aria-hidden className="flex-none transition-transform duration-150" style={{ color: isSelected ? accent : "var(--color-night-muted-foreground)", transform: isSelected ? "scale(1.12)" : "scale(1)" }}>
+                  {icons[option]}
+                </span>
+              )
+            ) : icons?.[option] ? (
               <span aria-hidden className="flex-none" style={{ color: isSelected ? accent : "var(--color-night-muted-foreground)" }}>
                 {icons[option]}
               </span>

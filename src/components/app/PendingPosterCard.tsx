@@ -31,8 +31,8 @@ function PendingFace({ career, narrow }: { career: PendingCareer; narrow: boolea
       style={{ borderColor: "var(--glass-border)", background: `linear-gradient(155deg, color-mix(in srgb, ${worldColor} 30%, var(--card)) 0%, var(--card) 100%)` }}
     >
       <span aria-hidden className="absolute top-[38%] left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[8px]">
-        <span className="flex size-[44px] items-center justify-center rounded-full border backdrop-blur-[6px]" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}>
-          <Lock className="h-[18px] w-[18px]" style={{ color: "#FFFFFF" }} />
+        <span className="flex size-[44px] items-center justify-center rounded-full border backdrop-blur-[6px]" style={{ background: "rgb(var(--scrim-rgb, 0 0 0) / calc(0.45 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.4))" }}>
+          <Lock className="h-[18px] w-[18px]" style={{ color: "var(--scrim-ink, #FFFFFF)" }} />
         </span>
         <span className="text-[12px] leading-[16px] font-semibold normal-case" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
           Coming soon

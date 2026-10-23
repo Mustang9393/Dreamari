@@ -38,11 +38,10 @@ type Scene = {
 // One introduction and one action. Keep the cinematic family resemblance,
 // but concentrate decoration above the instructions and give each gesture its own moment.
 const SCENES: Record<SplashSurface, Scene> = {
-  // Unused in the live app (13 Sept 2026): every entry point into Match now
-  // goes to /match-grid (see matchGrid below), so this only ever shows if
-  // someone reaches the dormant swipe-deck route (/match-lab) directly.
-  // Left as-is rather than repurposed, so that page keeps its own accurate
-  // gesture-appropriate copy if it's ever reactivated.
+  // Unused in the live app (13 Sept 2026): every entry point into Match goes
+  // to /match-grid (see matchGrid below). The swipe-deck route this was for
+  // was removed on 22 Oct 2026 (Chandu: "remove match lab etc permanently
+  // keep only the latest one"); kept so the surface map stays complete.
   match: {
     sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],

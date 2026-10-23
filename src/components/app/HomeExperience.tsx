@@ -26,7 +26,7 @@ import { INVESTMENT_BANKING, REGISTERED_NURSE, simThumb } from "@/components/pla
 import type { Simulation } from "@/components/play/types";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "@/components/play/progress";
 import { WORLD_COLORS, posterTitleFont, posterInk } from "./worlds";
-import { CARD_TEXT_SHADOW } from "./cardChrome";
+import { CARD_TEXT_SHADOW, SCRIM_DEEP, SCRIM_INK, SCRIM_INK_SOFT, glass } from "./cardChrome";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
 // (3-panel carousel: Daily Drop / Continue / Trending), Continue rail of
@@ -65,7 +65,7 @@ const SPACE_ACCENTS = [
 // under the light theme.
 function CaptionLabel({ color, children }: { color: string; children: React.ReactNode }) {
   return (
-    <p className="w-fit rounded-[4px] px-[6px] py-[1px] text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color, background: "rgba(5,8,20,0.45)" }}>
+    <p className="w-fit rounded-[4px] px-[6px] py-[1px] text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color, background: glass("5 8 20", 0.45) }}>
       {children}
     </p>
   );
@@ -127,7 +127,7 @@ export function HeroPanel({
 }) {
   const rise = (i: number) => ({ className: "motion-safe:animate-[fade-slide-up_0.55s_cubic-bezier(0.16,1,0.3,1)_both]", style: { animationDelay: `${120 + i * 90}ms` } });
   return (
-    <div className="relative h-full w-full flex-none overflow-hidden" style={{ background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+    <div className="relative h-full w-full flex-none overflow-hidden" style={{ background: SCRIM_DEEP, color: SCRIM_INK, textShadow: CARD_TEXT_SHADOW }}>
       <div aria-hidden className="absolute inset-0">
         {photo && (
           <span key={active ? "on" : "off"} className={`absolute inset-0 ${active ? "motion-safe:animate-[home-hero-push_8s_ease-out_forwards]" : ""}`} style={{ willChange: "transform" }}>
@@ -156,19 +156,21 @@ export function HeroPanel({
           </span>
         )}
         {art}
-        {/* scrims: phones dim the foot, desktop dims the text side and a little of the foot */}
-        <span className="absolute inset-0 sm:hidden" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.5) 34%, rgba(12,16,35,0.08) 62%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.4) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)" }} />
-        <span className="absolute inset-0 hidden sm:block" style={{ background: "linear-gradient(90deg, rgba(14,12,32,0.9) 0%, rgba(14,12,32,0.72) 26%, rgba(14,12,32,0.3) 48%, transparent 64%), linear-gradient(to top, rgba(12,16,35,0.55) 0%, rgba(12,16,35,0.15) 30%, transparent 55%)" }} />
+        {/* scrims: phones dim the foot, desktop dims the text side and a little of
+           the foot. Light swaps both ramps for its frost through --hero-scrim-*
+           (look-v2.css, section 7); the literal after the comma is dark's. */}
+        <span className="absolute inset-0 sm:hidden" style={{ background: `var(--hero-scrim-phone, linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.5) 34%, rgba(12,16,35,0.08) 62%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.4) 0%, rgba(10,9,20,0.1) 40%, transparent 65%))` }} />
+        <span className="absolute inset-0 hidden sm:block" style={{ background: `var(--hero-scrim-desktop, linear-gradient(90deg, rgba(14,12,32,0.9) 0%, rgba(14,12,32,0.72) 26%, rgba(14,12,32,0.3) 48%, transparent 64%), linear-gradient(to top, rgba(12,16,35,0.55) 0%, rgba(12,16,35,0.15) 30%, transparent 55%))` }} />
       </div>
       <div key={active ? "on" : "off"} className="relative z-[2] flex h-full flex-col justify-end gap-[var(--space-2)] p-[var(--space-5)] sm:max-w-[64%] sm:p-[var(--space-8)]">
         {/* the eyebrow sits on the dark photo in both themes, so its colour is
            lifted toward white rather than taken from the theme's light-mode
            value, which went dark and failed contrast on the card */}
-        <span {...rise(0)}><CaptionLabel color={`color-mix(in srgb, ${eyebrowColor} 25%, #ffffff)`}>{eyebrow}</CaptionLabel></span>
+        <span {...rise(0)}><CaptionLabel color={`color-mix(in srgb, ${eyebrowColor} 25%, ${SCRIM_INK})`}>{eyebrow}</CaptionLabel></span>
         <p {...rise(1)} className={`${rise(1).className} text-[30px] leading-[1.04] font-extrabold text-balance sm:text-[42px]`} style={{ ...rise(1).style, fontFamily: "var(--font-display)", letterSpacing: "-0.01em" }}>
           {title}
         </p>
-        {meta && <div {...rise(2)} className={`${rise(2).className} text-[14px] leading-[19px] font-medium`} style={{ ...rise(2).style, fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.86)" }}>{meta}</div>}
+        {meta && <div {...rise(2)} className={`${rise(2).className} text-[14px] leading-[19px] font-medium`} style={{ ...rise(2).style, fontFamily: "var(--font-body)", color: SCRIM_INK_SOFT }}>{meta}</div>}
         <div {...rise(3)} className={`${rise(3).className} mt-[var(--space-3)] flex flex-wrap items-center gap-[var(--space-4)]`} style={{ ...rise(3).style, textShadow: "none" }}>
           {children}
         </div>
@@ -181,7 +183,7 @@ export function HeroPanel({
  *  the streak and the trend so every panel carries one live-looking mark. */
 export function HeroChip({ color, children }: { color: string; children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-[6px] rounded-[6px] px-[9px] py-[4px] text-[10.5px] leading-[14px] font-bold tracking-[0.1em] uppercase" style={{ background: "rgba(8,10,22,0.72)", color: `color-mix(in srgb, ${color} 55%, #ffffff)`, backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none", fontFamily: "var(--font-body)" }}>
+    <span className="inline-flex items-center gap-[6px] rounded-[6px] px-[9px] py-[4px] text-[10.5px] leading-[14px] font-bold tracking-[0.1em] uppercase" style={{ background: "rgb(var(--scrim-rgb, 8 10 22) / calc(0.72 * var(--scrim-glass-gain, 1)))", color: `color-mix(in srgb, ${color} 55%, var(--scrim-ink, #ffffff))`, backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none", fontFamily: "var(--font-body)" }}>
       {children}
     </span>
   );
@@ -482,7 +484,7 @@ function HeroBanner() {
               aria-label={label}
               onClick={() => step(delta)}
               className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
-              style={{ background: "rgba(12,16,35,0.5)", borderColor: "rgba(255,255,255,0.22)", color: "#fff" }}
+              style={{ background: "rgb(var(--scrim-rgb, 12 16 35) / calc(0.5 * var(--scrim-glass-gain, 1)))", borderColor: "var(--scrim-chip-edge, rgba(255,255,255,0.22))", color: SCRIM_INK }}
             >
               <Icon className="h-[18px] w-[18px]" />
             </button>
@@ -611,7 +613,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
       {/* the real, sighted verb -- top-left, off the bottom stack, so the
          card reads "continue vs. new" in words, not just by whether a
          progress bar happens to be present */}
-      <span aria-hidden className="pointer-events-none absolute top-[10px] left-[10px] flex items-center gap-[5px] rounded-full px-[10px] py-[5px] text-[11px] font-bold tracking-[0.02em]" style={{ background: "rgba(5,8,20,0.62)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
+      <span aria-hidden className="pointer-events-none absolute top-[10px] left-[10px] flex items-center gap-[5px] rounded-full px-[10px] py-[5px] text-[11px] font-bold tracking-[0.02em]" style={{ background: "rgb(var(--scrim-rgb, 5 8 20) / calc(0.62 * var(--scrim-glass-gain, 1)))", color: "var(--scrim-ink, #FFFFFF)", backdropFilter: "blur(6px)" }}>
         <Play className="h-[10px] w-[10px]" fill="currentColor" aria-hidden />
         {verb}
       </span>

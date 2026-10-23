@@ -33,20 +33,20 @@ import { MetricTile } from "./viz";
 import { LightStrip } from "./charts/lit";
 import { SubTabs } from "./SubTabs";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { lastActiveLabel, milestonesForGrade, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
+import { milestonesForGrade, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { getReviewedStudentById, useReviewDecisions } from "@/lib/counselorReviews";
 import { readNotes, addNote } from "@/lib/counselorNotes";
-import { StatusChip, MilestoneChip, Avatar, CardLink, STATUS_COLORS } from "./chips";
+import { MilestoneChip, CardLink, STATUS_COLORS } from "./chips";
 import { signalsFor } from "@/lib/studentSignals";
 import { DraftTools } from "./ProductivitySuite";
 import { Disclosure } from "./Disclosure";
 import { FamilyCard, MeetingsCard, MessagesCard, PlanSignoffCard, TodosCard } from "./Casefile";
 import { GLASS_INSET } from "../surfaces";
-import { careerArtFor, DreamyMoment } from "./overviewShared";
+import { DreamyMoment } from "./overviewShared";
+import { StudentIdCard } from "../v7/StudentIdCard";
 
 
 
-const fmtDate = lastActiveLabel;
 
 
 /** What this student needs from the counselor: their own milestones, plus
@@ -189,8 +189,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const actions = needsYou(student, gradeKeys);
   const signals = signalsFor(student);
   const orderedKeys = [...gradeKeys].sort((a, b) => MILESTONE_RANK[student.milestones[a]] - MILESTONE_RANK[student.milestones[b]]);
-  const topMatch = student.topMatches[0]?.title;
-  const art = careerArtFor(topMatch);
 
   // The reference's eight On Dreamari tiles, live from the student app
   // where a live signal exists, then v2's three extra signals folded below.
@@ -239,18 +237,21 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
          many signals all at once"). Student number, school and DOB live in
          About the student; the milestone count lives on the Milestones card;
          the support flag is one of the "Needs you" items, not its own banner. */}
-      <HoverBeam strength={0.6} className="v4-profile-identity h-full">
-        <div className="v4-profile-summary v4-surface relative flex flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <div className="relative z-[1] flex min-w-0 items-center gap-[14px]">
-            <Avatar name={student.name} size={56} index={student.avatarIndex} />
-            <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-              <h1 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{student.name}</h1>
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.careerTrack} · active {fmtDate(student.lastActive).toLowerCase()}</span>
-            </div>
-            <StatusChip status={student.status} />
-          </div>
-          {(actions.length > 0 || student.supportFlagReason) && (
-            <ul className="relative z-[1] flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+      {/* The student's ID card, the same StudentIdCard v7 uses (23 Oct 2026,
+         Chandu: "why is the student id card different in v4? use the same
+         one we use for v7 here"). v4 had it on 20 Oct and lost it in the
+         rollback for Maisha's demos; the identity row it replaces carried the
+         same facts (name, grade, pathway, status, last active). What they
+         need from you sits under it as its own card. The reel hangs above
+         the card (rail) so the card's top edge lines up with the content's,
+         as in v7; the career-poster cover went with the identity row. */}
+      <div className="v4-profile-identity flex flex-col gap-[var(--space-5)]">
+        <StudentIdCard student={student} rail />
+        {(actions.length > 0 || student.supportFlagReason) && (
+          <HoverBeam strength={0.6}>
+            <div className="v4-profile-summary v4-surface relative flex flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+              <span className="text-[11px] font-bold uppercase tracking-[1.2px]" style={{ color: "var(--muted-foreground)" }}>Needs you</span>
+            <ul className="relative z-[1] flex flex-col gap-[6px]">
               {actions.map((a) => {
                 // the last reminder and the last feedback, so the profile
                 // says what was already done (8 Oct 2026 audit)
@@ -281,16 +282,10 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                 </li>
               )}
             </ul>
-          )}
-          {/* The student's top career match as the student app's own poster,
-             faded in like the Career & College focus card: from the right on a wide row, as a cover behind the portrait in the desktop sidebar
-             (Maisha, 7 Oct 2026: "loves the Explore cards art"; "draw it a
-             little closer to the student experience"). Decorative; the
-             match itself is named in the line below the name. Last child so the
-             sidebar layout's `>div:first-child` rules still apply. */}
-          {art && <span aria-hidden className="v4-career-art" style={{ backgroundImage: `url(${art.src})`, backgroundPosition: art.position }} />}
-        </div>
-      </HoverBeam>
+            </div>
+          </HoverBeam>
+        )}
+      </div>
 
       {/* Everything else, one group at a time (direct instruction: "organise
          and consolidate similar functions together into different tabs, the

@@ -1,0 +1,79 @@
+{
+  "career": "aviation-maintenance-technician-first-shift",
+  "coverageGroups": 6,
+  "artifactBeats": 0,
+  "status": "structural checks passed; human and runtime review are separate",
+  "assertions": 411,
+  "levels": [
+    {
+      "id": "aviation-first-shift-l1",
+      "screens": 29,
+      "scored": 7,
+      "questionTypes": [
+        "choice",
+        "rapid",
+        "pick",
+        "rank"
+      ],
+      "bespoke": []
+    }
+  ],
+  "sceneAssets": {
+    "af-exterior": {
+      "src": "/images/play/aviation-first-shift/exterior-v2.png",
+      "fileSha256": "11edf88d02a3eff2453c85f1cfb37f266b57e3782df40984cc7bccfcf684dc11",
+      "pixelSha256": "15c9b27894edb93170b1c31f3e4c317926125b43bc4dd4094023bb6332ad5eca",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "af-interior": {
+      "src": "/images/play/aviation-first-shift/interior-v2.png",
+      "fileSha256": "1213d6b32be89c02054c673b22801f0eb72ccf99ba675a3e3faf9298ded12392",
+      "pixelSha256": "e2d3371e18d22b1fe50d88128e95bbbdd470579df7511b9bdb18de528d14fbb3",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "af-sora": {
+      "src": "/images/play/aviation-first-shift/sora-v2.png",
+      "fileSha256": "2e3bd733038c2924dfd02ccb43c89c751630f9b98803d66662f4b60664b3f073",
+      "pixelSha256": "75e30f75749cb1785d59971ed9aba39c08c9ae018127052264ea76befddbf464",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "af-caleb": {
+      "src": "/images/play/aviation-first-shift/caleb-v2.png",
+      "fileSha256": "2d5ea7ed4903743b93bec78f5ef40bc3c853f3bca3d76017698ef93181b94792",
+      "pixelSha256": "c2446df19bff402e8236014ba5314e9ab8c17ab726cc313e94ef04d6dc04f73a",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "af-elena": {
+      "src": "/images/play/aviation-first-shift/elena-v2.png",
+      "fileSha256": "75efbb394ba2222f950cbae3ad2c8c09068303e97c0cc023c9c5d99823c37129",
+      "pixelSha256": "8b5b5d9df6f17fd3fac41d2c34e578ac7e8d46f9b857bbde74db7439e4afa025",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    },
+    "af-priya": {
+      "src": "/images/play/aviation-first-shift/priya-v2.png",
+      "fileSha256": "cd204fedf85c5b127e0d450e599ef638dabcc2f1f87c811cbb17df28110ce443",
+      "pixelSha256": "c0f069ccf887015ce46dd325eccf69a8ceefda1593155bcdd9a20a84c8d9754f",
+      "width": 1672,
+      "height": 941,
+      "opaque": true
+    }
+  },
+  "routedBeats": 28,
+  "errors": [],
+  "notCertified": [
+    "Subject-matter correctness",
+    "Aesthetic approval",
+    "All runtime branches",
+    "Windows/Chromebook hardware"
+  ]
+}

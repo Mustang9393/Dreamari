@@ -1,5 +1,5 @@
 import type { Level } from "./types";
-// Mirrors the actual approved IB Level 1 semantic and interaction sequence.
+// IB narrative pacing; researched tasks fit this career and supervised Level 1 authority.
 export const UX_LEVEL_1: Level = {
   "id": "ux-l1",
   "n": 1,
@@ -14,7 +14,7 @@ export const UX_LEVEL_1: Level = {
   "worldTheme": true,
   "coreKit": true,
   "quietQuestions": true,
-  "saveSlot": 212,
+  "saveSlot": 213,
   "cast": {
     "Arjun": "/images/play/ux/face-arjun-v7.webp",
     "Noah": "/images/play/ux/face-noah-v7.webp",
@@ -120,7 +120,7 @@ export const UX_LEVEL_1: Level = {
   "noStrikes": true,
   "qaSkip": true,
   "scoreTip": "Start at 50. Seven scored decisions change reputation by 6. Matching practice does not change your score. Reach 85.",
-  "generationTemplate": "ib-semantic-v3",
+  "generationTemplate": "ib-career-tasks-v4",
   "beats": [
     {
       "kind": "card",
@@ -158,7 +158,7 @@ export const UX_LEVEL_1: Level = {
       "id": "UX1-04",
       "speaker": "Narrator",
       "title": "Your work goes through Arjun.",
-      "body": "Check the brief and access first. Ask him about priorities or problems. His feedback helps decide your next assignment.",
+      "body": "Sketch a rough layout before polishing it. Arjun reviews changes and test plans. Ask him about priorities or problems before the client sees your work.",
       "castMember": "Arjun",
       "ladder": [
         {
@@ -196,25 +196,25 @@ export const UX_LEVEL_1: Level = {
       "kind": "choice",
       "id": "UX1-06",
       "speaker": "Arjun",
-      "question": "Before working on the client project, what should you do first?",
+      "question": "Arjun asks for a rough screen plan before any polish. What should you make?",
       "choices": [
         {
           "id": "a",
-          "label": "Read the brief and check approved access.",
-          "tier": "best",
-          "why": "You need the task and access before you can do useful work."
+          "label": "A wireframe showing the main layout.",
+          "why": "A wireframe lets the team review the layout before spending time on polish.",
+          "tier": "best"
         },
         {
           "id": "b",
-          "label": "Promise the client a finished product.",
-          "tier": "wrong",
-          "why": "You have not checked the work or your authority yet."
+          "label": "A finished app with every screen built.",
+          "why": "The layout needs review before the team builds the finished app.",
+          "tier": "wrong"
         },
         {
           "id": "c",
-          "label": "Replace the team’s whole plan.",
-          "tier": "wrong",
-          "why": "First understand the plan and your role."
+          "label": "A new logo for the client.",
+          "why": "The assignment is the screen layout, not the brand identity.",
+          "tier": "wrong"
         }
       ],
       "layout": "options",
@@ -233,7 +233,7 @@ export const UX_LEVEL_1: Level = {
       "speaker": "Arjun",
       "castMember": "Arjun",
       "title": "Four words for your first assignment.",
-      "setup": "Before client work: learn these words. Keep updates short, flag mistakes, and confirm anything you do not know.",
+      "setup": "These tools help you sketch, test, and record what fans actually do.",
       "cards": [
         {
           "term": "Wireframe",
@@ -245,11 +245,11 @@ export const UX_LEVEL_1: Level = {
         },
         {
           "term": "Usability test",
-          "def": "Watching someone try a task"
+          "def": "Watch a person try a goal without hints"
         },
         {
-          "term": "EOD",
-          "def": "End of the day"
+          "term": "Observation",
+          "def": "What someone did or said, without guessing why"
         }
       ],
       "cta": "Continue"
@@ -261,28 +261,28 @@ export const UX_LEVEL_1: Level = {
       "castMember": "Arjun",
       "practice": true,
       "noVerdict": true,
-      "setup": "Arjun sends your first task list.",
-      "question": "Match each request to the action.",
+      "setup": "Arjun shares the plan for the AMPLIFY test.",
+      "question": "Match each design job to the right tool.",
       "pairs": [
         {
-          "term": "Sketch a wireframe.",
-          "def": "Draw a rough screen layout"
+          "term": "Plan the screen layout.",
+          "def": "Sketch a wireframe"
         },
         {
-          "term": "Try the prototype.",
-          "def": "Open the design people can try"
+          "term": "Let a fan try the Save flow.",
+          "def": "Build a prototype"
         },
         {
-          "term": "Run a usability test.",
-          "def": "Watch someone attempt the task"
+          "term": "See if a fan can keep a set.",
+          "def": "Run a usability test"
         },
         {
-          "term": "Send it by EOD.",
-          "def": "Send it by end of day"
+          "term": "Record where a fan pauses.",
+          "def": "Write an observation"
         }
       ],
-      "whenRight": "You can turn the team’s words into actions.",
-      "whenWrong": "Use the four words you just learned.",
+      "whenRight": "Each tool has a job in the design process.",
+      "whenWrong": "Match the work to the tool, not just a similar word.",
       "feedback": "",
       "feedbackCta": "Continue",
       "skills": [
@@ -294,146 +294,194 @@ export const UX_LEVEL_1: Level = {
       "kind": "rapid",
       "id": "UX1-09",
       "speaker": "Arjun",
-      "setup": "AMPLIFY is a major client. Check how you will communicate before its review.",
+      "setup": "Arjun checks your plan before the first fan session.",
       "question": "",
       "timer": 45,
       "items": [
         {
-          "question": "How should you update the project lead?",
+          "question": "You need a quick layout before choosing colors. Which tool fits?",
           "options": [
             {
-              "label": "Lead with the result in a short message.",
+              "label": "Wireframe.",
               "correct": true,
-              "why": "A short result-first update is easy to act on."
+              "why": "It shows structure before visual polish."
             },
             {
-              "label": "Send every note without a summary.",
+              "label": "Finished app.",
               "correct": false,
-              "why": "The lead needs the main point first."
+              "why": "A finished app is more work than this first sketch needs."
             },
             {
-              "label": "Wait until the client asks.",
+              "label": "Logo sheet.",
               "correct": false,
-              "why": "The team needs updates before the client review."
+              "why": "A logo does not show the screen layout."
             }
           ]
         },
         {
-          "question": "Arjun asks about a result you have not checked. What do you say?",
+          "question": "A fan needs to try moving between screens. What should you prepare?",
           "options": [
             {
-              "label": "I’ll check and follow up.",
+              "label": "A linked prototype.",
               "correct": true,
-              "why": "Confirm the fact instead of guessing."
+              "why": "A prototype lets a person try the flow."
             },
             {
-              "label": "It is probably fine.",
+              "label": "A list of brand colors.",
               "correct": false,
-              "why": "Probably is not a checked result."
+              "why": "Colors alone do not let someone try the flow."
             },
             {
-              "label": "Ask someone else.",
+              "label": "A page of meeting notes.",
               "correct": false,
-              "why": "Take responsibility for closing the gap."
+              "why": "Notes record work but do not simulate the flow."
             }
           ]
         },
         {
-          "question": "You find a mistake in the client report. What next?",
+          "question": "A fan pauses, then asks where Save is. Which note is an observation?",
           "options": [
             {
-              "label": "Correct it and tell the team.",
+              "label": "Paused, then asked where Save is.",
               "correct": true,
-              "why": "Fix the record and flag which version changed."
+              "why": "This records what the fan did and said."
             },
             {
-              "label": "Wait until after the review.",
+              "label": "The fan dislikes music.",
               "correct": false,
-              "why": "The client could see the mistake first."
+              "why": "You did not observe that preference."
             },
             {
-              "label": "Delete the whole project.",
+              "label": "Everyone will miss Save.",
               "correct": false,
-              "why": "Correct the error instead of destroying useful work."
+              "why": "One observation does not establish what everyone will do."
             }
           ]
         },
         {
-          "question": "The brief says EOD. When is it due?",
+          "question": "Which request tests the design without giving a hint?",
           "options": [
             {
-              "label": "By end of day.",
+              "label": "Keep this set so you can find it later.",
               "correct": true,
-              "why": "EOD means end of day."
+              "why": "It gives a goal without naming the control."
             },
             {
-              "label": "Before the next test starts.",
+              "label": "Press Save beside the title.",
               "correct": false,
-              "why": "That is not what EOD means."
+              "why": "That tells the fan where the control is."
             },
             {
-              "label": "Whenever the client replies.",
+              "label": "You can see Save, right?",
               "correct": false,
-              "why": "EOD sets an end-of-day deadline."
+              "why": "That points out the answer instead of testing discovery."
             }
           ]
         }
       ],
-      "whenPass": "Clear updates, checked facts, and early warnings earn trust.",
-      "whenFail": "Keep updates short, check unknown facts, and flag errors early.",
+      "whenPass": "Your plan uses the right tools and lets fans act without hints.",
+      "whenFail": "Use rough layouts, testable prototypes, and notes about what people actually do.",
       "progress": 0.2857142857142857,
       "feedback": "",
       "feedbackCta": "Continue",
       "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Written Communication",
-        "Decision-Making"
+        "Critical Thinking",
+        "Active Learning"
       ]
     },
     {
       "kind": "card",
       "id": "UX1-10",
       "speaker": "Arjun",
-      "title": "Client files stay in the approved team folder.",
-      "body": "Use the project’s restricted access. Keep files off personal accounts and public chats.",
+      "title": "Put the main action near its content.",
+      "body": "Fans miss Save below a long description. Sketch a clearer position near the set it affects. Arjun reviews the prototype before anyone publishes it.",
       "cta": "Continue",
-      "variant": "intro"
+      "variant": "intro",
+      "artifact": {
+        "id": "ux-save-buried",
+        "kind": "scene-context",
+        "view": "music-ui",
+        "state": "buried",
+        "title": "Current layout",
+        "caption": "Current AMPLIFY layout: Save sits below a long description.",
+        "provenance": "Fictional layout matching the problem stated in the task."
+      }
     },
     {
       "kind": "choice",
       "id": "UX1-11",
       "speaker": "Narrator",
-      "question": "Where should you save the client’s private project files?",
+      "question": "Fans miss Save below a long description. Where should you place it in the next prototype?",
       "choices": [
         {
           "id": "a",
-          "label": "Approved team folder with restricted access.",
-          "tier": "best",
-          "why": "Only the authorized project team should have access."
+          "label": "Beside the set title.",
+          "why": "The action stays close to the set it saves and above the long copy.",
+          "tier": "best"
         },
         {
           "id": "b",
-          "label": "Your personal cloud drive.",
-          "tier": "wrong",
-          "why": "A personal account is outside the team’s approved access."
+          "label": "Below an even longer description.",
+          "why": "More copy keeps the same discovery problem.",
+          "tier": "wrong"
         },
         {
           "id": "c",
-          "label": "A public group chat.",
-          "tier": "wrong",
-          "why": "Public sharing exposes the client’s files."
+          "label": "Inside a new hidden menu.",
+          "why": "Hiding the main action adds another step.",
+          "tier": "wrong"
         }
       ],
-      "layout": "zones",
-      "dragItem": "Client files",
+      "layout": "options",
       "progress": 0.42857142857142855,
       "feedback": "",
       "feedbackCta": "Continue",
       "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Decision-Making",
+        "Problem-Solving",
         "Critical Thinking"
-      ]
+      ],
+      "dragEnabled": true,
+      "artifact": {
+        "id": "ux-save-buried",
+        "kind": "scene-context",
+        "view": "music-ui",
+        "state": "buried",
+        "title": "Current layout",
+        "caption": "Current AMPLIFY layout: Save sits below a long description.",
+        "provenance": "Fictional layout matching the problem stated in the task."
+      },
+      "feedbackArtifacts": {
+        "best": {
+          "id": "ux-save-clear",
+          "kind": "scene-context",
+          "view": "music-ui",
+          "state": "clear",
+          "title": "Proposed layout",
+          "caption": "Proposed AMPLIFY layout: Save sits beside the set title. It still needs testing.",
+          "provenance": "Fictional prototype proposal, not a claim of improved test results."
+        },
+        "wrong": {
+          "id": "ux-save-buried",
+          "kind": "scene-context",
+          "view": "music-ui",
+          "state": "buried",
+          "title": "Current layout",
+          "caption": "Current AMPLIFY layout: Save sits below a long description.",
+          "provenance": "Fictional layout matching the problem stated in the task."
+        },
+        "risky": {
+          "id": "ux-save-buried",
+          "kind": "scene-context",
+          "view": "music-ui",
+          "state": "buried",
+          "title": "Current layout",
+          "caption": "Current AMPLIFY layout: Save sits below a long description.",
+          "provenance": "Fictional layout matching the problem stated in the task."
+        }
+      },
+      "dragItem": "Save set"
     },
     {
       "kind": "card",
@@ -450,19 +498,19 @@ export const UX_LEVEL_1: Level = {
       "kind": "card",
       "id": "UX1-13",
       "speaker": "Narrator",
-      "title": "Show what the test actually found.",
-      "body": "Two fans needed a hint to find Save below long copy. A usability test records what people did. Your report must match.",
+      "title": "A clearer layout still needs a test.",
+      "body": "The goal is to keep a set for later. Give that goal without naming Save or pointing. Record whether the fan finishes without help.",
       "castMember": "Samira",
       "cta": "Continue",
       "variant": "character",
       "artifact": {
-        "id": "ux-save-buried",
+        "id": "ux-save-clear",
         "kind": "scene-context",
         "view": "music-ui",
-        "state": "buried",
-        "title": "Current layout",
-        "caption": "Current AMPLIFY layout: Save sits below a long description.",
-        "provenance": "Fictional UI reproducing the problem stated in the question."
+        "state": "clear",
+        "title": "Proposed layout",
+        "caption": "Proposed AMPLIFY layout: Save sits beside the set title. It still needs testing.",
+        "provenance": "Fictional prototype proposal, not a claim of improved test results."
       }
     },
     {
@@ -497,72 +545,50 @@ export const UX_LEVEL_1: Level = {
       "kind": "choice",
       "id": "UX1-15",
       "speaker": "Samira",
-      "question": "Two fans needed a hint to find Save. Which report line needs fixing?",
+      "question": "Which task should you give a fan to test the revised Save layout?",
       "choices": [
         {
           "id": "a",
-          "label": "Both fans saved without help.",
-          "tier": "best",
-          "why": "Both needed a hint. The report must record what actually happened."
+          "label": "Keep this set so you can find it tomorrow.",
+          "why": "The goal is clear without telling the fan where to click.",
+          "tier": "best"
         },
         {
           "id": "b",
-          "label": "We watched two fans try to save.",
-          "tier": "wrong",
-          "why": "That matches the stated test."
+          "label": "Click Save beside the title.",
+          "why": "That gives away the control you need to test.",
+          "tier": "wrong"
         },
         {
           "id": "c",
-          "label": "Both fans needed a hint to find Save.",
-          "tier": "wrong",
-          "why": "That accurately records the problem."
+          "label": "Do you like the new colors?",
+          "why": "That asks about preference, not whether the Save task works.",
+          "tier": "wrong"
         },
         {
           "id": "d",
-          "label": "Next, test a clearer Save placement.",
-          "tier": "wrong",
-          "why": "A next test is a proposal, not a claim that it already worked."
+          "label": "Watch me save this set, then copy me.",
+          "why": "A demonstration hides whether the fan can find the action alone.",
+          "tier": "wrong"
         }
       ],
-      "layout": "document",
-      "docStyle": "slide",
-      "doc": "Test Summary",
+      "layout": "options",
       "progress": 0.5714285714285714,
       "feedback": "",
       "feedbackCta": "Continue",
       "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Reading Comprehension",
-        "Critical Thinking"
+        "Critical Thinking",
+        "Active Learning"
       ],
-      "feedbackArtifacts": {
-        "best": {
-          "id": "ux-save-clear",
-          "kind": "scene-context",
-          "view": "music-ui",
-          "state": "clear",
-          "title": "Revised layout",
-          "caption": "A proposed clearer Save layout for the next test, not a proven result.",
-          "provenance": "Fictional proposed UI revision. The report records the observed test; no claim of improved results."
-        },
-        "wrong": {
-          "id": "ux-save-buried",
-          "kind": "scene-context",
-          "view": "music-ui",
-          "state": "buried",
-          "title": "Current layout",
-          "caption": "Current AMPLIFY layout: Save sits below a long description.",
-          "provenance": "Fictional UI reproducing the problem stated in the question."
-        },
-        "risky": {
-          "id": "ux-save-buried",
-          "kind": "scene-context",
-          "view": "music-ui",
-          "state": "buried",
-          "title": "Current layout",
-          "caption": "Current AMPLIFY layout: Save sits below a long description.",
-          "provenance": "Fictional UI reproducing the problem stated in the question."
-        }
+      "artifact": {
+        "id": "ux-save-clear",
+        "kind": "scene-context",
+        "view": "music-ui",
+        "state": "clear",
+        "title": "Proposed layout",
+        "caption": "Proposed AMPLIFY layout: Save sits beside the set title. It still needs testing.",
+        "provenance": "Fictional prototype proposal, not a claim of improved test results."
       }
     },
     {
@@ -670,8 +696,8 @@ export const UX_LEVEL_1: Level = {
       "kind": "card",
       "id": "UX1-21",
       "speaker": "Narrator",
-      "title": "3:00 P.M. A teammate leaves the project.",
-      "body": "Half the prototype review is unfinished. The client review starts at 6:00 P.M.",
+      "title": "3:00 P.M. The Save link breaks.",
+      "body": "Save opens the wrong screen. The cover art also needs polish. Only one fix fits before the 6:00 client review. Arjun must agree to the priority.",
       "world": {
         "kind": "clock",
         "now": "3:00 PM",
@@ -686,25 +712,25 @@ export const UX_LEVEL_1: Level = {
       "kind": "choice",
       "id": "UX1-22",
       "speaker": "Narrator",
-      "question": "There is more work than you can finish by six. What do you message Arjun?",
+      "question": "Only one fix fits before six. What should you propose to Arjun?",
       "choices": [
         {
           "id": "a",
-          "label": "Can you help me prioritize what is left?",
-          "tier": "best",
-          "why": "Flag the gap early so the team can protect the most important work."
+          "label": "Fix the Save path first; leave cover art rough.",
+          "why": "The client needs to try the core task. Arjun can approve leaving polish for later.",
+          "tier": "best"
         },
         {
           "id": "b",
-          "label": "I’ll finish everything myself.",
-          "tier": "wrong",
-          "why": "That hides the workload problem until the deadline."
+          "label": "Polish the cover art and hide the broken link.",
+          "why": "A polished screen does not fix the task the client needs to try.",
+          "tier": "wrong"
         },
         {
           "id": "c",
-          "label": "We should cancel without telling the team.",
-          "tier": "wrong",
-          "why": "You need direction, not a decision made outside your role."
+          "label": "Add more screens before checking Save.",
+          "why": "More screens increase work while the core path remains broken.",
+          "tier": "wrong"
         }
       ],
       "layout": "chat",
@@ -724,8 +750,8 @@ export const UX_LEVEL_1: Level = {
       "feedbackCta": "Continue",
       "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Time Management",
-        "Verbal Communication"
+        "Problem-Solving",
+        "Time Management"
       ]
     },
     {
@@ -733,7 +759,7 @@ export const UX_LEVEL_1: Level = {
       "id": "UX1-23",
       "speaker": "Narrator",
       "title": "6:00 P.M. The review pack is ready.",
-      "body": "Arjun checks it before the client review. You finished the priority work without hiding what still needs testing.",
+      "body": "Arjun reviews the repaired Save path. Cover art stays rough. The client can try the main task; the next test will show what still needs work.",
       "world": {
         "kind": "clock",
         "now": "6:00 PM",
@@ -749,7 +775,7 @@ export const UX_LEVEL_1: Level = {
       "id": "UX1-24",
       "speaker": "Narrator",
       "title": "Amina still needs a hand.",
-      "body": "Amina, an accessibility specialist, has keyboard-check notes due at 6:40. You have finished your work for today.",
+      "body": "Amina, an accessibility specialist, needs keyboard-check notes by 6:40. You have finished your work. She owns the final check.",
       "castMember": "Amina",
       "setup": "Amina • Accessibility Specialist",
       "cta": "Continue",
@@ -759,8 +785,8 @@ export const UX_LEVEL_1: Level = {
       "kind": "card",
       "id": "UX1-25",
       "speaker": "Narrator",
-      "title": "Their deadline is close. Yours is not.",
-      "body": "You have time to help with the notes. The work stays with its owner for the final check.",
+      "title": "Help with the notes, not the sign-off.",
+      "body": "Amina asks you to record where keyboard focus stops. Send her those notes. She decides what needs fixing before any accessibility claim.",
       "castMember": "Amina",
       "cta": "Continue",
       "variant": "intro"
@@ -769,20 +795,20 @@ export const UX_LEVEL_1: Level = {
       "kind": "rank",
       "id": "UX1-26",
       "speaker": "Narrator",
-      "question": "Rank these responses from best to worst.",
+      "question": "Amina needs keyboard-check notes. Rank your responses from best to worst.",
       "order": [
-        "Ask which notes you can help organize.",
-        "Wish them luck and leave.",
-        "Laugh at the delay and walk away."
+        "Record where focus stops and send Amina the notes.",
+        "Offer to polish cover art instead.",
+        "Mark the screen accessible without a check."
       ],
-      "whenRight": "You had time to help and left final checks with the person responsible.",
-      "whenWrong": "A useful offer of help matters more than a polite goodbye.",
+      "whenRight": "You support the actual check and leave final judgment with the specialist.",
+      "whenWrong": "Useful notes help Amina. Unrelated polish and untested claims do not.",
       "progress": 1,
       "feedback": "",
       "feedbackCta": "Continue",
       "planLineIfFailed": "you missed a step the team needed",
       "skills": [
-        "Social Awareness",
+        "Teamwork & Collaboration",
         "Critical Thinking"
       ]
     },

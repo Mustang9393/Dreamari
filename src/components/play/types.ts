@@ -447,7 +447,7 @@ export type ChoiceBeat = BeatBase & {
    *  header ("19:00"). No default: it was nursing's shift change on every
    *  chart (9 Oct 2026). */
   docTime?: string;
-  /** `zones` layout: the thing being filed, drawn as the card you drag
+  /** `zones` layout or `options` with dragEnabled: the work item drawn as the card you drag
    *  ("Client files"). Default "Your file" (9 Oct 2026: it was IB's
    *  "Client files" on every career). */
   dragItem?: string;
@@ -736,7 +736,7 @@ export type BandName = "At Risk" | "Cautious" | "Respected" | "Trusted";
 
 export type Level = {
   /** Authored sequence and scoring source; validation compares it to vetted IB L1. */
-  generationTemplate?: "ib-l1-2026-10-21" | "ib-narrative-v2" | "ib-semantic-v3";
+  generationTemplate?: "ib-l1-2026-10-21" | "ib-narrative-v2" | "ib-semantic-v3" | "ib-career-tasks-v4";
   id: string;
   n: number;
   /** "Intern", "Analyst" ... */

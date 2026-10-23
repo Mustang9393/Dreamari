@@ -1,0 +1,53 @@
+REQUIRED CAST AND ANIME DRAWING CHECK
+
+Keep hair in four to six broad silhouette groups, with only a few internal divisions, one shadow family and at most one restrained highlight band. Do not add strand-by-strand rendering, glossy ribbons, many tiny locks or individually shaded ringlets. Preserve straight, wavy, curly and coily textures by changing the grouped silhouette, not by increasing detail.
+
+Faces must remain drawn 2D anime: clear anime eye construction, a simple nose mark, short mouth lines and a deliberately drawn jaw/chin. No painted lips, realistic nostrils, sculpted cheek planes, airbrushed skin or comic-book hatching. Vary face proportions for identity and age without switching rendering style. Older characters must stay visibly older. Use the approved references as the upper detail limit.
+
+Create a cast ledger across the whole career library before generation. Vary ethnicity, gender, age, very light through very dark skin tones, hair texture, face shape, eye color, posture and expression. Do not repeat one demographic as every mentor or give every character the same head tilt and eyes. Eye colors are individual design choices, not racial rules. Lock each person's natural skin base/undertone, face proportions, eye color and hair silhouette in a canonical reference; scene lighting must not change identity. Introduce one new person through the story at a time. Compare every recurring appearance against its own canonical image, never against an unrelated cast member.
+
+Reject the scene if hair detail escalates, a face stops reading as anime, age changes, skin/eyes drift, or the cast ledger collapses into repeated identities. Repair before integration. Keep the one-image complete-scene rule: these cast instructions do not authorize sprites or separate character output.
+
+STYLE FAILURE GATE — REJECT THESE RESULTS
+
+Use the approved images as an upper limit on detail, not a minimum: simplify further when uncertain. In this PDF, extract only pages labeled APPROVED as positive generation references. Pages labeled REJECTED explain failures and must never be supplied as positive style inputs.
+
+Match hand-drawn 2D anime, not a realistic painting with anime eyes. Skin uses flat color plus one clean cel shadow, not airbrushed gradients or sculpted cheeks. Draw the nose and mouth with short simple marks; do not paint lips or detailed nostrils. Hair uses four to six large groups with minimal internal lines. For curls/coils use a few connected silhouette clusters, not dozens of individually shaded ringlets. Clothing needs only the folds that explain the pose; no dense wrinkle networks or shiny fabric modeling. Preserve age and individual identity without adding realism.
+
+Environments must be visibly illustrated at the SAME level of simplification. Use broad painted floor/wall/aircraft/bench planes and sparse clean edges. No stone pores, floor mottling, grunge, dense panel seams, tiny rivets, crisp equipment reflections, photoreal metal or glossy mirrored floors. Keep room function and aircraft/equipment proportions believable while simplifying surface detail. A detailed background with a flat anime person is a failed match. Make design rich through spatial composition, furniture and color, not texture density. Do not use prompt terms such as photorealistic, hyperreal, PBR, ray traced, Octane, Unreal render, ultra-detailed or intricate surfaces.
+
+The approved reference images set face drawing, shading and detail limits only. Do not copy their camera crops: if a reference cuts off a figure, recompose the new scene wider with complete grounded bodies. Reject any hard horizontal cutoff through a person's legs, even if the background continues below it. Reject a portrait plate over a separate room, even if color and lighting match. Transparent layers are not allowed in final scene production.
+
+Before acceptance, compare the output beside the approved references at equal display size, then inspect hair, face, clothing, floor and reflected surfaces closely. Check the entire image with HUD/dialogue hidden. If it has a realistic-render background, excessive hair/fabric detail, a non-anime face or a missing body, it fails. Regenerate/edit the complete scene with the approved references attached; do not pass the failed result forward or call its added detail an upgrade. These are acceptance rules, not a guarantee that any one generation will obey them.
+
+MANDATORY OUTPUT CONTRACT: ONE COMPLETE SCENE
+
+Generate exactly one finished, opaque image per story scene. Draw the people, room, furniture, floor and lighting together in the same image. The character and environment instructions below are two sections of ONE prompt for ONE generation call. Never generate them as separate deliverables or combine separate layers afterward.
+
+Do not generate sprites, transparent PNG people, isolated figures, cutout portraits, waist-up assets, cropped character plates or a background intended for a later character overlay. Do not paste a torso onto a counter or hide an unfinished body with the game dialogue box. No runtime character layers, sprite anchors, floating torsos or detached legs. An identity reference is INPUT only; never wire it into the game as scene art.
+
+Stage the camera wide enough to fit each required character naturally in the room. Standing characters must have complete anatomy, with legs and feet inside the image and grounded on the floor. If real furniture legitimately hides part of a body, draw the scene with coherent perspective and natural occlusion; never terminate the body at the furniture edge or place the figure on its surface. Prefer a wider shot when the body would otherwise hit the image boundary. Do not crop a person at the waist, knees or ankles to fill the frame.
+
+Deliver the complete scene at its target landscape or portrait aspect ratio. Keep faces and important actions clear of the HUD and dialogue zones. Review the image with ALL HUD/dialogue panels hidden: it must stand alone as a complete scene, with no missing lower bodies, exposed sprite edges or unnatural cutoffs. If it fails, recompose and regenerate the whole scene or edit the whole scene with its reference attached. Do not repair it by adding UI, zooming, blurring the sides or compositing a different character layer.
+
+APPROVED REFERENCE PACK — LOAD THE IMAGES BEFORE GENERATING
+
+UX Designer: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/ux-approved-work.png
+Food Scientist: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/food-approved-work.png
+Registered Nurse: https://dreamari-career-art-comparisons.chanduq.chatgpt.site/documents/references/nurse-approved-corridor.png
+
+Open/download these actual images and inspect them. A PDF thumbnail, game name, URL string or written description alone is not a visual reference input. Pass the selected downloaded image files to the image tool as reference images for EVERY generation and edit. If the tool cannot retrieve them, obtain the files before generating; do not silently substitute a remembered anime style. For this documentation, all three anchor drawing and detail level; none supplies a new career's character identity. Choose one primary full-scene reference for a batch and keep it fixed. Include canonical character and room images for follow-up scenes. Do not promote an unreviewed generated image into the style master.
+
+CHARACTER DIRECTION WITHIN THE COMPLETE SCENE — NOT A SEPARATE IMAGE JOB
+
+Inputs: {PRIMARY_APPROVED_SCENE_IMAGE}, {CANONICAL_CHARACTER_IMAGES}, {CHARACTER_ID}, {AGE}, {ETHNICITY}, {SKIN_BASE_AND_UNDERTONE}, {EYE_COLOR}, {FACE_SHAPE}, {HAIR_SILHOUETTE_AND_TEXTURE}, {OUTFIT}, {EXPRESSION}, {ACTION}, {SCENE_LIGHT}.
+
+Draw {CHARACTER_ID} as a hand-drawn 2D television-anime character, matching the actual attached UX Designer / Food Scientist / Registered Nurse reference in facial construction, contour weight and color separation. Keep the same drawing simplicity at final game size. Use clear expressive anime eyes with a simple iris and one small catchlight; a small nose mark and short mouth line; a clearly drawn jaw and chin. No painted lips, modeled cheekbones, realistic skin texture or comic-book hatching.
+
+Use a flat skin base and one broad, clean-edged shadow shape. Let the scene's light tint the lit and shadow colors without repainting the person's complexion. Preserve the canonical face shape, eye color, undertone, hairline, hair length, texture and outfit exactly across scenes. Keep older people visibly older through consistent facial proportions, restrained age lines and posture. Diversity comes from the cast ledger; never use ethnicity as a shortcut for identical faces or eye colors.
+
+Group hair into about four to six large silhouette masses, adapted to its texture. Add only the few interior divisions needed to read the hairstyle. One shadow family and at most one restrained highlight band. Blonde hair stays just as simple as dark hair. No individual flyaways, strand-by-strand highlights, glossy ribbons or dozens of sharp locks. Use a few structural garment folds, with flat fabric colors and a single shadow family; no fabric weave, metallic shine on skin or airbrushed body modeling.
+
+Expression and posture follow {EXPRESSION}/{ACTION}; vary them when the story calls for it. A colleague addressing the unseen player looks toward the camera. Observe a real conversation from the player's viewpoint when characters address each other. No visible player body or long foreground arms. Match light direction and time to {SCENE_LIGHT}.
+
+This describes the character inside one complete scene. Do not output a detached sprite, transparent cutout, bust pasted over furniture, character sheet or isolated portrait unless explicitly requested for an internal identity reference. Clothing and anatomy continue naturally behind real occluding objects. Keep the face clear of the actual HUD/dialogue mask.

@@ -42,7 +42,7 @@ let lastSmall = 0;
 let lastBig = 0;
 
 /** `from` defaults to the element that has focus (the button just pressed). */
-export function skyMoment(opts: { x?: number; from?: Element | null; big?: boolean } = {}): void {
+export function skyMoment(opts: { x?: number; y?: number; from?: Element | null; big?: boolean } = {}): void {
   if (typeof window === "undefined") return;
   const now = Date.now();
   if (opts.big) {
@@ -56,7 +56,10 @@ export function skyMoment(opts: { x?: number; from?: Element | null; big?: boole
   const el = opts.from === undefined ? document.activeElement : opts.from;
   const rect = el && el !== document.body ? el.getBoundingClientRect() : null;
   const x = opts.x ?? (rect ? rect.left + rect.width / 2 : window.innerWidth / 2);
-  window.dispatchEvent(new CustomEvent(SKY_EVENT, { detail: { x, big: !!opts.big } }));
+  // y: where it happened down the screen. The night sky ignores it; the day
+  // sky (SkySun.tsx) starts its surge and lens flare there (22 Oct 2026).
+  const y = opts.y ?? (rect ? rect.top + rect.height / 2 : undefined);
+  window.dispatchEvent(new CustomEvent(SKY_EVENT, { detail: { x, y, big: !!opts.big } }));
 }
 
 // ---- The wake-up on every page (22 Oct 2026). Chandu: "make sure the stars
@@ -72,4 +75,17 @@ export const SKY_ARRIVAL_EVENT = "dreamari:sky-arrival";
 export function skyArrival(): void {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(SKY_ARRIVAL_EVENT));
+}
+
+// ---- A missed streak (23 Oct 2026): the day sky, in its storm mode, answers
+// with sheet lightning in the clouds (SkySun.tsx). Nothing fires this yet:
+// the streak is still the hardcoded 12 (surfaceStates.ts), so call
+// skyStorm() from wherever a streak break is detected once that exists.
+// `from` places the strike above the element; the night sky ignores it.
+export const SKY_STORM_EVENT = "dreamari:sky-storm";
+export function skyStorm(opts: { from?: Element | null } = {}): void {
+  if (typeof window === "undefined") return;
+  const el = opts.from === undefined ? document.activeElement : opts.from;
+  const rect = el && el !== document.body ? el.getBoundingClientRect() : null;
+  window.dispatchEvent(new CustomEvent(SKY_STORM_EVENT, { detail: { x: rect ? rect.left + rect.width / 2 : undefined } }));
 }

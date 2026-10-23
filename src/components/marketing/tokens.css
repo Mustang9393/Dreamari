@@ -339,6 +339,12 @@ html.light .marketing-v2.themeable {
   /* Reaches solid sooner than the dark scrim (7 Oct 2026): the navy title
      sits higher on the photo at phone widths, where a 0.62 frost over a dark
      photo left it under 3:1. */
+  /* Stays white (23 Oct 2026, Chandu: "i think keep the white scrim. But
+     make sure it doesnt blend too much into its background"): a cooler,
+     thinner frost was tried and reverted the same day; the blending came
+     from the card's light-mode edge (a white-alpha border on a white
+     scrim on a pale page, globals.css), which now carries a navy hairline
+     and a resting shadow instead. */
   --poster-scrim: linear-gradient(180deg, rgba(247, 249, 255, 0) 0%, rgba(247, 249, 255, 0.74) 20%, rgba(247, 249, 255, 0.94) 38%, #f7f9ff 58%);
   --poster-title: #1d2539;
   /* World palette, light rungs (2026-08-22, recomputed against BOTH real

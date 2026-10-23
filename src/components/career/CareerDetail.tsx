@@ -114,7 +114,7 @@ const HERO_FOCUS: Record<string, string> = {
 
 // Custom-designed edge case, 22 Sept 2026: the header photo had no
 // `onError` handling -- unlike Match's grid, this hero already sits on a
-// solid dark base (`#0e0c20`) with its own gradient/blur scrims layered as
+// solid dark base (`var(--scrim-deep, #0e0c20)`) with its own gradient/blur scrims layered as
 // separate elements, so a failed photo doesn't need a new placeholder
 // graphic; it just needs to stop trying to paint a broken image on top of
 // an already-complete backdrop. On failure this renders nothing, and the
@@ -251,6 +251,20 @@ function TabComingSoon({ title, career }: { title: string; career: string }) {
 // One marker, one line per item. The marker is the world accent so the list
 // reads as this career's without a second color system. Shared by College
 // Detail too (CollegeDetailExperience.tsx imports this directly).
+/** A short-headed group of tags (Software & Skills). */
+function Tags({ id, label, items, accent }: { id?: string; label?: string; items: string[]; accent: string }) {
+  return (
+    <div id={id} className="flex min-w-0 scroll-mt-[96px] flex-col gap-[var(--space-2)]">
+      {label && <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>{label}</h3>}
+      <ul className="flex flex-wrap gap-[8px]">
+        {items.filter(Boolean).map((t) => (
+          <li key={t} className="rounded-[10px] border px-[12px] py-[6px] text-[14px] leading-[20px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{t}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function DotList({ items, accent, leading }: { items: string[]; accent: string; leading?: (item: string) => React.ReactNode }) {
   // Custom-designed edge case, 22 Sept 2026: field-level gaps, not just a
   // whole section missing -- direct report: "sometimes a few points inside
@@ -517,18 +531,22 @@ function viewModel(career: ResolvedCareer) {
 // The header's summary/scenario line and the Typical Degree/Typical Pay
 // facts stay outside the tab system, always visible above it, the same way
 // College Detail keeps its photo header and action row above its own tabs.
-// 21 Oct 2026 (Chandu): "rename education to education & skills and fold
-// software and skills into that tab". Four tabs: the skills lists left
-// Overview and Software lost its own tab; Pay becomes "Pay & Growth" when
-// the career has a BLS outlook. An old ?tab=software link lands on
-// Education & Skills.
-type CareerTab = "overview" | "education" | "ladder" | "pay";
+// 21 Oct 2026 (Chandu): the skills lists left Overview; Pay becomes "Pay &
+// Growth" when the career has a BLS outlook.
+// 22 Oct 2026 (Chandu): "split education tab and add a software and skills
+// tab and move the relevant information there". So Education is the degree
+// and where to study it again, and Know about, Good at and Software have
+// their own tab. Old links: ?tab=software, and ?tab=education with a
+// skills section (know-about, good-at, software), land on Software & Skills.
+type CareerTab = "overview" | "education" | "ladder" | "pay" | "skills";
 const CAREER_TABS: { key: CareerTab; label: string }[] = [
   { key: "overview", label: "Overview" },
-  { key: "education", label: "Education & Skills" },
+  { key: "education", label: "Education" },
   { key: "ladder", label: "Career Ladder" },
   { key: "pay", label: "Pay" },
+  { key: "skills", label: "Software & Skills" },
 ];
+const SKILL_SECTIONS = ["skills", "know-about", "good-at", "software"];
 
 export function CareerDetail({ slug }: { slug: string }) {
   const router = useRouter();
@@ -553,11 +571,12 @@ export function CareerDetail({ slug }: { slug: string }) {
     if (inSheet) return;
     const q = new URLSearchParams(window.location.search);
     const asked = q.get("tab");
-    const want = (asked === "software" ? "education" : asked) as CareerTab | null;
+    const section = q.get("section");
+    const want = (asked === "software" || (asked === "education" && section && SKILL_SECTIONS.includes(section)) ? "skills" : asked) as CareerTab | null;
     if (!want || !CAREER_TABS.some((t) => t.key === want)) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time URL read after mount
     setTab(want);
-    const target = q.get("section") ?? want;
+    const target = section ?? want;
     // a hand-rolled ease in instant steps: a smooth scroll here is cancelled
     // before it moves (the same finding as Profile's easeScrollTo)
     const t = window.setTimeout(() => {
@@ -658,23 +677,23 @@ export function CareerDetail({ slug }: { slug: string }) {
            lower half. */}
         {/* on-dark-media: the hero is a dark photo in both themes, so it keeps
            the bright world colours in light mode too (app.css, 9 Oct 2026). */}
-        <section data-focal className="on-dark-media relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+        <section data-focal className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--scrim-ink, #fff)", textShadow: CARD_TEXT_SHADOW }}>
           {/* Faces stay in frame (direct feedback): the poster photos carry the
              subject in their upper part, so the crop anchors near the top. On
              phones the photo runs behind the whole card; from md up it sits on
              the right half at its natural framing and fades into the card's
              dark base toward the text, so nothing is cropped to fit a wide
              band. */}
-          <div className="absolute inset-0" aria-hidden style={{ background: "#0e0c20" }}>
+          <div className="absolute inset-0" aria-hidden style={{ background: "var(--scrim-deep, #0e0c20)" }}>
             <HeroPhoto photo={career.photo} sizes="100vw" className="object-cover md:hidden" objectPosition={heroFocus(career.photo)?.mobile ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
             <span className="absolute inset-y-0 right-0 hidden w-[50%] md:block">
               <HeroPhoto photo={career.photo} sizes="520px" className="object-cover" objectPosition={heroFocus(career.photo)?.desktop ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
-              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.45) 26%, transparent 58%)" }} />
+              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, var(--scrim-deep, #0e0c20) 0%, rgb(var(--scrim-rgb, 14 12 32) / calc(0.45 * var(--scrim-gain, 1))) 26%, transparent 58%)" }} />
             </span>
             <CardProgressiveBlur size="52%" />
             {/* lighter than before (direct feedback: the blur and the side fade
                already carry the type, so the photo can show) */}
-            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.86) 0%, rgba(12,16,35,0.5) 32%, rgba(12,16,35,0.1) 60%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.35) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)` }} />
+            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgb(var(--scrim-rgb, 12 16 35) / calc(0.86 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.5 * var(--scrim-gain, 1))) 32%, rgb(var(--scrim-rgb, 12 16 35) / calc(0.1 * var(--scrim-gain, 1))) 60%, transparent 100%), linear-gradient(to bottom, rgb(var(--scrim-rgb, 10 9 20) / calc(0.35 * var(--scrim-gain, 1))) 0%, rgb(var(--scrim-rgb, 10 9 20) / calc(0.1 * var(--scrim-gain, 1))) 40%, transparent 65%)` }} />
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
@@ -773,14 +792,19 @@ export function CareerDetail({ slug }: { slug: string }) {
         )}
 
         <div id="career-tabs" className="scroll-mt-[96px]">
-          <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={tabs} grow />
+          {/* on a phone the five tabs scroll sideways instead of becoming a
+             dropdown (Chandu, 22 Oct 2026: "keep the tabs for mobile and
+             tablet too instead of the dropdown? But not like its cut off
+             inside a pill shape so its not obvious they can scroll"): see
+             Segmented's scroll mode */}
+          <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={tabs} grow overflow="scroll" bleed="-mx-5 px-5 md:-mx-8 md:px-8" />
         </div>
 
         {tab === "pay" && !pay && !national && <TabComingSoon title="Pay" career={career.title} />}
 
         {/* Pay & Growth: one section, one map (see PayGrowth) */}
         {tab === "pay" && (pay || national) && (
-          <PayGrowth slug={career.slug} accent={accent} typical={vm.typicalPay} pay={pay ?? null} national={national} yourState={pay?.yourStates?.[0]?.state ?? pickedStates[0]} />
+          <PayGrowth slug={career.slug} accent={accent} typical={vm.typicalPay} pay={pay ?? null} range={vm.details?.pay ?? null} national={national} yourState={pay?.yourStates?.[0]?.state ?? pickedStates[0]} />
         )}
 
         {tab === "ladder" && vm.ladder.length === 0 && <TabComingSoon title="Career ladder" career={career.title} />}
@@ -809,37 +833,38 @@ export function CareerDetail({ slug }: { slug: string }) {
           </Section>
         )}
 
-        {/* Education & Skills (21 Oct 2026): where to study, then the two
-           skills lists side by side (the same two-list shape Education
-           uses), then the software. Ids stay, so ?section=good-at still
-           lands. */}
-        {tab === "education" && !vm.education && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && vm.software.length === 0 && <TabComingSoon title="Education & Skills" career={career.title} />}
+        {/* Education (22 Oct 2026, split back out of Education & Skills):
+           what people study for it and where. */}
+        {tab === "education" && !vm.education && <TabComingSoon title="Education" career={career.title} />}
 
-        {tab === "education" && (
+        {tab === "education" && vm.education && (
+          <Section id="education" title="Education">
+            {/* dreamari.com's two lists, every row a door: see WhereToStudy */}
+            <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerSlug={career.slug} />
+          </Section>
+        )}
+
+        {/* Software & Skills (22 Oct 2026): its own tab again, in the shape
+           the team's note asked for ("Skills tab: Top Section: Know about -
+           Good at; Bottom Section: Software"): a Skills panel with Know
+           about and Good at side by side (Education's two-column shape),
+           then a Software panel. Tags, not bullet lists (21 Oct 2026, "this
+           is way too cluttered"). Ids stay, so ?section=good-at still lands. */}
+        {tab === "skills" && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && vm.software.length === 0 && <TabComingSoon title="Software & Skills" career={career.title} />}
+
+        {tab === "skills" && (
           <div className="flex flex-col gap-[var(--space-6)]">
-            {vm.education && (
-              <Section id="education" title="Education">
-                {/* dreamari.com's two lists, every row a door: see WhereToStudy */}
-                <WhereToStudy where={vm.education.where} studies={vm.education.studies} accent={accent} careerSlug={career.slug} />
+            {(vm.knowAbout.length > 0 || vm.goodAt.length > 0) && (
+              <Section id="skills" title="Skills">
+                <div className="grid gap-[var(--space-6)] sm:grid-cols-2">
+                  {vm.knowAbout.length > 0 && <Tags id="know-about" label="Know about" items={vm.knowAbout} accent={accent} />}
+                  {vm.goodAt.length > 0 && <Tags id="good-at" label="Good at" items={vm.goodAt} accent={accent} />}
+                </div>
               </Section>
             )}
-            {/* one Skills section (21 Oct 2026, "this is way too cluttered",
-               "Remove all redundant and extra copy"): three short-headed
-               groups of tags instead of two sections of long bullet lists */}
-            {(vm.knowAbout.length > 0 || vm.goodAt.length > 0 || vm.software.length > 0) && (
-              <Section id="skills" title="Skills">
-                {([["know-about", "Know about", vm.knowAbout], ["good-at", "Good at", vm.goodAt], ["software", "Software", vm.software]] as const).map(([id, label, items]) =>
-                  items.length > 0 ? (
-                    <div key={id} id={id} className="flex scroll-mt-[96px] flex-col gap-[var(--space-2)]">
-                      <h3 className="text-[16px] leading-[22px] font-semibold" style={{ ...DISPLAY, color: accent }}>{label}</h3>
-                      <ul className="flex flex-wrap gap-[8px]">
-                        {items.filter(Boolean).map((t) => (
-                          <li key={t} className="rounded-[10px] border px-[12px] py-[6px] text-[14px] leading-[20px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{t}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null,
-                )}
+            {vm.software.length > 0 && (
+              <Section id="software" title="Software">
+                <Tags items={vm.software} accent={accent} />
               </Section>
             )}
           </div>
@@ -869,7 +894,13 @@ export function CareerDetail({ slug }: { slug: string }) {
                Zeroing the margin/padding on desktop, as this rail used to,
                left no trailing space for the last card to fade into --
                it just hard-clipped at the container edge (16 Sept 2026). */}
-            <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
+            {/* The bleed matches the panel's padding exactly (Section:
+               space-5, space-6 from sm). It used to copy `main`'s 32px, 8px
+               more than the panel's 24px, so the cards ran 8px past the
+               panel's border on both sides (22 Oct 2026, Chandu: "the cards
+               in careers like this one are exceeding the border of the
+               card"). */}
+            <div className="poster-row -mx-[var(--space-5)] flex gap-[var(--space-4)] overflow-x-auto px-[var(--space-5)] py-5 [scrollbar-width:none] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
                 <PosterCard key={c.title} career={c} onClick={() => openCareerPeek(careerSlug(c.title)) || router.push(`/career/${careerSlug(c.title)}`)} />
               ))}

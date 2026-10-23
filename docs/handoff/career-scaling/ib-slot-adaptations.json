@@ -69,14 +69,14 @@
       "beat": "UX1-10",
       "slot": 10,
       "ibSlot": 10,
-      "role": "privacy-rule"
+      "role": "career-rule-before-application"
     },
     {
       "career": "ui-ux-designer",
       "beat": "UX1-11",
       "slot": 11,
       "ibSlot": 11,
-      "role": "privacy-application"
+      "role": "apply-career-rule"
     },
     {
       "career": "ui-ux-designer",
@@ -104,7 +104,7 @@
       "beat": "UX1-15",
       "slot": 15,
       "ibSlot": 15,
-      "role": "senior-evidence-review"
+      "role": "senior-career-work-check"
     },
     {
       "career": "ui-ux-designer",
@@ -153,7 +153,7 @@
       "beat": "UX1-22",
       "slot": 22,
       "ibSlot": 22,
-      "role": "deadline-message"
+      "role": "career-specific-priority-or-risk-message"
     },
     {
       "career": "ui-ux-designer",
@@ -272,14 +272,14 @@
       "beat": "FS1-10",
       "slot": 10,
       "ibSlot": 10,
-      "role": "privacy-rule"
+      "role": "career-rule-before-application"
     },
     {
       "career": "food-scientist",
       "beat": "FS1-11",
       "slot": 11,
       "ibSlot": 11,
-      "role": "privacy-application"
+      "role": "apply-career-rule"
     },
     {
       "career": "food-scientist",
@@ -307,7 +307,7 @@
       "beat": "FS1-15",
       "slot": 15,
       "ibSlot": 15,
-      "role": "senior-evidence-review"
+      "role": "senior-career-work-check"
     },
     {
       "career": "food-scientist",
@@ -356,7 +356,7 @@
       "beat": "FS1-22",
       "slot": 22,
       "ibSlot": 22,
-      "role": "deadline-message"
+      "role": "career-specific-priority-or-risk-message"
     },
     {
       "career": "food-scientist",
