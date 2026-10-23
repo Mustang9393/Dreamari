@@ -31,7 +31,7 @@ import { isoDay } from "@/lib/localRecord";
 import { schoolSnapshot, toV5 } from "@/lib/counselorV5";
 import { Coverflow } from "../v5/Coverflow";
 import { openCareer } from "../v5/ExploreSheets";
-import { mondayOf, useAllMeetings, inWeek } from "./data";
+import { addDays, mondayOf, useAllMeetings, inWeek } from "./data";
 import { catalog, matchesFor } from "./oppCatalog";
 import { Constellation, FIGURES } from "@/components/app/Constellation";
 import { openOpp, shareOpp } from "./OppSheets";
@@ -61,6 +61,13 @@ export function V7Home() {
   const nextStudent = next ? roster.find((s) => s.id === next.studentId) : undefined;
   const nextWhen = next ? `${DAY[new Date(`${next.day}T12:00:00`).getDay()]} · ${timeLabel(next.time)}` : "";
   const thisWeekLeft = week.filter((m) => m.day >= todayIso).length;
+  // Once this week's office hours are over (a Friday evening, a weekend)
+  // the card looks ahead to the coming week instead of reading 0 (24 Oct
+  // 2026, Chandu, on a Saturday: "the meetings say 0 ... I feel like it
+  // should be populated for demo's sake"). The count was true, the week
+  // was simply done; the next week's bookings are the useful number.
+  const weekDone = thisWeekLeft === 0;
+  const comingWeek = weekDone ? meetings.filter((m) => inWeek(m, addDays(monday, 7))).length : 0;
 
   return (
     <div className={SECTIONS}>
@@ -78,7 +85,7 @@ export function V7Home() {
         <div className="grid grid-cols-1 gap-[var(--space-5)] md:grid-cols-3 lg:gap-[var(--space-6)]">
           <Stat figure="reviews" href={v7("reviews")} label="Reviews" value={snap.pendingTotal} go="Start reviewing"
             line={snap.pending[0] ? <>Most: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{snap.pending[0].key}</span></> : "All caught up"} />
-          <Stat figure="meetings" href={v7("prepare")} label="Meetings this week" value={thisWeekLeft} go="View schedule"
+          <Stat figure="meetings" href={v7("prepare")} label={weekDone && comingWeek ? "Meetings next week" : "Meetings this week"} value={weekDone && comingWeek ? comingWeek : thisWeekLeft} go="View schedule"
             line={nextStudent ? <>Next: <span className="font-semibold" style={{ color: "var(--foreground)" }}>{nextStudent.name}</span> · {nextWhen}</> : "Nothing booked"} />
           <Stat figure="people" href={v7("students", "&status=need")} label="Students who need you" value={snap.needYou.length} go="Review students"
             line={snap.atRisk ? <><span aria-hidden className="mr-[7px] inline-block size-[7px] rounded-full align-[1px]" style={{ background: "var(--color-feedback-danger-solid)" }} /><span className="font-semibold" style={{ color: "var(--foreground)" }}>{snap.atRisk}</span> at risk</> : "None at risk"} />

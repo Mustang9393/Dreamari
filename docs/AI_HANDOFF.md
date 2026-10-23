@@ -1,3 +1,12 @@
+## 2026-10-24: Counselor v7 Home: "Meetings this week" looks ahead once the week is done
+
+File: `src/components/counselor/v7/Home.tsx`.
+
+**Why (Chandu, 24 Oct 2026, a Saturday):** "the meetings say 0 when i try the counselor dashboard is that real? I feel like it should be populated for demo's sake". It was real: the seeded meetings (`seededMeetings`, this week and next) fill weekday office hours (Tue and Thu 10 to 11:30, Wed 1:30 to 3), and the card counted the ones left this week, so every Friday evening and weekend it read 0 while its own line said "Next: Kai Nakamura · Tue".
+
+- When no meetings are left this week, the card reads "Meetings next week" with the coming week's count (6 today); otherwise it is unchanged. No data was invented: the next week was already seeded, and the Prepare schedule shows the same "Week of Oct 26 · 6 meetings".
+- Noticed, not changed: Prepare's header for a finished week still says "5 need prep" beside "7 meetings" though all seven are done.
+
 ## 2026-10-24: Counselor dashboard: the version pick is not remembered; every visit opens v7
 
 File: `src/components/counselor/version.tsx`.
