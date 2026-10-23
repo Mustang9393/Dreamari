@@ -24,6 +24,7 @@ let cache: BuildState | null = null;
 const DEMO_BUILD: Partial<BuildState> = {
   interests: ["Business & Finance", "Tech & Engineering"],
   subjects: ["Mathematics", "Business"],
+  skills: ["Solving hard problems", "Managing money", "Leading a team"],
   energy: "Fast pace",
   teamStyle: "Small team",
   education: "4 years",
@@ -41,6 +42,7 @@ function seedFromProfile(): BuildState {
     ...INITIAL_BUILD_STATE,
     interests: (prefs.industries.length ? prefs.industries : p.interests.map(labelFor)).slice(0, 3),
     subjects: (prefs.subjects.length ? prefs.subjects : p.subjects).slice(0, 5),
+    skills: p.skills.slice(0, 3),
     state: p.states[0] ?? "",
     email: p.email,
     gpa: p.gpa,
@@ -69,7 +71,7 @@ export function writeBuildAnswers(next: BuildState): void {
   cache = next;
   try { window.localStorage.setItem(KEY, JSON.stringify(next)); window.localStorage.setItem(AT_KEY, String(Date.now())); } catch { /* no storage */ }
   // the rest of the app reads these two stores
-  writeStudentProfile({ interests: next.interests, subjects: next.subjects, states: next.state ? [next.state] : [], gpa: next.gpa, zipCode: next.zipCode, travelDistance: next.travelDistance, path: next.path ?? "" });
+  writeStudentProfile({ interests: next.interests, subjects: next.subjects, skills: next.skills, states: next.state ? [next.state] : [], gpa: next.gpa, zipCode: next.zipCode, travelDistance: next.travelDistance, path: next.path ?? "" });
   writePreferences({ industries: next.interests.slice(0, 3), subjects: next.subjects.slice(0, 5), gpa: next.gpa, states: next.state ? [next.state] : [] });
   listeners.forEach((l) => l());
 }

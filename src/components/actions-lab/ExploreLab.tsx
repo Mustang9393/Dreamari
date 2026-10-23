@@ -661,9 +661,10 @@ const BUILT_RAIL_PREVIEW = 12;
 
 /** Browse's rails for the switch's state, in page order. */
 function browseRows(path: PathChoice): BrowseRow[] {
-  // CEO (4 Sept 2026): real clips from inside partner companies. Moved
-  // directly above Typical Pay (Joshua, 11 Sept 2026), in the Apple TV
-  // lean-back card shape; the lead card plays muted.
+  // CEO (4 Sept 2026): real clips from inside partner companies, in the
+  // Apple TV lean-back card shape; the lead card plays muted. Placed by
+  // Joshua: above Typical Pay (11 Sept 2026), then above Skilled Trades
+  // (23 Oct 2026).
   const videos: BrowseRow = { id: "videos", kind: "videos", title: "Videos Inside Leading Companies", careers: [] };
 
   if (path === "trades") {
@@ -684,21 +685,24 @@ function browseRows(path: PathChoice): BrowseRow[] {
   }
 
   // Rail order + content per Joshua (2026-08-21): merged recommended rail,
-  // then Tech, Top 10 trending, Might Not Know, Skilled Trades (added
-  // 11 Sept 2026), Videos, Public Service (added 21 Sept 2026), Typical
-  // Pay, Arts. Rank = the slot's place in Joshua's list, fixed (see
-  // TrendingRail).
+  // then Tech, Top 10 trending, Might Not Know, Videos, Skilled Trades
+  // (added 11 Sept 2026; Videos and Trades swapped places per Joshua's
+  // Slack to Chandu, 23 Oct 2026), Public Service (added 21 Sept 2026),
+  // Typical Pay, Arts. Rank = the slot's place in Joshua's list, fixed
+  // (see TrendingRail).
   const posters = (id: string, title: string, careers: CatalogCareer[], peek = false): BrowseRow => ({ id, kind: "posters", title, careers, peek });
   return [
     posters("liked", "Because you liked Business & Finance", BROWSE_BECAUSE_LIKED, true),
     posters("tech", "Tech & Engineering", BROWSE_WORLD_RAIL),
     { id: "trending", kind: "trending", title: TRENDING_TITLE, careers: [], ranked: BROWSE_TRENDING_SLOTS.map((slot, index) => ({ slot, rank: index + 1 })) },
     posters("new", "Careers You Might Not Know", BROWSE_MIGHT_NOT_KNOW),
-    // Trades row (Slack, 11 Sept 2026): its own row, directly above Typical
-    // Pay per the user, and trades are also mixed into the rows above so
-    // they read as equal to everything else on the page.
-    posters("trades", "Skilled Trades", BROWSE_TRADES),
+    // Videos first, then Trades (Joshua, 23 Oct 2026: "swap the positions
+    // of the Videos row and the Skilled Trades row").
     videos,
+    // Trades row (Slack, 11 Sept 2026): its own row, and trades are also
+    // mixed into the rows above so they read as equal to everything else
+    // on the page. The Non-college view above still leads with it.
+    posters("trades", "Skilled Trades", BROWSE_TRADES),
     // Public Service (Slack, 21 Sept 2026): its own row, directly above
     // Typical Pay, not folded into it -- these are civic/public-sector
     // careers, not a pay tier.

@@ -3,7 +3,12 @@
 Status: Locked (5 Sept 2026).
 
 ## Steps
-Interests → Subjects → Work vibe → 50% milestone ("You're moving fast." + Continue) → Education → Cost (slider) → Location → Profile Basics (name, school, grade, GPA, zip, distance) → Completion.
+Subjects → Skills → Industries (career fields) → 50% milestone ("You're halfway there." + Continue) → Work vibe → Education → Location → Profile Basics (grade, GPA, zip, distance) → Completion.
+
+Reordered 23 Oct 2026 (Joshua, Slack to Chandu): Subjects first, the new Skills step second, Industries third, the rest in their old order; the yearly tuition slider is no longer asked in Build (My Build still has it). The halfway beat stays at 50%.
+
+## Skills (23 Oct 2026)
+"Which of these do you actually enjoy doing?" / "Pick up to 3." Fifteen chips, the dataset's student-facing O*NET skills: Fixing things, Using your hands, Picturing things, Running machines, Spotting mistakes, Solving hard problems, New ideas, Understanding people, Helping people, Convincing people, Teaching others, Leading a team, Managing money, Staying organized, Being active. Up to 3; at 3 the rest grey out until one is deselected (no swap). Shuffled per student, stable for the session. All 15 fit one screen at 375 and 1440. Picks persist as `skills` next to subjects and interests. Nothing reads them yet.
 
 ## Completion screen (the only end screen)
 Copy, in order: "Congratulations!", "+100 XP" (counts 1→100 over about 1.1s), "Your personalized career matches are ready.", button "Reveal My Matches" → `/match-lab`. Back is available.

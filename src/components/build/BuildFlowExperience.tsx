@@ -11,9 +11,8 @@ import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { WelcomeAtmosphere, WelcomeScreen } from "./WelcomeScreen";
 import { archiveCurrentProfile, writeStudentProfile } from "@/lib/studentProfile";
-import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
-import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
+import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SkillsStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
 import { PARTY_SPRITE } from "./ui";
 import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_ACCENTS_V2, STAGE_DREAMY, type BuildState, type StageId } from "./types";
 import { useLookV2 } from "@/components/app/look";
@@ -66,6 +65,7 @@ export function BuildFlowExperience() {
     writeStudentProfile({
       interests: state.interests,
       subjects: state.subjects,
+      skills: state.skills,
       states: state.state ? [state.state] : [],
       email: state.email,
       gpa: state.gpa,
@@ -117,13 +117,16 @@ export function BuildFlowExperience() {
   const stepProps: StepProps = { state, patch, onNext: next, react, reactionNonce, percent: stage.percent, almostDone: stage.almostDone, sprite: dreamy?.sprite, onSkip: skipToMatch };
 
   let content: ReactNode = null;
+  // Order and the missing tuition step: see STAGES in types.ts (Joshua,
+  // 23 Oct 2026). Subjects is the first question, so it has no Back;
+  // Industries (interests) now sits third and gets one.
   if (stageId === "welcome") content = <WelcomeScreen onNext={next} onSkip={skipToMatch} />;
-  else if (stageId === "interests") content = <InterestsStep {...stepProps} />;
-  else if (stageId === "subjects") content = <SubjectsStep {...stepProps} onBack={back} />;
-  else if (stageId === "workVibe") content = <WorkVibeStep {...stepProps} onBack={back} />;
+  else if (stageId === "subjects") content = <SubjectsStep {...stepProps} />;
+  else if (stageId === "skills") content = <SkillsStep {...stepProps} onBack={back} />;
+  else if (stageId === "interests") content = <InterestsStep {...stepProps} onBack={back} />;
   else if (stageId === "milestone") content = <MilestoneScreen onNext={next} onBack={back} percent={stage.percent} />;
+  else if (stageId === "workVibe") content = <WorkVibeStep {...stepProps} onBack={back} />;
   else if (stageId === "education") content = <EducationStep {...stepProps} onBack={back} />;
-  else if (stageId === "cost") content = <CostStep {...stepProps} onBack={back} />;
   else if (stageId === "location") content = <LocationStep {...stepProps} onBack={back} />;
   else if (stageId === "profile") content = <ProfileStep {...stepProps} onBack={back} />;
   else if (stageId === "complete") content = <CompletionScreen onSeeMatches={seeMatches} onBack={back} />;

@@ -419,6 +419,8 @@ export function ChipGrid({
   icons,
   columns = "grid-cols-1 sm:grid-cols-2",
   onPick,
+  lockAtMax = false,
+  compact = false,
 }: {
   options: string[];
   selected: string[];
@@ -428,6 +430,17 @@ export function ChipGrid({
   icons?: Record<string, ReactNode>;
   columns?: string;
   onPick?: () => void;
+  /** At the cap, grey the unpicked chips out until one is deselected,
+      instead of the default swap (Joshua's rule for the Skills step,
+      23 Oct 2026: "once 3 are picked the rest grey out until one is
+      deselected"). The swap stays the default everywhere else (24 Sept
+      2026 feedback: deselecting first "creates friction"). */
+  lockAtMax?: boolean;
+  /** Wrapped pill chips at a smaller size, every option always shown (no
+      phone "Show all"), so a long list like the 15 skills fits one screen
+      at 375 and 1440 wide (Joshua, 23 Oct 2026). Same selection
+      micro-interaction as the grid. */
+  compact?: boolean;
 }) {
   // Progressive disclosure on phones: long lists show 6 options + one "Show
   // all N" reveal (never a second tier), so the CTA is visible without any
@@ -446,7 +459,7 @@ export function ChipGrid({
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
-  const collapsible = isPhone && options.length > PREVIEW + 1;
+  const collapsible = !compact && isPhone && options.length > PREVIEW + 1;
   const mustExpand = selected.some((option) => options.indexOf(option) >= PREVIEW);
   const expanded = expandedBy !== null || mustExpand;
   const visibleOptions = collapsible && !expanded ? options.slice(0, PREVIEW) : options;
@@ -468,6 +481,9 @@ export function ChipGrid({
       onChange(selected.filter((item) => item !== option));
       return;
     }
+    // Locked: the chip is drawn disabled below and a tap does nothing; the
+    // way in is to deselect one of the picks first.
+    if (atMax && lockAtMax) return;
     // At the cap, the OLDEST pick (selected[0] -- insertion order) is bumped
     // for the new one instead of locking new picks out entirely. Cheap to
     // undo (tap the bumped option again) since this is a max-2/3 list, not a
@@ -488,22 +504,28 @@ export function ChipGrid({
 
   return (
     <div>
-      <div ref={gridRef} className={`grid auto-rows-fr gap-1.5 ${columns}`}>
+      <div ref={gridRef} className={compact ? "flex flex-wrap gap-1.5" : `grid auto-rows-fr gap-1.5 ${columns}`}>
         {visibleOptions.map((option, index) => {
         const isSelected = selected.includes(option);
         const accent = accents?.[option] ?? "var(--color-brand-400)";
         const glowing = isSelected && confirming;
         const swappedOut = option === justSwapped;
+        const locked = lockAtMax && atMax && !isSelected;
         return (
           <button
             key={option}
             type="button"
             aria-pressed={isSelected}
+            // aria-disabled, not disabled: a locked chip stays in the tab
+            // order so a keyboard user can still read the full list.
+            aria-disabled={locked || undefined}
             onClick={(e) => toggle(option, e)}
             // No per-chip backdrop-filter: a dozen stacked backdrop-blur layers
             // is a WebKit compositing bomb on phones; the token surface reads
             // fine without it.
-            className={`relative flex h-full min-h-[44px] items-center gap-2.5 rounded-[var(--radius-md)] border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] dm-tap ${
+            className={`relative flex items-center rounded-[var(--radius-md)] border text-left leading-snug font-semibold transition-all duration-150 ${
+              compact ? "min-h-[36px] gap-2 px-3 py-1.5 text-[13px] sm:text-[13.5px]" : "h-full min-h-[44px] gap-2.5 px-3 py-2 text-[13.5px] sm:text-[14px]"
+            } ${locked ? "cursor-not-allowed opacity-40" : "dm-tap"} ${
               glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : swappedOut ? "motion-safe:animate-[chip-swap-out_0.32s_ease-out]" : ""
             }`}
             style={{

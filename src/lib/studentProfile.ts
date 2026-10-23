@@ -12,6 +12,10 @@ export type StudentProfile = {
   interests: string[];
   /** favourite school subjects, at most two (SUBJECTS) */
   subjects: string[];
+  /** the things they enjoy doing, at most three (SKILL_OPTIONS; Build's
+   *  Skills step, 23 Oct 2026). Each label is a student-facing O*NET skill,
+   *  so matching reads these as they are. */
+  skills: string[];
   /** states they would go to school in; Build asks for one, Settings allows more */
   states: string[];
   email: string;
@@ -26,12 +30,13 @@ export type StudentProfile = {
   path: string;
 };
 
-export const EMPTY_PROFILE: StudentProfile = { interests: [], subjects: [], states: [], email: "", gpa: "", gpaType: "", zipCode: "", travelDistance: "", path: "" };
+export const EMPTY_PROFILE: StudentProfile = { interests: [], subjects: [], skills: [], states: [], email: "", gpa: "", gpaType: "", zipCode: "", travelDistance: "", path: "" };
 
 // Build still asks for two; Preferences (Joshua, 25 Sept 2026) allows three
 // industries and five subjects, and this store must not truncate them.
 export const MAX_INTERESTS = 3;
 export const MAX_SUBJECTS = 5;
+export const MAX_SKILLS = 3;
 
 export const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
@@ -54,6 +59,7 @@ function normalize(value: unknown): StudentProfile {
   return {
     interests: strings(v.interests, MAX_INTERESTS),
     subjects: strings(v.subjects, MAX_SUBJECTS),
+    skills: strings(v.skills, MAX_SKILLS),
     states: strings(v.states),
     email: str(v.email),
     gpa: str(v.gpa),
@@ -131,7 +137,7 @@ const MAX_ARCHIVED = 10;
 export type ArchivedProfile = { id: string; savedAt: string; profile: StudentProfile };
 
 export function isEmptyProfile(p: StudentProfile): boolean {
-  return p.interests.length === 0 && p.subjects.length === 0 && p.states.length === 0 && !p.email && !p.gpa && !p.gpaType && !p.zipCode && !p.travelDistance && !p.path;
+  return p.interests.length === 0 && p.subjects.length === 0 && p.skills.length === 0 && p.states.length === 0 && !p.email && !p.gpa && !p.gpaType && !p.zipCode && !p.travelDistance && !p.path;
 }
 
 export function readProfileArchive(): ArchivedProfile[] {

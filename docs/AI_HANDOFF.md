@@ -4994,6 +4994,129 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-23 Build: Subjects, Skills (new), Industries; tuition question removed; Explore Videos and Trades swapped; v12 dataset name check
+
+- WHY: Joshua's Slack message to Chandu, 23 Oct 2026. New Build order
+  "Subjects, then Skills (new), then Industries, then the remaining Build
+  questions in their current order"; "remove the yearly tuition / school
+  budget question entirely from Build"; a new Skills question, copy exactly
+  as given ("Which of these do you actually enjoy doing?" / "Pick up to
+  3."); on Explore, "swap the positions of the Videos row and the Skilled
+  Trades row". Joshua: the 15 skills "are already mapped to O*NET for
+  matching, so this is UX integration only".
+- BUILD ORDER (`src/components/build/types.ts` STAGES): welcome, Subjects
+  13%, Skills 25%, Industries 38%, halfway 50%, Work vibe 63%, Education
+  75%, Location 88%, Profile 100%. Seven questions plus the halfway beat
+  fill the same eight slots as before, so the reference percentages did
+  not move. The halfway screen stays at 50% after the third question
+  because its copy says "halfway". Industries (the `interests` stage) now
+  has a Back button; Subjects, first, has none. The per-stage aurora
+  accents stayed with the percentages, not the questions (the color is
+  the progress bar sampled at that percent). Dreamy's lines moved with the
+  order: Subjects gets the warm-up line, Skills "No wrong answers. Pick
+  what feels fun.", Industries "Now pick the fields that pull your
+  attention."
+- TUITION: `CostStep` is no longer mounted in Build and "cost" is out of
+  STAGES. The field (`costIndex`, `COST_STOPS`, `CostSlider`) is KEPT
+  because My Build (Profile > About Me, `PreferencesTab.tsx`) still asks
+  it in its Tuition section and the DEMO_BUILD seed sets it. "cost" also
+  stays in the `StageId` union for that section's accent and Dreamy line.
+  Follow-up for Chandu to decide: whether My Build should drop Tuition
+  too, and whether it should gain the new Skills question (today its
+  "Skills" section is the Preferences question "What are you good at, and
+  what do you want to build?", a different thing).
+- SKILLS STEP (`SkillsStep` in `steps.tsx`): the 15 options are
+  `SKILL_OPTIONS` in types.ts, in Joshua's order for storage; they match
+  the dataset's "Skills" sheet labels one for one (Fixing things =
+  Repairing 2.B.3.l, Helping people = Service Orientation 2.B.1.f, and so
+  on), so no renaming is needed for matching. Rules, each from the Slack
+  message: max 3 (`MAX_SKILLS`); at 3 the other chips grey out until one
+  is deselected (new `lockAtMax` prop on `ChipGrid`; aria-disabled, kept
+  in the tab order; the default elsewhere is still the 24 Sept 2026
+  swap); random order per student, stable within a session
+  (`shuffledSkills()`: one seed in sessionStorage, mulberry32 + Fisher-
+  Yates); all 15 on one screen at 375 and 1440 (new `compact` prop on
+  ChipGrid: wrapped 36px pills, no phone "Show all"). Verified headless at
+  1440x900 and 375x812: the step column's scrollHeight equals its
+  clientHeight on both, so nothing scrolls. Same selection micro-
+  interaction as every other chip (aurora pulse, confirm lift, shimmer).
+  Skippable like every step (the Skip link); Next needs at least one pick,
+  the same rule as Subjects. Citation: "Question informed by O*NET".
+- STORE: `skills: string[]` on `BuildState`, `StudentProfile`
+  (`MAX_SKILLS`, normalized, part of `isEmptyProfile`) and the Build
+  answers store, written next to interests and subjects on Build handoff
+  and on every My Build save. DEMO-ONLY seed (`DEMO_BUILD`): Solving hard
+  problems, Managing money, Leading a team, shaped like the demo
+  student's Investment Banking pick. Nothing reads the picks yet; the
+  results echo Joshua marked "maybe later" ("You picked Helping People
+  and Understanding People...") was not built.
+- EXPLORE: the live Explore is `src/components/actions-lab/ExploreLab.tsx`
+  (`browseRows`), not `ExploreExperience.tsx`; the default view now runs
+  Might Not Know, Videos, Skilled Trades, Public Service. The Non-college
+  view still leads with Skilled Trades (Joshua's curated row, 11 Sept
+  2026), untouched.
+- VALIDATION: `npm run tokens:check` clean. `tsc --noEmit` has one
+  pre-existing error unrelated to this work (`counselor/v6/LineAvatar.tsx`
+  cannot find `@dicebear/lorelei-neutral`; the module is missing from the
+  shared node_modules). Browser check on :3033 (worktree
+  `.worktrees/build-skills`, launch entry `build-skills-3033`): the whole
+  flow clicked through, Subjects 13 to Location 88 with no tuition step.
+  Not pushed.
+- DATASET (`~/Downloads/dreamari_career_database_final_v12.xlsx`, not
+  wired in). Sheets: "Start here" (notes), "Careers" (342 rows, 56
+  columns), "Coverage", "Education mix", "Skills" (the 15 student labels,
+  their O*NET element and ID, column name, average and spread). Careers
+  columns: Group (15), Career, App Display Title, For You and Browse Card,
+  Career Facet, Build Subject (Primary/Secondary), O*NET Subgroup,
+  Industry theme (v2), v2 cluster, v2 accordion group, Theme source, Why
+  it's on the list, Education route, Official occupation, O*NET-SOC, Copy
+  status, Where the copy came from, v2 career it matched, Simple
+  explanation, Real life example, Why it matters, What you do daily, What
+  you need to learn, Best school subjects, Salary explanation, Door says
+  (BLS), Most people in the job hold, % who hold it, % with no
+  bachelor's, Study field, AI-Estimated Salary Note, Search Keywords,
+  Primary Major, College Majors, College Major CIP, Study Tier, Is Trade,
+  Training Route, Explore Category (33), Skill: x15, Top Skills. The
+  sheet's own rule: "Where v2 had a name, v2's name won"; App Display
+  Title is the short form for cards.
+  Compared against the app catalog (`ALL_CATALOG_CAREERS`: catalog.ts +
+  browseLibrary.ts + browseLibrary2026.ts, 349 titles): 324 match the
+  sheet exactly on Career or App Display Title. The differences, for
+  Usman to rename in production (catalog name -> sheet name, display
+  title in brackets where it differs):
+  - AI and Machine Learning Engineer -> AI / Machine Learning Engineer [AI Engineer]
+  - Cyber Security -> Cybersecurity Analyst
+  - Entrepreneur -> Entrepreneur or CEO
+  - Farm & Ranch Manager -> Farmer or Rancher
+  - Investment Banking -> Investment Banking Analyst
+  - Iron Worker -> Ironworker
+  - Park Ranger or Naturalist -> Park Ranger and Naturalist [Park Ranger]
+  - Software Engineer -> Software Developer
+  - Sound Engineering Technician -> Sound Engineer
+  - Sports Medicine Doctor -> Sports Medicine Physician
+  - Therapist -> Therapist or Mental Health Counselor [Mental Health Counselor]
+  - UI/UX Designer -> UX / UI Designer
+  - Management Analyst -> Management Consultant (same SOC, Management Analysts)
+  - Public Relations Manager -> nearest is Public Relations Specialist; the sheet's Public Relations Managers SOC is "Event Marketing Manager"
+  - Pediatric Surgeon -> nearest is Surgeon
+  - Emergency Medicine Doctor -> no sheet row (EMT and Emergency Management Director are different jobs)
+  - HR Manager -> no sheet row (Recruiter is the only Human Resources SOC)
+  - Game Designer, Video Game Designer -> no sheet row (the sheet has Game Producer, Game Programmer, Game QA Tester)
+  - Film Director -> no sheet row (Art Director and Film Editor only)
+  - Data Analyst, Database Architect, Architectural & Engineering Manager, Industrial-Organizational Psychologist, Purchasing Manager -> no sheet row
+  In the sheet but not in the catalog under any name: Sheet Metal Worker,
+  Jewelry Designer and Maker, Facilities Maintenance Technician,
+  Sommelier, Quality Control Lab Analyst [Lab Analyst], Teacher's Aide,
+  Special Education Aide. The sheet also shortens 25 names for cards
+  (Audio and Video Technician [AV Technician], Film and Video Editor [Film
+  Editor], Elevator and Escalator Technician [Elevator Technician],
+  Preschool or Kindergarten Teacher [Pre-K Teacher], Adult and English
+  Language Teacher [ESL Teacher], and so on); where the catalog already
+  uses the long form those match on the Career column and need no change.
+- NEXT: Chandu reviews the screenshots, then says push. Decide the two My
+  Build questions above.
+
+
 ### 2026-10-03 Home (v1, the default) restructured: two card languages, one section title
 
 - **Why.** Chandu: "work on the homepage a bit, it feels a little cluttered right now and there's too many graphic directions or visual identities on the same page and it needs better structure." Audit: four card languages (cinematic hero, landscape play cards with a centre badge plus a verb pill, portrait posters, glass icon cards), three section-title treatments (eyebrow+title, eyebrow+title+subtitle, title only), HUD chips on the hero, and the Registered Nurse game twice (hero and rail).

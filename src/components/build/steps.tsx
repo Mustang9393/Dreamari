@@ -16,8 +16,10 @@ import {
   GRADE_OPTIONS,
   TRAVEL_DISTANCE_OPTIONS,
   INTEREST_WORLDS,
+  MAX_SKILLS,
   SUBJECTS,
   TEAM_OPTIONS,
+  shuffledSkills,
   type BuildState,
 } from "./types";
 import { GpaField } from "./GpaField";
@@ -73,7 +75,7 @@ const WORLD_ACCENTS: Record<string, string> = Object.fromEntries(
   INTEREST_WORLDS.map((world) => [world.label, `var(--color-world-${world.slug})`]),
 );
 
-export function InterestsStep({ state, patch, onNext, react, reactionNonce, percent, sprite, onSkip }: StepProps) {
+export function InterestsStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite, onSkip }: StepProps) {
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
@@ -121,7 +123,42 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
         <Citation>Question informed by Harvard University Mignone Center + O*NET</Citation>
       </GlassCard>
       </div>
-      <StepFooter onNext={onNext} nextDisabled={state.interests.length === 0} onSkip={onSkip} />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={state.interests.length === 0} onSkip={onSkip} />
+    </div>
+  );
+}
+
+// Skills (Joshua, Slack to Chandu, 23 Oct 2026): the second question, between
+// Subjects and Industries. Copy exactly as given. The 15 labels are the
+// dataset's student-facing O*NET skills, "already mapped to O*NET for
+// matching", so this is UX only: the picks are stored next to Subjects and
+// Industries and the app does nothing else with them yet. Rules from the
+// same message: up to 3; once 3 are picked the rest grey out until one is
+// deselected (ChipGrid lockAtMax, not the usual swap); a different order
+// per student, the same for the session (shuffledSkills); all 15 on one
+// screen at 375 and 1440 (ChipGrid compact). Skippable like every step,
+// and Next needs at least one pick, the same rule as Subjects.
+export function SkillsStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite, onSkip }: StepProps) {
+  const [options] = useState(shuffledSkills);
+  return (
+    <div className="flex h-full w-full flex-col">
+      <CardHud percent={percent} />
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <GlassCard>
+        <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Which of these do you actually enjoy doing?" subtitle="Pick up to 3." />
+        <ChipGrid
+          options={options}
+          selected={state.skills}
+          max={MAX_SKILLS}
+          lockAtMax
+          compact
+          onChange={(skills) => patch({ skills })}
+          onPick={react}
+        />
+        <Citation>Question informed by O*NET</Citation>
+      </GlassCard>
+      </div>
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={state.skills.length === 0} onSkip={onSkip} />
     </div>
   );
 }
