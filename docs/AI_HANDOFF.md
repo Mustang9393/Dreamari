@@ -1,3 +1,12 @@
+## 2026-10-23: v4 student profile uses the same StudentIdCard as v7
+
+**Why (Chandu):** "why is the student id card different in v4? use the same one we use for v7 here." v4 had this card on 20 Oct (46e10317) and lost it in the rollback to its afternoon state for Maisha's demos (7cc0a82f); v7 kept it. Now both builds render one component.
+
+- **`v7/StudentIdCard.tsx` + `v7/studentIdCard.css`:** the card's styles moved out of `v7.css` into a file the component imports itself, so any build that renders the card gets them (v7.css only loads inside V7App).
+- **`v4/StudentProfile.tsx`:** the identity row (avatar, name, grade line, status chip, career-poster cover) is replaced by `<StudentIdCard rail />`, as the 20 Oct version had it; the "Needs you" list sits under it as its own card with a small label. The poster cover went with the identity row. Unused imports and the top-match helper removed.
+- **`v4/v4.css`:** the identity column is a 300px card centred on narrow screens with 72px above for the reel; at 1200px and up it is the sticky left column with no extra padding, so the reel hangs into the toolbar row (to the right of the Back button) and the card's top edge lines up with the content's, as in v7.
+- **Checked on :3089:** `/counselor?view=students&studentId=ref-115&v=4` at 1440 (card top 213 vs content top 218 during the swing, reel clear of Back) and at 375 (card centred, no overflow). tsc and eslint clean.
+
 ## 2026-10-23: Play tab, Investment Banker tile takes the new lobby scene
 
 **Why (Chandu, 23 Oct 2026):** "Please use any of these images for a day in the life of IB thumbnail on PLAY and push." Two renders were offered: Christina alone in the Cobalt lobby (3:2) and Christina with a colleague (16:9). The single-character one was chosen because the tile is cropped from a 5:7 portrait card to a 2.6:1 banner, and a two-person composition loses one of them in portrait.
