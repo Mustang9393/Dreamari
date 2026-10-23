@@ -158,7 +158,7 @@
       }
     },
     "cta": {
-      "$description": "The design system's CTA component (Figma node 2261:12200), extracted live 2026-08-19. Primary is the light foreground-on-background scheme (NOT blue - blue is the pressed state); Secondary is the bordered glass family. The legacy component.button group keeps the pre-alignment app spec until its adopters migrate. Destructive variant intentionally absent: still being finalized in Figma, check before implementing.",
+      "$description": "The CTA. Primary is the primary fill with primary-foreground ink, radius 12, never a pill (decided Aug to Sept 2026; the white primary was retired 4 Sept 2026). Secondary is glass with a hairline. Destructive variant intentionally absent.",
       "typography": {
         "$type": "typography",
         "$value": {
@@ -173,33 +173,33 @@
       "primary": {
         "background": {
           "$type": "color",
-          "$value": "{color.cta-foundation.surface-light}",
-          "$description": "Primary/Default surface. Figma binding: var(--foreground)."
+          "$value": "{color.ui.primary}",
+          "$description": "Primary CTA fill."
         },
         "text": {
           "$type": "color",
-          "$value": "{color.cta-foundation.on-surface-dark}",
-          "$description": "Primary/Default label. Figma binding: var(--background)."
+          "$value": "{color.ui.primary-foreground}",
+          "$description": "Primary CTA label ink."
         },
         "hover-background": {
           "$type": "color",
-          "$value": "{color.cta-foundation.glass-deep}",
-          "$description": "Primary/Hover surface. Figma binding: var(--glass-surface-3)."
+          "$value": "{color.ui.primary-hover}",
+          "$description": "Primary CTA fill on hover."
         },
         "hover-text": {
           "$type": "color",
-          "$value": "{color.cta-foundation.surface-light}",
-          "$description": "Primary/Hover label. Figma binding: var(--foreground)."
+          "$value": "{color.ui.primary-foreground}",
+          "$description": "Primary CTA label ink on hover."
         },
         "pressed-background": {
           "$type": "color",
-          "$value": "{color.brand.500}",
-          "$description": "Primary/Pressed surface. Figma binding: var(--primary)."
+          "$value": "{color.ui.primary-hover}",
+          "$description": "Primary CTA fill while pressed."
         },
         "pressed-text": {
           "$type": "color",
-          "$value": "{color.white}",
-          "$description": "Primary/Pressed label. Figma binding: var(--primary-foreground)."
+          "$value": "{color.ui.primary-foreground}",
+          "$description": "Primary CTA label ink while pressed."
         },
         "disabled-opacity": {
           "$type": "number",
@@ -210,38 +210,38 @@
       "secondary": {
         "background": {
           "$type": "color",
-          "$value": "{color.cta-foundation.glass-faint}",
-          "$description": "Secondary/Default surface. Figma binding: var(--secondary)."
+          "$value": "{color.ui.glass-surface-2}",
+          "$description": "Secondary CTA fill."
         },
         "border": {
           "$type": "color",
-          "$value": "{color.cta-foundation.glass-faint}",
-          "$description": "Secondary family border, all states. Figma binding: var(--border)."
+          "$value": "{color.ui.glass-border}",
+          "$description": "Secondary CTA hairline."
         },
         "text": {
           "$type": "color",
-          "$value": "{color.cta-foundation.surface-light}",
-          "$description": "Secondary/Default label. Figma binding: var(--secondary-foreground)."
+          "$value": "{color.ui.foreground}",
+          "$description": "Secondary CTA label ink."
         },
         "hover-background": {
           "$type": "color",
-          "$value": "{color.cta-foundation.glass-faint}",
-          "$description": "Secondary/Hover surface (currently equal to Default in the live file). Figma binding: var(--glass-surface-2)."
+          "$value": "{color.ui.glass-surface-1}",
+          "$description": "Secondary CTA fill on hover."
         },
         "hover-text": {
           "$type": "color",
-          "$value": "{color.cta-foundation.surface-light}",
-          "$description": "Secondary/Hover label. Figma binding: var(--foreground)."
+          "$value": "{color.ui.foreground}",
+          "$description": "Secondary CTA label ink."
         },
         "pressed-background": {
           "$type": "color",
-          "$value": "{color.brand.500}",
-          "$description": "Secondary/Pressed surface. Figma binding: var(--primary)."
+          "$value": "{color.ui.primary}",
+          "$description": "Secondary CTA fill while pressed."
         },
         "pressed-text": {
           "$type": "color",
-          "$value": "{color.white}",
-          "$description": "Secondary/Pressed label. Figma binding: var(--primary-foreground)."
+          "$value": "{color.ui.primary-foreground}",
+          "$description": "Secondary CTA label ink while pressed."
         },
         "disabled-content-opacity": {
           "$type": "number",

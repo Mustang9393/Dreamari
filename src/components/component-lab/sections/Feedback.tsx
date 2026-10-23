@@ -17,7 +17,6 @@ import { Toast } from "@/components/app/Toast";
 import { UndoToast } from "@/components/app/UndoToast";
 import { Toast as FlowLabToast } from "@/components/flow-lab/shared";
 import { SparkBar } from "@/components/flow/SparkBar";
-import { MatchRing } from "@/components/app/MatchRing";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
 import { DreamScoreTip } from "@/components/app/DreamScoreTip";
@@ -42,7 +41,7 @@ function ToastDemo() {
   const [shown, setShown] = useState(true);
   return (
     // Toast portals straight to document.body (see app/Toast.tsx), so it
-    // escapes ClippedStage's clip like GlobalSearch does -- clip={false}
+    // escapes ClippedStage's clip as a full-screen overlay must -- clip={false}
     // avoids an empty box sitting where the (elsewhere-rendered) toast
     // actually appears. Per kit.tsx: fine behind a Reveal, one at a time,
     // as long as it has a working close path (Close here, or the X on the
@@ -195,15 +194,6 @@ export function FeedbackSection() {
           <StateCell label="100%"><SparkBar percent={100} fill="var(--primary)" glow="var(--primary)" height={6} idle={false} /></StateCell>
           <StateCell label="Idle flicker" note="Fires an unprompted flicker after ~10-18s of no page activity while the bar is visible and incomplete."><SparkBar percent={65} fill="var(--primary)" glow="var(--primary)" height={6} idle memoryKey="lab-idle-demo" /></StateCell>
           <StateCell label="Gain spark" note="Click to grow the bar and see the particle spark fire."><SparkBarDemo /></StateCell>
-        </StateGrid>
-      </Specimen>
-
-      <Specimen name="MatchRing" file="src/components/app/MatchRing.tsx" purpose="A percentage ring with match language, not a generic progress ring." when="Any career/college match score.">
-        <StateGrid>
-          <StateCell label="Strong match (>=75)"><MatchRing score={80} /></StateCell>
-          <StateCell label="Solid match (>=50)"><MatchRing score={60} /></StateCell>
-          <StateCell label="Early match (>=25)"><MatchRing score={30} /></StateCell>
-          <StateCell label="Low signal"><MatchRing score={10} /></StateCell>
         </StateGrid>
       </Specimen>
 

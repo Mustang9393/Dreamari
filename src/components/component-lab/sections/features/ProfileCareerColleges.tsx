@@ -44,7 +44,6 @@ import {
 } from "@/components/career/CareerDetailExperience";
 
 import { COLLEGES, collegeImage, type College, type Level, type Control, type Setting, type Admission, type Size } from "@/components/colleges/data";
-import { BrowseShelves } from "@/components/colleges/BrowseShelves";
 import { Menu, MenuItem, WhySheet } from "@/components/colleges/ForYouSchools";
 import { FilterTray, CompareSheet } from "@/components/colleges/CollegesExperience";
 import type { Route } from "@/components/colleges/pathway";
@@ -593,14 +592,6 @@ export function ProfileCareerCollegesModules() {
       </p>
 
       <SubHead>Colleges</SubHead>
-
-      <Specimen name="BrowseShelves" file="src/components/colleges/BrowseShelves.tsx" purpose="Browse all, at rest: schools grouped into shelves by the question a student is actually asking (near you, lower cost, your programme...)." when="Explore Schools > Browse all, with no search or filters.">
-        <StateGrid min={320}>
-          <StateCell label="Default" pad={false} minH={280} note="Reads the picks and student-profile stores (read-only here); onSave/onCompare are no-ops.">
-            <BrowseShelves saved={new Set()} onSave={noop} compare={[]} onCompare={noop} />
-          </StateCell>
-        </StateGrid>
-      </Specimen>
 
       <Specimen name="ForYouSchools" file="src/components/colleges/ForYouSchools.tsx" purpose="For you: schools matched to the student's #1 career, route and GPA, with Target/Safety/Reach bands." when="Explore Schools' default view.">
         <StateGrid min={260}>

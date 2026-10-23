@@ -8,50 +8,18 @@
 // with getComputedStyle, re-reading whenever <html>'s class changes, so the
 // header's light/dark toggle updates everything on this page in place.
 
-import { useEffect, useRef, useState, type CSSProperties, type ComponentType, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Section, SubHead, Specimen, StateGrid, StateCell, Reveal, noop, MONO } from "../kit";
 import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { dispatchLight } from "@/components/app/LightPulse";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
-import { PlayBurst } from "@/components/play/PlayBurst";
-import { Confetti } from "@/components/flow/aurora/Confetti";
 import { GestureHint } from "@/components/flow/GestureHint";
 import { StreakBolt, XpBadge } from "@/components/app/ScoreIcons";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { PlayBackdrop } from "@/components/play/PlayBackdrop";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
-import { StarsBackground } from "@/components/ui/stars";
-import { FireworksBackground } from "@/components/ui/fireworks";
-import { Vortex } from "@/components/ui/vortex";
-import {
-  BookIcon,
-  GraduationCapIcon,
-  BriefcaseIcon,
-  DownloadIcon,
-  ShareIcon,
-  ChevronLeftIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  TargetIcon,
-  PiggyBankIcon,
-  ScaleIcon,
-  HandIcon,
-  HomeIcon,
-  MapIcon,
-  CompassIcon,
-  GlobeIcon,
-  CheckIcon,
-  HeartIcon,
-  XIcon,
-  LightbulbIcon,
-  StarIcon,
-  ArrowLeftRightIcon,
-  SunIcon,
-  MoonIcon,
-} from "@/components/flow/icons";
 
 const CAPTION: CSSProperties = { color: "var(--muted-foreground)" };
 
@@ -122,7 +90,7 @@ function SwatchGrid({ names, min = 118 }: { names: string[]; min?: number }) {
   );
 }
 
-const SEMANTIC_TOKENS = ["--background", "--foreground", "--card", "--muted", "--muted-foreground", "--border", "--primary", "--accent", "--accent-subtle", "--secondary", "--destructive"];
+const SEMANTIC_TOKENS = ["--background", "--foreground", "--card", "--surface", "--muted", "--muted-foreground", "--border", "--primary", "--primary-foreground", "--accent", "--accent-subtle", "--secondary", "--secondary-foreground", "--inset-surface", "--inset-border", "--destructive"];
 const FEEDBACK_TOKENS = ["--color-feedback-danger", "--color-feedback-success", "--color-feedback-success-dark-surface"];
 const WORLD_TOKENS = [
   "--world-arts-media-sport",
@@ -297,33 +265,6 @@ function UtilityCell({ label, cls, note, children }: { label: string; cls: strin
   );
 }
 
-const LINE_ICONS: { name: string; Icon: ComponentType<{ className?: string }> }[] = [
-  { name: "BookIcon", Icon: BookIcon },
-  { name: "GraduationCapIcon", Icon: GraduationCapIcon },
-  { name: "BriefcaseIcon", Icon: BriefcaseIcon },
-  { name: "DownloadIcon", Icon: DownloadIcon },
-  { name: "ShareIcon", Icon: ShareIcon },
-  { name: "ChevronLeftIcon", Icon: ChevronLeftIcon },
-  { name: "ChevronDownIcon", Icon: ChevronDownIcon },
-  { name: "ChevronRightIcon", Icon: ChevronRightIcon },
-  { name: "TargetIcon", Icon: TargetIcon },
-  { name: "PiggyBankIcon", Icon: PiggyBankIcon },
-  { name: "ScaleIcon", Icon: ScaleIcon },
-  { name: "HandIcon", Icon: HandIcon },
-  { name: "HomeIcon", Icon: HomeIcon },
-  { name: "MapIcon", Icon: MapIcon },
-  { name: "CompassIcon", Icon: CompassIcon },
-  { name: "GlobeIcon", Icon: GlobeIcon },
-  { name: "CheckIcon", Icon: CheckIcon },
-  { name: "HeartIcon", Icon: HeartIcon },
-  { name: "XIcon", Icon: XIcon },
-  { name: "LightbulbIcon", Icon: LightbulbIcon },
-  { name: "StarIcon", Icon: StarIcon },
-  { name: "ArrowLeftRightIcon", Icon: ArrowLeftRightIcon },
-  { name: "SunIcon", Icon: SunIcon },
-  { name: "MoonIcon", Icon: MoonIcon },
-];
-
 export function FoundationsSection() {
   return (
     <Section id="foundations" title="Foundations" intro="The tokens and shared CSS utilities everything else in this lab (and the app) is built from. Toggle light and dark with the header switch above; every swatch below reads its live, resolved value and updates in place.">
@@ -408,7 +349,7 @@ export function FoundationsSection() {
         </p>
         <StateGrid min={180}>
           <UtilityCell label="Solid button" cls="dm-solid">
-            <button type="button" onClick={noop} className="dm-solid cursor-pointer rounded-full px-[16px] py-[8px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#fff" }}>
+            <button type="button" onClick={noop} className="dm-solid cursor-pointer rounded-full px-[16px] py-[8px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
               Save
             </button>
           </UtilityCell>
@@ -510,7 +451,7 @@ export function FoundationsSection() {
             <Replayable>
               {(n) => (
                 <span className="block h-[64px] w-[130px] overflow-hidden rounded-[var(--radius-md)]">
-                  <span key={n} className="dm-goal-focus-in block h-full w-full" style={{ background: "linear-gradient(135deg, #2f6bf2 0%, #9ec6fa 45%, #0e0c20 100%)" }} />
+                  <span key={n} className="dm-goal-focus-in block h-full w-full" style={{ background: "linear-gradient(135deg, #2f5fb1 0%, #9ec6fa 45%, #131f36 100%)" }} />
                 </span>
               )}
             </Replayable>
@@ -556,7 +497,7 @@ export function FoundationsSection() {
         <Specimen name="LightPulse" file="src/components/app/LightPulse.tsx" purpose="Light at a moment, in Black & Blue: a soft radial bloom where a lit action is pressed, something is switched on, or a progress bar lands, then it fades back to calm. One fixed layer, opacity and scale only. Part 4 of &quot;light that behaves like light&quot; (Chandu, 19 Oct 2026: &quot;lets try 1,2,3,4&quot;)." when="Nothing to add per screen: the root layout mounts it once, and it listens for clicks on [data-lit] and [aria-pressed=false], and for dispatchLight(x, y) calls (SparkBar's head). Off in Classic and for reduced motion.">
           <StateGrid min={200}>
             <StateCell label="Lit action pressed" note="Click it. data-lit marks the one lit action per screen; it blooms at 1.2 strength. The layout's own LightPulse plays it; Classic turns it off.">
-              <button type="button" data-lit onClick={noop} className="dm-solid cursor-pointer rounded-full px-[18px] py-[9px] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "#fff" }}>
+              <button type="button" data-lit onClick={noop} className="dm-solid cursor-pointer rounded-full px-[18px] py-[9px] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
                 Let&apos;s Go
               </button>
             </StateCell>
@@ -577,7 +518,7 @@ export function FoundationsSection() {
               </div>
             </StateCell>
             <StateCell label="Fill light" note="data-fill-light (Segmented's sliding pill), or any selected control filled with var(--primary): a soft light beneath it.">
-              <span data-fill-light className="rounded-[var(--radius-sm)] px-[14px] py-[8px] text-[13px] font-semibold" style={{ background: "var(--primary)", color: "#fff" }}>
+              <span data-fill-light className="rounded-[var(--radius-sm)] px-[14px] py-[8px] text-[13px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
                 Active
               </span>
             </StateCell>
@@ -588,7 +529,7 @@ export function FoundationsSection() {
               </span>
             </StateCell>
             <StateCell label="Lit action" note="data-lit: the screen's one lit action (splash CTA, Let's Go, Next Step, Home's hero action). Everything else stays flat.">
-              <button type="button" data-lit onClick={noop} className="dm-solid cursor-pointer rounded-full px-[18px] py-[9px] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "#fff" }}>
+              <button type="button" data-lit onClick={noop} className="dm-solid cursor-pointer rounded-full px-[18px] py-[9px] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
                 Next Step
               </button>
             </StateCell>
@@ -606,32 +547,6 @@ export function FoundationsSection() {
                   </div>
                 )}
               </Replayable>
-            </StateCell>
-          </StateGrid>
-        </Specimen>
-
-        <Specimen name="PlayBurst" file="src/components/play/PlayBurst.tsx" purpose="A particle burst behind a correct answer or unlock moment in Play." when="A rewarding in-game moment, nonce bumped on each occurrence.">
-          <StateGrid min={180}>
-            <StateCell label="Burst" note="Click Replay to fire it. Reduced motion: both animations are motion-safe:, so the burst is silently skipped rather than replaced with a static flash." minH={140}>
-              <Replayable>
-                {(n) => (
-                  <div className="relative h-[110px] w-full overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: "var(--border)", background: "#070914" }}>
-                    <PlayBurst nonce={n} accent="#ffb81f" />
-                  </div>
-                )}
-              </Replayable>
-            </StateCell>
-          </StateGrid>
-        </Specimen>
-
-        <Specimen name="Confetti" file="src/components/flow/aurora/Confetti.tsx" purpose="Canvas confetti behind a big milestone (Build/Match finales)." when="A finale or milestone screen, sparingly.">
-          <StateGrid min={180}>
-            <StateCell label="Active" minH={200} note="Colours are literal hex, copied from --primary/--accent-subtle/--color-feedback-success: this component's prop type only takes hex strings, not var(). Reduced motion: checks matchMedia('(prefers-reduced-motion: reduce)') itself and skips the canvas loop entirely, same real guard as AuroraBackground and Vortex below.">
-              <Reveal label="Play" height={200}>
-                <div className="relative h-full w-full" style={{ background: "var(--background)" }}>
-                  <Confetti active colors={["#2f6bf2", "#3894ff", "#33c78c"]} />
-                </div>
-              </Reveal>
             </StateCell>
           </StateGrid>
         </Specimen>
@@ -672,24 +587,11 @@ export function FoundationsSection() {
           </StateGrid>
         </Specimen>
 
-        <Specimen name="Line icons" file="src/components/flow/icons.tsx" purpose="24 shared line icons used across Build, Match and Career instead of Lucide, for one consistent stroke weight." when="Build/Match flow screens and career category marks.">
-          <div className="grid grid-cols-4 gap-[var(--space-3)] sm:grid-cols-6">
-            {LINE_ICONS.map(({ name, Icon }) => (
-              <div key={name} className="flex flex-col items-center gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-2)]" style={{ borderColor: "var(--border)", color: "var(--foreground)" }}>
-                <Icon className="h-[20px] w-[20px]" />
-                <code className="text-center text-[9.5px] leading-[11px] break-all" style={MONO}>
-                  {name}
-                </code>
-              </div>
-            ))}
-          </div>
-        </Specimen>
-
         <Specimen
           name="Full-screen backgrounds and canvases"
-          file="src/components/app/AppBackdrop.tsx, src/components/play/PlayBackdrop.tsx, src/components/ui/{stars,fireworks,vortex}.tsx, src/components/flow/aurora/{AuroraBackground,BackgroundSpace}.tsx"
-          purpose="Fixed and/or CPU-heavy backdrops behind app chrome, Play and the Build/Match flow."
-          when="One per surface: AppBackdrop behind every standard tab, PlayBackdrop behind gameplay, Aurora/BackgroundSpace behind Build and Match. Each mounts only on click, one at a time."
+          file="src/components/app/AppBackdrop.tsx, src/components/flow/aurora/{AuroraBackground,BackgroundSpace}.tsx"
+          purpose="Fixed and/or CPU-heavy backdrops behind app chrome and the Build/Match flow."
+          when="One per surface: AppBackdrop behind every standard tab, Aurora/BackgroundSpace behind Build and Match. Each mounts only on click, one at a time."
         >
           <StateGrid min={220}>
             <StateCell label="AppBackdrop" minH={200} note="Reduced motion: N/A. Purely static gradients plus one static SVG image, nothing here animates.">
@@ -697,31 +599,11 @@ export function FoundationsSection() {
                 <AppBackdrop />
               </Reveal>
             </StateCell>
-            <StateCell label="PlayBackdrop" minH={200} note="Reduced motion: its one animation, the entrance bloom, is motion-safe: (the rest of the surface is static gradients).">
-              <Reveal label="Play" height={200}>
-                <PlayBackdrop />
-              </Reveal>
-            </StateCell>
-            <StateCell label="StarsBackground" kind="built" minH={200} note="Reduced motion (fixed 27 Sept 2026): checks useReducedMotion and freezes each star layer's scroll loop on one still frame instead of animating y: [0, -2000] continuously.">
-              <Reveal label="Play" height={200}>
-                <StarsBackground starColor="#ffffff" />
-              </Reveal>
-            </StateCell>
-            <StateCell label="FireworksBackground" kind="built" minH={200} note="Reduced motion (fixed 27 Sept 2026): checks useReducedMotion and draws one static burst instead of the continuous requestAnimationFrame launch loop, the same still-frame pattern as Vortex.">
-              <Reveal label="Play" height={200}>
-                <FireworksBackground population={0.6} />
-              </Reveal>
-            </StateCell>
-            <StateCell label="Vortex" minH={200} note="Reduced motion: built correctly. Checks prefers-reduced-motion and, when set, renders one still canvas frame in the field's own colours and density instead of looping requestAnimationFrame, the pattern the other canvases above should follow.">
-              <Reveal label="Play" height={200}>
-                <Vortex containerClassName="h-full w-full" particleCount={250} />
-              </Reveal>
-            </StateCell>
             <StateCell label="AuroraBackground + BackgroundSpace" minH={200} note="Needs ThemeProvider; re-syncs <html>'s theme class from its own localStorage key on mount, which can momentarily override the lab's own unpersisted toggle while this is open. Reduced motion: AuroraBackground checks matchMedia itself (built); BackgroundSpace underneath it is static gradients, N/A.">
               <Reveal label="Play" height={200}>
                 <ThemeProvider>
                   <BackgroundSpace />
-                  <AuroraBackground accent="#2f6bf2" visitedAccents={["#2f6bf2", "#33c78c"]} />
+                  <AuroraBackground accent="#2f5fb1" visitedAccents={["#2f5fb1", "#33c78c"]} />
                 </ThemeProvider>
               </Reveal>
             </StateCell>

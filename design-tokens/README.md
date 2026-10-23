@@ -1,8 +1,23 @@
 # Dreamari design-token handoff
 
-**Do not import this directory into the production app.** Production tokens are the certified Figma export in the app repo (`packages/ui/tokens`), with flat shadcn names. This directory is the prototype's own nested vocabulary and is not a version of that system. Figma v2.0 was brought level with the prototype on 4 September 2026; the app only needs a fresh export. Read `docs/DESIGN_SYSTEM_ALIGNMENT.md` for the full picture and `docs/TOKEN_DECISIONS.md` for the log.
+**Do not import these files into the production app.** Production tokens are the certified Figma export in the app repo (`packages/ui/tokens`), with flat shadcn names. Copy values, not files. Read `docs/handoff/DESIGN_SYSTEM_HANDOFF_2026-10-24.md` first, then `docs/DESIGN_SYSTEM_ALIGNMENT.md` and `docs/TOKEN_DECISIONS.md`.
 
 This directory is the portable token source for the Dreamari coded design reference only. The production application's `packages/ui/tokens` remains the final source of truth.
+
+## 24 October 2026: Black & Blue is the token set
+
+The files now carry the app's current look, Black & Blue (the default since 19 October 2026, `src/app/look-v2.css`): a dusk-navy dark mode and a cool-white light mode. What changed:
+
+- **Brand ramp re-hued to 213deg.** `color.brand.*` now holds the Black & Blue ramp; `brand.600` is the dusk cobalt `#2f5fb1`. The old purple and pink slots (`accent.purple`, `decorative.pink-glow`) resolve to light blues and are for glows only.
+- **Two new primitive groups, `color.dusk.*` (dark) and `color.day.*` (light)**, holding every surface, ink, border and link value the look uses. They exist in both primitive files at identical values; the semantic files choose between them.
+- **A new semantic group, `color.ui.*`**, the flat theme vocabulary the app paints with: `background`, `foreground`, `card`, `surface`, `muted`, `muted-foreground`, `border`, `primary`, `primary-hover`, `primary-foreground`, `secondary`, `secondary-foreground`, `accent`, `accent-subtle`, `destructive`, `glass-surface-1..3`, `glass-border`, `inset-surface`, `inset-border`, `scrim-base`, `scrim-ink`, `scrim-ink-soft`. Each token names its runtime CSS variable. These are the shadcn role names production already uses, so they map 1:1.
+- **Dark primary is periwinkle with dark ink.** `color.ui.primary` is `#8fb3f5` in dark with `primary-foreground` `#0b1a33` (8.2:1). White on it is 2.1:1, so never hard-code white on a primary fill. Light keeps cobalt `#2f5fb1` with white (6.2:1).
+- **Existing semantics re-pointed** where the live app had moved: `action.primary(-hover)`, the new `action.primary-foreground`, `text.brand`, `surface.page`, `surface.card`, `surface.feature(-strong)` in light, dark glass rungs. `action.secondary` keeps `#7fa8ff` (`accent.sky`) because the Glossary Games clouds mix it and game worlds keep their own palettes.
+- **`component.cta` is the blue button** (primary fill, primary-foreground ink; secondary is glass with a hairline), matching the decision logged in `docs/TOKEN_DECISIONS.md`. It described the retired white button until now.
+- **The validator checks more pairs** and composites translucent colours over the page before measuring: body, secondary and link text on the page, cards and glass; primary ink on primary and primary-hover; secondary ink on secondary; scrim ink on scrim. Each needs 4.5:1 in both modes.
+- **Checked against the running app:** with these values swapped in, every painted colour of ~3,000 sampled component-library elements was identical in dark and light. The only generated variables whose values moved are ones nothing in `src/` reads.
+
+**Classic is archived, not part of this set.** The token files as they stood before this change, and the CSS they generated, are in `archive/classic-2026-10-24/`. The prototype's Classic switch (`?look=v1`, DEMO-ONLY) keeps working from `src/app/archive/look-classic.css`. Neither is to be handed off or built from.
 
 ## Files
 

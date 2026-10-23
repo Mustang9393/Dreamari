@@ -1,0 +1,68 @@
+/* DEMO-ONLY: the Classic look (?look=v1 or the bottom-left switch), frozen.
+
+   On 24 Oct 2026 the design tokens took the Black & Blue values (the default
+   since 19 Oct; look-v2.css). The generated token CSS now carries them, so
+   Classic would have half-changed. This file pins every generated variable
+   that moved back to its value before that day, only where look-v2 is off.
+   Snapshot of the pre-24-Oct generated output; not generated, do not grow
+   it. Delete it together with the look switch. */
+
+html:not(.look-v2):not(.dark) {
+  --color-accent-deep: #0f4cd1;
+  --color-accent-navy: #1f418f;
+  --color-accent-purple: #7d5cff;
+  --color-action-primary: #1f5ff0;
+  --color-action-primary-hover: #143c96;
+  --color-brand-100: #eef4ff;
+  --color-brand-200: #d9e6ff;
+  --color-brand-300: #7fa8ff;
+  --color-brand-400: #4a82ff;
+  --color-brand-500: #2f6bf2;
+  --color-brand-600: #1f5ff0;
+  --color-brand-700: #143c96;
+  --color-brand-900: #0c2560;
+  --color-brand-950: #0a1e4c;
+  --color-decorative-pink-glow: #ff5d7d;
+  --color-match-accent: #2e73f5;
+  --color-surface-brand: #0a1e4c;
+  --color-surface-feature: #eef4ff;
+  --color-surface-feature-strong: #d9e6ff;
+  --color-surface-page: #f3f4f8;
+  --color-text-brand: #1f5ff0;
+  --component-input-focus-border: #1f5ff0;
+  --component-progress-text: #1f5ff0;
+}
+
+html.dark:not(.look-v2),
+html:not(.look-v2) .dark {
+  --color-accent-deep: #0f4cd1;
+  --color-accent-navy: #1f418f;
+  --color-accent-purple: #7d5cff;
+  --color-action-primary: #2e73f5;
+  --color-action-primary-hover: #4a82ff;
+  --color-brand-100: #eef4ff;
+  --color-brand-200: #d9e6ff;
+  --color-brand-300: #7fa8ff;
+  --color-brand-400: #4a82ff;
+  --color-brand-500: #2f6bf2;
+  --color-brand-600: #1f5ff0;
+  --color-brand-700: #143c96;
+  --color-brand-900: #0c2560;
+  --color-brand-950: #0a1e4c;
+  --color-decorative-pink-glow: #ff5d7d;
+  --color-glass-surface-1: rgb(255 255 255 / 0.031);
+  --color-glass-surface-2: rgb(255 255 255 / 0.09);
+  --color-glass-surface-3: rgb(12 16 35 / 0.8);
+  --color-glass-surface-raised: rgb(255 255 255 / 0.066667);
+  --color-match-accent: #2e73f5;
+  --color-match-toast-link: #5b9bff;
+  --color-surface-brand: #0a1e4c;
+  --color-surface-card: #1e2a3f;
+  --color-surface-feature: #0a1e4c;
+  --color-surface-page: #070912;
+  --color-text-brand: #7fa8ff;
+  --component-input-background: #1e2a3f;
+  --component-input-focus-border: #2e73f5;
+  --component-progress-text: #7fa8ff;
+  --component-toast-action: #5b9bff;
+}

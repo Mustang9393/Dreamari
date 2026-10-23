@@ -273,7 +273,7 @@ const IB_LEVELS: GlossaryLevel[] = [
 // Icon is a semantic slug (matching the xlsx's plain-word Icon column --
 // "building", "sneaker", "palette", "shopping bags", "money bag" -- not a
 // literal emoji), resolved to a real icon component from the design system
-// in the UI layer (ICON_MAP in GlossaryGameExperience.tsx). Content authors
+// in the UI layer. Content authors
 // pick the slug; the app owns what it looks like.
 const FIN_L01_TERMS: GlossaryTerm[] = [
   { id: "Company", order: 1, term: "Company", definition: "A company sells products or services to make money.", example: "Dream Sneakers is a company that makes and sells sneakers.", icon: "building", memoryTip: undefined },

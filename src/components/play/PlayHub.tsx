@@ -193,9 +193,8 @@ export function PlayHub() {
       {/* The Play TAB (this hub) uses the same background as every other
          tab (direct feedback, 21 Sept 2026: "Dont change the background of
          the PLAY TAB. Use the same background as other tabs. ONLY CHANGE
-         THE BACKGROUND OF THE IN GAME BACKGROUND") -- PlayBackdrop's own
-         "new world" treatment is scoped to actual gameplay screens
-         (GlossaryGameExperience) only, not this landing hub. */}
+         THE BACKGROUND OF THE IN GAME BACKGROUND") -- the hub keeps the
+         standard AppBackdrop; game screens carry their own worlds. */}
       <AppBackdrop />
       <FirstVisitSplash surface="play" onOpenChange={(open) => setSplashSettled(!open)} />
 

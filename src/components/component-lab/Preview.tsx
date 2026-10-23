@@ -60,7 +60,7 @@ export function PreviewModal({ target, onClose }: { target: { id: string; title:
         <p className="min-w-0 flex-1 truncate text-[14px] font-bold capitalize">{target.title}</p>
         <div role="group" aria-label="Screen size" className="flex rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
           {DEVICES.map((x) => (
-            <button key={x.key} type="button" aria-pressed={device === x.key} onClick={() => setDevice(x.key)} className="cursor-pointer rounded-full px-[12px] py-[5px] text-[12.5px] font-semibold transition-colors" style={device === x.key ? { background: "var(--primary)", color: "#fff" } : { color: "var(--muted-foreground)" }}>
+            <button key={x.key} type="button" aria-pressed={device === x.key} onClick={() => setDevice(x.key)} className="cursor-pointer rounded-full px-[12px] py-[5px] text-[12.5px] font-semibold transition-colors" style={device === x.key ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>
               {x.label}
             </button>
           ))}

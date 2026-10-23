@@ -13,7 +13,6 @@ import { Donut, SplitBar, RangeBar, Ladder } from "@/components/colleges/viz";
 import { BarChart as MentorshipBarChart, Sparkline as MentorshipSparkline, GoalTrack, Histogram, ShareBar } from "@/components/connect/mentorship/charts";
 import { PayMap } from "@/components/career/PayMap";
 import { LightRange } from "@/components/app/LightRange";
-import { Ring as PlanMapRing } from "@/components/counselor/v4/PlanMap";
 import { RankBar } from "@/components/counselor/v4/overviewShared";
 import { RankedBars } from "@/components/counselor/v4/CareerCollegeInsights";
 import { Sparkline as EngagementSparkline, LoginsChart, SiteBars } from "@/components/counselor/v4/PlatformEngagement";
@@ -133,14 +132,6 @@ export function ChartsSection() {
           </StateCell>
           <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading shape="document" /></StateCell>
           <StateCell label="Error" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedError verb="load pay by state" /></StateCell>
-        </StateGrid>
-      </Specimen>
-
-      <Specimen name="Ring (counselor Plan Map)" file="src/components/counselor/v4/PlanMap.tsx" purpose="A small percent-complete ring, the roadmap's own scale (no children slot)." when="the Counselor Dashboard's Plan Map only.">
-        <StateGrid>
-          <StateCell label="Default"><PlanMapRing pct={64} /></StateCell>
-          <StateCell label="Complete"><PlanMapRing pct={100} /></StateCell>
-          <StateCell label="All zero"><PlanMapRing pct={0} /></StateCell>
         </StateGrid>
       </Specimen>
 

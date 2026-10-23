@@ -9,7 +9,7 @@
 // ask/answer), the gesture and keyboard models the app leans on, the page-
 // and step-level transitions with their real durations, and every real
 // sound trigger. Micro-interaction components that already have live Replay
-// demos elsewhere (HoverBeam, ConfirmShimmer, PlayBurst, Confetti, SparkBar,
+// demos elsewhere (HoverBeam, ConfirmShimmer, SparkBar,
 // the dm-* nudges, DetailModal's states, Listbox's keyboard) are
 // cross-referenced rather than rebuilt -- see each Specimen's own note.
 

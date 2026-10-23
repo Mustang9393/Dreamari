@@ -232,8 +232,8 @@ export function setMusicMuted(muted: boolean): void {
   // silently, so the gesture retry never arms and the context stays
   // suspended; unmuting then only flips a flag nobody hears. The toggle's
   // own click is a user gesture, so resuming the context and calling
-  // play() here is allowed on every browser. Same approach as the Glossary
-  // Game's working toggle (glossaryThemeSound.ts stops and starts the loop).
+  // play() here is allowed on every browser. Same approach the retired Glossary
+  // Game's toggle used.
   if (el) {
     el.muted = muted;
     if (muted) el.pause();

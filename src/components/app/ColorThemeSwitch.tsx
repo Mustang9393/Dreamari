@@ -19,7 +19,10 @@ import { setLookV2, useLookV2 } from "./look";
 export function ColorThemeSwitch({ inline = false }: { inline?: boolean } = {}) {
   const lookV2 = useLookV2();
   const path = usePathname() ?? "";
-  if (path === "/counselor" || path.startsWith("/counselor/")) return null;
+  // The component library shows Black & Blue only; Classic is archived
+  // (24 Oct 2026, Chandu: "lets not have classic in the token/design
+  // system/component library").
+  if (path === "/counselor" || path.startsWith("/counselor/") || path.startsWith("/component-lab")) return null;
   return (
     <button
       type="button"

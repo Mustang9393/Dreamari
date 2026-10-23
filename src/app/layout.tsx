@@ -58,8 +58,10 @@ export default function RootLayout({
             // default and the switch to be done for classic"); Classic only
             // when chosen: ?look=v1 or the bottom-left switch saves "v1",
             // ?look=v2 saves "v2". Blocked storage still gets Black & Blue.
-            // Set before paint so the other palette never flashes.
-            __html: `(function(){var v2=true;try{var q=new URLSearchParams(location.search).get("look");if(q==="v1"||q==="v2")localStorage.setItem("dreamari-look",q);if(q==="v1"||(!q&&localStorage.getItem("dreamari-look")==="v1"))v2=false}catch(e){}if(v2)document.documentElement.classList.add("look-v2")})()`,
+            // Set before paint so the other palette never flashes. The
+            // component library is always Black & Blue: Classic is archived
+            // and not part of the design system (24 Oct 2026).
+            __html: `(function(){var v2=true;try{var q=new URLSearchParams(location.search).get("look");if(q==="v1"||q==="v2")localStorage.setItem("dreamari-look",q);if(q==="v1"||(!q&&localStorage.getItem("dreamari-look")==="v1"))v2=false}catch(e){}if(v2||location.pathname.indexOf("/component-lab")===0)document.documentElement.classList.add("look-v2")})()`,
           }}
         />
         <script

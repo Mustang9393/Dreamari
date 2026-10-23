@@ -98,21 +98,42 @@ function luminance(color) {
   return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
 }
 
-function contrast(foregroundPath, backgroundPath, tokens) {
-  const foreground = resolveToken(foregroundPath, tokens);
-  const background = resolveToken(backgroundPath, tokens);
+// A translucent colour is measured as it renders: composited over what sits
+// under it (the background), not as if it were opaque.
+function over(top, bottom) {
+  const alpha = top.alpha ?? 1;
+  return { components: top.components.map((value, index) => value * alpha + bottom.components[index] * (1 - alpha)) };
+}
+
+function contrast(foregroundPath, backgroundPath, tokens, pagePath) {
+  let background = resolveToken(backgroundPath, tokens);
+  if ((background.alpha ?? 1) < 1 && pagePath) background = over(background, resolveToken(pagePath, tokens));
+  const foreground = over(resolveToken(foregroundPath, tokens), background);
   const [lighter, darker] = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
   return (lighter + 0.05) / (darker + 0.05);
 }
+
+// [text, surface, minimum]. Body and secondary text need 4.5:1 on every
+// surface they sit on; the link blue the same on the page and on cards.
+const CONTRAST_PAIRS = [
+  ...["color.text.primary", "color.text.secondary", "color.text.muted"].map((text) => [text, "color.surface.card", 4.5]),
+  ...["color.ui.foreground", "color.ui.muted-foreground", "color.ui.accent-subtle"].flatMap((text) =>
+    ["color.ui.background", "color.ui.card", "color.ui.glass-surface-2"].map((surface) => [text, surface, 4.5]),
+  ),
+  ["color.ui.primary-foreground", "color.ui.primary", 4.5],
+  ["color.ui.primary-foreground", "color.ui.primary-hover", 4.5],
+  ["color.ui.secondary-foreground", "color.ui.secondary", 4.5],
+  ["color.ui.scrim-ink", "color.ui.scrim-base", 4.5],
+];
 
 for (const [mode, primitiveMap, semanticMap] of [
   ["light", maps.primitivesLight, maps.semanticLight],
   ["dark", maps.primitivesDark, maps.semanticDark],
 ]) {
   const tokens = mergeTokenMaps(primitiveMap, semanticMap);
-  for (const textPath of ["color.text.primary", "color.text.secondary", "color.text.muted"]) {
-    const ratio = contrast(textPath, "color.surface.card", tokens);
-    if (ratio < 4.5) fail(`${mode}:${textPath} contrast is ${ratio.toFixed(2)}:1 against color.surface.card; expected at least 4.5:1.`);
+  for (const [textPath, surfacePath, minimum] of CONTRAST_PAIRS) {
+    const ratio = contrast(textPath, surfacePath, tokens, "color.ui.background");
+    if (ratio < minimum) fail(`${mode}:${textPath} contrast is ${ratio.toFixed(2)}:1 against ${surfacePath}; expected at least ${minimum}:1.`);
   }
 }
 

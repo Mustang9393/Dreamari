@@ -41,18 +41,18 @@
         "$description": "Readable compact text placed on amber or yellow warning and reward surfaces."
       },
       "brand": {
-        "$value": "{color.brand.600}",
-        "$description": "Brand-emphasis text."
+        "$value": "{color.day.link}",
+        "$description": "Brand-coloured text and links, AAA in light and AA at the sky's brightest point in dark."
       }
     },
     "surface": {
       "page": {
-        "$value": "{color.aurora.canvas-light}",
-        "$description": "Default light-mode application background."
+        "$value": "{color.day.page}",
+        "$description": "App page background."
       },
       "card": {
         "$value": "{color.white}",
-        "$description": "Primary card surface."
+        "$description": "Default card fill."
       },
       "subtle": {
         "$value": "{color.neutral.50}",
@@ -67,12 +67,12 @@
         "$description": "Career-discovery card body surface in light mode."
       },
       "feature": {
-        "$value": "{color.brand.100}",
-        "$description": "Soft branded feature-panel surface in light mode."
+        "$value": "{color.day.feature}",
+        "$description": "Feature surface in light: pale ice blue (19 Oct 2026)."
       },
       "feature-strong": {
-        "$value": "{color.brand.200}",
-        "$description": "Stronger endpoint for feature-panel gradients in light mode."
+        "$value": "{color.day.feature-strong}",
+        "$description": "Stronger feature surface in light: ice blue (19 Oct 2026)."
       },
       "media-overlay": {
         "$value": "{color.black}",
@@ -104,15 +104,19 @@
     "action": {
       "primary": {
         "$value": "{color.brand.600}",
-        "$description": "Primary interactive action."
+        "$description": "Primary action fill on light surfaces: dusk cobalt, white ink."
       },
       "primary-hover": {
         "$value": "{color.brand.700}",
-        "$description": "Primary action hover state."
+        "$description": "Primary action hover."
       },
       "secondary": {
-        "$value": "{color.brand.300}",
+        "$value": "{color.accent.sky}",
         "$description": "Secondary interactive action."
+      },
+      "primary-foreground": {
+        "$value": "{color.white}",
+        "$description": "Ink on a primary action fill."
       }
     },
     "feedback": {
@@ -191,6 +195,105 @@
       "future-fit": {
         "$value": "{color.green.450}",
         "$description": "Match Future Fit category."
+      }
+    },
+    "ui": {
+      "$description": "The flat theme vocabulary the app paints with (shadcn role names). Each token names its runtime CSS variable; production maps these 1:1 onto its own tokens of the same name.",
+      "background": {
+        "$value": "{color.day.page}",
+        "$description": "Page background. Runtime name --background."
+      },
+      "foreground": {
+        "$value": "{color.day.ink}",
+        "$description": "Body text. Runtime name --foreground."
+      },
+      "card": {
+        "$value": "{color.white}",
+        "$description": "Card fill. Runtime name --card."
+      },
+      "surface": {
+        "$value": "{color.white}",
+        "$description": "Raised surface (sheets, rails). Runtime name --surface."
+      },
+      "muted": {
+        "$value": "{color.day.muted}",
+        "$description": "Muted fill. Runtime name --muted."
+      },
+      "muted-foreground": {
+        "$value": "{color.day.ink-muted}",
+        "$description": "Secondary text. Runtime name --muted-foreground."
+      },
+      "border": {
+        "$value": "{color.day.border}",
+        "$description": "Card and divider border. Runtime name --border."
+      },
+      "primary": {
+        "$value": "{color.brand.600}",
+        "$description": "Primary fill: buttons, selected tabs, progress. Runtime name --primary. Dark is periwinkle with dark ink; light is cobalt with white ink."
+      },
+      "primary-hover": {
+        "$value": "{color.brand.700}",
+        "$description": "Primary fill on hover."
+      },
+      "primary-foreground": {
+        "$value": "{color.white}",
+        "$description": "Text and icons on a primary fill. Runtime name --primary-foreground. Never hard-code white: dark mode needs dark ink."
+      },
+      "secondary": {
+        "$value": "{color.day.secondary}",
+        "$description": "Secondary fill. Runtime name --secondary."
+      },
+      "secondary-foreground": {
+        "$value": "{color.day.secondary-ink}",
+        "$description": "Text on a secondary fill. Runtime name --secondary-foreground."
+      },
+      "accent": {
+        "$value": "{color.brand.600}",
+        "$description": "Accent fill, same as primary. Runtime name --accent."
+      },
+      "accent-subtle": {
+        "$value": "{color.day.link}",
+        "$description": "Text-safe brand blue for links and brand words. Runtime name --accent-subtle."
+      },
+      "destructive": {
+        "$value": "{color.status.danger.ink}",
+        "$description": "Destructive text and icons. Runtime name --destructive."
+      },
+      "glass-surface-1": {
+        "$value": "{color.white}",
+        "$description": "Glass rung 1. Light is solid white (translucent white read grey on the tinted page). Runtime name --glass-surface-1."
+      },
+      "glass-surface-2": {
+        "$value": "{color.white}",
+        "$description": "Glass rung 2. Runtime name --glass-surface-2."
+      },
+      "glass-surface-3": {
+        "$value": "{color.white}",
+        "$description": "Glass rung 3. Runtime name --glass-surface-3."
+      },
+      "glass-border": {
+        "$value": "{color.day.glass-border}",
+        "$description": "Hairline on glass. Runtime name --glass-border."
+      },
+      "inset-surface": {
+        "$value": "{color.day.page}",
+        "$description": "Inset well. Runtime name --inset-surface."
+      },
+      "inset-border": {
+        "$value": "{color.day.inset-border}",
+        "$description": "Inset well border. Runtime name --inset-border."
+      },
+      "scrim-base": {
+        "$value": "{color.day.scrim-deep}",
+        "$description": "Solid end of a photo scrim (the colour text sits on under a photo). Light is frost, dark is the page navy."
+      },
+      "scrim-ink": {
+        "$value": "{color.day.secondary-ink}",
+        "$description": "Title ink on a photo scrim."
+      },
+      "scrim-ink-soft": {
+        "$value": "{color.day.scrim-ink-soft}",
+        "$description": "Secondary ink on a photo scrim."
       }
     }
   },

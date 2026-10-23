@@ -3,7 +3,7 @@
 // DEMO-ONLY: Interactions section, "Interaction models". The physical
 // gestures and keyboard rules the app leans on, once per model -- not
 // repeating what's already live elsewhere in the lab (PosterCard's own
-// hover cue is in Surfaces; HoverBeam, ConfirmShimmer, PlayBurst, Confetti
+// hover cue is in Surfaces; HoverBeam, ConfirmShimmer
 // and every dm-* nudge already have Replay demos in Foundations; Listbox's
 // arrow-key behaviour is in Controls; DetailModal's full state grid is in
 // Overlays). Each Specimen below is either genuinely new ground (the reel's
@@ -13,7 +13,6 @@
 
 import { useState, type CSSProperties } from "react";
 import { SubHead, Specimen, StateGrid, StateCell, Reveal, LiveRoute, NotRendered, MONO, noop } from "../../kit";
-import { SearchTrigger } from "@/components/app/GlobalSearch";
 import { DetailModal } from "@/components/flow-lab/shared";
 import { labCatalog } from "@/components/flow-lab/lab";
 import { RankBody, type Resolve } from "@/components/play/interactions";
@@ -173,17 +172,6 @@ export function ModelsGroup() {
         </p>
       </Specimen>
 
-      <Specimen name="Keyboard: Cmd/Ctrl+K search" file="src/components/app/GlobalSearch.tsx" purpose="Sitewide search: careers, colleges, people, companies and communities in one grouped result list, or a set of doors when nothing's typed yet." when="Not reachable from the app's chrome today — the file's own comment marks it PARKED (3 Sept 2026, 'heavy, busy, misaligned') after a review. The grouped-results model and code are real and working; this is the only place to try it live.">
-        <StateGrid min={280}>
-          <StateCell label="Live (parked)" note="Press Cmd/Ctrl+K, or click the icon. Typing searches real catalog/college/pro data; a result is a real Next.js Link and will navigate this tab away from the lab if clicked." minH={100}>
-            <SearchTrigger />
-          </StateCell>
-        </StateGrid>
-        <p className="max-w-[68ch] text-[12.5px] leading-[18px]" style={MUTED}>
-          Rule, if it ships: Cmd/Ctrl+K opens from anywhere, Escape closes it, and it never competes with a
-          page&apos;s own search field for the shortcut.
-        </p>
-      </Specimen>
     </>
   );
 }

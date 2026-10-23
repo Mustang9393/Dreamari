@@ -12,7 +12,6 @@
 import { useState } from "react";
 import { CareerSeal, EndingBackdrop } from "@/components/play/Celebrations";
 import { INVESTMENT_BANKING, REGISTERED_NURSE } from "@/components/play/games";
-import { IntroSplash } from "@/components/play/IntroSplash";
 import { CardBody, ChoiceBody } from "@/components/play/interactions";
 import { PreGameFlow, type PreGameMode } from "@/components/play/PreGame";
 import { PresentationProvider } from "@/components/play/presentation";
@@ -47,16 +46,6 @@ function Cinematic({ accent, children }: { accent: string; children: React.React
 function useLocalResolve() {
   const [locked, setLocked] = useState<string | null>(null);
   return { locked, onResolve: (_tier: unknown, _why: string, id?: string) => setLocked(id ?? "resolved"), reset: () => setLocked(null) };
-}
-
-function Room({ src, children, height = 300 }: { src: string; children: React.ReactNode; height?: number }) {
-  return (
-    <ClippedStage height={height}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- a lab backdrop, not a page image */}
-      <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      {children}
-    </ClippedStage>
-  );
 }
 
 function Bubbles({ accent, level, id }: { accent: string; level: Level; id: string }) {
@@ -110,17 +99,6 @@ export function CinematicPiecesGroup() {
                 </DialogueBox>
               </div>
             </Cinematic>
-          </StateCell>
-        </StateGrid>
-      </Specimen>
-
-      <Specimen name="IntroSplash" scale="core" file="src/components/play/IntroSplash.tsx" purpose="A character's name set huge behind them on their introduction: a solid deep shade of the career colour with one light tint traced round the word's silhouette (no inner contour lines, no black keyline), and a top-to-bottom fade to transparent. Sized to the name's length." when="Every character introduction on a cinematic level (a 'Name • Role' label or Beat.introduce).">
-        <StateGrid min={340}>
-          <StateCell label="Bright room, long name (IB)" pad={false} minH={260}>
-            <Room src="/images/play/ib/locations/reception.webp" height={260}><IntroSplash name="Christina" accent={GOLD} className="absolute inset-x-0 top-[12%] flex flex-col items-center" /></Room>
-          </StateCell>
-          <StateCell label="Dim room (nursing)" pad={false} minH={260}>
-            <Room src="/images/play/rn/locations/station.jpg" height={260}><IntroSplash name="Rosa" accent={TEAL} className="absolute inset-x-0 top-[12%] flex flex-col items-center" /></Room>
           </StateCell>
         </StateGrid>
       </Specimen>

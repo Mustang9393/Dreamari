@@ -26,7 +26,8 @@ import type { Level } from "./types";
 // names"); screen 18 is its own lines only, with no invented tool or steps
 // ("dont fill in the blanks for the task stuff on the main version"). The
 // team's expanded take (Chandu's screen 3-4 order, the task card and the
-// hands-on torque wrench) is the v2 LAB, amt-level-1-v2.ts.
+// hands-on torque wrench) was the v2 lab, amt-level-1-v2.ts, deleted on
+// 24 Oct 2026 as unrouted (it is in git history).
 //
 // AUTHORED, not in the script (flagged in the handoff): the wrong-answer
 // "why" lines, the inspection hotspot labels, the

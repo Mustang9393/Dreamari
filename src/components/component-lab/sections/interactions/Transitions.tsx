@@ -5,7 +5,7 @@
 // the lab, each with its real duration/easing (read from app.css/globals.css
 // or the component's own className) in MONO, a Replay button, and its
 // reduced-motion behaviour. The named micro-interaction components
-// (SparkBar, ConfirmShimmer, PlayBurst, Confetti, the dm-* nudges,
+// (SparkBar, ConfirmShimmer, the dm-* nudges,
 // BorderBeam/HoverBeam) already have live Replay demos in Feedback and
 // Foundations -- the "Timing reference" specimen below pulls their real
 // numbers into one place instead of re-building duplicate demos.
@@ -151,12 +151,6 @@ export function TransitionsGroup() {
           </StateCell>
           <StateCell label="ConfirmShimmer: sweep" note="Foundations → Motion and decor components → ConfirmShimmer.">
             <DurationTag duration="0.5s" easing="ease-out" />
-          </StateCell>
-          <StateCell label="PlayBurst: flash + particles" note="Foundations → Motion and decor components → PlayBurst.">
-            <DurationTag duration="flash 0.5s · particles 0.65–0.92s" easing="cubic-bezier(0.16, 1, 0.3, 1)" />
-          </StateCell>
-          <StateCell label="Confetti" note="Foundations → Motion and decor components → Confetti. Not a CSS animation -- a real-time canvas physics loop (gravity 0.16, drag 0.985 per 60fps-equivalent step), so there is no single duration: it runs until every particle's life reaches 0.">
-            <DurationTag duration="~2–3s (physics-driven)" easing="n/a — canvas simulation" />
           </StateCell>
           <StateCell label="dm-text-nudge" note="Foundations → Motion and nudge utilities → &quot;Sweeping label&quot;.">
             <DurationTag duration="3s, loops" easing="ease-in-out" delay="0.9s" />

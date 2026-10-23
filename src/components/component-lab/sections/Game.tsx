@@ -15,10 +15,7 @@ import { useContext, type ReactNode } from "react";
 import { LabViewContext, Section, SubHead, type Scale } from "../kit";
 import { BespokePiecesGroup, ProceduralCelebrations } from "./game/BespokePieces";
 import { CinematicPiecesGroup } from "./game/CinematicPieces";
-import { GameThemesGroup } from "./game/GameThemes";
-import { GlossaryLevelsGroup } from "./game/GlossaryLevels";
 import { GlossaryLiveGroup } from "./game/GlossaryLive";
-import { GlossaryScreensGroup } from "./game/GlossaryScreens";
 import { PlayHubCardsGroup } from "./game/PlayHubCards";
 import { PlayInteractionsGroup } from "./game/PlayInteractions";
 import { ScenePiecesGroup } from "./game/ScenePieces";
@@ -59,24 +56,12 @@ export function GameSection() {
         <PlayInteractionsGroup />
       </Group>
 
-      <Group title="Glossary Levels map" has={["core"]}>
-        <GlossaryLevelsGroup />
-      </Group>
-
-      <Group title="Game background versions" has={["core"]}>
-        <GameThemesGroup />
-      </Group>
-
       <Group title="Play hub cards" has={["core"]}>
         <PlayHubCardsGroup />
       </Group>
 
       <Group title="Glossary game, live engine (Drift and Signal)" has={["core"]}>
         <GlossaryLiveGroup />
-      </Group>
-
-      <Group title="Glossary game (retired engine, unrouted)" has={["core"]}>
-        <GlossaryScreensGroup />
       </Group>
 
       <Group title="Simulation player pieces" has={["core"]}>

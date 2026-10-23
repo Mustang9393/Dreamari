@@ -41,18 +41,18 @@
         "$description": "Readable compact text placed on amber or yellow warning and reward surfaces."
       },
       "brand": {
-        "$value": "{color.brand.300}",
-        "$description": "Brand-emphasis text on dark surfaces."
+        "$value": "{color.dusk.link}",
+        "$description": "Brand-coloured text and links, AAA in light and AA at the sky's brightest point in dark."
       }
     },
     "surface": {
       "page": {
-        "$value": "{color.aurora.canvas-dark}",
-        "$description": "Default dark-mode application background."
+        "$value": "{color.dusk.page}",
+        "$description": "App page background."
       },
       "card": {
-        "$value": "{color.neutral.900}",
-        "$description": "Primary dark card foundation beneath implementation opacity and blur."
+        "$value": "{color.dusk.card}",
+        "$description": "Default card fill."
       },
       "subtle": {
         "$value": "{color.neutral.800}",
@@ -68,11 +68,11 @@
       },
       "feature": {
         "$value": "{color.brand.950}",
-        "$description": "Dark branded feature-panel surface."
+        "$description": "Feature surface in dark: the deepest brand blue. (look-v2.css currently paints the pale light-mode fill here in dark too; flagged in the handoff, not copied.)"
       },
       "feature-strong": {
         "$value": "{color.navy.900}",
-        "$description": "Stronger endpoint for dark feature-panel gradients."
+        "$description": "Stronger feature surface in dark. Same note as surface.feature."
       },
       "media-overlay": {
         "$value": "{color.black}",
@@ -103,16 +103,20 @@
     },
     "action": {
       "primary": {
-        "$value": "{color.match.accent}",
-        "$description": "Primary interactive action on dark surfaces."
+        "$value": "{color.dusk.periwinkle}",
+        "$description": "Primary action fill on dark surfaces: periwinkle, dark ink (21 Oct 2026)."
       },
       "primary-hover": {
-        "$value": "{color.brand.400}",
-        "$description": "Primary dark action hover state."
+        "$value": "{color.dusk.periwinkle-hover}",
+        "$description": "Primary action hover."
       },
       "secondary": {
-        "$value": "{color.brand.300}",
+        "$value": "{color.accent.sky}",
         "$description": "Secondary interactive action on dark surfaces."
+      },
+      "primary-foreground": {
+        "$value": "{color.dusk.on-periwinkle}",
+        "$description": "Ink on a primary action fill."
       }
     },
     "feedback": {
@@ -191,6 +195,105 @@
       "future-fit": {
         "$value": "{color.green.450}",
         "$description": "Match Future Fit category."
+      }
+    },
+    "ui": {
+      "$description": "The flat theme vocabulary the app paints with (shadcn role names). Each token names its runtime CSS variable; production maps these 1:1 onto its own tokens of the same name.",
+      "background": {
+        "$value": "{color.dusk.page}",
+        "$description": "Page background. Runtime name --background."
+      },
+      "foreground": {
+        "$value": "{color.dusk.foreground}",
+        "$description": "Body text. Runtime name --foreground."
+      },
+      "card": {
+        "$value": "{color.dusk.card}",
+        "$description": "Card fill. Runtime name --card."
+      },
+      "surface": {
+        "$value": "{color.dusk.surface}",
+        "$description": "Raised surface (sheets, rails). Runtime name --surface."
+      },
+      "muted": {
+        "$value": "{color.dusk.glass-1}",
+        "$description": "Muted fill. Runtime name --muted."
+      },
+      "muted-foreground": {
+        "$value": "{color.dusk.muted-foreground}",
+        "$description": "Secondary text. Runtime name --muted-foreground."
+      },
+      "border": {
+        "$value": "{color.dusk.border}",
+        "$description": "Card and divider border. Runtime name --border."
+      },
+      "primary": {
+        "$value": "{color.dusk.periwinkle}",
+        "$description": "Primary fill: buttons, selected tabs, progress. Runtime name --primary. Dark is periwinkle with dark ink; light is cobalt with white ink."
+      },
+      "primary-hover": {
+        "$value": "{color.dusk.periwinkle-hover}",
+        "$description": "Primary fill on hover."
+      },
+      "primary-foreground": {
+        "$value": "{color.dusk.on-periwinkle}",
+        "$description": "Text and icons on a primary fill. Runtime name --primary-foreground. Never hard-code white: dark mode needs dark ink."
+      },
+      "secondary": {
+        "$value": "{color.dusk.glass-2}",
+        "$description": "Secondary fill. Runtime name --secondary."
+      },
+      "secondary-foreground": {
+        "$value": "{color.dusk.foreground}",
+        "$description": "Text on a secondary fill. Runtime name --secondary-foreground."
+      },
+      "accent": {
+        "$value": "{color.dusk.periwinkle}",
+        "$description": "Accent fill, same as primary. Runtime name --accent."
+      },
+      "accent-subtle": {
+        "$value": "{color.dusk.link}",
+        "$description": "Text-safe brand blue for links and brand words. Runtime name --accent-subtle."
+      },
+      "destructive": {
+        "$value": "{color.status.danger.ink}",
+        "$description": "Destructive text and icons. Runtime name --destructive."
+      },
+      "glass-surface-1": {
+        "$value": "{color.dusk.glass-1}",
+        "$description": "Glass rung 1. Light is solid white (translucent white read grey on the tinted page). Runtime name --glass-surface-1."
+      },
+      "glass-surface-2": {
+        "$value": "{color.dusk.glass-2}",
+        "$description": "Glass rung 2. Runtime name --glass-surface-2."
+      },
+      "glass-surface-3": {
+        "$value": "{color.dusk.glass-3}",
+        "$description": "Glass rung 3. Runtime name --glass-surface-3."
+      },
+      "glass-border": {
+        "$value": "{color.dusk.border}",
+        "$description": "Hairline on glass. Runtime name --glass-border."
+      },
+      "inset-surface": {
+        "$value": "{color.dusk.inset}",
+        "$description": "Inset well. Runtime name --inset-surface."
+      },
+      "inset-border": {
+        "$value": "{color.dusk.inset-border}",
+        "$description": "Inset well border. Runtime name --inset-border."
+      },
+      "scrim-base": {
+        "$value": "{color.dusk.page}",
+        "$description": "Solid end of a photo scrim (the colour text sits on under a photo). Light is frost, dark is the page navy."
+      },
+      "scrim-ink": {
+        "$value": "{color.white}",
+        "$description": "Title ink on a photo scrim."
+      },
+      "scrim-ink-soft": {
+        "$value": "{color.dusk.muted-foreground}",
+        "$description": "Secondary ink on a photo scrim."
       }
     }
   },

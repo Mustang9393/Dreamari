@@ -10,7 +10,7 @@ Master SOP v2.5: `docs/handoff/career-scaling/README.md`. UX/Food mirror the act
 
 Start here. This file tells an engineer, or an AI agent working for one, what is locked, where the truth for each feature lives, and what is demo scaffolding that must not be built.
 
-Last updated: 21 October 2026. Demo build tag: `demo-2026-09-06` on `main`.
+Last updated: 24 October 2026. Demo build tag: `demo-2026-09-06` on `main`.
 
 ## How to use this repo
 
@@ -20,7 +20,7 @@ DEMO-ONLY: `?v=2` on `/play/registered-nurse` opts into the 18 selected full-sce
 
 1. Read this file, then the spec for the feature you are building in `docs/handoff/specs/`. Each spec is short and overwrites itself; it is the current state, not a history.
 2. Copy, numbers and content come from the data files listed below, never from screenshots or older docs.
-3. Design tokens come from the certified Figma export, not from this repo's `design-tokens/` folder. Layout, behaviour and copy come from `src/`. See `docs/DESIGN_SYSTEM_ALIGNMENT.md`.
+3. Design system: start with `docs/handoff/DESIGN_SYSTEM_HANDOFF_2026-10-24.md` (Black & Blue, dark and light; the colour table, rules, component library). Token names come from the certified Figma export and values from `color.ui.*` in this repo's `design-tokens/`; copy values, never import the files. Layout, behaviour and copy come from `src/`. See `docs/DESIGN_SYSTEM_ALIGNMENT.md`. The Classic look is archived and not to be built.
 4. `docs/AI_HANDOFF.md` is a chronological session log kept for archaeology. Do not build from it; where it disagrees with a spec, the spec wins.
 5. Pull a tagged commit, not "whatever is on main". Tags named `demo-YYYY-MM-DD` are demo-ready builds.
 6. Before any layout, scrolling, positioning or icon-only-control work, read `docs/CROSS_BROWSER_GUARDRAILS.md`. Most students are on Windows laptops or Chromebooks, not Mac, and that mismatch has already shipped real bugs no one on a Mac could see. It has a self-check to run before calling UI work done.

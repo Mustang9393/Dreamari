@@ -8,13 +8,14 @@
 // Disclosure/Toggle; Feedback covers counselor/v4/states.tsx and
 // StatusChip/Verdict; Surfaces covers OverviewCard/DonutCard/MetricTile/
 // DrillTile; Charts covers every counselor chart (RankBar, RankedBars,
-// DrillBar, PlanMap's Ring); Overlays covers the resume modals (ResumeModal,
+// DrillBar); Overlays covers the resume modals (ResumeModal,
 // ZoomResumeModal, ExportChecklistModal -- its own built loading is
 // "Preparing..." at src/components/resume/ExportChecklistModal.tsx:68, no
 // built error yet), SidePanel, DetailPane and DocumentDesk.
 
 import { SubHead, Specimen, StateGrid, StateCell, LiveRoute, ProposedLoading, ProposedError, ClippedStage, EDGE, noop, MONO, Inert } from "../../kit";
 
+import { DeltaChip } from "@/components/counselor/v4/ReferenceOverview";
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { TemplateGallery } from "@/components/resume/TemplateGallery";
 import { VersionCard, ScoreBadge } from "@/components/resume/ResumeExperience";
@@ -27,7 +28,6 @@ import { SurfaceStateView } from "@/components/app/SurfaceState";
 import { EmptyView } from "@/components/app/states";
 
 import { MetricRow, InitialsBadge } from "@/components/counselor/v4/overviewShared";
-import { DeltaChip } from "@/components/component-lab/sections/counselorLegacyParts";
 import { HeaderCell } from "@/components/counselor/v4/StudentsRoster";
 import { TopTen } from "@/components/counselor/v4/CareerCollegeInsights";
 import { MetChip } from "@/components/counselor/v4/CounselorImpact";
@@ -205,7 +205,7 @@ export function ResumeCounselorModules() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="DeltaChip" file="src/components/component-lab/sections/counselorLegacyParts.tsx" purpose="A small trend chip: up/down arrow, signed point change, 'vs last month'." when="A DonutCard's trend line on the v2 Overview.">
+      <Specimen name="DeltaChip" file="src/components/counselor/v4/ReferenceOverview.tsx" purpose="A small trend chip: up/down arrow, signed point change, 'vs last month'." when="A DonutCard's trend line on the Counselor Overview.">
         <StateGrid>
           <StateCell label="Up"><DeltaChip pts={6} /></StateCell>
           <StateCell label="Down"><DeltaChip pts={-4} /></StateCell>

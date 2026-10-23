@@ -32,32 +32,154 @@
       "$description": "Absolute black."
     },
     "brand": {
-      "$description": "Dreamari brand-blue palette extracted from the approved UI kit and existing implementation.",
       "100": {
         "$value": {
           "colorSpace": "srgb",
           "components": [
+            0.886275,
             0.933333,
-            0.956863,
-            1
+            0.992157
           ],
-          "hex": "#eef4ff"
+          "hex": "#e2eefd"
         },
-        "$description": "Lightest brand-blue surface."
+        "$description": "Palest brand tint. Hue 213 (Black & Blue, 19 Oct 2026)."
       },
       "200": {
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            0.85098,
-            0.901961,
-            1
+            0.737255,
+            0.847059,
+            0.984314
           ],
-          "hex": "#d9e6ff"
+          "hex": "#bcd8fb"
         },
-        "$description": "Light brand-blue tint."
+        "$description": "Light brand tint for selected fills on light surfaces."
       },
       "300": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.580392,
+            0.760784,
+            0.976471
+          ],
+          "hex": "#94c2f9"
+        },
+        "$description": "Sky-blue glow tone; decorative light, never body text on white."
+      },
+      "400": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.34902,
+            0.627451,
+            0.972549
+          ],
+          "hex": "#59a0f8"
+        },
+        "$description": "Bright sky blue sampled from the Black & Blue references (bloom #599df9)."
+      },
+      "500": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.152941,
+            0.501961,
+            0.92549
+          ],
+          "hex": "#2780ec"
+        },
+        "$description": "Saturated mid blue; gradient stops and bars."
+      },
+      "600": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.184314,
+            0.372549,
+            0.694118
+          ],
+          "hex": "#2f5fb1"
+        },
+        "$description": "Dusk cobalt, the light-mode primary (21 Oct 2026). White text 6.2:1; as text 5.7:1 on the light page."
+      },
+      "700": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.156863,
+            0.309804,
+            0.576471
+          ],
+          "hex": "#284f93"
+        },
+        "$description": "Deep cobalt; light-mode primary hover."
+      },
+      "900": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.043137,
+            0.184314,
+            0.356863
+          ],
+          "hex": "#0b2f5b"
+        },
+        "$description": "Very deep blue; dark atmospheric washes."
+      },
+      "950": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.023529,
+            0.109804,
+            0.215686
+          ],
+          "hex": "#061c37"
+        },
+        "$description": "Darkest brand blue; dark feature surfaces."
+      },
+      "$description": "Dreamari brand-blue ramp, re-hued to 213deg for the Black & Blue look (19 Oct 2026; 600 deepened to dusk cobalt 21 Oct). Every rung that carries text is checked for WCAG AA."
+    },
+    "accent": {
+      "deep": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.156863,
+            0.309804,
+            0.576471
+          ],
+          "hex": "#284f93"
+        },
+        "$description": "Deep accent blue; same as brand.700."
+      },
+      "navy": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.054902,
+            0.258824,
+            0.505882
+          ],
+          "hex": "#0e4281"
+        },
+        "$description": "Navy accent for strong fills."
+      },
+      "purple": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.34902,
+            0.627451,
+            0.972549
+          ],
+          "hex": "#59a0f8"
+        },
+        "$description": "Retired purple slot: since 19 Oct 2026 it resolves to sky blue. Glows, sparks and gradient stops only, never text."
+      },
+      "sky": {
         "$value": {
           "colorSpace": "srgb",
           "components": [
@@ -67,118 +189,7 @@
           ],
           "hex": "#7fa8ff"
         },
-        "$description": "Soft brand-blue accent."
-      },
-      "400": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.290196,
-            0.509804,
-            1
-          ],
-          "hex": "#4a82ff"
-        },
-        "$description": "Bright brand blue."
-      },
-      "500": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.184314,
-            0.419608,
-            0.94902
-          ],
-          "hex": "#2f6bf2"
-        },
-        "$description": "Primary interactive blue."
-      },
-      "600": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.121569,
-            0.372549,
-            0.941176
-          ],
-          "hex": "#1f5ff0"
-        },
-        "$description": "Core Dreamari brand blue and default step accent."
-      },
-      "700": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.078431,
-            0.235294,
-            0.588235
-          ],
-          "hex": "#143c96"
-        },
-        "$description": "Deep brand blue."
-      },
-      "900": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.047059,
-            0.145098,
-            0.376471
-          ],
-          "hex": "#0c2560"
-        },
-        "$description": "Dark brand background."
-      },
-      "950": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.039216,
-            0.117647,
-            0.298039
-          ],
-          "hex": "#0a1e4c"
-        },
-        "$description": "Deepest brand background."
-      }
-    },
-    "accent": {
-      "deep": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.058824,
-            0.298039,
-            0.819608
-          ],
-          "hex": "#0f4cd1"
-        },
-        "$description": "Deep blue landing-page CTA accent."
-      },
-      "navy": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.121569,
-            0.254902,
-            0.560784
-          ],
-          "hex": "#1f418f"
-        },
-        "$description": "Navy role-toggle accent."
-      },
-      "purple": {
-        "$type": "color",
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.490196,
-            0.360784,
-            1.0
-          ],
-          "hex": "#7d5cff"
-        },
-        "$description": "Figma var(--accent)."
+        "$description": "Secondary action blue, kept from the pre-19 Oct ramp: the Glossary Games cloud tint mixes it, and game worlds keep their own palettes."
       }
     },
     "ink": {
@@ -220,7 +231,6 @@
       }
     },
     "neutral": {
-      "$description": "Neutral scale used by text, borders, and surfaces. Untuned Tailwind values are retained exactly to avoid visual regression.",
       "50": {
         "$value": {
           "colorSpace": "srgb",
@@ -352,7 +362,8 @@
           "hex": "#030712"
         },
         "$description": "Near-black application background."
-      }
+      },
+      "$description": "Neutral scale used by text, borders, and surfaces. Untuned Tailwind values are retained exactly to avoid visual regression."
     },
     "amber": {
       "50": {
@@ -525,13 +536,13 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            0.180392,
-            0.45098,
-            0.960784
+            0.184314,
+            0.372549,
+            0.694118
           ],
-          "hex": "#2e73f5"
+          "hex": "#2f5fb1"
         },
-        "$description": "Dark Match interaction accent."
+        "$description": "Match accent, the dusk cobalt."
       },
       "border": {
         "$value": {
@@ -585,13 +596,13 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            0.356863,
-            0.607843,
-            1
+            0.796078,
+            0.878431,
+            0.984314
           ],
-          "hex": "#5b9bff"
+          "hex": "#cbe0fb"
         },
-        "$description": "Dark Match toast action."
+        "$description": "Link colour inside the dark match toast."
       },
       "modal-background": {
         "$value": {
@@ -679,7 +690,7 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
+            1,
             0.270588,
             0.521569
           ],
@@ -691,7 +702,7 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
+            1,
             0.588235,
             0.25098
           ],
@@ -703,7 +714,7 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
+            1,
             0.721569,
             0.121569
           ],
@@ -823,7 +834,7 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            0.0,
+            0,
             0.784314,
             0.862745
           ],
@@ -865,7 +876,7 @@
           "components": [
             0.956863,
             0.968627,
-            1.0
+            1
           ],
           "hex": "#f4f7ff"
         },
@@ -902,9 +913,9 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
-            1.0,
-            1.0
+            1,
+            1,
+            1
           ],
           "alpha": 0.09
         },
@@ -914,65 +925,65 @@
     "glass": {
       "$description": "The Figma design system's glass surface set (Semantic.Dark), verbatim from the live variable pull and the dev handoff package - the canonical translucent panel/chip/border recipe for space-background screens like the build flow.",
       "surface-1": {
-        "$type": "color",
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
-            1.0,
-            1.0
+            0.082353,
+            0.141176,
+            0.235294
           ],
-          "alpha": 0.031
+          "alpha": 0.94,
+          "hex": "#15243c"
         },
-        "$description": "Figma var(--glass-surface-1) #ffffff08 - faintest glass fill (chips at rest)."
+        "$description": "Glass rung 1 in dark: near-opaque navy (19/21 Oct 2026)."
       },
       "surface-2": {
-        "$type": "color",
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
-            1.0,
-            1.0
+            0.117647,
+            0.188235,
+            0.305882
           ],
-          "alpha": 0.09
+          "alpha": 0.95,
+          "hex": "#1e304e"
         },
-        "$description": "Figma var(--glass-surface-2) #ffffff17 - mid glass fill (hover/active chips)."
+        "$description": "Glass rung 2 in dark: near-opaque navy."
       },
       "surface-3": {
-        "$type": "color",
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            0.047059,
             0.062745,
-            0.137255
+            0.109804,
+            0.188235
           ],
-          "alpha": 0.8
+          "alpha": 0.96,
+          "hex": "#101c30"
         },
-        "$description": "Figma var(--glass-surface-3) #0c1023cc - deep glass panel fill (cards)."
+        "$description": "Glass rung 3 in dark: near-opaque navy."
       },
       "surface-raised": {
-        "$type": "color",
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
-            1.0,
-            1.0
+            0.133333,
+            0.207843,
+            0.333333
           ],
-          "alpha": 0.066667
+          "alpha": 0.95,
+          "hex": "#223555"
         },
-        "$description": "Figma var(--glass-raised) #ffffff11 - the white-alpha rung between surface-1 and surface-2. The rest fill for glass tiles that a reader has to be able to FIND: surface-1's #ffffff08 over a night background leaves no perceivable tile edge, which fails WCAG 2.2 non-text contrast (1.4.11) for the option cards in the build flow. Reach for surface-1 only for decorative film that nobody has to locate."
+        "$description": "Raised glass in dark: the lightest near-opaque navy."
       },
       "border": {
         "$type": "color",
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
-            1.0,
-            1.0
+            1,
+            1,
+            1
           ],
           "alpha": 0.09
         },
@@ -983,9 +994,9 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
-            1.0,
-            1.0
+            1,
+            1,
+            1
           ],
           "alpha": 0.160784
         },
@@ -996,9 +1007,9 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
-            1.0,
-            1.0
+            1,
+            1,
+            1
           ],
           "alpha": 0.3
         },
@@ -1040,7 +1051,7 @@
           "components": [
             0.956863,
             0.968627,
-            1.0
+            1
           ],
           "hex": "#f4f7ff"
         },
@@ -1051,9 +1062,9 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
-            1.0,
-            1.0
+            1,
+            1,
+            1
           ],
           "alpha": 0.62
         },
@@ -1063,17 +1074,16 @@
     "decorative": {
       "$description": "Figma decorative accents from the live pull.",
       "pink-glow": {
-        "$type": "color",
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            1.0,
-            0.364706,
-            0.490196
+            0.580392,
+            0.760784,
+            0.976471
           ],
-          "hex": "#ff5d7d"
+          "hex": "#94c2f9"
         },
-        "$description": "Figma var(--decorative-pink-glow) - the pink nebula color."
+        "$description": "Retired pink slot: since 19 Oct 2026 it resolves to pale sky blue. Glows only."
       }
     },
     "status": {
@@ -1121,7 +1131,7 @@
           "$value": {
             "colorSpace": "srgb",
             "components": [
-              1.0,
+              1,
               0.792157,
               0.086275
             ],
@@ -1133,7 +1143,7 @@
           "$value": {
             "colorSpace": "srgb",
             "components": [
-              1.0,
+              1,
               0.772549,
               0.239216
             ],
@@ -1145,7 +1155,7 @@
           "$value": {
             "colorSpace": "srgb",
             "components": [
-              1.0,
+              1,
               0.772549,
               0.239216
             ],
@@ -1160,7 +1170,7 @@
           "$value": {
             "colorSpace": "srgb",
             "components": [
-              1.0,
+              1,
               0.584314,
               0.572549
             ],
@@ -1201,7 +1211,7 @@
             "components": [
               0.439216,
               0.721569,
-              1.0
+              1
             ],
             "hex": "#70b8ff"
           },
@@ -1211,9 +1221,9 @@
           "$value": {
             "colorSpace": "srgb",
             "components": [
-              0.0,
+              0,
               0.564706,
-              1.0
+              1
             ],
             "hex": "#0090ff"
           },
@@ -1223,9 +1233,9 @@
           "$value": {
             "colorSpace": "srgb",
             "components": [
-              0.0,
+              0,
               0.564706,
-              1.0
+              1
             ],
             "hex": "#0090ff",
             "alpha": 0.16
@@ -1233,12 +1243,425 @@
           "$description": "Info tint behind a chip or banner."
         }
       }
+    },
+    "dusk": {
+      "$description": "Dark-mode (Dusk) palette, 21 Oct 2026: a navy sky that brightens toward the horizon, navy surfaces, periwinkle actions with dark ink. Identical in both primitive files; dark semantics point here.",
+      "page": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.07451,
+            0.121569,
+            0.211765
+          ],
+          "hex": "#131f36"
+        },
+        "$description": "Dark page navy (Dusk, 21 Oct 2026). The app background and the landing below the hero."
+      },
+      "card": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.07451,
+            0.129412,
+            0.227451
+          ],
+          "hex": "#13213a"
+        },
+        "$description": "Dark card navy, a step up from the page so cards never read as holes in the sky."
+      },
+      "surface": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.078431,
+            0.137255,
+            0.219608
+          ],
+          "hex": "#142338"
+        },
+        "$description": "Dark raised surface (sheets, rails)."
+      },
+      "glass-1": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.082353,
+            0.141176,
+            0.235294
+          ],
+          "alpha": 0.94,
+          "hex": "#15243c"
+        },
+        "$description": "Dark glass rung 1. Near-opaque so stars never show through behind text (19 Oct 2026)."
+      },
+      "glass-2": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.117647,
+            0.188235,
+            0.305882
+          ],
+          "alpha": 0.95,
+          "hex": "#1e304e"
+        },
+        "$description": "Dark glass rung 2, one step lighter than rung 1."
+      },
+      "glass-3": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.062745,
+            0.109804,
+            0.188235
+          ],
+          "alpha": 0.96,
+          "hex": "#101c30"
+        },
+        "$description": "Dark glass rung 3, the deepest overlay panel."
+      },
+      "glass-raised": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.133333,
+            0.207843,
+            0.333333
+          ],
+          "alpha": 0.95,
+          "hex": "#223555"
+        },
+        "$description": "Dark raised glass, the lightest rung (popovers over cards)."
+      },
+      "inset": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.133333,
+            0.207843,
+            0.333333
+          ],
+          "alpha": 0.94,
+          "hex": "#223555"
+        },
+        "$description": "Dark inset well (inputs, nested rows)."
+      },
+      "border": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.580392,
+            0.760784,
+            0.976471
+          ],
+          "alpha": 0.14,
+          "hex": "#94c2f9"
+        },
+        "$description": "Dark hairline: sky blue at 14%, so edges read as light, not grey."
+      },
+      "inset-border": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1,
+            1,
+            1
+          ],
+          "alpha": 0.14,
+          "hex": "#ffffff"
+        },
+        "$description": "Dark hairline around inset wells."
+      },
+      "foreground": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.956863,
+            0.968627,
+            1
+          ],
+          "hex": "#f4f7ff"
+        },
+        "$description": "Dark-mode body ink, a cool off-white."
+      },
+      "muted-foreground": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1,
+            1,
+            1
+          ],
+          "alpha": 0.82,
+          "hex": "#ffffff"
+        },
+        "$description": "Dark-mode secondary ink: white at 82%, about 5:1 on the brightest part of the sky."
+      },
+      "periwinkle": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.560784,
+            0.701961,
+            0.960784
+          ],
+          "hex": "#8fb3f5"
+        },
+        "$description": "Dark-mode primary (21 Oct 2026): the landing's periwinkle, 8.5:1 on the page. Always carries dark ink, never white (2.2:1)."
+      },
+      "periwinkle-hover": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.639216,
+            0.756863,
+            0.968627
+          ],
+          "hex": "#a3c1f7"
+        },
+        "$description": "Dark-mode primary hover."
+      },
+      "on-periwinkle": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.043137,
+            0.101961,
+            0.2
+          ],
+          "hex": "#0b1a33"
+        },
+        "$description": "Ink on every periwinkle fill, 8.2:1."
+      },
+      "link": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.796078,
+            0.878431,
+            0.984314
+          ],
+          "hex": "#cbe0fb"
+        },
+        "$description": "Dark-mode text-safe brand blue for links and brand text, about 4.9:1 at the sky's brightest point."
+      },
+      "sky-top": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.066667,
+            0.121569,
+            0.211765
+          ],
+          "hex": "#111f36"
+        },
+        "$description": "Sky gradient, top stop (deep navy). The app backdrop runs top to horizon, never radial from above."
+      },
+      "sky-mid": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.117647,
+            0.215686,
+            0.352941
+          ],
+          "hex": "#1e375a"
+        },
+        "$description": "Sky gradient, middle stop."
+      },
+      "sky-horizon": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.290196,
+            0.478431,
+            0.670588
+          ],
+          "hex": "#4a7aab"
+        },
+        "$description": "Sky gradient, brightest stop. Full strength only behind the landing hero; app backdrops cap near #3c608f where text sits."
+      }
+    },
+    "day": {
+      "$description": "Light-mode palette, 19 to 22 Oct 2026: cool white page, solid white cards, navy ink, dusk-cobalt actions, frost photo scrims. Identical in both primitive files; light semantics point here.",
+      "page": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.952941,
+            0.964706,
+            0.976471
+          ],
+          "hex": "#f3f6f9"
+        },
+        "$description": "Light page, a cool white (was lavender #e4eaf8 before 19 Oct 2026)."
+      },
+      "ink": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.062745,
+            0.101961,
+            0.14902
+          ],
+          "hex": "#101a26"
+        },
+        "$description": "Light-mode body ink."
+      },
+      "ink-muted": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.262745,
+            0.298039,
+            0.345098
+          ],
+          "hex": "#434c58"
+        },
+        "$description": "Light-mode secondary ink, AAA: 8.0:1 on white, 7.5:1 on the page (21 Oct 2026)."
+      },
+      "border": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.835294,
+            0.866667,
+            0.905882
+          ],
+          "hex": "#d5dde7"
+        },
+        "$description": "Light-mode card border."
+      },
+      "glass-border": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.062745,
+            0.164706,
+            0.313725
+          ],
+          "alpha": 0.12,
+          "hex": "#102a50"
+        },
+        "$description": "Light-mode hairline: navy at 12%."
+      },
+      "inset-border": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.062745,
+            0.164706,
+            0.313725
+          ],
+          "alpha": 0.1,
+          "hex": "#102a50"
+        },
+        "$description": "Light-mode hairline around inset wells."
+      },
+      "muted": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.113725,
+            0.145098,
+            0.223529
+          ],
+          "alpha": 0.035,
+          "hex": "#1d2539"
+        },
+        "$description": "Light-mode muted fill (quiet chips, hover)."
+      },
+      "secondary": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.113725,
+            0.145098,
+            0.223529
+          ],
+          "alpha": 0.08,
+          "hex": "#1d2539"
+        },
+        "$description": "Light-mode secondary fill."
+      },
+      "secondary-ink": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.113725,
+            0.145098,
+            0.223529
+          ],
+          "hex": "#1d2539"
+        },
+        "$description": "Ink on light secondary fills and on light photo scrims."
+      },
+      "link": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.141176,
+            0.313725,
+            0.560784
+          ],
+          "hex": "#24508f"
+        },
+        "$description": "Light-mode text-safe brand blue, AAA 7:1 on the page (21 Oct 2026). Fills keep brand.600."
+      },
+      "feature": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.917647,
+            0.952941,
+            0.992157
+          ],
+          "hex": "#eaf3fd"
+        },
+        "$description": "Pale ice-blue feature fill."
+      },
+      "feature-strong": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.831373,
+            0.901961,
+            0.984314
+          ],
+          "hex": "#d4e6fb"
+        },
+        "$description": "Stronger ice-blue feature fill."
+      },
+      "scrim-deep": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.956863,
+            0.968627,
+            1
+          ],
+          "hex": "#f4f7ff"
+        },
+        "$description": "Light photo scrim base: frost, not white (22 Oct 2026)."
+      },
+      "scrim-ink-soft": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.184314,
+            0.219608,
+            0.298039
+          ],
+          "hex": "#2f384c"
+        },
+        "$description": "Secondary ink on a light photo scrim."
+      }
     }
   },
   "dimension": {
     "$type": "dimension",
     "spacing": {
-      "$description": "Spacing foundations named by pixel magnitude to avoid coupling token paths to Tailwind numbering.",
       "0": {
         "$value": {
           "value": 0,
@@ -1336,7 +1759,8 @@
           "unit": "px"
         },
         "$description": "Extra-large spacing."
-      }
+      },
+      "$description": "Spacing foundations named by pixel magnitude to avoid coupling token paths to Tailwind numbering."
     },
     "radius": {
       "xs": {

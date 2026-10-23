@@ -27,7 +27,6 @@ const GROUPS: { label: string; from: number; to: number }[] = [
   { label: "Connect", from: 40, to: 51 },
   { label: "Play and glossary", from: 52, to: 55 },
   { label: "App chrome", from: 56, to: 57 },
-  { label: "Counselor", from: 58, to: 62 },
 ];
 
 // The six app-wide gaps the inventory found, and where each is now built.
@@ -61,15 +60,6 @@ function builtLoad(n: number): { node: React.ReactNode; note: string } | undefin
       return { node: <ProposedLoading label="Generating" shape="button" />, note: "Exact real behavior, same button-swap pattern, plus an AI badge on the button. Live: Resume > an experience entry > Generate Lines." };
     case 38:
       return { node: <ProposedLoading label="Preparing" shape="button" />, note: "Exact real label; the download button reads \"Preparing…\" while disabled. Live: Resume > Export > Download .docx." };
-    case 54:
-      return {
-        node: (
-          <div className="flex flex-col items-center gap-[var(--space-2)] text-center">
-            <p className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Checking Your Mastery</p>
-          </div>
-        ),
-        note: "Real screen also shows a mascot illustration and a rotating fact card, omitted here. Live: Play > Glossary Game > finish a lesson.",
-      };
     case 58:
       return { node: <LoadingState />, note: "The real, exported component, rendered live. See it in the app: any /counselor?view=… URL with ?state=loading." };
     default:
@@ -108,8 +98,6 @@ function builtError(n: number): { node: React.ReactNode; note: string } | undefi
 
 function builtEmpty(n: number): { node: React.ReactNode; note: string } | undefined {
   switch (n) {
-    case 7:
-      return { node: <ProposedEmpty tier={5} query="welder" />, note: "Exact real copy from app/GlobalSearch.tsx." };
     case 9:
       return { node: <ProposedEmpty tier={6} />, note: "Exact literal string from career/CareerDetailExperience.tsx, shown per-section for thin, catalog-only careers." };
     case 18:

@@ -13,7 +13,7 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // order a student lives it: Top 3 -> Plan -> Resume -> hire-ready. Copy is
 // deliberately minimal and NEVER promises hiring happens on the platform —
 // the claim is prep: the resume gets out there, ready.
-// Mocks reuse the real product elements (MatchRing, poster title faces, the
+// Mocks reuse the real product elements (poster title faces, the
 // Browse Card scrim, plan copy verbatim from the profile's plan data) rather
 // than redrawn approximations.
 const WORLD_COLOR = "var(--world-building-construction)";

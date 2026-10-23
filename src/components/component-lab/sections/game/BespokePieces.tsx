@@ -23,7 +23,6 @@ import { EndingBackdrop } from "@/components/play/Celebrations";
 import { toCoreBeat } from "@/components/play/coreKit";
 import { AVIATION_MAINTENANCE, INVESTMENT_BANKING, REGISTERED_NURSE } from "@/components/play/games";
 import { AMT_LEVEL_1 } from "@/components/play/amt-level-1";
-import { AMT_LEVEL_1_V2 } from "@/components/play/amt-level-1-v2";
 import { IB_LEVEL_1 as IB_LEVEL_1_LEGACY } from "@/components/play/ib-level-1";
 import { IB_LEVEL_1_V2 } from "@/components/play/ib-level-1-v2";
 import { RN_LEVEL_1_V2 } from "@/components/play/rn-level-1-v2";
@@ -216,12 +215,6 @@ export function BespokePiecesGroup() {
       <Specimen name="InspectBody (photo hotspots)" scale="bespoke" fallback="Find All Red Flags. Each hotspot is a row; the issues are the flagged rows." file="src/components/play/interactions.tsx" purpose="Tap the parts of a photo that deserve a closer look. Needs hand-placed hotspots per photo.">
         <StateGrid min={340}>
           <Pair sim={AVIATION_MAINTENANCE} level={AMT_LEVEL_1} id="AMT-07" label="Inspect" />
-        </StateGrid>
-      </Specimen>
-
-      <Specimen name="TorqueBody (torque wrench)" scale="bespoke" fallback="the Risk Slider: under, at or over the mark." file="src/components/play/TorqueBody.tsx" purpose="Set a click-type torque wrench to the manual's mark and stop at the click. One career's tool.">
-        <StateGrid min={340}>
-          <Pair sim={AVIATION_MAINTENANCE} level={AMT_LEVEL_1_V2} id="AMT-18b" label="Torque" />
         </StateGrid>
       </Specimen>
 

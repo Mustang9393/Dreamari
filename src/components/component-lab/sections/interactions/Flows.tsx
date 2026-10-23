@@ -84,7 +84,7 @@ export function FlowsGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Glossary levels → lesson → mastery" file="src/components/glossary/LevelsMenu.tsx, src/components/glossary/GlossaryGameExperience.tsx" purpose="The vocabulary game's own climb: see the whole path (mostly locked), play the one authored lesson, land on a per-term mastery readout." when="Play hub's Glossary Games shelf, or a simulation's own vocabulary bridge.">
+      <Specimen name="Glossary levels → lesson → mastery" file="src/components/glossary/GlossaryLabExperience.tsx" purpose="The vocabulary game's own climb: see the whole path (mostly locked), play the one authored lesson, land on a per-term mastery readout." when="Play hub's Glossary Games shelf, or a simulation's own vocabulary bridge.">
         <StateGrid min={600}>
           <StateCell label="Steps" minH={90}>
             <StepStrip steps={GLOSSARY_MASTERY} />

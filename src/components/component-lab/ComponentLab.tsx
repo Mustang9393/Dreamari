@@ -291,7 +291,7 @@ function LabPage({ mounted }: { mounted: boolean }) {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <IconTip label="Find a component">
-              <button type="button" aria-label="Find a component" aria-expanded={findOpen} onClick={() => setFindOpen((o) => !o)} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border lg:hidden" style={{ borderColor: "var(--glass-border)", background: findOpen ? "var(--primary)" : "var(--glass-surface-2)", color: findOpen ? "#fff" : undefined }}>
+              <button type="button" aria-label="Find a component" aria-expanded={findOpen} onClick={() => setFindOpen((o) => !o)} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border lg:hidden" style={{ borderColor: "var(--glass-border)", background: findOpen ? "var(--primary)" : "var(--glass-surface-2)", color: findOpen ? "var(--primary-foreground)" : undefined }}>
                 <Search className="h-[16px] w-[16px]" aria-hidden />
               </button>
             </IconTip>
@@ -301,7 +301,7 @@ function LabPage({ mounted }: { mounted: boolean }) {
                 { key: "wide", label: "One per row", Icon: Rows3 },
               ] as const).map(({ key, label, Icon }) => (
                 <IconTip key={key} label={label}>
-                  <button type="button" aria-label={label} aria-pressed={grid === key} onClick={() => setGrid(key)} className="flex size-[30px] cursor-pointer items-center justify-center rounded-full transition-colors" style={grid === key ? { background: "var(--primary)", color: "#fff" } : { color: "var(--muted-foreground)" }}>
+                  <button type="button" aria-label={label} aria-pressed={grid === key} onClick={() => setGrid(key)} className="flex size-[30px] cursor-pointer items-center justify-center rounded-full transition-colors" style={grid === key ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>
                     <Icon className="h-[15px] w-[15px]" aria-hidden />
                   </button>
                 </IconTip>
@@ -309,7 +309,7 @@ function LabPage({ mounted }: { mounted: boolean }) {
             </div>
             <div role="group" aria-label="Component scale" className="hidden rounded-full border p-[3px] sm:flex" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
               {SCALES.map(({ key, label }) => (
-                <button key={key} type="button" aria-pressed={scale === key} onClick={() => setScale(key)} className="flex h-[30px] cursor-pointer items-center rounded-full px-[11px] text-[12.5px] font-semibold whitespace-nowrap transition-colors" style={scale === key ? { background: "var(--primary)", color: "#fff" } : { color: "var(--muted-foreground)" }}>
+                <button key={key} type="button" aria-pressed={scale === key} onClick={() => setScale(key)} className="flex h-[30px] cursor-pointer items-center rounded-full px-[11px] text-[12.5px] font-semibold whitespace-nowrap transition-colors" style={scale === key ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>
                   {label}
                 </button>
               ))}
@@ -343,7 +343,7 @@ function LabPage({ mounted }: { mounted: boolean }) {
               onClick={go(s.id)}
               aria-current={active === s.id ? "true" : undefined}
               className="shrink-0 rounded-full border px-[12px] py-[5px] text-[12.5px] font-semibold whitespace-nowrap transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
-              style={active === s.id ? { borderColor: "var(--primary)", background: "var(--primary)", color: "#fff" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
+              style={active === s.id ? { borderColor: "var(--primary)", background: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
             >
               {s.label}
             </a>

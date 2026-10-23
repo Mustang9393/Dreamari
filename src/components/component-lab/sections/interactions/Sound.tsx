@@ -9,7 +9,7 @@
 // like every other persisted preference in the app.
 
 import { useSyncExternalStore, type CSSProperties } from "react";
-import { SubHead, Specimen, StateGrid, StateCell, MONO } from "../../kit";
+import { SubHead, Specimen, StateGrid, StateCell } from "../../kit";
 import { SoundButton } from "./shared";
 import {
   playSelect,
@@ -72,7 +72,7 @@ export function SoundGroup() {
         the app&apos;s own rule that a sound only ever plays in direct response to something the student just did.
       </p>
 
-      <Specimen name="Play and Glossary sound effects" file="src/components/play/sound.ts, src/components/play/glossaryThemeSound.ts" purpose="Four core sounds (select, correct, wrong, sweep) plus scene/voice cues, shared by every simulation and Glossary game." when="A tile pick, a pair landing or missing, clearing the board, a scene change, a character entering, a typewriter line, or a scored beat's focus moment.">
+      <Specimen name="Play and Glossary sound effects" file="src/components/play/sound.ts" purpose="Four core sounds (select, correct, wrong, sweep) plus scene/voice cues, shared by every simulation and Glossary game." when="A tile pick, a pair landing or missing, clearing the board, a scene change, a character entering, a typewriter line, or a scored beat's focus moment.">
         <StateGrid min={200}>
           <StateCell label="Select"><SoundButton label="playSelect — picking a tile" onPlay={playSelect} /></StateCell>
           <StateCell label="Correct"><SoundButton label="playCorrect — a pair lands" onPlay={playCorrect} /></StateCell>
@@ -89,13 +89,6 @@ export function SoundGroup() {
             <SoundMuteToggle />
           </StateCell>
         </StateGrid>
-        <p className="max-w-[68ch] text-[12.5px] leading-[18px]" style={MUTED_STYLE}>
-          Each background version (v1–v4) re-skins these same four names in{" "}
-          <code style={MONO}>glossaryThemeSound.ts</code>, plus its own full background theme, gated by a{" "}
-          <em>separate</em> Music toggle (<code style={MONO}>dreamari-glossary-music-muted</code>) so muting sound
-          effects never silences the music and vice versa -- a real bug fixed 25 Sept 2026 (see the file&apos;s own
-          comment).
-        </p>
       </Specimen>
 
       <Specimen name="Dream Score milestones and tap feedback" file="src/components/build/sound.ts, src/components/flow/aurora/feedback.ts" purpose="The rising chime when a landmark is reached, the plain count-up tone for an ordinary XP gain, and the tap/CTA bell + haptic used across Build and Match." when="Build's 50% mark and completion, Match filling its picks, a mentorship module or Connect chain finishing, and any tap inside the aurora-driven flows.">

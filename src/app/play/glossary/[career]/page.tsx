@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 // The lab presentation (themes, flipbook, mastery HUD) IS the glossary game
 // now (Chandu, 6 Oct 2026: "push the glossary lab to the main glossary game
 // links ... it doesn't need to live in the hamburger anymore"). The older
-// GlossaryGameExperience stays in the repo, unrouted.
+// GlossaryGameExperience engine was deleted on 24 Oct 2026.
 // One route per career's glossary content. Only careers with a real,
 // authored lesson (glossaryFor) resolve — everything else 404s, since the
 // Career Detail/Home/Play cards that link here already gate on

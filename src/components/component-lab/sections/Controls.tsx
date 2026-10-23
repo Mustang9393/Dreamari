@@ -9,7 +9,7 @@
 
 import { useState } from "react";
 import { Download, Pencil } from "lucide-react";
-import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ProposedError, EDGE, noop } from "../kit";
+import { Section, Specimen, StateGrid, StateCell, ProposedError, EDGE, noop } from "../kit";
 
 import { Button } from "@/components/ui/Button";
 import { MarketingButton } from "@/components/marketing/Button";
@@ -18,11 +18,9 @@ import { DatePicker } from "@/components/app/DatePicker";
 import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
 import { ExploreSectionTabs, BackButton } from "@/components/app/chrome";
 import { AudienceToggle } from "@/components/marketing/AudienceToggle";
-import { Disclosure as MarketingDisclosure } from "@/components/marketing/Disclosure";
 import { Disclosure as CounselorDisclosure, ShowAll } from "@/components/counselor/v4/Disclosure";
 import { Segmented } from "@/components/connect/viz";
 import { TextTabs } from "@/components/app/TextTabs";
-import { ColorThemeSwitch } from "@/components/app/ColorThemeSwitch";
 import { SubTabs } from "@/components/counselor/v4/SubTabs";
 import { ScrollChips, SelectBox } from "@/components/counselor/chips";
 import { Toggle } from "@/components/counselor/v4/Settings";
@@ -32,7 +30,6 @@ import { FollowButton } from "@/components/connect/ProProfile";
 import { SaveButton } from "@/components/colleges/shared";
 import { OptionButton } from "@/components/play/interactions";
 import { Field as ResumeField, TextInput, SelectInput, ToolbarButton } from "@/components/resume/ui";
-import { SearchTrigger } from "@/components/app/GlobalSearch";
 
 const LISTBOX_OPTIONS: ListboxOption[] = [
   { value: "cs", label: "Computer Science" },
@@ -59,15 +56,6 @@ function ForYouBrowseToggleDemo({ nudge = false }: { nudge?: boolean }) {
 function AudienceToggleDemo() {
   const [view, setView] = useState<"student" | "schools">("student");
   return <AudienceToggle view={view} onChange={setView} />;
-}
-
-function MarketingDisclosureDemo({ startOpen }: { startOpen: boolean }) {
-  const [open, setOpen] = useState(startOpen);
-  return (
-    <MarketingDisclosure id="lab-marketing-disclosure" title="What students do" open={open} onToggle={() => setOpen((o) => !o)} size="sm">
-      <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers, save a Top 3, and build a resume around them.</p>
-    </MarketingDisclosure>
-  );
 }
 
 function CounselorDisclosureDemo({ startOpen }: { startOpen: boolean }) {
@@ -213,10 +201,6 @@ function ResumeSelectDemo() {
   );
 }
 
-function GlobalSearchDemo() {
-  return <SearchTrigger />;
-}
-
 function OverflowSegmentedDemo({ count }: { count: number }) {
   const labels = ["About Me", "Saved", "My Plan", "Report", "Resume", "Skills", "Software", "Internships"];
   const [value, setValue] = useState("t0");
@@ -227,19 +211,6 @@ function TextTabsDemo({ caps, soft, many }: { caps?: boolean; soft?: boolean; ma
   const items = (many ? ["Careers", "Schools", "Pay by State", "Outlook", "Programs"] : ["Careers", "Schools", "People"]).map((label) => ({ key: label.toLowerCase().replace(/ /g, "-"), label }));
   const [value, setValue] = useState(items[0].key);
   return <TextTabs items={items} value={value} onChange={setValue} ariaLabel="Saved" layoutId={`lab-text-tabs-${caps === false ? "tc" : ""}${soft ? "soft" : ""}${many ? "many" : ""}`} caps={caps} soft={soft} />;
-}
-
-/** ColorThemeSwitch's face with its own classes, minus the fixed position
- *  and the lg-only display, so each state can be shown at once. */
-function ThemeSwitchFace({ classic }: { classic: boolean }) {
-  return (
-    <span inert className="flex w-fit items-center gap-[7px] rounded-[var(--radius-sm,6px)] px-[6px] py-[3px] text-[10.5px] leading-[14px] font-semibold tracking-[0.06em] uppercase opacity-55" style={{ color: "var(--muted-foreground, rgba(255,255,255,0.62))", fontFamily: "var(--font-body)" }}>
-      Classic
-      <span aria-hidden className="relative h-[14px] w-[24px] flex-none rounded-full" style={{ background: classic ? "var(--primary, #2f6bf2)" : "color-mix(in srgb, var(--foreground, #f4f7ff) 22%, transparent)" }}>
-        <span className="absolute top-[2px] size-[10px] rounded-full bg-white" style={{ left: classic ? 12 : 2 }} />
-      </span>
-    </span>
-  );
 }
 
 export function ControlsSection() {
@@ -319,14 +290,6 @@ export function ControlsSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Disclosure (marketing)" file="src/components/marketing/Disclosure.tsx" purpose="Collapsible FAQ row or sub-section; the heading is the control." when="Marketing FAQs and Schools-page sub-sections.">
-        <StateGrid>
-          <StateCell label="Closed"><MarketingDisclosureDemo startOpen={false} /></StateCell>
-          <StateCell label="Open"><MarketingDisclosureDemo startOpen /></StateCell>
-          <StateCell label="Long title" note="Title wraps; the chevron stays pinned via flex-none."><MarketingDisclosure id="lab-marketing-disclosure-long" title={EDGE.longTitle} open={false} onToggle={noop} size="sm"><p /></MarketingDisclosure></StateCell>
-        </StateGrid>
-      </Specimen>
-
       <Specimen name="Disclosure / ShowAll (counselor v2)" file="src/components/counselor/v4/Disclosure.tsx" purpose="Progressive-disclosure accordion for the counselor dashboard, and the &quot;Show all N&quot; row underneath a truncated list." when="Any counselor v2 card that would otherwise show everything at once.">
         <StateGrid>
           <StateCell label="Section closed"><CounselorDisclosureDemo startOpen={false} /></StateCell>
@@ -394,22 +357,6 @@ export function ControlsSection() {
           <StateCell label="Pending / saving" note="Real pending prop (27 Sept 2026): spinner in the thumb, not clickable while a save is in flight."><Toggle on onChange={noop} pending /></StateCell>
         </StateGrid>
         <p className="text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>File-local in counselor/v4/Settings.tsx; only the <code>export</code> keyword was added so it could render here.</p>
-      </Specimen>
-
-      <Specimen name="ColorThemeSwitch" file="src/components/app/ColorThemeSwitch.tsx, src/components/app/look.ts" purpose="The color theme switch. Black & Blue is the default; the switch turns on Classic. One muted label and a mini track, dimmed until hovered or focused, fixed bottom-left. Chandu, 19 Oct 2026: &quot;lets have black and blue be the default and the switch to be done for classic&quot;, and it &quot;shouldnt be in my face&quot;." when="Mounted once by the root layout on every student page, desktop only (lg and up): on phones and tablets it covered the cards, and ?look=v1 / ?look=v2 still switch there. Not on the Counselor Dashboard, never printed. DEMO-ONLY.">
-        <StateGrid>
-          <StateCell label="Off: Black & Blue (default)" note="The track's face, drawn with the switch's own classes: the real one reads the page's theme, so it can't be forced to one state here.">
-            <ThemeSwitchFace classic={false} />
-          </StateCell>
-          <StateCell label="On: Classic" note="On means Classic, saved as &quot;v1&quot; in localStorage dreamari-look.">
-            <ThemeSwitchFace classic />
-          </StateCell>
-          <StateCell label="Live (desktop only)" note="The real switch, held in this box. Clicking it switches the whole lab's theme, the same as on any page. Hidden below lg." minH={80}>
-            <Reveal label="Show the live switch" closeLabel="Hide" height={72}>
-              <ColorThemeSwitch />
-            </Reveal>
-          </StateCell>
-        </StateGrid>
       </Specimen>
 
       <Specimen name="ChipRow, InterestPicker, Field" file="src/components/flow-lab/shared.tsx" purpose="Multi-select chip group (ChipRow), the Match Lab's worlds picker built on it (InterestPicker), and the labelled section wrapper (Field) they sit inside." when="Match Lab and Build's own multi-pick questions.">
@@ -494,16 +441,6 @@ export function ControlsSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="SearchTrigger / GlobalSearch" file="src/components/app/GlobalSearch.tsx" purpose="The Cmd+K search trigger and the full-screen results overlay it opens." when="Every app header.">
-        <StateGrid min={320}>
-          <StateCell label="Trigger and overlay" note="SearchTrigger's Cmd+K listener and GlobalSearch's scroll lock only run while this Reveal is open, so they never fire for the rest of the lab. Click the icon, then: idle shows the door links and Try suggestions (built), typing a real term shows grouped results, and typing gibberish (e.g. &quot;zzzzz&quot;) shows the built no-results line, all in the same live overlay. Escape or the backdrop closes it (and the scroll lock with it)." minH={180}>
-            <Reveal label="Open search demo" clip={false}>
-              <GlobalSearchDemo />
-            </Reveal>
-          </StateCell>
-        </StateGrid>
-        <NotRendered reason="Rendering SearchTrigger unconditionally at the lab's top level would install a page-wide Cmd+K listener for the whole lab; it is scoped inside the Reveal above instead." />
-      </Specimen>
     </Section>
   );
 }

@@ -6,6 +6,7 @@
 // lines 198-218 for the source table this section renders.
 
 import { useState, type CSSProperties } from "react";
+import { DonutCard } from "@/components/counselor/v4/ReferenceOverview";
 import { Users } from "lucide-react";
 import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedEmpty, ProposedError, LiveRoute, EDGE, noop } from "../kit";
 
@@ -43,13 +44,10 @@ import {
 import { ProfileCard, Panel as ConnectPanel, PanelRow, SignalRow, PeopleToFollow, NewFromFollowing } from "@/components/connect/ProProfile";
 
 import { OverviewCard } from "@/components/counselor/v4/overviewShared";
-import { DonutCard } from "@/components/component-lab/sections/counselorLegacyParts";
 import { MetricTile } from "@/components/connect/viz";
 import { DrillTile } from "@/components/counselor/v4/Drill";
 
 import { GlassCard, ChipGrid, QuestionHeading, StepFooter, InkText, DreamySprite } from "@/components/build/ui";
-import { MatchCard } from "@/components/flow/match/MatchCard";
-import type { MatchCardContent } from "@/components/flow/match/types";
 
 import { CTABlock } from "@/components/marketing/FinalCTAs";
 import { Grad, Panel as IllustrationPanel } from "@/components/marketing/SchoolsIllustrations";
@@ -118,14 +116,6 @@ function ComposerDemo() {
   const [value, setValue] = useState("");
   return <Composer id="lab-composer-demo" value={value} onChange={setValue} onSubmit={noop} submitLabel="Post" placeholder="Write a reply…" />;
 }
-
-const matchCard: MatchCardContent = {
-  key: "classes",
-  label: "AP Computer Science",
-  emoji: "\u{1F4BB}",
-  gradient: ["#0b0d1a", "#2f6bf2"] as const,
-  body: "You lit up talking about building things that other people actually use.",
-};
 
 function ScrollFadeDemo({ start = 0 }: { start?: number }) {
   return (
@@ -208,12 +198,12 @@ export function SurfacesSection() {
       <Specimen name="CardProgressiveBlur, scrims" file="src/components/app/cardChrome.tsx" purpose="The shared photo-card chrome: a progressive backdrop-blur ramp plus scrim gradients, so every full-bleed photo card fades its image the same way." when="Any card whose text sits over a full-bleed photo.">
         <StateGrid>
           <StateCell label="Up (bottom-anchored text)" pad={false} minH={160}>
-            <div className="relative h-[160px] w-full overflow-hidden" style={{ background: "linear-gradient(135deg, #2f6bf2 0%, #7c5cff 60%, #0e0c20 100%)" }}>
+            <div className="relative h-[160px] w-full overflow-hidden" style={{ background: "linear-gradient(135deg, #2f5fb1 0%, #59a0f8 60%, #131f36 100%)" }}>
               <CardProgressiveBlur direction="up" size="60%" />
             </div>
           </StateCell>
           <StateCell label="Left (photo/text split)" pad={false} minH={160}>
-            <div className="relative h-[160px] w-full overflow-hidden" style={{ background: "linear-gradient(135deg, #2f6bf2 0%, #7c5cff 60%, #0e0c20 100%)" }}>
+            <div className="relative h-[160px] w-full overflow-hidden" style={{ background: "linear-gradient(135deg, #2f5fb1 0%, #59a0f8 60%, #131f36 100%)" }}>
               <CardProgressiveBlur direction="left" size="60%" />
             </div>
           </StateCell>
@@ -364,7 +354,7 @@ export function SurfacesSection() {
         </ConnectNav.Provider>
       </Specimen>
 
-      <Specimen name="OverviewCard, DonutCard, MetricTile, DrillTile" file="src/components/counselor/v4/overviewShared.tsx, src/components/component-lab/sections/counselorLegacyParts.tsx, src/components/connect/viz.tsx, src/components/counselor/v4/Drill.tsx" purpose="Counselor Overview's card shells: a plain metric card, a donut breakdown, one metric tile, and a drillable tile with a hover arrow." when="the Counselor Dashboard's role Overview screens.">
+      <Specimen name="OverviewCard, DonutCard, MetricTile, DrillTile" file="src/components/counselor/v4/overviewShared.tsx, src/components/counselor/v4/ReferenceOverview.tsx, src/components/connect/viz.tsx, src/components/counselor/v4/Drill.tsx" purpose="Counselor Overview's card shells: a plain metric card, a donut breakdown, one metric tile, and a drillable tile with a hover arrow." when="the Counselor Dashboard's role Overview screens.">
         <StateGrid>
           <StateCell label="OverviewCard, hero" note="Hero glow.">
             <OverviewCard title="On-track students" hero tint="var(--primary)"><p className="text-[28px] font-extrabold">86%</p></OverviewCard>
@@ -406,13 +396,6 @@ export function SurfacesSection() {
           <StateCell label="GlassCard"><GlassCard><p className="text-[13px]">Step content.</p></GlassCard></StateCell>
           <StateCell label="StepFooter"><StepFooter onBack={noop} onNext={noop} /></StateCell>
           <StateCell label="DreamySprite, image failure" note="Falls back to a sparkle glyph on a tinted disc."><div className="relative h-[52px] w-[52px]"><DreamySprite src={EDGE.brokenImage} alt="" sizes="52px" /></div></StateCell>
-        </StateGrid>
-      </Specimen>
-
-      <Specimen name="MatchCard" file="src/components/flow/match/MatchCard.tsx" purpose="Match's one card shape: an emoji and label over a graphic area, a translucent body box below." when="Match's swipe deck only.">
-        <StateGrid>
-          <StateCell label="Default" pad={false} minH={280}><div style={{ width: 260 }}><MatchCard card={matchCard} /></div></StateCell>
-          <StateCell label="Long body" pad={false} minH={280}><div style={{ width: 260 }}><MatchCard card={{ ...matchCard, body: EDGE.longBody }} /></div></StateCell>
         </StateGrid>
       </Specimen>
 
