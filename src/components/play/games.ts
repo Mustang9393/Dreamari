@@ -80,8 +80,12 @@ export const INVESTMENT_BANKING: Simulation = {
   // characters and the compositions work in both 4:5 and 16:9"). Each thumb
   // is a v2 scene with the lead character in it; the focus was checked at
   // 5:7, 4:5, 1:1, 16:9 and 2.6:1 crops.
-  thumb: "/images/play/ib/v2/christina-thumbsup-glassdoor-sunset.webp",
-  thumbFocus: "30% 18%",
+  // 23 Oct 2026 (Chandu: "use any of these images for a day in the life of
+  // IB thumbnail on PLAY"): Christina welcoming the student in the Cobalt
+  // lobby. Picked over the two-character variant because one lead near
+  // centre survives every crop; her face sits at about 42% 32%.
+  thumb: "/images/play/ib/v2/christina-lobby-welcome.webp",
+  thumbFocus: "42% 32%",
   // The trailer (Trailer tab): plays once before Level 1, skippable, ~20
   // seconds, no choices, no score. REUSE ONLY -- six of seven cards use art
   // that already exists; only the finale's ladder is new. The seven-beat

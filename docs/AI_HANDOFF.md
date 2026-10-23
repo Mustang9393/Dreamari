@@ -1,3 +1,10 @@
+## 2026-10-23: Play tab, Investment Banker tile takes the new lobby scene
+
+**Why (Chandu, 23 Oct 2026):** "Please use any of these images for a day in the life of IB thumbnail on PLAY and push." Two renders were offered: Christina alone in the Cobalt lobby (3:2) and Christina with a colleague (16:9). The single-character one was chosen because the tile is cropped from a 5:7 portrait card to a 2.6:1 banner, and a two-person composition loses one of them in portrait.
+
+- **`play/games.ts`:** `INVESTMENT_BANKING.thumb` is now `/images/play/ib/v2/christina-lobby-welcome.webp`, focus `42% 32%` (her face). The in-game `cover` is untouched, so the backdrop behind the levels does not move. Every surface that reads `simThumb()` (Play hero row, Home, the counselor's Most played) picks it up.
+- **Checked on :3031 (dark):** `/play` at 1440 wide (hero card, 16:9) and at 375 (portrait card): face and gesture in frame on both. No console errors.
+
 ## 2026-10-23 — Anime cast and researched starting-role gates v2.5
 
 Chandu reinforced simple hair, anime face shapes, varied diversity and actual first-level career research. SOP/prompts now require grouped hair across textures, flat anime facial construction, cross-library cast planning and per-person identity locks. Added a sourced starting-role section: IB Intern; new graduate Registered Nurse; researched junior/intern UX; a verified food-science entry route without equating technicians and scientists. Every level requires stage-specific sources, authority limits and a task/source/review-owner contract. Preserves approved gameplay and full-scene-only art. PDF retains all nine approved references and two failure examples. Documentation only; no game scripts or art regenerated.
