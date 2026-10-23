@@ -1,3 +1,13 @@
+## 2026-10-24: Counselor dashboard: the version pick is not remembered; every visit opens v7
+
+File: `src/components/counselor/version.tsx`.
+
+**Why (Chandu, 24 Oct 2026):** asked whether v7 is the default (it has been since 110cd020, 22 Oct), then, on hearing that a browser which once picked v4 from the dock keeps opening v4: "lets not remember".
+
+- The dock pick is no longer written to localStorage, and on load the two keys earlier builds stored (`dreamari:counselor-version`, `dreamari:counselor-version-2`) are removed, so no browser keeps an old pick.
+- `/counselor` opens v7 on every visit. A dock pick or a `?v=4` link holds for that visit: the pick lives in the provider's state and the URL, and the dashboard's own links carry `v=` (checked: V4 picked, Students opened, still V4 at `/counselor?view=students&v=4`; then a fresh `/counselor` opened V7 with nothing stored).
+- Checked on :3041 with a stale stored v4 planted first. This worktree's `node_modules` link now points at `.worktrees/look-v2/node_modules` (same Next 16.2.12): the main checkout's install is missing `@dicebear/lorelei-neutral`, which the counselor v6 avatars import, so `/counselor` did not build from it.
+
 ## 2026-10-23: Play tab: the labelled carousel is v1; the TV rows move to v2
 
 Files: `src/components/play/PlayStage.tsx` (rewritten), `src/components/play/PlayHub.tsx` (version swap, catalogue wiring), `src/app/globals.css` (the rotation bar keyframe).

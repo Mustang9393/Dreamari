@@ -27,12 +27,12 @@ import { syncPageTheme } from "@/components/app/theme";
 // the old Replit-styled build -- so every such check below reads
 // `version === "v1"` / `!== "v1"` rather than naming "v2" specifically.
 //
-// Unlike the AT&T chip (URL-only, rebuilt into every link), this one is
-// remembered in localStorage: the dashboard navigates through dozens of
-// `router.push("/counselor?view=...")` calls and hrefs, and threading
-// `v=2` through all of them would spread demo plumbing across every
-// screen. `?v=2` / `?v=1` in the URL still wins on load so a demo link can
-// land on either build directly.
+// Unlike the AT&T chip (URL-only, rebuilt into every link), the pick lives
+// in this provider's state, which survives the dashboard's in-page
+// `router.push("/counselor?view=...")` navigation, so `v=` is not threaded
+// through every link. It was also kept in localStorage until 24 Oct 2026
+// (see DEFAULT_VERSION below for why it no longer is). `?v=4` etc. in the
+// URL still opens that build directly.
 // v5 (7 Oct 2026, Chandu: "lets add a v5 and start building. First go back
 // to the type and tokens from the student app"): the counselor app rebuilt
 // on the student design system (docs/handoff/counselor-app-plan-2026-10-07.md).
@@ -76,13 +76,13 @@ const V2_ENABLED = false;
 const V1_ENABLED = false;
 // v7 is the default (22 Oct 2026, Chandu: "make v7 the default view on
 // vercel for counselor dashboards"): /counselor with no ?v= opens Joshua's
-// official direction; v4 stays one pill away and at ?v=4. A browser that
-// picked a version from the dock keeps its pick (STORAGE_KEY).
+// official direction; v4 stays one pill away and at ?v=4.
+// Not remembered (24 Oct 2026, Chandu, on a browser that kept opening v4
+// from an earlier dock pick: "lets not remember"): every visit opens v7.
+// A dock pick or a ?v= link holds for that visit only. The keys earlier
+// builds stored are cleared on load so no browser keeps an old pick.
 const DEFAULT_VERSION: CounselorVersion = "v7";
-
-// A new key with the v7 default (22 Oct 2026), so every browser lands on v7
-// until it picks from the dock; the old key's stale v4 picks are left behind.
-const STORAGE_KEY = "dreamari:counselor-version-2";
+const OLD_STORAGE_KEYS = ["dreamari:counselor-version", "dreamari:counselor-version-2"];
 
 // `ready` flips once the real value has been read after mount. Anything
 // that would redirect based on the version (CounselorApp's role-gated view
@@ -99,22 +99,6 @@ export function useCounselorVersion() {
   return useContext(CounselorVersionContext);
 }
 
-function readStored(): CounselorVersion | null {
-  try {
-    const v = window.localStorage.getItem(STORAGE_KEY);
-    if (v === "v4") return "v4";
-    if (v === "v5") return "v5";
-    if (v === "v6") return "v6";
-    if (v === "v7") return "v7";
-    if (v === "v3") return V3_ENABLED ? "v3" : null;
-    if (v === "v1") return V1_ENABLED ? "v1" : null;
-    if (v === "v2") return V2_ENABLED ? "v2" : null;
-    return null;
-  } catch {
-    return null;
-  }
-}
-
 function syncUrl(version: CounselorVersion) {
   const url = new URL(window.location.href);
   if (version === DEFAULT_VERSION) url.searchParams.delete("v");
@@ -123,33 +107,31 @@ function syncUrl(version: CounselorVersion) {
 }
 
 export function CounselorVersionProvider({ children }: { children: React.ReactNode }) {
-  // Server and first client render always say DEFAULT_VERSION
-  // (localStorage/URL are client-only), then the real value is read once
+  // Server and first client render always say DEFAULT_VERSION (the URL is
+  // client-only), then the real value is read once
   // after mount -- same hydration-safe shape CounselorApp uses for its
   // own signed-in gate.
   const [version, setVersionState] = useState<CounselorVersion>(DEFAULT_VERSION);
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    // DEMO-ONLY: a new session starts on v2 as Sarah Chen (counselorAccount.ts);
-    // this runs before the stored version is read below.
+    // DEMO-ONLY: a new session starts as Sarah Chen (counselorAccount.ts).
     ensureDemoSession();
     const param = new URLSearchParams(window.location.search).get("v");
     const fromUrl: CounselorVersion | null = param === "7" ? "v7" : param === "6" ? "v6" : param === "5" ? "v5" : param === "4" ? "v4" : param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? (V2_ENABLED ? "v2" : null) : param === "1" ? (V1_ENABLED ? "v1" : null) : null;
-    const next = fromUrl ?? readStored() ?? DEFAULT_VERSION;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading client-only storage/URL after mount, same justification as CounselorApp's hydrated flag
+    try {
+      for (const key of OLD_STORAGE_KEYS) window.localStorage.removeItem(key);
+    } catch {
+      // storage blocked: nothing was stored either
+    }
+    const next = fromUrl ?? DEFAULT_VERSION;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading the client-only URL after mount, same justification as CounselorApp's hydrated flag
     setVersionState(next);
     setReady(true);
-    // a ?v= link opens that build for this visit only; only the dock's pill
-    // (setVersion) remembers a choice, so a shared v4 link never pins v4
+    // a ?v= link or a dock pick opens that build for this visit only
   }, []);
 
   const setVersion = (v: CounselorVersion) => {
     setVersionState(v);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, v);
-    } catch {
-      // ignore
-    }
     syncUrl(v);
     syncPageTheme();
   };
