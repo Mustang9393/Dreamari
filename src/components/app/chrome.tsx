@@ -164,7 +164,7 @@ export function ExploreSectionTabs({
 
 export function Wordmark({ href = "/" }: { href?: string }) {
   return (
-    <Link href={href} aria-label="Dreamari" className="dm-link flex items-center gap-[var(--space-1)]" style={{ color: "var(--foreground)" }}>
+    <Link href={href} aria-label="Dreamari" className="dm-link flex min-h-[24px] items-center gap-[var(--space-1)]" style={{ color: "var(--foreground)" }}>
       <span
         aria-hidden
         className="h-[12px] w-[21px] flex-none"

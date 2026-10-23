@@ -330,7 +330,7 @@ export function ReelAction({ label, on, busy, ariaLabel, onClick, children }: { 
       </span>
       {/* The label stays white over any photo (the "on" color is the
          icon's job); an accent label disappeared against the image. */}
-      <span className="text-[11px] leading-none font-bold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.9)]">{label}</span>
+      <span className="text-[11px] leading-none font-bold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_0_8px_rgba(0,0,0,0.85),0_0_2px_rgba(0,0,0,1)]">{label}</span>
     </button>
   );
 }

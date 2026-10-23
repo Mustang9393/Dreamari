@@ -787,7 +787,7 @@ function GroupHead({ title, count, action }: { title: string; count?: string; ac
   );
 }
 
-const QUIET_LINK = "dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-[var(--radius-md)] px-[8px] py-[4px] text-[14px] font-bold";
+const QUIET_LINK = "dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-[var(--radius-md)] px-[8px] py-[4px] text-[14px] font-bold inline-flex min-h-[24px] items-center";
 
 // ---------------------------------------------------------------- Career Goal
 

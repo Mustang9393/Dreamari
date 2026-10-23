@@ -522,6 +522,8 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
           <EmptyView tier={5} query={[...(q ? [`"${query.trim()}"`] : []), ...chips.map((c) => c.label)].join(", ")} line="Take off a filter, or widen the distance." cta="Clear filters" onAction={() => { setF(empty()); setQuery(""); }} />
         </section>
       ) : (
+        <>
+        <h2 className="sr-only">Schools</h2>
         <ul className={`grid grid-cols-1 gap-[var(--space-5)] ${n === 1 ? "" : n === 2 ? "sm:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"}`} aria-label="Schools">
           {results.slice(0, shown).map(({ c, fit, miles }) => {
             const prog = f.program && offers(c, f.program) ? programLabel(f.program) : undefined;
@@ -533,6 +535,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
             );
           })}
         </ul>
+        </>
       )}
       {/* 5,716 schools: the list grows in pages instead of drawing every card. */}
       {loaded && n > shown && (

@@ -15,7 +15,8 @@ import { setLookV2, useLookV2 } from "./look";
 // Chandu: "the black and blue/classic is too big and sitting over the
 // design... shouldnt be in my face and so prominent"): a muted label and a
 // mini track, no panel, dimmed until hovered or focused. On = Classic.
-export function ColorThemeSwitch() {
+/** `inline`: rendered inside PreviewSwitches' landmark, which does the fixed positioning */
+export function ColorThemeSwitch({ inline = false }: { inline?: boolean } = {}) {
   const lookV2 = useLookV2();
   const path = usePathname() ?? "";
   if (path === "/counselor" || path.startsWith("/counselor/")) return null;
@@ -31,14 +32,15 @@ export function ColorThemeSwitch() {
       // in the empty bottom-left corner: phones and tablets have no free
       // corner (it sat over the cards), and ?look=v2 / ?look=v1 still switch
       // the theme there.
-      className="marketing-v2 themeable no-print fixed bottom-[12px] left-[12px] z-[45] hidden cursor-pointer items-center gap-[7px] rounded-[var(--radius-sm,6px)] px-[6px] py-[3px] text-[10.5px] leading-[14px] font-semibold tracking-[0.06em] uppercase opacity-55 transition-opacity hover:opacity-100 focus-visible:opacity-100 lg:flex"
+      // 23 Oct 2026 (WCAG audit): the label reads at AA at rest (it was 55%
+      // opacity, 1.5:1 to 2.7:1), the control is 24px tall (2.5.8), and both
+      // preview switches live in one landmark (PreviewSwitches.tsx)
+      className={`${inline ? "" : "marketing-v2 themeable no-print fixed bottom-[12px] left-[12px] z-[45] hidden lg:flex"} min-h-[24px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-sm,6px)] px-[6px] py-[3px] text-[10.5px] leading-[14px] font-semibold tracking-[0.06em] uppercase opacity-80 transition-opacity hover:opacity-100 focus-visible:opacity-100 ${inline ? "flex" : ""}`}
       style={{
         background: "transparent",
         color: "var(--muted-foreground, rgba(255,255,255,0.62))",
         fontFamily: "var(--font-body)",
-        // light mode's tokens.css block gives every .marketing-v2.themeable
-        // min-height: 100% (meant for page roots); this is a small control
-        minHeight: "auto",
+        minHeight: 24,
       }}
     >
       Classic

@@ -77,7 +77,7 @@ export function DeadlineBar({ time, opens }: { time: Timing; opens: string | nul
   return (
     <div className="flex items-center gap-[14px]">
       <span className="flex w-[58px] flex-none flex-col overflow-hidden rounded-[10px] text-center" style={{ boxShadow: "0 8px 20px -10px rgba(0,0,0,0.6)" }}>
-        <span className="py-[3px] text-[10px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ background: tone, color: "#fff" }}>{MONTHS_SHORT[d.getMonth()]}</span>
+        <span className="py-[3px] text-[10px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ background: tone, color: tone === "var(--primary)" ? "var(--primary-foreground)" : "#fff" }}>{MONTHS_SHORT[d.getMonth()]}</span>
         <span className="py-[5px] text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", background: "color-mix(in srgb, var(--foreground) 10%, transparent)", color: "var(--foreground)" }}>{d.getDate()}</span>
       </span>
       <span className="flex min-w-0 flex-col gap-[2px]">

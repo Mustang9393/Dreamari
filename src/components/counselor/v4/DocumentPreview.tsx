@@ -136,14 +136,14 @@ function Sheet({ student: s, eyebrow, title, children }: { student: CounselorStu
     <article data-doc-page className="publication-report-page publication-student-doc" style={{ ...PAPER_VARS, "--publication-ink": style.accent, width: PAGE_W, minHeight: PAGE_H } as React.CSSProperties}>
       <Letterhead />
       <div className="publication-eyebrow">{eyebrow}<span>Grade {s.grade}</span></div>
-      <h1 className="publication-title small">{rest.length ? <>{first} <em>{rest.join(" ")}.</em></> : <em>{first}.</em>}</h1>
+      <h2 className="publication-title small">{rest.length ? <>{first} <em>{rest.join(" ")}.</em></> : <em>{first}.</em>}</h2>
       <div className="publication-byline"><div><strong>{style.school}</strong><span>Class of {2026 + (12 - s.grade)}</span></div><div><strong>{fmtToday()}</strong><span>Generated on Dreamari</span></div></div>
       {children}
       <footer className="publication-folio"><span>{s.name} · Grade {s.grade} · {eyebrow}</span><span>01 / 01</span></footer>
     </article>
   );
 }
-const section = (n: string, title: string) => <h2 className="publication-section"><span>{n}</span>{title}</h2>;
+const section = (n: string, title: string) => <h3 className="publication-section"><span>{n}</span>{title}</h3>;
 
 // ---- One realistic page per milestone type ---------------------------------
 

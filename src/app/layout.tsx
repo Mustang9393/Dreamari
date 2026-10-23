@@ -12,8 +12,7 @@ import { HeadingFallback } from "@/components/app/HeadingFallback";
 import { MotionPrefs } from "@/components/app/MotionPrefs";
 import { ThemeBoot } from "@/components/app/theme";
 import { LightPulse } from "@/components/app/LightPulse";
-import { ColorThemeSwitch } from "@/components/app/ColorThemeSwitch";
-import { WeatherSwitch } from "@/components/app/WeatherSwitch";
+import { PreviewSwitches } from "@/components/app/PreviewSwitches";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import "./globals.css";
 import "./look-v2.css";
@@ -104,9 +103,8 @@ export default function RootLayout({
         <HeadingFallback />
         <ThemeBoot />
         <LightPulse />
-        <ColorThemeSwitch />
-        {/* DEMO-ONLY: the day sky's Storm switch, light only (./WeatherSwitch.tsx) */}
-        <WeatherSwitch />
+        {/* DEMO-ONLY: Classic look and Storm sky switches, one landmark (./PreviewSwitches.tsx) */}
+        <PreviewSwitches />
         <ErrorReporter />
         <ScrollReset />
         <HistoryHost />

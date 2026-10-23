@@ -380,8 +380,8 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
           <button
             type="button"
             onClick={startBuilding}
-            className="dm-solid relative flex cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[12px] text-[14px] font-bold text-white"
-            style={{ background: "var(--primary)" }}
+            className="dm-solid relative flex cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[12px] text-[14px] font-bold"
+            style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             <Plus className="h-4 w-4" aria-hidden /> Create My Resume
           </button>

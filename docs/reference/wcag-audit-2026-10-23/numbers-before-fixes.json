@@ -1,0 +1,191 @@
+{
+ "desktop-dark": {
+  "pages": 33,
+  "axe": [
+   {
+    "id": "aria-required-children",
+    "impact": "critical",
+    "nodes": 1,
+    "routes": 1
+   },
+   {
+    "id": "aria-required-parent",
+    "impact": "critical",
+    "nodes": 1,
+    "routes": 1
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 7,
+    "routes": 6
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "nodes": 34,
+    "routes": 33
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "nodes": 2,
+    "routes": 2
+   }
+  ],
+  "contrast": {
+   "checked": 2717,
+   "aa": 57,
+   "aaaOnly": 74
+  },
+  "targets": {
+   "interactive": 1573,
+   "lt24": 118,
+   "lt44": 973
+  },
+  "focus": {
+   "noRing": 22,
+   "fullyCovered": 9,
+   "offscreen": 12
+  },
+  "reflowBad": 0,
+  "zoomBad": 0,
+  "h1bad": [
+   "/counselor?view=workspace:2"
+  ],
+  "headingSkips": [
+   "/colleges:1",
+   "/counselor?view=analytics:1"
+  ]
+ },
+ "desktop-light": {
+  "pages": 33,
+  "axe": [
+   {
+    "id": "aria-required-children",
+    "impact": "critical",
+    "nodes": 1,
+    "routes": 1
+   },
+   {
+    "id": "aria-required-parent",
+    "impact": "critical",
+    "nodes": 1,
+    "routes": 1
+   },
+   {
+    "id": "color-contrast-enhanced",
+    "impact": "serious",
+    "nodes": 38,
+    "routes": 26
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 10,
+    "routes": 8
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "nodes": 58,
+    "routes": 33
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "nodes": 2,
+    "routes": 2
+   },
+   {
+    "id": "skip-link",
+    "impact": "moderate",
+    "nodes": 1,
+    "routes": 1
+   }
+  ],
+  "contrast": {
+   "checked": 2741,
+   "aa": 72,
+   "aaaOnly": 290
+  },
+  "targets": {
+   "interactive": 1596,
+   "lt24": 141,
+   "lt44": 996
+  },
+  "focus": {
+   "noRing": 22,
+   "fullyCovered": 8,
+   "offscreen": 12
+  },
+  "reflowBad": 0,
+  "zoomBad": 0,
+  "h1bad": [
+   "/counselor?view=workspace:2"
+  ],
+  "headingSkips": [
+   "/colleges:1",
+   "/counselor?view=analytics:1"
+  ]
+ },
+ "phone-dark": {
+  "pages": 33,
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 4,
+    "routes": 4
+   },
+   {
+    "id": "color-contrast-enhanced",
+    "impact": "serious",
+    "nodes": 2,
+    "routes": 1
+   },
+   {
+    "id": "scrollable-region-focusable",
+    "impact": "serious",
+    "nodes": 1,
+    "routes": 1
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "nodes": 60,
+    "routes": 27
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "nodes": 2,
+    "routes": 2
+   }
+  ],
+  "contrast": {
+   "checked": 2301,
+   "aa": 34,
+   "aaaOnly": 53
+  },
+  "targets": {
+   "interactive": 1562,
+   "lt24": 87,
+   "lt44": 813
+  },
+  "focus": {
+   "noRing": 25,
+   "fullyCovered": 7,
+   "offscreen": 16
+  },
+  "reflowBad": 0,
+  "zoomBad": 0,
+  "h1bad": [
+   "/counselor?view=workspace:2"
+  ],
+  "headingSkips": [
+   "/colleges:1",
+   "/counselor?view=analytics:1"
+  ]
+ }
+}

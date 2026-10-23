@@ -133,7 +133,7 @@ function CardHead({ overline, title }: { overline: string; title: string }) {
   return (
     <div className="flex flex-col gap-[4px]">
       <span className={OVERLINE} style={MUTED}>{overline}</span>
-      <h3 className={H3} style={DISPLAY}>{title}</h3>
+      <h2 className={H3} style={DISPLAY}>{title}</h2>
     </div>
   );
 }
@@ -348,7 +348,7 @@ function Marks({ points, label, height = 220 }: { points: Measure[]; label: stri
   const area = `${monotone(pts)} L${pts[pts.length - 1].x.toFixed(1)} ${bottom} L${pts[0].x.toFixed(1)} ${bottom} Z`;
   const words = points.map((p) => `${p.label} ${p.value} percent`).join(", ");
   return (
-    <div ref={ref} className="w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="img" aria-label={`${label}: ${words}`}>
+    <div tabIndex={0} ref={ref} className="w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="img" aria-label={`${label}: ${words}`}>
       {W0 > 0 && (
         <div data-counselor-version="v4" style={{ width: W, height: H, color: "var(--foreground)" }}>
           <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden style={{ display: "block", overflow: "visible" }}>

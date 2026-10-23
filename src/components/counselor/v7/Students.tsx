@@ -151,7 +151,7 @@ function Directory() {
       {list.length ? (
         <div className="flex flex-col gap-[var(--space-3)]">
           <div className={`${CARD} overflow-hidden`} style={CARD_STYLE}>
-            <div role="row" className="hidden items-center gap-[14px] border-b px-[var(--space-5)] py-[10px] text-[12px] font-semibold tracking-[0.08em] uppercase md:flex" style={{ ...MUTED, borderColor: RULE }}>
+            <div className="hidden items-center gap-[14px] border-b px-[var(--space-5)] py-[10px] text-[12px] font-semibold tracking-[0.08em] uppercase md:flex" style={{ ...MUTED, borderColor: RULE }}>
               <span className="w-[36px] flex-none" />
               <span className="w-[220px] flex-none">Name</span>
               <span className="w-[72px] flex-none">Grade</span>
@@ -169,7 +169,7 @@ function Directory() {
           </div>
           <div className="flex items-center justify-between gap-[var(--space-3)] text-[14px]" style={MUTED}>
             <span className="tabular-nums">{Math.min(shown, list.length)} of {list.length} students</span>
-            {list.length > shown && <button type="button" onClick={() => setShown((n) => n + PAGE)} className="dm-link cursor-pointer font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>Show {Math.min(PAGE, list.length - shown)} more</button>}
+            {list.length > shown && <button type="button" onClick={() => setShown((n) => n + PAGE)} className="dm-link inline-flex min-h-[24px] cursor-pointer items-center font-semibold" style={{ color: "var(--pc-link, var(--color-text-brand))" }}>Show {Math.min(PAGE, list.length - shown)} more</button>}
           </div>
         </div>
       ) : (

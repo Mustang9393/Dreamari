@@ -16,7 +16,7 @@ function subscribeLight(cb: () => void) {
 }
 const isLight = () => document.documentElement.classList.contains("look-v2") && document.documentElement.classList.contains("light");
 
-export function WeatherSwitch() {
+export function WeatherSwitch({ inline = false }: { inline?: boolean } = {}) {
   const weather = useWeather();
   const light = useSyncExternalStore(subscribeLight, isLight, () => false);
   const path = usePathname() ?? "";
@@ -29,8 +29,8 @@ export function WeatherSwitch() {
       aria-checked={on}
       aria-label="Storm sky"
       onClick={() => setWeather(on ? "clear" : "storm")}
-      className="marketing-v2 themeable no-print fixed bottom-[12px] left-[104px] z-[45] hidden cursor-pointer items-center gap-[7px] rounded-[var(--radius-sm,6px)] px-[6px] py-[3px] text-[10.5px] leading-[14px] font-semibold tracking-[0.06em] uppercase opacity-55 transition-opacity hover:opacity-100 focus-visible:opacity-100 lg:flex"
-      style={{ background: "transparent", color: "var(--muted-foreground, rgba(255,255,255,0.62))", fontFamily: "var(--font-body)", minHeight: "auto" }}
+      className={`${inline ? "flex" : "marketing-v2 themeable no-print fixed bottom-[12px] left-[104px] z-[45] hidden lg:flex"} min-h-[24px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-sm,6px)] px-[6px] py-[3px] text-[10.5px] leading-[14px] font-semibold tracking-[0.06em] uppercase opacity-80 transition-opacity hover:opacity-100 focus-visible:opacity-100`}
+      style={{ background: "transparent", color: "var(--muted-foreground, rgba(255,255,255,0.62))", fontFamily: "var(--font-body)", minHeight: 24 }}
     >
       Storm
       <span aria-hidden className="relative h-[14px] w-[24px] flex-none rounded-full transition-colors" style={{ background: on ? "var(--primary, #2f6bf2)" : "color-mix(in srgb, var(--foreground, #f4f7ff) 22%, transparent)" }}>

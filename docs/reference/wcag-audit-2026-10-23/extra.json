@@ -1,0 +1,86 @@
+{
+ "motion /": {
+  "cssAnims": 1,
+  "cssNames": [
+   "waapi"
+  ],
+  "jsMoving": 0,
+  "jsEx": []
+ },
+ "motion /home": {
+  "cssAnims": 0,
+  "cssNames": [],
+  "jsMoving": 0,
+  "jsEx": []
+ },
+ "motion /explore": {
+  "cssAnims": 0,
+  "cssNames": [],
+  "jsMoving": 0,
+  "jsEx": []
+ },
+ "motion /play": {
+  "cssAnims": 0,
+  "cssNames": [],
+  "jsMoving": 0,
+  "jsEx": []
+ },
+ "motion /opportunities": {
+  "cssAnims": 0,
+  "cssNames": [],
+  "jsMoving": 0,
+  "jsEx": []
+ },
+ "motion /profile": {
+  "cssAnims": 0,
+  "cssNames": [],
+  "jsMoving": 0,
+  "jsEx": []
+ },
+ "motion /connect": {
+  "cssAnims": 0,
+  "cssNames": [],
+  "jsMoving": 0,
+  "jsEx": []
+ },
+ "motion /counselor?view=overview&v=4": {
+  "cssAnims": 0,
+  "cssNames": [],
+  "jsMoving": 0,
+  "jsEx": []
+ },
+ "motion /play/investment-banking": {
+  "cssAnims": 1,
+  "cssNames": [
+   "waapi"
+  ],
+  "jsMoving": 0,
+  "jsEx": []
+ },
+ "motion /flow": {
+  "cssAnims": 0,
+  "cssNames": [],
+  "jsMoving": 0,
+  "jsEx": []
+ },
+ "forced /home": {
+  "controls": 37,
+  "iconlessNoEdge": 0
+ },
+ "forced /opportunities": {
+  "controls": 161,
+  "iconlessNoEdge": 0
+ },
+ "forced /signup": {
+  "controls": 7,
+  "iconlessNoEdge": 0
+ },
+ "forced /counselor?view=students&v=4": {
+  "controls": 47,
+  "iconlessNoEdge": 0
+ },
+ "forced /play/investment-banking": {
+  "controls": 20,
+  "iconlessNoEdge": 0
+ }
+}

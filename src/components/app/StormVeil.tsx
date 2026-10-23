@@ -13,7 +13,7 @@ export function StormVeil() {
     <div
       aria-hidden
       data-storm-veil
-      className="pointer-events-none absolute inset-0 transition-opacity duration-[1600ms] ease-out"
+      className="pointer-events-none absolute inset-0 transition-opacity duration-[1600ms] ease-out motion-reduce:transition-none"
       style={{ opacity: storm ? 1 : 0, background: "var(--storm-veil)" }}
     />
   );

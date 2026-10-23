@@ -1,0 +1,359 @@
+{
+ "desktop-light": {
+  "/home": {
+   "axe": [
+    {
+     "id": "color-contrast-enhanced",
+     "n": 3
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 3,
+   "aaEx": [
+    [
+     2.47,
+     "See the scholarship"
+    ],
+    [
+     2.86,
+     "SCHOLARSHIP"
+    ],
+    [
+     3.4,
+     "Apply by Nov 11"
+    ]
+   ]
+  },
+  "/colleges": {
+   "axe": [
+    {
+     "id": "color-contrast-enhanced",
+     "n": 3
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [
+    "1188x22 "
+   ],
+   "aaFails": 1,
+   "aaEx": [
+    [
+     1.04,
+     "Likely"
+    ]
+   ]
+  },
+  "/counselor?view=students": {
+   "axe": [
+    {
+     "id": "color-contrast-enhanced",
+     "n": 1
+    },
+    {
+     "id": "region",
+     "n": 1
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 1,
+   "aaEx": [
+    [
+     2.83,
+     "Needs Attention"
+    ]
+   ]
+  },
+  "/counselor?view=analytics": {
+   "axe": [
+    {
+     "id": "color-contrast-enhanced",
+     "n": 1
+    },
+    {
+     "id": "region",
+     "n": 1
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 0,
+   "aaEx": []
+  },
+  "/counselor?view=workspace": {
+   "axe": [
+    {
+     "id": "color-contrast-enhanced",
+     "n": 2
+    },
+    {
+     "id": "region",
+     "n": 1
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 0,
+   "aaEx": []
+  },
+  "/profile?tab=resume": {
+   "axe": [
+    {
+     "id": "color-contrast-enhanced",
+     "n": 3
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 0,
+   "aaEx": []
+  },
+  "/opportunities/horatio-alger-national-scholarship": {
+   "axe": [
+    {
+     "id": "color-contrast-enhanced",
+     "n": 5
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [
+    "88x21 Scholarships",
+    "109x21 All scholarships"
+   ],
+   "aaFails": 0,
+   "aaEx": []
+  },
+  "/explore?tab=foryou": {
+   "axe": [
+    {
+     "id": "color-contrast-enhanced",
+     "n": 4
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 3,
+   "aaEx": [
+    [
+     1.09,
+     "Save"
+    ],
+    [
+     1.11,
+     "Dislike"
+    ],
+    [
+     3.58,
+     "Median salary"
+    ]
+   ]
+  },
+  "/accessibility": {
+   "axe": [
+    {
+     "id": "color-contrast-enhanced",
+     "n": 3
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [
+    "116x21 Back to Dreamari"
+   ],
+   "aaFails": 0,
+   "aaEx": []
+  },
+  "/career/software-engineer": {
+   "axe": [
+    {
+     "id": "color-contrast-enhanced",
+     "n": 4
+    },
+    {
+     "id": "color-contrast",
+     "n": 1
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [
+    "77x22 Explore"
+   ],
+   "aaFails": 4,
+   "aaEx": [
+    [
+     1,
+     "Bachelor's degree"
+    ],
+    [
+     1,
+     "$132,270"
+    ],
+    [
+     1.08,
+     "Not for me"
+    ],
+    [
+     3.26,
+     "Tech & Engineering"
+    ]
+   ]
+  }
+ },
+ "desktop-dark": {
+  "/home": {
+   "axe": [],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 2,
+   "aaEx": [
+    [
+     1.08,
+     "See the program"
+    ],
+    [
+     4.08,
+     "FROM A PARTNER"
+    ]
+   ]
+  },
+  "/colleges": {
+   "axe": [],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [
+    "1188x22 "
+   ],
+   "aaFails": 0,
+   "aaEx": []
+  },
+  "/counselor?view=students": {
+   "axe": [
+    {
+     "id": "region",
+     "n": 1
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 1,
+   "aaEx": [
+    [
+     1.97,
+     "Needs Attention"
+    ]
+   ]
+  },
+  "/counselor?view=analytics": {
+   "axe": [
+    {
+     "id": "region",
+     "n": 1
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 0,
+   "aaEx": []
+  },
+  "/counselor?view=workspace": {
+   "axe": [
+    {
+     "id": "region",
+     "n": 1
+    }
+   ],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 3,
+   "aaEx": [
+    [
+     1.25,
+     "02"
+    ],
+    [
+     1.8,
+     "Postsecondary intent"
+    ],
+    [
+     3.03,
+     "4-Year College"
+    ]
+   ]
+  },
+  "/profile?tab=resume": {
+   "axe": [],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 0,
+   "aaEx": []
+  },
+  "/opportunities/horatio-alger-national-scholarship": {
+   "axe": [],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [
+    "88x21 Scholarships",
+    "109x21 All scholarships"
+   ],
+   "aaFails": 0,
+   "aaEx": []
+  },
+  "/explore?tab=foryou": {
+   "axe": [],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [],
+   "aaFails": 1,
+   "aaEx": [
+    [
+     3.65,
+     "Median salary"
+    ]
+   ]
+  },
+  "/accessibility": {
+   "axe": [],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [
+    "116x21 Back to Dreamari"
+   ],
+   "aaFails": 0,
+   "aaEx": []
+  },
+  "/career/software-engineer": {
+   "axe": [],
+   "h1": 1,
+   "headingSkips": 0,
+   "lt24ex": [
+    "77x22 Explore"
+   ],
+   "aaFails": 2,
+   "aaEx": [
+    [
+     1,
+     "Bachelor's degree"
+    ],
+    [
+     1,
+     "$132,270"
+    ]
+   ]
+  }
+ }
+}
