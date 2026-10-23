@@ -9,7 +9,7 @@ The shared player renders authored Level 1 data through the career route, resolv
 ## Automated checks
 
 - Career structural validator: 411 assertions, no errors, 29 runtime beats, seven scored decisions, six full-scene groups, 28 scene routes plus the ambient final review.
-- Regression suite: 23 passing tests. Includes the existing work-evidence suite and eight aviation-specific tests: exact slot positions and midpoint; teach/practice/apply vocabulary; all 128 success/failure score combinations; cast entrance routing; stage/evidence coverage; music silence for main/promotion/retry/unmute; fixed scoring tiers; full-retry-only ending.
+- Regression suite: 24 passing tests. Includes the existing work-evidence suite and eight aviation-specific tests: exact slot positions and midpoint; teach/practice/apply vocabulary; all 128 success/failure score combinations; cast entrance routing; stage/evidence coverage; music silence for main/promotion/retry/unmute; fixed scoring tiers; full-retry-only ending.
 - TypeScript and scoped ESLint pass. Production build passes with webpack. Turbopack cannot resolve the checkout's linked dependency tree with its current root setting, so the existing supported webpack option was used without changing project configuration.
 - Token check passes: all 508 DTCG tokens and current generated artifacts.
 - Protected IB and RN gameplay source files have no changes in this work.
@@ -26,6 +26,14 @@ In the in-app browser on this Mac:
 5. Correct and incorrect choices lock; feedback explains the reason. Rapid subitems expose Next question and See how you did, then award one overall score. Two-action pick requires two choices; mentor chat requires selection and Send. Ranking worked with accessible Move up/down buttons. These checks used buttons and keyboard, not simulated score injection.
 6. Final architecture inspected at 1366 x 768: image loads, text legible, no horizontal overflow. Phone at 390 x 844: the dedicated portrait painting is selected, mentor face remains clear of HUD/dialogue, readable dialogue and Continue, first-choice button is 330 x 78 CSS pixels, ranking Submit is visible at y=679 with height 48.5 pixels, no horizontal overflow. Enter submits the selected native answer. Browser viewport and normal timer preference restored after testing.
 7. Shared music module regression proves no track is assigned or played for this aviation simulation, including main, promotion, retry and unmute; existing IB music remains functional. No new music asset was created.
+
+## Existing-game v2 integration
+
+User asked: "push this under a v2 toggle in the flight simulator game." The existing aviation route defaults to the original v1; `?v=2` selects Before the Next Flight. Start-screen and HUD buttons expose their selected state with `aria-pressed`. Switching versions remounts the player at the new game's beginning; clicking the active version preserves the current beat. The Play hub has one aviation tile. The previous first-shift review URL remains an alias.
+
+Browser verified on the production build at 1366 x 768 and 390 x 844: v1 default, start-screen v2 selection, new 29-beat script/7-decision HUD, active-version no-op on the second beat, HUD v1 reset to original 5-decision script, phone Enter activation back to v2, v2 retained on reload, dedicated portrait painting and no horizontal overflow. No audio element or track is loaded. Screenshots: `qa/v2-toggle-desktop.png`, `qa/v2-toggle-phone.png`, `qa/v2-toggle-hud.png`.
+
+Revalidated after rebasing on origin/main: 24 regression tests, 411 structural checks, scoped ESLint, tokens, TypeScript and production webpack build pass. Standalone TypeScript first found an obsolete generated `.next/dev/types/validator.ts` referring to main's removed match-lab route; moved that stale generated cache file to `/tmp` and reran successfully. Production build's own TypeScript check also passed. Actual additional browser engines/hardware remain unverified.
 
 ## Repairs made from actual failures
 

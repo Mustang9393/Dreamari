@@ -1,3 +1,9 @@
+## 2026-10-23 — Aviation simulation behind the existing game’s v2 toggle
+
+**Why (Chandu):** “push this under a v2 toggle in the flight simulator game.” The researched first-shift story is now opt-in at `/play/aviation-maintenance-technician?v=2`; original aviation remains v1 and the default. One aviation Play tile; shared start-screen/HUD v1/v2 buttons; different script IDs remount and restart safely on switch. Active-version click preserves position. Previous first-shift link remains a review alias. Replaces the old aviation v2 torque lab. Both versions remain silent per the earlier no-music instruction.
+
+**Validation:** rebased on origin/main, 24 regression tests and 411 structural assertions pass; scoped ESLint, TypeScript, tokens and production webpack build pass. Stale generated dev validator for main’s removed match-lab route was moved out of the build cache before rerunning standalone TypeScript. Browser verified default v1, start/HUD switches, correct decision counts and reset, active-version no-op, reload, phone keyboard activation, portrait artwork and no overflow at 1366x768/390x844. Evidence and limits in `docs/handoff/aviation-first-shift/QA.md`. Original aviation/IB/RN authored gameplay unchanged. Push authorized to `codex/aviation-sop-level-1`; no main merge or public deployment.
+
 ## 2026-10-23 - Aviation Maintenance Technician Level 1, SOP v2.5
 
 **Why:** User asked to use `master-sop (1).pdf` to create a Level 1 aviation maintenance technician simulation with authentic beginner work and vocabulary. Later steering: "dont give it music yet" and "the interior design and the hangar design can look better and more sexy. NO hyper realistic drawings though".

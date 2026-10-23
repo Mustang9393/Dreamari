@@ -1,31 +1,32 @@
-✔ exact v2.5 narrative spine, varied job controls and checkpoint location (1.434584ms)
-✔ vocabulary teaches, practices and applies the same four concepts (0.137542ms)
-✔ all 128 scoring combinations respect pass and midpoint boundaries (0.196917ms)
-✔ no scene leaks an unintroduced cast member and every beat routes (0.13325ms)
-✔ every scored task has primary evidence, prior teaching, reviewer and bounded scope (0.115292ms)
-✔ aviation stays silent for main, promotion, retry and unmute; IB keeps its own song (27.685833ms)
-✔ all authored decision outcomes use the fixed six-point scoring tiers (0.126083ms)
-✔ retry cannot expose the optional two-point repair mode or suggest an unbuilt level (0.058375ms)
-✔ one aviation hub tile, default v1 is unchanged, new game only opts in at v2 (0.411125ms)
-✔ old first-shift review link resolves; other games and unknown versions retain defaults (0.094667ms)
-✔ ux-l1: seven scored decisions, midpoint, first choice and passing score (1.457917ms)
-✔ ux-l1: concise copy and no duplicate instruction (0.29225ms)
-✔ fs-l1: seven scored decisions, midpoint, first choice and passing score (0.440708ms)
-✔ fs-l1: concise copy and no duplicate instruction (0.1435ms)
-✔ approved Nursing gameplay survives image-only updates (51.843792ms)
-✔ supporting graphics validate and render as read-only scene context (17.7045ms)
-✔ supporting artifact contracts reject embedded answer keys and interactive demos (0.070333ms)
-✔ UX visibly distinguishes buried and improved Save without extra controls (1.930583ms)
-✔ critical nursing art follows cast presence and has a sharp portrait composition (0.363916ms)
-✔ completion starts empty and advances regardless of answer reputation (8.342959ms)
-✔ colleagues enter through story events, with work between introductions (1.445083ms)
-✔ each tested concept is learned first, and the rival remains in the story (1.316625ms)
-✔ arrival establishes each building outside before the interior (0.234583ms)
-ℹ tests 23
+✔ exact v2.5 narrative spine, varied job controls and checkpoint location (2.508ms)
+✔ vocabulary teaches, practices and applies the same four concepts (0.164916ms)
+✔ all 128 scoring combinations respect pass and midpoint boundaries (0.192542ms)
+✔ no scene leaks an unintroduced cast member and every beat routes (0.149583ms)
+✔ every scored task has primary evidence, prior teaching, reviewer and bounded scope (0.110375ms)
+✔ aviation stays silent for main, promotion, retry and unmute; IB keeps its own song (33.215125ms)
+✔ all authored decision outcomes use the fixed six-point scoring tiers (0.122583ms)
+✔ retry cannot expose the optional two-point repair mode or suggest an unbuilt level (0.118667ms)
+✔ one aviation hub tile, default v1 is unchanged, new game only opts in at v2 (0.482625ms)
+✔ old first-shift review link resolves; other games and unknown versions retain defaults (0.107334ms)
+✔ ux-l1: seven scored decisions, midpoint, first choice and passing score (1.460209ms)
+✔ ux-l1: concise copy and no duplicate instruction (0.329458ms)
+✔ fs-l1: seven scored decisions, midpoint, first choice and passing score (0.529792ms)
+✔ fs-l1: concise copy and no duplicate instruction (2.427666ms)
+✔ approved Nursing gameplay survives image-only updates (51.907417ms)
+✔ supporting graphics validate and render as read-only scene context (20.427625ms)
+✔ supporting artifact contracts reject embedded answer keys and interactive demos (0.109959ms)
+✔ UX visibly distinguishes buried and improved Save without extra controls (1.729292ms)
+✔ critical nursing art follows cast presence and has a sharp portrait composition (0.29525ms)
+✔ completion starts empty and advances regardless of answer reputation (10.451291ms)
+✔ colleagues enter through story events, with work between introductions (1.39175ms)
+✔ each tested concept is learned first, and the rival remains in the story (0.955917ms)
+✔ arrival establishes each building outside before the interior (0.240334ms)
+✔ career tasks have researched scope and do not duplicate each other (1.249959ms)
+ℹ tests 24
 ℹ suites 0
-ℹ pass 23
+ℹ pass 24
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 643.744125
+ℹ duration_ms 718.841083
