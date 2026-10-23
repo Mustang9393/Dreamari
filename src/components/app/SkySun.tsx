@@ -238,17 +238,26 @@ void main() {
     // the flashes a bit. We have epilepsy and stuff to think about"; WCAG
     // 2.3.1 allows at most three flashes a second and this is one slow one):
     // a 180 ms rise, a long fall, and the lift capped well under full white
+    // one swell per strike (WCAG 2.3.1), its length its own: a quick rise,
+    // then a fall that takes between a third and two thirds of a second
     float sa = uStrike.y;
-    float swellS = smoothstep(0.0, 0.18, sa) * exp(-max(0.0, sa - 0.18) / 0.5);
-    strike = swellS * uStrike.z * 0.6;
-    vec2 sp = vec2(uStrike.x * aspect, 0.8 + 0.06 * sin(uStrike.x * 20.0));
-    float sdist = length(vec2(x, uv.y) - sp);
-    // light inside density: thick parts near the source glow most; thin
-    // parts let it through as a softer haze; it dies with distance
-    float core = exp(-sdist / 0.1);
-    float spread = exp(-sdist / 0.3);
-    glowIn = strike * (core * (0.6 + 1.4 * c) + spread * (0.25 + 0.5 * c) * 0.6);
-    glowIn = min(glowIn, 0.6);
+    float fallT = 0.3 + 0.35 * fract(uStrike.x * 17.0);
+    float swellS = smoothstep(0.0, 0.14, sa) * exp(-max(0.0, sa - 0.14) / fallT);
+    strike = swellS * uStrike.z;
+    // the source sits inside the deck; its light spreads further along the
+    // cloud than across it, and shows only where there is density to light
+    // (23 Oct 2026, Chandu: "shining through the clouds so they light up
+    // not a radial flash in front of the clouds")
+    vec2 sp = vec2(uStrike.x * aspect, 0.82 + 0.05 * sin(uStrike.x * 23.0));
+    vec2 dv = (vec2(x, uv.y) - sp) * vec2(0.55, 1.6);
+    float sdist = length(dv);
+    float core = exp(-sdist / 0.14);
+    float spread = exp(-sdist / 0.4);
+    // the cloud's own structure carries the light: thick parts glow, the
+    // fine detail stays visible in the glow
+    float detail = 0.55 + 0.45 * fbm(vec2(cp.x * 5.0 + 3.0, cp.y * 9.0));
+    glowIn = strike * c * (core * 2.3 + spread * 0.6) * detail;
+    glowIn = min(glowIn, 0.85);
   }
   // clear palette (day), or the night deck
   vec3 cloudDay = mix(vec3(0.975, 0.98, 0.99), light, lit);
@@ -263,7 +272,7 @@ void main() {
   // the lightning's colour: warm-white by day, blue-white at night, kept
   // under full white so the texture survives the flash
   vec3 bolt = mix(vec3(1.0, 0.98, 0.94), vec3(0.80, 0.88, 1.0), uDark);
-  deck = mix(deck, bolt, clamp(glowIn, 0.0, 0.55));
+  deck = mix(deck, bolt, clamp(glowIn, 0.0, 0.85));
   vec3 cloud = mix(cloudDay, deck, uWeather);
   float covDay = cc * (0.9 + 0.4 * through);
   float covStorm = min(1.0, c * (1.05 + 0.25 * glowIn));
@@ -282,8 +291,8 @@ void main() {
     // thin and sparse, under the deck only, gone before the content zone
     float rain = drop * step(0.72, hcol) * smoothstep(0.78, 0.6, uv.y) * smoothstep(0.3, 0.52, uv.y);
     over(P, A, mix(vec3(0.74, 0.79, 0.87), vec3(0.42, 0.48, 0.6), uDark), rain * mix(0.16, 0.07, uDark) * uWeather);
-    over(P, A, bolt, glowIn * (1.0 - c) * 0.1 * uWeather * smoothstep(0.3, 0.6, uv.y));
-    over(P, A, bolt, strike * 0.03 * uWeather);
+    // a breath of the glow in the air just under the lit cloud, nothing on the page
+    over(P, A, bolt, glowIn * 0.12 * uWeather * smoothstep(0.5, 0.7, uv.y));
   }
 
   // ---- motes: white specks rising through the glow near the limb (day)
@@ -561,11 +570,12 @@ export function SkySun({ still = false }: { /** one frame, no motion (the counse
     let weather = readWeather() === "storm" ? 1 : 0;
     let strike: { x: number; t0: number; strength: number } | null = null;
     let nextStrike = 0;
-    const strikeNow = (x?: number, strength = 1) => {
-      // never under reduced motion, and never within 7 s of the last one
+    const strikeNow = (x?: number, strength = 1, follow = false) => {
+      // never under reduced motion; at least a second between strikes, and a
+      // new unprompted one only after the last has faded
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const now = performance.now();
-      if (strike && now - strike.t0 < 7000) return;
+      if (strike && now - strike.t0 < (follow ? 1000 : 2500)) return;
       strike = { x: x ?? 0.15 + Math.random() * 0.7, t0: now, strength };
       L?.play();
     };
@@ -578,7 +588,12 @@ export function SkySun({ still = false }: { /** one frame, no motion (the counse
       weather += (target - weather) * 0.04;
       if (Math.abs(target - weather) < 0.005) weather = target;
       const now = performance.now();
-      if (weather > 0.5 && now > nextStrike) { nextStrike = now + 9000 + Math.random() * 8000; strikeNow(); }
+      if (weather > 0.5 && now > nextStrike) {
+        nextStrike = now + 6000 + Math.random() * 8000;
+        strikeNow(undefined, 0.7 + Math.random() * 0.5);
+        // sometimes a second strike nearby, a beat later (still well under three flashes a second)
+        if (Math.random() < 0.35) window.setTimeout(() => strikeNow(Math.min(0.9, Math.max(0.1, (strike?.x ?? 0.5) + (Math.random() - 0.5) * 0.3)), 0.5 + Math.random() * 0.4, true), 1100 + Math.random() * 600);
+      }
       if (weather <= 0.5) nextStrike = now + 2000;
       const age = strike ? (now - strike.t0) / 1000 : -1;
       if (strike && age > 2.2) strike = null;
