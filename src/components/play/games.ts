@@ -1,3 +1,4 @@
+import { AVIATION_FIRST_SHIFT_LEVEL_1 } from "./aviation-first-shift-level-1";
 import { FOOD_SCIENTIST_LEVEL_1 } from "./food-scientist-level-1";
 import { UX_LEVEL_1 } from "./ux-level-1";
 import { IB_LEVEL_1 } from "./ib-level-1";
@@ -212,6 +213,17 @@ export const FOOD_SCIENTIST: Simulation = {
   upcoming: ["Planned: repeatability study", "Planned: process scale-up", "Planned: product review"],
 };
 
+export const AVIATION_FIRST_SHIFT: Simulation = {
+ id: "aviation-maintenance-technician-first-shift", careerId: "aviation-maintenance-technician-first-shift",
+ title: "Aviation Maintenance Technician · Before the Next Flight", world: "Fixing Machines & Engines",
+ firm: "Gannet Flight Services", cover: AVIATION_FIRST_SHIFT_LEVEL_1.cover!,
+ thumb: "/images/play/aviation-first-shift/sora-v2.png", thumbFocus: "50% 24%", levels: [AVIATION_FIRST_SHIFT_LEVEL_1], upcoming: []
+};
+// Whole-game variants belong behind the existing career tile.
+export const SIMULATION_V2: Record<string, Simulation> = {
+  "aviation-maintenance-technician": AVIATION_FIRST_SHIFT,
+};
+
 export const SIMULATIONS: Simulation[] = [FOOD_SCIENTIST, INVESTMENT_BANKING, REGISTERED_NURSE, AVIATION_MAINTENANCE, UX_DESIGNER];
 
 /** Careers whose simulation is not built yet. Poster art only, no promises
@@ -245,8 +257,10 @@ export function simThumb(sim: Simulation): { src: string; focus: string } {
   return { src: sim.thumb ?? sim.cover, focus: sim.thumbFocus ?? "50% 50%" };
 }
 
-export function simulationFor(id: string): Simulation | undefined {
-  return SIMULATIONS.find((simulation) => simulation.id === id || simulation.careerId === id);
+export function simulationFor(id: string, version?: string): Simulation | undefined {
+  if (version === "2" && SIMULATION_V2[id]) return SIMULATION_V2[id];
+  return SIMULATIONS.find((simulation) => simulation.id === id || simulation.careerId === id)
+    ?? Object.values(SIMULATION_V2).find((simulation) => simulation.id === id);
 }
 
 /** A career's world by slug, checked across every catalogue that carries

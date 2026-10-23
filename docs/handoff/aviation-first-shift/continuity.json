@@ -1,0 +1,73 @@
+{
+  "career": "aviation-maintenance-technician-first-shift",
+  "cast": [
+    {
+      "name": "Sora",
+      "firstAppearance": 3,
+      "followUpSlots": [
+        4,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        16,
+        22,
+        23,
+        27,
+        28
+      ],
+      "roleAndPurpose": "Certificated mechanic; present in person; supervises work and reviews findings",
+      "canonicalIdentity": "Japanese woman, 44; warm-beige skin; dark-brown eyes; short black bob; navy coveralls; teal shirt",
+      "canonicalSoloScene": "/images/play/aviation-first-shift/sora-v2.png",
+      "laterLevelPlan": "Retain this identity and relationship if later levels are separately researched; no later levels built."
+    },
+    {
+      "name": "Caleb",
+      "firstAppearance": 5,
+      "followUpSlots": [
+        18,
+        19,
+        20
+      ],
+      "roleAndPurpose": "Junior peer; wants the next assignment; claims credit; private fact-based resolution",
+      "canonicalIdentity": "Black man, 25; very dark warm-brown skin; amber-brown eyes; grouped short coily black hair; navy coveralls",
+      "canonicalSoloScene": "/images/play/aviation-first-shift/caleb-v2.png",
+      "laterLevelPlan": "Retain this identity and relationship if later levels are separately researched; no later levels built."
+    },
+    {
+      "name": "Elena",
+      "firstAppearance": 12,
+      "followUpSlots": [
+        13,
+        14,
+        15
+      ],
+      "roleAndPurpose": "Maintenance supervisor; reviews part identity and supporting records",
+      "canonicalIdentity": "Latina woman, 59; olive-brown skin; hazel eyes; short silver-gray hair; safety glasses; slate shirt, navy trousers",
+      "canonicalSoloScene": "/images/play/aviation-first-shift/elena-v2.png",
+      "laterLevelPlan": "Retain this identity and relationship if later levels are separately researched; no later levels built."
+    },
+    {
+      "name": "Priya",
+      "firstAppearance": 24,
+      "followUpSlots": [
+        25,
+        26
+      ],
+      "roleAndPurpose": "Incoming junior; needs support with an unfinished-check handoff",
+      "canonicalIdentity": "South Asian woman, 24; deep warm-brown skin; dark-brown eyes; low grouped black bun; navy coveralls, sage shirt",
+      "canonicalSoloScene": "/images/play/aviation-first-shift/priya-v2.png",
+      "laterLevelPlan": "Retain this identity and relationship if later levels are separately researched; no later levels built."
+    }
+  ],
+  "rooms": [
+    {
+      "id": "gannet-hangar",
+      "architecture": "Sculptural barrel-vault blue roof and curved entrance canopy; sweeping steel-blue interior ribs; tall left windows facing a coastal bay and green hills; right walnut-and-glass mezzanine above records alcove; integrated teal storage; matte ivory floor with teal work-zone lines.",
+      "lighting": "Morning from left windows and roof glazing.",
+      "equipment": "Static small white-and-teal twin-engine survey aircraft on chocks; blue tool cart outside propeller arcs; folders at records alcove."
+    }
+  ]
+}

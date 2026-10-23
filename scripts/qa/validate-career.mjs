@@ -17,8 +17,8 @@ function load(file){
  vm.runInThisContext('(function(exports,require,module,__filename,__dirname){'+js+'\n})',{filename:file})(loadedModule.exports,localRequire,loadedModule,file,path.dirname(file));return loadedModule.exports;
 }
 const career=process.argv[2];if(!career)throw Error('Pass a simulation/catalogue ID.');
-const {SIMULATIONS}=load(path.join(root,'src/components/play/games.ts'));
-const sim=SIMULATIONS.find(s=>s.id===career||s.careerId===career);if(!sim)throw Error('Unknown career: '+career);
+const {SIMULATIONS,SIMULATION_V2={},simulationFor}=load(path.join(root,'src/components/play/games.ts'));
+const sim=simulationFor(career);if(!sim)throw Error('Unknown career: '+career);
 const {bespokeIn}=load(path.join(root,'src/components/play/coreKit.ts'));
 const {SKILL_MEANING}=load(path.join(root,'src/components/play/skills.ts'));
 const {WORLD_COLORS}=load(path.join(root,'src/components/app/worlds.ts'));
@@ -33,7 +33,7 @@ const traceFile=process.argv[4]??path.join(root,'docs/handoff/career-scaling/exa
 const trace=fs.existsSync(traceFile)?JSON.parse(fs.readFileSync(traceFile,'utf8')).trace:[];
 const errors=[];let count=0;
 const check=(ok,message)=>{count++;if(!ok)errors.push(message);};
-const allIds=SIMULATIONS.flatMap(s=>s.levels.flatMap(l=>l.beats.map(b=>b.id)));
+const allIds=[...SIMULATIONS,...Object.values(SIMULATION_V2)].flatMap(s=>s.levels.flatMap(l=>l.beats.map(b=>b.id)));
 const scoredKinds=new Set(['choice','match','rapid','chain','slider','flags','rank','pick','bucket']);
 const isScored=b=>scoredKinds.has(b.kind)&&!b.practice;
 const coreKinds=new Set(['card','flips','focus','reveal','check','review',...scoredKinds]);

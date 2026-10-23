@@ -1,0 +1,160 @@
+{
+  "career": "aviation-maintenance-technician-first-shift",
+  "folder": "aviation-first-shift",
+  "spriteStandard": "full-scene",
+  "notes": [
+    "SOP v2.5; one opaque complete scene per image.",
+    "Dedicated portrait companions; no runtime people overlays.",
+    "Approved PDF page 17 supplies drawing reference only.",
+    "User requested a sexier hangar without hyperrealism: sculptural canopy, sweeping blue ribs, warm walnut mezzanine gallery, integrated teal storage, matte illustrated surfaces."
+  ],
+  "locations": {
+    "af-exterior": {
+      "src": "/images/play/aviation-first-shift/exterior-v2.png",
+      "mobileSrc": "/images/play/aviation-first-shift/exterior-phone-v2.png",
+      "alt": "People-free barrel-vault maintenance hangar at a coastal airfield.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": []
+    },
+    "af-interior": {
+      "src": "/images/play/aviation-first-shift/interior-v2.png",
+      "mobileSrc": "/images/play/aviation-first-shift/interior-phone-v2.png",
+      "alt": "People-free hangar with a static white-and-teal survey aircraft and blue tool cart.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": []
+    },
+    "af-sora": {
+      "src": "/images/play/aviation-first-shift/sora-v2.png",
+      "mobileSrc": "/images/play/aviation-first-shift/sora-phone-v2.png",
+      "alt": "Sora, a middle-aged mechanic in navy coveralls, addresses you beside a blue tool cart.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": [
+        "Sora"
+      ]
+    },
+    "af-caleb": {
+      "src": "/images/play/aviation-first-shift/caleb-v2.png",
+      "mobileSrc": "/images/play/aviation-first-shift/caleb-phone-v2.png",
+      "alt": "Caleb, a junior technician in navy coveralls, holds a task folder in the hangar.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": [
+        "Caleb"
+      ]
+    },
+    "af-elena": {
+      "src": "/images/play/aviation-first-shift/elena-v2.png",
+      "mobileSrc": "/images/play/aviation-first-shift/elena-phone-v2.png",
+      "alt": "Elena, an older maintenance supervisor with gray hair and safety glasses, reviews a kit at the records alcove.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": [
+        "Elena"
+      ]
+    },
+    "af-priya": {
+      "src": "/images/play/aviation-first-shift/priya-v2.png",
+      "mobileSrc": "/images/play/aviation-first-shift/priya-phone-v2.png",
+      "alt": "Priya, a junior technician in navy coveralls, asks for help at the records alcove.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "locked": true,
+      "visibleCast": [
+        "Priya"
+      ]
+    }
+  },
+  "cast": {
+    "Sora": {
+      "face": "/images/play/aviation-first-shift/face-sora-v2.webp",
+      "voicePitch": 490
+    },
+    "Caleb": {
+      "face": "/images/play/aviation-first-shift/face-caleb-v2.webp",
+      "voicePitch": 370
+    },
+    "Elena": {
+      "face": "/images/play/aviation-first-shift/face-elena-v2.webp",
+      "voicePitch": 420
+    },
+    "Priya": {
+      "face": "/images/play/aviation-first-shift/face-priya-v2.webp",
+      "voicePitch": 560
+    }
+  },
+  "portraitRatios": {},
+  "beatLocations": {
+    "AF1-01": "af-exterior",
+    "AF1-02": "af-interior",
+    "AF1-03": "af-sora",
+    "AF1-04": "af-sora",
+    "AF1-05": "af-caleb",
+    "AF1-06": "af-sora",
+    "AF1-07": "af-sora",
+    "AF1-08": "af-sora",
+    "AF1-09": "af-sora",
+    "AF1-10": "af-sora",
+    "AF1-11": "af-sora",
+    "AF1-12": "af-elena",
+    "AF1-13": "af-elena",
+    "AF1-14": "af-elena",
+    "AF1-15": "af-elena",
+    "AF1-16": "af-sora",
+    "AF1-17": "af-interior",
+    "AF1-18": "af-caleb",
+    "AF1-19": "af-caleb",
+    "AF1-20": "af-caleb",
+    "AF1-21": "af-interior",
+    "AF1-22": "af-sora",
+    "AF1-23": "af-sora",
+    "AF1-24": "af-priya",
+    "AF1-25": "af-priya",
+    "AF1-26": "af-priya",
+    "AF1-27": "af-sora",
+    "AF1-28": "af-sora"
+  }
+}

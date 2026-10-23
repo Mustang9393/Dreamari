@@ -31,6 +31,7 @@ import { SKILL_MEANING } from "./skills";
 import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
 import type { Level, PreGame, Simulation } from "./types";
 import { ArtVersionToggle } from "./ArtVersionToggle";
+import { SimulationVersionToggle } from "./SimulationVersionToggle";
 import { v2PreGameArtFor, type ArtVersion } from "./ib-v2-scenes";
 
 export type PreGameMode = "start" | "howto" | "lesson" | "handoff";
@@ -69,7 +70,9 @@ export function PreGameFlow({
   onStart,
   artVersion,
   onArtVersion,
+  versionSwitch,
 }: {
+  versionSwitch?: import("./SimulationVersionToggle").SimulationVersionSwitch;
   /** DEMO-ONLY: v1/v2 comparison. The run's scene-art version and its
    *  switch, shown on the start screen when the simulation has a v2 set. */
   artVersion?: ArtVersion;
@@ -237,7 +240,7 @@ export function PreGameFlow({
           )}
           {/* DEMO-ONLY: v1/v2 comparison. Sets the scene art for the run
              (v1 sprites over rooms, v2 Joshua's painted scenes). */}
-          {artVersion && onArtVersion && <ArtVersionToggle includeV2={simulation.id === "registered-nurse"} version={artVersion} onChange={onArtVersion} accent={accent} size="start" />}
+          {versionSwitch ? <SimulationVersionToggle {...versionSwitch} accent={accent} size="start" /> : artVersion && onArtVersion && <ArtVersionToggle includeV2={simulation.id === "registered-nurse"} version={artVersion} onChange={onArtVersion} accent={accent} size="start" />}
         </header>
       )}
       {total > 0 && (

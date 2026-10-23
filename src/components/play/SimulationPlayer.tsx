@@ -72,6 +72,7 @@ import { SKILL_MEANING } from "./skills";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type Ending, type Level, type Mood, type Simulation, type Tier } from "./types";
 import { ConnectInterstitial } from "./ConnectInterstitial";
 import { ArtVersionToggle } from "./ArtVersionToggle";
+import { SimulationVersionToggle, type SimulationVersionSwitch } from "./SimulationVersionToggle";
 import { hasV2Art, v2SceneFor, v2SourcesFor, type ArtVersion, type V2Image } from "./ib-v2-scenes";
 import { LocalBurst } from "@/components/build/ui";
 import { logActivity } from "@/lib/activityEvents";
@@ -102,7 +103,7 @@ const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain",
 /** A beat that moves the score: a scored kind that is not a practice question. */
 const isScored = (b: Beat) => SCORED_KINDS.has(b.kind) && !b.practice;
 
-export function SimulationPlayer({ simulation, level, startAt, artVersion: initialArtVersion = 2 }: { simulation: Simulation; level: Level; startAt?: string; artVersion?: ArtVersion }) {
+export function SimulationPlayer({ simulation, level, startAt, artVersion: initialArtVersion = 2, versionSwitch }: { simulation: Simulation; level: Level; startAt?: string; artVersion?: ArtVersion; versionSwitch?: SimulationVersionSwitch }) {
   const router = useRouter();
   // DEMO-ONLY: v1/v2 comparison (ib-v2-scenes.ts). v2 swaps the scene
   // treatment only -- Joshua's painted scenes, no sprites -- never the run:
@@ -1011,7 +1012,7 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
         onBack={index > 0 ? goBack : undefined}
         onOpenConnect={DEMO_CONNECT_SHORTCUT && nextLevel ? () => setConnectOpen(true) : undefined}
         // DEMO-ONLY: v1/v2 comparison, the in-game switch for the current screen.
-        artToggle={v2Available ? <ArtVersionToggle includeV2={simulation.id === "registered-nurse"} version={artVersion} onChange={setArtVersion} accent={accent} /> : undefined}
+        artToggle={versionSwitch ? <SimulationVersionToggle {...versionSwitch} accent={accent} /> : v2Available ? <ArtVersionToggle includeV2={simulation.id === "registered-nurse"} version={artVersion} onChange={setArtVersion} accent={accent} /> : undefined}
       />
 
       {pip && ownPlan ? (
@@ -1157,6 +1158,7 @@ export function SimulationPlayer({ simulation, level, startAt, artVersion: initi
           inRun={preGameInRun}
           onClose={closePreGame}
           onStart={closePreGame}
+          versionSwitch={versionSwitch}
           // DEMO-ONLY: v1/v2 comparison, the start screen's switch.
           artVersion={v2Available ? artVersion : undefined}
           onArtVersion={v2Available ? setArtVersion : undefined}
