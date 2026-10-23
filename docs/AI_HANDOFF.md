@@ -1,3 +1,26 @@
+## 2026-10-23: Play tab: the labelled carousel is v1; the TV rows move to v2
+
+Files: `src/components/play/PlayStage.tsx` (rewritten), `src/components/play/PlayHub.tsx` (version swap, catalogue wiring), `src/app/globals.css` (the rotation bar keyframe).
+
+**Why (Chandu, 23 Oct 2026):** "the current v2 of the play tab is not up to the mark... It apparently isnt very intuitive and looks a little messy... the background changes and the text changes on the left but the images are without the text so older investors etc find it hard to understand or connect the dots. How can we simplify, make it intuitive but also as cinematic as we can?" The 8 Oct game-select ring named the game in a side panel and left every card bare, so the name and the picture were two objects ~400px apart. Two rejected tries on the way, recorded so nobody rebuilds them: a billboard with a named strip ("no this doesnt work... Also the images and their transitions into the banners are broken"; its crossfade showed the old art and a blank panel for half a second) and game cards with one wide flagship ("they are all valuable so one being highlighted is bad... I did like carousel style but I'm not sure how we can marry the two").
+
+**What it is now (the default at `/play`):**
+- The carousel stays, and every card carries its own words: full-bleed art, then "Day in the Life", the career and its world on a progressive blur at the bottom ("the cards can be wider and full bleed imagery with progressive blur"; "add the day in the life title and trailer chips"). On a laptop the right-hand cards put their words on the right edge, the part the front card never covers.
+- The blur is a pre-blurred copy of the card's picture faded in from the bottom, not a live backdrop-filter: the cards move, and blurring a moving layer is what lagged the Glossary Lab on Chromebooks.
+- Cards away from the front are dimmed by a wash of the page colour, not transparency ("subtly fade the ones not central... not transparency").
+- It turns itself every 6 seconds ("auto rotate them with a pause or mouse hover pause"), with a visible Pause, and holds under the pointer, under keyboard focus, behind the welcome splash, a game page or View all, and in a hidden tab; it never starts under reduced motion (WCAG 2.2.2, 2.3.3). Arrows, swipe, arrow keys, a sideways trackpad scroll or a click on a side card also turn it; a manual turn restarts the count.
+- The arrows and the count sit in one small pill under the carousel with a thin next-turn bar, Pause as quiet text beside it ("keep the arrows where they are actually but more prominent", then "a little too big and cluttered").
+- Only the front card carries Play, Express mode and Watch trailer. Clicking the card grows it into a full-screen game page (art, story, the climb level by level, Play, trailer); the card's own loaded picture fills the box while it grows. Back returns focus to the card. `?focus=<career>` opens that game's page on arrival.
+- "View all 10" opens the whole catalogue: Ready to play and In the works, with a world filter (`Listbox`) for when the list grows ("we still need a view all or something to open a catalogue"). A ready game opens its game page; one in the works opens its career page.
+- Glow cut right down ("the colored glows might be a bit too much"): no halos or coloured shadows; the world colour is a dot, a hairline on the front card and the Play button.
+- On phones, Glossary Games and In the works are compact swipe rows under the carousel, not the full-width card deck ("on mobile the glossary and the other ones seem bigger now than the highlight cards"); v2 keeps the deck.
+- The two coming-soon careers that sat in the old ring (Accountant, Emergency Medicine Doctor) are in In the works, and the Explore bridge closes the page.
+- Fixed in passing: Food Scientist's "Climb to Planned: product review" (`upcoming` entries starting "Planned:" are build notes, never shown as a job).
+
+**v2 (`?v=2` or the chip):** the older TV rows, unchanged ("push to v1 and put the older one in v2"). The 8 Oct ring is gone.
+
+**Validation:** ESLint clean on all three files; `tsc` clean for Play (one unrelated error, `@dicebear/lorelei-neutral` missing from the borrowed node_modules for the counselor v6 avatar). Checked at :3044 (worktree `.worktrees/play-v2-billboard`) at 1440 and 375, dark mode: turning by arrows, keys and side-card clicks; rotation every 6s; hover and Pause hold it (10s with no turn); no turning behind the splash; game page opens and closes with focus back on the card; View all filter and picks; `?v=2` shows the TV rows. **Not checked:** light mode, a real Windows or Chromebook screen, the zoom's middle frames, saved-progress bars (`DEMO_START_FRESH` is on).
+
 ## 2026-10-23: Explore search: category tiles rotate through every career in their world, in unison, with a light-sweep reveal; tiles shorter
 
 Branch `career-detail-declutter` (worktree `.worktrees/career-detail`, :3041). Files: `src/components/app/ExploreExperience.tsx` (`CategoryTiles`, `faceSequence`, `varietyLap`, `useFaceClock`), `src/components/app/app.css` (`.dm-face-*`).

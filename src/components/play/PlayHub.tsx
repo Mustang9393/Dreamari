@@ -97,11 +97,12 @@ export function PlayHub() {
   // hero instead of whatever the student's own Top 3 would otherwise show.
   const params = useSearchParams();
   const focusId = params.get("focus") ?? undefined;
-  // DEMO-ONLY: Play v2 (8 Oct 2026), the desktop "game select" stage in
-  // place of the TV rows, behind ?v=2 or the chip by the title so v1 and v2
-  // can be compared live (the AT&T board's v1/v2.0 pattern). v1 stays the
-  // default until Chandu and Joshua pick.
-  const v2 = params.get("v") === "2";
+  // DEMO-ONLY: the version chip by the title. Since 23 Oct 2026 v1 (the
+  // default) is the labelled carousel (PlayStage) and v2, behind ?v=2, is
+  // the older TV rows, kept so the two can still be compared live (the AT&T
+  // board's v1/v2.0 pattern). Chandu: "push to v1 and put the older one in
+  // v2."
+  const carousel = params.get("v") !== "2";
   const router = useRouter();
   const pickVersion = (next: "v1" | "v2") => {
     const q = new URLSearchParams(params.toString());
@@ -156,9 +157,9 @@ export function PlayHub() {
   // Akil's review: moving targets under a mouse is an anti-pattern); every
   // row rests in its full shape and changes only on a click
   const activeRow = hoveredRow ?? scrollActiveRow;
-  const isActive = (id: string) => v2 || activeRow === id;
+  const isActive = (id: string) => carousel || activeRow === id;
   function rowHoverProps(id: string) {
-    if (v2) return { onMouseEnter: () => {}, onMouseLeave: () => {} };
+    if (carousel) return { onMouseEnter: () => {}, onMouseLeave: () => {} };
     return {
       onMouseEnter: () => setHoveredRow(id),
       // Only clear if this row is still the one that set it -- guards
@@ -167,6 +168,17 @@ export function PlayHub() {
       onMouseLeave: () => setHoveredRow((current) => (current === id ? null : current)),
     };
   }
+
+  const exploreBridge = (
+    <NextStepBanner
+            eyebrow="Looking for another career to play?"
+            text="Explore more careers and find another simulation to play."
+            ctaLabel="Explore"
+            href="/explore"
+            Icon={ChevronRight}
+            storageKey="dreamari:play-explore-bridge-dismissed"
+          />
+  );
 
   return (
     <div
@@ -203,7 +215,7 @@ export function PlayHub() {
           <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
             Play
           </h1>
-          <PlayHubVersionChip version={v2 ? "v2" : "v1"} onChange={pickVersion} />
+          <PlayHubVersionChip version={carousel ? "v1" : "v2"} onChange={pickVersion} />
         </div>
 
         <FeaturedRow
@@ -212,7 +224,8 @@ export function PlayHub() {
           focusId={focusId}
           hintReady={splashSettled}
           active={isActive("simulations")}
-          stage={v2}
+          stage={carousel}
+          stageSoon={[...featuredRowSoon, ...soon]}
           hoverProps={rowHoverProps("simulations")}
         />
 
@@ -229,7 +242,7 @@ export function PlayHub() {
           <HeroShelfRow
             rowId="glossary"
             active={isActive("glossary")}
-            uniform={v2}
+            uniform={carousel}
             hoverProps={rowHoverProps("glossary")}
             label="Glossary Games"
             sub="Learn the language you'll hear in classes, use in job interviews, and need on the job."
@@ -253,23 +266,19 @@ export function PlayHub() {
            interrupting it (direct feedback, 6 Sept 2026). Not a row itself
            (no cards, nothing to focus), so it sits outside the row-focus
            system entirely -- always at rest. */}
-        <NextStepBanner
-          eyebrow="Looking for another career to play?"
-          text="Explore more careers and find another simulation to play."
-          ctaLabel="Explore"
-          href="/explore"
-          Icon={ChevronRight}
-          storageKey="dreamari:play-explore-bridge-dismissed"
-        />
+        {!carousel && exploreBridge}
 
         <HeroShelfRow
           rowId="soon"
           active={isActive("soon")}
-          uniform={v2}
+          uniform={carousel}
           hoverProps={rowHoverProps("soon")}
           label="In the works"
-          items={soon.map((game) => ({ id: game.careerId, title: game.title, cover: game.cover, world: game.world, locked: true }))}
+          items={(carousel ? [...featuredRowSoon, ...soon] : soon).map((game) => ({ id: game.careerId, title: game.title, cover: game.cover, world: game.world, locked: true }))}
         />
+        {/* carousel: the bridge to Explore closes the page, after everything in the
+           works, instead of splitting the rows (23 Oct 2026) */}
+        {carousel && exploreBridge}
       </main>
 
       <MobileNav active="Play" />
@@ -355,7 +364,10 @@ function FeaturedRow({
   active,
   hoverProps,
   stage = false,
+  stageSoon = [],
 }: {
+  /** The carousel (v1): every career in the works, for View all. */
+  stageSoon?: SoonCareer[];
   /** Play v2: the desktop game-select stage replaces the rail from lg up. */
   stage?: boolean;
   simulations: Simulation[];
@@ -403,6 +415,19 @@ function FeaturedRow({
     );
   }
 
+  // The carousel (v1 since 23 Oct 2026), at every width, phones included,
+  // in place of the deck and the rail (PlayStage). Only games you can play
+  // turn in it; everything in the works is in its own row and in View all.
+  if (stage) {
+    return (
+      <section ref={sectionRef} data-row-id="simulations" className="flex flex-col gap-[var(--space-3)]">
+        {trailerSim?.trailer && <TrailerFlow simulation={trailerSim} onDone={() => setTrailerSim(null)} />}
+        <RowTitle label="Career Simulations" sub="Play a day on the job. Your choices shape how it goes." active={active} />
+        <PlayStage simulations={simulations} soon={stageSoon} focusId={focusId} ready={hintReady} onTrailer={(sim) => setTrailerSim(sim)} />
+      </section>
+    );
+  }
+
   return (
     <section ref={sectionRef} data-row-id="simulations" className="flex flex-col gap-[var(--space-3)]" {...hoverProps}>
       {trailerSim?.trailer && <TrailerFlow simulation={trailerSim} onDone={() => setTrailerSim(null)} />}
@@ -433,12 +458,7 @@ function FeaturedRow({
          simply grows into the billboard while the old one shrinks (direct
          feedback -- reordering the row on every click read as a shuffle,
          not a selection). */}
-      {stage && (
-        <div className="hidden lg:block">
-          <PlayStage candidates={candidates} focusId={featured.id} onTrailer={(sim) => setTrailerSim(sim)} />
-        </div>
-      )}
-      <div className={`dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex ${stage ? "lg:hidden" : ""} md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw/var(--vz,1))] lg:px-[calc(calc(50vw/var(--vz,1))-50%)]`}>
+      <div className={`dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw/var(--vz,1))] lg:px-[calc(calc(50vw/var(--vz,1))-50%)]`}>
         {candidates.map((c) => (
           <RowCard
             key={c.id}
@@ -1055,8 +1075,13 @@ function HeroShelfRow({
          the same style for the hero row for the rest"). The front card is
          always the row's current "featured" pick; there is no separate
          compact tier on phones at all. */}
-      <CardDeck items={items} focusId={featured.id} renderCard={(item, front) => <HeroShelfCard item={item} deck front={front} />} />
-      <div className="dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw/var(--vz,1))] lg:px-[calc(calc(50vw/var(--vz,1))-50%)]">
+      {/* Under the carousel (v1 since 23 Oct 2026) these rows stay compact
+         on phones too, a swipe row with the next card cut by the screen
+         edge: the full-width deck made them bigger than the carousel above
+         (Chandu: "on mobile the glossary and the other ones seem bigger now
+         than the highlight cards"). */}
+      {!uniform && <CardDeck items={items} focusId={featured.id} renderCard={(item, front) => <HeroShelfCard item={item} deck front={front} />} />}
+      <div className={`dreamari-card-rail items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 ${uniform ? "-mx-5 flex px-5 sm:mx-0 sm:px-0" : "hidden sm:flex"} md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw/var(--vz,1))] lg:px-[calc(calc(50vw/var(--vz,1))-50%)]`}>
         {items.map((item) => (
           <HeroShelfCard
             key={item.id}
@@ -1177,9 +1202,9 @@ export function HeroShelfCard({ item, large = false, active = false, onSelect, d
 }
 
 
-/** DEMO-ONLY: v1 (the TV rows) or v2 (the game-select stage), a small muted
- *  chip like the AT&T board's, never part of the product UI. The stage is a
- *  desktop design, so the chip only shows from lg up. */
+/** DEMO-ONLY: v1 (the labelled carousel, the default) or v2 (the older TV
+ *  rows), a small muted chip like the AT&T board's, never part of the
+ *  product UI. It only shows from lg up. */
 function PlayHubVersionChip({ version, onChange }: { version: "v1" | "v2"; onChange: (v: "v1" | "v2") => void }) {
   return (
     <div role="tablist" aria-label="Play version" className="hidden flex-none items-center gap-[2px] rounded-[var(--radius-sm)] border p-[2px] lg:flex" style={{ borderColor: "var(--glass-border)" }}>

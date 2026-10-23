@@ -2389,3 +2389,9 @@ video::cue {
   text-transform: none;
   pointer-events: none;
 }
+
+/* Play's carousel: the thin bar under "1 of 5" that fills until the next
+   turn (PlayStage.tsx). Its duration and pause come inline. */
+@keyframes dm-rotate-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.dm-rotate-bar { transform-origin: left center; animation-name: dm-rotate-bar; animation-timing-function: linear; animation-fill-mode: forwards; }
+@media (prefers-reduced-motion: reduce) { .dm-rotate-bar { animation: none; } }
