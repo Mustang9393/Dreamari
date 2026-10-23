@@ -6,10 +6,10 @@
 // career pages not be different... the flows need to follow what we did
 // for the detail pages. The pulses, nudges, etc.", then "NO THE CTAS NEED
 // TO FOLLOW THE FORMAT IN THE DETAIL PAGES"). Moved whole from
-// CareerDetailLab, the live /career page: the loud tier (Play in its
+// CareerDetail, the live /career page: the loud tier (Play in its
 // BorderBeam, Glossary Game), the quiet icon-over-label strip (Save, Top 3,
 // Connect) with its pulse on the next step, and the nudge line. The undo
-// bar and the swap sheet come from the shared LabLayer, as on the page.
+// bar and the swap sheet come from the shared ActionsLayer, as on the page.
 // `surface` follows the header or sheet's theme. Both use the same game
 // row and unboxed utility toolbar, including their nudge and state styling.
 // All handlers, saved/Top 3 state, undo/swap and nudges remain shared.
@@ -22,8 +22,8 @@ import { AskProAction, Top3RankAction } from "@/components/app/actionIcons";
 import { PROS } from "@/components/connect/data";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
-import { toggleSave, toggleTop3, useLab } from "./labStore";
-import { NextStep } from "./labUi";
+import { toggleSave, toggleTop3, useCareerActions } from "@/components/app/careerActionsStore";
+import { NextStep } from "@/components/app/careerActions";
 import { WORLD_COLORS } from "@/components/app/worlds";
 
 const DARK_INK = new Set(["Business & Finance", "Health & Medicine", "Building & Construction", "Food & Cooking", "Farming, Animals & Nature", "Science & Research"]);
@@ -38,16 +38,16 @@ const TONES: Record<"photo" | "card", Tone> = {
 
 export function CareerHeaderActions({ career, onConnect, surface = "photo", stack = true, split = false, games = { play: true, glossary: true } }: { career: { slug: string; title: string; world: string }; onConnect: () => void; surface?: "photo" | "card"; stack?: boolean; /** a sheet footer: games at the left edge, the icons at the right */ split?: boolean; /** which game buttons show. Every career offers both today (8 Oct 2026: without a game they open the Play tab); a backend that hides missing games passes its own, and the row adapts. */ games?: { play: boolean; glossary: boolean } }) {
   const router = useRouter();
-  const lab = useLab();
+  const lab = useCareerActions();
   const T = TONES[surface];
   // A page loading from a backend has no saved/Top 3 state yet: the pills
-  // wait as skeletons rather than flash the wrong state (the lab's Slow
-  // network shows it for a moment on arrival).
+  // wait as skeletons rather than flash the wrong state. Ready on the first
+  // client tick here, since the stores are local.
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    const t = window.setTimeout(() => setReady(true), lab.network === "normal" ? 0 : 900);
+    const t = window.setTimeout(() => setReady(true), 0);
     return () => window.clearTimeout(t);
-  }, [lab.network]);
+  }, []);
   const hasSimulation = !!simulationFor(career.slug);
   const hasGlossaryGame = hasGlossary(career.slug);
   const hasWorldProfessionals = PROS.some((pro) => pro.world === career.world);

@@ -26,7 +26,7 @@ import { matchDetail, REVEAL_STEP, type LabCareer, WORLDS } from "./lab";
 import { PeekList, PeekSheet, type PeekFact } from "@/components/app/PeekSheet";
 import { FacePhoto } from "@/components/app/FacePhoto";
 import { heroFocus } from "@/components/career/heroFocus";
-import { careerButtonInk } from "@/components/actions-lab/CareerHeaderActions";
+import { careerButtonInk } from "@/components/career/CareerHeaderActions";
 
 export const CARD = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
 const SUCCESS = "var(--color-feedback-success)";

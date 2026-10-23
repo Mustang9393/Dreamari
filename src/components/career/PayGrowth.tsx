@@ -28,7 +28,7 @@
 
 import { useState } from "react";
 import { ArrowDown, ArrowUp, Minus, TrendingDown, TrendingUp } from "lucide-react";
-import { DISPLAY, Section } from "@/components/actions-lab/CareerDetailLab";
+import { DISPLAY, Section } from "@/components/career/CareerDetail";
 import { formatPay, parsePay, PayMap, payValues } from "./PayMap";
 import { count, expectedOpenings, pct, stateOutlook, type NationalOutlook } from "./outlook";
 

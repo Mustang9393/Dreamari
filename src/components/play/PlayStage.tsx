@@ -25,7 +25,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ChevronLeft, ChevronRight, Film, Lock, Play, Zap } from "lucide-react";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
-import { careerButtonInk } from "@/components/actions-lab/CareerHeaderActions";
+import { careerButtonInk } from "@/components/career/CareerHeaderActions";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import { playSelect } from "./sound";

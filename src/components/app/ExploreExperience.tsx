@@ -1,32 +1,43 @@
 "use client";
 
- 
+// The Explore page: the For You reel and Browse All. This file started as
+// the Career actions lab's copy of Explore (26 Sept 2026), became the live
+// /explore on 1 Oct 2026, and on 23 Oct 2026 the lab itself was removed
+// (Chandu: "Remove the actions lab stuff we dont need it anymore"), so this
+// is the one Explore again. Saves, Top 3 and reactions go through
+// careerActionsStore.ts, which writes the real stores.
+//
+// The reel's actions: each icon has a one-word label under it (Dislike,
+// Save), the reel convention; states say themselves ("Disliked", "Saved");
+// no coachmarks or first-time tip toasts; the feedback bar says what
+// happened, where it went, how to undo. Top 3 and Connect left the reel on
+// 4 Oct 2026 (they live on Career Detail), and the reel's videos got their
+// own Save the same day. Like left careers and videos on 8 Oct 2026 (7 Oct
+// review call: "we can remove the like and then just keep it as saved").
 
 import { openCareerPeek } from "@/components/app/peek";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "@/components/app/Beam";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
+import { useWelcomeInFront } from "@/components/app/SplashVeil";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, Captions, CaptionsOff, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Check, Pause, Play, Plus, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Play, Search, SlidersHorizontal, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { useSavedVideos } from "@/lib/savedVideos";
+import { Listbox } from "@/components/app/Listbox";
+import { PendingPosterCard, PendingRankedCard } from "@/components/app/PendingPosterCard";
 import { useDiscoveryNudge } from "@/lib/nudge";
-import { useSavedCareers } from "@/lib/savedCareers";
-import { useTop3 } from "@/lib/useTop3";
-import type { Picks } from "@/lib/picks";
-import { Top3SwapModal } from "@/components/career/Top3SwapModal";
-import { Toast } from "@/components/app/Toast";
-import { UndoToast } from "@/components/app/UndoToast";
+import { react, toggleSave, useCareerActions } from "./careerActionsStore";
+import { ActionsLayer, ReelAction } from "./careerActions";
 import { useFirstUseHint, Coachmark } from "@/components/flow/GestureSpotlight";
-import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
-import { HeaderActions } from "./Inbox";
-import { PosterCard, RankedPosterCard } from "./PosterCard";
-import { PendingRankedCard } from "./PendingPosterCard";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { HeaderActions } from "@/components/app/Inbox";
+import { PosterCard, RankedPosterCard } from "@/components/app/PosterCard";
 import { IconTip } from "@/components/app/IconTip";
-import { SurfaceState } from "@/components/app/SurfaceState";
 
-import { CompanyVideoCards } from "./CompanyVideoCards";
+import { CompanyVideoCards } from "@/components/app/CompanyVideoCards";
 import {
   ALL_CATALOG_CAREERS,
   BROWSE_ARTS,
@@ -45,16 +56,16 @@ import {
   type ReelCareer,
   type ReelItem,
   type VideoReel,
-} from "./catalog";
-import { WORLD_LABELS } from "./worlds";
-import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "./careerSearch";
+} from "@/components/app/catalog";
+import { TEXT_SCRIM, WORLD_LABELS } from "@/components/app/worlds";
+import { HoverBeam } from "@/components/app/HoverBeam";
+import { buildTradesRails, filterByPath, isPathChoice, type PathChoice } from "@/components/app/careerPath";
+import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
+import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "@/components/app/careerSearch";
 import { careerSlug } from "@/components/career/slug";
 import { simulationFor } from "@/components/play/games";
-import "./app.css";
-import { announce } from "./LiveRegion";
-import { CaptionTrack, VideoTranscript } from "@/components/app/VideoTranscript";
-import { captionsFor } from "@/components/app/videoTranscripts";
-import { setCaptionsOn, useCaptionsOn } from "@/lib/captionsPref";
+import "@/components/app/app.css";
+import { logActivity } from "@/lib/activityEvents";
 
 // Explore, both faces of the Figma design:
 //  - "For You" (Explore — v2.1B, 2288:16179): the Env Card reel with the
@@ -91,6 +102,7 @@ export function ForYouBrowseToggle({
   nudge = false,
   showTutorial = false,
   onDismissTutorial,
+  variant = "segment",
 }: {
   tab: "foryou" | "browse";
   onTab: (tab: "foryou" | "browse") => void;
@@ -101,23 +113,42 @@ export function ForYouBrowseToggle({
       showForYouTutorial. */
   showTutorial?: boolean;
   onDismissTutorial?: () => void;
+  /** "text": Instagram Reels' own treatment for the phone reel (1 Oct 2026;
+      Chandu: "follow Instagram's UI there for For you and Browse all"):
+      plain words over the video, white and bold when selected, dimmed when
+      not, a text shadow instead of a surface. Everywhere else: "segment". */
+  variant?: "segment" | "text";
 }) {
+  const text = variant === "text";
   return (
     <>
-    {/* Boxed pill only from `lg:` on -- this same component also renders on
-       top of the reel's photo at every width below that (mobile AND
-       tablet), where the pill/border read as extra chrome over the image.
-       Restored to Instagram's own convention there: plain text, weight and
-       brightness carrying the selected state, a text-shadow for legibility
-       instead of a surface (direct instruction, 23 Sept 2026: "restored to
-       what it was for mobile before... just text like instagram with a
-       subtle scrim and shadows"). `lg:` still gets the bordered glass pill,
-       since that version sits in a normal page header, not over a photo. */}
-    <div className="flex items-center gap-[var(--space-4)] lg:gap-[var(--space-1)] lg:rounded-[var(--radius-lg)] lg:border lg:border-[color:var(--glass-border)] lg:bg-[color:var(--glass-surface-1)] lg:p-[var(--space-1)]">
+    {/* One glass pill at every width, in the same place (right of the
+       header) on every device (1 Oct 2026; Chandu: "there needs to be a
+       consistency with the tabs on different devices, don't switch places...
+       follow the desktop's layout and positions"). This replaces the 23 Sept
+       phone treatment (plain Instagram-style text over the reel photo),
+       which put the toggle at the left on phones and at the right on
+       desktop. The shape is a segmented control the way Apple Music, the App
+       Store and Spotify do it on phones: a 32px track, two text segments at
+       13px, no icons. A first pass stacked an icon over a 9px label below lg
+       and read as a bottom tab bar ("this looks ugly, let's see how other
+       platforms do it first"; none of Instagram, TikTok, YouTube, Spotify or
+       Apple stack an icon over a label inside a segmented control). */}
+    {/* No accent fill on the selected segment: a blue chip inside a glass
+       box read as "a chip in a box" (Chandu: "the highlight chip thing looks
+       really bad"). Apple's dark segmented control: a translucent grey
+       track, a slightly lighter grey selected segment, weight and brightness
+       carry the state. */}
+    {/* Room around the words (3 Oct 2026, Chandu: "the padding when i hover
+       for you and also when its active is badly designed and hugs the
+       letters too tightly"): a 38px track with 3px inset, segments with 16px
+       side padding, so the hover wash and the selected pill sit around the
+       label with air, the way iOS segmented controls do. */}
+    <div className={text ? "inline-flex flex-none items-center gap-[24px]" : "seg-track inline-flex h-[38px] flex-none items-center gap-[2px] rounded-[12px] p-[3px] backdrop-blur-[10px]"} style={text ? undefined : { background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
       {(
         [
           { key: "foryou", label: "For you" },
-          { key: "browse", label: "Browse All" },
+          { key: "browse", label: "Browse all" },
         ] as const
       ).map((item) => {
         const on = tab === item.key;
@@ -130,14 +161,20 @@ export function ForYouBrowseToggle({
               if (item.key === "foryou") onDismissTutorial?.();
               onTab(item.key);
             }}
-            className={`dm-quiet cursor-pointer rounded-[var(--radius-md)] text-[15px] leading-[20px] font-bold whitespace-nowrap uppercase [text-shadow:0_1px_3px_rgba(0,0,0,0.6)] lg:px-[var(--space-4)] lg:py-[6px] lg:text-[13px] lg:leading-[18px] lg:[text-shadow:none] ${
+            /* px-10 below sm (4 Oct 2026): at 375px wide the phone Browse
+               row (Careers/Schools, this pill, Search) ran 16px past the
+               page margin and clipped the Search button at the screen edge.
+               The row's gaps tighten below sm for the same reason. */
+            className={text
+              ? `dm-quiet cursor-pointer text-[16px] leading-[20px] font-semibold whitespace-nowrap [text-shadow:0_1px_3px_rgba(0,0,0,0.6)] ${on ? "text-white" : "text-white/60"}`
+              : `seg-item dm-quiet flex h-full cursor-pointer items-center rounded-[9px] px-[8px] text-[13px] sm:px-[16px] leading-[16px] whitespace-nowrap ${
               on
-                ? "text-white lg:bg-[color:var(--color-text-brand)] lg:text-[color:var(--primary-foreground)]"
+                ? "font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]"
                 // the unselected label is muted so the nudge's white sweep has
                 // something to travel over (direct feedback, 19 Sept 2026)
-                : "text-white/65 lg:bg-transparent lg:text-[color:var(--muted-foreground)]"
+                : "font-medium text-[color:var(--muted-foreground)]"
             }`}
-            style={{ fontFamily: "var(--font-body)" }}
+            style={{ fontFamily: "var(--font-body)", background: text ? undefined : on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}
           >
             <span className={`relative ${item.key === "foryou" && nudge ? "dm-text-nudge" : ""}`}>
               {item.label}
@@ -173,6 +210,11 @@ export function ForYouBrowseToggle({
             side="bottom"
             align="start"
             spotlight
+            // Full height of the track (4 Oct 2026, Chandu: the For you chip
+            // "should fill height and width, not hug the text"). The default
+            // inline-flex wrapper took the label's height, so this button's
+            // h-full collapsed to it while Browse all, unwrapped, filled.
+            wrapperClassName={text ? undefined : "relative flex h-full"}
           >
             {button}
           </Coachmark>
@@ -191,66 +233,80 @@ export function ForYouBrowseToggle({
 // 2026: "scale down the cards etc proportionally... especially in explore
 // page"). See `.explore-poster-row` in globals.css; Home's own poster-row
 // rails are untouched.
-function Rail({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+/** A row of posters. Sideways scrolling is never the only way through it
+ *  (Chandu, 1 Oct 2026): the count sits by the title and View all opens the
+ *  whole row as a grid, with Back returning here. */
+function Rail({ title, subtitle, onViewAll, peek = false, children }: { title: string; subtitle?: string; onViewAll?: () => void; /** the first row: nudge sideways until a row is scrolled */ peek?: boolean; children: React.ReactNode }) {
+  const [scrolled, setScrolled] = useState(false);
+  // Every page load, not once per device (Chandu, 2 Oct 2026: "have that
+  // appear on every refresh"); it stops as soon as any row is scrolled.
+  // waits for the welcome to close, then plays (SplashVeil.useWelcomeInFront)
+  const welcomeInFront = useWelcomeInFront();
+  const peeking = peek && !scrolled && !welcomeInFront;
   return (
-    <section aria-label={title} className="flex w-full flex-col gap-[var(--space-3)]">
+    <section aria-label={title} data-focal-rail={peek || undefined} className="flex w-full flex-col gap-[var(--space-3)]">
       <div className="flex flex-col gap-[var(--space-1)]">
-        <h2 className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          {title}
-        </h2>
+        <div className="flex items-baseline justify-between gap-[12px]">
+          <h2 className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            {/* No count beside a row title (13 Oct 2026, Chandu: "Remove the
+               number counters next to the row titles on explore. No numbers.") */}
+            {title}
+          </h2>
+          {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-[8px] px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
+        </div>
         {subtitle && (
           <p className="text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
             {subtitle}
           </p>
         )}
       </div>
-      {/* md:px-[space-6], not [space-14]: the rail's own inset is
-         deliberately SHORTER than the page's title/content margin, so
-         cards bleed past that margin line and the trailing card peeks at
-         the edge instead of stopping flush with it (direct feedback, 22
-         Sept 2026: "cards should not get clipped... let them exceed the
-         limits and peek through"). Still fully symmetric left/right --
-         the "margins not consistent" report traced to card rows not
-         evenly filling their track, not an actual left/right CSS
-         mismatch (measured: both sides resolve to the same inset). */}
-      <div className="poster-row explore-poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
+      {/* Left inset = the page margin (space-14), so the first card starts
+         exactly under the row title (Chandu, 1 Oct 2026: "the cards start
+         before the title starts, can we make that align?"). Right inset
+         stays the shorter space-6 so the trailing card still peeks past the
+         margin line instead of stopping flush with it (22 Sept 2026: "let
+         them exceed the limits and peek through"). */}
+      <div onScroll={() => { if (!scrolled) setScrolled(true); }} className={`poster-row explore-poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:pl-[var(--space-14)] md:pr-[var(--space-6)] ${peek && peeking ? "dm-row-peek" : ""}`} style={{ touchAction: "pan-x pan-y" }}>{children}</div>
     </section>
   );
 }
 
 function PosterRail({ careers }: { careers: CatalogCareer[] }) {
   const router = useRouter();
+  const lab = useCareerActions();
   return (
     <>
-      {careers.map((career, index) => (
-        <PosterCard key={`${career.title}-${index}`} career={career} onClick={() => (openCareerPeek(careerSlug(career.title)) || router.push(`/career/${careerSlug(career.title)}`))} />
-      ))}
+      {careers.map((career, index) => {
+        const slug = careerSlug(career.title);
+        return <PosterCard key={`${career.title}-${index}`} career={career} saved={lab.saved.includes(slug)} onSave={() => toggleSave(slug, career.title)} onClick={() => (openCareerPeek(slug) || router.push(`/career/${slug}`))} />;
+      })}
     </>
   );
 }
 
-// Not the live route (/explore renders actions-lab/ExploreLab.tsx since 1
-// Oct 2026); kept in step with it so this reference copy never contradicts
-// the live row: Top 10, ranks fixed to Joshua's list, "Coming soon" slots.
-function TrendingRail({ trending }: { trending: { slot: TrendingSlot; rank: number }[] }) {
+const TRENDING_TITLE = "Top 10 Trending Careers Among Gen Z";
+
+/** The ranked row. Ranks come from each slot's place in Joshua's list (4
+ *  Oct 2026), not its place in this array, so a world filter or a career
+ *  that is not in the catalog yet never renumbers the others. No count by
+ *  the title: the title already says ten. */
+function TrendingRail({ slots, onViewAll }: { slots: { slot: TrendingSlot; rank: number }[]; onViewAll?: () => void }) {
   const router = useRouter();
+  const lab = useCareerActions();
   return (
-    <section aria-label="Top 10 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[var(--space-3)]">
-      <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-        Top 10 Trending Careers Among Gen Z
-      </h2>
-      <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
-        {/* Surface 6 (27 Sept 2026): used to render nothing at all (and the
-           heading above it) whenever the caller only rendered this rail
-           for a non-empty list -- now the heading always shows and a real
-           empty state covers the "nothing trending" case. */}
-        <SurfaceState id={6} isEmpty={trending.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
-          <>
-            {trending.map(({ slot, rank }) => (isPendingCareer(slot)
-              ? <PendingRankedCard key={slot.title} career={slot} rank={rank} />
-              : <RankedPosterCard key={slot.title} career={slot} rank={rank} onClick={() => (openCareerPeek(careerSlug(slot.title)) || router.push(`/career/${careerSlug(slot.title)}`))} />))}
-          </>
-        </SurfaceState>
+    <section aria-label={TRENDING_TITLE} className="flex w-full flex-col gap-[var(--space-3)]">
+      <div className="flex items-baseline justify-between gap-[12px]">
+        <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+          {TRENDING_TITLE}
+        </h2>
+        {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-[8px] px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
+      </div>
+      <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:pl-[var(--space-14)] md:pr-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
+        {slots.map(({ slot, rank }) => {
+          if (isPendingCareer(slot)) return <PendingRankedCard key={slot.title} career={slot} rank={rank} />;
+          const slug = careerSlug(slot.title);
+          return <RankedPosterCard key={slot.title} career={slot} rank={rank} saved={lab.saved.includes(slug)} onSave={() => toggleSave(slug, slot.title)} onClick={() => (openCareerPeek(slug) || router.push(`/career/${slug}`))} />;
+        })}
       </div>
     </section>
   );
@@ -278,217 +334,429 @@ function FilterPill({ label, selected, onClick }: { label: string; selected: boo
   );
 }
 
-/** Netflix's search page: "Explore careers related to" chips built from
- *  what the results share, then the ranked grid; a no-match state that
- *  offers the top searches instead of a dead end. */
-function SearchResults({ query, hits, onQuery, heading }: { query: string; hits: SearchHit[]; onQuery: (q: string) => void; /** a world's name when the grid is a filter, not a search */ heading?: string }) {
+/** Netflix's search page: the heading (or the no-match line) with the
+ *  Filters button at its right, "Explore careers related to" chips built
+ *  from what the results share, then the ranked grid. A no-match state
+ *  offers the suggested searches instead of a dead end. */
+function SearchResults({ query, hits, onQuery, heading, onBack, backLabel = "All careers", slots, tools, toolsPanel }: {
+  query: string;
+  hits: SearchHit[];
+  onQuery: (q: string) => void;
+  /** a world's name when the grid is a filter, not a search */
+  heading?: string;
+  /** a row opened as a grid, or a category: the way back */
+  onBack?: () => void;
+  backLabel?: string;
+  /** the trending row opened as a grid keeps its "Coming soon" slots */
+  slots?: TrendingSlot[];
+  /** the Filters button, at the right of the heading */
+  tools?: React.ReactNode;
+  /** the open Filters panel, under the heading */
+  toolsPanel?: React.ReactNode;
+}) {
   const router = useRouter();
-  const related = query.trim() ? relatedTerms(query, hits) : [];
-  // Only the count is read, once typing settles (WCAG 4.1.3, audit 21 Oct
-  // 2026): an aria-live grid read every card aloud on every keystroke.
-  useEffect(() => {
-    const t = window.setTimeout(() => announce(`${hits.length} ${hits.length === 1 ? "career" : "careers"} found`), 600);
-    return () => window.clearTimeout(t);
-  }, [query, hits.length]);
+  // Three related chips, not five: the lighter search Joshua asked for
+  // (4 Oct 2026), and five wrapped to three lines on a phone.
+  const related = query.trim() ? relatedTerms(query, hits, 3) : [];
+  const count = slots ? slots.length : hits.length;
   return (
-    <section className="flex w-full flex-col gap-[var(--space-5)]">
+    <section className="flex w-full flex-col gap-[var(--space-5)]" aria-live="polite">
+      {onBack && (
+        <button type="button" onClick={onBack} className="dm-quiet -mb-[8px] flex w-fit cursor-pointer items-center gap-[4px] rounded-[8px] py-[6px] pr-[12px] pl-[6px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>
+          <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
+        </button>
+      )}
+      <div className="flex w-full flex-col gap-[var(--space-3)]">
+        <div className="flex w-full items-center justify-between gap-[12px]">
+          {count > 0 ? (
+            <h2 className="min-w-0 text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
+              {heading ?? <>Results for “{query.trim()}”</>}
+              {/* the trending grid's title already says ten */}
+              {!slots && <> <span className="text-[15px] font-bold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>({count})</span></>}
+            </h2>
+          ) : (
+            <p className="min-w-0 text-[17px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)" }}>
+              {query.trim() ? <>No careers match “{query.trim()}”.</> : <>No careers here yet.</>}
+            </p>
+          )}
+          {tools}
+        </div>
+        {toolsPanel}
+      </div>
       {related.length > 0 && (
         <div className="flex flex-wrap items-center gap-[8px]">
           <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Explore careers related to:</span>
           {related.map((t) => <FilterPill key={t} label={t} selected={false} onClick={() => onQuery(t)} />)}
         </div>
       )}
-      {hits.length > 0 ? (
-        <>
-          <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
-            {heading ?? <>Results for “{query.trim()}”</>} <span className="text-[15px] font-bold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>({hits.length})</span>
-          </h2>
-          {/* a grid that fills the width: as many columns as fit, cards
-             stretching to share the row, instead of fixed 210px posters
-             clustering at the left (direct feedback, 19 Sept 2026).
-             Custom-designed edge case, 22 Sept 2026: `auto-fill` reserves
-             a full row of equal-width tracks even when only 1-2 results
-             exist (Food & Cooking, Teaching & Education: 1 career each;
-             Science & Research: 2) -- a small card pinned left with dead,
-             unexplained empty tracks stretching the rest of the row.
-             `auto-fit` collapses tracks with no content, so the real
-             card(s) get the freed space instead -- same "stretch to
-             share the row" behavior already requested above, just
-             correctly extended to a row that only has 1-2 cards to
-             share it. */}
-          <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fit,minmax(180px,1fr))] sm:gap-[var(--space-5)]">
-            {hits.map(({ career }) => <PosterCard key={career.title} career={career} fill onClick={() => (openCareerPeek(careerSlug(career.title)) || router.push(`/career/${careerSlug(career.title)}`))} />)}
-          </div>
-        </>
-      ) : (
-        <div className="flex flex-col gap-[var(--space-4)] py-[var(--space-6)]">
-          <p className="text-[17px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)" }}>No careers match “{query.trim()}”.</p>
-          <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Try a career, a world like Arts or Finance, or something you like doing, like drawing or coding.</p>
-          <TopSearches onQuery={onQuery} />
+      {count > 0 ? (
+        /* a grid that fills the width: as many columns as fit, cards
+           stretching to share the row, instead of fixed 210px posters
+           clustering at the left (direct feedback, 19 Sept 2026).
+           `auto-fill` (6 Oct 2026, reversing 22 Sept's `auto-fit`): one
+           or two results keep the same card size as a full grid instead of
+           stretching to fill the screen (Chandu: "when I have just one
+           result don't scale it up to fill the whole screen"). */
+        <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] sm:gap-[var(--space-5)]">
+          {slots
+            ? slots.map((slot) => (isPendingCareer(slot)
+              ? <PendingPosterCard key={slot.title} career={slot} />
+              : <PosterCard key={slot.title} career={slot} fill onClick={() => (openCareerPeek(careerSlug(slot.title)) || router.push(`/career/${careerSlug(slot.title)}`))} />))
+            : hits.map(({ career }) => <PosterCard key={career.title} career={career} fill onClick={() => (openCareerPeek(careerSlug(career.title)) || router.push(`/career/${careerSlug(career.title)}`))} />)}
         </div>
-      )}
+      ) : query.trim() ? (
+        <div className="flex flex-col gap-[var(--space-4)]">
+          <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Try a career, a world like Arts or Finance, or something you like doing, like drawing or coding.</p>
+          <SuggestedSearches onQuery={onQuery} />
+        </div>
+      ) : null}
     </section>
   );
 }
 
-function TopSearches({ onQuery }: { onQuery: (q: string) => void }) {
+/** "Try one of these": the chip row under a search with no match. (The
+ *  full photo "Suggested searches" section this used to render on the
+ *  empty search page was removed on 22 Oct 2026 for the category tiles.) */
+function SuggestedSearches({ onQuery }: { onQuery: (q: string) => void }) {
   return (
     <div className="flex flex-wrap items-center gap-[8px]">
-      <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Top searches:</span>
+      <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Try one of these:</span>
       {TOP_SEARCHES.map((t) => <FilterPill key={t} label={t} selected={false} onClick={() => onQuery(t)} />)}
     </div>
   );
 }
 
-function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpen: boolean; onQuery: (q: string) => void }) {
-  const router = useRouter();
+// -- Browse by category tiles (22 Oct 2026) -----------------------------
+// Chandu: "remove the suggested searches from when the user clicks on the
+// search bar and show categories as tiles like in dreamonna.com". So the
+// empty search page is one thing: every career world as a photo tile, in
+// the same Netflix shape the suggestion rows had (a real career photo, the
+// name over the house scrim), never a coloured block (Chandu, 5 Oct 2026:
+// "I dont like the colored category tiles"). One recognisable career per
+// world fronts its tile; the count under the name tells a student how much
+// is behind it. Tapping a tile opens the same world grid the old picker
+// did (SearchResults with a Back link), so nothing downstream changed.
+const WORLD_HERO: Record<string, string> = {
+  "Tech & Engineering": "Software Engineer",
+  "Health & Medicine": "Registered Nurse",
+  "Business & Finance": "Investment Banking",
+  "Arts, Media & Sport": "Film Director",
+  "Science & Research": "Chemist",
+  "Teaching & Education": "Elementary School Teacher",
+  "Building & Construction": "Electrician",
+  "Law, Safety & Justice": "Firefighter",
+  "Food & Cooking": "Executive Chef",
+  "Farming, Animals & Nature": "Veterinarian",
+  "Counseling & Social Work": "Therapist",
+  "Driving, Flying & Shipping": "Airline Pilot",
+  "Factories & Making Things": "Welder",
+  "Fixing Machines & Engines": "Auto Mechanic",
+  "Personal Care & Community Services": "Hairstylist",
+};
+const CATEGORY_WORLDS = WORLD_LABELS.filter((w) => w !== "All");
+
+function CategoryTiles({ onPick }: { onPick: (world: string) => void }) {
+  return (
+    <section aria-label="Browse by category" className="flex w-full flex-col gap-[var(--space-3)]">
+      <h2 className="text-[18px] leading-[24px] font-extrabold sm:text-[20px]" style={{ fontFamily: "var(--font-display)" }}>Browse by category</h2>
+      <ul className="grid w-full grid-cols-2 gap-[10px] sm:grid-cols-3 sm:gap-[12px] lg:grid-cols-5">
+        {CATEGORY_WORLDS.map((world) => {
+          const inWorld = ALL_CATALOG_CAREERS.filter((c) => c.world === world);
+          const hero = inWorld.find((c) => c.title === WORLD_HERO[world]) ?? inWorld.find((c) => c.photo);
+          return (
+            <li key={world} className="h-full">
+              <HoverBeam strength={0.8} className="h-full">
+                <button
+                  type="button"
+                  onClick={() => onPick(world)}
+                  aria-label={`${world}, ${inWorld.length} careers`}
+                  className="dm-tap group relative flex aspect-[4/3] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[12px] p-[12px] text-left"
+                  style={{ background: "var(--glass-surface-2)", fontFamily: "var(--font-body)" }}
+                >
+                  {hero && <Image src={hero.photo} alt="" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw" className="object-cover object-[50%_30%] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]" />}
+                  <span aria-hidden className="absolute inset-0" style={{ background: TEXT_SCRIM }} />
+                  <span className="relative flex min-w-0 flex-col gap-[2px]">
+                    <span className="text-[14px] leading-[18px] font-extrabold sm:text-[15px] sm:leading-[19px]" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{world}</span>
+                    <span className="text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "rgba(255,255,255,0.72)" }}>{inWorld.length} careers</span>
+                  </span>
+                </button>
+              </HoverBeam>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+const FILTER_FIELD = "h-10 w-full rounded-[var(--radius-md)] border px-[12px] text-[13px] font-semibold";
+const FILTER_FIELD_STYLE: React.CSSProperties = { background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" };
+
+/** Explore Search while it is active (4 Oct 2026, Joshua: "Netflix or Apple
+ *  TV: focused, minimal"). It replaces the old search state, which stacked
+ *  a world pill row, a Sort by row and a Top searches row on top of every
+ *  Browse row. Now: nothing typed shows one "Suggested searches" section
+ *  and one "Browse by category" picker; typing shows the results; the
+ *  category and sort filters sit behind one Filters button next to the
+ *  results heading. Mounted only while search is active, so closing search
+ *  forgets the filters and the normal Browse comes back exactly as it was. */
+function SearchPanel({ query, onQuery }: { query: string; onQuery: (q: string) => void }) {
   const [world, setWorld] = useState<string>("All");
   const [sort, setSort] = useState<SortOption>("Recommended");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const typing = query.trim().length > 0;
+  const activeFilters = (world !== "All" ? 1 : 0) + (sort !== "Recommended" ? 1 : 0);
 
-  // When the search (and with it the pill rows) is closed, the catalog view
-  // derives back to unfiltered — nothing stays silently filtered; reopening
-  // restores the previous selection.
-  const effectiveWorld = filtersOpen ? world : "All";
-  const effectiveSort: SortOption = filtersOpen ? sort : "Recommended";
-  // A typed query becomes the search page (Netflix): one ranked grid across
-  // the whole catalog, not seven rails each losing most of their cards.
-  const searching = query.trim().length > 0;
-  // a world pill with nothing typed is a filter: the whole world as a grid,
-  // sorted like the rails, instead of seven rails each losing most cards
-  const worldOnly = !searching && effectiveWorld !== "All";
-  const hits: SearchHit[] = searching
-    ? searchCareers(query, effectiveWorld)
-    : worldOnly ? applyCatalogView(ALL_CATALOG_CAREERS, effectiveWorld, "", effectiveSort).map((career) => ({ career, score: 0 })) : [];
-  const view = (careers: CatalogCareer[]) => applyCatalogView(careers, effectiveWorld, "", effectiveSort);
-  const becauseLiked = view(BROWSE_BECAUSE_LIKED);
-  const trades = view(BROWSE_TRADES);
-  // Custom-designed edge case, 22 Sept 2026: the Sort control (A-Z/Salary)
-  // was applied here through `view()` same as every other rail, but this
-  // one carries rank badges (#1..#5) tied to BROWSE_TRENDING's own curated
-  // order -- picking a sort re-ordered the cards while the heading and
-  // badges kept claiming "#1 trending", mislabeling whatever the sort put
-  // first. World filter still applies (trending WITHIN a world is a
-  // reasonable question); sort never does, since the rank badges are the
-  // whole point of this rail.
-  const trending = BROWSE_TRENDING_SLOTS.map((slot, index) => ({ slot, rank: index + 1 })).filter(({ slot }) => effectiveWorld === "All" || slot.world === effectiveWorld);
-  const worldRail = view(BROWSE_WORLD_RAIL);
-  const mightNotKnow = view(BROWSE_MIGHT_NOT_KNOW);
-  const typicalPay = view(BROWSE_TYPICAL_PAY);
-  const publicService = view(BROWSE_PUBLIC_SERVICE);
-  // Arts, Media & Sport: one row, at the bottom of the page only (direct
-  // feedback, 19 Sept 2026: no second appearance near the top, no "New in").
-  // The full world, not just the poster-library additions.
-  const arts = view(BROWSE_ARTS);
+  const tools = (
+    <button
+      type="button"
+      aria-expanded={filtersOpen}
+      onClick={() => setFiltersOpen((open) => !open)}
+      className="dm-quiet flex h-9 flex-none cursor-pointer items-center gap-[6px] rounded-[10px] border px-[14px] text-[13px] font-semibold"
+      style={{ fontFamily: "var(--font-body)", background: filtersOpen ? "var(--glass-surface-2)" : "var(--glass-surface-1)", borderColor: activeFilters > 0 ? "var(--primary)" : "var(--glass-border)", color: "var(--foreground)" }}
+    >
+      <SlidersHorizontal className="h-4 w-4" aria-hidden />
+      Filters
+      {activeFilters > 0 && (
+        <span className="flex size-[18px] items-center justify-center rounded-full text-[11px] font-bold tabular-nums" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+          {activeFilters}
+          <span className="sr-only"> on</span>
+        </span>
+      )}
+    </button>
+  );
+  const toolsPanel = filtersOpen ? (
+    <div className="filters-reveal flex w-full flex-wrap items-end gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+      <div className="flex min-w-[160px] flex-1 flex-col gap-[6px] sm:max-w-[260px]">
+        <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Category</span>
+        <Listbox ariaLabel="Category" value={world} onChange={setWorld} options={WORLD_LABELS.map((w) => ({ value: w, label: w === "All" ? "All careers" : w }))} className={FILTER_FIELD} style={FILTER_FIELD_STYLE} />
+      </div>
+      <div className="flex min-w-[160px] flex-1 flex-col gap-[6px] sm:max-w-[200px]">
+        <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Sort by</span>
+        <Listbox ariaLabel="Sort by" value={sort} onChange={(v) => setSort(v as SortOption)} options={SORT_OPTIONS.map((o) => ({ value: o, label: o }))} className={FILTER_FIELD} style={FILTER_FIELD_STYLE} />
+      </div>
+      {activeFilters > 0 && (
+        <button type="button" onClick={() => { setWorld("All"); setSort("Recommended"); }} className="dm-quiet flex h-10 cursor-pointer items-center rounded-[12px] px-[12px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>
+          Clear filters
+        </button>
+      )}
+    </div>
+  ) : null;
+
+  if (typing) {
+    // Search hits come ranked by relevance; "Recommended" keeps that order.
+    let hits = searchCareers(query, world);
+    if (sort !== "Recommended") {
+      const order = applyCatalogView(hits.map((h) => h.career), "All", "", sort);
+      hits = order.map((career) => ({ career, score: 0 }));
+    }
+    return <SearchResults query={query} hits={hits} onQuery={onQuery} tools={tools} toolsPanel={toolsPanel} />;
+  }
+  if (world !== "All") {
+    const hits = applyCatalogView(ALL_CATALOG_CAREERS, world, "", sort).map((career) => ({ career, score: 0 }));
+    // data-search-browsing: a picked category keeps search active even
+    // with nothing typed, so a click on empty page space doesn't drop it.
+    return <div data-search-browsing className="w-full"><SearchResults query="" heading={world} hits={hits} onQuery={onQuery} onBack={() => { setWorld("All"); setFiltersOpen(false); }} backLabel="Back" tools={tools} toolsPanel={toolsPanel} /></div>;
+  }
+  // Nothing typed: the category tiles alone. The "Suggested searches" rows
+  // that sat above the old picker are gone from this state (Chandu, 22 Oct
+  // 2026); the compact "Try one of these" still backs a search with no match.
+  return (
+    <div className="filters-reveal w-full">
+      <CategoryTiles onPick={setWorld} />
+    </div>
+  );
+}
+
+// -- Non-college switch (16-17 Oct 2026) -------------------------------
+// Chandu: "for the explore careers tab lets have a switch without
+// cluttering to show college paths and non college paths... The goal is to
+// show trade/non college careers for those that want that." Then: "lets
+// make it a toggle switch that then shows only trade/non college level
+// stuff and make sure the use and feedback is obvious", "it should very
+// obviously be College vs non college, remember this is for 8th standard
+// comprehension level they may not know what trades are. please no long
+// descriptions permanently on screen. brand it better for genz please the
+// label should not be too long. Lets also think of mobile/tablet." Then,
+// on the first wording ("Skip college" with a slashed cap): "we might be
+// suggesting or incentivizing students to skip college", and "they are
+// still too long" about the first neutral rewrite.
+//
+// Wording rule: a filter describes what it shows, it never advises. So no
+// imperative verb ("Skip"), no icon that takes a side (the slashed cap),
+// no selling copy ("No degree needed"). One short noun phrase, two
+// words at most, in the muted colour: "Non-college". An 8th grader reads
+// it with no explanation. (It also covers the 2-year-degree careers, which
+// is why a longer, more exact "No 4-year degree" was the runner-up.)
+//
+// Shape: one quiet control, first in the content area, left under the
+// Careers/Schools strip, identical at every width: a label and a switch.
+// Off = Browse as it is (every career). On = only careers whose typical
+// entry is not a bachelor's, in rails built for that view (browseRows).
+// Feedback on a flip: the track goes blue, a light sweeps the control
+// once, a two-word status shows for 2 seconds and leaves, and the rails
+// replay their entrance. Nothing stays on screen but the control.
+//
+// Rejected: three chips (Chandu wanted one switch); a banner hanging off
+// the Careers tab's blue underline -- the app already hangs coachmarks off
+// that strip, so it would read as a hint to dismiss, not a control, and it
+// breaks the title + tabs unit locked on 22 Sept; a segment in the For you
+// / Browse all pill -- two dimensions in one control; a header dropdown --
+// no room in the phone header, and the 1 Oct 2026 rule puts a control in
+// the same place on every device.
+//
+// The choice lives in the URL (?path=trades) so View all's grid and the
+// browser's Back keep it, and in localStorage so a student who flipped it
+// lands on it next visit.
+const PATH_STORAGE_KEY = "dreamari.explore.path";
+const ROW_FLOOR = 3;
+const STATUS_MS = 2200;
+
+function NonCollegeSwitch({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
+  // The status line is transient on purpose (no long descriptions
+  // permanently on screen): it confirms the flip, then leaves.
+  const [status, setStatus] = useState<{ text: string; key: number } | null>(null);
+  const [sweep, setSweep] = useState(0);
+  useEffect(() => {
+    if (!status) return;
+    const t = window.setTimeout(() => setStatus(null), STATUS_MS);
+    return () => window.clearTimeout(t);
+  }, [status]);
+  const flip = () => {
+    const next = !on;
+    onChange(next);
+    setStatus({ text: next ? "Non-college careers" : "All careers", key: Date.now() });
+    setSweep((n) => n + 1);
+  };
+  // Visual rank (Chandu, after the first cut: "right now it steals all
+  // prominence and hierarchy"): no pill surface or border, a 36px switch,
+  // a 13px semibold label in the muted colour. Page title > rail titles >
+  // this control. Blue appears only on the switch track while on;
+  // everything else stays quiet.
+  return (
+    <div className="relative flex w-full items-center">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        onClick={flip}
+        className="dm-quiet relative -ml-[8px] flex h-8 flex-none cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px]"
+        style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-body)" }}
+      >
+        <span className="text-[13px] leading-[16px] font-semibold whitespace-nowrap transition-colors">Non-college</span>
+        <span className="relative inline-flex h-[20px] w-[36px] flex-none items-center rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "var(--glass-surface-2)", boxShadow: on ? "none" : "inset 0 0 0 1px var(--glass-border)" }}>
+          <span className="absolute size-[16px] rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(${on ? 18 : 2}px)`, boxShadow: "0 1px 2px rgba(0,0,0,.25)" }} />
+        </span>
+        {sweep > 0 && <ConfirmShimmer key={sweep} active />}
+      </button>
+      {/* Beside the control where there is room (tablet, desktop); tucked
+         into the gap under it on phones. Absolute, so the rails never shift. */}
+      {status && (
+        <span key={status.key} role="status" className="dm-status-flash pointer-events-none absolute left-0 top-full mt-[2px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap sm:left-auto sm:top-auto sm:mt-0 sm:ml-[10px] sm:static" style={{ color: "var(--primary)", fontFamily: "var(--font-body)" }}>
+          {status.text}
+        </span>
+      )}
+    </div>
+  );
+}
+
+type RankedSlot = { slot: TrendingSlot; rank: number };
+type BrowseRow =
+  | { id: string; kind: "posters"; title: string; careers: CatalogCareer[]; peek?: boolean; /** the rail shows this many; View all shows every career */ preview?: number }
+  | { id: string; kind: "trending"; title: string; careers: CatalogCareer[]; ranked: RankedSlot[] }
+  | { id: string; kind: "videos"; title: string; careers: CatalogCareer[] };
+
+const TRADES_RAILS = buildTradesRails(ALL_CATALOG_CAREERS);
+// A built rail can hold 60 careers ("Ready in 2 Years or Less"); the row
+// shows its first dozen and View all opens the lot. Curated rows are
+// untouched: their length is part of what was signed off.
+const BUILT_RAIL_PREVIEW = 12;
+
+/** Browse's rails for the switch's state, in page order. */
+function browseRows(path: PathChoice): BrowseRow[] {
+  // CEO (4 Sept 2026): real clips from inside partner companies. Moved
+  // directly above Typical Pay (Joshua, 11 Sept 2026), in the Apple TV
+  // lean-back card shape; the lead card plays muted.
+  const videos: BrowseRow = { id: "videos", kind: "videos", title: "Videos Inside Leading Companies", careers: [] };
+
+  if (path === "trades") {
+    // Browse's curated rows were picked around degree careers: filtered,
+    // they keep ~20 of the 186 no-college careers. This view builds its
+    // own rails from the whole catalog instead (buildTradesRails).
+    const themes = TRADES_RAILS.filter((r) => r.group === "theme");
+    const worlds = TRADES_RAILS.filter((r) => r.group === "world");
+    const mightNotKnow = filterByPath(BROWSE_MIGHT_NOT_KNOW, "trades");
+    return [
+      // Joshua's curated row (11 Sept 2026) leads.
+      { id: "trades", kind: "posters", title: "Skilled Trades", careers: BROWSE_TRADES, peek: true },
+      ...themes.map((r): BrowseRow => ({ id: r.id, kind: "posters", title: r.title, careers: r.careers, preview: BUILT_RAIL_PREVIEW })),
+      ...(mightNotKnow.length >= ROW_FLOOR ? [{ id: "new", kind: "posters", title: "Careers You Might Not Know", careers: mightNotKnow } as BrowseRow] : []),
+      videos,
+      ...worlds.map((r): BrowseRow => ({ id: r.id, kind: "posters", title: r.title, careers: r.careers, preview: BUILT_RAIL_PREVIEW })),
+    ];
+  }
+
+  // Rail order + content per Joshua (2026-08-21): merged recommended rail,
+  // then Tech, Top 10 trending, Might Not Know, Skilled Trades (added
+  // 11 Sept 2026), Videos, Public Service (added 21 Sept 2026), Typical
+  // Pay, Arts. Rank = the slot's place in Joshua's list, fixed (see
+  // TrendingRail).
+  const posters = (id: string, title: string, careers: CatalogCareer[], peek = false): BrowseRow => ({ id, kind: "posters", title, careers, peek });
+  return [
+    posters("liked", "Because you liked Business & Finance", BROWSE_BECAUSE_LIKED, true),
+    posters("tech", "Tech & Engineering", BROWSE_WORLD_RAIL),
+    { id: "trending", kind: "trending", title: TRENDING_TITLE, careers: [], ranked: BROWSE_TRENDING_SLOTS.map((slot, index) => ({ slot, rank: index + 1 })) },
+    posters("new", "Careers You Might Not Know", BROWSE_MIGHT_NOT_KNOW),
+    // Trades row (Slack, 11 Sept 2026): its own row, directly above Typical
+    // Pay per the user, and trades are also mixed into the rows above so
+    // they read as equal to everything else on the page.
+    posters("trades", "Skilled Trades", BROWSE_TRADES),
+    videos,
+    // Public Service (Slack, 21 Sept 2026): its own row, directly above
+    // Typical Pay, not folded into it -- these are civic/public-sector
+    // careers, not a pay tier.
+    posters("public", "Public Service Careers", BROWSE_PUBLIC_SERVICE),
+    posters("pay", "Typical Pay: $100K +", BROWSE_TYPICAL_PAY),
+    // Arts, Media & Sport: one row, at the bottom of the page only (direct
+    // feedback, 19 Sept 2026: no second appearance near the top, no "New
+    // in"). Its lead six and what it leaves out: see BROWSE_ARTS in catalog.ts.
+    posters("arts", "Arts, Media & Sport", BROWSE_ARTS),
+  ];
+}
+
+function BrowseFace({ query, searchActive, onQuery, row, onRow, path, onPath }: { query: string; /** search is open: the search panel replaces every row */ searchActive: boolean; onQuery: (q: string) => void; /** a row opened as a grid (?row=), and how to open or close one */ row: string; onRow: (id: string | null) => void; /** the Non-college switch */ path: PathChoice; onPath: (next: PathChoice) => void }) {
+  // The rows always show their own curated order now: filters live inside
+  // search (SearchPanel), and every row is hidden while search is open.
+  // Every row, by id, so ?row= can open one as a grid.
+  const rows = browseRows(path);
+  const opened = rows.find((r) => r.id === row) ?? null;
+
+  // data-search-zone: a click inside the search area never counts as
+  // clicking away from search (see ExploreExperience's outside-click close).
+  if (searchActive) return <div data-search-zone className="w-full"><SearchPanel query={query} onQuery={onQuery} /></div>;
+  if (opened) {
+    const slots = opened.kind === "trending" ? opened.ranked.map((r) => r.slot) : undefined;
+    return <SearchResults query="" heading={opened.title} hits={opened.careers.map((career) => ({ career, score: 0 }))} slots={slots} onQuery={onQuery} onBack={() => onRow(null)} />;
+  }
 
   return (
     <>
-      {/* Search reveals the whole filter block: the world pills row scrolls
-         edge-to-edge, and the sort row sits beneath it — filter and sort
-         work together, no mode switching. */}
-      {filtersOpen && (
-        <div className="filters-reveal flex w-full flex-col gap-[var(--space-3)]">
-          <div
-            className="-mx-5 flex gap-[8px] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-14)]"
-            style={{ touchAction: "pan-x pan-y" }}
-          >
-            {WORLD_LABELS.map((label) => (
-              <FilterPill key={label} label={label} selected={world === label} onClick={() => setWorld(label)} />
-            ))}
-          </div>
-          <div className="flex items-center gap-[10px]">
-            <span className="flex items-center gap-[6px] text-[10px] leading-[14px] font-semibold tracking-[0.6px] whitespace-nowrap uppercase" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-              <span aria-hidden className="text-[12px] normal-case">↕</span> Sort by
-            </span>
-            <div className="flex gap-[8px] overflow-x-auto [scrollbar-width:none]" style={{ touchAction: "pan-x pan-y" }}>
-              {SORT_OPTIONS.map((option) => (
-                <FilterPill key={option} label={option} selected={sort === option} onClick={() => setSort(option)} />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {filtersOpen && !searching && !worldOnly && <TopSearches onQuery={onQuery} />}
-      {searching && <SearchResults query={query} hits={hits} onQuery={onQuery} />}
-      {worldOnly && <SearchResults query="" heading={effectiveWorld} hits={hits} onQuery={onQuery} />}
-
-      {!searching && !worldOnly && (
-      <>
-      {/* Rail order + content per Joshua (2026-08-21): merged recommended
-         rail, then Tech, Top 5, Might Not Know, Skilled Trades (added 11
-         Sept 2026), Videos, Public Service (added 21 Sept 2026), Typical
-         Pay. `contents` keeps
-         this div out of main's flex layout (the rails still lay out as if
-         they were main's own direct children) while giving seq-reveal
-         something to stagger the rails' entrance from off of. */}
-      <div className="seq-reveal contents">
-        {/* Surface 5 (27 Sept 2026): each of these rails used to render
-           NOTHING (heading included) whenever its source array came back
-           empty -- a silent gap under the section above it, with no signal
-           the category simply has no careers loaded. Now the heading always
-           shows and SurfaceState covers the empty case, matching the
-           EmptyView tier 2 pattern every other "shelf" surface uses. In
-           practice these arrays are always populated on the unfiltered
-           "All" view this branch renders under, so the empty path only
-           shows up here if the underlying catalog data itself goes missing. */}
-        <Rail title="Recommended Because You Liked Business & Finance">
-          <SurfaceState id={5} isEmpty={becauseLiked.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
-            <PosterRail careers={becauseLiked} />
-          </SurfaceState>
-        </Rail>
-
-        <Rail title="Tech & Engineering">
-          <SurfaceState id={5} isEmpty={worldRail.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
-            <PosterRail careers={worldRail} />
-          </SurfaceState>
-        </Rail>
-
-        <TrendingRail trending={trending} />
-
-        <Rail title="Careers You Might Not Know">
-          <SurfaceState id={5} isEmpty={mightNotKnow.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
-            <PosterRail careers={mightNotKnow} />
-          </SurfaceState>
-        </Rail>
-
-        {/* Trades row (Slack, 11 Sept 2026): its own row, directly above
-           Typical Pay per the user, and trades are also mixed into the rows
-           above so they read as equal to everything else on the page. */}
-        <Rail title="Skilled Trades">
-          <SurfaceState id={5} isEmpty={trades.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
-            <PosterRail careers={trades} />
-          </SurfaceState>
-        </Rail>
-
-        {/* CEO (4 Sept 2026): real clips from inside partner companies.
-           Moved directly above Typical Pay (Joshua, 11 Sept 2026), in the
-           Apple TV lean-back card shape; the lead card plays muted. */}
-        <Rail title="Videos Inside Leading Companies">
-          <CompanyVideoCards />
-        </Rail>
-
-        {/* Public Service (Slack, 21 Sept 2026): its own row, directly above
-           Typical Pay, not folded into it -- these are civic/public-sector
-           careers, not a pay tier. */}
-        <Rail title="Public Service Careers">
-          <SurfaceState id={5} isEmpty={publicService.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
-            <PosterRail careers={publicService} />
-          </SurfaceState>
-        </Rail>
-
-        <Rail title="Typical Pay: $100K +">
-          <SurfaceState id={5} isEmpty={typicalPay.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
-            <PosterRail careers={typicalPay} />
-          </SurfaceState>
-        </Rail>
-        <Rail title="Arts, Media & Sport">
-          <SurfaceState id={5} isEmpty={arts.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
-            <PosterRail careers={arts} />
-          </SurfaceState>
-        </Rail>
+      <NonCollegeSwitch on={path === "trades"} onChange={(on) => onPath(on ? "trades" : "all")} />
+      {/* `contents` keeps this div out of main's flex layout (the rails
+         still lay out as if they were main's own direct children) while
+         giving seq-reveal something to stagger the rails' entrance from off
+         of. Keyed by path so a switch replays that entrance: the page
+         visibly rebuilds instead of silently swapping posters. */}
+      <div key={path} className="seq-reveal contents">
+        {rows.map((r) => {
+          if (r.kind === "videos") return <Rail key={r.id} title={r.title}><CompanyVideoCards /></Rail>;
+          if (r.kind === "trending") return <TrendingRail key={r.id} slots={r.ranked} onViewAll={() => onRow(r.id)} />;
+          return (
+            <Rail key={r.id} title={r.title} onViewAll={() => onRow(r.id)} peek={r.peek}>
+              <PosterRail careers={r.preview ? r.careers.slice(0, r.preview) : r.careers} />
+            </Rail>
+          );
+        })}
       </div>
-      </>
-      )}
     </>
   );
 }
@@ -534,48 +802,12 @@ const LEGIBLE_TEXT_SHADOW = "0 1px 3px rgba(0,0,0,0.55)";
 // duration below, so the two can never drift apart.
 const AUTOPLAY_MS = 6000;
 
-// Same literal keys as CareerDetailExperience.tsx's own DISLIKE_TIP_KEY /
-// TOP3_TIP_KEY -- whichever surface (this reel or Career
-// Detail) a student explains an action on first is the only one that ever
-// shows the explanatory copy again. Small helpers duplicated per file
-// rather than shared, matching this codebase's existing convention for
-// this exact pattern.
-const DISLIKE_TIP_KEY = "dreamari-seen-dislike-tip";
-const TOP3_TIP_KEY = "dreamari-seen-top3-tip";
-function tipSeen(key: string): boolean {
-  try {
-    return window.localStorage.getItem(key) === "1";
-  } catch {
-    return false;
-  }
-}
-function markTipSeen(key: string) {
-  try {
-    window.localStorage.setItem(key, "1");
-  } catch {
-    /* private mode */
-  }
-}
-function top3AddedToast(): string {
-  if (tipSeen(TOP3_TIP_KEY)) return "Added to your Top 3";
-  markTipSeen(TOP3_TIP_KEY);
-  return "Added to your Top 3. You can swap or remove picks anytime.";
-}
-
 function EnvCard({
   career,
   active,
-  disliked,
-  onSetDisliked,
-  showActionsHint,
-  onDismissActionsHint,
 }: {
   career: ReelCareer;
   active: boolean;
-  disliked: boolean;
-  onSetDisliked: (next: boolean) => void;
-  showActionsHint: boolean;
-  onDismissActionsHint: () => void;
 }) {
   const [face, setFace] = useState<"Summary" | "Details">("Summary");
   // Tracks a genuine manual flip (tap, swipe, or chevron), separate from an
@@ -598,16 +830,8 @@ function EnvCard({
   // you'?", "I was not clear if I could... add to my Top 3, but then I
   // didn't know what to do"). Save and Top 3 read/write the app's real
   // global stores, so they're already in sync with Saved and Career Detail;
-  // Not for me mirrors Career Detail's own convention of local, per-visit
-  // state (never persisted there either).
-  const [savedCareers, toggleSavedCareer] = useSavedCareers();
-  const saved = savedCareers.has(slug);
-  const { ids: top3Ids, addToTop3, confirmSwap, removeFromTop3, restore } = useTop3();
-  const inTop3 = top3Ids.includes(slug);
-  const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-  const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
-
+  // Dislike shares Career Detail's Not for me through the same actions store.
+  const lab = useCareerActions();
   // Auto-advance Summary -> Details once the card has been sitting on
   // Summary for a few seconds -- direct instruction, 23 Sept 2026: "if they
   // auto play the slide thats even better... realistically only though,
@@ -615,16 +839,11 @@ function EnvCard({
   // the two-line description before it moves; only ever advances FORWARD
   // once (the `face !== "Summary"` guard stops it from also auto-reversing
   // or looping), and only while the card is the one actually on screen.
-  // Holds while the pointer or keyboard is on the card, and never runs for
-  // reduced motion (WCAG 2.2.1 / 3.2.5, audit 21 Oct 2026): six seconds is a
-  // reading deadline the student did not ask for.
-  const [held, setHeld] = useState(false);
   useEffect(() => {
-    if (!active || face !== "Summary" || held) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!active || face !== "Summary") return;
     const t = setTimeout(() => setFace("Details"), AUTOPLAY_MS);
     return () => clearTimeout(t);
-  }, [active, face, held]);
+  }, [active, face]);
   // The progress track's fill animation (below) is keyed on `${face}-
   // ${active}` rather than a separately-tracked counter -- every entry
   // into a face's own timer above corresponds 1:1 to either `face` or
@@ -692,10 +911,6 @@ function EnvCard({
 
   return (
     <article
-      onMouseEnter={() => setHeld(true)}
-      onMouseLeave={() => setHeld(false)}
-      onFocus={() => setHeld(true)}
-      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHeld(false); }}
       className="relative flex h-full w-full flex-col justify-end gap-[var(--space-6)] overflow-hidden border p-[var(--space-4)] md:rounded-[var(--radius-lg)]"
       style={{ borderColor: "var(--glass-surface-2)", background: "var(--background)" }}
     >
@@ -722,23 +937,9 @@ function EnvCard({
          bottom-anchored as a pair) -- NOT pinned to the top of the card,
          which was a misreading of that flex layout the first time around. */}
       <div className="relative -mx-[var(--space-4)] -mb-[var(--space-4)] flex flex-col">
-        {swapCandidate && (
-          <Top3SwapModal
-            incomingId={swapCandidate}
-            currentIds={top3Ids}
-            onConfirm={(outgoingId) => {
-              confirmSwap(outgoingId, swapCandidate);
-              setSwapCandidate(null);
-              setUndoRemove(null);
-              setToast(top3AddedToast());
-            }}
-            onCancel={() => setSwapCandidate(null)}
-          />
-        )}
-        {undoRemove && (
-          <UndoToast message="Removed from your Top 3" onUndo={() => restore(undoRemove)} onClose={() => setUndoRemove(null)} />
-        )}
-        {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+        {/* Each icon with a one-word label under it, the reel convention
+           (a word or count under every icon), so the column teaches itself.
+           Same glyphs and order as the career page. */}
 
         {/* Career Details Panel: the whole block, text through the CTA row,
            sits on ONE continuous backdrop -- not a blurred text panel with
@@ -777,7 +978,7 @@ function EnvCard({
                can't contain another `<button>` (direct instruction, 23 Sept
                2026: real swipe AND click-able chevrons, not just tap). */}
             <div
-              className="relative flex w-full flex-col gap-[var(--space-2)] pr-[60px] text-left lg:pr-0"
+              className="relative flex w-full flex-col gap-[var(--space-2)] pr-[64px] text-left lg:px-0"
               style={{ textShadow: LEGIBLE_TEXT_SHADOW }}
             >
               {/* lg:, not md: -- this 326px cap is for the small FRAMED
@@ -792,12 +993,12 @@ function EnvCard({
                  partway through a drag (direct report, 23 Sept 2026:
                  "swiping breaks on tablet... clips off... disappears into
                  space because the container is small and left aligned"). */}
-              <div className="face-swap flex w-full flex-col gap-[var(--space-2)] lg:w-[326px]">
+              <div className="face-swap flex w-full flex-col gap-[var(--space-2)]">
                 {/* Swipe/autoplay row: a short, fixed-width progress track
                    (not a full-width bar -- that reads as a page-level
                    control) with quiet chevrons grouped tight around it, all
                    pinned to the FAR LEFT -- as far as the panel allows from
-                   Top 3 / Not for me / Save, which live in their own row
+                   Dislike / Save, which live in their own row
                    above this whole panel, untouched (direct instruction, 23
                    Sept 2026: keep the action buttons exactly where they are;
                    chevrons must sit "farthest away" from them). Each
@@ -814,40 +1015,62 @@ function EnvCard({
                    them") -- `lg:` keeps the tight desktop size, a mouse
                    doesn't need the extra hit area. */}
                 <div className="relative flex items-center gap-[9px]">
-                  <button
-                    type="button"
-                    aria-label="Previous: summary"
-                    onClick={jumpTo("Summary")}
-                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full lg:size-4"
-                    style={{ color: face === "Summary" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
-                  >
-                    <ChevronLeft className="h-4 w-4 lg:h-3 lg:w-3" aria-hidden />
-                  </button>
-                  <span aria-hidden className="flex w-[34px] gap-[3px]">
-                    <span className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.22)" }}>
+                  {/* Desktop shows ONLY the arrow for where you can go next (3 Oct
+                     2026, Chandu: "Remove the arrows from the sides of the
+                     cards in desktop mode in for you, place them back near
+                     the progress bars, a little smaller but tappable, or
+                     like only what direction is next needs to show at once,
+                     so if im on the first slide show only one right arrow
+                     and when i go there change that right arrow back to
+                     left."). The side-of-the-text circles (2 Oct) are gone.
+                     First slide: one right arrow after the track. Last
+                     slide: one left arrow before it. The card has two faces,
+                     so each face has exactly one way to go; a card with
+                     more than two would show both arrows on its middle
+                     slides, so nothing is a dead end. The glyph is 14px but
+                     the circle is the 32px hit area, hover stays inside it.
+                     Phones and tablets keep both arrows (lg:hidden only
+                     drops the one that can't be used on desktop). */}
+                  <IconTip label="Back to summary" className={face === "Summary" ? "lg:hidden" : ""}>
+                    <button
+                      type="button"
+                      aria-label="Previous: summary"
+                      onClick={jumpTo("Summary")}
+                      className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
+                      style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Summary" ? 0.4 : 1 }}
+                    >
+                      <ChevronLeft className="h-[18px] w-[18px] lg:h-[14px] lg:w-[14px]" aria-hidden />
+                    </button>
+                  </IconTip>
+                  {/* Wider and thicker (2 Oct 2026: "even the progress bar for the auto
+                     swipe can be a little bigger or wider"). */}
+                  <span aria-hidden className="flex w-[64px] gap-[4px]">
+                    <span className="h-[4px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.25)" }}>
                       {face === "Summary" ? (
-                        <span key={`s-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms`, animationPlayState: held ? "paused" : "running" }} />
+                        <span key={`s-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
                       ) : (
                         <span className="block h-full w-full rounded-full bg-white" />
                       )}
                     </span>
-                    <span className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.22)" }}>
+                    <span className="h-[4px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.25)" }}>
                       {face === "Details" ? (
-                        <span key={`d-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms`, animationPlayState: held ? "paused" : "running" }} />
+                        <span key={`d-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
                       ) : (
                         <span className="block h-full rounded-full bg-white" style={{ width: "0%" }} />
                       )}
                     </span>
                   </span>
-                  <button
-                    type="button"
-                    aria-label="Next: more info"
-                    onClick={jumpTo("Details")}
-                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full lg:size-4"
-                    style={{ color: face === "Details" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
-                  >
-                    <ChevronRight className="h-4 w-4 lg:h-3 lg:w-3" aria-hidden />
-                  </button>
+                  <IconTip label="More info" className={face === "Details" ? "lg:hidden" : ""}>
+                    <button
+                      type="button"
+                      aria-label="Next: more info"
+                      onClick={jumpTo("Details")}
+                      className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
+                      style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Details" ? 0.4 : 1 }}
+                    >
+                      <ChevronRight className="h-[18px] w-[18px] lg:h-[14px] lg:w-[14px]" aria-hidden />
+                    </button>
+                  </IconTip>
                 </div>
                 {/* Heading > subheading > body BY SIZE, strictly top-down --
                    this kicker and the field labels below are subheadings,
@@ -959,6 +1182,9 @@ function EnvCard({
                     style={{ width: "200%", transform: face === "Summary" ? "translateX(0)" : "translateX(-50%)" }}
                   >
                     <div aria-hidden={face !== "Summary"} className="flex flex-none flex-col gap-[var(--space-2)]" style={{ width: "50%" }}>
+                      {/* No "Because you saved X" line here: the match band
+                         above already says why (Chandu, 1 Oct 2026: "we
+                         already show strong match etc."). */}
                       <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
                         {career.title}
                       </h2>
@@ -1007,86 +1233,19 @@ function EnvCard({
                   </motion.div>
                 </div>
               </div>
-              {/* Phone and tablet actions sit where Instagram Reels and
-                 TikTok put them (direct instruction, 26 Sept 2026: "the
-                 action buttons on the reel... should sit lower, mimic
-                 instagram and tik tok positions"): a column on the right
-                 edge whose bottom lines up with the caption, the caption
-                 making room beside it, the column rising over the photo.
-                 It used to sit ABOVE the whole panel in its own row, and
-                 through the Coachmark's inline-flex wrapper that row could
-                 shrink to the icons' width and land on the LEFT (iPhone
-                 Safari report, same day). Absolute on the right can't. */}
-              <Coachmark
-                active={showActionsHint}
-                label="Hide or save this career from here."
-                onDismiss={onDismissActionsHint}
-                align="end"
-                spotlight
-                wrapperClassName="absolute -right-[6px] bottom-0 z-[2] flex lg:hidden"
-              >
-              <div className="flex flex-col items-center gap-[var(--space-4)]">
-                <PreferenceButton
-                  label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
-                  Icon={inTop3 ? Check : Plus}
-            solid
-                  bare
-                  active={inTop3}
-                  onClick={() => {
-                    onDismissActionsHint();
-                    if (inTop3) {
-                      setToast(null);
-                      const before = removeFromTop3(slug);
-                      setUndoRemove(before);
-                      return;
-                    }
-                    setUndoRemove(null);
-                    const result = addToTop3(slug);
-                    if (result === "added") setToast(top3AddedToast());
-                    else if (result === "full") setSwapCandidate(slug);
-                  }}
-                />
-                {/* Like was removed 8 Oct 2026: on the 7 Oct review call
-                   Joshua decided "we can remove the like and then just keep
-                   it as saved", since Save already says the student likes
-                   it and a like showed nowhere. */}
-                <PreferenceButton
-                  label="Not for me"
-                  Icon={ThumbsDown}
-                  bare
-                  active={disliked}
-                  filled={disliked}
-                  onClick={() => {
-                    onDismissActionsHint();
-                    const next = !disliked;
-                    onSetDisliked(next);
-                    if (next && !tipSeen(DISLIKE_TIP_KEY)) {
-                      setUndoRemove(null);
-                      setToast("Noted, we'll show you less like this.");
-                      markTipSeen(DISLIKE_TIP_KEY);
-                    }
-                  }}
-                />
-                <PreferenceButton
-                  label={saved ? "Saved" : "Save for later"}
-                  Icon={Bookmark}
-                  bare
-                  active={saved}
-                  filled={saved}
-                  onClick={() => {
-                    onDismissActionsHint();
-                    toggleSavedCareer(slug);
-                  }}
-                />
+              {/* Right edge, bottom-aligned with the caption: the Reels /
+                 TikTok spot (same change as the live reel, 26 Sept 2026). Lifted
+                 10px: the labels made the column crowd the CTA row. */}
+              <div className="absolute -right-[8px] bottom-[10px] z-[2] flex flex-col items-center gap-[10px] lg:hidden">
+                <ReelColumn slug={slug} title={career.title} lab={lab} />
               </div>
-              </Coachmark>
             </div>
 
             <div className="flex w-full items-stretch justify-between gap-[var(--space-3)]">
               {hasSimulation && (
                 <button
                   type="button"
-                  onClick={() => router.push(`/play?focus=${encodeURIComponent(simulationFor(slug)?.id ?? slug)}`)}
+                  onClick={() => router.push(`/play/${slug}`)}
                   className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
                   /* solid dark glass in BOTH themes: the faint white-alpha surface
                      disappeared against the photos (founder feedback) */
@@ -1195,20 +1354,6 @@ function ProgressiveBlur() {
  *  reel shares one preference instead of each clip resetting to muted. */
 function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; active: boolean; soundOn: boolean; onSoundChange: (next: boolean) => void }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  // A looping clip needs a way to stop it (WCAG 2.2.2, audit 21 Oct 2026),
-  // and does not start on its own for anyone who asked for reduced motion.
-  const [paused, setPaused] = useState(false);
-  const captionsShown = useCaptionsOn();
-  // the Pause button follows the video itself (it can stop on its own, or
-  // never start under reduced motion)
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const sync = () => setPaused(video.paused);
-    video.addEventListener("play", sync);
-    video.addEventListener("pause", sync);
-    return () => { video.removeEventListener("play", sync); video.removeEventListener("pause", sync); };
-  }, []);
 
   // Starting a clip: reset to the top and (re)attempt playback. Deliberately
   // NOT keyed on `soundOn` -- toggling sound on an already-playing clip must
@@ -1222,7 +1367,8 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
     }
     video.currentTime = 0;
     video.muted = !soundOn;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // counselor-side tracking: a view each time this clip comes on screen
+    logActivity("view", item.video);
     video.play().catch(() => {
       if (!video.muted) {
         video.muted = true;
@@ -1242,7 +1388,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
       className="relative flex h-full w-full flex-col justify-end overflow-hidden border md:rounded-[var(--radius-lg)]"
       style={{ borderColor: "var(--glass-surface-2)", background: "#000" }}
     >
-      <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" loop playsInline preload={active ? "auto" : "none"}><CaptionTrack video={item.video} /></video>
+      <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" loop playsInline preload={active ? "auto" : "none"} />
       {/* top-[86px]: below `lg:` this card is the fixed, viewport-filling
          reel layer (see `.foryou-snap`), sitting directly under
          MobileHeaderShell's floating pill (chrome.tsx, `lg:hidden`, a real
@@ -1252,37 +1398,6 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
          navbar"). lg:top-4 restores the tight offset once this card is the
          small framed desktop reel instead, which has no overlapping fixed
          header of its own. */}
-      {/* Captions on or off, remembered for every video (lib/captionsPref.ts);
-         this reel has no native controls, so it carries its own CC switch */}
-      {captionsFor(item.video) && (
-        <IconTip label={captionsShown ? "Turn captions off" : "Turn captions on"} className="absolute top-[86px] right-[calc(var(--space-4)+88px)] z-[1] lg:top-[var(--space-4)]">
-          <button
-            type="button"
-            aria-label={captionsShown ? "Turn captions off" : "Turn captions on"}
-            aria-pressed={captionsShown}
-            onClick={() => setCaptionsOn(!captionsShown)}
-            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-            style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
-          >
-            {captionsShown ? <Captions className="h-4 w-4" aria-hidden /> : <CaptionsOff className="h-4 w-4" aria-hidden />}
-          </button>
-        </IconTip>
-      )}
-      <IconTip label={paused ? "Play video" : "Pause video"} className="absolute top-[86px] right-[calc(var(--space-4)+44px)] z-[1] lg:top-[var(--space-4)]">
-        <button
-          type="button"
-          aria-label={paused ? "Play video" : "Pause video"}
-          onClick={() => {
-            const video = videoRef.current;
-            if (!video) return;
-            if (video.paused) video.play().catch(() => {}); else video.pause();
-          }}
-          className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-          style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
-        >
-          {paused ? <Play className="h-4 w-4" fill="currentColor" aria-hidden /> : <Pause className="h-4 w-4" fill="currentColor" aria-hidden />}
-        </button>
-      </IconTip>
       <IconTip label={soundOn ? "Mute video" : "Unmute video"} className="absolute top-[86px] right-[var(--space-4)] z-[1] lg:top-[var(--space-4)]">
         <button
           type="button"
@@ -1295,6 +1410,12 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
           {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
         </button>
       </IconTip>
+      {/* Save, at the right edge above the caption: the same
+         Reels / TikTok spot as a career card's column. Desktop shows them
+         in the rail beside the reel instead (DesktopPreferenceRail). */}
+      <div className="absolute right-[var(--space-2)] bottom-[calc(64px+env(safe-area-inset-bottom)+72px)] z-[2] flex flex-col items-center gap-[10px] lg:hidden">
+        <VideoColumn video={item.video} />
+      </div>
       <div className="relative z-[1] p-[var(--space-4)] pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-[var(--space-4)]">
         {/* Same rounded panel language as the Env Card v2 details panel, but
            a SOLID scrim rather than the frosted-glass blur -- blurring part
@@ -1306,7 +1427,6 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
         >
           {item.title}
         </span>
-        <div className="mt-[var(--space-2)]"><VideoTranscript video={item.video} /></div>
       </div>
     </article>
   );
@@ -1318,102 +1438,30 @@ function ForYouCard({
   active,
   soundOn,
   onSoundChange,
-  disliked,
-  onSetDisliked,
-  showActionsHint,
-  onDismissActionsHint,
 }: {
   item: ReelItem;
   active: boolean;
   soundOn: boolean;
   onSoundChange: (next: boolean) => void;
-  disliked: boolean;
-  onSetDisliked: (next: boolean) => void;
-  showActionsHint: boolean;
-  onDismissActionsHint: () => void;
 }) {
   if (isVideoReel(item)) return <VideoCard item={item} active={active} soundOn={soundOn} onSoundChange={onSoundChange} />;
   return (
     <EnvCard
       career={item}
       active={active}
-      disliked={disliked}
-      onSetDisliked={onSetDisliked}
-      showActionsHint={showActionsHint}
-      onDismissActionsHint={onDismissActionsHint}
     />
-  );
-}
-
-function PreferenceButton({
-  label,
-  Icon,
-  bare = false,
-  active = false,
-  filled = false,
-  solid = false,
-  onClick,
-}: {
-  label: string;
-  Icon: typeof Bookmark;
-  bare?: boolean;
-  /** Selected/on state -- e.g. already saved, already in your Top 3. */
-  active?: boolean;
-  /** Fill the icon glyph itself (Not for me/Save fill on select,
-      matching Career Detail's exact convention); Top 3's Plus/Minus swap
-      icon instead, so it stays false there. */
-  filled?: boolean;
-  /** Top 3: when on, a solid accent disc with a white check instead of a
-      tinted outline glyph. A thin blue minus over the photo was nearly
-      invisible (direct report, 26 Sept 2026: "the minus is bad i cant even
-      see it properly"); the disc reads at a glance, like TikTok's follow
-      check, and the label still says tapping removes it. */
-  solid?: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <IconTip label={label}>
-      <button
-        type="button"
-        aria-label={label}
-        aria-pressed={onClick ? active : undefined}
-        onClick={onClick}
-        className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border transition-transform duration-150 hover:-translate-y-px active:scale-95"
-        style={{
-          background: bare ? "transparent" : active ? "var(--primary)" : "var(--glass-surface-1)",
-          borderColor: bare ? "transparent" : active ? "var(--primary)" : "var(--glass-border)",
-          color: bare ? (active ? "var(--accent-subtle)" : "var(--foreground)") : active ? "var(--primary-foreground)" : "var(--foreground)",
-        }}
-      >
-        {/* `bare` is the reel's own floating column, straight over the
-           photo with no surface behind it -- a plain icon can wash out
-           against a light window or shirt the same way text would (direct
-           instruction, 23 Sept 2026: "make sure the action buttons... are
-           legible too... refer what instagram and tiktok do"). Same fix
-           they use: a drop-shadow on the icon itself, background-
-           independent, not a background chip (which would cover the photo
-           behind every icon and read heavier than either app's own
-           treatment). The non-bare version already sits on a real glass
-           surface, so it doesn't need this. */}
-        {solid && active && bare ? (
-          <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--primary)", boxShadow: "0 2px 8px rgba(0,0,0,0.45)" }}>
-            <Icon className="h-[18px] w-[18px]" strokeWidth={3} style={{ color: "var(--primary-foreground)" }} />
-          </span>
-        ) : (
-          <Icon className="h-6 w-6" strokeWidth={solid && active ? 3 : undefined} fill={filled ? "currentColor" : "none"} style={bare ? { filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 1px 5px rgba(0,0,0,0.35))" } : undefined} />
-        )}
-      </button>
-    </IconTip>
   );
 }
 
 const REEL_SOUND_KEY = "dreamari:reel-sound-on";
 
 function ForYouFace() {
-  const router = useRouter();
   const total = FOR_YOU_FEED.length;
   const [active, setActive] = useState(0);
   const feedRef = useRef<HTMLDivElement | null>(null);
+  // The first card nudges upward every few seconds until the first swipe.
+  const swipePeek = useDiscoveryNudge("dreamari:foryou-swipe-peek", active > 0);
+  const welcomeInFront = useWelcomeInFront();
 
   // Remember the last sound choice across the reel (and across visits) --
   // same as Instagram/TikTok's web players. Starts true (attempt sound);
@@ -1429,21 +1477,13 @@ function ForYouFace() {
     window.localStorage.setItem(REEL_SOUND_KEY, String(next));
   }, []);
 
-  // Not for me for the whole reel, keyed by career slug -- lifted up
-  // here (rather than kept local to each EnvCard) so the mobile in-card
-  // buttons and the desktop rail below both read/write the SAME state for
-  // whichever career is currently active, instead of silently drifting
-  // apart the way two independent useState calls would.
-  const [prefs, setPrefs] = useState<Record<string, { disliked: boolean }>>({});
-  const setDisliked = useCallback((slug: string, next: boolean) => {
-    setPrefs((p) => ({ ...p, [slug]: { disliked: next } }));
-  }, []);
+  // The reel's old per-card Like/Not for me state lived here; it was never
+  // rendered (the reel reads the actions store), and Like itself was removed 8
+  // Oct 2026 per the 7 Oct review call ("we can remove the like and then
+  // just keep it as saved"), so the dead state went with it.
   // Career action coachmarks belong on Career Detail, where students can
   // understand each control in the context of the career they are editing.
-  // The reel stays focused on discovery instead of explaining management
-  // actions before the student reaches that screen.
-  const showActionsHint = false;
-  const dismissActionsHint = useCallback(() => undefined, []);
+  // The reel stays focused on discovery, so it has no actions hint.
 
   // Active-card tracking (drives the Ken Burns restart + paging state).
   useEffect(() => {
@@ -1559,6 +1599,12 @@ function ForYouFace() {
         // this same lg: breakpoint (see its own className), so h-full
         // correctly resolves and max-h-[672px] just caps it on a tall
         // desktop monitor with room to spare.
+        // 8 Oct 2026 (Chandu: "the explore For You was all the way on top
+        // instead of centred and there was an ocean of space underneath"):
+        // the reel no longer stops at 390x672. It takes the full height the
+        // row has (capped at 1180px) and its width follows the same 390:672
+        // portrait, the way TikTok and Reels scale on a desktop, so a tall
+        // monitor fills top to bottom instead of leaving half the screen empty.
         // lg:self-start: on a genuinely tall/wide desktop monitor, this
         // box's real height (h-full, capped at 672) ends up well short of
         // the row's own full height -- the parent's `items-center` then
@@ -1570,48 +1616,29 @@ function ForYouFace() {
         // unnoticed there. self-start overrides just this one flex item
         // so it anchors to the row's top regardless of how much slack
         // exists below it.
-        className="foryou-snap fixed inset-0 z-0 overflow-y-auto lg:relative lg:inset-auto lg:z-auto lg:h-full lg:max-h-[672px] lg:w-[390px] lg:self-start lg:overflow-y-auto lg:rounded-[var(--radius-lg)]"
+        className="foryou-snap fixed inset-0 z-0 overflow-y-auto lg:relative lg:inset-auto lg:z-auto lg:h-full lg:max-h-[1180px] lg:aspect-[390/672] lg:w-auto lg:max-w-full lg:self-start lg:overflow-y-auto lg:rounded-[var(--radius-lg)]"
       >
-        {/* Surface 4 (27 Sept 2026): an empty FOR_YOU_FEED used to render a
-           blank full-bleed screen (no cards, no signal) -- now a real tier 2
-           empty, centered in the same full-bleed area the reel itself fills. */}
-        <SurfaceState id={4} isEmpty={total === 0} onEmptyAction={() => router.push("/explore?tab=browse")} className="flex h-full items-center justify-center px-[var(--space-5)]">
-          <>
-            {FOR_YOU_FEED.map((item, index) => {
-              const itemSlug = isVideoReel(item) ? null : careerSlug(item.title);
-              const itemPrefs = itemSlug ? prefs[itemSlug] : undefined;
-              return (
-                <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
-                  <ForYouCard
-                    item={item}
-                    active={index === active}
-                    soundOn={soundOn}
-                    onSoundChange={updateSoundOn}
-                    disliked={itemPrefs?.disliked ?? false}
-                    onSetDisliked={(next) => itemSlug && setDisliked(itemSlug, next)}
-                    showActionsHint={showActionsHint && index === active}
-                    onDismissActionsHint={dismissActionsHint}
-                  />
-                </div>
-              );
-            })}
-          </>
-        </SurfaceState>
+        {FOR_YOU_FEED.map((item, index) => {
+          return (
+            <div key={index} data-reel-index={index} className={`h-full w-full snap-start snap-always ${index === 0 && swipePeek && !welcomeInFront ? "dm-peek-up" : ""}`}>
+              <ForYouCard
+                item={item}
+                active={index === active}
+                soundOn={soundOn}
+                onSoundChange={updateSoundOn}
+              />
+            </div>
+          );
+        })}
       </div>
 
-      {/* Desktop Career Preference Rail — "Place immediately to the right of
+      {/* Desktop Career Preference Rail: "Place immediately to the right of
          an Env Card. Phone AND tablet keep these controls inside the card
          instead (see EnvCard's own lg:hidden buttons)." Acts on whichever
-         career is currently active in the feed; hidden entirely when that's
-         a video card (Videos Inside Leading Companies has no save/Top
-         3 of its own -- same as the mobile card, which renders VideoCard
-         instead of EnvCard for those). */}
+         card is active in the feed: a career's Dislike / Save, or a
+         video's Save (VideoColumn, 4 Oct 2026). */}
       <DesktopPreferenceRail
         activeItem={FOR_YOU_FEED[active]}
-        prefs={prefs}
-        setDisliked={setDisliked}
-        showActionsHint={showActionsHint}
-        dismissActionsHint={dismissActionsHint}
       />
 
       {/* Previous / Next paging */}
@@ -1647,110 +1674,116 @@ function ForYouFace() {
 
 function DesktopPreferenceRail({
   activeItem,
-  prefs,
-  setDisliked,
-  showActionsHint,
-  dismissActionsHint,
 }: {
   activeItem: ReelItem | undefined;
-  prefs: Record<string, { disliked: boolean }>;
-  setDisliked: (slug: string, next: boolean) => void;
-  showActionsHint: boolean;
-  dismissActionsHint: () => void;
 }) {
-  const [savedCareers, toggleSavedCareer] = useSavedCareers();
-  const { ids: top3Ids, addToTop3, confirmSwap, removeFromTop3, restore } = useTop3();
-  const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-  const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
-
-  if (!activeItem || isVideoReel(activeItem)) {
-    // Still rendered (empty) rather than unmounted -- keeps the row's own
-    // gap/paging column layout stable instead of the paging arrows beside
-    // it jumping left every time a video card becomes active.
-    return <div className="hidden flex-col items-center gap-[var(--space-6)] lg:flex" />;
+  const lab = useCareerActions();
+  // Every card has a 56px column now (videos got actions, 4 Oct
+  // 2026), so the reel keeps its place as the student moves between a
+  // career and a video (Chandu, 1 Oct 2026: "it jumps right and left when
+  // you land on each type of card"). The empty spacer stays for the moment
+  // before the feed reports its first card.
+  if (!activeItem) {
+    return <div aria-hidden className="hidden w-[56px] flex-none lg:block" />;
   }
-
+  if (isVideoReel(activeItem)) {
+    return (
+      <div className="hidden flex-col items-center gap-[var(--space-4)] lg:flex">
+        <VideoColumn video={activeItem.video} />
+      </div>
+    );
+  }
   const slug = careerSlug(activeItem.title);
-  const saved = savedCareers.has(slug);
-  const inTop3 = top3Ids.includes(slug);
-  const disliked = prefs[slug]?.disliked ?? false;
-
   return (
-    <Coachmark
-      active={showActionsHint}
-      label="Hide or save this career from here."
-      onDismiss={dismissActionsHint}
-      align="end"
-      spotlight
-    >
-    <div className="hidden flex-col items-center gap-[var(--space-6)] lg:flex">
-      <PreferenceButton
-        label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
-        Icon={inTop3 ? Check : Plus}
-            solid
-        active={inTop3}
-        onClick={() => {
-          dismissActionsHint();
-          if (inTop3) {
-            setToast(null);
-            const before = removeFromTop3(slug);
-            setUndoRemove(before);
-            return;
-          }
-          setUndoRemove(null);
-          const result = addToTop3(slug);
-          if (result === "added") setToast(top3AddedToast());
-          else if (result === "full") setSwapCandidate(slug);
-        }}
-      />
-      {/* Like removed 8 Oct 2026 (7 Oct review call: "we can remove the
-         like and then just keep it as saved"); see EnvCard. */}
-      <PreferenceButton
-        label="Not for me"
-        Icon={ThumbsDown}
-        active={disliked}
-        filled={disliked}
-        onClick={() => {
-          dismissActionsHint();
-          const next = !disliked;
-          setDisliked(slug, next);
-          if (next && !tipSeen(DISLIKE_TIP_KEY)) {
-            setUndoRemove(null);
-            setToast("Noted, we'll show you less like this.");
-            markTipSeen(DISLIKE_TIP_KEY);
-          }
-        }}
-      />
-      <PreferenceButton
-        label={saved ? "Saved" : "Save for later"}
-        Icon={Bookmark}
-        active={saved}
-        filled={saved}
-        onClick={() => {
-          dismissActionsHint();
-          toggleSavedCareer(slug);
-        }}
-      />
-      {swapCandidate && (
-        <Top3SwapModal
-          incomingId={swapCandidate}
-          currentIds={top3Ids}
-          onConfirm={(outgoingId) => {
-            confirmSwap(outgoingId, swapCandidate);
-            setSwapCandidate(null);
-            setUndoRemove(null);
-            setToast(top3AddedToast());
-          }}
-          onCancel={() => setSwapCandidate(null)}
-        />
-      )}
-      {undoRemove && (
-        <UndoToast message="Removed from your Top 3" onUndo={() => restore(undoRemove)} onClose={() => setUndoRemove(null)} />
-      )}
-      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+    <div className="hidden flex-col items-center gap-[var(--space-4)] lg:flex">
+      <ReelColumn slug={slug} title={activeItem.title} lab={lab} />
     </div>
-    </Coachmark>
+  );
+}
+
+/** A tag that slides out beside a reel action for a few seconds: the
+ *  real-time nudge that replaced the coachmark tour. It points at the
+ *  control, says what it does in a few words, and goes away by itself or
+ *  on the first tap. */
+function ReelTag({ show, children }: { show: boolean; children: React.ReactNode }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.span initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 6 }} transition={{ type: "spring", stiffness: 380, damping: 28 }} aria-hidden className="pointer-events-none absolute top-[12px] right-[calc(100%+6px)] flex items-center gap-[5px] rounded-full px-[10px] py-[5px] text-[12px] leading-none font-bold whitespace-nowrap text-white shadow-lg" style={{ background: "var(--primary)" }}>
+          <Sparkles className="h-[12px] w-[12px]" aria-hidden />
+          {children}
+          <span className="absolute top-1/2 -right-[4px] size-[8px] -translate-y-1/2 rotate-45" style={{ background: "var(--primary)" }} />
+        </motion.span>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Once per browser session: the nudge that teaches Save.
+function nudgeSeen(key: string): boolean {
+  try { return window.sessionStorage.getItem(`dreamari:reel-nudge:${key}`) === "1"; } catch { return true; }
+}
+function markNudge(key: string) {
+  try { window.sessionStorage.setItem(`dreamari:reel-nudge:${key}`, "1"); } catch { /* */ }
+}
+
+/** The reel actions: Dislike, then Save (4 Oct 2026, Joshua). Save sits
+ *  last because that is where TikTok and Instagram put it, so the thumb
+ *  already knows the spot. Like was removed 8 Oct 2026: on the 7 Oct
+ *  review call Joshua decided "we can remove the like and then just keep
+ *  it as saved", since Save already says the student likes it. Top 3 and
+ *  Connect left the reel: they live on Career Detail, where a student has
+ *  the whole career in front of them before ranking it or reaching out.
+ *  "Nope" became "Dislike": plainer, and the word students already use for
+ *  a thumbs down. Same icons and fills as before. */
+function ReelColumn({ slug, title, lab }: { slug: string; title: string; lab: ReturnType<typeof useCareerActions> }) {
+  const saved = lab.saved.includes(slug);
+  const r = lab.reaction[slug] ?? null;
+  const [tag, setTag] = useState(false);
+  // Save nudge: 2.5 seconds on a card with nothing done yet.
+  useEffect(() => {
+    if (saved || nudgeSeen("save")) return;
+    const show = window.setTimeout(() => { setTag(true); markNudge("save"); }, 2500);
+    return () => window.clearTimeout(show);
+  }, [slug, saved]);
+  useEffect(() => {
+    if (!tag) return;
+    const hide = window.setTimeout(() => setTag(false), 4200);
+    return () => window.clearTimeout(hide);
+  }, [tag]);
+  const act = (fn: () => void) => () => { setTag(false); fn(); };
+  return (
+    <>
+      <ReelAction label="Dislike" on={r === "nope"} busy={lab.pending === `react:${slug}`} ariaLabel={r === "nope" ? "Disliked. Tap to undo" : "Dislike: fewer like this"} onClick={act(() => react(slug, "nope"))}>
+        <ThumbsDown className="h-7 w-7" fill={r === "nope" ? "currentColor" : "none"} />
+      </ReelAction>
+      <span className="relative">
+        <ReelTag show={tag}>Save it to keep it</ReelTag>
+        {/* The bookmark Browse and the career page use, a see-through fill
+           when on (3 Oct 2026). */}
+        <ReelAction label={saved ? "Saved" : "Save"} on={saved} busy={lab.pending === `save:${slug}`} ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"} onClick={act(() => toggleSave(slug, title))}>
+          {saved ? <BookmarkCheck className="h-7 w-7" fill="currentColor" fillOpacity={0.35} /> : <Bookmark className="h-7 w-7" />}
+        </ReelAction>
+      </span>
+    </>
+  );
+}
+
+/** A reel video's action (4 Oct 2026, Joshua: the videos should not be
+ *  passive). Save, in the same column and look as a career's. It is the
+ *  same saved-videos store the Browse video row and My Profile's Videos
+ *  shelf use, in localStorage, so it survives a reload. Like was removed 8
+ *  Oct 2026 per the 7 Oct review call ("we can remove the like and then
+ *  just keep it as saved"): a like showed nowhere, and Save already says
+ *  it. No feedback bar: that bar raises the saved careers tray, which would
+ *  point at the wrong list. The fill and the "Saved" label confirm it. */
+function VideoColumn({ video }: { video: string }) {
+  const [savedVideos, toggleSaved] = useSavedVideos();
+  const saved = savedVideos.has(video);
+  return (
+    <ReelAction label={saved ? "Saved" : "Save"} on={saved} busy={false} ariaLabel={saved ? "Saved video. Tap to remove from Saved" : "Save video"} onClick={() => toggleSaved(video)}>
+      {saved ? <BookmarkCheck className="h-7 w-7" fill="currentColor" fillOpacity={0.35} /> : <Bookmark className="h-7 w-7" />}
+    </ReelAction>
   );
 }
 
@@ -1773,11 +1806,72 @@ function useIsDesktop(): boolean {
   return isDesktop;
 }
 
+/** The search bar while search is open: big, focused on open, a clear
+ *  button once something is typed, and Cancel to leave search the way Apple
+ *  TV and iOS do. */
+function SearchBar({ query, setQuery, onClose }: { query: string; setQuery: (value: string) => void; onClose: () => void }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+  return (
+    <div data-search-zone className="filters-reveal flex w-full items-center gap-[var(--space-3)] lg:pt-[6px]">
+      <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} borderRadius={16} className="min-w-0 flex-1">
+        <div
+          className="flex h-[52px] w-full items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] backdrop-blur-[10px] sm:h-14"
+          style={{ background: "var(--glass-surface-1)", borderColor: "var(--primary)" }}
+        >
+          <Search className="h-5 w-5 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+          <input
+            ref={inputRef}
+            type="search"
+            inputMode="search"
+            enterKeyHint="search"
+            aria-label="Search careers"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") (event.target as HTMLInputElement).blur();
+            }}
+            placeholder="Search careers, skills, worlds..."
+            className="dm-beam-input min-w-0 flex-1 bg-transparent text-[16px] leading-[22px] font-medium outline-none placeholder:text-[color:var(--muted-foreground)] sm:text-[18px] [&::-webkit-search-cancel-button]:hidden"
+            style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+          />
+          {query && (
+            <IconTip label="Clear">
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => {
+                  setQuery("");
+                  inputRef.current?.focus();
+                }}
+                className="dm-quiet flex size-7 flex-none cursor-pointer items-center justify-center rounded-full"
+                style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </IconTip>
+          )}
+        </div>
+      </BorderBeam>
+      <button
+        type="button"
+        onClick={onClose}
+        className="dm-link flex-none cursor-pointer px-[4px] text-[15px] font-semibold"
+        style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}
+      >
+        Cancel
+      </button>
+    </div>
+  );
+}
+
 /** The search box + For you/Browse All toggle, shared by Browse's header
  *  row and For You's desktop row (identical control, two different
  *  layout contexts) so the two never drift out of sync. */
 function DesktopSearchToggle({
-  tab, switchTab, nudge, showTutorial, onDismissTutorial, searchOpen, setSearchOpen, query, setQuery,
+  tab, switchTab, nudge, showTutorial, onDismissTutorial, searchOpen, onOpenSearch, onCloseSearch, query, setQuery,
 }: {
   tab: "foryou" | "browse";
   switchTab: (next: "foryou" | "browse") => void;
@@ -1785,12 +1879,20 @@ function DesktopSearchToggle({
   showTutorial: boolean;
   onDismissTutorial: () => void;
   searchOpen: boolean;
-  setSearchOpen: (updater: boolean | ((value: boolean) => boolean)) => void;
+  onOpenSearch: () => void;
+  onCloseSearch: () => void;
   query: string;
   setQuery: (value: string) => void;
 }) {
+  // Opening search puts the cursor in the field, so the bar is the focus
+  // the moment it opens (4 Oct 2026, Joshua: the search bar is the main
+  // focus while searching).
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (searchOpen) inputRef.current?.focus();
+  }, [searchOpen]);
   return (
-    <div className="flex min-w-0 items-center gap-[var(--space-6)]">
+    <div data-search-zone className="flex min-w-0 items-center gap-[var(--space-6)]">
       {/* Search grows from icon to input; the toggle folds away while
          it is open. Perfectly circular collapsed (a fixed 40x40 with
          rounded-lg read as a rounded square, not a circle -- direct
@@ -1805,22 +1907,25 @@ function DesktopSearchToggle({
       <div
         className="flex h-10 min-w-0 items-center gap-[var(--space-3)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{
-          width: searchOpen ? "min(480px, calc(44vw / var(--vz, 1)))" : 40,
+          width: searchOpen ? "min(560px, calc(48vw / var(--vz, 1)))" : 40,
           borderRadius: searchOpen ? "var(--radius-lg)" : 9999,
           background: searchOpen ? "var(--glass-surface-1)" : "var(--glass-surface-2)",
           borderColor: searchOpen ? "var(--primary)" : "var(--glass-border)",
         }}
       >
         <IconTip label="Search">
-          <button type="button" aria-label="Search" onClick={() => setSearchOpen(true)} className="dm-link flex flex-none cursor-pointer items-center" style={{ color: searchOpen ? "var(--muted-foreground)" : "var(--foreground)" }}>
+          <button type="button" aria-label="Search" onClick={onOpenSearch} className="dm-link flex flex-none cursor-pointer items-center" style={{ color: searchOpen ? "var(--muted-foreground)" : "var(--foreground)" }}>
             <Search className="h-4 w-4" />
           </button>
         </IconTip>
         <input
+          ref={inputRef}
+          inputMode="search"
+          enterKeyHint="search"
+          aria-label="Search careers"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          onFocus={() => setSearchOpen(true)}
-          aria-label="Search careers"
+          onFocus={() => { if (!searchOpen) onOpenSearch(); }}
           placeholder="Search careers, skills, worlds..."
           aria-hidden={!searchOpen}
           tabIndex={searchOpen ? 0 : -1}
@@ -1832,7 +1937,7 @@ function DesktopSearchToggle({
             <button
               type="button"
               aria-label="Close search"
-              onClick={() => (query ? setQuery("") : setSearchOpen(false))}
+              onClick={onCloseSearch}
               className="dm-quiet flex h-7 flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
               style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
             >
@@ -1859,8 +1964,32 @@ function DesktopSearchToggle({
   );
 }
 
-export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTab: "foryou" | "browse"; initialQuery?: string }) {
+export function ExploreExperience({ initialTab, initialQuery = "", initialRow = "", initialPath = "all" }: { initialTab: "foryou" | "browse"; initialQuery?: string; /** a Browse row opened as a grid (?row=) */ initialRow?: string; /** the Non-college switch (?path=trades) */ initialPath?: PathChoice }) {
   const router = useRouter();
+  const base = "/explore";
+  const [path, setPath] = useState<PathChoice>(initialPath);
+  // A plain /explore visit lands on the path the student picked last time.
+  // Only then: a URL that names a path or a row is someone's exact view
+  // and must open as written. Layout effect so the stored path paints
+  // first, with no All-then-Trades flash.
+  useLayoutEffect(() => {
+    if (initialPath !== "all" || initialRow) return;
+    try {
+      // ?path=all spelled out is also an exact view (a shared link), not a plain visit.
+      if (new URLSearchParams(window.location.search).has("path")) return;
+      const stored = window.localStorage.getItem(PATH_STORAGE_KEY) ?? undefined;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time restore from localStorage, which the server render cannot read
+      if (isPathChoice(stored) && stored !== "all") setPath(stored);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
+  }, []);
+  const choosePath = useCallback((next: PathChoice) => {
+    setPath(next);
+    try { window.localStorage.setItem(PATH_STORAGE_KEY, next); } catch {}
+    // Native replaceState (Next syncs it into useSearchParams) instead of
+    // router.replace: the rails re-render in place, no server round trip.
+    window.history.replaceState(null, "", next === "all" ? base : `${base}?path=${next}`);
+  }, [base]);
   const [tab, setTab] = useState<"foryou" | "browse">(initialTab);
   // ?q= from the sitewide search lands here with the box already open
   const [searchOpen, setSearchOpen] = useState(initialQuery.length > 0);
@@ -1876,7 +2005,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
   // when I land and dismiss the popup"). Gating the class itself behind
   // splashDone means the animation's own 0.9s starting delay is now
   // measured from dismissal, not from mount.
-  const [splashDone, setSplashDone] = useState(false);
+  const [splashDone] = useState(true);
   // A 2-step guided tour, not two hints racing each other (direct feedback,
   // 24 Sept 2026: "they should happen in succession"). One shared "seen"
   // flag for the whole tour; `tourStep` decides which half is currently
@@ -1884,18 +2013,63 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
   // -- ForYouBrowseToggle's own tab === "browse" gate already gets that for
   // free. Step 2 (Schools) follows once step 1 is dismissed, whether by its
   // own "Next" or by the student just tapping For You directly.
-  const [tourNotSeen, dismissTour] = useFirstUseHint("explore-tour", { repeatOnReload: true });
-  const [tourStep, setTourStep] = useState<"foryou" | "schools">("foryou");
+  const [, dismissTour] = useFirstUseHint("explore-tour", { repeatOnReload: true });
+  const [, setTourStep] = useState<"foryou" | "schools">("foryou");
   const advanceTour = () => setTourStep("schools");
-  const showForYouTutorial = tourNotSeen && splashDone && tab === "browse" && tourStep === "foryou";
-  const showSchoolsTutorial = tourNotSeen && splashDone && tourStep === "schools";
+  // No coachmark tour (the no-coachmark proposal, 26 Sept 2026).
+  const showForYouTutorial = false;
+  const showSchoolsTutorial = false;
   // Mobile/tablet's own Schools entry point is the graduation-cap icon below
   // -- desktop shows ExploreSectionTabs' text tabs instead, wired the same
   // way further down.
 
+  // Search is active while it is open: from the moment the field opens (or
+  // gets focus) until Escape, the X, or a click away with nothing typed.
+  // Typed text keeps it active even after the field loses focus, and so
+  // does a picked category. Closing clears the text, so the normal Browse
+  // comes back exactly as it was (4 Oct 2026, Joshua's search feedback).
+  const closeSearch = useCallback(() => {
+    setQuery("");
+    setSearchOpen(false);
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && focused.closest("[data-search-zone]")) focused.blur();
+  }, []);
+  // Search lives on Browse. The For You row shows the same search box, so
+  // opening it there moves to Browse first; it used to open a field whose
+  // results had nowhere to show.
+  function openSearch() {
+    if (tab === "foryou") {
+      setTab("browse");
+      router.replace("/explore", { scroll: false });
+    }
+    setSearchOpen(true);
+  }
+  useEffect(() => {
+    if (!searchOpen) return;
+    // An open picker (Listbox) takes Escape and outside clicks first.
+    const pickerOpen = () => !!document.querySelector('[role="combobox"][aria-expanded="true"]');
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== "Escape" || pickerOpen()) return;
+      closeSearch();
+    }
+    function onPointerDown(event: PointerEvent) {
+      if (query.trim() || pickerOpen() || document.querySelector("[data-search-browsing]")) return;
+      const target = event.target as Element | null;
+      if (target?.closest?.("[data-search-zone], [role='listbox']")) return;
+      closeSearch();
+    }
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [searchOpen, query, closeSearch]);
+
   function switchTab(next: "foryou" | "browse") {
     setTab(next);
     setSearchOpen(false);
+    setQuery("");
     // Browse is the server's default for a bare `/explore` (page.tsx:
     // "Browse is the default view"), so refreshing there already lands
     // back on Browse correctly -- but writing FOR YOU as bare `/explore`
@@ -1910,8 +2084,9 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
+      {/* The welcome (2 Oct 2026, "open on the modal everywhere"). */}
+      <FirstVisitSplash surface="explore" />
       <AppBackdrop />
-      <FirstVisitSplash surface="explore" onOpenChange={(open) => { if (!open) setSplashDone(true); }} />
 
       {/* forceBlur on For You: that tab's `main` owns its own internal
          scroll (the reel) and never lets the page itself scroll, so the
@@ -1921,6 +2096,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
          blur"). Browse still frosts only once actually scrolled, same as
          every other page. */}
       <DesktopNavigation active="Explore" forceBlur={tab === "foryou"} />
+      <ActionsLayer barAtTop={tab === "foryou"} />
 
       {/* Phones and tablets: the same header shell as every other page
          (logo, search on Browse, streak | XP, bell, hamburger) -- Browse
@@ -1969,23 +2145,52 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             // Giving `main` a real, definite height at md: too (not just
             // lg:) is what lets the card size ITSELF against it below,
             // instead of a hardcoded number that can't shrink.
-            : "gap-[var(--space-6)] pb-0 md:h-[calc(calc(100dvh/var(--vz,1))-86px)] md:overflow-hidden md:pb-[var(--space-6)]"
+            : "gap-[var(--space-6)] pb-0 md:h-[calc(100dvh-86px)] md:overflow-hidden md:pb-[var(--space-6)]"
         }`}
       >
         {/* Phone row: the view toggle, then Search (Browse only) and Schools;
            search stays off the top bar (direct feedback, 19 Sept 2026) */}
         {/* z-20: on phones the For you reel is a fixed layer inside main, so
            this row has to sit above it to stay tappable over the photo */}
-        <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
-          <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} />
-          <div className="flex items-center gap-[10px]">
+        {/* Same lockup and positions as the desktop header below (1 Oct
+           2026; Chandu: "follow the desktop's layout and positions"): title
+           with the Careers/Schools tabs under it at the left, Search and the
+           For you/Browse All pill at the right. The old phone row had the
+           toggle at the left as plain text and overflowed at 390px. */}
+        {/* Two rows at 390px: title + pill, then the Careers/Schools tabs +
+           Search. Everything keeps its desktop side (lockup left, controls
+           right); only the two right-hand controls stack, because title,
+           tabs, search and pill do not fit on one 350px line. */}
+        {/* The reel itself is Instagram's: no title, no Careers/Schools
+           lockup, just For you / Browse all as words over the video (Chandu,
+           1 Oct 2026: "the Explore, Careers/Schools thing doesn't need to be
+           there in the For you reel; follow Instagram's UI there"). */}
+        {tab === "foryou" && (
+        <div className="relative z-20 flex w-full justify-center lg:hidden">
+          <ForYouBrowseToggle variant="text" tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} />
+        </div>
+        )}
+        {/* Phone Browse: one row, no title (the top bar and the bottom nav
+           already say Explore); a two-row title-plus-tabs lockup was clutter
+           (Chandu, 1 Oct 2026). */}
+        {/* Same lockup and order as desktop at every width (Chandu, 7 Oct
+           2026: "the schools/careers tab switches clash with the design of
+           the for you browse all switches... make things consistent across",
+           and Search sat after the toggle here but before it on desktop).
+           Careers/Schools are the desktop's text tabs, not a second grey
+           pill; Search comes before For you / Browse all. */}
+        {tab === "browse" && !searchOpen && (
+        <div className="relative z-20 flex w-full items-center justify-between gap-[6px] sm:gap-[var(--space-3)] lg:hidden">
+          <ExploreSectionTabs active="careers" showTutorial={showSchoolsTutorial} onDismissTutorial={dismissTour} />
+          <div className="flex flex-none items-center gap-[4px] sm:gap-[10px]">
             {tab === "browse" && (
-              <IconTip label="Search">
+              <IconTip label={searchOpen ? "Close search" : "Search"}>
                 <button
                   type="button"
-                  aria-label="Search"
+                  data-search-zone
+                  aria-label={searchOpen ? "Close search" : "Search"}
                   aria-pressed={searchOpen}
-                  onClick={() => setSearchOpen((value) => !value)}
+                  onClick={() => (searchOpen ? closeSearch() : openSearch())}
                   className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
                   style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: searchOpen ? "var(--primary)" : "var(--foreground)" }}
                 >
@@ -1993,28 +2198,10 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                 </button>
               </IconTip>
             )}
-            <Coachmark
-              active={showSchoolsTutorial}
-              label="Schools have a tab too! Look up any school, or see the ones picked for you."
-              onDismiss={dismissTour}
-              side="bottom"
-              align="end"
-              spotlight
-            >
-              <IconTip label="Schools">
-                <button
-                  type="button"
-                  aria-label="Find a college"
-                  onClick={() => { dismissTour(); router.push("/colleges"); }}
-                  className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-                  style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-                >
-                  <GraduationCap className="h-4 w-4" />
-                </button>
-              </IconTip>
-            </Coachmark>
+            <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} />
           </div>
         </div>
+        )}
         {/* Explore Header (desktop) -- Browse only. For You gets its own
            row below: the title block, the reel and the search+toggle all
            share one row there instead of the reel sitting in a second row
@@ -2025,7 +2212,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
            unit down to the rails below should match every other page's
            title-to-content gap (24px) -- 2px more than main's own 22px
            section rhythm, same pattern as every other title page. */}
-        {tab === "browse" && (
+        {tab === "browse" && !searchOpen && (
         <div className="mb-[2px] hidden w-full flex-col gap-[var(--space-6)] lg:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
             <div className="flex flex-col gap-[var(--space-2)]">
@@ -2034,7 +2221,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
               </h1>
               <ExploreSectionTabs active="careers" showTutorial={showSchoolsTutorial} onDismissTutorial={dismissTour} />
             </div>
-            <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} searchOpen={searchOpen} setSearchOpen={setSearchOpen} query={query} setQuery={setQuery} />
+            <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} searchOpen={searchOpen} onOpenSearch={openSearch} onCloseSearch={closeSearch} query={query} setQuery={setQuery} />
           </div>
         </div>
         )}
@@ -2066,44 +2253,27 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             {isDesktop && <ForYouFace />}
           </div>
           <div className="flex-none self-start">
-            <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} searchOpen={searchOpen} setSearchOpen={setSearchOpen} query={query} setQuery={setQuery} />
+            <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} searchOpen={searchOpen} onOpenSearch={openSearch} onCloseSearch={closeSearch} query={query} setQuery={setQuery} />
           </div>
         </div>
         )}
 
-        {/* Mobile search input (the desktop header is hidden below md) */}
-        {tab === "browse" && searchOpen && (
-          <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} borderRadius={16} className="md:hidden">
-          <div
-            className="filters-reveal flex h-12 w-full items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] backdrop-blur-[10px]"
-            style={{ background: "var(--glass-surface-1)", borderColor: "var(--primary)" }}
-          >
-            <Search className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              aria-label="Search careers"
-              placeholder="Search careers, skills, worlds..."
-              className="dm-beam-input min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none placeholder:text-[color:var(--muted-foreground)]"
-              style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
-            />
-            <IconTip label="Clear search">
-              <button
-                type="button"
-                aria-label="Clear search"
-                onClick={() => (query ? setQuery("") : setSearchOpen(false))}
-                className="dm-quiet flex h-8 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
-                style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </IconTip>
-          </div>
-          </BorderBeam>
-        )}
+        {/* Search mode, every screen size: one large bar is the focus and
+           the title, Careers/Schools and For you / Browse all step aside
+           until Cancel (5 Oct 2026, Joshua: "Search bar as the main focus...
+           Everything else should temporarily disappear while they are
+           searching"). */}
+        {tab === "browse" && searchOpen && <SearchBar query={query} setQuery={setQuery} onClose={closeSearch} />}
 
         {tab === "browse" ? (
-          <BrowseFace query={query} filtersOpen={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} />
+          <BrowseFace query={query} searchActive={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} row={initialRow} path={path} onPath={choosePath}
+            onRow={(id) => {
+              // The row's grid is its own URL, so the browser's Back returns to the rows.
+              // It carries the path too, so the grid shows that path's row.
+              if (id) { router.push(`${base}?row=${id}${path === "all" ? "" : `&path=${path}`}`); window.scrollTo({ top: 0, behavior: "smooth" }); }
+              else if (window.history.length > 1) router.back();
+              else router.push(base);
+            }} />
         ) : (
           !isDesktop && <ForYouFace />
         )}

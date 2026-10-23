@@ -253,7 +253,7 @@ const COUNSELOR_LINKS = [{ label: "Counselor Dashboard", href: "/counselor" }] a
 // 2026). Remove once a flow is chosen and built for real. See
 // docs/HANDOFF_INDEX.md. (The Career outlook lab left this list on 20 Oct
 // 2026: its Pay & Outlook tab is the live /career page now.)
-const LAB_LINKS = [{ label: "Flow lab", href: "/flow-lab" }, { label: "Career actions lab", href: "/actions-lab/explore" }, { label: "Component library", href: "/component-lab" }, { label: "Scene review", href: "/play-tools/scene-review" }, { label: "Glossary QA", href: "/play-tools/glossary-qa" }, { label: "Dreamy 3D", href: "/dreamy-lab/3d" }] as const;
+const LAB_LINKS = [{ label: "Flow lab", href: "/flow-lab" }, { label: "Component library", href: "/component-lab" }, { label: "Scene review", href: "/play-tools/scene-review" }, { label: "Glossary QA", href: "/play-tools/glossary-qa" }, { label: "Dreamy 3D", href: "/dreamy-lab/3d" }] as const;
 
 /** One step back, never a jump. Every Back control in the app goes to the
  *  screen the student actually came from (Chandu, 6 Oct 2026: "Every BACK

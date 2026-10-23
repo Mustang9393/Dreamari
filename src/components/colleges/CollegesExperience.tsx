@@ -17,7 +17,7 @@ import { SurfaceState } from "@/components/app/SurfaceState";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
-import { ForYouBrowseToggle } from "@/components/actions-lab/ExploreLab";
+import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
 import { goalHref } from "@/components/profile/layoutVersion";
 import { BrowseV2 } from "./BrowseV2";
 

@@ -1,14 +1,17 @@
 "use client";
 
-// DEMO-ONLY: Career actions lab copy of the real career page
-// (src/components/career/CareerDetailExperience.tsx, forked 26 Sept 2026).
-// Identical except for the action controls, their feedback, and links that
-// stay inside the lab. Reads and writes the lab's own store (labStore.ts),
-// never the real saved careers or Top 3. The proposal, in the user's words
-// (26 Sept 2026): Save, Top 3, Like and Not for me "need to be somehow taught
-// to the student without coachmarks", in exact context, not a mockup.
+// The career page (/career/[slug]) and the body of the career sheet. This
+// file started as the Career actions lab's copy of CareerDetailExperience
+// (26 Sept 2026), became the live page on 1 Oct 2026, and on 23 Oct 2026 the
+// lab itself was removed (Chandu: "Remove the actions lab stuff we dont
+// need it anymore"). CareerDetailExperience.tsx stays only for the type
+// scale and pieces other pages import from it. Saves, Top 3 and reactions
+// go through careerActionsStore.ts, which writes the real stores. The
+// proposal that shaped the actions, in the user's words (26 Sept 2026):
+// Save, Top 3, Like and Not for me "need to be somehow taught to the
+// student without coachmarks", in exact context, not a mockup.
 //
-// What changed from the real page:
+// What changed from the older page:
 // - One primary action on every career: Play Game when a game exists,
 //   otherwise Add to Top 3 (the step every career has).
 // - Top 3 and Save are labeled pills that say their state ("#2 in Top 3",
@@ -37,9 +40,9 @@ import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChro
 import { IconTip } from "@/components/app/IconTip";
 import { FactSheet, PaySheet, SheetHero } from "@/components/career/PaySheet";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
-import { react, useLab } from "./labStore";
+import { react, useCareerActions } from "@/components/app/careerActionsStore";
 import { CareerHeaderActions } from "./CareerHeaderActions";
-import { careerHref, LabLayer, LabPill } from "./labUi";
+import { ActionsLayer, ActionPill } from "@/components/app/careerActions";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { WhereToStudy } from "@/components/career/WhereToStudy";
@@ -527,11 +530,7 @@ const CAREER_TABS: { key: CareerTab; label: string }[] = [
   { key: "pay", label: "Pay" },
 ];
 
-export function CareerDetailLab({ slug, live = false }: {
-  slug: string;
-  /** the live /career route: no lab dock, links stay on the live routes */
-  live?: boolean;
-}) {
+export function CareerDetail({ slug }: { slug: string }) {
   const router = useRouter();
   const career = resolveCareer(slug);
   // Open at the top. Arriving from a rail deep in Explore or Home kept the
@@ -576,7 +575,7 @@ export function CareerDetailLab({ slug, live = false }: {
     }, 450);
     return () => window.clearTimeout(t);
   }, [inSheet]);
-  const lab = useLab();
+  const lab = useCareerActions();
   const [connectOpen, setConnectOpen] = useState(false);
   // The states the student picked in Build: Pay by state shows those as
   // "Your states", New Jersey for the demo when none is picked, from real
@@ -587,7 +586,7 @@ export function CareerDetailLab({ slug, live = false }: {
     return (
       <div className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col items-center justify-center gap-[var(--space-4)] overflow-hidden px-5 text-center" style={{ background: "transparent", color: "var(--foreground)" }}>
         <p className="relative z-10 text-[20px] font-bold">We don&apos;t have that career yet.</p>
-        <Link href={live ? "/explore?tab=browse" : "/actions-lab/explore?tab=browse"} className="dm-solid relative z-10 flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+        <Link href="/explore?tab=browse" className="dm-solid relative z-10 flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           Back to Explore
         </Link>
       </div>
@@ -643,7 +642,7 @@ export function CareerDetailLab({ slug, live = false }: {
             // that's a no-op with nothing to go back to) -- this page is
             // reachable via a direct/shared link, so history can be empty.
             if (window.history.length > 1) router.back();
-            else router.push(live ? "/explore" : "/actions-lab/explore");
+            else router.push("/explore");
           }}
           className={`dm-link ${SMALL} flex w-fit cursor-pointer items-center gap-[6px] font-semibold`}
           style={{ color: "var(--muted-foreground)" }}
@@ -854,7 +853,7 @@ export function CareerDetailLab({ slug, live = false }: {
            it and a like shows nowhere. */}
         <section aria-label="Not a fit for you?" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={PANEL}>
           <span className={`${LABEL}`}>Not a fit for you?</span>
-          <LabPill small on={reaction === "nope"} busy={lab.pending === `react:${career.slug}`} onClick={() => react(career.slug, "nope")} icon={<ThumbsDown className="h-4 w-4" aria-hidden fill={reaction === "nope" ? "currentColor" : "none"} />} ariaLabel="Not for me: fewer like this">Not for me</LabPill>
+          <ActionPill small on={reaction === "nope"} busy={lab.pending === `react:${career.slug}`} onClick={() => react(career.slug, "nope")} icon={<ThumbsDown className="h-4 w-4" aria-hidden fill={reaction === "nope" ? "currentColor" : "none"} />} ariaLabel="Not for me: fewer like this">Not for me</ActionPill>
         </section>
 
         {/* Careers like this one stays outside the tab system, at the
@@ -872,7 +871,7 @@ export function CareerDetailLab({ slug, live = false }: {
                it just hard-clipped at the container edge (16 Sept 2026). */}
             <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
-                <PosterCard key={c.title} career={c} onClick={() => (live && openCareerPeek(careerSlug(c.title))) || router.push(careerHref(careerSlug(c.title), live))} />
+                <PosterCard key={c.title} career={c} onClick={() => openCareerPeek(careerSlug(c.title)) || router.push(`/career/${careerSlug(c.title)}`)} />
               ))}
             </div>
           </Section>
@@ -895,7 +894,7 @@ export function CareerDetailLab({ slug, live = false }: {
       </main>
 
       {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}
-      {!inSheet && <LabLayer dock={!live} />}
+      {!inSheet && <ActionsLayer />}
 
       {!inSheet && <MobileNav active="Explore" />}
     </div>

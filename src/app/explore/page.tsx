@@ -1,10 +1,5 @@
 import type { Metadata } from "next";
-// The Career actions lab's Explore is the live Explore now (1 Oct 2026;
-// Chandu: "push the updated Explore and Career Detail to the main flow").
-// The lab route keeps its dock for iterating; ExploreExperience stays for
-// the pieces other pages import from it.
-import { ExploreLab } from "@/components/actions-lab/ExploreLab";
-import { LiveProvider } from "@/components/actions-lab/labUi";
+import { ExploreExperience } from "@/components/app/ExploreExperience";
 import { isPathChoice } from "@/components/app/careerPath";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
@@ -30,7 +25,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <LiveProvider><ExploreLab live initialTab={q || row ? "browse" : initialTab} initialQuery={q ?? ""} initialRow={row ?? ""} initialPath={path} /></LiveProvider>
+      <ExploreExperience initialTab={q || row ? "browse" : initialTab} initialQuery={q ?? ""} initialRow={row ?? ""} initialPath={path} />
     </>
   );
 }

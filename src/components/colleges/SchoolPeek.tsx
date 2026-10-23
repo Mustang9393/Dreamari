@@ -11,7 +11,7 @@ import { useState } from "react";
 import { PeekLine, PeekList, PeekSheet, type PeekFact, type PeekTab } from "@/components/app/PeekSheet";
 import type { College } from "./data";
 import { CollegePicture } from "./shared";
-import { ModalActionFeedback } from "@/components/actions-lab/labUi";
+import { ModalActionFeedback } from "@/components/app/careerActions";
 import { SchoolActions } from "./SchoolActions";
 
 type Tab = "cost" | "in" | "results";

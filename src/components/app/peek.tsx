@@ -23,15 +23,14 @@ import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { collegeBySlug, type College } from "@/components/colleges/data";
 import { loadDatasetCollege } from "@/components/colleges/dataset";
 import { SchoolPeek } from "@/components/colleges/SchoolPeek";
-import { LabLayer } from "@/components/actions-lab/labUi";
+import { ActionsLayer } from "@/components/app/careerActions";
 import { StudentCheckInHost } from "./WeeklyCheckIn";
 import { peekOpenedFrom, peekSet, peekSnapshot, peekSubscribe, rememberAt, setSheetsEnabled, sheetsEnabled, subscribeSheets, takeReturn } from "./peekStore";
 import { useNarrowSheet } from "./PeekSheet";
 import { IconTip } from "./IconTip";
 import { useDialogFocus } from "./useDialogFocus";
 import { InSheet } from "./inSheet";
-import { CareerDetailLab } from "@/components/actions-lab/CareerDetailLab";
-import { LiveProvider } from "@/components/actions-lab/labUi";
+import { CareerDetail } from "@/components/career/CareerDetail";
 import { CollegeDetailExperience } from "@/components/colleges/CollegeDetailExperience";
 
 const set = peekSet;
@@ -138,12 +137,12 @@ export function PeekHost() {
 
   if (inert || !isOwner) return null;
   const close = () => set(null);
-  const page = narrow && open ? (open.kind === "career" ? { key: `p-${open.ids[open.index]}`, label: "Career", body: <LiveProvider><CareerDetailLab slug={open.ids[open.index]} live /></LiveProvider> } : { key: `p-${open.list[open.index].slug}`, label: "School", body: <CollegeDetailExperience slug={open.list[open.index].slug} /> }) : null;
+  const page = narrow && open ? (open.kind === "career" ? { key: `p-${open.ids[open.index]}`, label: "Career", body: <CareerDetail slug={open.ids[open.index]} /> } : { key: `p-${open.list[open.index].slug}`, label: "School", body: <CollegeDetailExperience slug={open.list[open.index].slug} /> }) : null;
   return (
     <>
     {/* the career page's undo bar and Top 3 swap sheet, for screens that
-       don't mount their own (LabLayer renders once however many mount) */}
-    <LabLayer dock={false} host />
+       don't mount their own (ActionsLayer renders once however many mount) */}
+    <ActionsLayer host />
     {/* a counselor-sent check-in, opened from the bell (8 Oct 2026) */}
     <StudentCheckInHost />
     <AnimatePresence>

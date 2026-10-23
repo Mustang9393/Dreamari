@@ -62,7 +62,7 @@ export function FlowsGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Explore → Career Detail → Save / Top 3" file="src/components/app/ExploreExperience.tsx, src/components/career/CareerDetailExperience.tsx" purpose="How a career gets from a poster or reel card into a student's Top 3 without going through Build or Match at all." when="Any time browsing (not the guided flow) is how a career gets found.">
+      <Specimen name="Explore → Career Detail → Save / Top 3" file="src/components/app/ExploreExperience.tsx, src/components/career/CareerDetail.tsx" purpose="How a career gets from a poster or reel card into a student's Top 3 without going through Build or Match at all." when="Any time browsing (not the guided flow) is how a career gets found.">
         <StateGrid min={600}>
           <StateCell label="Steps" minH={90}>
             <StepStrip steps={EXPLORE_DETAIL_SAVE} />
